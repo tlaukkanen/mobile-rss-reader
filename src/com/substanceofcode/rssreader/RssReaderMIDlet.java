@@ -55,10 +55,12 @@ public class RssReaderMIDlet extends MIDlet
     private Form        m_itemForm;         // The item form
     private Form        m_addNewBMForm;     // The add new bookmark form
     private Form        m_loadForm;         // The "loading..." form
+    private Form        m_importFeedsForm;  // The import feed list form
     private TextField   m_bmName;           // The RSS feed name field
     private TextField   m_bmURL;            // The RSS feed URL field
     private TextField   m_bmUsername;       // The RSS feed username field
     private TextField   m_bmPassword;       // The RSS feed password field
+    private TextField   m_feedListURL;      // The feed list URL field
     
     // Commands
     private Command     m_addOkCmd;         // The OK command
@@ -72,6 +74,9 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_openHeaderCmd;    // The open header command
     private Command     m_backHeaderCmd;    // The back to bookmark list command
     private Command     m_updateCmd;        // The update headers command
+    private Command     m_importFeedListCmd;// The import feed list command
+    private Command     m_importOkCmd;      // The OK command for importing
+    private Command     m_importCancelCmd;  // The Cancel command for importing
     
     
     public RssReaderMIDlet() {
@@ -89,6 +94,9 @@ public class RssReaderMIDlet extends MIDlet
         m_openHeaderCmd     = new Command("Open", Command.SCREEN, 1);
         m_backHeaderCmd     = new Command("Back", Command.SCREEN, 2);
         m_updateCmd         = new Command("Update", Command.SCREEN, 2);
+        m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
+        m_importOkCmd       = new Command("OK", Command.OK, 1);
+        m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
         
         m_getPage = false;
         m_curBookmark = -1;
@@ -98,6 +106,7 @@ public class RssReaderMIDlet extends MIDlet
         initializeAddBookmarkForm();
         initializeHeadersList();
         initializeLoadingForm();
+        initializeImportForm();
         
         m_display.setCurrent(m_bookmarkList);
         
@@ -115,6 +124,7 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_openBookmark );
             m_bookmarkList.addCommand( m_editBookmark );
             m_bookmarkList.addCommand( m_delBookmark );
+            m_bookmarkList.addCommand( m_importFeedListCmd );
             m_bookmarkList.setCommandListener( this );
             
             boolean stop = false;
@@ -167,6 +177,16 @@ public class RssReaderMIDlet extends MIDlet
         m_addNewBMForm.addCommand( m_addOkCmd );
         m_addNewBMForm.addCommand( m_addCancelCmd );
         m_addNewBMForm.setCommandListener(this);
+    }
+    
+    /** Initialize import form */
+    private void initializeImportForm() {
+        m_importFeedsForm = new Form("Import feeds");
+        m_feedListURL = new TextField("URL", "http://", 64, TextField.URL);
+        m_importFeedsForm.append(m_feedListURL);
+        m_importFeedsForm.addCommand( m_importOkCmd );
+        m_importFeedsForm.addCommand( m_importCancelCmd );
+        m_importFeedsForm.setCommandListener(this);        
     }
     
     /** Run method is used to get RSS feed with HttpConnection */
@@ -410,6 +430,26 @@ public class RssReaderMIDlet extends MIDlet
         /** Update currently selected RSS feed's headers */
         if( c == m_updateCmd ) {
             updateHeaders();
+        }
+        
+        /** Show import feed list form */
+        if( c == m_importFeedListCmd ) {
+            m_display.setCurrent( m_importFeedsForm );
+        }
+        
+        /** Import list of feeds */
+        if( c == m_importOkCmd ) {
+            // TODO: Add code for importing
+            
+            // 1. Show wait screen
+            // 2. Import feeds
+            // 3. Show result screen
+            // 4. Show list of feeds
+        }
+        
+        /** Cancel importing -> Show list of feeds */
+        if( c == m_importCancelCmd ) {
+            m_display.setCurrent( m_headerList );
         }
     }
 }
