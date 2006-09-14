@@ -44,6 +44,8 @@ public class RssReaderMIDlet extends MIDlet
     private Hashtable   m_rssFeeds;         // The bookmark URLs
     private Thread      m_netThread;        // The thread for networking
     private boolean     m_getPage;          // The noticy flag for HTTP
+    private boolean     m_getFeedList;      // The noticy flag for list parsing
+    private FeedListParser m_listParser;    // The feed list parser
     
     // Currently selected bookmark
     private int             m_curBookmark;  // The currently selected item
@@ -61,6 +63,7 @@ public class RssReaderMIDlet extends MIDlet
     private TextField   m_bmUsername;       // The RSS feed username field
     private TextField   m_bmPassword;       // The RSS feed password field
     private TextField   m_feedListURL;      // The feed list URL field
+    private ChoiceGroup m_importFormatGroup;// The import type choice group
     
     // Commands
     private Command     m_addOkCmd;         // The OK command
@@ -99,6 +102,7 @@ public class RssReaderMIDlet extends MIDlet
         m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
         
         m_getPage = false;
+        m_getFeedList = false;
         m_curBookmark = -1;
         
         /** Initialize GUI items */
@@ -184,6 +188,11 @@ public class RssReaderMIDlet extends MIDlet
         m_importFeedsForm = new Form("Import feeds");
         m_feedListURL = new TextField("URL", "http://", 64, TextField.URL);
         m_importFeedsForm.append(m_feedListURL);
+        
+        String[] formats = {"line by line", "OPML"};
+        m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
+        m_importFeedsForm.append(m_importFormatGroup);
+        
         m_importFeedsForm.addCommand( m_importOkCmd );
         m_importFeedsForm.addCommand( m_importCancelCmd );
         m_importFeedsForm.setCommandListener(this);        
@@ -210,6 +219,35 @@ public class RssReaderMIDlet extends MIDlet
                         m_display.setCurrent( m_loadForm );
                     }
                     m_getPage = false;
+                }
+                if( m_getFeedList ) {
+                    try {
+                        if(m_listParser.isReady()==true) {
+                            // Feed list parsing is ready
+                            System.out.println("Feed list parsing is ready");
+                            RssFeed[] feeds = m_listParser.getFeeds();
+                            for(int feedIndex=0; feedIndex<feeds.length; feedIndex++) {
+                                String name = feeds[feedIndex].getName();
+                                System.out.println("Adding: " + name);
+                                if(name.length()>0) {
+                                    m_rssFeeds.put( name, feeds[feedIndex] );
+                                    if( m_curBookmark>=0 ){
+                                        m_bookmarkList.set(m_curBookmark, name, null);
+                                    } else{
+                                        m_bookmarkList.insert(m_bookmarkList.size(), name, null);
+                                    }
+                                }
+                            }                            
+                            m_getFeedList = false;
+                            m_display.setCurrent( m_bookmarkList );
+                        } else {
+                            System.out.println("Feed list parsing isn't ready");
+                        }
+                    } catch(Exception ex) {
+                        // TODO: Add exception handling
+                        System.err.println("Error while parsing feed list: " + ex.toString());
+                        m_getFeedList = false;
+                    }                    
                 }
                 lngStart = System.currentTimeMillis();
                 lngTimeTaken = System.currentTimeMillis()-lngStart;
@@ -439,12 +477,33 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Import list of feeds */
         if( c == m_importOkCmd ) {
-            // TODO: Add code for importing
-            
-            // 1. Show wait screen
-            // 2. Import feeds
-            // 3. Show result screen
-            // 4. Show list of feeds
+            try {
+                // TODO: Add code for importing
+                // 1. Show wait screen
+
+                // 2. Import feeds
+                int selectedImportType = m_importFormatGroup.getSelectedIndex();
+                RssFeed[] feeds = null;
+                String url = m_feedListURL.getString();
+                if(selectedImportType==0) {
+                    // Use line by line parser
+                    m_listParser = new LineByLineParser(url);
+                }
+                if(selectedImportType==1) {
+                    // Use OPML parser
+                    m_listParser = new OpmlParser(url);
+                }
+                
+                // Start parsing
+                m_listParser.startParsing();
+                m_getFeedList = true;
+
+                // 3. Show result screen
+                // 4. Show list of feeds
+
+            } catch(Exception ex) {
+                // TODO: Show alarm
+            }
         }
         
         /** Cancel importing -> Show list of feeds */
