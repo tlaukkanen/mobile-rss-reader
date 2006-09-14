@@ -29,8 +29,10 @@ import java.io.InputStream;
 import java.util.Vector;
 
 /**
+ * LineByLineParser class is used when we are parsing RSS feed list 
+ * line-by-line.
  *
- * @author Tommi
+ * @author Tommi Laukkanen
  */
 public class LineByLineParser extends FeedListParser {
     

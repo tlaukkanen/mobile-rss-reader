@@ -44,6 +44,7 @@ public class OpmlParser extends FeedListParser {
         super(url);
     }
     
+    /** Parse OPML list */
     public RssFeed[] parseFeeds(InputStream is) {
         /** Initialize item collection */
         Vector rssFeeds = new Vector();
@@ -85,55 +86,22 @@ public class OpmlParser extends FeedListParser {
                     }
                 }
             }while (parser.getEventType() != XmlPullParser.END_DOCUMENT);
-  /*
-            parser.require(parser.START_TAG, null, null);
-            while(!"outline".equals(parser.getName()) ){
-                if( parser.next() == parser.END_DOCUMENT )
-                    throw new IOException("No <outline> tag found!");
-            }
-   
-            do {
-                System.out.println("Parsing <outline> tag");
-                parser.require(parser.START_TAG, null, null);
-   
-                title = "";
-                link = "";
-   
-                System.out.println("Parsing <outline> tag");
-                System.out.println("Attribute count " + parser.getAttributeCount());
-   
-                title = parser.getAttributeValue(null, "title");
-                description = parser.getAttributeValue(null, "title");
-                link = parser.getAttributeValue(null, "xmlUrl");
-   
-//                parser.require(parser.END_TAG, null, null);
-   
-                System.out.println("Title:       " + title);
-                System.out.println("Link:        " + link);
-                System.out.println("Description: " + description);
-   
-                RssFeed feed = new RssFeed(title, link, "", "");
-                rssFeeds.addElement( feed );
-   
-                parser.nextTag();
-            } while("outline".equals(parser.getName()));
-   */            //}while (parser.nextTag() != parser.END_TAG);
-                    
-                } catch (XmlPullParserException ex) {
-                    System.err.println("OpmlParser.parseFeeds(): XmlPullParserException " + ex.toString());
-                    return null;
-                } catch (Exception ex) {
-                    System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
-                    return null;
-                }
-                
-                /** Create array */
-                RssFeed[] feeds = new RssFeed[ rssFeeds.size() ];
-                for(int feedIndex=0; feedIndex<rssFeeds.size(); feedIndex++) {
-                    feeds[ feedIndex ] = (RssFeed)rssFeeds.elementAt(feedIndex);
-                }
-                return feeds;
-            }
             
+        } catch (XmlPullParserException ex) {
+            System.err.println("OpmlParser.parseFeeds(): XmlPullParserException " + ex.toString());
+            return null;
+        } catch (Exception ex) {
+            System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
+            return null;
         }
         
+        /** Create array */
+        RssFeed[] feeds = new RssFeed[ rssFeeds.size() ];
+        for(int feedIndex=0; feedIndex<rssFeeds.size(); feedIndex++) {
+            feeds[ feedIndex ] = (RssFeed)rssFeeds.elementAt(feedIndex);
+        }
+        return feeds;
+    }
+    
+}
+
