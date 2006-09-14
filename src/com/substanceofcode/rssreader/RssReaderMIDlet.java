@@ -247,6 +247,7 @@ public class RssReaderMIDlet extends MIDlet
                         // TODO: Add exception handling
                         System.err.println("Error while parsing feed list: " + ex.toString());
                         m_getFeedList = false;
+                        m_display.setCurrent( m_bookmarkList );
                     }                    
                 }
                 lngStart = System.currentTimeMillis();
