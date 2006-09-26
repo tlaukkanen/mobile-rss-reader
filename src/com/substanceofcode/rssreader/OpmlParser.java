@@ -22,7 +22,7 @@
 
 package com.substanceofcode.rssreader;
 
-import com.sun.cldc.i18n.StreamReader;
+//import com.sun.cldc.i18n.StreamReader;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
