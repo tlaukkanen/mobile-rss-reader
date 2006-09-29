@@ -22,24 +22,36 @@
 
 package com.substanceofcode.rssreader;
 
+import java.util.Date;
+
 /**
  * RssItem class is a data store for a single item in RSS feed.
- * One item consist of title, link and description.
+ * One item consist of title, link, description and optional date.
  *
  * @author  Tommi Laukkanen
- * @version 1.0
+ * @version 1.1
  */
 public class RssItem {
     
-    private String  m_title = "";   // The RSS item title
-    private String  m_link  = "";   // The RSS item link
-    private String  m_desc  = "";   // The RSS item description
+    private String m_title = "";   // The RSS item title
+    private String m_link  = "";   // The RSS item link
+    private String m_desc  = "";   // The RSS item description
+    private Date m_date = null;
     
     /** Creates a new instance of RssItem */
     public RssItem(String title, String link, String desc) {
         m_title = title;
-        m_link  = link;
-        m_desc  = desc;
+        m_link = link;
+        m_desc = desc;
+        m_date = null;
+    }
+
+    /** Creates a new instance of RssItem */
+    public RssItem(String title, String link, String desc, Date pubDate) {
+        m_title = title;
+        m_link = link;
+        m_desc = desc;
+        m_date = pubDate;
     }
     
     /** Get RSS item title */
@@ -55,5 +67,10 @@ public class RssItem {
     /** Get RSS item description */
     public String getDescription(){
         return m_desc;
+    }
+    
+    /** Get RSS item publication date */
+    public Date getDate() {
+        return m_date;
     }
 }

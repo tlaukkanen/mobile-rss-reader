@@ -95,6 +95,7 @@
         </exec>
         <copy file="${name}.alx" todir="${dist.root.dir}"/>
     </target>
+    <!--
     <target name="run" depends="init,jar">
         <copy todir="${rim.blackberry.home}/simulator" verbose="true">
             <fileset dir="${dist.root.dir}">
@@ -106,7 +107,7 @@
 	executable="${rim.blackberry.home}/simulator/${rim.blackberry.emulator}.bat"
 	failonerror="true" resolveExecutable="true"/>
     </target>
-
+-->
     <target name="debug" depends="init,jar">
         <copy todir="${rim.blackberry.home}/simulator" verbose="true">
             <fileset dir="${dist.root.dir}">

@@ -102,7 +102,7 @@ public class RssFeedParser {
 
    /** 
     * Nasty RSS feed XML parser.
-    * Seams to work with both RSS 1.0 and 2.0.
+    * Seams to work with all RSS 0.91, 0.92 and 2.0.
     */
     public void parseRssFeedXml(InputStream is) 
             throws IOException, XmlPullParserException {
@@ -125,6 +125,7 @@ public class RssFeedParser {
         String title = null;
         String description = null;
         String link = null;
+        String date = null;
 
         /** <?xml...*/
         parser.nextTag();
@@ -145,6 +146,7 @@ public class RssFeedParser {
             title = "";
             description = "";
             link = "";
+            date = "";
 
             /** One <item> tag handling*/
             while (parser.nextTag() != parser.END_TAG) {
@@ -167,6 +169,9 @@ public class RssFeedParser {
                 else if (name.equals("link")) {
                     link = text;
                 }
+                else if (name.equals("pubDate")) {
+                    date = text;
+                }
 
                 parser.require(parser.END_TAG, null, name);
             }
@@ -175,11 +180,19 @@ public class RssFeedParser {
             System.out.println ("Title:       " + title);
             System.out.println ("Link:        " + link);
             System.out.println ("Description: " + description);
+            System.out.println ("Date:        " + date);
 
             /** Create new RSS item and add it do RSS document's item
              *  collection
              */
-            RssItem rssItem = new RssItem(title, link, description);
+            RssItem rssItem = null;
+            if(date.length()>0) {
+                Date pubDate = parseRssDate(date);
+                System.out.println("ConvertedDate: " + pubDate.toString());
+                rssItem = new RssItem(title, link, description, pubDate);
+            } else {
+                rssItem = new RssItem(title, link, description);
+            }
             m_rssFeed.getItems().addElement( rssItem );
             parser.nextTag();
             
@@ -206,4 +219,71 @@ public class RssFeedParser {
        }
        return s;
     }    
+    
+    /** 
+     * Parse RSS date format to Date object. 
+     * Example of RSS date:
+     * Sat, 23 Sep 2006 22:25:11 +0000
+     */
+    private Date parseRssDate(String dateString) {
+        Date pubDate = null;
+        try {
+            // Split date string to values
+            // 0 = week day
+            // 1 = day of month
+            // 2 = month
+            // 3 = year (could be with either 4 or 2 digits)
+            // 4 = time
+            // 5 = GMT
+            String[] values = StringUtil.split(dateString, " ");
+            int expectedValueCount = 6;
+            if(values.length != expectedValueCount) {
+                throw new Exception("Invalid date format: " + dateString);
+            }
+            
+            // Day of month
+            int dayOfMonth = Integer.parseInt( values[1] );
+            
+            // Month
+            String[] months =  {
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+            String monthString = values[2];
+            int month=0;
+            for(int monthIndex=0; monthIndex<11; monthIndex++) {
+                if( monthString.equals( months[monthIndex] )==true) {
+                    month = monthIndex;
+                }
+            }            
+            
+            // Year
+            int year = Integer.parseInt(values[3]);
+            if(year<100) {
+                year += 2000;
+            }
+            
+            // Time
+            String[] timeValues = StringUtil.split(values[4],":");
+            int hours = Integer.parseInt( timeValues[0] );
+            int minutes = Integer.parseInt( timeValues[1] );
+            int seconds = Integer.parseInt( timeValues[2] );
+
+            // Create calendar object from date values
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            cal.set(Calendar.MONTH, month);
+            cal.set(Calendar.YEAR, year);
+            cal.set(Calendar.HOUR_OF_DAY, hours);
+            cal.set(Calendar.MINUTE, minutes);
+            cal.set(Calendar.SECOND, seconds);
+            
+            pubDate = cal.getTime();
+            
+        } catch(Exception ex) {
+            // TODO: Add exception handling code
+            System.err.println("Error while convertin date string to object: " +
+                    ex.toString());
+        }
+        return pubDate;
+    }
 }
