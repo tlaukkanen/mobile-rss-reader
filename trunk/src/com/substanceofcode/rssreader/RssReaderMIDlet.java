@@ -80,6 +80,7 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_importFeedListCmd;// The import feed list command
     private Command     m_importOkCmd;      // The OK command for importing
     private Command     m_importCancelCmd;  // The Cancel command for importing
+    private Command     m_updateAllCmd;     // The update all command
     
     
     public RssReaderMIDlet() {
@@ -100,6 +101,7 @@ public class RssReaderMIDlet extends MIDlet
         m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
         m_importOkCmd       = new Command("OK", Command.OK, 1);
         m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
+        m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
         
         m_getPage = false;
         m_getFeedList = false;
@@ -129,6 +131,7 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_editBookmark );
             m_bookmarkList.addCommand( m_delBookmark );
             m_bookmarkList.addCommand( m_importFeedListCmd );
+            m_bookmarkList.addCommand( m_updateAllCmd );
             m_bookmarkList.setCommandListener( this );
             
             boolean stop = false;
@@ -308,21 +311,21 @@ public class RssReaderMIDlet extends MIDlet
     
     /** Initialize RSS item form */
     private void initializeItemForm(RssItem item) {
-        if( m_itemForm == null){
-            System.out.println("Create new item form");
-            m_itemForm = new Form( item.getTitle() );
-            m_itemForm.addCommand( m_backCommand );
-            m_itemForm.setCommandListener(this);
-        }
-        while(m_itemForm.size()>0) {
-            System.out.println("Delete item");
-            m_itemForm.delete(0);
-        }
+        System.out.println("Create new item form");
+        m_itemForm = new Form( item.getTitle() );
+        m_itemForm.addCommand( m_backCommand );
+        m_itemForm.setCommandListener(this);
         m_itemForm.setTitle(item.getTitle());
         m_itemForm.append(new StringItem(item.getTitle() + "\n", 
                 item.getDescription()));
         m_itemForm.append(new StringItem("Link:", 
                 item.getLink()));
+        
+        // Add item's date if it is available
+        Date itemDate = item.getDate();
+        if(itemDate!=null) {
+            m_itemForm.append(new StringItem("Date:", itemDate.toString()));
+        }
     }
     
     /**
@@ -366,6 +369,13 @@ public class RssReaderMIDlet extends MIDlet
         if(m_curRssParser.getRssFeed().getUrl().length()>0) {
             m_getPage = true;
         }
+    }
+    
+    /** Update all RSS feeds */
+    private void updateAllHeaders() {
+        initializeLoadingForm();
+        m_display.setCurrent( m_loadingForm );
+        // TODO: Add code for parsing all RSS feeds
     }
     
     /** Respond to commands */
@@ -469,6 +479,11 @@ public class RssReaderMIDlet extends MIDlet
         /** Update currently selected RSS feed's headers */
         if( c == m_updateCmd ) {
             updateHeaders();
+        }
+        
+        /** Update all RSS feeds */
+        if( c == m_updateAllCmd ) {
+            updateAllFeeds();
         }
         
         /** Show import feed list form */
