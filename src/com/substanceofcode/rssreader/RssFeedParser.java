@@ -50,8 +50,13 @@ public class RssFeedParser {
         return m_rssFeed;
     }
     
-    /** send a GET request to web server */
-    public void parseRssFeed()
+    /** 
+     * Send a GET request to web server and parse feeds from response.
+     *
+     * @input maxItemCount Maximum item count for the feed.
+     *
+     */
+    public void parseRssFeed(int maxItemCount)
     throws IOException, Exception {
         
         HttpConnection hc = null;
@@ -90,7 +95,7 @@ public class RssFeedParser {
              * Get a DataInputStream from the HttpConnection 
              * and forward it to kXML parser
              */
-            parseRssFeedXml( hc.openInputStream() );
+            parseRssFeedXml( hc.openInputStream(), maxItemCount );
         } catch(Exception e) {
             throw new Exception("Error while parsing RSS data: " 
                     + e.toString());
@@ -102,9 +107,9 @@ public class RssFeedParser {
 
    /** 
     * Nasty RSS feed XML parser.
-    * Seams to work with all RSS 0.91, 0.92 and 2.0.
+    * Seems to work with all RSS 0.91, 0.92 and 2.0.
     */
-    public void parseRssFeedXml(InputStream is) 
+    public void parseRssFeedXml(InputStream is, int maxItemCount) 
             throws IOException, XmlPullParserException {
         /** Initialize item collection */
         m_rssFeed.getItems().removeAllElements();
@@ -154,10 +159,14 @@ public class RssFeedParser {
                 String name = parser.getName();
                 String text = parser.nextText();
                 
+                /** Encode some characters */
                 text = replace(text, "&auml;", "ä");
                 text = replace(text, "&ouml;", "ö");
                 text = replace(text, "Ã¤", "ä");
                 text = replace(text, "Ã¶", "ö");
+                text = replace(text, "#8217", "'");
+                text = replace(text, "#8220", "\"");
+                text = replace(text, "#8221", "\"");
                 
                 /** Save item property values */
                 if (name.equals("title")) {
@@ -193,7 +202,12 @@ public class RssFeedParser {
             } else {
                 rssItem = new RssItem(title, link, description);
             }
-            m_rssFeed.getItems().addElement( rssItem );
+            Vector rssItems = m_rssFeed.getItems();
+            rssItems.addElement( rssItem );
+            if(rssItems.size()>= maxItemCount)
+            {
+                return;
+            }
             parser.nextTag();
             
         } while("item".equals(parser.getName()));

@@ -41,11 +41,13 @@ public class RssReaderMIDlet extends MIDlet
     // Attributes
     private Display     m_display;          // The display for this MIDlet
     private Settings    m_settings;         // The settings
+    private RssReaderSettings m_appSettings;// The application settings
     private Hashtable   m_rssFeeds;         // The bookmark URLs
     private Thread      m_netThread;        // The thread for networking
     private boolean     m_getPage;          // The noticy flag for HTTP
     private boolean     m_getFeedList;      // The noticy flag for list parsing
     private FeedListParser m_listParser;    // The feed list parser
+    private int         m_maxRssItemCount;  // The maximum item count in a feed
     
     // Currently selected bookmark
     private int             m_curBookmark;  // The currently selected item
@@ -64,6 +66,7 @@ public class RssReaderMIDlet extends MIDlet
     private TextField   m_bmPassword;       // The RSS feed password field
     private TextField   m_feedListURL;      // The feed list URL field
     private ChoiceGroup m_importFormatGroup;// The import type choice group
+    private SettingsForm m_settingsForm;    // The settings form    
     
     // Commands
     private Command     m_addOkCmd;         // The OK command
@@ -80,6 +83,7 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_importFeedListCmd;// The import feed list command
     private Command     m_importOkCmd;      // The OK command for importing
     private Command     m_importCancelCmd;  // The Cancel command for importing
+    private Command     m_settingsCmd;      // The show settings command
     private Command     m_updateAllCmd;     // The update all command
     
     
@@ -90,7 +94,7 @@ public class RssReaderMIDlet extends MIDlet
         m_addOkCmd          = new Command("OK", Command.OK, 1);
         m_addCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
         m_backCommand       = new Command("Back", Command.SCREEN, 1);
-        m_exitCommand       = new Command("Exit", Command.SCREEN, 4);
+        m_exitCommand       = new Command("Exit", Command.SCREEN, 5);
         m_addNewBookmark    = new Command("Add new", Command.SCREEN, 2);
         m_openBookmark      = new Command("Open", Command.SCREEN, 1);
         m_editBookmark      = new Command("Edit", Command.SCREEN, 2);
@@ -101,11 +105,15 @@ public class RssReaderMIDlet extends MIDlet
         m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
         m_importOkCmd       = new Command("OK", Command.OK, 1);
         m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
+        m_settingsCmd       = new Command("Settings", Command.SCREEN, 4);
         m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
         
         m_getPage = false;
         m_getFeedList = false;
         m_curBookmark = -1;
+        m_maxRssItemCount = 10;
+        
+        m_appSettings = RssReaderSettings.getInstance(this);
         
         /** Initialize GUI items */
         initializeBookmarkList();
@@ -113,12 +121,23 @@ public class RssReaderMIDlet extends MIDlet
         initializeHeadersList();
         initializeLoadingForm();
         initializeImportForm();
+        m_settingsForm = new SettingsForm(this);
         
         m_display.setCurrent(m_bookmarkList);
         
         /** Initialize thread for http connection operations */
         m_netThread = new Thread(this);
         m_netThread.start();
+    }
+
+    /** Get application settings */
+    public RssReaderSettings getSettings() {
+        return m_appSettings;
+    }    
+    
+    /** Show bookmark list */
+    public void showBookmarkList() {
+        m_display.setCurrent( m_bookmarkList );
     }
     
     /** Load bookmarks from record store */
@@ -131,6 +150,7 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_editBookmark );
             m_bookmarkList.addCommand( m_delBookmark );
             m_bookmarkList.addCommand( m_importFeedListCmd );
+            m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_updateAllCmd );
             m_bookmarkList.setCommandListener( this );
             
@@ -211,7 +231,8 @@ public class RssReaderMIDlet extends MIDlet
                 if( m_getPage ) {
                     try {
                         /** Get RSS feed */
-                        m_curRssParser.parseRssFeed();
+                        int maxItemCount = m_appSettings.getMaximumItemCountInFeed();
+                        m_curRssParser.parseRssFeed( maxItemCount );
                         fillHeadersList();
                         m_display.setCurrent( m_headerList );
                     }catch(Exception e) {
@@ -526,5 +547,11 @@ public class RssReaderMIDlet extends MIDlet
         if( c == m_importCancelCmd ) {
             m_display.setCurrent( m_headerList );
         }
+        
+        /** Settings form */
+        if( c == m_settingsCmd ) {
+            m_display.setCurrent( m_settingsForm );
+        }
     }
+
 }
