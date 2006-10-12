@@ -209,7 +209,12 @@ public class RssReaderMIDlet extends MIDlet
     /** Initialize import form */
     private void initializeImportForm() {
         m_importFeedsForm = new Form("Import feeds");
-        m_feedListURL = new TextField("URL", "http://", 64, TextField.URL);
+        RssReaderSettings settings = RssReaderSettings.getInstance(this);
+        String url = settings.getImportUrl();
+        if(url.length()==0) {
+            url = "http://";
+        }
+        m_feedListURL = new TextField("URL", url, 64, TextField.URL);
         m_importFeedsForm.append(m_feedListURL);
         
         String[] formats = {"line by line", "OPML"};
@@ -395,7 +400,7 @@ public class RssReaderMIDlet extends MIDlet
     /** Update all RSS feeds */
     private void updateAllHeaders() {
         initializeLoadingForm();
-        m_display.setCurrent( m_loadingForm );
+        m_display.setCurrent( m_loadForm );
         // TODO: Add code for parsing all RSS feeds
     }
     
@@ -504,7 +509,7 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Update all RSS feeds */
         if( c == m_updateAllCmd ) {
-            updateAllFeeds();
+            updateAllHeaders();
         }
         
         /** Show import feed list form */
@@ -522,6 +527,9 @@ public class RssReaderMIDlet extends MIDlet
                 int selectedImportType = m_importFormatGroup.getSelectedIndex();
                 RssFeed[] feeds = null;
                 String url = m_feedListURL.getString();
+                // Save url
+                RssReaderSettings settings = RssReaderSettings.getInstance(this);
+                settings.setImportUrl(url);
                 if(selectedImportType==0) {
                     // Use line by line parser
                     m_listParser = new LineByLineParser(url);

@@ -37,6 +37,9 @@ public class RssReaderSettings {
     private static RssReaderSettings m_singleton;    
     
     private static final String MAX_ITEM_COUNT = "max-item-count";
+    private static final String IMPORT_URL = "import-url";
+    private static final String IMPORT_USERNAME = "import-username";
+    private static final String IMPORT_PASSWORD = "import-password";
     
     /** Creates a new instance of RssFeedReaderSettings */
     private RssReaderSettings(MIDlet midlet) {
@@ -65,4 +68,39 @@ public class RssReaderSettings {
     public void setMaximumItemCountInFeed(int maxCount) {
         m_settings.setIntProperty(MAX_ITEM_COUNT, maxCount);
     }
+    
+    /** Get import URL address */
+    public String getImportUrl() {
+        String url = m_settings.getStringProperty(IMPORT_URL, "");
+        return url;
+    }
+    
+    /** Set import URL address */
+    public void setImportUrl(String url) {
+        m_settings.setStringProperty(IMPORT_URL, url);
+    }
+    
+    /** Get import URL username */
+    public String getImportUrlUsername() {
+        String username = m_settings.getStringProperty(IMPORT_USERNAME, "");
+        return username;
+    }
+    
+    /** Set import URL username */
+    public void setImportUrlUsername(String username) {
+        m_settings.setStringProperty(IMPORT_USERNAME, username);
+    }
+    
+    /** Get import URL password */
+    public String getImportUrlPassword() {
+        String password = m_settings.getStringProperty(IMPORT_PASSWORD, "");
+        return password;
+    }
+    
+    /** Set import URL password */
+    public void setImportUrlPassword(String password) {
+        m_settings.setStringProperty(IMPORT_PASSWORD, password);
+    }
+    
+    
 }

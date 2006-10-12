@@ -84,8 +84,8 @@ public class RssFeedParser {
                  */
                 String username = m_rssFeed.getUsername();
                 String password = m_rssFeed.getPassword();
-                Base64 b64 = new Base64();
                 String userPass;
+                Base64 b64 = new Base64();
                 userPass = username + ":" + password;
                 userPass = b64.encode(userPass.getBytes());
                 hc.setRequestProperty("Authorization", "Basic " + userPass);
