@@ -37,8 +37,8 @@ import java.util.Vector;
 public class LineByLineParser extends FeedListParser {
     
     /** Creates a new instance of LineByLineParser */
-    public LineByLineParser(String url) {
-        super(url);
+    public LineByLineParser(String url, String username, String password) {
+        super(url, username, password);
     }
 
     public RssFeed[] parseFeeds(InputStream is) {

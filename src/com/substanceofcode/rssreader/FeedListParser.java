@@ -37,13 +37,17 @@ public abstract class FeedListParser implements Runnable{
     
     private Thread m_parsingThread;
     private String m_url;
+    private String m_username;
+    private String m_password;
     private boolean m_ready;
     private RssFeed[] m_feeds;
     
     /** Creates a new instance of FeedListParser */
-    public FeedListParser(String url) {
+    public FeedListParser(String url, String username, String password) {
         m_parsingThread = new Thread(this);
         m_url = url;
+        m_username = username;
+        m_password = password;
     }
     
     /** Start parsing the feed list */
@@ -94,6 +98,20 @@ public abstract class FeedListParser implements Runnable{
             hc.setRequestProperty("Content-Length", "0");
             hc.setRequestProperty("Connection", "close");
 
+            /** Add credentials if they are defined */
+            if( m_username.length()>0) {
+                /** 
+                 * Add authentication header in HTTP request. Basic authentication
+                 * should be formatted like this:
+                 *     Authorization: Basic QWRtaW46Zm9vYmFy
+                 */
+                String userPass;
+                Base64 b64 = new Base64();
+                userPass = m_username + ":" + m_password;
+                userPass = b64.encode(userPass.getBytes());
+                hc.setRequestProperty("Authorization", "Basic " + userPass);
+            }            
+            
             /** 
              * Get a DataInputStream from the HttpConnection 
              * and return it to the caller
