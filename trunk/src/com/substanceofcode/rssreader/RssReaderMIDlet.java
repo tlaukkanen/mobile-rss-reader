@@ -65,6 +65,8 @@ public class RssReaderMIDlet extends MIDlet
     private TextField   m_bmUsername;       // The RSS feed username field
     private TextField   m_bmPassword;       // The RSS feed password field
     private TextField   m_feedListURL;      // The feed list URL field
+    private TextField   m_feedListUsername; // The feed list username
+    private TextField   m_feedListPassword; // The feed list password
     private ChoiceGroup m_importFormatGroup;// The import type choice group
     private SettingsForm m_settingsForm;    // The settings form    
     
@@ -221,6 +223,14 @@ public class RssReaderMIDlet extends MIDlet
         m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
         m_importFeedsForm.append(m_importFormatGroup);
         
+        String username = settings.getImportUrlUsername();        
+        m_feedListUsername  = new TextField("Username (optional)", username, 64, TextField.ANY);
+        m_importFeedsForm.append(m_feedListUsername);
+        
+        String password = settings.getImportUrlPassword();
+        m_feedListPassword  = new TextField("Password (optional)", password, 64, TextField.PASSWORD);
+        m_importFeedsForm.append(m_feedListPassword);
+                
         m_importFeedsForm.addCommand( m_importOkCmd );
         m_importFeedsForm.addCommand( m_importCancelCmd );
         m_importFeedsForm.setCommandListener(this);        
@@ -527,16 +537,21 @@ public class RssReaderMIDlet extends MIDlet
                 int selectedImportType = m_importFormatGroup.getSelectedIndex();
                 RssFeed[] feeds = null;
                 String url = m_feedListURL.getString();
-                // Save url
+                String username = m_feedListUsername.getString();
+                String password = m_feedListPassword.getString();
+                
+                // Save settings
                 RssReaderSettings settings = RssReaderSettings.getInstance(this);
                 settings.setImportUrl(url);
+                settings.setImportUrlUsername(username);
+                settings.setImportUrlPassword(password);
                 if(selectedImportType==0) {
                     // Use line by line parser
-                    m_listParser = new LineByLineParser(url);
+                    m_listParser = new LineByLineParser(url, username, password);
                 }
                 if(selectedImportType==1) {
                     // Use OPML parser
-                    m_listParser = new OpmlParser(url);
+                    m_listParser = new OpmlParser(url, username, password);
                 }
                 
                 // Start parsing

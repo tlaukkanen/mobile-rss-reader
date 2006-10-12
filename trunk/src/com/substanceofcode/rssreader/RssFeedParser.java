@@ -164,9 +164,9 @@ public class RssFeedParser {
                 text = replace(text, "&ouml;", "ö");
                 text = replace(text, "Ã¤", "ä");
                 text = replace(text, "Ã¶", "ö");
-                text = replace(text, "#8217", "'");
-                text = replace(text, "#8220", "\"");
-                text = replace(text, "#8221", "\"");
+                text = replace(text, "&#8217;", "'");
+                text = replace(text, "&#8220;", "\"");
+                text = replace(text, "&#8221;", "\"");
                 
                 /** Save item property values */
                 if (name.equals("title")) {

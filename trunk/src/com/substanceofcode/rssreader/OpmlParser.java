@@ -40,8 +40,8 @@ public class OpmlParser extends FeedListParser {
     
     private XmlPullParser m_xmlParser = new KXmlParser(); // The Xml parser
     
-    public OpmlParser(String url) {
-        super(url);
+    public OpmlParser(String url, String username, String password) {
+        super(url, username, password);
     }
     
     /** Parse OPML list */
