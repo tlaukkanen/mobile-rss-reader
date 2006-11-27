@@ -45,7 +45,7 @@ public class RssItem {
         m_desc = desc;
         m_date = null;
     }
-
+    
     /** Creates a new instance of RssItem */
     public RssItem(String title, String link, String desc, Date pubDate) {
         m_title = title;
@@ -72,5 +72,56 @@ public class RssItem {
     /** Get RSS item publication date */
     public Date getDate() {
         return m_date;
+    }
+    
+    /** Serialize the object */
+    public String serialize() {
+        String dateString;
+        if(m_date==null){
+            dateString = "";
+        } else {
+            dateString = String.valueOf( m_date.getTime() );
+        }
+        String preData = m_title + "|" + m_link + "|" + dateString + "|" + m_desc;
+        Base64 b64 = new Base64();
+        String encodedSerializedData = b64.encode( preData.getBytes() );
+        return encodedSerializedData;
+    }
+    
+    /** Deserialize the object */
+    public static RssItem deserialize(String data) {
+        
+        String title = "";
+        String link = "";
+        String desc = "";
+        Date date = null;
+
+        // Base64 decode
+        Base64 b64 = new Base64();
+        byte[] decodedData = b64.decode(data);
+        data = new String( decodedData );
+        
+        String[] nodes = StringUtil.split( data, "|");
+        
+        /* Node count should be 4:
+         * title | link | date | desc
+         */
+        int TITLE = 0;
+        title = nodes[TITLE];
+        
+        int LINK = 1;
+        link = nodes[LINK];
+        
+        int DATE = 2;
+        String dateString = nodes[DATE];
+        if(dateString.length()>0) {
+            date = new Date(Long.parseLong(dateString));
+        }        
+        
+        int DESC = 3;
+        desc = nodes[DESC];
+                
+        RssItem item = new RssItem(title, link, desc, date);
+        return item;
     }
 }

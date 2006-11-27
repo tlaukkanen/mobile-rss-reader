@@ -78,10 +78,11 @@
 
     -->
     
+    <!--
     <property name="rim.blackberry.home" location="C:\Program Files\Research In Motion\BlackBerry JDE 4.2.0"/>
-    <property name="rim.blackberry.emulator" value="8100"/>
+    <property name="rim.blackberry.emulator" value="7250"/>
     <property name="rim.blackberry.jdwp.port" value="8000"/>
-<!--
+
     <target name="post-jar">
         <exec os="Windows NT Windows 95 Windows 98 Windows 2000 Windows XP"
 	dir="${dist.root.dir}"
@@ -95,9 +96,6 @@
         </exec>
         <copy file="${name}.alx" todir="${dist.root.dir}"/>
     </target>
-    -->
-    
-    <!--
     <target name="run" depends="init,jar">
         <copy todir="${rim.blackberry.home}/simulator" verbose="true">
             <fileset dir="${dist.root.dir}">
@@ -109,8 +107,7 @@
 	executable="${rim.blackberry.home}/simulator/${rim.blackberry.emulator}.bat"
 	failonerror="true" resolveExecutable="true"/>
     </target>
--->
-<!--
+
     <target name="debug" depends="init,jar">
         <copy todir="${rim.blackberry.home}/simulator" verbose="true">
             <fileset dir="${dist.root.dir}">
@@ -139,6 +136,5 @@
             </fileset>
         </delete>
     </target>
-    
     -->
 </project>
