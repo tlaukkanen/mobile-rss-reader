@@ -49,23 +49,39 @@ public class RssFeed{
     
     /** Creates a new instance of RSSBookmark with record store string */
     public RssFeed(String storeString){
-        int i = storeString.indexOf("|");
-        if(i>0) {
-            m_name = storeString.substring(0,i);
-            int usernameIndex = storeString.indexOf("|", i+1);
-            if(usernameIndex>0) {
-                m_url  = storeString.substring(i+1, usernameIndex);
-                // Older versions didn't include username+password
-                int passwordIndex = storeString.indexOf("|", usernameIndex+1);
-                if(passwordIndex>0) {
-                    m_username = storeString.substring(usernameIndex+1,passwordIndex);
-                    m_password = storeString.substring(passwordIndex+1);
-                }
-            }
-            else {
-                m_url  = storeString.substring(i+1);
+        
+        String[] nodes = StringUtil.split( storeString, "|" );
+        
+        /* Node count should be 5
+         * name | url | username | password | items
+         */
+        int NAME = 0;        
+        m_name = nodes[ NAME ];
+        
+        int URL = 1;
+        m_url = nodes[ URL ];
+        
+        int USERNAME = 2;
+        m_username = nodes[ USERNAME ];
+        
+        int PASSWORD = 3;
+        m_password = nodes[ PASSWORD ];
+        
+        int ITEMS = 4;
+        String itemArrayData = nodes[ ITEMS ];
+        
+        // Deserialize itemss
+        String[] serializedItems = StringUtil.split(itemArrayData, ".");
+        
+        m_items = new Vector();
+        for(int itemIndex=0; itemIndex<serializedItems.length; itemIndex++) {
+            String serializedItem = serializedItems[ itemIndex ];
+            if(serializedItem.length()>0) {
+                RssItem rssItem = RssItem.deserialize( serializedItem );
+                m_items.addElement( rssItem );
             }
         }
+       
     }
     
     /** Return bookmark's name */
@@ -90,7 +106,19 @@ public class RssFeed{
     
     /** Return record store string */
     public String getStoreString(){
-        return m_name + "|" + m_url + "|" + m_username + "|" + m_password;
+        String serializedItems = "";
+        for(int itemIndex=0; itemIndex<m_items.size();itemIndex++) {
+            RssItem rssItem = (RssItem)m_items.elementAt(itemIndex);
+            String serializedItem = rssItem.serialize();
+            serializedItems += serializedItem + ".";
+        }
+        String storeString = m_name + "|" +
+                m_url + "|" +
+                m_username + "|" +
+                m_password + "|" +
+                serializedItems;
+        return storeString;
+        
     }
     
     /** Return RSS feed items */
