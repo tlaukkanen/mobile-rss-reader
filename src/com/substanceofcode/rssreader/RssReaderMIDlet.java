@@ -45,6 +45,7 @@ public class RssReaderMIDlet extends MIDlet
     private Hashtable   m_rssFeeds;         // The bookmark URLs
     private Thread      m_netThread;        // The thread for networking
     private boolean     m_getPage;          // The noticy flag for HTTP
+    private boolean     m_refreshAllFeeds;  // The notify flag for all feeds
     private boolean     m_getFeedList;      // The noticy flag for list parsing
     private FeedListParser m_listParser;    // The feed list parser
     private int         m_maxRssItemCount;  // The maximum item count in a feed
@@ -97,13 +98,13 @@ public class RssReaderMIDlet extends MIDlet
         m_addCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
         m_backCommand       = new Command("Back", Command.SCREEN, 1);
         m_exitCommand       = new Command("Exit", Command.SCREEN, 5);
-        m_addNewBookmark    = new Command("Add new", Command.SCREEN, 2);
-        m_openBookmark      = new Command("Open", Command.SCREEN, 1);
-        m_editBookmark      = new Command("Edit", Command.SCREEN, 2);
-        m_delBookmark       = new Command("Delete", Command.SCREEN, 3);
-        m_openHeaderCmd     = new Command("Open", Command.SCREEN, 1);
+        m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
+        m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
+        m_editBookmark      = new Command("Edit feed", Command.SCREEN, 2);
+        m_delBookmark       = new Command("Delete feed", Command.SCREEN, 3);
+        m_openHeaderCmd     = new Command("Open item", Command.SCREEN, 1);
         m_backHeaderCmd     = new Command("Back", Command.SCREEN, 2);
-        m_updateCmd         = new Command("Update", Command.SCREEN, 2);
+        m_updateCmd         = new Command("Update feed", Command.SCREEN, 2);
         m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
         m_importOkCmd       = new Command("OK", Command.OK, 1);
         m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
@@ -111,6 +112,7 @@ public class RssReaderMIDlet extends MIDlet
         m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
         
         m_getPage = false;
+        m_refreshAllFeeds = false;
         m_getFeedList = false;
         m_curBookmark = -1;
         m_maxRssItemCount = 10;
@@ -121,7 +123,7 @@ public class RssReaderMIDlet extends MIDlet
         initializeBookmarkList();
         initializeAddBookmarkForm();
         initializeHeadersList();
-        initializeLoadingForm();
+        //initializeLoadingForm();
         initializeImportForm();
         m_settingsForm = new SettingsForm(this);
         
@@ -152,7 +154,7 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_editBookmark );
             m_bookmarkList.addCommand( m_delBookmark );
             m_bookmarkList.addCommand( m_importFeedListCmd );
-            //m_bookmarkList.addCommand( m_settingsCmd );
+            m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_updateAllCmd );
             m_bookmarkList.setCommandListener( this );
             
@@ -188,9 +190,9 @@ public class RssReaderMIDlet extends MIDlet
     }
     
     /** Initialize loading form */
-    private void initializeLoadingForm() {
+    private void initializeLoadingForm(String desc) {
         m_loadForm = new Form("Loading");
-        m_loadForm.append("Loading RSS feed...");
+        m_loadForm.append( desc + "\n" );
         m_loadForm.addCommand( m_backHeaderCmd );
         m_loadForm.setCommandListener( this );
     }
@@ -262,6 +264,29 @@ public class RssReaderMIDlet extends MIDlet
                     }
                     m_getPage = false;
                 }
+                if( m_refreshAllFeeds ) {
+                    try{
+                        int maxItemCount = m_appSettings.getMaximumItemCountInFeed();
+                        Enumeration feedEnum = m_rssFeeds.elements();
+                        while(feedEnum.hasMoreElements()) {
+                            RssFeed feed = (RssFeed)feedEnum.nextElement();
+                            try{
+                                m_loadForm.append(feed.getName() + "...");
+                                RssFeedParser parser = new RssFeedParser( feed );
+                                parser.parseRssFeed(maxItemCount);
+                                m_loadForm.append("ok\n");
+                            } catch(Exception ex) {
+                                m_loadForm.append("Error\n");
+                            }
+                        }
+                        m_display.setCurrent( m_bookmarkList );
+                    } catch(Exception ex) {
+                        m_loadForm.append("\nError parsing RSS feed from:\n" +
+                                m_curRssParser.getRssFeed().getUrl());
+                        m_display.setCurrent( m_loadForm );
+                    }
+                    m_refreshAllFeeds = false;
+                }
                 if( m_getFeedList ) {
                     try {
                         if(m_listParser.isReady()==true) {
@@ -327,15 +352,16 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.insert(m_bookmarkList.size(), bm.getName(), null);
         }
         m_rssFeeds.put(bm.getName(), bm);
-        System.out.println("bm: " + bm.getStoreString());
     }
     
     /** Fill RSS header list */
     private void fillHeadersList() {
-        while(m_headerList.size()>0)
+        while(m_headerList.size()>0) {
             m_headerList.delete(0);
+        }
+        RssFeed feed = m_curRssParser.getRssFeed();
+        m_headerList.setTitle( feed.getName() );
         for(int i=0; i<m_curRssParser.getRssFeed().getItems().size(); i++){
-            RssFeed feed = m_curRssParser.getRssFeed();
             RssItem r = (RssItem)feed.getItems().elementAt(i);
             m_headerList.append( r.getTitle(), null );
         }
@@ -394,18 +420,38 @@ public class RssReaderMIDlet extends MIDlet
     /** Save bookmarks to record store */
     public void saveBookmarks() {
         String bookmarks = "";
-        for( int i=0; i<m_bookmarkList.size(); i++) {
-            String name = m_bookmarkList.getString(i);
-            RssFeed rss = (RssFeed)m_rssFeeds.get( name );
-            if( name.length()>0)
-                bookmarks += rss.getStoreString() + "^";
+        try {
+            /** Try to save feeds including items */
+            for( int i=0; i<m_bookmarkList.size(); i++) {
+                String name = m_bookmarkList.getString(i);
+                RssFeed rss = (RssFeed)m_rssFeeds.get( name );
+                if( name.length()>0)
+                    bookmarks += rss.getStoreString(true) + "^";
+            }
+            m_settings.setStringProperty("bookmarks",bookmarks);
+        } catch(OutOfMemoryError error) {
+            Alert memoryAlert = new Alert(
+                    "Out of memory", 
+                    "Saving bookmarks without updated news items.",
+                    null,
+                    AlertType.WARNING);
+            m_display.setCurrent( memoryAlert );
+            
+            /** Save feeds without items */
+            bookmarks = "";
+            for( int i=0; i<m_bookmarkList.size(); i++) {
+                String name = m_bookmarkList.getString(i);
+                RssFeed rss = (RssFeed)m_rssFeeds.get( name );
+                if( name.length()>0)
+                    bookmarks += rss.getStoreString(false) + "^";
+            }
+            m_settings.setStringProperty("bookmarks",bookmarks);
         }
-        m_settings.setStringProperty("bookmarks",bookmarks);
     }
     
     /** Update RSS feed's headers */
     private void updateHeaders() {
-        initializeLoadingForm();
+        initializeLoadingForm("updating feed...");
         m_display.setCurrent( m_loadForm );
         if(m_curRssParser.getRssFeed().getUrl().length()>0) {
             m_getPage = true;
@@ -414,9 +460,9 @@ public class RssReaderMIDlet extends MIDlet
     
     /** Update all RSS feeds */
     private void updateAllHeaders() {
-        initializeLoadingForm();
+        initializeLoadingForm("Updating all feeds...");
         m_display.setCurrent( m_loadForm );
-        // TODO: Add code for parsing all RSS feeds
+        m_refreshAllFeeds = true;
     }
     
     /** Respond to commands */

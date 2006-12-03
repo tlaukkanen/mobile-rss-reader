@@ -105,12 +105,14 @@ public class RssFeed{
     }
     
     /** Return record store string */
-    public String getStoreString(){
+    public String getStoreString(boolean serializeItems){
         String serializedItems = "";
-        for(int itemIndex=0; itemIndex<m_items.size();itemIndex++) {
-            RssItem rssItem = (RssItem)m_items.elementAt(itemIndex);
-            String serializedItem = rssItem.serialize();
-            serializedItems += serializedItem + ".";
+        if( serializeItems ) {
+            for(int itemIndex=0; itemIndex<m_items.size();itemIndex++) {
+                RssItem rssItem = (RssItem)m_items.elementAt(itemIndex);
+                String serializedItem = rssItem.serialize();
+                serializedItems += serializedItem + ".";
+            }
         }
         String storeString = m_name + "|" +
                 m_url + "|" +
