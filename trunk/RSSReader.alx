@@ -12,7 +12,7 @@
         </version>
 
         <vendor >
-            SubstanceOfCode.com
+            substanceofcode.com
         </vendor>
 
         <copyright >
@@ -21,7 +21,7 @@
 
         <fileset Java="1.5">
             <directory >
-                SubstanceOfCode.com
+                substanceofcode
             </directory>
 
             <files >

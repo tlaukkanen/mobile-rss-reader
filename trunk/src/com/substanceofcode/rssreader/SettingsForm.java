@@ -56,14 +56,21 @@ public class SettingsForm extends Form implements CommandListener {
         RssReaderSettings settings = m_midlet.getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
         
-        m_itemCountField = new TextField("Max item count in feed", 
+        m_itemCountField = new TextField("Max item count in feed",
                 String.valueOf(maxCount), 3, TextField.NUMERIC);
         this.append( m_itemCountField );
     }
-
+    
     public void commandAction(Command command, Displayable displayable) {
         if(command==m_okCommand) {
             // Save settings
+            RssReaderSettings settings = m_midlet.getSettings();
+            try {
+                int maxCount = Integer.parseInt( m_itemCountField.getString() );
+                settings.setMaximumItemCountInFeed( maxCount );
+            } catch(Exception e) {
+                System.err.println("Error: " + e.toString());
+            }
             
             m_midlet.showBookmarkList();
         }

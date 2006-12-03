@@ -22,7 +22,6 @@
 
 package com.substanceofcode.rssreader;
 
-//import com.sun.cldc.i18n.StreamReader;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
@@ -40,6 +39,7 @@ public class OpmlParser extends FeedListParser {
     
     private XmlPullParser m_xmlParser = new KXmlParser(); // The Xml parser
     
+    /** Constructor with url, username and password parameters. */
     public OpmlParser(String url, String username, String password) {
         super(url, username, password);
     }

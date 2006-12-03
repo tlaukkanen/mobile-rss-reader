@@ -84,7 +84,7 @@
     <property name="rim.blackberry.jdwp.port" value="8000"/>
 
     <target name="post-jar">
-        <exec os="Windows NT Windows 95 Windows 98 Windows 2000 Windows XP"
+        <exec os="Windows NT Windows 95 Windows 98 Windows 2000 Windows XP Windows Vista"
 	dir="${dist.root.dir}"
 	executable="${rim.blackberry.home}/bin/rapc.exe"
 	failonerror="true" resolveExecutable="true">
