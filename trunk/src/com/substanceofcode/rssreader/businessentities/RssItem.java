@@ -20,8 +20,10 @@
  *
  */
 
-package com.substanceofcode.rssreader;
+package com.substanceofcode.rssreader.businessentities;
 
+import com.substanceofcode.utils.Base64;
+import com.substanceofcode.utils.StringUtil;
 import java.util.Date;
 
 /**

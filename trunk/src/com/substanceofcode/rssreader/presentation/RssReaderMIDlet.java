@@ -20,8 +20,16 @@
  *
  */
 
-package com.substanceofcode.rssreader;
+package com.substanceofcode.rssreader.presentation;
 
+import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.rssreader.businessentities.RssItem;
+import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
+import com.substanceofcode.rssreader.businesslogic.FeedListParser;
+import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
+import com.substanceofcode.rssreader.businesslogic.OpmlParser;
+import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
+import com.substanceofcode.utils.Settings;
 import java.util.*;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.*;
@@ -258,7 +266,7 @@ public class RssReaderMIDlet extends MIDlet
                     }catch(Exception e) {
                         /** Error while parsing RSS feed */
                         System.out.println("Error: " + e.getMessage());
-                        m_loadForm.append("\nError parsing RSS feed on:\n" +
+                        m_loadForm.append("\nError parsing feed on:\n" +
                                 m_curRssParser.getRssFeed().getUrl());
                         m_display.setCurrent( m_loadForm );
                     }
@@ -281,7 +289,7 @@ public class RssReaderMIDlet extends MIDlet
                         }
                         m_display.setCurrent( m_bookmarkList );
                     } catch(Exception ex) {
-                        m_loadForm.append("\nError parsing RSS feed from:\n" +
+                        m_loadForm.append("\nError parsing feed from:\n" +
                                 m_curRssParser.getRssFeed().getUrl());
                         m_display.setCurrent( m_loadForm );
                     }

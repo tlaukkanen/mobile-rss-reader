@@ -20,8 +20,9 @@
  *
  */
 
-package com.substanceofcode.rssreader;
+package com.substanceofcode.rssreader.businessentities;
 
+import com.substanceofcode.utils.Settings;
 import java.io.IOException;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStoreException;

@@ -20,8 +20,9 @@
  *
  */
 
-package com.substanceofcode.rssreader;
+package com.substanceofcode.rssreader.businessentities;
 
+import com.substanceofcode.utils.StringUtil;
 import java.util.*;
 
 /**
@@ -126,6 +127,11 @@ public class RssFeed{
     /** Return RSS feed items */
     public Vector getItems() {
         return m_items;
+    }
+    
+    /** Set items */
+    public void setItems(Vector items) {
+        m_items = items;
     }
     
 }
