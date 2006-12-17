@@ -20,13 +20,13 @@
  *
  */
 
-package com.substanceofcode.rssreader;
+package com.substanceofcode.rssreader.businesslogic;
 
+import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.utils.XmlParser;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
-import org.xmlpull.v1.*;
-import org.kxml2.io.*;
 
 /**
  * OpmlParser is an utility class for aquiring and parsing a OPML lists.
@@ -36,8 +36,6 @@ import org.kxml2.io.*;
  * @version 1.0
  */
 public class OpmlParser extends FeedListParser {
-    
-    private XmlPullParser m_xmlParser = new KXmlParser(); // The Xml parser
     
     /** Constructor with url, username and password parameters. */
     public OpmlParser(String url, String username, String password) {
@@ -50,46 +48,41 @@ public class OpmlParser extends FeedListParser {
         Vector rssFeeds = new Vector();
         
         /** Initialize XML parser and parse OPML XML */
-        KXmlParser  parser = new KXmlParser();
-        InputStreamReader reader = new InputStreamReader(is);
+        XmlParser  parser = new XmlParser(is);
         try {
             
-            parser.setInput( new InputStreamReader(is) );
+            int elementType = parser.parse();
             
-            do {
+            while( elementType != XmlParser.END_DOCUMENT ) {
                 /** RSS item properties */
                 String title = "";
                 String link = "";
-                
-                // Get next event from parser
-                parser.next();
-                
-                System.out.println("Parser.next()");
-                
-                if (parser.getEventType() == XmlPullParser.START_TAG) {
-                    String tagName = parser.getName();
-                    if (tagName.equals("outline")) {
-                        System.out.println("Parsing <outline> tag");
-                        
-                        title = parser.getAttributeValue(null, "text");
-                        link = parser.getAttributeValue(null, "xmlUrl");
-                        
-                        /** Debugging information */
-                        System.out.println("Title:       " + title);
-                        System.out.println("Link:        " + link);
-                        
-                        /** Create new RSS item and add it do RSS document's item
-                         *  collection
-                         */
+                                                
+                String tagName = parser.getName();
+                System.out.println("tagname: " + tagName);
+                if (tagName.equals("outline")) {
+                    System.out.println("Parsing <outline> tag");
+                    
+                    title = parser.getAttributeValue( "text" );
+                    link = parser.getAttributeValue( "xmlUrl" );
+                    
+                    /** Debugging information */
+                    System.out.println("Title:       " + title);
+                    System.out.println("Link:        " + link);
+                    
+                    /** 
+                     * Create new RSS item and add it do RSS document's item
+                     * collection.
+                     */
+                    if( link.length()>0 ) {
                         RssFeed feed = new RssFeed(title, link, "", "");
                         rssFeeds.addElement( feed );
                     }
                 }
-            }while (parser.getEventType() != XmlPullParser.END_DOCUMENT);
+                
+                elementType = parser.parse();
+            };
             
-        } catch (XmlPullParserException ex) {
-            System.err.println("OpmlParser.parseFeeds(): XmlPullParserException " + ex.toString());
-            return null;
         } catch (Exception ex) {
             System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
             return null;

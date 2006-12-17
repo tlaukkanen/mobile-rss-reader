@@ -20,8 +20,10 @@
  *
  */
 
-package com.substanceofcode.rssreader;
+package com.substanceofcode.rssreader.businesslogic;
 
+import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.utils.Base64;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;

@@ -20,8 +20,9 @@
  *
  */
 
-package com.substanceofcode.rssreader;
+package com.substanceofcode.rssreader.presentation;
 
+import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;

@@ -20,7 +20,7 @@
  *
  */
 
-package com.substanceofcode.rssreader;
+package com.substanceofcode.utils;
 
 import java.io.*;
 
