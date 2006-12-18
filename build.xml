@@ -77,8 +77,8 @@
         </target>
 
     -->
-    
     <!--
+    
     <property name="rim.blackberry.home" location="C:\Program Files\Research In Motion\BlackBerry JDE 4.2.0"/>
     <property name="rim.blackberry.emulator" value="7250"/>
     <property name="rim.blackberry.jdwp.port" value="8000"/>
@@ -136,5 +136,5 @@
             </fileset>
         </delete>
     </target>
-    -->
+   -->
 </project>
