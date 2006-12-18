@@ -25,6 +25,7 @@ package com.substanceofcode.rssreader.presentation;
 import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businessentities.RssItem;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
+import com.substanceofcode.rssreader.businesslogic.Controller;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
@@ -97,9 +98,14 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_settingsCmd;      // The show settings command
     private Command     m_updateAllCmd;     // The update all command
     
+    // The controller of the application
+    private Controller m_controller;
     
     public RssReaderMIDlet() {
         m_display = Display.getDisplay(this);
+        
+        /** Initialize controller */
+        m_controller = new Controller( this );
         
         /** Initialize commands */
         m_addOkCmd          = new Command("OK", Command.OK, 1);
