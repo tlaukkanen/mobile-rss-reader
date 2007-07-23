@@ -355,7 +355,7 @@ public class RssReaderMIDlet extends MIDlet
     }
     
     /** Save bookmark into record store and bookmark list */
-    private void SaveBookmark(){
+    private void saveBookmark(){
         String name = "";
         name = m_bmName.getString();
         
@@ -377,6 +377,9 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.insert(m_bookmarkList.size(), bm.getName(), null);
         }
         m_rssFeeds.put(bm.getName(), bm);
+        
+        // Save bookmarks with the new entry
+        saveBookmarks();
     }
     
     /** Fill RSS header list */
@@ -517,7 +520,7 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Save currently edited (or added) RSS feed's properties */
         if( c == m_addOkCmd ){
-            SaveBookmark();
+            saveBookmark();
             m_display.setCurrent( m_bookmarkList );
         }
         
