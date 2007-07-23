@@ -20,6 +20,8 @@
  *
  */
 
+//#define MIDP20
+
 package com.substanceofcode.rssreader.presentation;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
