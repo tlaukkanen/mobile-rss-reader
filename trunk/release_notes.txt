@@ -1,0 +1,13 @@
+Mobile RSS Reader
+
+Copyright (c) 2006-2007 Tommi Laukkanen
+http://www.substanceofcode.com
+
+Contributors:
+Irving Bunton
+
+Release Notes:
+
+v1.5 (July 23th 2007)
++ Open links in device browser
++ Allow long feed URLs
