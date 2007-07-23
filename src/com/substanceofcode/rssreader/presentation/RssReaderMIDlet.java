@@ -33,6 +33,7 @@ import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.utils.Settings;
 import java.util.*;
 import javax.microedition.midlet.*;
+import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.*;
 
 /**
@@ -89,6 +90,10 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_editBookmark;     // The edit bookmark command
     private Command     m_delBookmark;      // The delete bookmark command
     private Command     m_backCommand;      // The back to header list command
+	//#ifdef MIDP20
+    private Command     m_openLinkCmd;    // The open link command
+	//#endif
+    private Command     m_copyLinkCmd;    // The copy link command
     private Command     m_openHeaderCmd;    // The open header command
     private Command     m_backHeaderCmd;    // The back to bookmark list command
     private Command     m_updateCmd;        // The update headers command
@@ -100,6 +105,8 @@ public class RssReaderMIDlet extends MIDlet
     
     // The controller of the application
     private Controller m_controller;
+    private int citemNbr = -1;
+    private RssItem citem = null;
     
     public RssReaderMIDlet() {
         m_display = Display.getDisplay(this);
@@ -117,6 +124,10 @@ public class RssReaderMIDlet extends MIDlet
         m_editBookmark      = new Command("Edit feed", Command.SCREEN, 2);
         m_delBookmark       = new Command("Delete feed", Command.SCREEN, 3);
         m_openHeaderCmd     = new Command("Open item", Command.SCREEN, 1);
+		//#ifdef MIDP20
+        m_openLinkCmd       = new Command("Open link", Command.SCREEN, 1);
+		//#endif
+        m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 1);
         m_backHeaderCmd     = new Command("Back", Command.SCREEN, 2);
         m_updateCmd         = new Command("Update feed", Command.SCREEN, 2);
         m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
@@ -394,12 +405,17 @@ public class RssReaderMIDlet extends MIDlet
     private void initializeItemForm(RssItem item) {
         System.out.println("Create new item form");
         m_itemForm = new Form( item.getTitle() );
+		//#ifdef MIDP20
+        m_itemForm.addCommand( m_openLinkCmd );
+		//#endif
+        m_itemForm.addCommand( m_copyLinkCmd );
         m_itemForm.addCommand( m_backCommand );
         m_itemForm.setCommandListener(this);
         m_itemForm.setTitle(item.getTitle());
         m_itemForm.append(new StringItem(item.getTitle() + "\n",
                 item.getDescription()));
-        m_itemForm.append(new StringItem("Link:",
+		citem = item;
+        citemNbr  = m_itemForm.append(new StringItem("Link:",
                 item.getLink()));
         
         // Add item's date if it is available
@@ -571,6 +587,31 @@ public class RssReaderMIDlet extends MIDlet
         if( c == m_backCommand ){
             m_display.setCurrent( m_headerList );
         }
+        
+        /** Copy link to clipboard.  */
+        if( c == m_copyLinkCmd ){
+			m_itemForm.set(citemNbr, new TextField("Link:",
+                citem.getLink(), citem.getLink().length(), TextField.URL));
+        }
+        
+		//#ifdef MIDP20
+        /** Go to link and get back to RSS feed headers */
+        if( c == m_openLinkCmd ){
+			try {
+				if (super.platformRequest(citem.getLink())) {
+					destroyApp(false);
+					super.notifyDestroyed();
+				}
+				m_display.setCurrent( m_headerList );
+			} catch (ConnectionNotFoundException e) {
+				Alert badLink = new Alert("Could not connect to link",
+								"Bad link:  " + citem.getLink(), null,
+								AlertType.ERROR);
+				badLink.setTimeout(Alert.FOREVER);
+				m_display.setCurrent( badLink, m_headerList );
+			}
+        }
+		//#endif
         
         /** Get back to RSS feed bookmarks */
         if( c == m_backHeaderCmd ){
