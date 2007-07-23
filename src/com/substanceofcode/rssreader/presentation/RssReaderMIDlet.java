@@ -226,7 +226,7 @@ public class RssReaderMIDlet extends MIDlet
     private void initializeAddBookmarkForm() {
         m_addNewBMForm = new Form("New bookmark");
         m_bmName = new TextField("Name", "", 35, TextField.ANY);
-        m_bmURL  = new TextField("URL", "http://", 64, TextField.URL);
+        m_bmURL  = new TextField("URL", "http://", 256, TextField.URL);
         m_bmUsername  = new TextField("Username (optional)", "", 64, TextField.ANY);
         m_bmPassword  = new TextField("Password (optional)", "", 64, TextField.PASSWORD);
         m_addNewBMForm.append( m_bmName );
@@ -246,7 +246,7 @@ public class RssReaderMIDlet extends MIDlet
         if(url.length()==0) {
             url = "http://";
         }
-        m_feedListURL = new TextField("URL", url, 64, TextField.URL);
+        m_feedListURL = new TextField("URL", url, 256, TextField.URL);
         m_importFeedsForm.append(m_feedListURL);
         
         String[] formats = {"OPML", "line by line"};
