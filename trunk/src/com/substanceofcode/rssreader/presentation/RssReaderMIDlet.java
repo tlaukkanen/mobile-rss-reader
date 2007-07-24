@@ -61,6 +61,10 @@ public class RssReaderMIDlet extends MIDlet
     private boolean     m_getFeedList;      // The noticy flag for list parsing
     private FeedListParser m_listParser;    // The feed list parser
     private int         m_maxRssItemCount;  // The maximum item count in a feed
+	// Tells us if this is the first time program was used.  This is
+	// done by seeing if max item count is set.  We also set it after
+	// showing the about.
+    private boolean firstTime = false;
     
     // Currently selected bookmark
     private int             m_curBookmark;  // The currently selected item
@@ -103,6 +107,7 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_importOkCmd;      // The OK command for importing
     private Command     m_importCancelCmd;  // The Cancel command for importing
     private Command     m_settingsCmd;      // The show settings command
+    private Command     m_AboutCmd;      // The show About
     private Command     m_updateAllCmd;     // The update all command
     
     // The controller of the application
@@ -136,6 +141,7 @@ public class RssReaderMIDlet extends MIDlet
         m_importOkCmd       = new Command("OK", Command.OK, 1);
         m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
         m_settingsCmd       = new Command("Settings", Command.SCREEN, 4);
+        m_AboutCmd          = new Command("About", Command.SCREEN, 4);
         m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
         
         m_getPage = false;
@@ -145,6 +151,12 @@ public class RssReaderMIDlet extends MIDlet
         m_maxRssItemCount = 10;
         
         m_appSettings = RssReaderSettings.getInstance(this);
+		try {
+			m_settings = Settings.getInstance(this);
+			firstTime = !m_settings.isInitialized();
+        } catch(Exception e) {
+            System.err.println("Error while getting settings: " + e.toString());
+        }
         
         /** Initialize GUI items */
         initializeBookmarkList();
@@ -183,6 +195,7 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_importFeedListCmd );
             m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_updateAllCmd );
+            m_bookmarkList.addCommand( m_AboutCmd );
             m_bookmarkList.setCommandListener( this );
             
             boolean stop = false;
@@ -357,7 +370,7 @@ public class RssReaderMIDlet extends MIDlet
     }
     
     /** Save bookmark into record store and bookmark list */
-    private void saveBookmark(){
+    private void SaveBookmark(){
         String name = "";
         name = m_bmName.getString();
         
@@ -379,9 +392,6 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.insert(m_bookmarkList.size(), bm.getName(), null);
         }
         m_rssFeeds.put(bm.getName(), bm);
-        
-        // Save bookmarks with the new entry
-        saveBookmarks();
     }
     
     /** Fill RSS header list */
@@ -435,9 +445,45 @@ public class RssReaderMIDlet extends MIDlet
      * the exit command and listener.
      */
     public void startApp() {
-        m_display.setCurrent( m_bookmarkList );
+		if( firstTime ) {
+			try {
+				firstTime = false;
+				m_settings = Settings.getInstance(this);
+				// Set Max item count to default so that it is initialized.
+				m_appSettings.setMaximumItemCountInFeed(
+						m_appSettings.getMaximumItemCountInFeed());
+				m_settings.save(false);
+				Alert m_about = getAbout();
+				m_display.setCurrent( m_about, m_bookmarkList );
+			} catch(Exception e) {
+				System.err.println("Error while getting/updating settings: " + e.toString());
+				m_display.setCurrent( m_bookmarkList );
+			}
+		} else {
+            m_display.setCurrent( m_bookmarkList );
+		}
     }
     
+    /**
+	  Create about alert.
+	  **/
+	private Alert getAbout() {
+		Alert about = new Alert("About RssReader",
+ "Copyright (C) 2005-2006 Tommi Laukkanen " +
+ "http://www.substanceofcode.com.  " +
+ "This program is distributed in the hope that it will be useful, " +
+ "but WITHOUT ANY WARRANTY; without even the implied warranty of " +
+ "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the " +
+ "GNU General Public License for more details. " +
+ "This program is free software; you can redistribute it and/or modify " +
+ "it under the terms of the GNU General Public License as published by " +
+ "the Free Software Foundation; either version 2 of the License, or " +
+ "(at your option) any later version.  ", null, AlertType.INFO);
+		about.setTimeout(Alert.FOREVER);
+ 
+		return about;
+	}
+
     /**
      * Pause is a no-op since there are no background activities or
      * record stores that need to be closed.
@@ -522,7 +568,7 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Save currently edited (or added) RSS feed's properties */
         if( c == m_addOkCmd ){
-            saveBookmark();
+            SaveBookmark();
             m_display.setCurrent( m_bookmarkList );
         }
         
@@ -603,7 +649,7 @@ public class RssReaderMIDlet extends MIDlet
         /** Go to link and get back to RSS feed headers */
         if( c == m_openLinkCmd ){
 			try {
-				if (super.platformRequest(citem.getLink())) {
+				if( super.platformRequest(citem.getLink()) ) {
 					destroyApp(false);
 					super.notifyDestroyed();
 				}
@@ -686,6 +732,12 @@ public class RssReaderMIDlet extends MIDlet
         if( c == m_settingsCmd ) {
             m_display.setCurrent( m_settingsForm );
         }
+        
+        /** Show about */
+		if( c == m_AboutCmd ) {
+			Alert m_about = getAbout();
+			m_display.setCurrent( m_about, m_bookmarkList );
+		}
     }
     
 }
