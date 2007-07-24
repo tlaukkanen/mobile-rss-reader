@@ -196,4 +196,9 @@ public class Settings {
         m_valuesChanged = true;
         return true;
     }
+
+	/** Get properties size to allow us to know if it was from a load or not.
+	  **/
+	public boolean isInitialized() { return m_properties.size() != 0; }
+
 }
