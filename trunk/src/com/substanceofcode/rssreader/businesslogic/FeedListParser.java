@@ -41,6 +41,8 @@ public abstract class FeedListParser implements Runnable{
     private String m_url;
     private String m_username;
     private String m_password;
+	protected String feedNameFilter;
+	protected String feedURLFilter;
     private boolean m_ready;
     private RssFeed[] m_feeds;
     
@@ -130,4 +132,20 @@ public abstract class FeedListParser implements Runnable{
     
     abstract RssFeed[] parseFeeds(InputStream is);
     
+    public void setFeedNameFilter(String feedNameFilter) {
+        this.feedNameFilter = feedNameFilter.toLowerCase();
+    }
+
+    public String getFeedNameFilter() {
+        return (feedNameFilter);
+    }
+
+    public void setFeedURLFilter(String feedURLFilter) {
+        this.feedURLFilter = feedURLFilter.toLowerCase();
+    }
+
+    public String getFeedURLFilter() {
+        return (feedURLFilter);
+    }
+
 }
