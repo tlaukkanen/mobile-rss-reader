@@ -30,6 +30,7 @@ import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.rssreader.businesslogic.Controller;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
+import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.utils.Settings;
@@ -82,6 +83,8 @@ public class RssReaderMIDlet extends MIDlet
     private TextField   m_bmUsername;       // The RSS feed username field
     private TextField   m_bmPassword;       // The RSS feed password field
     private TextField   m_feedListURL;      // The feed list URL field
+    private TextField   m_feedNameFilter;   // The feed name filter string
+    private TextField   m_feedURLFilter;    // The feed URL filter string
     private TextField   m_feedListUsername; // The feed list username
     private TextField   m_feedListPassword; // The feed list password
     private ChoiceGroup m_importFormatGroup;// The import type choice group
@@ -264,9 +267,14 @@ public class RssReaderMIDlet extends MIDlet
         m_feedListURL = new TextField("URL", url, 256, TextField.URL);
         m_importFeedsForm.append(m_feedListURL);
         
-        String[] formats = {"OPML", "line by line"};
+        String[] formats = {"OPML", "line by line", "HTML Links"};
         m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
         m_importFeedsForm.append(m_importFormatGroup);
+        
+        m_feedNameFilter = new TextField("Name filter string (optional)", "", 256, TextField.ANY);
+        m_importFeedsForm.append(m_feedNameFilter);
+        m_feedURLFilter = new TextField("URL filter string (optional)", "", 256, TextField.ANY);
+        m_importFeedsForm.append(m_feedURLFilter);
         
         String username = settings.getImportUrlUsername();
         m_feedListUsername  = new TextField("Username (optional)", username, 64, TextField.ANY);
@@ -465,8 +473,10 @@ public class RssReaderMIDlet extends MIDlet
     }
     
     /**
-	  Create about alert.
-	  **/
+	 * Create about alert.
+	 * @author  Irving Bunton
+	 * @version 1.0
+	 */
 	private Alert getAbout() {
 		Alert about = new Alert("About RssReader",
 "RssReader v@MIDLETVERS@ " +
@@ -695,6 +705,8 @@ public class RssReaderMIDlet extends MIDlet
                 int selectedImportType = m_importFormatGroup.getSelectedIndex();
                 RssFeed[] feeds = null;
                 String url = m_feedListURL.getString();
+				String feedNameFilter = m_feedNameFilter.getString();
+				String feedURLFilter = m_feedURLFilter.getString();
                 String username = m_feedListUsername.getString();
                 String password = m_feedListPassword.getString();
                 
@@ -703,6 +715,10 @@ public class RssReaderMIDlet extends MIDlet
                 settings.setImportUrl(url);
                 settings.setImportUrlUsername(username);
                 settings.setImportUrlPassword(password);
+                if(selectedImportType==2) {
+                    // Use line by line parser
+                    m_listParser = new HTMLLinkParser(url, username, password);
+                }
                 if(selectedImportType==1) {
                     // Use line by line parser
                     m_listParser = new LineByLineParser(url, username, password);
@@ -711,6 +727,8 @@ public class RssReaderMIDlet extends MIDlet
                     // Use OPML parser
                     m_listParser = new OpmlParser(url, username, password);
                 }
+				m_listParser.setFeedNameFilter(feedNameFilter);
+				m_listParser.setFeedURLFilter(feedURLFilter);
                 
                 // Start parsing
                 m_listParser.startParsing();
