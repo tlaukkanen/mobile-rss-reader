@@ -74,7 +74,11 @@ public class OpmlParser extends FeedListParser {
                      * Create new RSS item and add it do RSS document's item
                      * collection.
                      */
-                    if( link.length()>0 ) {
+                    if(( link.length()>0 ) &&
+						(( feedNameFilter == null) ||
+							(title.toLowerCase().indexOf(feedNameFilter) >= 0))
+						&& (( feedURLFilter == null) ||
+							( link.toLowerCase().indexOf(feedURLFilter) >=0))) {
                         RssFeed feed = new RssFeed(title, link, "", "");
                         rssFeeds.addElement( feed );
                     }
