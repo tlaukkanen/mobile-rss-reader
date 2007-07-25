@@ -73,6 +73,12 @@ public class LineByLineParser extends FeedListParser {
                 name = line;
                 url = line;
             }
+			if((( feedNameFilter != null) &&
+			  (name.toLowerCase().indexOf(feedNameFilter) < 0)) &&
+			  (( feedURLFilter != null) &&
+			  (url.toLowerCase().indexOf(feedURLFilter) < 0))) {
+				continue;
+			}
             feeds[lineIndex] = new RssFeed(name, url, "", "");
         }
         
