@@ -74,7 +74,7 @@ public class LineByLineParser extends FeedListParser {
                 url = line;
             }
 			if((( feedNameFilter != null) &&
-			  (name.toLowerCase().indexOf(feedNameFilter) < 0)) &&
+			  (name.toLowerCase().indexOf(feedNameFilter) < 0)) ||
 			  (( feedURLFilter != null) &&
 			  (url.toLowerCase().indexOf(feedURLFilter) < 0))) {
 				continue;
