@@ -66,7 +66,15 @@ public class RssFormatParser implements FeedFormatParser {
                 /** Save previous entry */
                 if(title.length()>0) {
                     RssItem item;
-                    Date pubDate = parseRssDate(date);
+                    Date pubDate = null;
+					// Check date in case we cannot find it.
+					if (date != null) {
+						if (date.indexOf("-") >= 0) {
+							pubDate = parseDcDate(date);
+						} else {
+							pubDate = parseRssDate(date);
+						}
+					}
                     if(pubDate!=null) {
                         item = new RssItem(title, link, description, pubDate);
                     } else {
@@ -95,7 +103,8 @@ public class RssFormatParser implements FeedFormatParser {
                 description = parser.getText();
                 description = StringUtil.removeHtml( description );
             }
-            else if( elementName.equals("pubDate")) {
+            else if( elementName.equals("pubDate") ||
+                     elementName.equals("dc:date")) {
                 date = parser.getText();
             }
             
@@ -118,6 +127,21 @@ public class RssFormatParser implements FeedFormatParser {
         return items;
     }
     
+	/** Get calendar date. **/
+	private Date getCal(int dayOfMonth, int month, int year, int hours,
+			           int minutes, int seconds) throws Exception {
+		// Create calendar object from date values
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+		cal.set(Calendar.MONTH, month);
+		cal.set(Calendar.YEAR, year);
+		cal.set(Calendar.HOUR_OF_DAY, hours);
+		cal.set(Calendar.MINUTE, minutes);
+		cal.set(Calendar.SECOND, seconds);
+		
+		return cal.getTime();
+	}
+
     /**
      * Parse RSS date format to Date object.
      * Example of RSS date:
@@ -181,16 +205,60 @@ public class RssFormatParser implements FeedFormatParser {
             int minutes = Integer.parseInt( timeValues[1] );
             int seconds = Integer.parseInt( timeValues[2] );
             
-            // Create calendar object from date values
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            cal.set(Calendar.MONTH, month);
-            cal.set(Calendar.YEAR, year);
-            cal.set(Calendar.HOUR_OF_DAY, hours);
-            cal.set(Calendar.MINUTE, minutes);
-            cal.set(Calendar.SECOND, seconds);
+            pubDate = getCal(dayOfMonth, month, year, hours, minutes, seconds);
             
-            pubDate = cal.getTime();
+        } catch(Exception ex) {
+            // TODO: Add exception handling code
+            System.err.println("Error while convertin date string to object: " +
+                    ex.toString());
+        }
+        return pubDate;
+    }
+    
+    /**
+     * Parse RSS date dc:date format to Date object.
+     * Example of RSS dc:date:
+     * 2007-07-31T02:02:00+00:00
+     */
+    private Date parseDcDate(String dateString) {
+        Date pubDate = null;
+        try {
+            // Split date string to values
+            // 0 = year (could be with either 4 or 2 digits)
+            // 1 = month
+            // 2 = day of month/time
+            int yearIndex = 0;
+            int monthIndex = 1;
+            int dayOfMonthTimeIndex = 2;
+            
+            String[] values = StringUtil.split(dateString, "-");
+
+            if( values.length!=3 ) {
+                throw new Exception("Invalid date format: " + dateString);
+            }
+            
+            int year = Integer.parseInt(values[ yearIndex ]);
+            
+            // Month
+            int month = Integer.parseInt( values[ monthIndex ] );
+            
+            int dayOfMonthIndex = 0;
+            // Time
+            String[] dayTimeValues = StringUtil.split(values[ dayOfMonthTimeIndex ],":");
+            // Day of month
+            String sdayOfMonth = values[ dayOfMonthTimeIndex ].substring(0, 2);
+
+            int dayOfMonth = Integer.parseInt( sdayOfMonth );
+            
+            String time = values[ dayOfMonthTimeIndex ].substring(3);
+            String [] timeValues = StringUtil.split(time, ":");
+
+            int hours = Integer.parseInt( timeValues[0] );
+            int minutes = Integer.parseInt( timeValues[1] );
+            timeValues[2] = timeValues[2].substring( 0, 2 );
+            int seconds = Integer.parseInt( timeValues[2] );
+            
+            pubDate = getCal(dayOfMonth, month, year, hours, minutes, seconds);
             
         } catch(Exception ex) {
             // TODO: Add exception handling code
