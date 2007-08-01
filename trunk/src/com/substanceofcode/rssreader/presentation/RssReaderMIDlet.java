@@ -479,7 +479,7 @@ public class RssReaderMIDlet extends MIDlet
 	 */
 	private Alert getAbout() {
 		Alert about = new Alert("About RssReader",
-"RssReader v1.7 " +
+"RssReader v1.8 " +
  "Copyright (C) 2005-2006 Tommi Laukkanen " +
  "http://www.substanceofcode.com.  " +
  "This program is distributed in the hope that it will be useful, " +
