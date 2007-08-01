@@ -115,7 +115,14 @@ public class RssFormatParser implements FeedFormatParser {
         /** Save previous entry */
         if(title.length()>0) {
             RssItem item;
-            Date pubDate = parseRssDate(date);
+            Date pubDate = null;
+			if (date != null) {
+				if (date.indexOf("-") >= 0) {
+					pubDate = parseDcDate(date);
+				} else {
+					pubDate = parseRssDate(date);
+				}
+			}
             if(pubDate!=null) {
                 item = new RssItem(title, link, description, pubDate);
             } else {
