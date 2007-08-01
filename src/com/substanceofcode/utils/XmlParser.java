@@ -66,15 +66,15 @@ public class XmlParser {
         while (inputCharacter != -1 && elementFound==false) {
             c = (char)inputCharacter;
             
-            if(c=='/' && elementStart==true) {
+            if(c=='/' && elementStart) {
                 parsingElementName = false;
             }
-            else if(elementStart==true && (c=='?' || c=='!')) {
+            else if(elementStart && (c=='?' || c=='!')) {
                 if(m_currentElementData.charAt(m_currentElementData.length()-1)=='<') {
                     parsingElementName = false;
                 }
             }
-            if(parsingElementName==true) {
+            if(parsingElementName) {
                 if(c==' ' || c=='/' || c==':') {
 					// For specified namespace, put it into element name
 					if ((c==':') && (namespace != null) &&
@@ -96,7 +96,7 @@ public class XmlParser {
                 m_currentElementName = "";
                 m_currentElementData = "";
             }            
-            if(parsingElementData==true) {
+            if(parsingElementData) {
                 m_currentElementData += c;
             }
             if(c=='>') {
