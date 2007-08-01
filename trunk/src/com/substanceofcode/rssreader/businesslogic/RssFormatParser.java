@@ -195,7 +195,7 @@ public class RssFormatParser implements FeedFormatParser {
             String monthString = values[ monthIndex ];
             int month=0;
             for(int monthEnumIndex=0; monthEnumIndex<11; monthEnumIndex++) {
-                if( monthString.equals( months[ monthEnumIndex ] )==true) {
+                if( monthString.equals( months[ monthEnumIndex ] )) {
                     month = monthEnumIndex;
                 }
             }
