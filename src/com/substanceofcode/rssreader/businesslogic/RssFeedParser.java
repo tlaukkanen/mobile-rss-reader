@@ -141,6 +141,8 @@ public class RssFeedParser {
         
         /** Initialize XML parser and parse feed */
         XmlParser parser = new XmlParser(is);
+		// Account for some Chinese (and other) rss.
+        parser.setNamespace("dc");
         
         /** <?xml...*/
         parser.parse();
