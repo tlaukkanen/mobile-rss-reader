@@ -24,6 +24,7 @@ package com.substanceofcode.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Simple and lightweight XML parser without complete error handling.
@@ -38,6 +39,8 @@ public class XmlParser {
     private String m_currentElementName = "";
     private String m_currentElementData = "";
     private boolean m_currentElementContainsText = false;
+    private static String encoding = "UTF-8";
+    private String namespace = null;
     
     /** Enumerations for parse function */
     public static final int END_DOCUMENT = 0;
@@ -73,8 +76,14 @@ public class XmlParser {
             }
             if(parsingElementName==true) {
                 if(c==' ' || c=='/' || c==':') {
-                    parsingElementName = false;
-                    parsingElementData = true;
+					// For specified namespace, put it into element name
+					if ((c==':') && (namespace != null) &&
+						namespace.equals(m_currentElementName)) {
+						m_currentElementName += c;
+					} else {
+						parsingElementName = false;
+						parsingElementData = true;
+					}
                 }
                 else if(c!='>') {
                     m_currentElementName += c;
@@ -159,7 +168,21 @@ public class XmlParser {
                 }
             }
         }
-        text = textBuffer.toString();
+		if (encoding.equals("")) {
+			text = textBuffer.toString();
+		} else {
+			try {
+				text = new String(textBuffer.toString().getBytes(), encoding);
+			} catch (UnsupportedEncodingException e) {
+				try {
+					text = new String(textBuffer.toString().getBytes(), "UTF8");
+					encoding = "UTF8";
+				} catch (UnsupportedEncodingException e2) {
+					text = textBuffer.toString();
+					encoding = "";
+				}
+			}
+		}
         text = StringUtil.replace(text, "</" + m_currentElementName, "");
         
         /** Handle some entities and encoded characters */
@@ -169,6 +192,7 @@ public class XmlParser {
         text = StringUtil.replace(text, "&gt;", ">");
         text = StringUtil.replace(text, "&nbsp;", " ");
         text = StringUtil.replace(text, "&amp;", "&");
+        text = StringUtil.replace(text, "&apos;", "'");
         text = StringUtil.replace(text, "&auml;", "ä");
         text = StringUtil.replace(text, "&ouml;", "ö");
         text = StringUtil.replace(text, "Ã¤", "ä");
@@ -208,4 +232,12 @@ public class XmlParser {
         return value;
     }
     
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getNamespace() {
+        return (namespace);
+    }
+
 }
