@@ -337,7 +337,7 @@ public class RssReaderMIDlet extends MIDlet
                 }
                 if( m_getFeedList ) {
                     try {
-                        if(m_listParser.isReady()==true) {
+                        if(m_listParser.isReady()) {
                             // Feed list parsing is ready
                             System.out.println("Feed list parsing is ready");
                             RssFeed[] feeds = m_listParser.getFeeds();
