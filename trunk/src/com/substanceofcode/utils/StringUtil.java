@@ -107,7 +107,8 @@ public class StringUtil {
             plainText = plainText.trim();
             return plainText;
         } catch(Exception e) {
-            System.err.println("Error while removing HTML: " + e.toString());
+            System.err.println("Error while removing HTML: " +
+					           e.getClass().getName() + " " + e.toString());
             return text;
         }
     }
