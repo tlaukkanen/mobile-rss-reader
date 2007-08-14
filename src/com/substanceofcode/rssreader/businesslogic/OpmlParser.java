@@ -52,39 +52,45 @@ public class OpmlParser extends FeedListParser {
         try {
             
             int elementType = parser.parse();
+			// If we found the prologue, get the next entry.
+			if( elementType == XmlParser.PROLOGUE ) {
+				elementType = parser.parse();
+			}
             
             while( elementType != XmlParser.END_DOCUMENT ) {
-                /** RSS item properties */
-                String title = "";
-                String link = "";
-                                                
-                String tagName = parser.getName();
-                System.out.println("tagname: " + tagName);
-                if (tagName.equals("outline")) {
-                    System.out.println("Parsing <outline> tag");
-                    
-                    title = parser.getAttributeValue( "text" );
-                    link = parser.getAttributeValue( "xmlUrl" );
-                    
-                    /** Debugging information */
-                    System.out.println("Title:       " + title);
-                    System.out.println("Link:        " + link);
-                    
-                    /** 
-                     * Create new RSS item and add it do RSS document's item
-                     * collection.
-                     */
-                    if(( link.length()>0 ) &&
+				/** RSS item properties */
+				String title = "";
+				String link = "";
+												
+				String tagName = parser.getName();
+				System.out.println("tagname: " + tagName);
+				if (tagName.equals("outline")) {
+					System.out.println("Parsing <outline> tag");
+					
+					title = parser.getAttributeValue( "text" );
+					link = parser.getAttributeValue( "xmlUrl" );
+					
+					/** Debugging information */
+					System.out.println("Title:       " + title);
+					System.out.println("Link:        " + link);
+					
+					/** 
+					 * Create new RSS item and add it do RSS document's item
+					 * collection.  Account for wrong OPML which is an
+					 * OPML composed of other OPML.  These have url attribute
+					 * instead of link attribute.
+					 */
+					if(( link != null ) &&( link.length()>0 ) &&
 						(( feedNameFilter == null) ||
 							(title.toLowerCase().indexOf(feedNameFilter) >= 0))
 						&& (( feedURLFilter == null) ||
 							( link.toLowerCase().indexOf(feedURLFilter) >=0))) {
-                        RssFeed feed = new RssFeed(title, link, "", "");
-                        rssFeeds.addElement( feed );
-                    }
-                }
-                
-                elementType = parser.parse();
+						RssFeed feed = new RssFeed(title, link, "", "");
+						rssFeeds.addElement( feed );
+					}
+				}
+				
+				elementType = parser.parse();
             };
             
         } catch (Exception ex) {
