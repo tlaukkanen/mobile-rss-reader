@@ -20,6 +20,8 @@
  *
  */
 
+// Expand to define test define
+//#define DNOTEST
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
@@ -61,9 +63,20 @@ public class RssFeedParser {
     throws IOException, Exception {
         
         HttpConnection hc = null;
+		//#ifdef DTEST
+//@        InputStream ris = null;
+		//#endif
         DataInputStream dis = null;
         String response = "";
         try {
+			//#ifdef DTEST
+//@			if (m_rssFeed.getUrl().indexOf("file://") == 0) {
+//@				parseRssFeedXml(
+//@						this.getClass().getResourceAsStream(
+//@						 m_rssFeed.getUrl().substring(7)), maxItemCount );
+//@				return;
+//@			}
+			//#endif
             /**
              * Open an HttpConnection with the Web server
              * The default request method is GET
@@ -122,10 +135,14 @@ public class RssFeedParser {
                         
             parseRssFeedXml( hc.openInputStream(), maxItemCount );
         } catch(Exception e) {
+			System.out.println("error " + e.getMessage());
             throw new Exception("Error while parsing feed: "
                     + e.toString());
         } finally {
             if (hc != null) hc.close();
+			//#ifdef DTEST
+//@            if (ris != null) ris.close();
+			//#endif
             if (dis != null) dis.close();
         }
     }
@@ -145,7 +162,11 @@ public class RssFeedParser {
         parser.setNamespace("dc");
         
         /** <?xml...*/
-        parser.parse();
+        int parsingResult = parser.parse();
+		/** if prologue was found, parse after prologue.  **/
+		if (parsingResult == XmlParser.PROLOGUE) {
+			parser.parse();
+		}
         
         FeedFormatParser formatParser = null;
         String entryElementName = parser.getName();
