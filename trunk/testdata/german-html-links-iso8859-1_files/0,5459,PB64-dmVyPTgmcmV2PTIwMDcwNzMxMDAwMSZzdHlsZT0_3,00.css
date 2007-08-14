@@ -1,0 +1,3394 @@
+.dotteddiv {
+	FONT-SIZE: 0.83em! important; MARGIN: 4px 4px 4px 15px; TEXT-INDENT: -10px
+}
+#spMainContent .gesperrt {
+	FONT-SIZE: 0.83em! important; LETTER-SPACING: 1px
+}
+.f5px {
+	LINE-HEIGHT: 5px
+}
+.f10px {
+	LINE-HEIGHT: 10px
+}
+.f15px {
+	LINE-HEIGHT: 15px
+}
+.kastenabstand {
+	BORDER-BOTTOM: #fff 1px solid
+}
+.kasten .kastenmitte {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; TEXT-INDENT: -10px; PADDING-TOP: 0px
+}
+.kasten .dotteddiv {
+	MARGIN: 3px 0px; TEXT-INDENT: -10px
+}
+.kastenhead {
+	PADDING-RIGHT: 2px; PADDING-LEFT: 15px; PADDING-BOTTOM: 4px; MARGIN: 0px; PADDING-TOP: 4px
+}
+.kastensubhead {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 11px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 8px
+}
+.dottedhead {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 8px
+}
+.sonderkasten {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.sonderkasten .dotteddiv {
+	MARGIN: 3px 0px; TEXT-INDENT: -10px
+}
+.sonderkastenbild IMG {
+	BORDER-RIGHT: #000 1px solid; BORDER-TOP: #000 1px solid; MARGIN: 5px 0px; BORDER-LEFT: #000 1px solid; BORDER-BOTTOM: #000 1px solid
+}
+.sonderheadbild IMG {
+	BORDER-RIGHT: 0px; PADDING-RIGHT: 0px; BORDER-TOP: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; BORDER-LEFT: 0px; PADDING-TOP: 0px; BORDER-BOTTOM: 0px
+}
+.sonderhead {
+	WIDTH: 80%
+}
+.sonderschluss {
+	BORDER-TOP: #fff 2px solid
+}
+.sonderf1kasten {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 4px; MARGIN: 0px; PADDING-TOP: 2px
+}
+.sonderf1kasten .dotteddiv {
+	MARGIN: 2px 2px 5px 35px; TEXT-INDENT: -24px
+}
+.padding-5-15 {
+	PADDING-RIGHT: 15px; PADDING-LEFT: 15px; PADDING-BOTTOM: 5px; MARGIN: 0px; PADDING-TOP: 5px
+}
+.padding-5-10 {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; PADDING-BOTTOM: 5px; MARGIN: 0px; PADDING-TOP: 5px
+}
+.font10 {
+	FONT-SIZE: 10px; LINE-HEIGHT: 12px
+}
+.font10 TD {
+	FONT-SIZE: 10px; LINE-HEIGHT: 12px
+}
+.font11 {
+	FONT-SIZE: 11px; LINE-HEIGHT: 12px
+}
+.font11 TD {
+	FONT-SIZE: 11px; LINE-HEIGHT: 12px
+}
+.arial {
+	FONT-FAMILY: Arial
+}
+.col219C08 {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #219c08
+}
+.colf00 {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #f00
+}
+.tabelle TD {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; PADDING-BOTTOM: 1px; MARGIN: 0px; PADDING-TOP: 1px; WHITE-SPACE: nowrap
+}
+.tabellesys TD {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; PADDING-BOTTOM: 2px; MARGIN: 0px; PADDING-TOP: 2px
+}
+.tabellesyskopf {
+	FONT-WEIGHT: bold! important; COLOR: #fff! important
+}
+.tableAsset {
+	page-break-inside: avoid
+}
+.tableAsset P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.62em; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.tableAsset TH {
+	FONT-WEIGHT: bold; COLOR: #000000; BACKGROUND-COLOR: #dfdfdf
+}
+.oddRow {
+	BACKGROUND-COLOR: #ffffff
+}
+.evenRow {
+	BACKGROUND-COLOR: #f0f0f0
+}
+.allRows {
+	BACKGROUND-COLOR: #ffffff
+}
+#spMainContent H6 {
+	FONT-SIZE: 0.62em
+}
+.spSidebar .spPage {
+	WIDTH: 95%! important
+}
+.spSidebar .spPage A {
+	FONT-WEIGHT: normal! important
+}
+.spSidebar .spPage LI {
+	PADDING-RIGHT: 0px! important; BACKGROUND-POSITION: 0px 5px; PADDING-LEFT: 8px! important; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+.spTabellesys TH {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 4px; PADDING-BOTTOM: 0px; PADDING-TOP: 2px; HEIGHT: 16px; TEXT-ALIGN: left
+}
+.f10px {
+	FONT-SIZE: 10px! important
+}
+#spContainer #spColumAd {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px 0px 0px 5px; PADDING-TOP: 0px! important
+}
+.spFullScreen #spColumAd {
+	FLOAT: left! important
+}
+.spPrintversion {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spBlaetterButton {
+	MARGIN-TOP: 4px; DISPLAY: block
+}
+.spToggleButton {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; WIDTH: auto; PADDING-TOP: 0px
+}
+.spPaginator {
+	BACKGROUND: #f7f7f7; FLOAT: left; MARGIN: 1px 0px 4px; WIDTH: 100%
+}
+.spChannelBlockHP {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: 50% top; PADDING-LEFT: 0px; FLOAT: left; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif); PADDING-BOTTOM: 15px; MARGIN: 0px; WIDTH: 100%; BORDER-TOP-STYLE: none; PADDING-TOP: 0px; BACKGROUND-REPEAT: repeat-x; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BACKGROUND-COLOR: white; BORDER-BOTTOM-STYLE: none
+}
+.spChannelBlockHP:unknown {
+	CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: "."
+}
+.spChannelBlockHPTeaser {
+	MARGIN-TOP: 5px; FLOAT: left; WIDTH: 95%; LINE-HEIGHT: 1.2em
+}
+.spChannelBlockHP H3 A {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+.spChannelBlockHP H3 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 10px; FONT-WEIGHT: bold; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 5px 0px 7px; TEXT-TRANSFORM: uppercase; WIDTH: auto! important; LINE-HEIGHT: 10px; PADDING-TOP: 0px; LETTER-SPACING: 1px
+}
+.spChannelBlockHPTeaser H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 1.33em; PADDING-TOP: 0px
+}
+.spChannelBlockHPTeaser H4 A {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spChannelBlockHPTeaser H4 A SPAN {
+	COLOR: #000000
+}
+.spChannelBlockHPTeaser P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 1.33em; PADDING-TOP: 0px
+}
+.spChannelBlockHP .spAutorenzeile {
+	FONT-SIZE: 1em! important
+}
+.spPage {
+	PADDING-RIGHT: 0px; MARGIN-TOP: 1px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; FLOAT: left; PADDING-BOTTOM: 0px; WIDTH: 100%; PADDING-TOP: 0px
+}
+.spPage UL {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 5px; MARGIN: 0px; WIDTH: 100%; PADDING-TOP: 5px
+}
+.spPage UL LI {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: 0px 10px; PADDING-LEFT: 8px; FONT-SIZE: 1em! important; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif); PADDING-BOTTOM: 0px; PADDING-TOP: 5px; BACKGROUND-REPEAT: no-repeat; LIST-STYLE-TYPE: none
+}
+.spPage LI A {
+	FONT-WEIGHT: bold
+}
+.spPage LI A SPAN {
+	FONT-WEIGHT: normal
+}
+.spTabs {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 6px; FONT-SIZE: 0.83em; BACKGROUND: none transparent scroll repeat 0% 0%; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 5px 0px 0px 5px; WIDTH: auto; PADDING-TOP: 0px; HEIGHT: 1.6em! important
+}
+.spTabs LI {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; PADDING-LEFT: 5px; FONT-SIZE: 1em; FLOAT: left; PADDING-BOTTOM: 0px; LINE-HEIGHT: 1.2em; PADDING-TOP: 0px; LIST-STYLE-TYPE: none; HEIGHT: 1.2em
+}
+.spTabs LI A {
+	COLOR: #666
+}
+.spTabs LI.spFirstLink {
+	BORDER-LEFT: #ccc 1px solid
+}
+HTML {
+	FONT-SIZE: 100.01%; HEIGHT: 100%
+}
+BODY {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: normal; PADDING-BOTTOM: 0px; MARGIN: 0px; COLOR: #000; LINE-HEIGHT: 1.33em; PADDING-TOP: 0px; FONT-STYLE: normal; FONT-FAMILY: verdana, arial, helvetica, geneva, sans-serif; HEIGHT: 100%; BACKGROUND-COLOR: #fff! important; FONT-VARIANT: normal
+}
+IMG {
+	BORDER-TOP-WIDTH: 0px; BORDER-LEFT-WIDTH: 0px; BORDER-BOTTOM-WIDTH: 0px; BORDER-RIGHT-WIDTH: 0px
+}
+A {
+	COLOR: #990000; TEXT-DECORATION: none
+}
+A SPAN {
+	COLOR: #000; TEXT-DECORATION: none
+}
+A:hover SPAN.blk {
+	COLOR: #000! important; TEXT-DECORATION: underline! important
+}
+A:hover {
+	TEXT-DECORATION: underline
+}
+A:hover SPAN {
+	TEXT-DECORATION: underline
+}
+A.anker {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #000; TEXT-DECORATION: none
+}
+H2 {
+	FONT-WEIGHT: bold; FONT-SIZE: 1em
+}
+H3 {
+	FONT-WEIGHT: bold; FONT-SIZE: 1.5em; MARGIN: 17px 0px 13px; LINE-HEIGHT: 1.27em
+}
+H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+H5 {
+	FONT-WEIGHT: bold; FONT-SIZE: 1em; TEXT-TRANSFORM: uppercase; COLOR: #000
+}
+H6 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em; PADDING-BOTTOM: 0px; MARGIN: 0px; COLOR: #000; PADDING-TOP: 0px
+}
+FONT {
+	FONT-SIZE: 1em! important
+}
+#spColumnRight FONT {
+	FONT-SIZE: 1em! important
+}
+HR {
+	BORDER-RIGHT: 0px; PADDING-RIGHT: 0px; BORDER-TOP: 0px; PADDING-LEFT: 0px; BACKGROUND: #ccc; PADDING-BOTTOM: 0px; MARGIN: 1px 0px; BORDER-LEFT: 0px; COLOR: #ccc; PADDING-TOP: 0px; BORDER-BOTTOM: 0px; HEIGHT: 1px
+}
+#spHeader {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; Z-INDEX: 1000000; BACKGROUND: #f5f5f5; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 10px; WIDTH: 794px; LINE-HEIGHT: 1em; PADDING-TOP: 0px; POSITION: relative; HEIGHT: 126px
+}
+#spHeader:unknown {
+	CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: "."
+}
+ HTML #spHeader {
+	HEIGHT: 1%
+}
+#spContainer {
+	CLEAR: both; PADDING-RIGHT: 0px! important; PADDING-LEFT: 22px! important; FLOAT: left! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important; min-width: 980px; max-width: 3000px
+}
+#spMainContent {
+	FONT-SIZE: 0.75em; LINE-HEIGHT: 1.33em! important
+}
+#spColumnRight {
+	FONT-SIZE: 0.62em; LINE-HEIGHT: 1.2em! important
+}
+.spBereich4720 #spHeader {
+	WIDTH: 100%! important
+}
+.spBereich4720 #spMainNavigation {
+	WIDTH: 100%! important
+}
+.spBereich4720 .spChannelNavigationLine {
+	WIDTH: 100%! important
+}
+.spBereich4720 #spArticleBody {
+	WIDTH: 100%! important
+}
+.spBereich4720 .spLevel1 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; WIDTH: 99.8%! important; PADDING-TOP: 0px! important
+}
+.spBereich4720 .spFullScreen #spMainContent {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 14px 0px 0px; WIDTH: auto; PADDING-TOP: 0px! important
+}
+.spBereich4720 #spContainer {
+	MARGIN-LEFT: auto; WIDTH: 920px; MARGIN-RIGHT: auto; POSITION: relative
+}
+.spFullScreen #spMainContent {
+	CLEAR: left; FLOAT: left; MARGIN: 20px 0px 0px; OVERFLOW: visible; WIDTH: 772px
+}
+.spSmallScreen #spMainContent {
+	CLEAR: left; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left! important; PADDING-BOTTOM: 0px; MARGIN: 20px 12px 10px 0px; OVERFLOW: hidden; WIDTH: 422px! important; PADDING-TOP: 0px
+}
+.spSmallScreen #spColumnRight {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: left top; PADDING-LEFT: 0px; FLOAT: left! important; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_spColumRight.gif); PADDING-BOTTOM: 0px; MARGIN: 0px; OVERFLOW: hidden; WIDTH: 339px! important; PADDING-TOP: 0px; BACKGROUND-REPEAT: repeat-y
+}
+.spNoColumnRight #spMainContent {
+	CLEAR: left; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left! important; PADDING-BOTTOM: 0px; MARGIN: 20px 12px 10px 0px; OVERFLOW: visible; WIDTH: 421px! important; PADDING-TOP: 0px
+}
+.spBigScreen #spContainer {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 22px; FLOAT: left! important; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; min-width: 980px; max-width: 3000px
+}
+.spBigScreen #spMainContent {
+	CLEAR: left! important; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left! important; PADDING-BOTTOM: 0px; MARGIN: 20px 0px 10px; OVERFLOW: hidden; WIDTH: 517px! important; PADDING-TOP: 0px
+}
+.spBigScreen #spColumnRight {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: right top; PADDING-LEFT: 5px; FLOAT: left; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_rightSide2.gif); PADDING-BOTTOM: 0px; MARGIN: 0px 0px 0px 9px; WIDTH: 241px! important; PADDING-TOP: 0px; BACKGROUND-REPEAT: repeat-y
+}
+#spColumnRight:unknown {
+	CLEAR: both
+}
+#spFooter {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.62em! important; FLOAT: left; PADDING-BOTTOM: 10px; MARGIN: 45px 0px 0px 22px; WIDTH: 772px; PADDING-TOP: 0px
+}
+.spBereich4720 #spFooter {
+	MARGIN: 45px 0px 0px 22px; WIDTH: auto
+}
+.spBigaPopup {
+	FONT-SIZE: 12px
+}
+.spPopup {
+	FONT-SIZE: 0.75em! important; MARGIN: 20px 15px; LINE-HEIGHT: 1.33em! important
+}
+.spImpressumPopup FONT {
+	FONT-SIZE: 0.62em! important; LINE-HEIGHT: 1.33em! important
+}
+.spImpressumPopup H2 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1.2em! important; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 1em; PADDING-TOP: 0px
+}
+.spPdfPopup {
+	FONT-SIZE: 0.75em! important; LINE-HEIGHT: 1.33em! important
+}
+.spPdfPopup TD TD {
+	TEXT-ALIGN: left
+}
+#spMainNavigation {
+	BACKGROUND-COLOR: #c11919
+}
+.spTableBackground {
+	BACKGROUND-COLOR: #c11919
+}
+H3 {
+	COLOR: #c11919
+}
+.spTopThema H3 A {
+	COLOR: #c11919
+}
+.spTeaserCenterpage H3 A {
+	COLOR: #c11919
+}
+.spBlockBullet {
+	BORDER-LEFT-COLOR: #c11919; BORDER-BOTTOM-COLOR: #c11919; BORDER-TOP-COLOR: #c11919; BORDER-RIGHT-COLOR: #c11919
+}
+#abosundshop #spMainNavigation {
+	BACKGROUND-COLOR: #ff6600
+}
+#abosundshop H3 {
+	COLOR: #ff6600
+}
+#abosundshop .spTopThema H3 A {
+	COLOR: #ff6600
+}
+#abosundshop .spTeaserCenterpage H3 A {
+	COLOR: #ff6600
+}
+#abosundshop .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff6600; BORDER-BOTTOM-COLOR: #ff6600; BORDER-TOP-COLOR: #ff6600; BORDER-RIGHT-COLOR: #ff6600
+}
+.abosundshop .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff6600! important; BORDER-BOTTOM-COLOR: #ff6600! important; BORDER-TOP-COLOR: #ff6600! important; BORDER-RIGHT-COLOR: #ff6600! important
+}
+#abosundshop .spTableBackground {
+	BACKGROUND-COLOR: #ff6600
+}
+#spam #spMainNavigation {
+	BACKGROUND-COLOR: #000000
+}
+#spam H3 {
+	COLOR: #000000
+}
+#spam .spTopThema H3 A {
+	COLOR: #000000
+}
+#spam .spTeaserCenterpage H3 A {
+	COLOR: #000000
+}
+#spam .spBlockBullet {
+	BORDER-LEFT-COLOR: #000000; BORDER-BOTTOM-COLOR: #000000; BORDER-TOP-COLOR: #000000; BORDER-RIGHT-COLOR: #000000
+}
+.spam .spBlockBullet {
+	BORDER-LEFT-COLOR: #000000! important; BORDER-BOTTOM-COLOR: #000000! important; BORDER-TOP-COLOR: #000000! important; BORDER-RIGHT-COLOR: #000000! important
+}
+#spam .spTableBackground {
+	BACKGROUND-COLOR: #000000
+}
+#panorama #spMainNavigation {
+	BACKGROUND-COLOR: #ff724b
+}
+#panorama H3 {
+	COLOR: #ff724b
+}
+#panorama .spTopThema H3 A {
+	COLOR: #ff724b
+}
+#panorama .spTeaserCenterpage H3 A {
+	COLOR: #ff724b
+}
+#panorama .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff724b; BORDER-BOTTOM-COLOR: #ff724b; BORDER-TOP-COLOR: #ff724b; BORDER-RIGHT-COLOR: #ff724b
+}
+.panorama .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff724b! important; BORDER-BOTTOM-COLOR: #ff724b! important; BORDER-TOP-COLOR: #ff724b! important; BORDER-RIGHT-COLOR: #ff724b! important
+}
+#panorama .spTableBackground {
+	BACKGROUND-COLOR: #ff724b
+}
+#sport #spMainNavigation {
+	BACKGROUND-COLOR: #528264
+}
+#sport H3 {
+	COLOR: #528264
+}
+#sport .spTopThema H3 A {
+	COLOR: #528264
+}
+#sport .spTeaserCenterpage H3 A {
+	COLOR: #528264
+}
+#sport .spBlockBullet {
+	BORDER-LEFT-COLOR: #528264; BORDER-BOTTOM-COLOR: #528264; BORDER-TOP-COLOR: #528264; BORDER-RIGHT-COLOR: #528264
+}
+.sport .spBlockBullet {
+	BORDER-LEFT-COLOR: #528264! important; BORDER-BOTTOM-COLOR: #528264! important; BORDER-TOP-COLOR: #528264! important; BORDER-RIGHT-COLOR: #528264! important
+}
+#sport .spTableBackground {
+	BACKGROUND-COLOR: #528264
+}
+#politik #spMainNavigation {
+	BACKGROUND-COLOR: #b10027
+}
+#politik H3 {
+	COLOR: #b10027
+}
+#politik .spTopThema H3 A {
+	COLOR: #b10027
+}
+#politik .spTeaserCenterpage H3 A {
+	COLOR: #b10027
+}
+#politik .spBlockBullet {
+	BORDER-LEFT-COLOR: #b10027; BORDER-BOTTOM-COLOR: #b10027; BORDER-TOP-COLOR: #b10027; BORDER-RIGHT-COLOR: #b10027
+}
+.politik .spBlockBullet {
+	BORDER-LEFT-COLOR: #b10027! important; BORDER-BOTTOM-COLOR: #b10027! important; BORDER-TOP-COLOR: #b10027! important; BORDER-RIGHT-COLOR: #b10027! important
+}
+#politik .spTableBackground {
+	BACKGROUND-COLOR: #b10027
+}
+#wirtschaft #spMainNavigation {
+	BACKGROUND-COLOR: #34537c
+}
+#wirtschaft H3 {
+	COLOR: #34537c
+}
+#wirtschaft .spTopThema H3 A {
+	COLOR: #34537c
+}
+#wirtschaft .spTeaserCenterpage H3 A {
+	COLOR: #34537c
+}
+#wirtschaft .spBlockBullet {
+	BORDER-LEFT-COLOR: #34537c; BORDER-BOTTOM-COLOR: #34537c; BORDER-TOP-COLOR: #34537c; BORDER-RIGHT-COLOR: #34537c
+}
+.wirtschaft .spBlockBullet {
+	BORDER-LEFT-COLOR: #34537c! important; BORDER-BOTTOM-COLOR: #34537c! important; BORDER-TOP-COLOR: #34537c! important; BORDER-RIGHT-COLOR: #34537c! important
+}
+#wirtschaft .spTableBackground {
+	BACKGROUND-COLOR: #34537c
+}
+#kultur #spMainNavigation {
+	BACKGROUND-COLOR: #f38030
+}
+#kultur H3 {
+	COLOR: #f38030
+}
+#kultur .spTopThema H3 A {
+	COLOR: #f38030
+}
+#kultur .spTeaserCenterpage H3 A {
+	COLOR: #f38030
+}
+#kultur .spBlockBullet {
+	BORDER-LEFT-COLOR: #f38030; BORDER-BOTTOM-COLOR: #f38030; BORDER-TOP-COLOR: #f38030; BORDER-RIGHT-COLOR: #f38030
+}
+.kultur .spBlockBullet {
+	BORDER-LEFT-COLOR: #f38030! important; BORDER-BOTTOM-COLOR: #f38030! important; BORDER-TOP-COLOR: #f38030! important; BORDER-RIGHT-COLOR: #f38030! important
+}
+#kultur .spTableBackground {
+	BACKGROUND-COLOR: #f38030
+}
+#netzwelt #spMainNavigation {
+	BACKGROUND-COLOR: #556f77
+}
+#netzwelt H3 {
+	COLOR: #556f77
+}
+#netzwelt .spTopThema H3 A {
+	COLOR: #556f77
+}
+#netzwelt .spTeaserCenterpage H3 A {
+	COLOR: #556f77
+}
+#netzwelt .spBlockBullet {
+	BORDER-LEFT-COLOR: #556f77; BORDER-BOTTOM-COLOR: #556f77; BORDER-TOP-COLOR: #556f77; BORDER-RIGHT-COLOR: #556f77
+}
+.netzwelt .spBlockBullet {
+	BORDER-LEFT-COLOR: #556f77! important; BORDER-BOTTOM-COLOR: #556f77! important; BORDER-TOP-COLOR: #556f77! important; BORDER-RIGHT-COLOR: #556f77! important
+}
+#netzwelt .spTableBackground {
+	BACKGROUND-COLOR: #556f77
+}
+#wissenschaft #spMainNavigation {
+	BACKGROUND-COLOR: #7d9f89
+}
+#wissenschaft H3 {
+	COLOR: #7d9f89
+}
+#wissenschaft .spTopThema H3 A {
+	COLOR: #7d9f89
+}
+#wissenschaft .spTeaserCenterpage H3 A {
+	COLOR: #7d9f89
+}
+#wissenschaft .spBlockBullet {
+	BORDER-LEFT-COLOR: #7d9f89; BORDER-BOTTOM-COLOR: #7d9f89; BORDER-TOP-COLOR: #7d9f89; BORDER-RIGHT-COLOR: #7d9f89
+}
+.wissenschaft .spBlockBullet {
+	BORDER-LEFT-COLOR: #7d9f89! important; BORDER-BOTTOM-COLOR: #7d9f89! important; BORDER-TOP-COLOR: #7d9f89! important; BORDER-RIGHT-COLOR: #7d9f89! important
+}
+#wissenschaft .spTableBackground {
+	BACKGROUND-COLOR: #7d9f89
+}
+#sptv #spMainNavigation {
+	BACKGROUND-COLOR: #000059
+}
+#sptv H3 {
+	COLOR: #000059
+}
+#sptv .spTopThema H3 A {
+	COLOR: #000059
+}
+#sptv .spTeaserCenterpage H3 A {
+	COLOR: #000059
+}
+#sptv .spBlockBullet {
+	BORDER-LEFT-COLOR: #000059; BORDER-BOTTOM-COLOR: #000059; BORDER-TOP-COLOR: #000059; BORDER-RIGHT-COLOR: #000059
+}
+.sptv .spBlockBullet {
+	BORDER-LEFT-COLOR: #000059! important; BORDER-BOTTOM-COLOR: #000059! important; BORDER-TOP-COLOR: #000059! important; BORDER-RIGHT-COLOR: #000059! important
+}
+#sptv .spTableBackground {
+	BACKGROUND-COLOR: #000059
+}
+#shop #spMainNavigation {
+	BACKGROUND-COLOR: #ff6600
+}
+#shop H3 {
+	COLOR: #ff6600
+}
+#shop .spTopThema H3 A {
+	COLOR: #ff6600
+}
+#shop .spTeaserCenterpage H3 A {
+	COLOR: #ff6600
+}
+#shop .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff6600; BORDER-BOTTOM-COLOR: #ff6600; BORDER-TOP-COLOR: #ff6600; BORDER-RIGHT-COLOR: #ff6600
+}
+.shop .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff6600! important; BORDER-BOTTOM-COLOR: #ff6600! important; BORDER-TOP-COLOR: #ff6600! important; BORDER-RIGHT-COLOR: #ff6600! important
+}
+#shop .spTableBackground {
+	BACKGROUND-COLOR: #ff6600
+}
+#forum #spMainNavigation {
+	BACKGROUND-COLOR: #395a6d
+}
+#forum H3 {
+	COLOR: #395a6d
+}
+#forum .spTopThema H3 A {
+	COLOR: #395a6d
+}
+#forum .spTeaserCenterpage H3 A {
+	COLOR: #395a6d
+}
+#forum .spBlockBullet {
+	BORDER-LEFT-COLOR: #395a6d; BORDER-BOTTOM-COLOR: #395a6d; BORDER-TOP-COLOR: #395a6d; BORDER-RIGHT-COLOR: #395a6d
+}
+.forum .spBlockBullet {
+	BORDER-LEFT-COLOR: #395a6d! important; BORDER-BOTTOM-COLOR: #395a6d! important; BORDER-TOP-COLOR: #395a6d! important; BORDER-RIGHT-COLOR: #395a6d! important
+}
+#forum .spTableBackground {
+	BACKGROUND-COLOR: #395a6d
+}
+#auto #spMainNavigation {
+	BACKGROUND-COLOR: #5888ab
+}
+#auto H3 {
+	COLOR: #5888ab
+}
+#auto .spTopThema H3 A {
+	COLOR: #5888ab
+}
+#auto .spTeaserCenterpage H3 A {
+	COLOR: #5888ab
+}
+#auto .spBlockBullet {
+	BORDER-LEFT-COLOR: #5888ab; BORDER-BOTTOM-COLOR: #5888ab; BORDER-TOP-COLOR: #5888ab; BORDER-RIGHT-COLOR: #5888ab
+}
+.auto .spBlockBullet {
+	BORDER-LEFT-COLOR: #5888ab! important; BORDER-BOTTOM-COLOR: #5888ab! important; BORDER-TOP-COLOR: #5888ab! important; BORDER-RIGHT-COLOR: #5888ab! important
+}
+#auto .spTableBackground {
+	BACKGROUND-COLOR: #5888ab
+}
+#reise #spMainNavigation {
+	BACKGROUND-COLOR: #ff9900
+}
+#reise H3 {
+	COLOR: #ff9900
+}
+#reise .spTopThema H3 A {
+	COLOR: #ff9900
+}
+#reise .spTeaserCenterpage H3 A {
+	COLOR: #ff9900
+}
+#reise .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff9900; BORDER-BOTTOM-COLOR: #ff9900; BORDER-TOP-COLOR: #ff9900; BORDER-RIGHT-COLOR: #ff9900
+}
+.reise .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff9900! important; BORDER-BOTTOM-COLOR: #ff9900! important; BORDER-TOP-COLOR: #ff9900! important; BORDER-RIGHT-COLOR: #ff9900! important
+}
+#reise .spTableBackground {
+	BACKGROUND-COLOR: #ff9900
+}
+#leserbriefe #spMainNavigation {
+	BACKGROUND-COLOR: #717e8f
+}
+#leserbriefe H3 {
+	COLOR: #717e8f
+}
+#leserbriefe .spTopThema H3 A {
+	COLOR: #717e8f
+}
+#leserbriefe .spTeaserCenterpage H3 A {
+	COLOR: #717e8f
+}
+#leserbriefe .spBlockBullet {
+	BORDER-LEFT-COLOR: #717e8f; BORDER-BOTTOM-COLOR: #717e8f; BORDER-TOP-COLOR: #717e8f; BORDER-RIGHT-COLOR: #717e8f
+}
+.leserbriefe .spBlockBullet {
+	BORDER-LEFT-COLOR: #717e8f! important; BORDER-BOTTOM-COLOR: #717e8f! important; BORDER-TOP-COLOR: #717e8f! important; BORDER-RIGHT-COLOR: #717e8f! important
+}
+#leserbriefe .spTableBackground {
+	BACKGROUND-COLOR: #717e8f
+}
+#unispiegel #spMainNavigation {
+	BACKGROUND-COLOR: #ff4b00
+}
+#unispiegel H3 {
+	COLOR: #ff4b00
+}
+#unispiegel .spTopThema H3 A {
+	COLOR: #ff4b00
+}
+#unispiegel .spTeaserCenterpage H3 A {
+	COLOR: #ff4b00
+}
+#unispiegel .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff4b00; BORDER-BOTTOM-COLOR: #ff4b00; BORDER-TOP-COLOR: #ff4b00; BORDER-RIGHT-COLOR: #ff4b00
+}
+.unispiegel .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff4b00! important; BORDER-BOTTOM-COLOR: #ff4b00! important; BORDER-TOP-COLOR: #ff4b00! important; BORDER-RIGHT-COLOR: #ff4b00! important
+}
+#unispiegel .spTableBackground {
+	BACKGROUND-COLOR: #ff4b00
+}
+#abo #spMainNavigation {
+	BACKGROUND-COLOR: #ff6600
+}
+#abo H3 {
+	COLOR: #ff6600
+}
+#abo .spTopThema H3 A {
+	COLOR: #ff6600
+}
+#abo .spTeaserCenterpage H3 A {
+	COLOR: #ff6600
+}
+#abo .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff6600; BORDER-BOTTOM-COLOR: #ff6600; BORDER-TOP-COLOR: #ff6600; BORDER-RIGHT-COLOR: #ff6600
+}
+.abo .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff6600! important; BORDER-BOTTOM-COLOR: #ff6600! important; BORDER-TOP-COLOR: #ff6600! important; BORDER-RIGHT-COLOR: #ff6600! important
+}
+#abo .spTableBackground {
+	BACKGROUND-COLOR: #ff6600
+}
+#wetter #spMainNavigation {
+	BACKGROUND-COLOR: #357ecc
+}
+#wetter H3 {
+	COLOR: #357ecc
+}
+#wetter .spTopThema H3 A {
+	COLOR: #357ecc
+}
+#wetter .spTeaserCenterpage H3 A {
+	COLOR: #357ecc
+}
+#wetter .spBlockBullet {
+	BORDER-LEFT-COLOR: #357ecc; BORDER-BOTTOM-COLOR: #357ecc; BORDER-TOP-COLOR: #357ecc; BORDER-RIGHT-COLOR: #357ecc
+}
+.wetter .spBlockBullet {
+	BORDER-LEFT-COLOR: #357ecc! important; BORDER-BOTTOM-COLOR: #357ecc! important; BORDER-TOP-COLOR: #357ecc! important; BORDER-RIGHT-COLOR: #357ecc! important
+}
+#wetter .spTableBackground {
+	BACKGROUND-COLOR: #357ecc
+}
+#schulspiegel #spMainNavigation {
+	BACKGROUND-COLOR: #cc3300
+}
+#schulspiegel H3 {
+	COLOR: #cc3300
+}
+#schulspiegel .spTopThema H3 A {
+	COLOR: #cc3300
+}
+#schulspiegel .spTeaserCenterpage H3 A {
+	COLOR: #cc3300
+}
+#schulspiegel .spBlockBullet {
+	BORDER-LEFT-COLOR: #cc3300; BORDER-BOTTOM-COLOR: #cc3300; BORDER-TOP-COLOR: #cc3300; BORDER-RIGHT-COLOR: #cc3300
+}
+.schulspiegel .spBlockBullet {
+	BORDER-LEFT-COLOR: #cc3300! important; BORDER-BOTTOM-COLOR: #cc3300! important; BORDER-TOP-COLOR: #cc3300! important; BORDER-RIGHT-COLOR: #cc3300! important
+}
+#schulspiegel .spTableBackground {
+	BACKGROUND-COLOR: #cc3300
+}
+#uniundschule #spMainNavigation {
+	BACKGROUND-COLOR: #ff4b00
+}
+#uniundschule H3 {
+	COLOR: #ff4b00
+}
+#uniundschule .spTopThema H3 A {
+	COLOR: #ff4b00
+}
+#uniundschule .spTeaserCenterpage H3 A {
+	COLOR: #ff4b00
+}
+#uniundschule .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff4b00; BORDER-BOTTOM-COLOR: #ff4b00; BORDER-TOP-COLOR: #ff4b00; BORDER-RIGHT-COLOR: #ff4b00
+}
+.uniundschule .spBlockBullet {
+	BORDER-LEFT-COLOR: #ff4b00! important; BORDER-BOTTOM-COLOR: #ff4b00! important; BORDER-TOP-COLOR: #ff4b00! important; BORDER-RIGHT-COLOR: #ff4b00! important
+}
+#uniundschule .spTableBackground {
+	BACKGROUND-COLOR: #ff4b00
+}
+TABLE.kastenabstand TABLE TABLE {
+	WIDTH: 100px! important
+}
+.spInfoBox TABLE {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+#spColumnRight .spDotteddiv {
+	FONT-SIZE: 1em! important; MARGIN: 4px 4px 4px 9px; TEXT-INDENT: -10px
+}
+#spColumnRight .dotteddiv FONT {
+	FONT-SIZE: 10px! important
+}
+.spBigScreen .spInfoBox TABLE {
+	WIDTH: 200px! important
+}
+.spBigScreen #spColumnRight .spInfoBox {
+	WIDTH: 219px! important
+}
+.spBigScreen #spColumnRight .spInfoBox P IMG {
+	BORDER-RIGHT: #666 1px solid; BORDER-TOP: #666 1px solid; MARGIN: 5px 0px 5px 30px; BORDER-LEFT: #666 1px solid; BORDER-BOTTOM: #666 1px solid
+}
+.spBigScreen #spColumnRight .spInfoBox UL.spLinkList {
+	FLOAT: left! important; WIDTH: 220px! important
+}
+.spBigScreen #spColumnRight .spInfoBox UL.spLinkList LI {
+	WIDTH: 220px! important
+}
+.spBigScreen #spColumnRight UL.spSingle {
+	WIDTH: 220px! important; LIST-STYLE-TYPE: none
+}
+.spBigScreen #spColumnRight UL.spSplit {
+	WIDTH: 220px! important; LIST-STYLE-TYPE: none
+}
+.spBigScreen #spColumnRight UL.spSplitRight {
+	WIDTH: 220px! important; LIST-STYLE-TYPE: none
+}
+.spBigScreen #spColumnRight UL.spSplitRight {
+	MARGIN: 0px
+}
+.spBigScreen #spColumnRight UL.spSingle LI {
+	FLOAT: none! important; WIDTH: 220px! important
+}
+.spBigScreen #spColumnRight UL.spSplit LI {
+	FLOAT: none! important; WIDTH: 220px! important
+}
+.spBigScreen #spColumnRight UL.spSplitRight LI {
+	FLOAT: none! important; WIDTH: 220px! important
+}
+.spBigScreen .spBoerseTable {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 219px! important; PADDING-TOP: 0px
+}
+.spBigScreen .spBoerseTable TABLE {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 219px! important; PADDING-TOP: 0px
+}
+.spBigScreen .spBoersenMap {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left! important; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 218px! important; PADDING-TOP: 0px
+}
+.spBigScreen .spInfoBox TABLE.spWetterbox {
+	WIDTH: 219px! important
+}
+.spBigScreen .spWetterList {
+	MARGIN: 0px; WIDTH: 175px! important
+}
+.spBigScreen .spWetterList LI {
+	WIDTH: 175px! important
+}
+.spBigScreen #spColumnRight .spArticleImageBox {
+	MARGIN: 15px 0px 0px 37px
+}
+.spBigScreen #spColumnRight UL.spSingle .spArticleImageBox {
+	MARGIN: 3px 0px 0px 30px
+}
+.spBigScreen #spColumnRight .spInfoBox .spSplit .spArticleImageBox {
+	CLEAR: both; MARGIN: 15px 10px 0px 37px
+}
+.spBigScreen #spColumnRight .spInfoBox .spSplit .spArticleImageBox:unknown {
+	CLEAR: both
+}
+.spInfoBox {
+	PADDING-RIGHT: 10px! important; PADDING-LEFT: 11px! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% bottom; FLOAT: left; PADDING-BOTTOM: 15px! important; MARGIN: 0px 0px 0px 1px; WIDTH: 317px; PADDING-TOP: 13px! important
+}
+.spInfoBox H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 1em; PADDING-TOP: 0px
+}
+.sonderhead {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 1em; PADDING-TOP: 0px
+}
+.spInfoBox H5 A {
+	PADDING-RIGHT: 17px; BACKGROUND-POSITION: 100% 50%; PADDING-LEFT: 0px; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_forward.gif); PADDING-BOTTOM: 0px; MARGIN: 0px; COLOR: #000; PADDING-TOP: 0px; BACKGROUND-REPEAT: no-repeat
+}
+.spSpecialHeader {
+	PADDING-LEFT: 1px; FLOAT: left; WIDTH: 337px
+}
+.spSpecialHeader IMG {
+	PADDING-RIGHT: 2px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px 0px 10px -1px; PADDING-TOP: 20px! important; BACKGROUND-COLOR: white
+}
+.spSpecialHeader H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% bottom; PADDING-BOTTOM: 7px; MARGIN: 1px 0px 0px; TEXT-TRANSFORM: uppercase; WIDTH: 100%; COLOR: #666666; LINE-HEIGHT: 1em; PADDING-TOP: 0px; TEXT-ALIGN: center
+}
+.spSpecialHeader SPAN {
+	FONT-SIZE: 1em! important; COLOR: #000; TEXT-ALIGN: center
+}
+#spColumnRight .spInfoBox UL.spLinkList {
+	PADDING-RIGHT: 0px; MARGIN-TOP: 6px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; WIDTH: 150px; LINE-HEIGHT: 1.2em! important; PADDING-TOP: 0px; LIST-STYLE-TYPE: none! important
+}
+#spColumnRight .spInfoBox UL.spFullsize {
+	WIDTH: 320px! important
+}
+#spColumnRight .spInfoBox UL.spFullsize LI {
+	WIDTH: 320px! important
+}
+.spBigScreen #spColumnRight .spInfoBox UL.spFullsize {
+	WIDTH: 200px! important
+}
+.spBigScreen #spColumnRight .spInfoBox UL.spFullsize LI {
+	WIDTH: 200px! important
+}
+.spSmallScreen #spColumnRight .spInfoBox .spArticleImageBox {
+	FLOAT: left! important; MARGIN: 14px 20px 0px 0px
+}
+#spColumnRight .spInfoBox UL.spLinkList LI {
+	CLEAR: both; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 140px; PADDING-TOP: 5px
+}
+#spColumnRight .spInfoBox UL.spLinkList LI H6 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; FONT-WEIGHT: normal! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spInfoBox UL.spLinkList LI H6 A {
+	COLOR: #b20a15
+}
+.spInfoBox UL.spLinkList LI H6 A SPAN {
+	COLOR: #000
+}
+.spInfoBox UL.spLinkList LI P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spInfoBox TABLE {
+	WIDTH: 280px! important
+}
+.spInfoBox UL.spExtraPart {
+	BACKGROUND: #dfdfdf
+}
+UL.spSingle {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 11px 0px 0px 1px; WIDTH: 155px! important; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+UL.spSplit {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 11px 0px 0px 1px; WIDTH: 155px! important; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+UL.spSplitRight {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 11px 0px 0px 1px; WIDTH: 155px! important; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+UL.spSplitRight {
+	MARGIN: 13px 0px 0px 11px; WIDTH: 142px! important
+}
+UL.spSingle LI {
+	CLEAR: both; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; WIDTH: 155px! important; PADDING-TOP: 5px
+}
+UL.spSplit LI {
+	CLEAR: both; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; WIDTH: 155px! important; PADDING-TOP: 5px
+}
+UL.spSplitRight LI {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; WIDTH: 142px; PADDING-TOP: 5px; LIST-STYLE-TYPE: none
+}
+UL.spSingle IMG {
+	BORDER-RIGHT: #666 1px solid; BORDER-TOP: #666 1px solid; MARGIN: 0px 0px 0px 1px; BORDER-LEFT: #666 1px solid; BORDER-BOTTOM: #666 1px solid
+}
+.spSingle H6 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; FONT-WEIGHT: normal! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spSplit H6 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; FONT-WEIGHT: normal! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spSplitRight H6 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; FONT-WEIGHT: normal! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+#spColumnRight .spSplit .spCredit {
+	FONT-WEIGHT: normal! important; FONT-SIZE: 1em! important; WIDTH: 140px! important
+}
+#spColumnRight .spCredit {
+	FONT-SIZE: 1em! important
+}
+.spSmallScreen #spColumnRight .spInfoBox .spSplit .spArticleImageBox {
+	FLOAT: left! important; MARGIN: 14px 20px 0px 0px
+}
+UL.spTabTeaser {
+	PADDING-RIGHT: 3px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 5px 0px 0px; FONT: bold 1em Verdana, sans-serif; PADDING-TOP: 3px! important; BORDER-BOTTOM: #ccc 1px solid; HEIGHT: 1.4em
+}
+.spTabTeaser LI {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px! important; BORDER-TOP: #ccc 1px solid; DISPLAY: inline; PADDING-LEFT: 5px! important; BACKGROUND: #e5e5e5; PADDING-BOTTOM: 2px! important; MARGIN: 2px 0px 0px 3px; BORDER-LEFT: #ccc 1px solid; COLOR: #666666; PADDING-TOP: 1px! important; BORDER-BOTTOM: #ccc 1px; LIST-STYLE-TYPE: none; TEXT-DECORATION: none
+}
+.spTabTeaser LI.spTop3reiterAktiv {
+	BACKGROUND: none transparent scroll repeat 0% 0%; BORDER-BOTTOM: #fafafa 1px solid
+}
+#spTop3KastenReiter {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 10px 0px 0px; WIDTH: 310px; PADDING-TOP: 0px; HEIGHT: 1.4em
+}
+#spColumnRight .spInfoBox .spMPCBox {
+	FONT-SIZE: 1em! important; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-TOP: 0px; HEIGHT: auto
+}
+#spColumnRight .spInfoBox .spMPCBoxHintergrund {
+	PADDING-BOTTOM: 1px! important
+}
+#spColumnRight .spInfoBox .spMPCBox .spMPCTabs {
+	MARGIN-TOP: 2px; BORDER-BOTTOM: #ccc 1px solid
+}
+#spColumnRight .spInfoBox .spMPCContent {
+	BORDER-RIGHT: #ccc 1px solid; BORDER-TOP: #ccc 1px; BORDER-LEFT: #ccc 1px solid; WIDTH: 306px; BORDER-BOTTOM: #ccc 1px solid; HEIGHT: 120px
+}
+#spColumnRight .spInfoBox .spMPCBoxAutoHeight .spMPCContent {
+	OVERFLOW: hidden; HEIGHT: auto
+}
+.spBigScreen #spColumnRight .spInfoBox .spMPCBox .spMPCContent {
+	WIDTH: 206px
+}
+.spBigScreen #spColumnRight .spInfoBox .spMPCBox .spMPCContent UL.spSplit {
+	WIDTH: 187px! important
+}
+.spBigScreen #spColumnRight .spInfoBox .spMPCBox .spMPCContent UL.spSplit LI {
+	WIDTH: 187px! important
+}
+#spColumnRight .spInfoBox .spMPCBox .spMPCTabs LI.spMPCTab A {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 5px; BACKGROUND: url(http://www.spiegel.de/img/0,1020,829940,00.gif) #ebebeb 0% 100%; PADDING-BOTTOM: 0px; MARGIN: 0px 3px 0px 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 2px; BORDER-BOTTOM: #ccc 1px solid
+}
+#spColumnRight .spInfoBox .spMPCBox .spMPCTabs LI.spMPCTabAktiv A {
+	BACKGROUND: url(http://www.spiegel.de/img/0,1020,829939,00.gif) #fff; BORDER-BOTTOM: #fff 1px solid
+}
+.spWetterBox {
+	BORDER-RIGHT: #ccc 1px solid; BORDER-TOP: #ccc 1px solid
+}
+.spWetterbox {
+	FLOAT: left
+}
+.spInfoBox TABLE.spWetterbox {
+	BORDER-RIGHT: #ccc 1px solid; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 0px; MARGIN: 10px 0px; WIDTH: 140px! important
+}
+.spWetterbox TD {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; PADDING-BOTTOM: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 0px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spRow1 {
+	BACKGROUND-COLOR: #fff
+}
+.spRow2 {
+	BACKGROUND-COLOR: #f6f6f6
+}
+.spWetterList {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 10px 0px 0px 20px; WIDTH: 100px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spWetterList LI {
+	CLEAR: both; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 110px; PADDING-TOP: 5px
+}
+.spWetterList LI H6 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; FONT-WEIGHT: normal! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spWetterbox IMG {
+	MARGIN: 0px 0px 0px 5px; BORDER-TOP-STYLE: none! important; BORDER-RIGHT-STYLE: none! important; BORDER-LEFT-STYLE: none! important; BORDER-BOTTOM-STYLE: none! important
+}
+.spBoersenMap {
+	BORDER-RIGHT: #ccc 1px solid; FLOAT: left; BORDER-LEFT: #ccc 1px solid; WIDTH: 313px; BACKGROUND-COLOR: #fff
+}
+.spBoerseTab {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; BORDER-TOP-STYLE: none! important; PADDING-TOP: 5px! important; BORDER-RIGHT-STYLE: none! important; BORDER-LEFT-STYLE: none! important; BORDER-BOTTOM-STYLE: none! important
+}
+.spBigScreen .spBoersenMap IMG {
+	MARGIN: 15px 0px 0px 8px
+}
+.spBoersenMap IMG {
+	DISPLAY: block; FLOAT: left! important; MARGIN: 15px 0px 0px; BORDER-TOP-STYLE: none! important; BORDER-RIGHT-STYLE: none! important; BORDER-LEFT-STYLE: none! important; BORDER-BOTTOM-STYLE: none! important
+}
+.spBoersenList {
+	FLOAT: left; MARGIN: 15px 0px 0px 10px; WIDTH: 90px
+}
+.spBigScreen .spBoersenList {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 5px 5px; WIDTH: 208px; PADDING-TOP: 0px
+}
+.spBoersenList UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spBigScreen .spBoersenList UL LI {
+	WIDTH: 175px
+}
+.spBoersenList UL LI {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; PADDING-BOTTOM: 5px; WIDTH: 90px; LINE-HEIGHT: 1.2em; PADDING-TOP: 0px; HEIGHT: 10px
+}
+.spBoerseTable {
+	BORDER-RIGHT: #ccc 1px solid; BORDER-TOP: #ccc 1px solid; FONT-WEIGHT: normal! important; FLOAT: left; WIDTH: 314px
+}
+.spBoerseTable TD {
+	PADDING-RIGHT: 2px; PADDING-LEFT: 2px; PADDING-BOTTOM: 0px; MARGIN: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 0px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spBoerseTable TABLE {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 313px! important; PADDING-TOP: 0px
+}
+.spNumberPositive {
+	COLOR: #219c08
+}
+.spNumberNegative {
+	COLOR: #f00
+}
+.spInfoBox .spVideoBox {
+	BORDER-RIGHT: #a5a9ac 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: #a5a9ac 1px solid; PADDING-LEFT: 0px; BACKGROUND: #fff; PADDING-BOTTOM: 0px; MARGIN: 10px 0px 0px; BORDER-LEFT: #a5a9ac 1px solid; WIDTH: 314px; PADDING-TOP: 10px; BORDER-BOTTOM: #a5a9ac 1px solid
+}
+.spInfoBox .spVideoBox:unknown {
+	CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: "."
+}
+ HTML #spColumnRight .spInfoBox .spVideoBox {
+	HEIGHT: 1%
+}
+.spInfoBox .spVideoBox  {
+	MARGIN: 0px
+}
+.spInfoBox .spVideoBox .spVideoBoxNav {
+	FLOAT: left; WIDTH: 65px; HEIGHT: 155px
+}
+.spInfoBox .spVideoBox .spVideoBoxCont {
+	FLOAT: left; WIDTH: 180px; HEIGHT: 180px
+}
+#spColumnRight .spPartnerBar {
+	BACKGROUND: none transparent scroll repeat 0% 0%; MARGIN: 0px
+}
+#spColumnRight .spPartnerBar TABLE TD {
+	FONT-SIZE: 0.9em; LINE-HEIGHT: 10px
+}
+TABLE.spToolBox {
+	MARGIN-TOP: 10px! important
+}
+TABLE.spToolBox IMG {
+	MARGIN-TOP: 3px! important
+}
+TABLE.spToolBox .dotteddiv {
+	FONT-SIZE: 1em! important; MARGIN: 0px 4px 0px 15px
+}
+TABLE.spToolBoxLeft {
+	WIDTH: 192px! important
+}
+.spInfoBox TABLE.spF1Ticker {
+	BORDER-RIGHT: #ccc 1px solid; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 0px; MARGIN: 0px 0px 10px
+}
+.spSmallScreen .spInfoBox TABLE.spF1Ticker {
+	WIDTH: 300px! important
+}
+.spBigScreen .spInfoBox TABLE.spF1Ticker {
+	WIDTH: 200px! important
+}
+.spF1Ticker TD {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; PADDING-BOTTOM: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 0px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spKickerLegend {
+	FLOAT: left; TEXT-ALIGN: right
+}
+.spBigScreen .spKickerTime {
+	FLOAT: left; MARGIN: 5px 0px 0px
+}
+.spBigScreen .spKickerTime P {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important
+}
+.spKickerTime {
+	FLOAT: right; MARGIN: 15px 0px 10px; WIDTH: 95px
+}
+.spTickerReload {
+	FLOAT: right
+}
+UL.spF1List {
+	WIDTH: 200px! important
+}
+.spF1List LI {
+	WIDTH: 200px! important
+}
+.spInfoBox TABLE.spKickerticker {
+	CLEAR: left; BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: #ccc 1px solid; MARGIN-TOP: 0px! important; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; WIDTH: 300px! important; PADDING-TOP: 0px
+}
+.spBigScreen .spInfoBox TABLE.spKickerticker {
+	WIDTH: 200px! important
+}
+.spKicker {
+	FLOAT: left; MARGIN: 15px 0px 10px; WIDTH: 56%
+}
+.spBigScreen .spKicker {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 10px 0px; WIDTH: 100%; PADDING-TOP: 0px! important
+}
+.spBigScreen .spKicker P {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important
+}
+.spKickerticker TD {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; PADDING-BOTTOM: 4px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 4px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spF1Powered {
+	FLOAT: left
+}
+.spCelink {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: orange! important
+}
+.celink {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: orange! important
+}
+.spDottedLine {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1px; FLOAT: left; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif); PADDING-BOTTOM: 0px; MARGIN: 0px 0px 15px; WIDTH: 100%; LINE-HEIGHT: 1px; PADDING-TOP: 0px; BACKGROUND-REPEAT: repeat-x; HEIGHT: 1px! important
+}
+.spBreakNoHeight {
+	DISPLAY: none; FONT-SIZE: 1px; LINE-HEIGHT: 1px; HEIGHT: 1px
+}
+.spNoUpperLine {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; FLOAT: left; PADDING-BOTTOM: 17px! important; MARGIN: 0px; PADDING-TOP: 0.1em! important
+}
+.spCredit {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em! important; PADDING-BOTTOM: 0px; MARGIN-LEFT: 4px; COLOR: #999; PADDING-TOP: 0px; TEXT-ALIGN: right
+}
+.spNoLink {
+	BACKGROUND: none transparent scroll repeat 0% 0%
+}
+.spImgNoBorder {
+	BORDER-TOP-STYLE: none! important; BORDER-RIGHT-STYLE: none! important; BORDER-LEFT-STYLE: none! important; BORDER-BOTTOM-STYLE: none! important
+}
+.spOptiBreak {
+	FONT-SIZE: 0.1%; VISIBILITY: hidden; LINE-HEIGHT: 0.1%; TEXT-DECORATION: none! important
+}
+.spTextSmaller {
+	FONT-SIZE: 0.83em
+}
+.spTextBigger {
+	FONT-SIZE: 1em
+}
+.spLine5px {
+	LINE-HEIGHT: 5px
+}
+.spAutorenzeile {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: normal; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; FONT-STYLE: italic
+}
+.spBoldLink A {
+	FONT-WEIGHT: bold
+}
+.spBoldLink A SPAN {
+	FONT-WEIGHT: normal
+}
+.spMarkVisited A:visited {
+	COLOR: #999
+}
+.spMarkVisited A:visited SPAN {
+	COLOR: #999
+}
+.spBlockBullet A {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+.spBlockBullet {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 10px; FONT-WEIGHT: bold; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 5px 0px 7px; BORDER-LEFT: #c11919 10px solid; WIDTH: auto! important; COLOR: #000; LINE-HEIGHT: 10px; PADDING-TOP: 0px; LETTER-SPACING: 1px
+}
+.spCenterTable {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px auto; VERTICAL-ALIGN: middle; WIDTH: 100%; BORDER-TOP-STYLE: none; PADDING-TOP: 0px; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; HEIGHT: 100%; TEXT-ALIGN: center; BORDER-BOTTOM-STYLE: none
+}
+#spHeader FORM {
+	DISPLAY: inline
+}
+#spHeader UL {
+	CLEAR: both; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+#spHeader LI {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+#spHeader H1 {
+	DISPLAY: none
+}
+#spHeader #spLogo {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 16px 0px 16px 22px; WIDTH: 232px; PADDING-TOP: 0px; POSITION: relative; HEIGHT: 31px
+}
+#home H2 {
+	PADDING-LEFT: 10px; MARGIN: 0px
+}
+#spHeader H2 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; LEFT: 270px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 20px; WIDTH: 300px; PADDING-TOP: 0px; POSITION: absolute; TOP: 25px; HEIGHT: 17px
+}
+#spHeader H2 SPAN {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; TEXT-TRANSFORM: uppercase; COLOR: #fff
+}
+UL#spMetaNavigation {
+	PADDING-RIGHT: 1px; PADDING-LEFT: 1px; FLOAT: right; PADDING-BOTTOM: 1px; MARGIN: 7px 19px 4px 0px; WIDTH: auto; LINE-HEIGHT: 16px; PADDING-TOP: 1px; HEIGHT: 16px; TEXT-ALIGN: right
+}
+UL#spMetaNavigation LI {
+	FLOAT: left
+}
+UL#spMetaNavigation LI A {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: 0px -1px; DISPLAY: block; PADDING-LEFT: 21px; FONT-SIZE: 9px! important; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_spMetaNIcons.gif); PADDING-BOTTOM: 0px; MARGIN: 0px 0px 1px 8px; COLOR: #333; PADDING-TOP: 0px; BACKGROUND-REPEAT: no-repeat
+}
+UL#spMetaNavigation LI A#spSchlagz {
+	BACKGROUND-POSITION: 0px -1px
+}
+UL#spMetaNavigation LI A#spNewsletter {
+	BACKGROUND-POSITION: 0px -18px
+}
+UL#spMetaNavigation LI A#spDreiMinuten {
+	BACKGROUND-POSITION: 0px -35px
+}
+UL#spMetaNavigation LI A#spRss {
+	BACKGROUND-POSITION: 0px -52px
+}
+UL#spMetaNavigation LI A#spMobil {
+	BACKGROUND-POSITION: 0px -70px
+}
+UL#spMetaNavigation LI A#spStartseite {
+	BACKGROUND-POSITION: 0px -89px
+}
+UL#spMetaNavigation LI A#spWetter {
+	BACKGROUND-POSITION: 0px -110px
+}
+DIV#spMainNavigation {
+	CLEAR: both; PADDING-RIGHT: 0px; BORDER-TOP: #fff 1px solid; PADDING-LEFT: 0px; FONT-SIZE: 10px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 794px; PADDING-TOP: 0px; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; POSITION: relative; HEIGHT: 79px; BORDER-BOTTOM-STYLE: none
+}
+DIV#spMainNavigation UL {
+	MARGIN: 0px 0px 0px 22px; HEIGHT: 15px
+}
+DIV#spMainNavigation LI {
+	FLOAT: left; MARGIN: 0px 2px 0px 0px; WIDTH: auto; HEIGHT: 15px
+}
+DIV#spMainNavigation UL LI A {
+	BORDER-RIGHT: #ffffff 1px solid; PADDING-RIGHT: 6px; BORDER-TOP: #ffffff 1px solid; PADDING-LEFT: 6px; FONT-WEIGHT: bold; FONT-SIZE: 10px! important; PADDING-BOTTOM: 3px; BORDER-LEFT: #ffffff 1px solid; COLOR: white; PADDING-TOP: 2px; BACKGROUND-COLOR: #999; TEXT-DECORATION: none
+}
+#spMainNavigation UL LI A.active {
+	COLOR: #000; BACKGROUND-COLOR: #fff
+}
+#spMainNavigation UL LI A:hover {
+	COLOR: #000; BACKGROUND-COLOR: #fff
+}
+.spLevel1 {
+	DISPLAY: block; POSITION: relative
+}
+.spLevel1 UL {
+	FLOAT: left; HEIGHT: 25px
+}
+A.spActive {
+	FONT-WEIGHT: bold! important; COLOR: #000
+}
+#spMainSearch {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; LEFT: 532px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 261px; COLOR: #fff; PADDING-TOP: 3px; POSITION: absolute; TOP: 5px; HEIGHT: 44px
+}
+#spMainSearch P {
+	FLOAT: left; LINE-HEIGHT: 12px
+}
+#spMainSearch INPUT#spSearchInput {
+	BORDER-RIGHT: #fff 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: #fff 1px solid; PADDING-LEFT: 0px; FONT-SIZE: 10px; LEFT: 4px; PADDING-BOTTOM: 1px; MARGIN: 0px; BORDER-LEFT: #fff 1px solid; WIDTH: 216px; LINE-HEIGHT: 12px! important; PADDING-TOP: 1px; BORDER-BOTTOM: #fff 1px solid; FONT-FAMILY: verdana, sans-serif; POSITION: absolute; TOP: 23px; HEIGHT: 13px
+}
+#spHeader LABEL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px 11px 0px 0px; VERTICAL-ALIGN: middle; PADDING-TOP: 0px
+}
+#wirtschaft #spHeader LABEL {
+	MARGIN: 0px 1px 0px 0px
+}
+#spHeader INPUT {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 0px 2px; VERTICAL-ALIGN: middle; PADDING-TOP: 0px
+}
+#spMainSearch INPUT#spSearchGo {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; LEFT: 225px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 17px; BORDER-TOP-STYLE: none; LINE-HEIGHT: 11px; PADDING-TOP: 0px; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; POSITION: absolute; TOP: 23px; HEIGHT: 17px; BORDER-BOTTOM-STYLE: none
+}
+#spCommercialNav {
+	Z-INDEX: 1002; LEFT: 644px; WIDTH: 130px; POSITION: absolute; TOP: 61px; HEIGHT: 18px
+}
+#spCommercialNav A {
+	BORDER-RIGHT: #fff 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #fff 1px solid; DISPLAY: block; PADDING-LEFT: 5px; FONT-WEIGHT: bold; FONT-SIZE: 10px; PADDING-BOTTOM: 0px; MARGIN: 0px; BORDER-LEFT: #fff 1px solid; COLOR: #fff; LINE-HEIGHT: 17px; PADDING-TOP: 0px; BORDER-BOTTOM: #fff 1px solid; TEXT-ALIGN: center
+}
+#spCommercialNavFirst {
+	Z-INDEX: 1002; LEFT: 592px; WIDTH: 90px; POSITION: absolute; TOP: 62px; HEIGHT: 17px
+}
+#spCommercialNavSecond {
+	Z-INDEX: 1002; LEFT: 684px; WIDTH: 90px; POSITION: absolute; TOP: 62px; HEIGHT: 17px
+}
+#spCommercialNavFirst A {
+	BORDER-RIGHT: #fff 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: #fff 1px solid; DISPLAY: block; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FONT-SIZE: 10px; PADDING-BOTTOM: 0px; MARGIN: 0px; BORDER-LEFT: #fff 1px solid; COLOR: #fff; LINE-HEIGHT: 17px; PADDING-TOP: 0px; BORDER-BOTTOM: #fff 1px solid; TEXT-ALIGN: center
+}
+#spCommercialNavSecond A {
+	BORDER-RIGHT: #fff 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: #fff 1px solid; DISPLAY: block; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FONT-SIZE: 10px; PADDING-BOTTOM: 0px; MARGIN: 0px; BORDER-LEFT: #fff 1px solid; COLOR: #fff; LINE-HEIGHT: 17px; PADDING-TOP: 0px; BORDER-BOTTOM: #fff 1px solid; TEXT-ALIGN: center
+}
+#spHeader #spMainDate {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FONT-SIZE: 10px! important; Z-INDEX: 1000; LEFT: 21px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 270px; PADDING-TOP: 0px; POSITION: absolute; TOP: 10px; HEIGHT: 17px
+}
+UL.spNaviLevel1 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 22px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important; WHITE-SPACE: nowrap
+}
+UL.spNaviLevel1 LI.spNaviSubNavigation {
+	PADDING-RIGHT: 5px! important; PADDING-LEFT: 0px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; PADDING-TOP: 1px! important; HEIGHT: 1.75em
+}
+#spNaviChannel UL.spNaviLevel1 LI.spNaviSubNavigation A.spNaviLevel1Link {
+	PADDING-RIGHT: 3px! important; PADDING-LEFT: 0px! important; FONT-SIZE: 0.62em; PADDING-BOTTOM: 0px! important; MARGIN: 6px 0px 0px; COLOR: #980100; LINE-HEIGHT: 28px; PADDING-TOP: 2px! important; TEXT-DECORATION: none
+}
+.spNaviLevel1Div {
+	POSITION: relative
+}
+.spNaviLevel1Div LI {
+	CLEAR: both; DISPLAY: block
+}
+UL.spNaviLevel2 {
+	PADDING-RIGHT: 0px! important; DISPLAY: none; PADDING-LEFT: 0px! important; Z-INDEX: 100; LEFT: -7px; FLOAT: left; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0.07em! important; POSITION: absolute; TOP: 0px
+}
+UL.spNaviLevel1 LI.spNaviSubNavigation:hover UL.spNaviLevel2 {
+	DISPLAY: block
+}
+UL.spNaviLevel2 LI {
+	DISPLAY: block
+}
+UL.spNaviLevel2 A {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px! important; DISPLAY: block; PADDING-LEFT: 5px! important; FONT-SIZE: 0.62em; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) #f5f5f5 repeat-x left bottom; PADDING-BOTTOM: 3px! important; MARGIN: 0px; OVERFLOW: visible; BORDER-LEFT: #ccc 1px solid; WIDTH: auto; PADDING-TOP: 2px! important; WHITE-SPACE: nowrap; min-width: 120px
+}
+UL.spNaviLevel2 A:hover {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px! important; DISPLAY: block; PADDING-LEFT: 5px! important; FONT-SIZE: 0.62em; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) #f5f5f5 repeat-x left bottom; PADDING-BOTTOM: 3px! important; MARGIN: 0px; OVERFLOW: visible; BORDER-LEFT: #ccc 1px solid; WIDTH: auto; PADDING-TOP: 2px! important; WHITE-SPACE: nowrap; min-width: 120px
+}
+DIV#spNaviChannel UL.spNaviLevel1 UL.spNaviLevel2 LI A.spNaviLevel2Last {
+	BACKGROUND: #f5f5f5; BORDER-BOTTOM: #ccc 1px solid
+}
+DIV#spNaviChannel {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_navigationBottomnoline.gif); PADDING-BOTTOM: 0px; WIDTH: 100%; LINE-HEIGHT: normal; PADDING-TOP: 0px; BACKGROUND-REPEAT: repeat-x; POSITION: relative; BACKGROUND-COLOR: #e5e5e5
+}
+.spChannelNavigationLine {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1px! important; FLOAT: left; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_navigationBottomLine.gif); PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 794px; LINE-HEIGHT: 1px! important; PADDING-TOP: 0px; BACKGROUND-REPEAT: repeat-x; HEIGHT: 1px! important
+}
+.spNaviPipe {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.62em; PADDING-BOTTOM: 0px; PADDING-TOP: 6px
+}
+DIV#spNaviChannel UL UL.spNaviLevel2 LI A:hover {
+	BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) #fff repeat-x left bottom
+}
+DIV#spNaviChannel UL UL.spNaviLevel2 LI A.spNaviLevel2Last:hover {
+	BACKGROUND: #fff
+}
+#spBreadcrumb {
+	CLEAR: both; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.62em; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x left bottom; FLOAT: left; PADDING-BOTTOM: 4px; WIDTH: 772px; LINE-HEIGHT: 1em; PADDING-TOP: 12px; HEIGHT: 15px; TEXT-ALIGN: right
+}
+#spBreadcrumbNoLine {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FONT-SIZE: 0.62em; FLOAT: left; PADDING-BOTTOM: 4px! important; MARGIN: 0px; WIDTH: 772px; LINE-HEIGHT: 1.33em; PADDING-TOP: 13px! important; HEIGHT: auto; TEXT-ALIGN: right
+}
+#spHistory {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 520px; PADDING-TOP: 0px
+}
+#spHistory UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 520px; PADDING-TOP: 0px
+}
+#spHistory UL LI {
+	PADDING-RIGHT: 7px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none; TEXT-ALIGN: left
+}
+#spTop {
+	BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% bottom; FLOAT: left; MARGIN: 0px 0px 45px; WIDTH: 100%
+}
+#spFooter UL {
+	CLEAR: both; PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 4px; LINE-HEIGHT: 9px! important; PADDING-TOP: 0px; TEXT-ALIGN: center
+}
+#spFooter UL LI {
+	PADDING-RIGHT: 0px; DISPLAY: inline; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none; HEIGHT: 9px
+}
+#spFooter UL LI A {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; PADDING-BOTTOM: 0px; MARGIN: 0px; BORDER-LEFT: #000 1px solid; COLOR: #b20a15; LINE-HEIGHT: 2px; PADDING-TOP: 0px; HEIGHT: 9px
+}
+#spFooter UL LI.first A {
+	PADDING-LEFT: 4px; FONT-WEIGHT: normal! important; BORDER-LEFT-STYLE: none
+}
+.spTop {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x left bottom; PADDING-BOTTOM: 6px; MARGIN: 0px 0px 49px; WIDTH: 420px; PADDING-TOP: 0px
+}
+.spArrowList LI {
+	PADDING-RIGHT: 0px; DISPLAY: inline-block; PADDING-LEFT: 8px; FONT-SIZE: 1em! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 10px; PADDING-BOTTOM: 0px; PADDING-TOP: 5px; LIST-STYLE-TYPE: none
+}
+UL.spLinkList {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 15px 0px 0px; PADDING-TOP: 0px
+}
+#spMainContent UL.spLinkList LI {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+UL.spLinkList LI A {
+	COLOR: #990102
+}
+UL.spLinkList LI A SPAN {
+	COLOR: #000
+}
+UL.spLinkList LI A:hover SPAN {
+	COLOR: #000! important; TEXT-DECORATION: underline! important
+}
+UL.spLinkList IMG {
+	BORDER-TOP-WIDTH: 0px! important; PADDING-RIGHT: 4px; PADDING-LEFT: 0px; BORDER-LEFT-WIDTH: 0px! important; FLOAT: none! important; BORDER-BOTTOM-WIDTH: 0px! important; PADDING-BOTTOM: 4px; MARGIN: 0px; PADDING-TOP: 0px; BORDER-RIGHT-WIDTH: 0px! important
+}
+UL.spSimpleArticleList {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 100%; PADDING-TOP: 0px
+}
+UL.spSimpleArticleList LI {
+	BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif); BACKGROUND-REPEAT: no-repeat; LIST-STYLE-TYPE: none
+}
+UL.spSimpleArticleList LI {
+	PADDING-RIGHT: 0px! important; BACKGROUND-POSITION: 0px 5px; PADDING-LEFT: 8px! important; FONT-SIZE: 1em! important; PADDING-BOTTOM: 2px! important; PADDING-TOP: 0px! important
+}
+.spFullScreen #spArticleBody {
+	MARGIN-TOP: 12px
+}
+.spSmallScreen #spArticleBody {
+	WIDTH: 420px
+}
+#spArticleBody {
+	CLEAR: left
+}
+.spIntrotext {
+	FONT-WEIGHT: bold! important; MARGIN-BOTTOM: 12px
+}
+.spArticleCredit {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em! important; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 100%; COLOR: #000; LINE-HEIGHT: 1.2em; PADDING-TOP: 0px; TEXT-ALIGN: right
+}
+#spArticleBody I {
+	MARGIN-LEFT: 3px
+}
+#spArticleHeadNoLine {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 2px; WIDTH: 100%; LINE-HEIGHT: 1.2em; PADDING-TOP: 2px; HEIGHT: auto; TEXT-ALIGN: left
+}
+#spArticleHead {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/artcleHead.gif) repeat-x left top; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 5px; WIDTH: 100%; LINE-HEIGHT: 1.2em; PADDING-TOP: 3px; HEIGHT: 25px; TEXT-ALIGN: left
+}
+#spArticleHead H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: normal! important; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; TEXT-TRANSFORM: none! important; WIDTH: 120px; PADDING-TOP: 0px
+}
+#spArticleHeadNoLine H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: normal! important; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; TEXT-TRANSFORM: none! important; WIDTH: 120px; PADDING-TOP: 0px
+}
+#spArticleHead UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: auto; PADDING-TOP: 0px; TEXT-ALIGN: right
+}
+#spArticleHeadNoLine UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: auto; PADDING-TOP: 0px; TEXT-ALIGN: right
+}
+#spArticleHead UL LI {
+	FLOAT: left; LIST-STYLE-TYPE: none
+}
+#spArticleHeadNoLine UL LI {
+	FLOAT: left; LIST-STYLE-TYPE: none
+}
+#spFontSizing {
+	FONT-SIZE: 0.83em; FLOAT: right
+}
+#spFontsizeMinus {
+	MARGIN: 0px 2px 0px 5px
+}
+#spFontsizePlus {
+	MARGIN: 0px 0px 0px 2px
+}
+#spFontSizing P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 12px; PADDING-TOP: 0px
+}
+.spMagMarker {
+	FLOAT: left; MARGIN: 0px 0px 10px
+}
+.spMagMarker P {
+	MARGIN: 0px; BACKGROUND-COLOR: #e7e7e7; TEXT-ALIGN: center
+}
+.spMagMarker A {
+	COLOR: #000! important
+}
+.spMagMarker A:hover {
+	COLOR: #000! important
+}
+.spMagMarker TABLE {
+	MARGIN: 0px 0px 15px
+}
+.spMagMarker A:hover {
+	COLOR: #000
+}
+#spPaginate {
+	FONT-SIZE: 0.83em; FLOAT: left; MARGIN-BOTTOM: 9px
+}
+#spPaginate UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+#spPaginate LI {
+	PADDING-RIGHT: 3px; FLOAT: left
+}
+#spMultiPage UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 10px 0px 20px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+#spMultiPage LI {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: 0px 10px; PADDING-LEFT: 8px; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif); PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 5px; BACKGROUND-REPEAT: no-repeat
+}
+.spMultiPageLink {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 70px; PADDING-TOP: 0px; LETTER-SPACING: 2px; TEXT-ALIGN: right
+}
+.spMultiPageLink A {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spMultiPageLinkback {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 70px; PADDING-TOP: 0px; LETTER-SPACING: 2px; TEXT-ALIGN: left
+}
+.spMultiPageLinkback A {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 16px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrowsback.gif) no-repeat 0px 50%; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+#spSocialBookmarkBox {
+	CLEAR: both; Z-INDEX: 10; WIDTH: 110px; POSITION: relative
+}
+#spSocialBookmark {
+	LEFT: 294px; VISIBILITY: hidden; WIDTH: 110px; POSITION: absolute; TOP: 5px; HEIGHT: 100%
+}
+.spFullScreen #spSocialBookmark {
+	LEFT: 644px
+}
+#spSocialBookmarkClose {
+	DISPLAY: block; Z-INDEX: 2; LEFT: 117px; POSITION: absolute; TOP: -3px
+}
+#spSocialBookmark UL {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 8px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 8px; Z-INDEX: 1; BACKGROUND: #fff; LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 5px; MARGIN: 0px; BORDER-LEFT: #ccc 1px solid; WIDTH: 110px; PADDING-TOP: 5px; BORDER-BOTTOM: #ccc 1px solid; POSITION: absolute; TOP: 0px
+}
+#spSocialBookmark LI {
+	PADDING-RIGHT: 3px; DISPLAY: block; PADDING-LEFT: 3px; FONT-SIZE: 0.83em; PADDING-BOTTOM: 1px; PADDING-TOP: 1px; LIST-STYLE-TYPE: none; HEIGHT: 20px
+}
+#spSocialBookmark LI IMG {
+	MARGIN-RIGHT: 5px! important
+}
+.spLastBlogBox {
+	MARGIN-BOTTOM: 15px! important
+}
+.spBlogBox {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 10px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 10px; FLOAT: left; MARGIN-BOTTOM: 5px; PADDING-BOTTOM: 10px; BORDER-LEFT: #ccc 1px solid; WIDTH: 400px; PADDING-TOP: 10px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spBlogBox H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 5px; COLOR: #ccc; PADDING-TOP: 0px
+}
+.spBlogBox UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.9em; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spBlogBox LI SPAN {
+	FONT-WEIGHT: bold! important; COLOR: #ccc! important
+}
+.spBlogBox LI SPAN.spBlk {
+	FONT-WEIGHT: normal! important; COLOR: #000! important
+}
+.spBlogBox P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 5px; PADDING-TOP: 0px
+}
+.spBlogBox A#spBlogComments {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; FLOAT: right; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spBlogBox IMG {
+	FLOAT: right
+}
+.spDiscussBox {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 10px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 10px; FLOAT: left; MARGIN-BOTTOM: 2em; PADDING-BOTTOM: 10px; BORDER-LEFT: #ccc 1px solid; WIDTH: 400px; PADDING-TOP: 10px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spDiscussBox H5 {
+	MARGIN: 1em 0px 5px
+}
+.spDiscussBox UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.9em; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 1em; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spDiscussBox LI SPAN {
+	FONT-WEIGHT: bold; MARGIN-RIGHT: 5px
+}
+.spDiscussBox LI SPAN.spBlk {
+	FONT-WEIGHT: normal! important; COLOR: #000! important
+}
+.spDiscussBox P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 5px; PADDING-TOP: 0px
+}
+.spDiscussBox A#spBlogComments {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; FLOAT: left; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spDiscussBox IMG {
+	FLOAT: right
+}
+.spCommentBox {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 10px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 10px; FLOAT: left; PADDING-BOTTOM: 10px; BORDER-LEFT: #ccc 1px solid; WIDTH: 180px; PADDING-TOP: 10px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spCommentBox H5 {
+	FONT-WEIGHT: bold; FONT-SIZE: 0.83em; MARGIN: 0px 5px 5px 0px
+}
+.spCommentBox P {
+	FONT-SIZE: 0.83em; MARGIN: 0px 0px 5px; LINE-HEIGHT: 1.2em
+}
+.spCommentBox IMG {
+	FLOAT: right
+}
+.spDruckversion {
+	MARGIN: 15px; WIDTH: 92%
+}
+.spDruckversion #spArticleBody {
+	FLOAT: none
+}
+.spDruckversion .spPhotoGallery {
+	MARGIN: 5px 15px 5px 0px
+}
+.spDruckversion HR {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spDruckversion .spArticleCredit {
+	PADDING-RIGHT: 0px; DISPLAY: block; PADDING-LEFT: 0px; FONT-SIZE: 10px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spDruckversion .spDotteddiv {
+	FONT-SIZE: 0.83em! important; MARGIN: 4px 4px 4px 15px; TEXT-INDENT: -10px
+}
+.spArtikelVersandEmailform {
+	PADDING-RIGHT: 9px; PADDING-LEFT: 9px; PADDING-BOTTOM: 9px; MARGIN: 10px 0px; PADDING-TOP: 9px; FONT-FAMILY: verdana, sans-serif; BACKGROUND-COLOR: #f0f0f0
+}
+.spArtikelVersandSMSform {
+	PADDING-RIGHT: 9px; PADDING-LEFT: 9px; PADDING-BOTTOM: 9px; MARGIN: 10px 0px; PADDING-TOP: 9px; FONT-FAMILY: verdana, sans-serif; BACKGROUND-COLOR: #f0f0f0
+}
+.spArtikelVersandEmailform H5 {
+	MARGIN: 0px 0px 10px; TEXT-TRANSFORM: none
+}
+.spArtikelVersandEmailAdresse {
+	CLEAR: both; MARGIN: 15px 0px 0px
+}
+.spArtikelVersandEmailLabel {
+	FONT-SIZE: 1em; FLOAT: left; WIDTH: 110px; MARGIN-RIGHT: 5px
+}
+.spArtikelVersandEmailInput {
+	FLOAT: left; WIDTH: 286px
+}
+.spArtikelVersandEmailInput P {
+	FONT-SIZE: 0.83em; MARGIN: 0px; COLOR: #666; LINE-HEIGHT: 1.1em
+}
+.spArtikelVersandEmailInput INPUT {
+	BORDER-RIGHT: #ccc 1px solid; BORDER-TOP: #ccc 1px solid; BORDER-LEFT: #ccc 1px solid; WIDTH: 285px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spArtikelVersandEmailNachricht TEXTAREA {
+	BORDER-RIGHT: #ccc 1px solid; BORDER-TOP: #ccc 1px solid; OVERFLOW: auto; BORDER-LEFT: #ccc 1px solid; WIDTH: 399px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spArtikelVersandEmailNachricht P {
+	FONT-SIZE: 1em; MARGIN: 15px 0px 0px
+}
+.spArtikelVersandEmailSubmit {
+	WIDTH: 100%
+}
+.spArtikelVersandEmailSubmit INPUT {
+	FLOAT: right; MARGIN: 10px 2px 0px 0px
+}
+.spArtikelVersandSMSform {
+	HEIGHT: 40px
+}
+.spArtikelVersandSMSform IMG {
+	FLOAT: right; MARGIN: 10px 2px 0px 0px
+}
+.spArtikelVersandSMSform P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FLOAT: left; PADDING-BOTTOM: 15px; MARGIN: 0px; PADDING-TOP: 10px
+}
+.spArtikelVersandDisclaimer {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% top; PADDING-BOTTOM: 10px; WIDTH: 100%; COLOR: #666666! important; LINE-HEIGHT: 1.1em; PADDING-TOP: 10px
+}
+.spArtikelVersandDisclaimer H5 {
+	PADDING-RIGHT: 2px; PADDING-LEFT: 2px; FONT-WEIGHT: bold; PADDING-BOTTOM: 2px; MARGIN: 0px 0px 5px; TEXT-TRANSFORM: none; PADDING-TOP: 2px; BACKGROUND-COLOR: #ffff99
+}
+.spArtikelVersandTopFive {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% top; PADDING-BOTTOM: 10px; WIDTH: 100%; PADDING-TOP: 10px
+}
+.spArtikelVersandTopFive H5 {
+	FONT-SIZE: 1em! important; MARGIN: 0px 0px 5px; TEXT-TRANSFORM: none
+}
+.spArtikelVersandTopFive H6 {
+	FONT-SIZE: 1em! important; MARGIN: 0px 0px 5px; TEXT-TRANSFORM: none
+}
+.spArtikelVersandOk {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; PADDING-BOTTOM: 10px; MARGIN: 10px 0px; PADDING-TOP: 10px; BACKGROUND-COLOR: #f6f6f6
+}
+.spArtikelVersandErr {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; PADDING-BOTTOM: 10px; MARGIN: 10px 0px; PADDING-TOP: 10px; BACKGROUND-COLOR: #f6f6f6
+}
+.spArtikelVersandOk {
+	BORDER-RIGHT: darkgreen 2px solid; BORDER-TOP: darkgreen 2px solid; BORDER-LEFT: darkgreen 2px solid; BORDER-BOTTOM: darkgreen 2px solid
+}
+.spArtikelVersandErr {
+	BORDER-RIGHT: red 2px solid; BORDER-TOP: red 2px solid; BORDER-LEFT: red 2px solid; BORDER-BOTTOM: red 2px solid
+}
+.spTextList LI {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 8px; PADDING-TOP: 0px
+}
+.spImagenav {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 10px! important; FLOAT: left; PADDING-BOTTOM: 12px; MARGIN: auto; WIDTH: 100%; COLOR: #666; PADDING-TOP: 12px; TEXT-ALIGN: center
+}
+.spImagenav FONT {
+	FONT-SIZE: 10px! important; LETTER-SPACING: 1px
+}
+.spImagenav A {
+	FONT-SIZE: 10px! important; LETTER-SPACING: 1px
+}
+.spImagenav .gesperrt {
+	FONT-SIZE: 10px! important; LETTER-SPACING: 1px
+}
+.spInteractionMarks {
+	FONT-SIZE: 0.83em; COLOR: #999
+}
+.spInteractionMarks A {
+	COLOR: #000! important
+}
+.spCenterCatIcon {
+	FLOAT: right; MARGIN: 0px 0px 5px 5px; WIDTH: 18px! important; BORDER-TOP-STYLE: none; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; HEIGHT: 88px; BORDER-BOTTOM-STYLE: none
+}
+.spCenterCatIcon IMG {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; BORDER-TOP-STYLE: none! important; PADDING-TOP: 0px! important; BORDER-RIGHT-STYLE: none! important; BORDER-LEFT-STYLE: none! important; BORDER-BOTTOM-STYLE: none! important
+}
+.spCenterCatIconLeft {
+	FLOAT: left; MARGIN: 0px 5px 5px 0px
+}
+.spTopThema {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% top; FLOAT: left; PADDING-BOTTOM: 17px; MARGIN: 0px; WIDTH: 100%; PADDING-TOP: 20px
+}
+.spTopThema .spAutorenzeile {
+	FONT-SIZE: 1em! important
+}
+.spTopThema H3 {
+	FONT-WEIGHT: bold! important; FONT-SIZE: 1.5em! important; MARGIN: 5px 0px 7px; LINE-HEIGHT: 1.27em
+}
+.spTopThema H4 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FONT-WEIGHT: bold; FONT-SIZE: 0.83em; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-BOTTOM: 0px! important; MARGIN: 0px 0px 8px; LINE-HEIGHT: 1.2em! important; PADDING-TOP: 0px! important; LETTER-SPACING: 1px
+}
+.spTopThema IMG {
+	BORDER-RIGHT: #666 1px solid; BORDER-TOP: #666 1px solid; BORDER-LEFT: #666 1px solid; BORDER-BOTTOM: #666 1px solid
+}
+.spTopThema P {
+	MARGIN: 0px
+}
+.spTopThema P IMG {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 2px
+}
+.spTeaserCenterpage {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: 50% top; PADDING-LEFT: 0px; FLOAT: left; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif); PADDING-BOTTOM: 18px; MARGIN: 0px; OVERFLOW: hidden; WIDTH: 100%; BORDER-TOP-STYLE: none; PADDING-TOP: 17px; BACKGROUND-REPEAT: repeat-x; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BACKGROUND-COLOR: transparent; BORDER-BOTTOM-STYLE: none
+}
+.spTeaserCenterpage UL.spLinkList {
+	MARGIN-TOP: 15px; WIDTH: 100%
+}
+.spTeaserCenterpage H3 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FONT-WEIGHT: bold; FONT-SIZE: 1.08em! important; PADDING-BOTTOM: 10px! important; MARGIN: 0px; LINE-HEIGHT: 1.23em! important; PADDING-TOP: 11px! important
+}
+.spTeaserCenterpage H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LETTER-SPACING: 1px
+}
+.spTeaserCenterpage IMG {
+	BORDER-RIGHT: #666 1px solid; BORDER-TOP: #666 1px solid; FLOAT: left; MARGIN: 0px 12px 0px 0px; BORDER-LEFT: #666 1px solid; BORDER-BOTTOM: #666 1px solid
+}
+.spTeaserCenterpage P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spArchiveLinkCP {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FONT-SIZE: 0.83em; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 20px 0px; WIDTH: 420px; PADDING-TOP: 0px; LETTER-SPACING: 2px; TEXT-ALIGN: right
+}
+.spArchiveLinkCP A {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spArchiveLink {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FONT-SIZE: 0.83em; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 20px 0px; WIDTH: 210px; PADDING-TOP: 0px; LETTER-SPACING: 2px; TEXT-ALIGN: right
+}
+.spArchiveLink A {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spArchiveLinkback {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FONT-SIZE: 0.83em; FLOAT: left! important; PADDING-BOTTOM: 0px; MARGIN: 20px 0px; WIDTH: 210px; PADDING-TOP: 0px; LETTER-SPACING: 2px; TEXT-ALIGN: left
+}
+.spArchiveLinkback A {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 16px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrowsback.gif) no-repeat 0px 50%; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spArchiveHeader {
+	FONT-WEIGHT: normal! important; FONT-SIZE: 1.16em! important; PADDING-BOTTOM: 10px; MARGIN: 0px; TEXT-TRANSFORM: uppercase; COLOR: #000! important; LINE-HEIGHT: 1.64em! important; BORDER-BOTTOM: #ccc 1px dotted
+}
+.spDateTime {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 2px; PADDING-TOP: 0px
+}
+.spArchivdate {
+	PADDING-RIGHT: 2px; PADDING-LEFT: 2px; BACKGROUND: #efefef; PADDING-BOTTOM: 2px; PADDING-TOP: 2px
+}
+.spSpecialArticles {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 20px; WIDTH: 420px; LINE-HEIGHT: 1.2em; PADDING-TOP: 0px; TEXT-ALIGN: right! important
+}
+.spSpecialArticles P.spKategorieTeaser {
+	FONT-SIZE: 1.16em; LINE-HEIGHT: 1.2em; TEXT-ALIGN: left
+}
+.spSpecialArticles A {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 420px; PADDING-TOP: 0px
+}
+.spSpecialArticles .spKopfgrafik {
+	CLEAR: both; MARGIN-BOTTOM: 4px
+}
+.spAsset {
+	CLEAR: both; PADDING-RIGHT: 5px! important; PADDING-LEFT: 5px! important; FONT-SIZE: 0.83em; PADDING-BOTTOM: 5px! important; WIDTH: 410px; LINE-HEIGHT: 12px; MARGIN-RIGHT: 5px; PADDING-TOP: 5px! important; BACKGROUND-COLOR: #f6f6f6
+}
+.spAssetInner INPUT {
+	DISPLAY: block; FLOAT: left; WIDTH: 15px; HEIGHT: auto
+}
+FORM .spAssetInner UL LI SPAN {
+	DISPLAY: block; FLOAT: left; MARGIN: 3px 0px 5px; WIDTH: 80%
+}
+FORM .spAssetInner UL LI {
+	CLEAR: left
+}
+.spAssetInner {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; MARGIN: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 5px; BORDER-BOTTOM: #ccc 1px solid; BACKGROUND-COLOR: #fff
+}
+.spAssetInner:unknown {
+	CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: "."
+}
+ HTML .spAssetInner {
+	HEIGHT: 1%
+}
+.spAsset H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 2px 0px 5px; TEXT-TRANSFORM: uppercase; COLOR: #000! important; PADDING-TOP: 0px
+}
+.spAsset H4 A {
+	PADDING-RIGHT: 16px! important; PADDING-LEFT: 0px! important; FONT-SIZE: 1em; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px! important; TEXT-TRANSFORM: none; COLOR: #000! important; PADDING-TOP: 0px! important
+}
+.spAssetInner H4 {
+	MARGIN: 5px 0px 6px; TEXT-TRANSFORM: none; LINE-HEIGHT: 12px
+}
+.spAssetInner H4 A {
+	BACKGROUND: none transparent scroll repeat 0% 0%; COLOR: #990000! important
+}
+.spAsset H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px; TEXT-TRANSFORM: none; LINE-HEIGHT: normal; PADDING-TOP: 0px
+}
+.spAsset .spAssetInner P {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+FORM .spAssetInner P {
+	MARGIN: 10px 5px 0px
+}
+.spAssetInner UL {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important; LIST-STYLE-TYPE: none! important
+}
+.spAssetInner LI {
+	FLOAT: none; MARGIN: 5px 0px
+}
+.spAssetInner H6 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; FONT-WEIGHT: normal! important; FONT-SIZE: 1em! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spAssetInner LI IMG {
+	FLOAT: none
+}
+.spAsset .spAssetInner .spCredit {
+	FONT-SIZE: 1em! important
+}
+H4.spBoxHeadline {
+	MARGIN: 2px 0px 5px
+}
+H4.spBoxHeadline A {
+	PADDING-RIGHT: 16px! important; PADDING-LEFT: 0px! important; FONT-SIZE: 1em; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px! important; TEXT-TRANSFORM: none; COLOR: #000! important; PADDING-TOP: 0px! important
+}
+H4.spBoxHeadline A.spCelink {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-BOTTOM: 0px! important; COLOR: orange! important; PADDING-TOP: 0px! important
+}
+H4.spBoxHeadline A.celink {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-BOTTOM: 0px! important; COLOR: orange! important; PADDING-TOP: 0px! important
+}
+.spMPCBox {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em! important; FLOAT: left; PADDING-BOTTOM: 15px; MARGIN: 0px; LINE-HEIGHT: 1.3em! important; PADDING-TOP: 11px; POSITION: relative; BACKGROUND-COLOR: #fff
+}
+#spArticleBody .spMPCBox {
+	PADDING-TOP: 0px
+}
+.spMPCBox .spMPCContent UL {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important; LIST-STYLE-TYPE: none! important
+}
+.spMPCBox .spMPCContent LI {
+	FLOAT: none; MARGIN: 3px 0px
+}
+.spMPCBox .spMPCContent LI H6 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; FONT-WEIGHT: normal! important; FONT-SIZE: 1em! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spMPCBox .spMPCContent .spCredit {
+	FONT-SIZE: 1em! important
+}
+.spMPCBoxHintergrund {
+	BACKGROUND-COLOR: #f6f6f6
+}
+.spMPCBoxHintergrund .spMPCContent {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; OVERFLOW: auto; BORDER-LEFT: #ccc 1px solid; WIDTH: 398px; LINE-HEIGHT: 1.3em; PADDING-TOP: 5px; BORDER-BOTTOM: #ccc 1px solid; HEIGHT: 140px; BACKGROUND-COLOR: #ffffff
+}
+.spMPCBoxHintergrund .spMPCContent .spCredit {
+	FONT-SIZE: 1em! important
+}
+.spMPCTabs {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spMPCTabs LI {
+	PADDING-RIGHT: 0px; DISPLAY: inline; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; OVERFLOW: hidden; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spMPCTabs A {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px! important; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 5px! important; FONT-WEIGHT: bold; BACKGROUND: #e5e5e5; PADDING-BOTTOM: 2px! important; MARGIN: 2px 0px 0px 3px; BORDER-LEFT: #ccc 1px solid; COLOR: #666666; LINE-HEIGHT: 16px; PADDING-TOP: 1px! important; BORDER-BOTTOM: #ccc 1px solid; TEXT-DECORATION: none
+}
+UL.spMPCTabs:unknown {
+	CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: "*"
+}
+LI.spMPCTabAktiv A {
+	BACKGROUND: #fff; BORDER-BOTTOM: #fff 1px solid
+}
+.spMPCBoxTicker {
+	FONT-SIZE: 1em
+}
+.spMPCBoxTicker .spBoxHeadline {
+	BORDER-RIGHT: 0px; PADDING-RIGHT: 5px! important; BORDER-TOP: 0px; PADDING-LEFT: 5px! important; FONT-SIZE: 1em! important; PADDING-BOTTOM: 2px! important; MARGIN: 0px; BORDER-LEFT: 0px; WIDTH: 412px! important; PADDING-TOP: 2px! important; BORDER-BOTTOM: 0px; BACKGROUND-COLOR: #f6f6f6
+}
+.spMPCBoxTicker .spMPCTab A {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: 2px 2px; DISPLAY: block; PADDING-LEFT: 14px; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_pfeil_inaktiv.gif); PADDING-BOTTOM: 0px; MARGIN: 0px; COLOR: #636363; PADDING-TOP: 0px; BACKGROUND-REPEAT: no-repeat; BACKGROUND-COLOR: transparent
+}
+.spMPCBoxTicker .spMPCTabAktiv A {
+	BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_pfeil_aktiv.gif); COLOR: #000
+}
+.spMPCBoxTicker H3.spMPCTab {
+	BORDER-RIGHT: #e3e3e3 1px solid; PADDING-RIGHT: 1px; BORDER-TOP: #e3e3e3 1px solid; PADDING-LEFT: 1px; FONT-SIZE: 1em; PADDING-BOTTOM: 1px; MARGIN: 2px 0px 0px; BORDER-LEFT: #e3e3e3 1px solid; WIDTH: 418px; LINE-HEIGHT: 16px; PADDING-TOP: 1px; BORDER-BOTTOM: #e3e3e3 1px solid; BACKGROUND-COLOR: #f6f6f6
+}
+.spMPCBoxTicker H3.spMPCTabAktiv {
+	BORDER-BOTTOM-STYLE: none! important
+}
+.spMPCBoxTicker .spMPCContent {
+	BORDER-RIGHT: #e3e3e3 1px solid; PADDING-RIGHT: 5px; PADDING-LEFT: 5px; MARGIN-BOTTOM: 3px; PADDING-BOTTOM: 10px; BORDER-LEFT: #e3e3e3 1px solid; WIDTH: 410px; PADDING-TOP: 10px; BORDER-BOTTOM: #e3e3e3 1px solid; BACKGROUND-COLOR: #ffffff
+}
+.spFullScreen .spPhotoGallery {
+	WIDTH: 358px! important
+}
+.spFullScreen .spPhotoGallery .spInnerBox {
+	WIDTH: 346px! important
+}
+.spPhotoGallery {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; BACKGROUND: #f6f6f6; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 10px 0px; WIDTH: 419px; PADDING-TOP: 0px
+}
+.spPhotoGallery H4 {
+	FONT-SIZE: 1em; MARGIN: 5px 0px 3px 4px; TEXT-TRANSFORM: uppercase
+}
+.spPhotoGallery .spInnerBox {
+	BORDER-RIGHT: #ccc 1px solid; BORDER-TOP: #ccc 1px solid; BACKGROUND: white; FLOAT: left; MARGIN: 0px 5px; BORDER-LEFT: #ccc 1px solid; WIDTH: 403px; BORDER-BOTTOM: #ccc 1px solid
+}
+.spPhotoGallery UL {
+	PADDING-RIGHT: 20px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 7px; MARGIN: auto; PADDING-TOP: 7px; TEXT-ALIGN: center
+}
+.spPhotoGallery LI {
+	PADDING-LEFT: 10px; FLOAT: left; LIST-STYLE-TYPE: none
+}
+#spArticleBody .spPhotoGallery P {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 4px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 2px 0px 2px 5px; COLOR: #686868; PADDING-TOP: 0px! important
+}
+.spBigaPopup .spImagenav FONT {
+	FONT-SIZE: 10px! important; LINE-HEIGHT: 14px
+}
+.spBigaPopup .spImagenav {
+	FONT-SIZE: 10px! important; LINE-HEIGHT: 14px
+}
+.spBigaPopup .spCredit {
+	FONT-SIZE: 10px! important; LINE-HEIGHT: 14px
+}
+.spBigaPopup TD {
+	FONT-SIZE: 10px! important; LINE-HEIGHT: 14px
+}
+.spBigaPopup H2 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 10px; FONT-WEIGHT: bold; FONT-SIZE: 1.2em! important; BACKGROUND: url(http://www.spiegel.de/static/sys/logos/spon_108x21.gif) #999999 no-repeat right 50%; PADDING-BOTTOM: 5px; MARGIN: 0px; COLOR: white; PADDING-TOP: 5px
+}
+.spBigaPopup .spCredit {
+	FONT-SIZE: 10px! important
+}
+.spBigasTextLeft {
+	FONT-SIZE: 1em! important; FLOAT: left; MARGIN-LEFT: 15px; TEXT-ALIGN: left
+}
+.spBigasLinks {
+	FONT-SIZE: 10px; MARGIN: 5px 0px; LINE-HEIGHT: 12px
+}
+.spBigasLinks H5 {
+	MARGIN: 0px 0px 5px
+}
+.spBigasLinks H5 A {
+	PADDING-RIGHT: 16px; FONT-WEIGHT: bold; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; TEXT-TRANSFORM: none; COLOR: #000
+}
+.spBigasLinks UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spBigasLinks UL LI {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 5px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 8px; PADDING-BOTTOM: 0px; PADDING-TOP: 5px
+}
+.spVideoAsset {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 10px 10px 10px 0px; WIDTH: 180px! important; PADDING-TOP: 0px! important
+}
+.spVideoAsset IMG {
+	BORDER-TOP-WIDTH: 0px! important; PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BORDER-LEFT-WIDTH: 0px! important; BORDER-BOTTOM-WIDTH: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important; BORDER-RIGHT-WIDTH: 0px! important
+}
+.spBigScreen #spColumnRight .spVideoAsset {
+	MARGIN: 0px 0px 10px 20px
+}
+.spBigScreen #spColumnRight .spVideoAsset IMG {
+	FLOAT: left
+}
+.spFlashvideoBase {
+	LEFT: 0px; WIDTH: 180px; POSITION: relative; TOP: 0px
+}
+.spFlashvideoFirstView {
+	Z-INDEX: 2; LEFT: 0px; WIDTH: 180px; POSITION: relative; TOP: 0px
+}
+.spFlashvideoMovie {
+	Z-INDEX: -1; LEFT: 0px; WIDTH: 180px; POSITION: absolute; TOP: 0px
+}
+.spFlashVideoCredit {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 2px; WIDTH: 180px; COLOR: #999; PADDING-TOP: 2px
+}
+.spArticleImageBox {
+	FLOAT: left; MARGIN: 5px 0px; LINE-HEIGHT: 1em
+}
+.spArticleImageBox P {
+	PADDING-LEFT: 4px; FONT-SIZE: 0.83em! important
+}
+.spArticleImageBox IMG {
+	BORDER-RIGHT: #666 1px solid; BORDER-TOP: #666 1px solid; DISPLAY: block; FLOAT: left; BORDER-LEFT: #666 1px solid; BORDER-BOTTOM: #666 1px solid
+}
+.spPhotoGallery .spArticleImageBox .spCredit {
+	FONT-SIZE: 1em! important
+}
+TABLE .spCredit {
+	FONT-SIZE: 1em! important
+}
+.spArticleImageBox UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spArticleImageBox UL LI {
+	FLOAT: left
+}
+.spLupe {
+	BACKGROUND-POSITION: 50% bottom; DISPLAY: block; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_lupe.gif); WIDTH: 30px; PADDING-TOP: 2px; BACKGROUND-REPEAT: no-repeat; HEIGHT: 22px
+}
+.spLupe SPAN {
+	DISPLAY: none
+}
+spMainContent FORM {
+	PADDING-RIGHT: 0px; DISPLAY: inline; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+DIV.spGetResult {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; PADDING-TOP: 0px; BACKGROUND-COLOR: #cccccc; TEXT-ALIGN: right
+}
+.spAsset .spGetResult {
+	FLOAT: left
+}
+.spAsset FORM .spGetResult INPUT {
+	MARGIN-TOP: 1px; DISPLAY: block; FLOAT: right; WIDTH: auto; HEIGHT: 12px
+}
+.spFahrzeugTable {
+	FONT-SIZE: 0.83em! important; WIDTH: 190px; BACKGROUND-COLOR: #999
+}
+.spFahrzeugTable TD {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 5px; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spFahrzeugTableHead {
+	FONT-WEIGHT: bold; COLOR: #ffffff; TEXT-ALIGN: center
+}
+.spFahrzeugTable .spRow0 {
+	BACKGROUND-COLOR: #e7e7e7
+}
+.spFahrzeugTable .spRow1 {
+	BACKGROUND-COLOR: #fff
+}
+.spFahrzeugTable .spAlignRight {
+	TEXT-ALIGN: right
+}
+.spTabellesys TD {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 4px; PADDING-BOTTOM: 2px; MARGIN: 0px; LINE-HEIGHT: 12px; PADDING-TOP: 2px
+}
+.spTabellesyskopf {
+	FONT-WEIGHT: bold! important; FONT-SIZE: 11px! important; COLOR: #fff! important
+}
+.spTablesysRowHead {
+	FONT-WEIGHT: bold; BACKGROUND-COLOR: #c0c0c0
+}
+.spTabellesys TR TD {
+	FONT-SIZE: 10px
+}
+.spResultTable {
+	BACKGROUND-COLOR: #fff
+}
+.spResultTableSubject {
+	FONT-WEIGHT: bold; COLOR: #fff; BACKGROUND-COLOR: #e7be84
+}
+.spResultTableRows {
+	FONT-WEIGHT: bold; BACKGROUND-COLOR: #ccc
+}
+.spResultTableRow1 {
+	BACKGROUND-COLOR: #f0f0f0
+}
+.spResultTableRow2 {
+	BACKGROUND-COLOR: #dfdfdf
+}
+.spLinkBox {
+	CLEAR: both; BORDER-RIGHT: black 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: black 1px solid; PADDING-LEFT: 10px; PADDING-BOTTOM: 5px; MARGIN: 12px 0px 14px; BORDER-LEFT: black 1px solid; WIDTH: 406px; PADDING-TOP: 5px; BORDER-BOTTOM: black 1px solid
+}
+.spLinkBox A {
+	PADDING-RIGHT: 0px; DISPLAY: block; PADDING-LEFT: 40px; PADDING-BOTTOM: 0px; WIDTH: 200px; LINE-HEIGHT: 20px; PADDING-TOP: 0px
+}
+.spLinkBox .spPdf {
+	BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_pdf.gif); WIDTH: 360px! important; BACKGROUND-REPEAT: no-repeat
+}
+.spLinkBox .spSwf {
+	BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_swf.gif); WIDTH: 400px! important; BACKGROUND-REPEAT: no-repeat; TEXT-ALIGN: left! important
+}
+.tableAsset TD P {
+	FONT-SIZE: 10px! important
+}
+.spContentBox {
+	BACKGROUND: #f6f6f6; FLOAT: left! important; MARGIN-BOTTOM: 20px! important
+}
+.spSimpleContentBox {
+	PADDING-RIGHT: 12px; PADDING-LEFT: 12px; BACKGROUND: #f6f6f6; FLOAT: left! important; MARGIN-BOTTOM: 20px! important; PADDING-BOTTOM: 12px; PADDING-TOP: 0px
+}
+#home .spSimpleContentBox {
+	MARGIN-BOTTOM: 15px! important
+}
+.spSimpleContentBox .spTopThema {
+	MARGIN-TOP: 20px! important; FLOAT: left! important
+}
+.spSimpleContentBox .spTopThema H4 {
+	MARGIN-TOP: 0px! important; COLOR: #000
+}
+.spSimpleContentBox H4 {
+	MARGIN-TOP: 10px! important; COLOR: #000
+}
+.spSimpleContentBox H4 A {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px; COLOR: #000000! important; PADDING-TOP: 0px
+}
+.spSimpleContentBox .spTopThema H3 {
+	FONT-SIZE: 1.16em! important
+}
+.spSimpleContentBox H6 {
+	FONT-SIZE: 0.83em! important
+}
+.spSimpleContentBox H6.spPoweredBy {
+	FONT-WEIGHT: normal! important; FLOAT: right! important; MARGIN: 10px 5px 0px 0px; WIDTH: 200px! important
+}
+.spSimpleContentBox H6.spPoweredBy A {
+	FONT-WEIGHT: bold! important
+}
+.spSimpleContentBox .spTopThema {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; PADDING-TOP: 20px
+}
+.spSimpleContentBox .spNoUpperLine {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.spSimpleContentBox .spArchiveLink {
+	MARGIN: 20px 0px 0px
+}
+.spSimpleContentBox .spLinks {
+	MARGIN-TOP: 10px; FLOAT: left; WIDTH: 420px
+}
+.spSimpleContentBox .spLinkList {
+	FLOAT: left
+}
+.spCBvideospecials {
+	FONT-SIZE: 0.9em; LINE-HEIGHT: 1.2em; BACKGROUND-COLOR: #fff
+}
+.spCBvideospecialsLeft {
+	PADDING-LEFT: 5px; FLOAT: left; WIDTH: 415px; BACKGROUND-COLOR: #f6f6f6
+}
+.spCBvideospecialsRight {
+	FLOAT: left; MARGIN: 0px 0px 8px 20px; WIDTH: 332px
+}
+.spCBvideospecialsLeft H2 {
+	MARGIN: 8px 0px 0px 8px
+}
+.spCBvideospecialsLeft .spTeaserCenterpage {
+	FLOAT: left
+}
+.spCBvideospecials .spCBvideospecialsLeft .spTeaserCenterpage {
+	MARGIN: 8px 10px 8px 8px; WIDTH: 180px
+}
+.spCBvideospecialsProgramm .spCBvideospecialsLeft .spTeaserCenterpage {
+	CLEAR: both; MARGIN: 8px 0px 0px 8px; WIDTH: 380px
+}
+.spCBvideospecials .spCBvideospecialsLeft .spVideoAsset {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important
+}
+.spCBvideospecialsProgramm .spCBvideospecialsLeft .spTeaserCenterpage .spVideoAsset {
+	MARGIN-RIGHT: 10px! important
+}
+.spCBvideospecials H2 SPAN {
+	VISIBILITY: hidden
+}
+.spCBvideospecialsSpezial H2 {
+	BACKGROUND: url(http://www.spiegel.de/img/0,1020,877892,00.gif) no-repeat left top; WIDTH: 81px; HEIGHT: 28px
+}
+.spCBvideospecialsProgramm H2 {
+	BACKGROUND: url(http://www.spiegel.de/img/0,1020,877872,00.gif) no-repeat left top; WIDTH: 355px; HEIGHT: 38px
+}
+.spMultimediaLeiste {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 1.2em; PADDING-TOP: 0px
+}
+.spMultimediaLeiste H4 {
+	FONT-SIZE: 1em
+}
+.spMultimediaLeiste UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 4px 0px 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spMultimediaLeiste UL LI {
+	DISPLAY: block; FLOAT: left; MARGIN: 0px
+}
+.spMultimediaLeiste:unknown {
+	CLEAR: both
+}
+.spMultimediaLeiste H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 10px; FLOAT: none; PADDING-BOTTOM: 5px; MARGIN: 2px 0px 7px; WIDTH: auto! important; LINE-HEIGHT: 10px; PADDING-TOP: 5px
+}
+.spMultimediaLeiste UL LI A .spImgNoBorder {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; BORDER-TOP-STYLE: none! important; PADDING-TOP: 0px; BORDER-RIGHT-STYLE: none! important; BORDER-LEFT-STYLE: none! important; BORDER-BOTTOM-STYLE: none! important
+}
+.spMultimediaLeiste .spToggleButton {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; WIDTH: auto; PADDING-TOP: 4px
+}
+.spMML4pics90 {
+	FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 10px; MARGIN: 0px 0px 17px; WIDTH: 517px; LINE-HEIGHT: 1.2em; BACKGROUND-COLOR: #f6f6f6
+}
+.spMML3pics90 {
+	FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 10px; MARGIN: 0px 0px 17px; LINE-HEIGHT: 1.2em; BACKGROUND-COLOR: #f6f6f6
+}
+#home .spMML5pics240 {
+	MARGIN: 0px 0px 15px
+}
+.spMML5pics240 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 17px; LINE-HEIGHT: 1.2em; PADDING-TOP: 0px; BACKGROUND-COLOR: #f6f6f6
+}
+.spMML3pics90 .spCredit {
+	FLOAT: right; MARGIN: 0px 20px 0px 0px
+}
+.spMML4pics90 UL LI {
+	PADDING-RIGHT: 1px; PADDING-LEFT: 8px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 0px 10px; WIDTH: 107px; PADDING-TOP: 0px
+}
+.spMML3pics90 UL LI {
+	PADDING-RIGHT: 1px; PADDING-LEFT: 7px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 130px; PADDING-TOP: 0px
+}
+.spMML5pics240 UL LI {
+	PADDING-RIGHT: 3px; PADDING-LEFT: 8px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 0px 10px; WIDTH: 105px; PADDING-TOP: 0px
+}
+.spMML4pics90 UL LI A IMG {
+	BORDER-RIGHT: #666 1px solid; BORDER-TOP: #666 1px solid; MARGIN: 0px 0px 1px 13px; BORDER-LEFT: #666 1px solid; BORDER-BOTTOM: #666 1px solid
+}
+.spMML5pics240 UL LI IMG {
+	BORDER-RIGHT: #666 1px solid; BORDER-TOP: #666 1px solid; MARGIN: 0px 0px 1px 13px; BORDER-LEFT: #666 1px solid; BORDER-BOTTOM: #666 1px solid
+}
+.spMML3pics90 UL LI IMG {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 1px 18px; PADDING-TOP: 0px
+}
+.spMML4pics90 .spMMLBackground {
+	BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bgHPGaleriekasten.gif) repeat-y; FLOAT: left
+}
+.spMML3pics90 .spMMLBackground {
+	BACKGROUND: url(http://www.spiegel.de/img/0,1020,730894,00.gif) repeat-y; FLOAT: left
+}
+.spMML5pics240 .spMMLBackground {
+	BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bgFivePicsGalleryBox.gif) repeat-y; FLOAT: left; MARGIN: 0px 0px 18px
+}
+.spMML5pics240 .spMML5pics240Left {
+	FLOAT: left; WIDTH: 256px
+}
+.spMML5pics240 .spMML5pics240Right {
+	FLOAT: left; MARGIN: 4px 0px 0px 11px; WIDTH: 250px
+}
+.spMML4pics120 {
+	PADDING-BOTTOM: 8px; WIDTH: 517px
+}
+.spMML4pics120 UL {
+	CLEAR: both; MARGIN: 0px
+}
+.spMML4pics120 UL LI {
+	PADDING-RIGHT: 1px; PADDING-LEFT: 5px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 0px 2px; WIDTH: 120px; PADDING-TOP: 0px
+}
+.spMML4pics120 UL LI A IMG {
+	MARGIN: 0px 0px 1px
+}
+#home .spForumBoxBig {
+	FONT-SIZE: 0.83em; MARGIN-BOTTOM: 15px; WIDTH: 510px
+}
+#home .spForumBox {
+	FONT-SIZE: 0.83em; MARGIN-BOTTOM: 15px; WIDTH: 510px
+}
+#home .spForumBoxBig .spInner {
+	FLOAT: left! important; WIDTH: 268px
+}
+#home .spForumBox .spInner {
+	FLOAT: left! important; WIDTH: 268px
+}
+#home .spForumBox .spInnerRight {
+	FLOAT: left! important; MARGIN-LEFT: 15px; WIDTH: 200px; HEIGHT: 150px
+}
+#home .spInner IMG {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spForumBoxBig {
+	PADDING-RIGHT: 5px! important; PADDING-LEFT: 5px! important; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 5px! important; WIDTH: 170px; LINE-HEIGHT: 12px; MARGIN-RIGHT: 5px; PADDING-TOP: 5px! important; BACKGROUND-COLOR: #f6f6f6
+}
+.spForumBox {
+	PADDING-RIGHT: 5px! important; PADDING-LEFT: 5px! important; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 5px! important; WIDTH: 170px; LINE-HEIGHT: 12px; MARGIN-RIGHT: 5px; PADDING-TOP: 5px! important; BACKGROUND-COLOR: #f6f6f6
+}
+.spForumBoxBig .spInner {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; MARGIN: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 5px; BORDER-BOTTOM: #ccc 1px solid; BACKGROUND-COLOR: #fff
+}
+.spForumBox .spInner {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; MARGIN: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 5px; BORDER-BOTTOM: #ccc 1px solid; BACKGROUND-COLOR: #fff
+}
+.spForumBox .spInnerRight {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; MARGIN: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 5px; BORDER-BOTTOM: #ccc 1px solid; BACKGROUND-COLOR: #fff
+}
+.spForumBox .spInner IMG {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spForumBoxBig H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 2px 0px 5px; TEXT-TRANSFORM: uppercase; COLOR: #000! important; PADDING-TOP: 0px
+}
+.spForumBox H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 2px 0px 5px; TEXT-TRANSFORM: uppercase; COLOR: #000! important; PADDING-TOP: 0px
+}
+.spForumBoxBig H4 A {
+	COLOR: #000! important
+}
+#home .spInner H4 A {
+	PADDING-RIGHT: 16px! important; PADDING-LEFT: 0px! important; FONT-SIZE: 1em; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px! important; TEXT-TRANSFORM: none; PADDING-TOP: 0px! important
+}
+.spInner H4 {
+	MARGIN: 5px 0px 6px; TEXT-TRANSFORM: none; LINE-HEIGHT: 12px
+}
+.spForumBox H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px; TEXT-TRANSFORM: none; WIDTH: 100px; LINE-HEIGHT: normal; PADDING-TOP: 0px
+}
+.spForumBoxBig .spInner P {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+.spForumBox .spInner P {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+.spForumBoxBig UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spForumBox UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spForumBoxBig LI {
+	MARGIN-TOP: 15px
+}
+.spForumBox LI {
+	MARGIN-TOP: 15px
+}
+#home .spForumBoxBig {
+	FONT-SIZE: 0.83em; MARGIN-BOTTOM: 15px; WIDTH: 510px
+}
+#home .spForumBoxBig .spInner {
+	FLOAT: left! important; WIDTH: 268px
+}
+#home .spForumBox .spInnerRight {
+	FLOAT: left! important; MARGIN-LEFT: 15px; WIDTH: 200px; HEIGHT: 150px
+}
+.spForumBoxBig {
+	PADDING-RIGHT: 5px! important; PADDING-LEFT: 5px! important; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 5px! important; WIDTH: 170px; LINE-HEIGHT: 12px; MARGIN-RIGHT: 5px; PADDING-TOP: 5px! important; BACKGROUND-COLOR: #f6f6f6
+}
+.spForumBoxBig .spInner {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; MARGIN: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 5px; BORDER-BOTTOM: #ccc 1px solid; BACKGROUND-COLOR: #fff
+}
+.spForumBox .spInnerRight {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; BORDER-TOP: #ccc 1px solid; PADDING-LEFT: 5px; PADDING-BOTTOM: 5px; MARGIN: 0px; BORDER-LEFT: #ccc 1px solid; PADDING-TOP: 5px; BORDER-BOTTOM: #ccc 1px solid; BACKGROUND-COLOR: #fff
+}
+.spForumBoxBig H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 2px 0px 5px; TEXT-TRANSFORM: uppercase; COLOR: #000! important; PADDING-TOP: 0px
+}
+.spForumBoxBig H4 A {
+	COLOR: #000! important
+}
+.spForumBoxBig .spInner P {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+.spForumBox UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spForumBoxBig LI {
+	MARGIN-TOP: 15px
+}
+.spRessortTeaserBox {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: 50% top; PADDING-LEFT: 0px; FLOAT: left; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif); PADDING-BOTTOM: 15px; MARGIN: 0px; WIDTH: 100%; BORDER-TOP-STYLE: none; PADDING-TOP: 0px; BACKGROUND-REPEAT: repeat-x; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BACKGROUND-COLOR: white; BORDER-BOTTOM-STYLE: none
+}
+.spRessortTeaserBox:unknown {
+	CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: "."
+}
+#home .spRessortTeaserBox {
+	WIDTH: 517px
+}
+.spRessortTeaserBoxTops H4 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 1.33em; PADDING-TOP: 0px
+}
+.spRessortTeaserBoxTops H4 A {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spRessortTeaserBoxTops H4 A SPAN {
+	COLOR: #000000
+}
+.spRessortTeaserBoxTops P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; LINE-HEIGHT: 1.33em; PADDING-TOP: 0px
+}
+.spRessortTeaserBox .spAutorenzeile {
+	FONT-SIZE: 1em! important
+}
+.spRessortTeaserBoxList {
+	PADDING-RIGHT: 0px; MARGIN-TOP: 1px; PADDING-LEFT: 0px; FONT-SIZE: 1em! important; FLOAT: left; PADDING-BOTTOM: 0px; WIDTH: 100%; PADDING-TOP: 0px
+}
+.spRessortTeaserBoxList UL {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 5px; MARGIN: 0px; WIDTH: 100%; PADDING-TOP: 5px
+}
+.spRessortTeaserBoxList UL LI {
+	PADDING-RIGHT: 0px; BACKGROUND-POSITION: 0px 10px; PADDING-LEFT: 8px; FONT-SIZE: 1em! important; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif); PADDING-BOTTOM: 0px; PADDING-TOP: 5px; BACKGROUND-REPEAT: no-repeat; LIST-STYLE-TYPE: none
+}
+.spRessortTeaserBoxList LI A {
+	FONT-WEIGHT: bold
+}
+.spRessortTeaserBoxList LI A SPAN {
+	FONT-WEIGHT: normal
+}
+.spRessortTeaserBox .spToggleButton {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 0px; FLOAT: right; PADDING-BOTTOM: 0px; WIDTH: auto; PADDING-TOP: 4px
+}
+.spRessortTeaserBoxBottom {
+	FONT-SIZE: 0.83em! important; BORDER-TOP-STYLE: none; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BORDER-BOTTOM-STYLE: none
+}
+.spRessortTeaserBoxBottom H2 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FONT-SIZE: 14px; PADDING-BOTTOM: 5px; MARGIN: 0px 0px 10px; COLOR: #666; PADDING-TOP: 17px
+}
+.spRessortTeaserBoxBottom H3 {
+	FONT-SIZE: 1em! important; MARGIN-LEFT: 5px
+}
+.spRessortTeaserBoxBottom .spRessortTeaserBox {
+	BACKGROUND-POSITION: 50% top; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif); BACKGROUND-REPEAT: repeat-x; BACKGROUND-COLOR: #f6f6f6
+}
+.spRessortTeaserBoxBottom H4 {
+	FONT-WEIGHT: bold
+}
+.spRessortTeaserBoxBottom .spRessortTeaserBoxTops {
+	FLOAT: left; MARGIN: 0px 5px; WIDTH: 95%
+}
+.spRessortTeaserBoxBottom .spRessortTeaserBoxList UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 5px 0px 0px 10px; PADDING-TOP: 0px
+}
+.spRessortTeaserBoxBottom .spRessortTeaserBoxList UL LI {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 10px! important; FONT-SIZE: 1em; PADDING-BOTTOM: 0px! important; LINE-HEIGHT: 1.2em; PADDING-TOP: 5px! important
+}
+.spRessortTeaserBoxBottom .spCredit {
+	FONT-SIZE: 1em
+}
+.spRessortTeaserBoxBottom .spInteractionMarks {
+	FONT-SIZE: 1em! important
+}
+.spRessortTeaserBoxHPHeadline {
+	BACKGROUND: #f7f7f7; FLOAT: none; MARGIN: 1px 0px 8px; WIDTH: 100%; HEIGHT: 24px
+}
+.spRessortTeaserBoxHPHeadline H3 A {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+.spRessortTeaserBoxHPHeadline H3 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 10px; FONT-WEIGHT: bold; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 5px 0px 7px; TEXT-TRANSFORM: uppercase; WIDTH: auto! important; LINE-HEIGHT: 10px; PADDING-TOP: 0px; LETTER-SPACING: 1px
+}
+.spRessortTeaserBoxHPHeadline .spTabs {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 6px; FONT-SIZE: 0.83em; BACKGROUND: none transparent scroll repeat 0% 0%; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 5px 0px 0px 5px; WIDTH: auto; PADDING-TOP: 0px; HEIGHT: 1.6em! important
+}
+.spRessortTeaserBoxHPHeadline .spTabs LI {
+	BORDER-RIGHT: #ccc 1px solid; PADDING-RIGHT: 5px; PADDING-LEFT: 5px; FONT-SIZE: 1em; FLOAT: left; PADDING-BOTTOM: 0px; LINE-HEIGHT: 1.2em; PADDING-TOP: 0px; LIST-STYLE-TYPE: none; HEIGHT: 1.2em
+}
+.spRessortTeaserBoxHPHeadline .spTabs LI A {
+	COLOR: #666
+}
+.spRessortTeaserBoxHPHeadline .spTabs LI.spFirstLink {
+	BORDER-LEFT: #ccc 1px solid
+}
+.spVideoCpBox {
+	FONT-SIZE: 1em; FLOAT: left; MARGIN: 0px 0px 15px; WIDTH: 520px; POSITION: relative
+}
+.spVideoCpBoxTop {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; BACKGROUND: #f5f5f5; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; POSITION: relative; HEIGHT: 23px
+}
+.spVideoCpBoxTopLeft {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 195px; PADDING-TOP: 0px
+}
+.spVideoCpBoxTopLeft H3 {
+	PADDING-RIGHT: 0px; DISPLAY: block; PADDING-LEFT: 10px; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 0px; COLOR: #000! important; PADDING-TOP: 0px
+}
+.spVideoCpLine {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 2px 0px 0px; WIDTH: 1px; PADDING-TOP: 0px; HEIGHT: 18px; BACKGROUND-COLOR: #cdcdcd
+}
+.spVideoCpBoxTopRight {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 5px; FLOAT: left; PADDING-BOTTOM: 0px; WIDTH: 310px; PADDING-TOP: 3px
+}
+.spVideoCpCategoryBtn {
+	BORDER-RIGHT: #fff 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: #fff 1px solid; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; BORDER-LEFT: #fff 1px solid; LINE-HEIGHT: 0px; PADDING-TOP: 0px; BORDER-BOTTOM: #fff 1px solid
+}
+.spVideoCpCategory {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 2px; FONT-WEIGHT: bold; FONT-SIZE: 0.83em! important; FLOAT: left; BACKGROUND-IMAGE: url(http://www.spiegel.de/static/sys/v8/backgrounds/spVideoCpBgCat.gif)! important; PADDING-BOTTOM: 0px; WIDTH: 278px; LINE-HEIGHT: 10px; PADDING-TOP: 2px; BACKGROUND-REPEAT: repeat-x; HEIGHT: 15px
+}
+.spVideoCpCategory A {
+	PADDING-RIGHT: 4px; PADDING-LEFT: 3px; FONT-SIZE: 0.9em! important; PADDING-BOTTOM: 0px; MARGIN: 0px; COLOR: #990100; PADDING-TOP: 0px; TEXT-DECORATION: none
+}
+#spVideoCpBoxMain {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; BACKGROUND: #fafafa; FLOAT: left; PADDING-BOTTOM: 20px; MARGIN: 0px; WIDTH: 520px; PADDING-TOP: 0px
+}
+#spVideoCpBoxDisplay {
+	FLOAT: left; MARGIN: 0px; WIDTH: 195px
+}
+#spVideoCpBoxDisplay P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 180px; PADDING-TOP: 0px
+}
+.spVideoCpLine2 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 10px 0px 0px; WIDTH: 1px; PADDING-TOP: 0px; HEIGHT: 225px; BACKGROUND-COLOR: #cdcdcd
+}
+#spVideoCpLoadMessage {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; PADDING-TOP: 100px; TEXT-ALIGN: center
+}
+#spVideoCpLoadMessage P {
+	FONT-WEIGHT: bold
+}
+#spVideoCpErrorMessage {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 50px; FONT-WEIGHT: bold; PADDING-BOTTOM: 0px; COLOR: #990100; PADDING-TOP: 70px
+}
+#spVideoCpEmptyMessage {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 20px; PADDING-BOTTOM: 0px; PADDING-TOP: 40px
+}
+#spViseoCpBoxScroll {
+	FLOAT: left; MARGIN: 0px 0px 0px 10px; OVERFLOW: auto; WIDTH: 310px; HEIGHT: 230px
+}
+#spViseoCpBoxScroll P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+#spViseoCpBoxScroll IMG {
+	FLOAT: left; MARGIN-LEFT: 10px
+}
+.spVideoCpBoxItem {
+	CLEAR: both; PADDING-RIGHT: 5px; DISPLAY: block; PADDING-LEFT: 0px; PADDING-BOTTOM: 5px; MARGIN: 0px 0px 10px; CURSOR: pointer; PADDING-TOP: 5px; HEIGHT: 60px
+}
+.spVideoCpBoxText {
+	PADDING-RIGHT: 0px; DISPLAY: block; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 190px; PADDING-TOP: 0px; HEIGHT: 58px
+}
+.spVideoCpBoxTextActive {
+	BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/spVideoCpItemActive.gif) no-repeat right 50%
+}
+.spVideoCpBoxText P {
+	FONT-SIZE: 0.91em; WIDTH: 190px
+}
+.spVideoCpBoxText H3 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.91em; PADDING-BOTTOM: 0px; MARGIN: 3px 0px 5px; COLOR: #990100; LINE-HEIGHT: 16px; PADDING-TOP: 0px
+}
+.spInfoBox H5#dnTagCloud-label A {
+	PADDING-RIGHT: 17px; BACKGROUND-POSITION: 100% 50%; PADDING-LEFT: 0px; BACKGROUND-IMAGE: url(http://www.spiegel.de//img/0,1020,725272,00.gif); PADDING-BOTTOM: 2px; PADDING-TOP: 2px; BACKGROUND-REPEAT: no-repeat
+}
+.spTagCloud {
+	BORDER-RIGHT: #ccc 1px dotted; PADDING-RIGHT: 0px; BORDER-TOP: #ccc 1px dotted; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 4px; MARGIN: 15px 0px 0px; OVERFLOW: hidden; BORDER-LEFT: #ccc 1px dotted; PADDING-TOP: 4px; BORDER-BOTTOM: #ccc 1px dotted; BACKGROUND-COLOR: #ffffff
+}
+.spBigScreen .spTagCloud {
+	WIDTH: 195px! important
+}
+.spSmallScreen .spTagCloud {
+	WIDTH: 280px
+}
+.spSmallScreen .spTagCloud UL {
+	WIDTH: 290px
+}
+.spTagCloud H5 {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; PADDING-BOTTOM: 3px; MARGIN: 0px 0px 10px; WIDTH: 155px; PADDING-TOP: 0px
+}
+.spTagCloud UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; WIDTH: 180px; PADDING-TOP: 0px
+}
+.spTagCloud LI {
+	PADDING-RIGHT: 5px; DISPLAY: inline; PADDING-LEFT: 5px; FLOAT: left; PADDING-BOTTOM: 0px; LINE-HEIGHT: 20px; PADDING-TOP: 0px
+}
+.spTagCloud {
+	PADDING-RIGHT: 10px; PADDING-LEFT: 10px; PADDING-BOTTOM: 10px; LINE-HEIGHT: 1em; PADDING-TOP: 10px; TEXT-ALIGN: center
+}
+.spTagCloud  {
+	LINE-HEIGHT: 1em
+}
+A.spTagCloud_cnt1 {
+	FONT-SIZE: 9px; COLOR: #e37e7e
+}
+A.spTagCloud_cntW1-3 {
+	FONT-SIZE: 9px; COLOR: #e37e7e
+}
+A.spTagCloud_cnt2 {
+	FONT-SIZE: 9px; COLOR: #e37e7e
+}
+A.spTagCloud_cntW4-6 {
+	FONT-SIZE: 9px; COLOR: #e37e7e
+}
+A.spTagCloud_cnt3 {
+	FONT-SIZE: 9px; COLOR: #bc0203
+}
+A.spTagCloud_cntW7-9 {
+	FONT-SIZE: 9px; COLOR: #bc0203
+}
+A.spTagCloud_cnt4 {
+	FONT-SIZE: 10px; COLOR: #b40304
+}
+A.spTagCloud_cntW10-12 {
+	FONT-SIZE: 10px; COLOR: #b40304
+}
+A.spTagCloud_cnt5 {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #b40304
+}
+A.spTagCloud_cntW13-15 {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #b40304
+}
+A.spTagCloud_cnt6 {
+	FONT-WEIGHT: bold; FONT-SIZE: 12px; COLOR: #b40304
+}
+A.spTagCloud_cntW16-18 {
+	FONT-WEIGHT: bold; FONT-SIZE: 12px; COLOR: #b40304
+}
+A.spTagCloud_cnt7 {
+	FONT-WEIGHT: bold; FONT-SIZE: 13px; COLOR: #a90203
+}
+A.spTagCloud_cntW19-21 {
+	FONT-WEIGHT: bold; FONT-SIZE: 13px; COLOR: #a90203
+}
+A.spTagCloud_cnt8 {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: #a90203
+}
+A.spTagCloud_cntW22-24 {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: #a90203
+}
+A.spTagCloud_cnt9 {
+	FONT-WEIGHT: bold; FONT-SIZE: 15px; COLOR: #a90203
+}
+A.spTagCloud_cntW25-27 {
+	FONT-WEIGHT: bold; FONT-SIZE: 15px; COLOR: #a90203
+}
+A.spTagCloud_cnt10 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt11 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt12 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt13 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt14 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt15 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt16 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt17 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt18 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt19 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cnt20 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cntW28-30 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cntW31-33 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cntW34-36 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cntW37-39 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cntW40-42 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+A.spTagCloud_cntW40 {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: #990102
+}
+.spArticleCloud #dnTagCloud-label {
+	DISPLAY: none
+}
+.spArticleCloud .spTagCloud H5 {
+	DISPLAY: none
+}
+.spArticleCloud .spTagCloud {
+	BORDER-RIGHT: 0px; BORDER-TOP: 0px; BACKGROUND: none transparent scroll repeat 0% 0%; MARGIN: 0px; BORDER-LEFT: 0px; WIDTH: 250px! important; BORDER-BOTTOM: 0px
+}
+.spEpaper {
+	PADDING-RIGHT: 8px; PADDING-LEFT: 8px; BACKGROUND: #f6f6f6; FLOAT: left; PADDING-BOTTOM: 15px; MARGIN: 0px; WIDTH: 508px; PADDING-TOP: 15px; BORDER-BOTTOM: #fff 1px solid
+}
+.spEpaper H4 A {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px; COLOR: #000! important; PADDING-TOP: 0px
+}
+.spEpaperHeft IMG {
+	DISPLAY: block; FLOAT: left; MARGIN: 0px 7px 0px 0px
+}
+.spEpaper H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; TEXT-TRANSFORM: none! important; WIDTH: 150px; COLOR: #000! important; PADDING-TOP: 0px
+}
+.spEpaper P {
+	FONT-SIZE: 0.83em; FLOAT: left; WIDTH: 150px; LINE-HEIGHT: 1.2em! important
+}
+#spColumnRight .spEpaper UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 10px 0px 0px; WIDTH: 150px; LINE-HEIGHT: 1.2em! important; PADDING-TOP: 0px
+}
+.spEpaper UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 10px 0px 0px; WIDTH: 150px; LINE-HEIGHT: 1.2em! important; PADDING-TOP: 0px
+}
+.spEpaper LI {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 7px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 1px 7px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; LIST-STYLE-TYPE: none
+}
+.spEpaper .spFullwidthList LI {
+	BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 1px 4px
+}
+.spFullwidthList {
+	WIDTH: 410px! important
+}
+.spFullwidthList LI A {
+	FONT-WEIGHT: normal! important; LINE-HEIGHT: 16px! important
+}
+#spMainContent .spEpaper LI {
+	BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 1px 4px
+}
+.spEpaper LI A {
+	COLOR: #990102
+}
+#spMainContent .spEpaperHeft {
+	FLOAT: left; WIDTH: 270px
+}
+#spMainContent .spEpaperHeft LI A {
+	FONT-SIZE: 0.83em! important
+}
+#spColumnRight .spEpaperHeft LI A {
+	FONT-SIZE: 1em! important
+}
+.spSmallScreen .spEpaperHeft {
+	FLOAT: left; WIDTH: 150px
+}
+#home #spColumnRight .spEpaperHeft {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 0px; WIDTH: 150px! important; PADDING-TOP: 0px! important
+}
+.spSmallScreen #spColumnRight .spEpaperHeft {
+	MARGIN-TOP: 1px; FLOAT: left; WIDTH: 150px! important; LINE-HEIGHT: 1.2em! important
+}
+.spEpaperAbo {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN-LEFT: 20px; WIDTH: 210px; PADDING-TOP: 0px
+}
+.spEpaperTest {
+	PADDING-RIGHT: 5px; PADDING-LEFT: 5px; BACKGROUND: #f6f6f6; FLOAT: left; MARGIN-BOTTOM: 15px; PADDING-BOTTOM: 10px; WIDTH: 508px; PADDING-TOP: 10px
+}
+#spColumnRight .spEpaperTest {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 0px; WIDTH: 218px; PADDING-TOP: 0px! important
+}
+#spColumnRight .spEpaperTest IMG {
+	PADDING-TOP: 15px! important
+}
+.spMagBox .spMagBoxRight {
+	DISPLAY: block; MARGIN-LEFT: 105px
+}
+.spMagBox H5 {
+	FONT-WEIGHT: bold; FONT-SIZE: 0.83em; MARGIN: 0px 0px 10px; COLOR: #000
+}
+.spMagBox H4 {
+	MARGIN: 0px 0px 5px
+}
+.spMagBox H3 {
+	FONT-WEIGHT: bold; FONT-SIZE: 1.2em; MARGIN: 0px 0px 5px
+}
+.spMagBox H5 A {
+	PADDING-RIGHT: 16px; PADDING-LEFT: 0px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_two_arrows.gif) no-repeat 100% 50%; PADDING-BOTTOM: 0px; COLOR: #000! important; PADDING-TOP: 0px
+}
+.spMagBox P {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 1em; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 5px; PADDING-TOP: 0px
+}
+.spBoersenList UL LI {
+	CLEAR: left; HEIGHT: auto
+}
+.spBigScreen .spPartnerBar {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; WIDTH: 520px! important; PADDING-TOP: 21px! important
+}
+.spPartnerBar {
+	BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% top; FLOAT: left; MARGIN: 10px 0px; WIDTH: 200px! important; PADDING-TOP: 10px
+}
+.spPartnerBar H4 {
+	FONT-SIZE: 0.83em
+}
+.spBigScreen .spPartnerBar TABLE {
+	BACKGROUND: #f9f9f9; WIDTH: 520px! important
+}
+.spBigScreen .spPartnerBar IMG {
+	BORDER-LEFT: white 1px solid
+}
+.spPartnerBar TABLE TD {
+	FONT-SIZE: 0.75em; VERTICAL-ALIGN: middle; LINE-HEIGHT: 10px; BORDER-BOTTOM: white 1px solid
+}
+.spPartnerBar .spCelink {
+	DISPLAY: none
+}
+.spPartnerBar .celink {
+	DISPLAY: none
+}
+#spArticleBody .spAssetalignleft {
+	MARGIN: 10px 12px 12px 0px
+}
+#spArticleBody .assetalignleft {
+	MARGIN: 10px 12px 12px 0px
+}
+#spArticleBody .spAssetaligncenter {
+	MARGIN: 12px auto; LINE-HEIGHT: 1.2em! important
+}
+#spArticleBody .spAssetAligncenter {
+	MARGIN: 12px auto; LINE-HEIGHT: 1.2em! important
+}
+#spArticleBody .spAssetaligncenter TABLE {
+	MARGIN: 12px auto; TEXT-ALIGN: left
+}
+#spArticleBody .spAssetAligncenter TABLE {
+	MARGIN: 12px auto; TEXT-ALIGN: left
+}
+.spAssetAlignleft {
+	FLOAT: left; MARGIN: 0px 15px 12px 0px; page-break-inside: avoid
+}
+.spAssetalignleft {
+	FLOAT: left; MARGIN: 0px 15px 12px 0px; page-break-inside: avoid
+}
+.assetalignleft {
+	FLOAT: left; MARGIN: 0px 15px 12px 0px; page-break-inside: avoid
+}
+.spAssetAlignleft:unknown {
+	CLEAR: both
+}
+.spAssetalignleft:unknown {
+	CLEAR: both
+}
+.assetalignleft:unknown {
+	CLEAR: both
+}
+.spAssetalignright:unknown {
+	CLEAR: both
+}
+.spAssetAlignleft IMG {
+	FLOAT: left; MARGIN: 0px
+}
+.spAssetalignleft IMG {
+	FLOAT: left; MARGIN: 0px
+}
+.assetalignleft IMG {
+	FLOAT: left; MARGIN: 0px
+}
+.spAssetAlignright {
+	FLOAT: right! important; MARGIN: 0px 0px 15px 12px; page-break-inside: avoid
+}
+.spAssetalignright {
+	FLOAT: right! important; MARGIN: 0px 0px 15px 12px; page-break-inside: avoid
+}
+.assetalignright {
+	FLOAT: right! important; MARGIN: 0px 0px 15px 12px; page-break-inside: avoid
+}
+.spAssetalignright IMG {
+	MARGIN: 0px
+}
+.assetalignright IMG {
+	MARGIN: 0px
+}
+.spAssetaligncenter {
+	CLEAR: both; FLOAT: none; MARGIN-RIGHT: 12px! important
+}
+.spAssetAligncenter {
+	CLEAR: both; FLOAT: none; MARGIN-RIGHT: 12px! important
+}
+.assetaligncenter {
+	CLEAR: both; FLOAT: none; MARGIN-RIGHT: 12px! important
+}
+.spAssetAligncenter:unknown {
+	CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: "."
+}
+ HTML .spAssetAligncenter {
+	HEIGHT: 1%
+}
+.spAssetalign {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.spAssetalignleft {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.spAssetalignright {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.spAssetaligncenter {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.spAssetAlign {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.spAssetAlignleft {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.spAssetAlignright {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.spAssetAligncenter {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.assetalign {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.assetalignleft {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.assetalignright {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+.assetaligncenter {
+	TEXT-ALIGN: left; page-break-inside: avoid
+}
+
+@media Print    
+{
+.spNoPrint {
+	DISPLAY: none; POSITION: absolute
+}
+    }
+#spam #spHeader {
+	PADDING-RIGHT: 0px! important; BACKGROUND-POSITION: 0px bottom; PADDING-LEFT: 0px! important; BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,724549,00.gif); PADDING-BOTTOM: 20px! important; MARGIN: 0px; PADDING-TOP: 0px! important; BACKGROUND-REPEAT: no-repeat; HEIGHT: 100px
+}
+#spam #spHeader #spMainNavigation {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important
+}
+#spam #spHeader #spLogo {
+	MARGIN: 15px; WIDTH: 751px! important; HEIGHT: 45px! important
+}
+#spam #spContainer {
+	BACKGROUND-POSITION: 14px top; BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,719728,00.gif); BACKGROUND-REPEAT: repeat-y
+}
+#spam .spBigScreen #spMainContent {
+	MARGIN: 0px 0px 10px; PADDING-TOP: 21px! important
+}
+#spam .spBigScreen #spColumnRight {
+	BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-TOP: 21px! important
+}
+#spam .spTopThema {
+	BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,722430,00.gif)! important; BACKGROUND-REPEAT: no-repeat! important
+}
+#spam .spTopThema:unknown {
+	CLEAR: both
+}
+#spam .spNoUpperLine {
+	BACKGROUND: none transparent scroll repeat 0% 0%
+}
+#spam .spTeaserCenterpage {
+	BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,722430,00.gif)! important; BACKGROUND-REPEAT: no-repeat! important
+}
+#spam #spMainContent .spDottedLine {
+	DISPLAY: none
+}
+#spam .spMultimediaLeiste {
+	BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,722430,00.gif)! important; MARGIN: 0px; PADDING-TOP: 14px; BACKGROUND-REPEAT: no-repeat! important; BACKGROUND-COLOR: transparent! important
+}
+#spam #spArticleHead {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-BOTTOM: 1px! important; MARGIN: 0px 0px 14px; PADDING-TOP: 3px! important; BORDER-BOTTOM: #9a9a9a 1px solid; HEIGHT: auto
+}
+#spam #spArticleHeadNoLine {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: none transparent scroll repeat 0% 0%; PADDING-BOTTOM: 1px! important; MARGIN: 0px 0px 14px; PADDING-TOP: 3px! important; BORDER-BOTTOM: #9a9a9a 1px solid; HEIGHT: auto
+}
+#spam .spTopThema .spAssetaligncenter IMG {
+	MARGIN-BOTTOM: 2px! important
+}
+#spam H3 {
+	CLEAR: both; PADDING-RIGHT: 0.2em! important; PADDING-LEFT: 0.2em! important; BACKGROUND: #990000; PADDING-BOTTOM: 0.1em! important; MARGIN: 5px 0px 7px; COLOR: #fff! important; PADDING-TOP: 0px! important
+}
+#spam H3 IMG {
+	DISPLAY: none! important
+}
+#spam H3 A {
+	PADDING-RIGHT: 0px! important; DISPLAY: block! important; PADDING-LEFT: 0px! important; BACKGROUND: #990000; PADDING-BOTTOM: 0px! important; MARGIN: 0px; COLOR: #fff! important; LINE-HEIGHT: 1.5em! important; PADDING-TOP: 0px! important
+}
+#spam H3 A.spCelink {
+	DISPLAY: none! important
+}
+#spam H3 A.celink {
+	DISPLAY: none! important
+}
+#spam H4:unknown {
+	CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: "."
+}
+ HTML #spam H4:unknown {
+	HEIGHT: 1%
+}
+#spam #spArticleBody .spAssetalignleft {
+	BORDER-RIGHT: #cfcfcf 1px solid; BORDER-TOP: #cfcfcf 1px solid; BACKGROUND: #fafafa; BORDER-LEFT: #cfcfcf 1px solid; BORDER-BOTTOM: #cfcfcf 1px solid
+}
+#spam #spArticleBody .spAssetalignleft DIV {
+	BORDER-RIGHT: 0px; BORDER-TOP: 0px; BACKGROUND: #fafafa; BORDER-LEFT: 0px; BORDER-BOTTOM: 0px
+}
+#spam #spArticleBody .spAssetalignleft TABLE {
+	BORDER-RIGHT: 0px; BORDER-TOP: 0px; BACKGROUND: #fafafa; BORDER-LEFT: 0px; BORDER-BOTTOM: 0px
+}
+#spam #spArticleBody .spArticleImageBox DIV {
+	BACKGROUND: #ccc; COLOR: #000! important
+}
+#spam #spArticleBody .spArticleImageBox DIV {
+	BACKGROUND: #ccc; COLOR: #000! important
+}
+#spam .spArticleImageBox .spCredit {
+	COLOR: #666! important
+}
+#spam .spMPCBoxTicker {
+	PADDING-RIGHT: 0px! important; BORDER-TOP: #0f0f0f 1px solid; PADDING-LEFT: 0px! important; FONT-SIZE: 1em! important; BACKGROUND: #eee; PADDING-BOTTOM: 15px! important; WIDTH: 515px! important; LINE-HEIGHT: 1.3em! important; PADDING-TOP: 15px! important
+}
+#spam .spMPCBoxTicker .spBoxHeadline {
+	FONT-SIZE: 0.83em! important
+}
+#spam .spMPCBoxTicker .spBoxHeadline {
+	BACKGROUND-COLOR: #eee
+}
+#spam .spMPCBoxTicker H3 {
+	BACKGROUND: #4c4c4c; COLOR: #fff! important
+}
+#spam .spMPCBoxTicker H3 A {
+	BACKGROUND: #4c4c4c; COLOR: #fff! important
+}
+#spam .spMPCBoxTicker H3.spMPCTab {
+	WIDTH: 509px! important
+}
+#spam .spMPCBoxTicker H3.spMPCTab A {
+	PADDING-RIGHT: 0px! important; BACKGROUND-POSITION: 0% 50%; PADDING-LEFT: 14px! important; BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,729146.gif)! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; PADDING-TOP: 0px! important; BACKGROUND-REPEAT: no-repeat! important; BACKGROUND-COLOR: #4c4c4c! important
+}
+#spam H3.spMPCTabAktiv A {
+	BACKGROUND-POSITION: 0% 50%; BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,729005.gif)! important; BACKGROUND-REPEAT: no-repeat! important; BACKGROUND-COLOR: transparent! important
+}
+#spam .spMPCBoxTicker .spMPCContent {
+	PADDING-RIGHT: 2px! important; PADDING-LEFT: 2px! important; PADDING-BOTTOM: 2px! important; WIDTH: 509px! important; BORDER-TOP-STYLE: none; PADDING-TOP: 2px! important; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; BACKGROUND-COLOR: transparent! important; BORDER-BOTTOM-STYLE: none
+}
+#spam .spPhotoGallery {
+	BORDER-RIGHT: #cfcfcf 1px solid; BORDER-TOP: #cfcfcf 1px solid; BACKGROUND: none transparent scroll repeat 0% 0%; BORDER-LEFT: #cfcfcf 1px solid; WIDTH: 506px! important; BORDER-BOTTOM: #cfcfcf 1px solid
+}
+#spam .spPhotoGallery .spInnerBox {
+	BORDER-RIGHT: 0px; BORDER-TOP: 0px; BACKGROUND: none transparent scroll repeat 0% 0%; BORDER-LEFT: 0px; WIDTH: 494px! important; BORDER-BOTTOM: 0px
+}
+#spam .spPhotoGallery:unknown {
+	CLEAR: both
+}
+#spam .spPhotoGallery DIV DIV.spPhotoGallerySinglePic {
+	WIDTH: 420px! important
+}
+#spam .spPhotoGallery DIV DIV.spPhotoGallerySinglePic UL {
+	WIDTH: 420px! important
+}
+#spam #spColumnRight .spInfoBox {
+	BACKGROUND: none transparent scroll repeat 0% 0%; BORDER-BOTTOM: #cfcfcf 1px solid
+}
+#spam #spColumnRight .spInfoBox H5 {
+	COLOR: #000! important
+}
+#spam #spColumnRight .spInfoBox A {
+	COLOR: #000! important
+}
+#spam #spColumnRight .spInfoBox A SPAN {
+	COLOR: #000! important
+}
+#spam #spColumnRight .spInfoBox H5 A {
+	PADDING-RIGHT: 13px! important; BACKGROUND-POSITION: 100% 50%; PADDING-LEFT: 0px! important; BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,719818,00.gif)! important; PADDING-BOTTOM: 0px! important; COLOR: #000! important; PADDING-TOP: 0px! important; BACKGROUND-REPEAT: no-repeat! important
+}
+#spam #spColumnRight .spInfoBox H5 A.spCelink {
+	BACKGROUND-IMAGE: none! important; COLOR: orange! important
+}
+#spam #spColumnRight .spInfoBox H5 A.celink {
+	BACKGROUND-IMAGE: none! important; COLOR: orange! important
+}
+#spam #spColumnRight .spInfoBox .spZurueckZuSPON {
+	TEXT-ALIGN: right
+}
+#spam #spColumnRight .spInfoBox .spZurueckZuSPON H5 A {
+	TEXT-TRANSFORM: none! important; COLOR: #900! important
+}
+#spam #spColumnRight .spInfoBox .spZurueckZuSPON H5 A.spCelink {
+	DISPLAY: none
+}
+#spam #spColumnRight .spInfoBox .spZurueckZuSPON H5 A.celink {
+	DISPLAY: none
+}
+#spam #spFooter {
+	PADDING-RIGHT: 0px! important; BORDER-TOP: #cfcfcf 1px solid; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px 0px 0px 14px; WIDTH: 780px! important; PADDING-TOP: 1em! important
+}
+#spam .spBigaPopup H2 {
+	BACKGROUND-POSITION: right 50%; BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,727982,00.gif)! important; BACKGROUND-REPEAT: no-repeat! important
+}
+.spam H3 {
+	BORDER-RIGHT: 0px; PADDING-RIGHT: 0px! important; BORDER-TOP: 0px; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 18px 0px 0px; BORDER-LEFT: 0px; WIDTH: 517px! important; PADDING-TOP: 0px! important; BORDER-BOTTOM: 0px; HEIGHT: 20px! important
+}
+.spam UL LI {
+	BACKGROUND-POSITION: 0px 7px; FONT-SIZE: 1em; BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,719818,00.gif)! important; LINE-HEIGHT: 1.2em; BACKGROUND-REPEAT: no-repeat! important
+}
+.spam LI A {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 3px! important; FONT-WEIGHT: normal; PADDING-BOTTOM: 0px! important; COLOR: #000; PADDING-TOP: 0px! important
+}
+.spam .spChannelBlockHPTeaser UL {
+	MARGIN: 0px; WIDTH: 375px! important
+}
+.spam .spChannelBlockHPTeaser LI A IMG.spImgNoBorder {
+	FLOAT: none! important
+}
+.spam .spRessortTeaserBoxHPHeadline {
+	BORDER-RIGHT: 0px; PADDING-RIGHT: 0px! important; BORDER-TOP: 0px; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 12px 0px 0px; BORDER-LEFT: 0px; WIDTH: 517px! important; PADDING-TOP: 0px! important; BORDER-BOTTOM: 0px; BACKGROUND-COLOR: #fff! important
+}
+.spam .spRessortTeaserBoxHPHeadline H3 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+.spam UL {
+	MARGIN: 0px; WIDTH: 375px! important
+}
+.spam .spRessortTeaserBoxList {
+	WIDTH: 375px! important
+}
+.spam UL LI {
+	BACKGROUND-POSITION: 0px 7px; FONT-SIZE: 1em; BACKGROUND-IMAGE: url(http://www.spiegel.de/img/0,1020,719818,00.gif)! important; LINE-HEIGHT: 1.2em; BACKGROUND-REPEAT: no-repeat! important
+}
+.spam LI A {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 3px! important; FONT-WEIGHT: normal; PADDING-BOTTOM: 0px! important; COLOR: #000; PADDING-TOP: 0px! important
+}
+.spam .spRessortTeaserBoxTops LI A IMG.spImgNoBorder {
+	FLOAT: none! important
+}
+#spam #spSocialBookmark {
+	LEFT: 389px; VISIBILITY: hidden; WIDTH: 110px; POSITION: absolute; TOP: -10px
+}
+.spSidebar {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 5px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px
+}
+#spSidebarHeader {
+	BACKGROUND: #cd3326; FLOAT: left; WIDTH: 100%; HEIGHT: 30px; TEXT-ALIGN: center; min-width: 200px
+}
+#sidebar #spMainContent {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px; WIDTH: 100%! important; PADDING-TOP: 0px! important
+}
+.spLogoSideBar {
+	FLOAT: left; TEXT-ALIGN: left
+}
+.spLogoSideBar IMG {
+	BORDER-RIGHT: white 1px solid
+}
+.spSidebar H3 {
+	FLOAT: left
+}
+.spReload {
+	FLOAT: right
+}
+.spSidebar .spBlockBullet {
+	MARGIN-TOP: 25px! important
+}
+.spSidebar .spArrowList {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 8px 0px 0px 4px; WIDTH: 95%; PADDING-TOP: 0px; min-width: 200px
+}
+.spSidebar .spArrowList LI {
+	PADDING-RIGHT: 0px! important; BACKGROUND-POSITION: 0px 5px; PADDING-LEFT: 8px! important; PADDING-BOTTOM: 3px! important; LINE-HEIGHT: 1.3em; PADDING-TOP: 0px! important
+}
+.spSidebar H3 A {
+	COLOR: #000! important
+}
+#sp3Min {
+	FONT-SIZE: 12px; BACKGROUND: #f9f9f9; FLOAT: left; WIDTH: 500px; HEIGHT: 310px
+}
+#sp3MinHeader H1 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 12px; LEFT: 121px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 301px; COLOR: #fff; PADDING-TOP: 0px; POSITION: absolute; TOP: 3px
+}
+#sp3MinHeader {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: normal; FLOAT: left; PADDING-BOTTOM: 0px; WIDTH: 500px; COLOR: #000; PADDING-TOP: 0px; POSITION: relative; BACKGROUND-COLOR: #c11919
+}
+#sp3MinHeader A {
+	PADDING-LEFT: 5px; COLOR: #4c4c4c
+}
+#sp3MinHeader IMG {
+	BORDER-RIGHT: white 1px solid; BORDER-TOP: white 1px solid; MARGIN: 2px 0px 2px 3px; BORDER-LEFT: white 1px solid; BORDER-BOTTOM: white 1px solid
+}
+#sp3MinStand {
+	PADDING-LEFT: 1px; FLOAT: left; WIDTH: 499px; BACKGROUND-COLOR: #efefef
+}
+#sp3MinStand A {
+	FONT-SIZE: 0.83em; FLOAT: right; COLOR: #990000; MARGIN-RIGHT: 7px
+}
+#sp3MinStand A IMG {
+	BORDER-TOP-STYLE: none! important; BORDER-RIGHT-STYLE: none! important; BORDER-LEFT-STYLE: none! important; BORDER-BOTTOM-STYLE: none! important
+}
+#sp3MinStand SPAN {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-SIZE: 0.83em; PADDING-BOTTOM: 0px; MARGIN-LEFT: 2px; PADDING-TOP: 0px
+}
+#sp3Min .spTopThema {
+	PADDING-RIGHT: 20px! important; PADDING-LEFT: 20px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 0px; WIDTH: 450px; LINE-HEIGHT: 16px; PADDING-TOP: 25px! important; HEIGHT: 215px
+}
+#sp3MinFooter {
+	FLOAT: left; WIDTH: 500px; BACKGROUND-COLOR: #e2e2e2
+}
+#sp3MinPage {
+	FONT-WEIGHT: bold; FONT-SIZE: 10px; FLOAT: right; TEXT-TRANSFORM: uppercase; COLOR: #666
+}
+#sp3MinAnzahl {
+	FONT-WEIGHT: bold; COLOR: #666! important
+}
+.spQuizQuestion LI {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px 0px 5px; PADDING-TOP: 0px
+}
+#spSchlagzeilenSortieren DIV {
+	FLOAT: left; MARGIN: 10px 20px 10px 0px; POSITION: relative
+}
+#spSchlagzeilenSortieren IMG {
+	MARGIN-RIGHT: 6px; POSITION: relative; TOP: 1px
+}
+.spArchiveDateLine {
+	CLEAR: both; PADDING-RIGHT: 2px; DISPLAY: block; PADDING-LEFT: 2px; BACKGROUND: #f6f6f6; PADDING-BOTTOM: 2px; PADDING-TOP: 2px
+}
+.spInfoBox .spSPTVSendetermin {
+	MARGIN: 5px 0px
+}
+.spCBvideospecialsLeft .spSPTVSendetermin {
+	MARGIN: 5px 0px
+}
+.spCBvideospecialsLeft .spSPTVSendeterminSendung {
+	DISPLAY: block; FONT-WEIGHT: bold
+}
+.spCBvideospecialsRight .spSPTVSendetermin {
+	MARGIN: 5px 0px
+}
+.spCBvideospecialsRight .spSPTVSendeterminSendung {
+	FONT-WEIGHT: bold
+}
+.quchnoad {
+	DISPLAY: none
+}
+#spColumnRight .spCommercial {
+	CLEAR: both; PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% bottom; PADDING-BOTTOM: 10px! important; MARGIN: 0px; PADDING-TOP: 0px! important
+}
+#spColumnRight .spCommercial UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 15px; FLOAT: left; PADDING-BOTTOM: 15px; MARGIN: 0px; WIDTH: 95%; PADDING-TOP: 15px; LIST-STYLE-TYPE: none
+}
+#spColumnRight .spCommercial UL LI P {
+	PADDING-LEFT: 7px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; FLOAT: left; WIDTH: 300px; LINE-HEIGHT: 1.2em; TEXT-ALIGN: left
+}
+#spColumnRight .spCommercial UL LI IMG {
+	DISPLAY: block; FLOAT: right; MARGIN: 4px 0px 5px 5px
+}
+.spCommercial UL LI {
+	FLOAT: left; WIDTH: 300px
+}
+.spSmallScreen #spColumnRight .spCommercial {
+	WIDTH: 336px! important
+}
+#spColumnRight #spR336 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/backgrounds/bg_maincontainer_line.gif) repeat-x 50% bottom; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 0px 0px 1px 1px; WIDTH: 336px; PADDING-TOP: 0px! important
+}
+#spColumnRight #spR336 H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: normal; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 0px 2px 0px 10px; PADDING-TOP: 0px; TEXT-ALIGN: right
+}
+#spColumnRight #spR336 H6 {
+	MARGIN: 0px 0px 0px 10px
+}
+#spColumnRight #spR300 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: 0px 0px 0px 2px; WIDTH: 336px; PADDING-TOP: 0px! important; TEXT-ALIGN: center
+}
+#spColumnRight #spR300 H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: normal; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 0px 19px 0px 0px; PADDING-TOP: 0px; TEXT-ALIGN: right
+}
+#spColumnRight .spCommercial H6 {
+	FONT-SIZE: 1em! important
+}
+#spMainContent #spM300 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 57px; FLOAT: none; PADDING-BOTTOM: 15px; MARGIN: 0px; WIDTH: 300px! important; PADDING-TOP: 0px; TEXT-ALIGN: center
+}
+#spMainContent #spM336 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 41px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 336px! important; PADDING-TOP: 0px; TEXT-ALIGN: center
+}
+#spMainContent #spM420 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FLOAT: none; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 415px; PADDING-TOP: 0px; TEXT-ALIGN: center
+}
+.spBigScreen #spMainContent #spM420 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 50px! important; PADDING-BOTTOM: 0px! important; PADDING-TOP: 0px! important
+}
+#spMainContent #spM515 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left; PADDING-BOTTOM: 0px! important; MARGIN: -5px 0px 10px; WIDTH: 515px! important; PADDING-TOP: 0px! important
+}
+#spMainContent .spCommercial #spM300 H5 {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 57px! important; PADDING-BOTTOM: 0px! important; WIDTH: 300px! important; PADDING-TOP: 0px! important
+}
+#spMainContent .spCommercial #spM336 H5 {
+	MARGIN: 0px 0px 0px 41px; WIDTH: 336px! important
+}
+#spMainContent .spCommercial H6 {
+	FONT-SIZE: 1em
+}
+.spCommercial H5 {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: normal; FONT-SIZE: 1em! important; PADDING-BOTTOM: 0px; MARGIN: 0px 2px 0px 0px; WIDTH: auto; PADDING-TOP: 0px; TEXT-ALIGN: right
+}
+#home .spCommercialInner {
+	BACKGROUND: #ffffd2; MARGIN-LEFT: 1px! important; WIDTH: 239px
+}
+.spCommercialInner {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; BACKGROUND: #ffffd2; PADDING-BOTTOM: 1em! important; MARGIN-LEFT: 1px! important; WIDTH: 335px; PADDING-TOP: 0px! important
+}
+.spCommercialInner H6 {
+	LETTER-SPACING: 1px; TEXT-ALIGN: left! important
+}
+.spCommercialInner P {
+	MARGIN: 0px; WIDTH: 286px; LINE-HEIGHT: 12px
+}
+.spCommercialInner P A {
+	DISPLAY: block; COLOR: #b20a15
+}
+.spCommercial .spCenterImage {
+	TEXT-ALIGN: center
+}
+#spMainContent .spCommercial {
+	CLEAR: both
+}
+#spMainContent .spCommercial UL {
+	LIST-STYLE-TYPE: disc! important
+}
+.spCommercial UL {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 15px; FLOAT: left; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 95%; PADDING-TOP: 15px; LIST-STYLE-TYPE: none
+}
+.spCommercial UL:unknown {
+	CLEAR: both
+}
+.spCommercial UL LI P {
+	PADDING-LEFT: 5px; BACKGROUND: url(http://www.spiegel.de/static/sys/v8/icons/ic_right_one_arrow_small.gif) no-repeat 0px 3px; FLOAT: left; WIDTH: 100%; TEXT-ALIGN: left
+}
+.spCommercial UL LI IMG {
+	DISPLAY: block; MARGIN: 0.25em 0px 0px 0.5em
+}
+#spMainContent .spCommercial UL LI {
+	WIDTH: 380px! important
+}
+.spCommercial UL LI {
+	FLOAT: left; WIDTH: 48%; LINE-HEIGHT: 12px
+}
+#spContainer #spColumnAd {
+	PADDING-RIGHT: 0px! important; PADDING-LEFT: 0px! important; FLOAT: left! important; PADDING-BOTTOM: 0px! important; MARGIN: 0px 0px 0px 5px; PADDING-TOP: 0px! important
+}
+.spFullScreen #spColumnAd {
+	FLOAT: left! important
+}
