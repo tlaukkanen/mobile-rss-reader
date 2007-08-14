@@ -24,9 +24,13 @@ package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.XmlParser;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Vector;
+
+import com.substanceofcode.utils.EncodingUtil;
 
 /**
  * HTMLLinkParser class is used when we are parsing RSS feed list 
@@ -39,6 +43,9 @@ import java.util.Vector;
  */
 public class HTMLLinkParser extends FeedListParser {
     
+    private String fileEncoding = "ISO8859_1";  // Open with ISO8859_1
+    private String docEncoding = "";  // Default for HTML is ISO8859_1?
+    private EncodingUtil encodingUtil = null;
 
     /** Creates a new instance of HTMLLinkParser */
     public HTMLLinkParser(String url, String username, String password) {
@@ -48,11 +55,13 @@ public class HTMLLinkParser extends FeedListParser {
     public RssFeed[] parseFeeds(InputStream is) {
         // Prepare buffer for input data
         StringBuffer inputBuffer = new StringBuffer();
+		encodingUtil = new EncodingUtil(is);
+		fileEncoding = encodingUtil.getFileEncoding();
         
         // Read all data to buffer
         int inputCharacter;
         try {
-            while ((inputCharacter = is.read()) != -1) {
+            while ((inputCharacter = encodingUtil.read()) != -1) {
                 inputBuffer.append((char)inputCharacter);
             }
         } catch (IOException ex) {
@@ -61,51 +70,101 @@ public class HTMLLinkParser extends FeedListParser {
         
         // Split buffer string by each new line
         String text = inputBuffer.toString();
+		int pcharset;
+        if ((pcharset = text.indexOf("charset=")) > 0) {
+			int plt;
+			if (((plt = text.lastIndexOf('<', pcharset)) != -1) &&
+				(plt < pcharset)) {
+				int pgt = text.indexOf(">", plt);
+				String meta = text.substring(plt, pgt);
+				pcharset = meta.indexOf("charset=");
+				int pquot = meta.indexOf("\"", pcharset);
+ 				String encoding = meta.substring(pcharset + 8, pquot);
+				encodingUtil.getEncoding(encoding);
+				docEncoding = encodingUtil.getDocEncoding();
+			}
+		}
+
+		if (!docEncoding.equals("")) {
+			try {
+				if (fileEncoding.equals("")) {
+					text = new String(text.getBytes(), docEncoding);
+				} else {
+					text = new String(text.getBytes(fileEncoding), docEncoding);
+				}
+			} catch (UnsupportedEncodingException e) {
+				// We should not get here as EncodingUtil checks if
+				// this is supported.
+				System.out.println("UnsupportedEncodingException " + e +
+						           e.getMessage());
+			}
+		}
+
         text = StringUtil.replace(text, "\r", "");
-        String[] links = StringUtil.split(text, "<a");
+        String[] alinks = StringUtil.split(text, "<a");
         
-        Vector vfeeds = new Vector( links.length );
-        for(int linkIndex=0; linkIndex<links.length; linkIndex++) {
-            String link = links[linkIndex];
-            String name;
-            String url;
-            int indexOfHref = link.indexOf("href");
-            if (indexOfHref < 0) {
-				continue;
+        Vector vfeeds = new Vector();
+        for(int alinkIndex=0; alinkIndex<alinks.length; alinkIndex++) {
+            String alink = alinks[alinkIndex];
+			String[] calinks = StringUtil.split(alink, "<A");
+			for(int calinkIndex = 0; calinkIndex < calinks.length;
+					calinkIndex++) {
+				String calink = calinks[calinkIndex];
+				String name;
+				String url;
+				int indexOfHref = calink.indexOf("href");
+				if (indexOfHref < 0) {
+					continue;
+				}
+				int indexOfBQuote = calink.indexOf("\"", indexOfHref);
+				if (indexOfBQuote < 0) {
+					continue;
+				}
+				int indexOfEQuote = calink.indexOf("\"", indexOfBQuote + 1);
+				if (indexOfEQuote < 0) {
+					continue;
+				}
+				url = calink.substring(indexOfBQuote + 1, indexOfEQuote);
+				// If filtering is requesting, continue if it does not match.
+				if ((feedURLFilter != null) &&
+					(url.toLowerCase().indexOf(feedURLFilter) < 0)) {
+					continue;
+				}
+				int indexOfGt = calink.indexOf('>', indexOfEQuote);
+				if (indexOfGt < 0) {
+					continue;
+				}
+				int aindexOfELink = calink.indexOf("</a>", indexOfGt);
+				int caindexOfELink = calink.indexOf("</A>", indexOfGt);
+				int indexOfELink = -1;
+				if ((aindexOfELink > 0) && ((caindexOfELink < 0) ||
+				    (aindexOfELink < caindexOfELink))) {
+					indexOfELink = aindexOfELink;
+				} else if ((caindexOfELink > 0) && ((aindexOfELink < 0) ||
+				    (caindexOfELink < aindexOfELink))) {
+					indexOfELink = caindexOfELink;
+				}
+				if (indexOfELink < 0) {
+					continue;
+				}
+				name = calink.substring(indexOfGt + 1, indexOfELink);
+				if ((feedNameFilter != null) &&
+					(name.toLowerCase().indexOf(feedNameFilter) < 0)) {
+					continue;
+				}
+				name = name.trim();
+				// Must be a valid name.
+				if (name.indexOf('<') >= 0) {
+					continue;
+				}
+				// Replace special chars like left quote, etc.
+				name = XmlParser.replaceAlphaEntities(name);
+				name = encodingUtil.replaceNumEntity(name);
+				name = encodingUtil.replaceSpChars(name);
+				vfeeds.addElement(new RssFeed(name, url, "", ""));
 			}
-            int indexOfBQuote = link.indexOf("\"", indexOfHref);
-            if (indexOfBQuote < 0) {
-				continue;
-			}
-            int indexOfEQuote = link.indexOf("\"", indexOfBQuote + 1);
-            if (indexOfEQuote < 0) {
-				continue;
-			}
-			url = link.substring(indexOfBQuote + 1, indexOfEQuote);
-			if ((feedURLFilter != null) &&
-				(url.toLowerCase().indexOf(feedURLFilter) < 0)) {
-				continue;
-			}
-            int indexOfGt = link.indexOf('>', indexOfEQuote);
-            if (indexOfGt < 0) {
-				continue;
-			}
-            int indexOfELink = link.indexOf("</a>", indexOfGt);
-            if (indexOfELink < 0) {
-				continue;
-			}
-			name = link.substring(indexOfGt + 1, indexOfELink);
-			if ((feedNameFilter != null) &&
-				(name.toLowerCase().indexOf(feedNameFilter) < 0)) {
-				continue;
-			}
-			name = name.trim();
-			// Must be a valid name.
-			if (name.indexOf('<') >= 0) {
-				continue;
-			}
-            vfeeds.addElement(new RssFeed(name, url, "", ""));
         }
+
         RssFeed[] feeds = new RssFeed[ vfeeds.size() ];
         for(int linkIndex=0; linkIndex<feeds.length; linkIndex++) {
             feeds[linkIndex] = (RssFeed)vfeeds.elementAt(linkIndex);
