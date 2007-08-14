@@ -20,7 +20,12 @@
  *
  */
 
-//#define MIDP20
+// Expand to define test define
+//#define DNOTEST
+// Expand to define MIDP define
+//#define DMIDP20
+// Expand to define logging define
+//#define DNOLOGGING
 
 package com.substanceofcode.rssreader.presentation;
 
@@ -34,10 +39,17 @@ import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.utils.Settings;
+import com.substanceofcode.utils.EncodingUtil;
 import java.util.*;
 import javax.microedition.midlet.*;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.*;
+
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * RSS feed reader MIDlet
@@ -99,7 +111,7 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_editBookmark;     // The edit bookmark command
     private Command     m_delBookmark;      // The delete bookmark command
     private Command     m_backCommand;      // The back to header list command
-	//#ifdef MIDP20
+	//#ifdef DMIDP20
     private Command     m_openLinkCmd;    // The open link command
 	//#endif
     private Command     m_copyLinkCmd;    // The copy link command
@@ -107,6 +119,15 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_backHeaderCmd;    // The back to bookmark list command
     private Command     m_updateCmd;        // The update headers command
     private Command     m_importFeedListCmd;// The import feed list command
+	//#ifdef DTEST
+//@    private Command     m_importCurrFeedListCmd;// The import feed list command and default current seleected feed
+	//#endif
+	//#ifdef DLOGGING
+//@    private Command     m_debugCmd; // The back to bookmark list command
+//@	                                      // from debug form
+//@    private Command     m_backFrDebugCmd; // The back to bookmark list command
+//@	                                      // from debug form
+	//#endif
     private Command     m_importOkCmd;      // The OK command for importing
     private Command     m_importCancelCmd;  // The Cancel command for importing
     private Command     m_settingsCmd;      // The show settings command
@@ -117,10 +138,34 @@ public class RssReaderMIDlet extends MIDlet
     private Controller m_controller;
     private int citemNbr = -1;
     private RssItem citem = null;
+	//#ifdef DLOGGING
+//@    private Form m_debug;
+//@    private Logger logger;
+//@    private boolean fineLoggable;
+//@    private boolean finestLoggable;
+	//#endif
     
     public RssReaderMIDlet() {
         m_display = Display.getDisplay(this);
         
+		//#ifdef DLOGGING
+//@        LogManager.readConfiguration(this);
+//@        logger = Logger.getLogger("RssReaderMIDlet");
+//@		fineLoggable = logger.isLoggable(Level.FINE);
+//@		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+//@		finestLoggable = logger.isLoggable(Level.FINEST);
+//@		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+//@		for (Enumeration eForms =
+//@				logger.getParent().getForms().elements();
+//@				eForms.hasMoreElements();) {
+//@				m_debug = (Form)eForms.nextElement();
+//@				logger.finest("form=" + m_debug);
+//@		}
+		//#endif
+
+		/** Initialize encodingUtil. */
+		EncodingUtil.init();
+
         /** Initialize controller */
         m_controller = new Controller( this );
         
@@ -134,18 +179,25 @@ public class RssReaderMIDlet extends MIDlet
         m_editBookmark      = new Command("Edit feed", Command.SCREEN, 2);
         m_delBookmark       = new Command("Delete feed", Command.SCREEN, 3);
         m_openHeaderCmd     = new Command("Open item", Command.SCREEN, 1);
-		//#ifdef MIDP20
+		//#ifdef DMIDP20
         m_openLinkCmd       = new Command("Open link", Command.SCREEN, 1);
 		//#endif
         m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 1);
         m_backHeaderCmd     = new Command("Back", Command.SCREEN, 2);
         m_updateCmd         = new Command("Update feed", Command.SCREEN, 2);
         m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
+		//#ifdef DTEST
+//@        m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 3);
+		//#endif
         m_importOkCmd       = new Command("OK", Command.OK, 1);
         m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
         m_settingsCmd       = new Command("Settings", Command.SCREEN, 4);
         m_AboutCmd          = new Command("About", Command.SCREEN, 4);
         m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
+	//#ifdef DLOGGING
+//@        m_debugCmd          = new Command("Debug Log", Command.SCREEN, 4);
+//@        m_backFrDebugCmd    = new Command("Back", Command.SCREEN, 2);
+	//#endif
         
         m_getPage = false;
         m_refreshAllFeeds = false;
@@ -167,6 +219,9 @@ public class RssReaderMIDlet extends MIDlet
         initializeHeadersList();
         //initializeLoadingForm();
         initializeImportForm();
+	//#ifdef DLOGGING
+//@        initializeDebugForm();
+	//#endif
         m_settingsForm = new SettingsForm(this);
         
         m_display.setCurrent(m_bookmarkList);
@@ -196,8 +251,14 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_editBookmark );
             m_bookmarkList.addCommand( m_delBookmark );
             m_bookmarkList.addCommand( m_importFeedListCmd );
+			//#ifdef DTEST
+//@            m_bookmarkList.addCommand( m_importCurrFeedListCmd );
+			//#endif
             m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_updateAllCmd );
+	//#ifdef DLOGGING
+//@            m_bookmarkList.addCommand( m_debugCmd );
+	//#endif
             m_bookmarkList.addCommand( m_AboutCmd );
             m_bookmarkList.setCommandListener( this );
             
@@ -289,6 +350,13 @@ public class RssReaderMIDlet extends MIDlet
         m_importFeedsForm.setCommandListener(this);
     }
     
+	//#ifdef DLOGGING
+//@    public void initializeDebugForm() {
+//@        m_debug.addCommand( m_backFrDebugCmd );
+//@        m_debug.setCommandListener(this);
+//@	}
+	//#endif
+
     /** Run method is used to get RSS feed with HttpConnection */
     public void run(){
         /* Use networking if necessary */
@@ -428,7 +496,7 @@ public class RssReaderMIDlet extends MIDlet
     private void initializeItemForm(RssItem item) {
         System.out.println("Create new item form");
         m_itemForm = new Form( item.getTitle() );
-		//#ifdef MIDP20
+		//#ifdef DMIDP20
         m_itemForm.addCommand( m_openLinkCmd );
 		//#endif
         m_itemForm.addCommand( m_copyLinkCmd );
@@ -479,7 +547,7 @@ public class RssReaderMIDlet extends MIDlet
 	 */
 	private Alert getAbout() {
 		Alert about = new Alert("About RssReader",
-"RssReader v1.8 " +
+"RssReader v1.9 " +
  "Copyright (C) 2005-2006 Tommi Laukkanen " +
  "http://www.substanceofcode.com.  " +
  "This program is distributed in the hope that it will be useful, " +
@@ -656,7 +724,7 @@ public class RssReaderMIDlet extends MIDlet
                 citem.getLink(), citem.getLink().length(), TextField.URL));
         }
         
-		//#ifdef MIDP20
+		//#ifdef DMIDP20
         /** Go to link and get back to RSS feed headers */
         if( c == m_openLinkCmd ){
 			try {
@@ -692,9 +760,27 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Show import feed list form */
         if( c == m_importFeedListCmd ) {
+			// Reset current bookmark so that the added feeds do not
+			// get put into the same bookmark and overrite each other.
+			m_curBookmark = -1;
             m_display.setCurrent( m_importFeedsForm );
         }
         
+		//#ifdef DTEST
+//@		/** Show import feed list form and default file */
+//@		if( c == m_importCurrFeedListCmd ) {
+//@			System.out.println( "s=" + m_headerList.size());
+//@			if( m_bookmarkList.size()>0 ) {
+//@                m_curBookmark = m_bookmarkList.getSelectedIndex();
+//@                RssFeed bm = (RssFeed)m_rssFeeds.get(
+//@                        m_bookmarkList.getString(m_curBookmark));
+//@				m_feedListURL.setString(bm.getUrl());
+//@				m_curBookmark = -1;
+//@			}
+//@			m_display.setCurrent( m_importFeedsForm );
+//@        }
+		//#endif
+
         /** Import list of feeds */
         if( c == m_importOkCmd ) {
             try {
@@ -757,6 +843,20 @@ public class RssReaderMIDlet extends MIDlet
 			Alert m_about = getAbout();
 			m_display.setCurrent( m_about, m_bookmarkList );
 		}
+
+	//#ifdef DLOGGING
+//@        /** Show about */
+//@		if( c == m_debugCmd ) {
+//@			m_display.setCurrent( m_debug );
+//@		}
+//@
+//@        /** Show about */
+//@		if( c == m_backFrDebugCmd ) {
+//@			m_display.setCurrent( m_bookmarkList );
+//@		}
+//@
+	//#endif
+
     }
     
 }
