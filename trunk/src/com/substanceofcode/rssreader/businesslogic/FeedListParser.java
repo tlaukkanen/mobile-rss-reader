@@ -19,7 +19,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-
+// Expand to define test define
+//#define DNOTEST
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
@@ -87,9 +88,19 @@ public abstract class FeedListParser implements Runnable{
     public RssFeed[] parseFeeds() throws IOException, Exception {
         
         HttpConnection hc = null;
+		//#ifdef DTEST
+//@        InputStream ris = null;
+		//#endif
         DataInputStream dis = null;
         String response = "";
         try {
+			//#ifdef DTEST
+//@			// If testing, allow opening of files in the jar.
+//@			if (m_url.indexOf("file://") == 0) {
+//@				return parseFeeds(this.getClass().getResourceAsStream(
+//@						 m_url.substring(7)));
+//@			}
+			//#endif
             /**
              * Open an HttpConnection with the Web server
              * The default request method is GET
@@ -122,10 +133,16 @@ public abstract class FeedListParser implements Runnable{
              */
             return parseFeeds(hc.openInputStream());
         } catch(Exception e) {
+			if ((m_url != null) && (m_url.indexOf("file://") == 0)) {
+				System.err.println("Cannot process file.");
+			}
             throw new Exception("Error while parsing RSS data: " 
                     + e.toString());
         } finally {
             if (hc != null) hc.close();
+			//#ifdef DTEST
+//@            if (ris != null) ris.close();
+			//#endif
             if (dis != null) dis.close();
         }
     }    
