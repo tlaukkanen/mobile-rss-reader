@@ -20,6 +20,9 @@
  *
  */
 
+// Expand to define logging define
+//#define DNOLOGGING
+
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
@@ -31,6 +34,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * HTMLLinkParser class is used when we are parsing RSS feed list 
@@ -46,6 +54,12 @@ public class HTMLLinkParser extends FeedListParser {
     private String fileEncoding = "ISO8859_1";  // Open with ISO8859_1
     private String docEncoding = "";  // Default for HTML is ISO8859_1?
     private EncodingUtil encodingUtil = null;
+	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("HTMLLinkParser");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#endif
 
     /** Creates a new instance of HTMLLinkParser */
     public HTMLLinkParser(String url, String username, String password) {
@@ -53,121 +67,136 @@ public class HTMLLinkParser extends FeedListParser {
     }
 
     public RssFeed[] parseFeeds(InputStream is) {
-        // Prepare buffer for input data
-        StringBuffer inputBuffer = new StringBuffer();
-		encodingUtil = new EncodingUtil(is);
-		fileEncoding = encodingUtil.getFileEncoding();
-        
-        // Read all data to buffer
-        int inputCharacter;
-        try {
-            while ((inputCharacter = encodingUtil.read()) != -1) {
-                inputBuffer.append((char)inputCharacter);
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        
-        // Split buffer string by each new line
-        String text = inputBuffer.toString();
-		int pcharset;
-        if ((pcharset = text.indexOf("charset=")) > 0) {
-			int plt;
-			if (((plt = text.lastIndexOf('<', pcharset)) != -1) &&
-				(plt < pcharset)) {
-				int pgt = text.indexOf(">", plt);
-				String meta = text.substring(plt, pgt);
-				pcharset = meta.indexOf("charset=");
-				int pquot = meta.indexOf("\"", pcharset);
- 				String encoding = meta.substring(pcharset + 8, pquot);
-				encodingUtil.getEncoding(encoding);
-				docEncoding = encodingUtil.getDocEncoding();
-			}
-		}
-
-		if (!docEncoding.equals("")) {
+		// Init in case we get a severe error.
+        RssFeed[] feeds = new RssFeed[0];
+		try {
+			// Prepare buffer for input data
+			StringBuffer inputBuffer = new StringBuffer();
+			encodingUtil = new EncodingUtil(is);
+			fileEncoding = encodingUtil.getFileEncoding();
+			
+			// Read all data to buffer
+			int inputCharacter;
 			try {
-				if (fileEncoding.equals("")) {
-					text = new String(text.getBytes(), docEncoding);
-				} else {
-					text = new String(text.getBytes(fileEncoding), docEncoding);
+				while ((inputCharacter = encodingUtil.read()) != -1) {
+					inputBuffer.append((char)inputCharacter);
 				}
-			} catch (UnsupportedEncodingException e) {
-				// We should not get here as EncodingUtil checks if
-				// this is supported.
-				System.out.println("UnsupportedEncodingException " + e +
-						           e.getMessage());
+			} catch (IOException ex) {
+				ex.printStackTrace();
 			}
-		}
-
-        text = StringUtil.replace(text, "\r", "");
-        String[] alinks = StringUtil.split(text, "<a");
-        
-        Vector vfeeds = new Vector();
-        for(int alinkIndex=0; alinkIndex<alinks.length; alinkIndex++) {
-            String alink = alinks[alinkIndex];
-			String[] calinks = StringUtil.split(alink, "<A");
-			for(int calinkIndex = 0; calinkIndex < calinks.length;
-					calinkIndex++) {
-				String calink = calinks[calinkIndex];
-				String name;
-				String url;
-				int indexOfHref = calink.indexOf("href");
-				if (indexOfHref < 0) {
-					continue;
+			
+			// Split buffer string by each new line
+			String text = inputBuffer.toString();
+			int pcharset;
+			if ((pcharset = text.indexOf("charset=")) > 0) {
+				int plt;
+				if (((plt = text.lastIndexOf('<', pcharset)) != -1) &&
+					(plt < pcharset)) {
+					int pgt = text.indexOf(">", plt);
+					String meta = text.substring(plt, pgt);
+					pcharset = meta.indexOf("charset=");
+					int pquot = meta.indexOf("\"", pcharset);
+					String encoding = meta.substring(pcharset + 8, pquot);
+					encodingUtil.getEncoding(encoding);
+					docEncoding = encodingUtil.getDocEncoding();
 				}
-				int indexOfBQuote = calink.indexOf("\"", indexOfHref);
-				if (indexOfBQuote < 0) {
-					continue;
-				}
-				int indexOfEQuote = calink.indexOf("\"", indexOfBQuote + 1);
-				if (indexOfEQuote < 0) {
-					continue;
-				}
-				url = calink.substring(indexOfBQuote + 1, indexOfEQuote);
-				// If filtering is requesting, continue if it does not match.
-				if ((feedURLFilter != null) &&
-					(url.toLowerCase().indexOf(feedURLFilter) < 0)) {
-					continue;
-				}
-				int indexOfGt = calink.indexOf('>', indexOfEQuote);
-				if (indexOfGt < 0) {
-					continue;
-				}
-				int aindexOfELink = calink.indexOf("</a>", indexOfGt);
-				int caindexOfELink = calink.indexOf("</A>", indexOfGt);
-				int indexOfELink = -1;
-				if ((aindexOfELink > 0) && ((caindexOfELink < 0) ||
-				    (aindexOfELink < caindexOfELink))) {
-					indexOfELink = aindexOfELink;
-				} else if ((caindexOfELink > 0) && ((aindexOfELink < 0) ||
-				    (caindexOfELink < aindexOfELink))) {
-					indexOfELink = caindexOfELink;
-				}
-				if (indexOfELink < 0) {
-					continue;
-				}
-				name = calink.substring(indexOfGt + 1, indexOfELink);
-				if ((feedNameFilter != null) &&
-					(name.toLowerCase().indexOf(feedNameFilter) < 0)) {
-					continue;
-				}
-				name = name.trim();
-				// Must be a valid name.
-				if (name.indexOf('<') >= 0) {
-					continue;
-				}
-				// Replace special chars like left quote, etc.
-				name = XmlParser.replaceAlphaEntities(name);
-				name = encodingUtil.replaceNumEntity(name);
-				name = encodingUtil.replaceSpChars(name);
-				vfeeds.addElement(new RssFeed(name, url, "", ""));
 			}
-        }
 
-        RssFeed[] feeds = new RssFeed[ vfeeds.size() ];
-        for(int linkIndex=0; linkIndex<feeds.length; linkIndex++) {
-            feeds[linkIndex] = (RssFeed)vfeeds.elementAt(linkIndex);
+			if (!docEncoding.equals("")) {
+				try {
+					if (fileEncoding.equals("")) {
+						text = new String(text.getBytes(), docEncoding);
+					} else {
+						text = new String(text.getBytes(fileEncoding), docEncoding);
+					}
+				} catch (UnsupportedEncodingException e) {
+					// We should not get here as EncodingUtil checks if
+					// this is supported.
+					System.out.println("UnsupportedEncodingException " + e +
+									   e.getMessage());
+				}
+			}
+
+			text = StringUtil.replace(text, "\r", "");
+			String[] alinks = StringUtil.split(text, "<a");
+			
+			Vector vfeeds = new Vector();
+			for(int alinkIndex=0; alinkIndex<alinks.length; alinkIndex++) {
+				String alink = alinks[alinkIndex];
+				String[] calinks = StringUtil.split(alink, "<A");
+				for(int calinkIndex = 0; calinkIndex < calinks.length;
+						calinkIndex++) {
+					String calink = calinks[calinkIndex];
+					//#ifdef DLOGGING
+//@					if (finerLoggable) {logger.finer("calink=" + calink);}
+					//#endif
+					String name;
+					String url;
+					int indexOfHref = calink.indexOf("href");
+					if (indexOfHref < 0) {
+						continue;
+					}
+					int indexOfBQuote = calink.indexOf("\"", indexOfHref);
+					if (indexOfBQuote < 0) {
+						continue;
+					}
+					int indexOfEQuote = calink.indexOf("\"", indexOfBQuote + 1);
+					if (indexOfEQuote < 0) {
+						continue;
+					}
+					url = calink.substring(indexOfBQuote + 1, indexOfEQuote);
+					//#ifdef DLOGGING
+//@					if (finerLoggable) {logger.finer("url=" + url);}
+					//#endif
+					// If filtering is requesting, continue if it does not match.
+					if ((feedURLFilter != null) &&
+						(url.toLowerCase().indexOf(feedURLFilter) < 0)) {
+						continue;
+					}
+					int indexOfGt = calink.indexOf('>', indexOfEQuote);
+					if (indexOfGt < 0) {
+						continue;
+					}
+					int aindexOfELink = calink.indexOf("</a>", indexOfGt);
+					int caindexOfELink = calink.indexOf("</A>", indexOfGt);
+					int indexOfELink = -1;
+					if ((aindexOfELink > 0) && ((caindexOfELink < 0) ||
+						(aindexOfELink < caindexOfELink))) {
+						indexOfELink = aindexOfELink;
+					} else if ((caindexOfELink > 0) && ((aindexOfELink < 0) ||
+						(caindexOfELink < aindexOfELink))) {
+						indexOfELink = caindexOfELink;
+					}
+					if (indexOfELink < 0) {
+						continue;
+					}
+					name = calink.substring(indexOfGt + 1, indexOfELink);
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("name 1=" + name);}
+					//#endif
+					if ((feedNameFilter != null) &&
+						(name.toLowerCase().indexOf(feedNameFilter) < 0)) {
+						continue;
+					}
+					name = name.trim();
+					// Replace special chars like left quote, etc.
+					name = XmlParser.replaceAlphaEntities(name);
+					name = encodingUtil.replaceNumEntity(name);
+					name = encodingUtil.replaceSpChars(name);
+					name = StringUtil.removeHtml(name);
+					vfeeds.addElement(new RssFeed(name, url, "", ""));
+				}
+			}
+
+			feeds = new RssFeed[ vfeeds.size() ];
+			for(int linkIndex=0; linkIndex<feeds.length; linkIndex++) {
+				feeds[linkIndex] = (RssFeed)vfeeds.elementAt(linkIndex);
+			}
+		} catch (Throwable t) {
+//#ifdef DLOGGING
+//@			logger.severe("parseFeeds error.", t);
+//#endif
+			System.out.println("parseFeeds error." + t + " " + t.getMessage());
 		}
         
         return feeds;        
