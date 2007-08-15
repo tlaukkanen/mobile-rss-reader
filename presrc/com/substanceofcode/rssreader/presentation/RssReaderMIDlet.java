@@ -41,6 +41,7 @@ import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.utils.Settings;
 import com.substanceofcode.utils.EncodingUtil;
 import java.util.*;
+import java.io.UnsupportedEncodingException;
 import javax.microedition.midlet.*;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.*;
@@ -830,7 +831,12 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Cancel importing -> Show list of feeds */
         if( c == m_importCancelCmd ) {
-            m_display.setCurrent( m_headerList );
+			// Only go to header list if something is there.
+			if(m_headerList.size()>0) {
+				m_display.setCurrent( m_headerList );
+			} else {
+				m_display.setCurrent( m_bookmarkList );
+			}
         }
         
         /** Settings form */
