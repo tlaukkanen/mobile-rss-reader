@@ -20,14 +20,28 @@
  *
  */
 
+// Expand to define logging define
+//#define DNOLOGGING
+
 package com.substanceofcode.rssreader.presentation;
 
+import java.lang.IllegalArgumentException;
+
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
+import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.TextField;
+
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  *
@@ -40,6 +54,13 @@ public class SettingsForm extends Form implements CommandListener {
     private Command m_cancelCommand;
     
     private TextField m_itemCountField;
+    private TextField m_logLevelField;
+	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("SettingsForm");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#endif
     
     /** Creates a new instance of SettingsForm */
     public SettingsForm(RssReaderMIDlet midlet) {
@@ -60,6 +81,11 @@ public class SettingsForm extends Form implements CommandListener {
         m_itemCountField = new TextField("Max item count in feed",
                 String.valueOf(maxCount), 3, TextField.NUMERIC);
         this.append( m_itemCountField );
+		//#ifdef DLOGGING
+//@        m_logLevelField = new TextField("Logging level",
+//@                logger.getLevel().getName(), 20, TextField.ANY);
+//@        this.append( m_logLevelField );
+		//#endif
     }
     
     public void commandAction(Command command, Displayable displayable) {
@@ -69,6 +95,21 @@ public class SettingsForm extends Form implements CommandListener {
             try {
                 int maxCount = Integer.parseInt( m_itemCountField.getString() );
                 settings.setMaximumItemCountInFeed( maxCount );
+				//#ifdef DLOGGING
+//@				try {
+//@					logger.setLevel(Level.parse(
+//@							m_logLevelField.getString().toUpperCase()));
+//@				} catch (IllegalArgumentException e) {
+//@					Alert invalidData = new Alert("Invalid Log Level",
+//@									"Invalid Log Level " +
+//@									m_logLevelField.getString(),
+//@									null,
+//@									AlertType.ERROR);
+//@					invalidData.setTimeout(Alert.FOREVER);
+//@					Display.getDisplay(m_midlet).setCurrent(invalidData, this);
+//@					return;
+//@				}
+				//#endif
             } catch(Exception e) {
                 System.err.println("Error: " + e.toString());
             }
