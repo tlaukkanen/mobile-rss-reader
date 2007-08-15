@@ -34,6 +34,7 @@ import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
 import net.sf.jlogmicro.util.logging.Level;
 //#endif
+
 /**
  * Simple encoding handler to allow handling utf-16 and 1252.
  *
@@ -75,6 +76,8 @@ public class EncodingUtil {
     private boolean secondChar = false;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("EncodingUtil");
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of EncodingUtil */
@@ -158,8 +161,7 @@ public class EncodingUtil {
 	public int read() throws IOException {
     
 		try {
-			int inputCharacter = -1;
-			inputCharacter = m_inputStream.read();
+			int inputCharacter = m_inputStream.read();
 			if (modEncoding) {
 				if (getPrologue || modUTF16) {
 					// If we get 0 character during prologue, it must be
@@ -290,14 +292,22 @@ public class EncodingUtil {
     }
 
 	public String replaceSpChars(String text) {
-		// No need to convert i diaeresis anymore as we do encoding
-		// change.
-		text = StringUtil.replace(text, LEFT_DBL_QUOTE, "\"");
-		text = StringUtil.replace(text, RIGHT_DBL_QUOTE, "\"");
-		text = StringUtil.replace(text, LEFT_SGL_QUOTE, "'");
-		text = StringUtil.replace(text, RIGHT_SGL_QUOTE, "'");
-		text = StringUtil.replace(text, NON_BREAKING_SP, " ");
-		text = StringUtil.replace(text, LONG_DASH, "-");
+		try {
+			// No need to convert i diaeresis anymore as we do encoding
+			// change.
+			text = StringUtil.replace(text, LEFT_DBL_QUOTE, "\"");
+			text = StringUtil.replace(text, RIGHT_DBL_QUOTE, "\"");
+			text = StringUtil.replace(text, LEFT_SGL_QUOTE, "'");
+			text = StringUtil.replace(text, RIGHT_SGL_QUOTE, "'");
+			text = StringUtil.replace(text, NON_BREAKING_SP, " ");
+			text = StringUtil.replace(text, LONG_DASH, "-");
+		} catch (Throwable t) {
+			//#ifdef DLOGGING
+            logger.severe("replaceNumEntity error ", t);
+			//#endif
+            System.out.println("replaceNumEntity error " + t + "," +
+					           t.getMessage());
+		}
 		return text;
 	}
 
@@ -306,24 +316,33 @@ public class EncodingUtil {
      */
     public static String replaceNumEntity( String s) {
         if (s == null)  return s;
-        
-        int index01 = s.indexOf( "&#" );
-		char [] achar = new char[1];
-        while (index01 != -1) {
-			int index02 = s.indexOf( ";" , index01 );
-			if (index02 == -1) {
-				return s;
+		try {
+			
+			int index01 = s.indexOf( "&#" );
+			char [] achar = new char[1];
+			while (index01 != -1) {
+				int index02 = s.indexOf( ";" , index01 );
+				if (index02 == -1) {
+					return s;
+				}
+				try {
+					String snum = s.substring(index01 + 2, index02);
+					achar[0] = (char)Integer.parseInt(snum);
+					s = s.substring(0, index01) + new String(achar) +
+							  s.substring(index02 + 1);
+				} catch (NumberFormatException e) {
+					return s;
+				}
+				index01 = s.indexOf( "&#" );
 			}
-			try {
-				String snum = s.substring(index01 + 2, index02);
-				achar[0] = (char)Integer.parseInt(snum);
-				s = s.substring(0, index01) + new String(achar) +
-					      s.substring(index02 + 1);
-			} catch (NumberFormatException e) {
-				return s;
-			}
-			index01 = s.indexOf( "&#" );
-        }
+		} catch (Throwable t) {
+			//#ifdef DLOGGING
+			Logger logger = Logger.getLogger("EncodingUtil");
+            logger.severe("replaceNumEntity error ", t);
+			//#endif
+            System.out.println("replaceNumEntity error " + t + "," +
+					           t.getMessage());
+		}
         return s;
     }
     
