@@ -21,6 +21,8 @@
  */
 // Expand to define test define
 //#define DNOTEST
+// Expand to define logging define
+//#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
@@ -30,6 +32,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
+
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * Base class for feed list parsers.
@@ -47,6 +55,13 @@ public abstract class FeedListParser implements Runnable{
     private boolean m_ready;
     private RssFeed[] m_feeds;
     
+	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("FeedListParser");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#endif
+
     /** Creates a new instance of FeedListParser */
     public FeedListParser(String url, String username, String password) {
         m_parsingThread = new Thread(this);
@@ -97,8 +112,11 @@ public abstract class FeedListParser implements Runnable{
 			//#ifdef DTEST
 //@			// If testing, allow opening of files in the jar.
 //@			if (m_url.indexOf("file://") == 0) {
-//@				return parseFeeds(this.getClass().getResourceAsStream(
-//@						 m_url.substring(7)));
+//@				ris = this.getClass().getResourceAsStream( m_url.substring(7));
+//@				if (ris == null) {
+//@					new IOException("No file found:  " + m_url);
+//@				}
+//@				return parseFeeds(ris);
 //@			}
 			//#endif
             /**
@@ -133,11 +151,23 @@ public abstract class FeedListParser implements Runnable{
              */
             return parseFeeds(hc.openInputStream());
         } catch(Exception e) {
+			//#ifdef DLOGGING
+//@			logger.severe("parseFeeds error with " + m_url, e);
+			//#endif
 			if ((m_url != null) && (m_url.indexOf("file://") == 0)) {
 				System.err.println("Cannot process file.");
 			}
             throw new Exception("Error while parsing RSS data: " 
                     + e.toString());
+        } catch(Throwable t) {
+			//#ifdef DLOGGING
+//@			logger.severe("parseFeeds error with " + m_url, t);
+			//#endif
+			if ((m_url != null) && (m_url.indexOf("file://") == 0)) {
+				System.err.println("Cannot process file.");
+			}
+            throw new Exception("Error while parsing RSS data: " 
+								+ t.toString());
         } finally {
             if (hc != null) hc.close();
 			//#ifdef DTEST
