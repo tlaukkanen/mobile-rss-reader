@@ -41,7 +41,9 @@ import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.utils.Settings;
 import com.substanceofcode.utils.EncodingUtil;
 import java.util.*;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
 import javax.microedition.midlet.*;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.*;
@@ -71,7 +73,9 @@ public class RssReaderMIDlet extends MIDlet
     private Hashtable   m_rssFeeds;         // The bookmark URLs
     private Thread      m_netThread;        // The thread for networking
     private boolean     m_getPage;          // The noticy flag for HTTP
+    private boolean     m_getModPage;       // The noticy flag for modified HTTP
     private boolean     m_refreshAllFeeds;  // The notify flag for all feeds
+    private boolean     m_refreshUpdFeeds;  // The notify flag for updated feeds
     private boolean     m_getFeedList;      // The noticy flag for list parsing
     private FeedListParser m_listParser;    // The feed list parser
     private int         m_maxRssItemCount;  // The maximum item count in a feed
@@ -79,14 +83,21 @@ public class RssReaderMIDlet extends MIDlet
 	// done by seeing if max item count is set.  We also set it after
 	// showing the about.
     private boolean firstTime = false;
+	// This is a mark (icon) next to unread items (except on unread items
+	// screen).  Given that many screens are small, it is optional as 
+	// we don't want to reduce space for text.
+    private Image           m_unreadImage;
+    private Vector          m_unreadItems = new Vector();
     
     // Currently selected bookmark
     private int             m_curBookmark;  // The currently selected item
     private RssFeedParser   m_curRssParser; // The currently selected RSS
     
     // GUI items
-    private List        m_bookmarkList;     // The bookmark list
+    private PromptList  m_bookmarkList;     // The bookmark list
     private List        m_headerList;       // The header list
+    private List        m_unreadHeaderList;    // The header list for unread items
+    private List        m_itemRrnForm;      // The list to return from for item
     private Form        m_itemForm;         // The item form
     private Form        m_addNewBMForm;     // The add new bookmark form
     private Form        m_loadForm;         // The "loading..." form
@@ -107,18 +118,24 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_addOkCmd;         // The OK command
     private Command     m_addCancelCmd;     // The Cancel command
     private Command     m_exitCommand;      // The exit command
+    private Command     m_SaveCommand;      // The save without exit command
     private Command     m_addNewBookmark;   // The add new bookmark command
     private Command     m_openBookmark;     // The open bookmark command
+    private Command     m_readUnreadItems;     // The read unread items command
     private Command     m_editBookmark;     // The edit bookmark command
     private Command     m_delBookmark;      // The delete bookmark command
     private Command     m_backCommand;      // The back to header list command
 	//#ifdef DMIDP20
-    private Command     m_openLinkCmd;    // The open link command
+    private Command     m_openLinkCmd;      // The open link command
+    private Command     m_openEnclosureCmd; // The open enclosure command
 	//#endif
     private Command     m_copyLinkCmd;    // The copy link command
     private Command     m_openHeaderCmd;    // The open header command
     private Command     m_backHeaderCmd;    // The back to bookmark list command
+    private Command     m_openUnreadHdrCmd;    // The open new header command
+    private Command     m_backUnreadHdrCmd;    // The back to bookmark list command
     private Command     m_updateCmd;        // The update headers command
+    private Command     m_updateModCmd;     // The update modified headers command
     private Command     m_importFeedListCmd;// The import feed list command
 	//#ifdef DTEST
 //@    private Command     m_importCurrFeedListCmd;// The import feed list command and default current seleected feed
@@ -134,6 +151,7 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_settingsCmd;      // The show settings command
     private Command     m_AboutCmd;      // The show About
     private Command     m_updateAllCmd;     // The update all command
+    private Command     m_updateAllModCmd;  // The update all modified command
     
     // The controller of the application
     private Controller m_controller;
@@ -150,12 +168,12 @@ public class RssReaderMIDlet extends MIDlet
         m_display = Display.getDisplay(this);
         
 		//#ifdef DLOGGING
+		//#ifdef DCLDCV10
+//@        LogManager.getInstance().readConfiguration(this);
+		//#else
 //@        LogManager.readConfiguration(this);
+		//#endif
 //@        logger = Logger.getLogger("RssReaderMIDlet");
-//@		fineLoggable = logger.isLoggable(Level.FINE);
-//@		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
-//@		finestLoggable = logger.isLoggable(Level.FINEST);
-//@		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
 //@		for (Enumeration eForms =
 //@				logger.getParent().getForms().elements();
 //@				eForms.hasMoreElements();) {
@@ -175,17 +193,24 @@ public class RssReaderMIDlet extends MIDlet
         m_addCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
         m_backCommand       = new Command("Back", Command.SCREEN, 1);
         m_exitCommand       = new Command("Exit", Command.SCREEN, 5);
+        m_SaveCommand       = new Command("Save without exit", Command.SCREEN, 4);
         m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
         m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
+        m_readUnreadItems      = new Command("Read unread items", Command.SCREEN, 1);
         m_editBookmark      = new Command("Edit feed", Command.SCREEN, 2);
         m_delBookmark       = new Command("Delete feed", Command.SCREEN, 3);
         m_openHeaderCmd     = new Command("Open item", Command.SCREEN, 1);
+        m_openUnreadHdrCmd     = new Command("Open item", Command.SCREEN, 1);
 		//#ifdef DMIDP20
         m_openLinkCmd       = new Command("Open link", Command.SCREEN, 1);
+        m_openEnclosureCmd  = new Command("Open enclosure", Command.SCREEN, 1);
 		//#endif
         m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 1);
         m_backHeaderCmd     = new Command("Back", Command.SCREEN, 2);
+        m_backUnreadHdrCmd     = new Command("Back", Command.SCREEN, 2);
         m_updateCmd         = new Command("Update feed", Command.SCREEN, 2);
+        m_updateModCmd      = new Command("Update modified feed",
+										  Command.SCREEN, 2);
         m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
 		//#ifdef DTEST
 //@        m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 3);
@@ -195,29 +220,63 @@ public class RssReaderMIDlet extends MIDlet
         m_settingsCmd       = new Command("Settings", Command.SCREEN, 4);
         m_AboutCmd          = new Command("About", Command.SCREEN, 4);
         m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
+        m_updateAllModCmd   = new Command("Update modified all",
+				      					  Command.SCREEN, 2);
 	//#ifdef DLOGGING
 //@        m_debugCmd          = new Command("Debug Log", Command.SCREEN, 4);
 //@        m_backFrDebugCmd    = new Command("Back", Command.SCREEN, 2);
 	//#endif
         
         m_getPage = false;
+        m_getModPage = false;
         m_refreshAllFeeds = false;
+        m_refreshUpdFeeds = false;
         m_getFeedList = false;
         m_curBookmark = -1;
         m_maxRssItemCount = 10;
         
         m_appSettings = RssReaderSettings.getInstance(this);
+		//#ifdef DLOGGING
+//@		if (m_appSettings.getLogLevel().equals("")) {
+//@			m_appSettings.setLogLevel(logger.getLevel().getName());
+//@		} else {
+//@			m_appSettings.setLogLevel(logger.getLevel().getName());
+//@		}
+//@		fineLoggable = logger.isLoggable(Level.FINE);
+//@		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+//@		finestLoggable = logger.isLoggable(Level.FINEST);
+//@		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+		//#endif
 		try {
 			m_settings = Settings.getInstance(this);
 			firstTime = !m_settings.isInitialized();
         } catch(Exception e) {
             System.err.println("Error while getting settings: " + e.toString());
         }
+
+		try {
+			try {
+				// createImage("/icons/unread.png") does not always work
+				// with the emulator.  so, I do an alternate which is
+				// effectively the same thing.
+				m_unreadImage = Image.createImage("/icons/unread.png");
+			} catch(IOException e) {
+				//#ifdef DMIDP20
+				InputStream is =
+						this.getClass().getResourceAsStream("/icons/unread.png");
+				m_unreadImage = Image.createImage(is);
+				is.close();
+				//#endif
+			}
+        } catch(Exception e) {
+            System.err.println("Error while getting mark image: " + e.toString());
+        }
         
         /** Initialize GUI items */
         initializeBookmarkList();
         initializeAddBookmarkForm();
         initializeHeadersList();
+        initializeUnreadHhdrsList();
         //initializeLoadingForm();
         initializeImportForm();
 	//#ifdef DLOGGING
@@ -245,50 +304,60 @@ public class RssReaderMIDlet extends MIDlet
     /** Load bookmarks from record store */
     private void initializeBookmarkList() {
         try {
-            m_bookmarkList = new List("Bookmarks", List.IMPLICIT);
+            m_bookmarkList = new PromptList(this, "Bookmarks", List.IMPLICIT);
             m_bookmarkList.addCommand( m_exitCommand );
+            m_bookmarkList.addCommand( m_SaveCommand );
             m_bookmarkList.addCommand( m_addNewBookmark );
             m_bookmarkList.addCommand( m_openBookmark );
+            m_bookmarkList.addCommand( m_readUnreadItems );
             m_bookmarkList.addCommand( m_editBookmark );
-            m_bookmarkList.addCommand( m_delBookmark );
+            m_bookmarkList.addPromptCommand( m_delBookmark,
+					                         "Are you sure you want to delete?" );
             m_bookmarkList.addCommand( m_importFeedListCmd );
 			//#ifdef DTEST
 //@            m_bookmarkList.addCommand( m_importCurrFeedListCmd );
 			//#endif
             m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_updateAllCmd );
+            m_bookmarkList.addCommand( m_updateAllModCmd );
 	//#ifdef DLOGGING
 //@            m_bookmarkList.addCommand( m_debugCmd );
 	//#endif
             m_bookmarkList.addCommand( m_AboutCmd );
             m_bookmarkList.setCommandListener( this );
             
-            boolean stop = false;
             int i = 1;
             
             m_rssFeeds = new Hashtable();
-            m_settings = Settings.getInstance(this);
-            String bms = m_settings.getStringProperty("bookmarks", "");
-            
-            if(bms.length()>0) {
-                do{
-                    
-                    String part = "";
-                    if(bms.indexOf("^")>0) {
-                        part = bms.substring(0, bms.indexOf("^"));
-                    }
-                    bms = bms.substring(bms.indexOf("^")+1);
-                    if(part.length()>0) {
-                        RssFeed bm = new RssFeed( part );
-                        if(bm.getName().length()>0){
-                            m_bookmarkList.append(bm.getName(),null);
-                            m_rssFeeds.put(bm.getName(), bm);
-                        }
-                    }
-                    if( part.length()==0)
-                        stop = true;
-                }while(!stop);
+			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
+				boolean stop = false;
+				String bms = m_settings.getStringProperty(ic, "bookmarks", "");
+				// Save memory by setting bookmarks to "" now that
+				// we will convert them to objects.
+				m_settings.setStringProperty("bookmarks", "");
+				
+				if(bms.length()>0) {
+					do{
+						
+						String part = "";
+						if(bms.indexOf("^")>0) {
+							part = bms.substring(0, bms.indexOf("^"));
+						}
+						bms = bms.substring(bms.indexOf("^")+1);
+						if(part.length()>0) {
+							RssFeed bm = new RssFeed( part );
+							if(bm.getName().length()>0){
+								m_bookmarkList.append(bm.getName(),null);
+								m_rssFeeds.put(bm.getName(), bm);
+							}
+						}
+						if( part.length()==0)
+							stop = true;
+					}while(!stop);
+				}
             }
+			// Reset internal region to 0.
+			m_settings.getStringProperty(0, "bookmarks", "");
         } catch(Exception e) {
             System.err.println("Error while initializing bookmark list: " + e.toString());
         }
@@ -305,7 +374,7 @@ public class RssReaderMIDlet extends MIDlet
     /** Initialize bookmark adding form */
     private void initializeAddBookmarkForm() {
         m_addNewBMForm = new Form("New bookmark");
-        m_bmName = new TextField("Name", "", 35, TextField.ANY);
+        m_bmName = new TextField("Name", "", 64, TextField.ANY);
         m_bmURL  = new TextField("URL", "http://", 256, TextField.URL);
         m_bmUsername  = new TextField("Username (optional)", "", 64, TextField.ANY);
         m_bmPassword  = new TextField("Password (optional)", "", 64, TextField.PASSWORD);
@@ -365,23 +434,37 @@ public class RssReaderMIDlet extends MIDlet
         long lngTimeTaken;
         while(true) {
             try {
-                if( m_getPage ) {
+                if( m_getPage || m_getModPage ) {
                     try {
                         /** Get RSS feed */
                         int maxItemCount = m_appSettings.getMaximumItemCountInFeed();
-                        m_curRssParser.parseRssFeed( maxItemCount );
+						//TODO
+                        m_curRssParser.parseRssFeed( m_getModPage, maxItemCount );
                         fillHeadersList();
                         m_display.setCurrent( m_headerList );
                     }catch(Exception e) {
+						//#ifdef DLOGGING
+//@						logger.severe("Parsing feeds.", e);
+						//#endif
                         /** Error while parsing RSS feed */
                         System.out.println("Error: " + e.getMessage());
                         m_loadForm.append("\nError parsing feed on:\n" +
                                 m_curRssParser.getRssFeed().getUrl());
                         m_display.setCurrent( m_loadForm );
+                    }catch(Throwable t) {
+						//#ifdef DLOGGING
+//@						logger.severe("Parsing feeds.", t);
+						//#endif
+                        /** Error while parsing RSS feed */
+                        System.out.println("Error: " + t.getMessage());
+                        m_loadForm.append("\nError parsing feed on:\n" +
+                                m_curRssParser.getRssFeed().getUrl());
+                        m_display.setCurrent( m_loadForm );
                     }
                     m_getPage = false;
+                    m_getModPage = false;
                 }
-                if( m_refreshAllFeeds ) {
+                if( m_refreshAllFeeds || m_refreshUpdFeeds ) {
                     try{
                         int maxItemCount = m_appSettings.getMaximumItemCountInFeed();
                         Enumeration feedEnum = m_rssFeeds.elements();
@@ -390,31 +473,49 @@ public class RssReaderMIDlet extends MIDlet
                             try{
                                 m_loadForm.append(feed.getName() + "...");
                                 RssFeedParser parser = new RssFeedParser( feed );
-                                parser.parseRssFeed(maxItemCount);
+                                parser.parseRssFeed( m_refreshUpdFeeds,
+										maxItemCount);
                                 m_loadForm.append("ok\n");
                             } catch(Exception ex) {
                                 m_loadForm.append("Error\n");
+								System.out.println("Error feed " +
+										           feed.getName());
                             }
                         }
                         m_display.setCurrent( m_bookmarkList );
                     } catch(Exception ex) {
+						//#ifdef DLOGGING
+//@						logger.severe("Error parsing feeds from:\n" +
+//@                                m_curRssParser.getRssFeed().getUrl(), ex);
+						//#endif
+                        m_loadForm.append("\nError parsing feed from:\n" +
+                                m_curRssParser.getRssFeed().getUrl());
+                        m_display.setCurrent( m_loadForm );
+                    } catch(Throwable t) {
+						//#ifdef DLOGGING
+//@						logger.severe("Parsing feeds.", t);
+						//#endif
                         m_loadForm.append("\nError parsing feed from:\n" +
                                 m_curRssParser.getRssFeed().getUrl());
                         m_display.setCurrent( m_loadForm );
                     }
                     m_refreshAllFeeds = false;
+                    m_refreshUpdFeeds = false;
                 }
                 if( m_getFeedList ) {
                     try {
                         if(m_listParser.isReady()) {
                             // Feed list parsing is ready
                             System.out.println("Feed list parsing is ready");
+							if(!m_listParser.isSuccessfull()) {
+								throw new Exception("Feed parsing error.");
+							}
                             RssFeed[] feeds = m_listParser.getFeeds();
                             for(int feedIndex=0; feedIndex<feeds.length; feedIndex++) {
                                 String name = feeds[feedIndex].getName();
                                 System.out.println("Adding: " + name);
                                 if(name.length()>0) {
-                                    if(m_rssFeeds.containsKey( name )==false) {
+                                    if(!m_rssFeeds.containsKey( name )) {
                                         m_rssFeeds.put( name, feeds[feedIndex] );
                                         if( m_curBookmark>=0 ){
                                             m_bookmarkList.set(m_curBookmark, name, null);
@@ -431,9 +532,18 @@ public class RssReaderMIDlet extends MIDlet
                         }
                     } catch(Exception ex) {
                         // TODO: Add exception handling
+						//#ifdef DLOGGING
+//@						logger.severe("Error while parsing feed list: ", ex);
+						//#endif
                         System.err.println("Error while parsing feed list: " + ex.toString());
-                        m_getFeedList = false;
-                        m_display.setCurrent( m_bookmarkList );
+						Alert importAlert = new Alert(
+								"Import errror", 
+								"Error importing feeds:  " + ex.getMessage(),
+								null,
+								AlertType.ERROR);
+						importAlert.setTimeout(Alert.FOREVER);
+						m_display.setCurrent( importAlert, m_importFeedsForm );
+						m_getFeedList = false;
                     }
                 }
                 lngStart = System.currentTimeMillis();
@@ -473,14 +583,52 @@ public class RssReaderMIDlet extends MIDlet
     
     /** Fill RSS header list */
     private void fillHeadersList() {
-        while(m_headerList.size()>0) {
-            m_headerList.delete(0);
+		//#ifdef DMIDP20
+        if(m_headerList.size()>0) {
+            m_headerList.deleteAll();
         }
+		//#else
+//@        while(m_headerList.size()>0) {
+//@
+//@            m_headerList.delete(0);
+//@
+//@		}
+		//#endif
         RssFeed feed = m_curRssParser.getRssFeed();
         m_headerList.setTitle( feed.getName() );
-        for(int i=0; i<m_curRssParser.getRssFeed().getItems().size(); i++){
+		boolean markUnreadItems = m_appSettings.getMarkUnreadItems();
+        for(int i=0; i<feed.getItems().size(); i++){
             RssItem r = (RssItem)feed.getItems().elementAt(i);
-            m_headerList.append( r.getTitle(), null );
+			if (markUnreadItems && r.isUnreadItem()) {
+				m_headerList.append( r.getTitle(), m_unreadImage );
+			} else {
+				m_headerList.append( r.getTitle(), null );
+			}
+        }
+    }
+    
+    /** Fill RSS unread header list */
+    private void fillUnreadHdrsList( boolean firstItem, RssFeed feed ) {
+        if(firstItem && (m_unreadHeaderList.size()>0)) {
+			initializeLoadingForm("Loading unread items...");
+			m_display.setCurrent( m_loadForm );
+			//#ifdef DMIDP20
+            m_unreadHeaderList.deleteAll();
+			//#else
+//@			while(m_unreadHeaderList.size()>0) {
+//@
+//@				m_unreadHeaderList.delete(0);
+//@
+//@			}
+			//#endif
+			m_unreadItems.removeAllElements();
+        }
+        for(int i=0; i<feed.getItems().size(); i++){
+            RssItem r = (RssItem)feed.getItems().elementAt(i);
+			if (r.isUnreadItem()) {
+				m_unreadHeaderList.append( r.getTitle(), null );
+				m_unreadItems.addElement(r);
+			}
         }
     }
     
@@ -490,7 +638,16 @@ public class RssReaderMIDlet extends MIDlet
         m_headerList.addCommand(m_openHeaderCmd);
         m_headerList.addCommand(m_backHeaderCmd);
         m_headerList.addCommand(m_updateCmd);
+        m_headerList.addCommand(m_updateModCmd);
         m_headerList.setCommandListener(this);
+    }
+    
+    /** Initialize new RSS headers list */
+    private void initializeUnreadHhdrsList() {
+        m_unreadHeaderList = new List("New Headers", List.IMPLICIT);
+        m_unreadHeaderList.addCommand(m_openUnreadHdrCmd);
+        m_unreadHeaderList.addCommand(m_backUnreadHdrCmd);
+        m_unreadHeaderList.setCommandListener(this);
     }
     
     /** Initialize RSS item form */
@@ -499,6 +656,9 @@ public class RssReaderMIDlet extends MIDlet
         m_itemForm = new Form( item.getTitle() );
 		//#ifdef DMIDP20
         m_itemForm.addCommand( m_openLinkCmd );
+		if (!item.getEnclosure().equals("")) {
+			m_itemForm.addCommand( m_openEnclosureCmd );
+		}
 		//#endif
         m_itemForm.addCommand( m_copyLinkCmd );
         m_itemForm.addCommand( m_backCommand );
@@ -507,8 +667,25 @@ public class RssReaderMIDlet extends MIDlet
         m_itemForm.append(new StringItem(item.getTitle() + "\n",
                 item.getDescription()));
 		citem = item;
-        citemNbr  = m_itemForm.append(new StringItem("Link:",
-                item.getLink()));
+        StringItem senclosure = null;
+		//#ifdef DMIDP20
+        StringItem slink = new StringItem("Link:", item.getLink(),
+				                          Item.HYPERLINK);
+		if (!item.getEnclosure().equals("")) {
+			senclosure = new StringItem("Enclosure:", item.getEnclosure(),
+													  Item.HYPERLINK);
+		}
+		//#else
+//@        StringItem slink = new StringItem("Link:", item.getLink());
+//@		if (!item.getEnclosure().equals("")) {
+//@			senclosure = new StringItem("Enclosure:", item.getEnclosure());
+//@		}
+		//#endif
+        citemNbr  = m_itemForm.append(slink);
+		// TODO get number of this or delete all and add.
+		if (senclosure != null) {
+			m_itemForm.append(senclosure);
+		}
         
         // Add item's date if it is available
         Date itemDate = item.getDate();
@@ -525,11 +702,10 @@ public class RssReaderMIDlet extends MIDlet
 		if( firstTime ) {
 			try {
 				firstTime = false;
-				m_settings = Settings.getInstance(this);
 				// Set Max item count to default so that it is initialized.
 				m_appSettings.setMaximumItemCountInFeed(
 						m_appSettings.getMaximumItemCountInFeed());
-				m_settings.save(false);
+				saveBkMrkSettings(false);
 				Alert m_about = getAbout();
 				m_display.setCurrent( m_about, m_bookmarkList );
 			} catch(Exception e) {
@@ -548,7 +724,7 @@ public class RssReaderMIDlet extends MIDlet
 	 */
 	private Alert getAbout() {
 		Alert about = new Alert("About RssReader",
-"RssReader v1.9 " +
+"RssReader v1.10 " +
  "Copyright (C) 2005-2006 Tommi Laukkanen " +
  "http://www.substanceofcode.com.  " +
  "This program is distributed in the hope that it will be useful, " +
@@ -578,19 +754,42 @@ public class RssReaderMIDlet extends MIDlet
     public void destroyApp(boolean unconditional) {
     }
     
-    /** Save bookmarks to record store */
-    public void saveBookmarks() {
+    /** Save bookmarks to record store
+        releaseMemory use true if exiting as we do not need
+		the rss feeds anymore, so we can save memory and avoid
+		having extra memory around.  */
+    public void saveBookmarks(int region, boolean releaseMemory) {
         String bookmarks = "";
+		m_settings.setStringProperty("bookmarks",bookmarks);
+		if (m_bookmarkList.size() == 0) {
+			return;
+		}
         try {
+			int bookRegion = region - 1;
+			int iparts = m_settings.MAX_REGIONS - 1;
+			int firstIx = bookRegion * m_bookmarkList.size() / iparts;
+			int endIx = (bookRegion + 1) * m_bookmarkList.size() / iparts - 1;
             /** Try to save feeds including items */
-            for( int i=0; i<m_bookmarkList.size(); i++) {
+            for( int i=firstIx; i<=endIx; i++) {
                 String name = m_bookmarkList.getString(i);
+				if (!m_rssFeeds.containsKey( name )) {
+					continue;
+				}
                 RssFeed rss = (RssFeed)m_rssFeeds.get( name );
-                if( name.length()>0)
+                if( name.length()>0) {
                     bookmarks += rss.getStoreString(true) + "^";
+					if (releaseMemory) {
+						m_rssFeeds.remove( name );
+					}
+				}
             }
             m_settings.setStringProperty("bookmarks",bookmarks);
         } catch(OutOfMemoryError error) {
+//#ifdef DLOGGING
+//@			logger.severe("saveBookmarks could not save.", error);
+//#endif
+			System.out.println("saveBookmarks could not save." + error + " " +
+					           error.getMessage());
             Alert memoryAlert = new Alert(
                     "Out of memory", 
                     "Saving bookmarks without updated news items.",
@@ -607,25 +806,73 @@ public class RssReaderMIDlet extends MIDlet
                     bookmarks += rss.getStoreString(false) + "^";
             }
             m_settings.setStringProperty("bookmarks",bookmarks);
+		} catch (Throwable t) {
+//#ifdef DLOGGING
+//@			logger.severe("saveBookmarks could not save.", t);
+//#endif
+			System.out.println("saveBookmarks could not save." + t + " " +
+					           t.getMessage());
         }
     }
     
     /** Update RSS feed's headers */
-    private void updateHeaders() {
-        initializeLoadingForm("updating feed...");
-        m_display.setCurrent( m_loadForm );
-        if(m_curRssParser.getRssFeed().getUrl().length()>0) {
-            m_getPage = true;
-        }
+    private void updateHeaders(boolean updMod) {
+		try {
+			initializeLoadingForm("updating feed...");
+			m_display.setCurrent( m_loadForm );
+			if(m_curRssParser.getRssFeed().getUrl().length()>0) {
+				if (updMod) {
+					m_getModPage = true;
+				} else {
+					m_getPage = true;
+				}
+			}
+		} catch (Throwable t) {
+//#ifdef DLOGGING
+//@			logger.severe("updateHeaders could not update." + t + " " +
+//@					           t.getMessage());
+//#endif
+			System.out.println("updateHeaders could not update." + t + " " +
+					           t.getMessage());
+		}
     }
     
     /** Update all RSS feeds */
-    private void updateAllHeaders() {
+    private void updateAllHeaders(boolean updModHdr) {
         initializeLoadingForm("Updating all feeds...");
         m_display.setCurrent( m_loadForm );
-        m_refreshAllFeeds = true;
+		if (updModHdr) {
+			m_refreshUpdFeeds = true;
+		} else {
+			m_refreshAllFeeds = true;
+		}
     }
     
+	private synchronized void saveBkMrkSettings(boolean releaseMemory) {
+		try {
+			m_settings.save(0, false);
+			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
+				saveBookmarks(ic, releaseMemory);
+				m_settings.save(ic, false);
+			}
+			// Set internal region back to 0.
+			m_settings.setStringProperty("bookmarks","");
+			m_settings.save(0, false);
+		} catch(Exception e) {
+			//#ifdef DLOGGING
+//@			logger.severe("Saving feeds.", e);
+			//#endif
+			/** Error while parsing RSS feed */
+			System.out.println("Error saving: " + e + e.getMessage());
+		} catch(Throwable t) {
+			//#ifdef DLOGGING
+//@			logger.severe("Saving feeds.", t);
+			//#endif
+			/** Error while parsing RSS feed */
+			System.out.println("Error saving: " + t + t.getMessage());
+		}
+	}
+
     /** Respond to commands */
     public void commandAction(Command c, Displayable s) {
         /** Add new RSS feed bookmark */
@@ -638,12 +885,14 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Exit from MIDlet and save bookmarks */
         if( c == m_exitCommand ){
-            try {
-                saveBookmarks();
-                m_settings.save(false);
-            } catch(Exception e) {}
+			saveBkMrkSettings(true);
             destroyApp(false);
             notifyDestroyed();
+        }
+        
+        /** Save bookmarks without exit (don't free up bookmarks)  */
+        if( c == m_SaveCommand ){
+			saveBkMrkSettings(false);
         }
         
         /** Save currently edited (or added) RSS feed's properties */
@@ -659,23 +908,35 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Edit currently selected RSS feed bookmark */
         if( c == m_editBookmark ){
-            if( m_bookmarkList.size()>0 ){
-                m_curBookmark = m_bookmarkList.getSelectedIndex();
-                RssFeed bm = (RssFeed)m_rssFeeds.get(
-                        m_bookmarkList.getString(m_curBookmark));
-                m_bmName.setString( bm.getName() );
-                m_bmURL.setString(  bm.getUrl() );
-                m_bmUsername.setString( bm.getUsername() );
-                m_bmPassword.setString( bm.getPassword() );
-                m_display.setCurrent( m_addNewBMForm );
-            }
+			try {
+				if( m_bookmarkList.size()>0 ){
+					m_curBookmark = m_bookmarkList.getSelectedIndex();
+					RssFeed bm = (RssFeed)m_rssFeeds.get(
+							m_bookmarkList.getString(m_curBookmark));
+					m_bmName.setString( bm.getName() );
+					m_bmURL.setString(  bm.getUrl() );
+					m_bmUsername.setString( bm.getUsername() );
+					m_bmPassword.setString( bm.getPassword() );
+					m_display.setCurrent( m_addNewBMForm );
+				}
+			}catch(Throwable t) {
+				//#ifdef DLOGGING
+//@				logger.severe("Editing feeds.", t);
+				//#endif
+				/** Error while parsing RSS feed */
+				System.out.println("Error editing feeds: " + t.getMessage());
+			}
         }
         
         /** Delete currently selected RSS feed bookmark */
         if( c == m_delBookmark ){
             if( m_bookmarkList.size()>0 ){
                 m_curBookmark = m_bookmarkList.getSelectedIndex();
+                String name = m_bookmarkList.getString(m_curBookmark);
                 m_bookmarkList.delete( m_curBookmark );
+				if (m_rssFeeds.containsKey( name )) {
+					m_rssFeeds.remove( name );
+				}
             }
         }
         
@@ -690,7 +951,7 @@ public class RssReaderMIDlet extends MIDlet
                 m_curRssParser = new RssFeedParser( feed );
                 if( m_curRssParser.getRssFeed().getItems().size()==0 ) {
                     /** Update RSS feed headers only if this is a first time */
-                    updateHeaders();
+                    updateHeaders(false);
                 } else {
                     /**
                      * Show currently selected RSS feed
@@ -702,21 +963,76 @@ public class RssReaderMIDlet extends MIDlet
             }
         }
         
+        /** Read unread items */
+        if( c == m_readUnreadItems ) {
+            if( m_bookmarkList.size()>0 ){
+				boolean firstItem = true;
+				for( int ic = 0; ic < m_bookmarkList.size(); ic++ ){
+                
+					RssFeed feed = (RssFeed)m_rssFeeds.get(
+							m_bookmarkList.getString(ic));
+					if( feed.getItems().size()>0 ) {
+						/**
+						 * Show currently selected RSS feed
+						 * headers without updating them
+						 */
+						fillUnreadHdrsList( firstItem, feed );
+						if ( firstItem ) {
+							firstItem = false;
+						}
+					}
+				}
+				if ( !firstItem ) {
+					m_unreadHeaderList.setTitle("New items:  " +
+							                 m_unreadHeaderList.size());
+					m_display.setCurrent( m_unreadHeaderList );
+				} else {
+					m_display.setCurrent( m_bookmarkList );
+				}
+            }
+        }
+        
         /** Open RSS feed's selected topic */
         if( c == m_openHeaderCmd || (c == List.SELECT_COMMAND &&
                 m_display.getCurrent()==m_headerList)) {
             if( m_headerList.size()>0 ) {
                 RssFeed feed = m_curRssParser.getRssFeed();
+				int selIdx;
                 RssItem item = (RssItem) feed.getItems().elementAt(
-                        m_headerList.getSelectedIndex() );
+                        (selIdx = m_headerList.getSelectedIndex()) );
+				m_headerList.set(selIdx, m_headerList.getString(selIdx),
+						null );
+                item.setUnreadItem(false);
                 initializeItemForm( item );
+				m_itemRrnForm = m_headerList;
                 m_display.setCurrent( m_itemForm );
+            }
+        }
+        
+        /** Open RSS feed's selected topic */
+        if( (c == m_openUnreadHdrCmd) || (c == List.SELECT_COMMAND &&
+                s.equals(m_unreadHeaderList))) {
+			int selIdx = m_unreadHeaderList.getSelectedIndex();
+            if( m_unreadHeaderList.size()>0){
+				m_unreadHeaderList.delete(selIdx);
+				RssItem item = (RssItem)m_unreadItems.elementAt(selIdx);
+				m_unreadItems.removeElementAt(selIdx);
+				m_unreadHeaderList.setTitle("New items:  " +
+										 m_unreadHeaderList.size());
+				/**
+				 * Show currently selected RSS item
+				 * without updating it
+				 */
+				item.setUnreadItem(false);
+				initializeItemForm( item );
+				m_itemRrnForm = m_unreadHeaderList;
+				m_display.setCurrent( m_itemForm );
             }
         }
         
         /** Get back to RSS feed headers */
         if( c == m_backCommand ){
-            m_display.setCurrent( m_headerList );
+            m_display.setCurrent( m_itemRrnForm );
         }
         
         /** Copy link to clipboard.  */
@@ -730,18 +1046,37 @@ public class RssReaderMIDlet extends MIDlet
         if( c == m_openLinkCmd ){
 			try {
 				if( super.platformRequest(citem.getLink()) ) {
+					saveBkMrkSettings(true);
 					destroyApp(false);
 					super.notifyDestroyed();
 				}
-				m_display.setCurrent( m_headerList );
+				m_display.setCurrent( m_itemRrnForm );
 			} catch (ConnectionNotFoundException e) {
 				Alert badLink = new Alert("Could not connect to link",
 								"Bad link:  " + citem.getLink(), null,
 								AlertType.ERROR);
 				badLink.setTimeout(Alert.FOREVER);
+				m_display.setCurrent( badLink, m_itemRrnForm );
+			}
+        }
+
+        /** Go to link and get back to RSS feed headers */
+        if( c == m_openEnclosureCmd ){
+			try {
+				if( super.platformRequest(citem.getEnclosure()) ) {
+					destroyApp(false);
+					super.notifyDestroyed();
+				}
+				m_display.setCurrent( m_itemRrnForm );
+			} catch (ConnectionNotFoundException e) {
+				Alert badLink = new Alert("Could not connect to link",
+								"Bad link:  " + citem.getEnclosure(), null,
+								AlertType.ERROR);
+				badLink.setTimeout(Alert.FOREVER);
 				m_display.setCurrent( badLink, m_headerList );
 			}
         }
+
 		//#endif
         
         /** Get back to RSS feed bookmarks */
@@ -749,14 +1084,20 @@ public class RssReaderMIDlet extends MIDlet
             m_display.setCurrent( m_bookmarkList );
         }
         
+        /** Get back to RSS feed bookmarks */
+        if( c == m_backUnreadHdrCmd ){
+			m_unreadItems.removeAllElements(); 
+            m_display.setCurrent( m_bookmarkList );
+        }
+        
         /** Update currently selected RSS feed's headers */
-        if( c == m_updateCmd ) {
-            updateHeaders();
+        if( (c == m_updateCmd) ||  (c == m_updateModCmd) ) {
+            updateHeaders(c == m_updateModCmd);
         }
         
         /** Update all RSS feeds */
-        if( c == m_updateAllCmd ) {
-            updateAllHeaders();
+        if( (c == m_updateAllCmd) || (c == m_updateAllModCmd) ) {
+            updateAllHeaders(c == m_updateAllModCmd);
         }
         
         /** Show import feed list form */
@@ -770,7 +1111,6 @@ public class RssReaderMIDlet extends MIDlet
 		//#ifdef DTEST
 //@		/** Show import feed list form and default file */
 //@		if( c == m_importCurrFeedListCmd ) {
-//@			System.out.println( "s=" + m_headerList.size());
 //@			if( m_bookmarkList.size()>0 ) {
 //@                m_curBookmark = m_bookmarkList.getSelectedIndex();
 //@                RssFeed bm = (RssFeed)m_rssFeeds.get(
@@ -787,6 +1127,8 @@ public class RssReaderMIDlet extends MIDlet
             try {
                 // TODO: Add code for importing
                 // 1. Show wait screen
+				initializeLoadingForm("Loading feeds from import...");
+				m_display.setCurrent( m_loadForm );
                 
                 // 2. Import feeds
                 int selectedImportType = m_importFormatGroup.getSelectedIndex();
@@ -826,6 +1168,13 @@ public class RssReaderMIDlet extends MIDlet
                 
             } catch(Exception ex) {
                 // TODO: Show alarm
+				Alert importAlert = new Alert(
+						"Import errror", 
+						"Error importing feeds",
+						null,
+						AlertType.ERROR);
+				importAlert.setTimeout(Alert.FOREVER);
+				m_display.setCurrent( importAlert, m_importFeedsForm );
             }
         }
         
@@ -856,7 +1205,7 @@ public class RssReaderMIDlet extends MIDlet
 //@			m_display.setCurrent( m_debug );
 //@		}
 //@
-//@        /** Show about */
+//@        /** Back to bookmarks */
 //@		if( c == m_backFrDebugCmd ) {
 //@			m_display.setCurrent( m_bookmarkList );
 //@		}
