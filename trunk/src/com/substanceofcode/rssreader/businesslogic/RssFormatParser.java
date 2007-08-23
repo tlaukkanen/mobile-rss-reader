@@ -22,6 +22,7 @@
 
 package com.substanceofcode.rssreader.businesslogic;
 
+import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businessentities.RssItem;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
@@ -41,12 +42,14 @@ public class RssFormatParser implements FeedFormatParser {
     public RssFormatParser() {
     }
     
-    public Vector parse(XmlParser parser, int maxItemCount) throws IOException {
+    public Vector parse(XmlParser parser, RssFeed feed,
+			            int maxItemCount) throws IOException {
         /** RSS item properties */
-        String title = null;
-        String description = null;
-        String link = null;
-        String date = null;
+        String title = "";
+        String description = "";
+        String link = "";
+        String date = "";
+        String enclosure = "";
         
         Vector items = new Vector();
         
@@ -68,7 +71,7 @@ public class RssFormatParser implements FeedFormatParser {
                     RssItem item;
                     Date pubDate = null;
 					// Check date in case we cannot find it.
-					if (date != null) {
+					if (!date.equals("")) {
 						if (date.indexOf("-") >= 0) {
 							pubDate = parseDcDate(date);
 						} else {
@@ -76,9 +79,14 @@ public class RssFormatParser implements FeedFormatParser {
 						}
 					}
                     if(pubDate!=null) {
-                        item = new RssItem(title, link, description, pubDate);
+                        item = new RssItem(title, link, description, pubDate,
+										   enclosure, true);
                     } else {
                         item = new RssItem(title, link, description);
+						item.setUnreadItem(true);
+						if (!enclosure.equals("")) {
+							item.setEnclosure(enclosure);
+						}
                     }
                     items.addElement( item );
                     if(items.size()==maxItemCount) {
@@ -91,9 +99,11 @@ public class RssFormatParser implements FeedFormatParser {
                 description = "";
                 link = "";
                 date = "";
+                enclosure = "";
             }
             else if( elementName.equals("title") ) {
                 title = parser.getText();
+                title = StringUtil.replace(title, "\n", " ");
                 title = StringUtil.removeHtml( title );
             }
             else if( elementName.equals("link") ) {
@@ -106,6 +116,12 @@ public class RssFormatParser implements FeedFormatParser {
             else if( elementName.equals("pubDate") ||
                      elementName.equals("dc:date")) {
                 date = parser.getText();
+			}
+            else if( elementName.equals("enclosure") ) {
+                String cenclosure = parser.getAttributeValue("url");
+                if (cenclosure != null) {
+                	enclosure = cenclosure;
+				}
             }
             
             /** Parse next element */            
@@ -116,7 +132,7 @@ public class RssFormatParser implements FeedFormatParser {
         if(title.length()>0) {
             RssItem item;
             Date pubDate = null;
-			if (date != null) {
+			if ((date != null) && !date.equals("")) {
 				if (date.indexOf("-") >= 0) {
 					pubDate = parseDcDate(date);
 				} else {
@@ -124,9 +140,14 @@ public class RssFormatParser implements FeedFormatParser {
 				}
 			}
             if(pubDate!=null) {
-                item = new RssItem(title, link, description, pubDate);
+                item = new RssItem(title, link, description, pubDate,
+								   enclosure, true);
             } else {
                 item = new RssItem(title, link, description);
+				item.setUnreadItem(true);
+				if (!enclosure.equals("")) {
+					item.setEnclosure(enclosure);
+				}
             }
             items.addElement( item );
         }        
@@ -135,7 +156,7 @@ public class RssFormatParser implements FeedFormatParser {
     }
     
 	/** Get calendar date. **/
-	private Date getCal(int dayOfMonth, int month, int year, int hours,
+	public static Date getCal(int dayOfMonth, int month, int year, int hours,
 			           int minutes, int seconds) throws Exception {
 		// Create calendar object from date values
 		Calendar cal = Calendar.getInstance();
@@ -154,7 +175,7 @@ public class RssFormatParser implements FeedFormatParser {
      * Example of RSS date:
      * Sat, 23 Sep 2006 22:25:11 +0000
      */
-    private Date parseRssDate(String dateString) {
+    public static Date parseRssDate(String dateString) {
         Date pubDate = null;
         try {
             // Split date string to values
@@ -181,6 +202,12 @@ public class RssFormatParser implements FeedFormatParser {
                 yearIndex = 2;
                 timeIndex = 3;
                 gmtIndex = 4;
+			} else if( columnCount==7 ) {
+                // Expected format:
+                // Thu, 19 Jul  2007 00:00:00 N
+                yearIndex = 4;
+                timeIndex = 5;
+                gmtIndex = 6;
             } else if( columnCount<5 || columnCount>6 ) {
                 throw new Exception("Invalid date format: " + dateString);
             }
@@ -216,18 +243,24 @@ public class RssFormatParser implements FeedFormatParser {
             
         } catch(Exception ex) {
             // TODO: Add exception handling code
-            System.err.println("Error while convertin date string to object: " +
-                    ex.toString());
+            System.err.println("parseRssDate error while converting date string to object: " + 
+                    dateString + "," + ex.toString());
+        } catch(Throwable t) {
+            // TODO: Add exception handling code
+            System.err.println("parseRssDate error while converting date string to object: " + 
+                    dateString + "," + t.toString());
         }
         return pubDate;
     }
     
     /**
-     * Parse RSS date dc:date format to Date object.
+     * Parse RSS date dc:date or atom format to Date object.
      * Example of RSS dc:date:
      * 2007-07-31T02:02:00+00:00
+	 * atom date
+     * [-]CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
      */
-    private Date parseDcDate(String dateString) {
+    public static Date parseDcDate(String dateString) {
         Date pubDate = null;
         try {
             // Split date string to values
@@ -237,10 +270,13 @@ public class RssFormatParser implements FeedFormatParser {
             int yearIndex = 0;
             int monthIndex = 1;
             int dayOfMonthTimeIndex = 2;
+			if (dateString.charAt(0) == '-') {
+				dateString = dateString.substring(1);
+			}
             
             String[] values = StringUtil.split(dateString, "-");
 
-            if( values.length!=3 ) {
+            if( values.length<3 ) {
                 throw new Exception("Invalid date format: " + dateString);
             }
             
@@ -269,8 +305,12 @@ public class RssFormatParser implements FeedFormatParser {
             
         } catch(Exception ex) {
             // TODO: Add exception handling code
-            System.err.println("Error while convertin date string to object: " +
-                    ex.toString());
+            System.err.println("parseDcDate error while converting date string to object: " +
+                    dateString + "," + ex.toString());
+        } catch(Throwable t) {
+            // TODO: Add exception handling code
+            System.err.println("parseDcDate error while converting date string to object: " +
+                    dateString + "," + t.toString());
         }
         return pubDate;
     }
