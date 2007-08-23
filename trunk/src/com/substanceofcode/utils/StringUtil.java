@@ -62,6 +62,25 @@ public class StringUtil {
         return result;
     }
     
+    /**
+     * Join strings into one string
+     * @param originals      Original strings
+     * @param joinStr        Join string
+     * @param index          Index to start at
+     * @return               Joined string
+     */
+    public static String join(String[] originals, String joinStr, int index) {
+        if (originals == null)  return null;
+        if (joinStr == null)  joinStr = "";
+        StringBuffer sb = new StringBuffer(originals[index]);
+        
+        // Parse nodes into vector
+        for (int ic = index + 1; ic < originals.length; ic++) {
+            sb.append( joinStr + originals[ic] );
+        }
+        return sb.toString();
+    }
+    
     /* Replace all instances of a String in a String.
      *   @param  s  String to alter.
      *   @param  f  String to look for.
