@@ -291,7 +291,7 @@ public class EncodingUtil {
 		//#endif
     }
 
-	public String replaceSpChars(String text) {
+	public static String replaceSpChars(String text) {
 		try {
 			// No need to convert i diaeresis anymore as we do encoding
 			// change.
@@ -303,6 +303,7 @@ public class EncodingUtil {
 			text = StringUtil.replace(text, LONG_DASH, "-");
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("EncodingUtil");
 //@            logger.severe("replaceNumEntity error ", t);
 			//#endif
             System.out.println("replaceNumEntity error " + t + "," +
