@@ -22,7 +22,9 @@
 
 package com.substanceofcode.rssreader.businessentities;
 
+import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -37,6 +39,7 @@ public class RssFeed{
     private String m_name = "";
     private String m_username = "";
     private String m_password = "";
+    private Date m_upddate = null;
     
     protected Vector m_items = new Vector();  // The RSS item vector
     
@@ -48,41 +51,80 @@ public class RssFeed{
         m_password = password;
     }
     
+	/** Create feed from an existing feed.  **/
+	public RssFeed(RssFeed feed) {
+		this.m_url = feed.m_url;
+		this.m_name = feed.m_name;
+		this.m_username = feed.m_username;
+		this.m_password = feed.m_password;
+		this.m_upddate = feed.m_upddate;
+		this.m_items = feed.m_items;
+		this.m_items = new Vector();
+		for (int ic = 0; ic < feed.m_items.size(); ic++) {
+			this.m_items.addElement(feed.m_items.elementAt(ic));
+		}
+	}
+    
     /** Creates a new instance of RSSBookmark with record store string */
     public RssFeed(String storeString){
+
+		try {
         
-        String[] nodes = StringUtil.split( storeString, "|" );
-        
-        /* Node count should be 5
-         * name | url | username | password | items
-         */
-        int NAME = 0;        
-        m_name = nodes[ NAME ];
-        
-        int URL = 1;
-        m_url = nodes[ URL ];
-        
-        int USERNAME = 2;
-        m_username = nodes[ USERNAME ];
-        
-        int PASSWORD = 3;
-        m_password = nodes[ PASSWORD ];
-        
-        int ITEMS = 4;
-        String itemArrayData = nodes[ ITEMS ];
-        
-        // Deserialize itemss
-        String[] serializedItems = StringUtil.split(itemArrayData, ".");
-        
-        m_items = new Vector();
-        for(int itemIndex=0; itemIndex<serializedItems.length; itemIndex++) {
-            String serializedItem = serializedItems[ itemIndex ];
-            if(serializedItem.length()>0) {
-                RssItem rssItem = RssItem.deserialize( serializedItem );
-                m_items.addElement( rssItem );
-            }
-        }
+			String[] nodes = StringUtil.split( storeString, "|" );
+			
+			/* Node count should be 5
+			 * name | url | username | password | items
+			 */
+			int NAME = 0;
+			m_name = nodes[ NAME ];
+			
+			int URL = 1;
+			m_url = nodes[ URL ];
+			
+			int USERNAME = 2;
+			m_username = nodes[ USERNAME ];
+			
+			int PASSWORD = 3;
+			m_password = nodes[ PASSWORD ];
+			
+			int ITEMS = 5;
+			if (ITEMS < nodes.length) {
+				int UPDDATE = 4;
+				String dateString = nodes[UPDDATE];
+				if(dateString.length()>0) {
+					m_upddate = new Date(Long.parseLong(dateString));
+				}
+				// Encode for better UTF-8 and to allow '|' in the name.
+				Base64 b64 = new Base64();
+				byte[] decodedName = b64.decode(m_name);
+				try {
+					m_name = new String( decodedName , "UTF-8" );
+				} catch (UnsupportedEncodingException e) {
+					m_name = new String( decodedName );
+				}
+			} else {
+				ITEMS = 4;
+			}
+			String itemArrayData = nodes[ ITEMS ];
+			
+			// Deserialize itemss
+			String[] serializedItems = StringUtil.split(itemArrayData, ".");
+			
+			m_items = new Vector();
+			for(int itemIndex=0; itemIndex<serializedItems.length; itemIndex++) {
+				String serializedItem = serializedItems[ itemIndex ];
+				if(serializedItem.length()>0) {
+					RssItem rssItem = RssItem.deserialize( serializedItem );
+					if (rssItem != null) {
+						m_items.addElement( rssItem );
+					}
+				}
+			}
        
+        } catch(Exception e) {
+            System.err.println("Error while rssfeed initialization : " + e.toString());
+			e.printStackTrace();
+        }
     }
     
     /** Return bookmark's name */
@@ -95,6 +137,10 @@ public class RssFeed{
         return m_url;
     }
     
+    public void setUrl(String url) {
+        this.m_url = url;
+    }
+
     /** Return bookmark's username for basic authentication */
     public String getUsername(){
         return m_username;
@@ -115,14 +161,35 @@ public class RssFeed{
                 serializedItems += serializedItem + ".";
             }
         }
-        String storeString = m_name + "|" +
-                m_url + "|" +
-                m_username + "|" +
+		String encodedName;
+        Base64 b64 = new Base64();
+		try {
+			encodedName = b64.encode( m_name.getBytes("UTF-8") );
+		} catch (UnsupportedEncodingException e) {
+			encodedName = b64.encode( m_name.getBytes() );
+		}
+        String storeString = encodedName + "|" +
+                              m_url + "|" + m_username + "|" +
                 m_password + "|" +
+                ((m_upddate == null) ? "" :
+				 String.valueOf(m_upddate.getTime())) + "|" +
                 serializedItems;
         return storeString;
         
     }
+
+	/** Copy feed to an existing feed.  **/
+	public void copyTo(RssFeed toFeed) {
+		toFeed.m_url = this.m_url;
+		toFeed.m_name = this.m_name;
+		toFeed.m_username = this.m_username;
+		toFeed.m_password = this.m_password;
+		toFeed.m_upddate = this.m_upddate;
+		toFeed.m_items = new Vector();
+		for (int ic = 0; ic < this.m_items.size(); ic++) {
+			toFeed.m_items.addElement(this.m_items.elementAt(ic));
+		}
+	}
     
     /** Return RSS feed items */
     public Vector getItems() {
@@ -134,4 +201,12 @@ public class RssFeed{
         m_items = items;
     }
     
+    public void setUpddate(Date upddate) {
+        this.m_upddate = upddate;
+    }
+
+    public Date getUpddate() {
+        return (m_upddate);
+    }
+
 }
