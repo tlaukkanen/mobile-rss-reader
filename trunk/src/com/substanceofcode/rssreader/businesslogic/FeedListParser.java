@@ -53,6 +53,7 @@ public abstract class FeedListParser implements Runnable{
 	protected String feedNameFilter;
 	protected String feedURLFilter;
     private boolean m_ready;
+    private boolean m_successfull = false;
     private RssFeed[] m_feeds;
     
 	//#ifdef DLOGGING
@@ -90,7 +91,12 @@ public abstract class FeedListParser implements Runnable{
     public void run() {
         try {
             m_feeds = parseFeeds();
+			m_successfull = true;
         } catch( Exception ex ) {
+			//#ifdef DLOGGING
+//@			logger.severe("FeedListParser.run(): Error while parsing " +
+//@					      "feeds: " + m_url, ex);
+			//#endif
             // TODO: Add exception handling
             System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
         } finally {
@@ -193,6 +199,10 @@ public abstract class FeedListParser implements Runnable{
 
     public String getFeedURLFilter() {
         return (feedURLFilter);
+    }
+
+    public boolean isSuccessfull() {
+        return (m_successfull);
     }
 
 }
