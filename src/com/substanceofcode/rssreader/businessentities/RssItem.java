@@ -24,6 +24,7 @@ package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 /**
@@ -39,6 +40,8 @@ public class RssItem {
     private String m_link  = "";   // The RSS item link
     private String m_desc  = "";   // The RSS item description
     private Date m_date = null;
+    private String m_enclosure  = "";   // The RSS item enclosure
+    private boolean m_unreadItem = false;
     
     /** Creates a new instance of RssItem */
     public RssItem(String title, String link, String desc) {
@@ -46,14 +49,18 @@ public class RssItem {
         m_link = link;
         m_desc = desc;
         m_date = null;
+        m_enclosure = "";
     }
     
     /** Creates a new instance of RssItem */
-    public RssItem(String title, String link, String desc, Date pubDate) {
+    public RssItem(String title, String link, String desc, Date pubDate,
+			       String enclosure, boolean unreadItem) {
         m_title = title;
         m_link = link;
         m_desc = desc;
         m_date = pubDate;
+        m_enclosure = enclosure;
+        m_unreadItem = unreadItem;
     }
     
     /** Get RSS item title */
@@ -84,46 +91,109 @@ public class RssItem {
         } else {
             dateString = String.valueOf( m_date.getTime() );
         }
-        String preData = m_title + "|" + m_link + "|" + dateString + "|" + m_desc;
-        Base64 b64 = new Base64();
-        String encodedSerializedData = b64.encode( preData.getBytes() );
-        return encodedSerializedData;
-    }
-    
-    /** Deserialize the object */
-    public static RssItem deserialize(String data) {
-        
-        String title = "";
-        String link = "";
-        String desc = "";
-        Date date = null;
 
-        // Base64 decode
+		String title = StringUtil.replace(m_title, "|", "\n");
+        String preData = title + "|" + m_link + "|" + dateString + "|" +
+			    m_enclosure + "|" + (m_unreadItem ? "1" : "0") + "|" + m_desc;
         Base64 b64 = new Base64();
-        byte[] decodedData = b64.decode(data);
-        data = new String( decodedData );
-        
-        String[] nodes = StringUtil.split( data, "|");
-        
-        /* Node count should be 4:
-         * title | link | date | desc
-         */
-        int TITLE = 0;
-        title = nodes[TITLE];
-        
-        int LINK = 1;
-        link = nodes[LINK];
-        
-        int DATE = 2;
-        String dateString = nodes[DATE];
-        if(dateString.length()>0) {
-            date = new Date(Long.parseLong(dateString));
-        }        
-        
-        int DESC = 3;
-        desc = nodes[DESC];
-                
-        RssItem item = new RssItem(title, link, desc, date);
+        String encodedSerializedData = null;
+		try {
+			encodedSerializedData = b64.encode( preData.getBytes("UTF-8") );
+		} catch (UnsupportedEncodingException e) {
+			encodedSerializedData = b64.encode( preData.getBytes() );
+		}
+		return encodedSerializedData;
+	}
+		
+	/** Deserialize the object */
+	public static RssItem deserialize(String data) {
+			
+		String title = "";
+		String link = "";
+		String desc = "";
+		Date date = null;
+		String enclosure = "";
+		boolean unreadItem = false;
+		RssItem item = null;
+
+		try {
+			// Base64 decode
+			Base64 b64 = new Base64();
+			byte[] decodedData = b64.decode(data);
+			try {
+				data = new String( decodedData, "UTF-8" );
+			} catch (UnsupportedEncodingException e) {
+				data = new String( decodedData );
+			}
+			
+			String[] nodes = StringUtil.split( data, "|");
+			
+			/* Node count should be 6:
+			 * title | link | date | enclosure | unreadItem | desc
+			 */
+			int TITLE = 0;
+			title = nodes[TITLE];
+			
+			int LINK = 1;
+			link = nodes[LINK];
+			
+			int DATE = 2;
+			String dateString = nodes[DATE];
+			if(dateString.length()>0) {
+				date = new Date(Long.parseLong(dateString));
+			}        
+			
+			int DESC = 5;
+			if (DESC < nodes.length) {
+				int ENCLOSURE = 3;
+				enclosure = nodes[ENCLOSURE];
+				int NEWITEM = 4;
+				String cunreadItem = nodes[NEWITEM];
+				if (cunreadItem.equals("1")) {
+					unreadItem = true;
+				} else if (cunreadItem.equals("0")) {
+					unreadItem = false;
+				} else {
+					// If we get here, then description has '|' in it.
+					DESC = 3;
+				}
+				if (DESC != 3) {
+					title = StringUtil.replace(title, "\n", "|");
+				}
+			} else {
+				DESC = 3;
+			}
+					
+			// If description has '|', we need to join.
+			if (DESC < (nodes.length - 1)) {
+				desc = StringUtil.join(nodes, "|", DESC);
+			} else {
+				desc = nodes[DESC];
+			}
+					
+			item = new RssItem(title, link, desc, date, enclosure, unreadItem);
+
+        } catch(Exception e) {
+            System.err.println("Error while rssitem deserialize : " + e.toString());
+			e.printStackTrace();
+        }
         return item;
     }
+
+    public void setUnreadItem(boolean unreadItem) {
+        this.m_unreadItem = unreadItem;
+    }
+
+    public boolean isUnreadItem() {
+        return (m_unreadItem);
+    }
+
+    public void setEnclosure(String enclosure) {
+        this.m_enclosure = enclosure;
+    }
+
+    public String getEnclosure() {
+        return (m_enclosure);
+    }
+
 }
