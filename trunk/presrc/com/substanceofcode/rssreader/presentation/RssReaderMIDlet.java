@@ -844,7 +844,7 @@ public class RssReaderMIDlet extends MIDlet
 		}
     }
     
-	private void saveBkMrkSettings(boolean releaseMemory) {
+	private synchronized void saveBkMrkSettings(boolean releaseMemory) {
 		try {
 			m_settings.save(0, false);
 			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
