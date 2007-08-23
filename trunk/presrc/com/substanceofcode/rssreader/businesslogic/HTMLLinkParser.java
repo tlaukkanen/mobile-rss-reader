@@ -51,9 +51,6 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class HTMLLinkParser extends FeedListParser {
     
-    private String fileEncoding = "ISO8859_1";  // Open with ISO8859_1
-    private String docEncoding = "";  // Default for HTML is ISO8859_1?
-    private EncodingUtil encodingUtil = null;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("HTMLLinkParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
@@ -68,12 +65,43 @@ public class HTMLLinkParser extends FeedListParser {
 
     public RssFeed[] parseFeeds(InputStream is) {
 		// Init in case we get a severe error.
+		try {
+			return HTMLLinkParser.parseFeeds(new EncodingUtil(is),
+											feedNameFilter,
+											feedURLFilter
+											//#ifdef DLOGGING
+											,logger
+											,fineLoggable
+											,finerLoggable
+											,finestLoggable
+											//#endif
+											);
+		} catch (Throwable t) {
+//#ifdef DLOGGING
+			logger.severe("parseFeeds error.", t);
+//#endif
+			System.out.println("parseFeeds error." + t + " " + t.getMessage());
+			return null;
+		}
+	}
+        
+    static public RssFeed[] parseFeeds(EncodingUtil encodingUtil,
+										String feedNameFilter,
+										String feedURLFilter
+										//#ifdef DLOGGING
+										,Logger logger,
+										 boolean fineLoggable,
+										 boolean finerLoggable,
+										 boolean finestLoggable
+										//#endif
+			                           ) {
+		// Init in case we get a severe error.
         RssFeed[] feeds = new RssFeed[0];
+		String docEncoding = "";  // Default for HTML is ISO8859_1?
 		try {
 			// Prepare buffer for input data
 			StringBuffer inputBuffer = new StringBuffer();
-			encodingUtil = new EncodingUtil(is);
-			fileEncoding = encodingUtil.getFileEncoding();
+			String fileEncoding = encodingUtil.getFileEncoding();
 			
 			// Read all data to buffer
 			int inputCharacter;
