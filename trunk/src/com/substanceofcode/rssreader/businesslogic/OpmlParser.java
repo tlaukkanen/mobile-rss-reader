@@ -27,6 +27,7 @@ import com.substanceofcode.utils.XmlParser;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
+import com.substanceofcode.utils.EncodingUtil;
 
 /**
  * OpmlParser is an utility class for aquiring and parsing a OPML lists.
@@ -37,6 +38,10 @@ import java.io.*;
  */
 public class OpmlParser extends FeedListParser {
     
+	// Future allow reading in OMPL which contain OMPL.
+
+	private boolean opmlDirectory = false;
+
     /** Constructor with url, username and password parameters. */
     public OpmlParser(String url, String username, String password) {
         super(url, username, password);
@@ -68,7 +73,21 @@ public class OpmlParser extends FeedListParser {
 					System.out.println("Parsing <outline> tag");
 					
 					title = parser.getAttributeValue( "text" );
-					link = parser.getAttributeValue( "xmlUrl" );
+					title = XmlParser.replaceAlphaEntities(title);
+					// No need to convert from UTF-8 to Unicode using replace
+					// umlauts now because it is done with new String...,encoding.
+
+					// Replace numeric entities including &#8217;, &#8216;
+					// &#8220;, and &#8221;
+					title = EncodingUtil.replaceNumEntity(title);
+
+					// Replace special chars like left quote, etc.
+					title = EncodingUtil.replaceSpChars(title);
+					if ((link = parser.getAttributeValue( "xmlUrl" )) == null) {
+						if (opmlDirectory) {
+							link = parser.getAttributeValue( "url" );
+						}
+					}
 					
 					/** Debugging information */
 					System.out.println("Title:       " + title);
