@@ -41,6 +41,8 @@ public class RssReaderSettings {
     private static final String IMPORT_URL = "import-url";
     private static final String IMPORT_USERNAME = "import-username";
     private static final String IMPORT_PASSWORD = "import-password";
+    private static final String MARK_UNREAD_ITEMS = "mark-unread-items";
+    private static final String LOG_LEVEL = "log-level";
     
     /** Creates a new instance of RssFeedReaderSettings */
     private RssReaderSettings(MIDlet midlet) {
@@ -72,36 +74,58 @@ public class RssReaderSettings {
     
     /** Get import URL address */
     public String getImportUrl() {
-        String url = m_settings.getStringProperty(IMPORT_URL, "");
+        String url = m_settings.getStringProperty(0, IMPORT_URL, "");
         return url;
     }
     
     /** Set import URL address */
     public void setImportUrl(String url) {
-        m_settings.setStringProperty(IMPORT_URL, url);
+        m_settings.setStringProperty( IMPORT_URL, url);
     }
     
     /** Get import URL username */
     public String getImportUrlUsername() {
-        String username = m_settings.getStringProperty(IMPORT_USERNAME, "");
+        String username = m_settings.getStringProperty(0, IMPORT_USERNAME, "");
         return username;
     }
     
     /** Set import URL username */
     public void setImportUrlUsername(String username) {
-        m_settings.setStringProperty(IMPORT_USERNAME, username);
+        m_settings.setStringProperty( IMPORT_USERNAME, username);
     }
     
     /** Get import URL password */
     public String getImportUrlPassword() {
-        String password = m_settings.getStringProperty(IMPORT_PASSWORD, "");
+        String password = m_settings.getStringProperty(0, IMPORT_PASSWORD, "");
         return password;
     }
     
     /** Set import URL password */
     public void setImportUrlPassword(String password) {
-        m_settings.setStringProperty(IMPORT_PASSWORD, password);
+        m_settings.setStringProperty( IMPORT_PASSWORD, password);
     }
     
+    /** Get mark unread items */
+    public boolean getMarkUnreadItems() {
+        return m_settings.getBooleanProperty( MARK_UNREAD_ITEMS, false);
+    }
     
+    /** Set import URL password */
+    public void setMarkUnreadItems(boolean markUnreadItems) {
+        m_settings.setBooleanProperty( MARK_UNREAD_ITEMS, markUnreadItems);
+    }
+    
+	//#ifdef DTEST
+    /** Get log level */
+    public String getLogLevel() {
+        String log_level = m_settings.getStringProperty(0, LOG_LEVEL, "");
+        return log_level;
+    }
+    
+    /** Set import URL password */
+    public void setLogLevel(String log_level) {
+        m_settings.setStringProperty( LOG_LEVEL, log_level);
+    }
+    
+	//#endif
 }
