@@ -22,6 +22,8 @@
 
 // Expand to define test define
 @DTESTDEF@
+// Expand to define logging define
+@DLOGDEF@
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
@@ -31,6 +33,13 @@ import com.substanceofcode.utils.XmlParser;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
+
+import com.substanceofcode.utils.EncodingUtil;
+//#ifdef DLOGGING
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.LogManager;
+import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * RssFeedParser is an utility class for aquiring and parsing a RSS feed.
@@ -42,6 +51,16 @@ import java.io.*;
 public class RssFeedParser {
     
     private RssFeed m_rssFeed;  // The RSS feed
+    private boolean m_redirect = false;  // The RSS feed
+	//#ifdef DTEST
+    private long m_lastMod;  // Last modification used for testing.
+	//#endif
+	//#ifdef DLOGGING
+    private Logger logger = Logger.getLogger("RssFeedParser");
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#endif
     
     /** Create new instance of RssDocument */
     public RssFeedParser(RssFeed rssFeed) {
@@ -56,94 +75,165 @@ public class RssFeedParser {
     /**
      * Send a GET request to web server and parse feeds from response.
      *
+     * @input updFeed Do updated feeds only.
      * @input maxItemCount Maximum item count for the feed.
      *
      */
-    public void parseRssFeed(int maxItemCount)
+    public void parseRssFeed(boolean updFeed, int maxItemCount)
     throws IOException, Exception {
         
         HttpConnection hc = null;
-		//#ifdef DTEST
-        InputStream ris = null;
-		//#endif
-        DataInputStream dis = null;
+        InputStream is = null;
         String response = "";
+		long lastMod = 0L;
         try {
+			String contentType = null;
+			String url = m_rssFeed.getUrl();
 			//#ifdef DTEST
-			if (m_rssFeed.getUrl().indexOf("file://") == 0) {
-				parseRssFeedXml(
-						this.getClass().getResourceAsStream(
-						 m_rssFeed.getUrl().substring(7)), maxItemCount );
-				return;
+			if (url.indexOf("file://") == 0) {
+				is = this.getClass().getResourceAsStream( url.substring(7));
+				if (is == null) {
+					throw new IOException("Cannot read jar file " + url);
+				}
+				int dotPos = url.lastIndexOf('.');
+				if (dotPos >= 0) {
+					contentType = url.substring(dotPos + 1);
+				}
+				lastMod = m_lastMod;
+			} else {
+			//#endif
+				/**
+				 * Open an HttpConnection with the Web server
+				 * The default request method is GET
+				 */
+				hc = (HttpConnection) Connector.open( url );
+				hc.setRequestMethod(HttpConnection.GET);
+				/** Some web servers requires these properties */
+				//hc.setRequestProperty("User-Agent",
+				//        "Profile/MIDP-1.0 Configuration/CLDC-1.0");
+				hc.setRequestProperty("Content-Length", "0");
+				hc.setRequestProperty("Connection", "close");
+				
+				/** Add credentials if they are defined */
+				if( m_rssFeed.getUsername().length()>0) {
+					/**
+					 * Add authentication header in HTTP request. Basic authentication
+					 * should be formatted like this:
+					 *     Authorization: Basic QWRtaW46Zm9vYmFy
+					 */
+					String username = m_rssFeed.getUsername();
+					String password = m_rssFeed.getPassword();
+					String userPass;
+					Base64 b64 = new Base64();
+					userPass = username + ":" + password;
+					userPass = b64.encode(userPass.getBytes());
+					hc.setRequestProperty("Authorization", "Basic " + userPass);
+				}
+				
+				/**
+				 * Get a DataInputStream from the HttpConnection
+				 * and forward it to XML parser
+				 */
+				
+				/*
+				// DEBUG_START
+				// Prepare buffer for input data
+				InputStream is = hc.openInputStream();
+				StringBuffer inputBuffer = new StringBuffer();
+				 
+				// Read all data to buffer
+				int inputCharacter;
+				try {
+					while ((inputCharacter = is.read()) != -1) {
+						inputBuffer.append((char)inputCharacter);
+					}
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				 
+				// Split buffer string by each new line
+				String text = inputBuffer.toString();
+				System.out.println("Input: " + text);
+				 
+				// DEBUG_END
+				*/
+							
+				is = hc.openInputStream();
+				lastMod = hc.getLastModified();
+				contentType = hc.getHeaderField("content-type");
+			//#ifdef DTEST
 			}
 			//#endif
-            /**
-             * Open an HttpConnection with the Web server
-             * The default request method is GET
-             */
-            hc = (HttpConnection) Connector.open( m_rssFeed.getUrl() );
-            hc.setRequestMethod(HttpConnection.GET);
-            /** Some web servers requires these properties */
-            //hc.setRequestProperty("User-Agent",
-            //        "Profile/MIDP-1.0 Configuration/CLDC-1.0");
-            hc.setRequestProperty("Content-Length", "0");
-            hc.setRequestProperty("Connection", "close");
-            
-            /** Add credentials if they are defined */
-            if( m_rssFeed.getUsername().length()>0) {
-                /**
-                 * Add authentication header in HTTP request. Basic authentication
-                 * should be formatted like this:
-                 *     Authorization: Basic QWRtaW46Zm9vYmFy
-                 */
-                String username = m_rssFeed.getUsername();
-                String password = m_rssFeed.getPassword();
-                String userPass;
-                Base64 b64 = new Base64();
-                userPass = username + ":" + password;
-                userPass = b64.encode(userPass.getBytes());
-                hc.setRequestProperty("Authorization", "Basic " + userPass);
-            }
-            
-            /**
-             * Get a DataInputStream from the HttpConnection
-             * and forward it to XML parser
-             */
-            
-            /*
-            // DEBUG_START
-            // Prepare buffer for input data
-            InputStream is = hc.openInputStream();
-            StringBuffer inputBuffer = new StringBuffer();
-             
-            // Read all data to buffer
-            int inputCharacter;
-            try {
-                while ((inputCharacter = is.read()) != -1) {
-                    inputBuffer.append((char)inputCharacter);
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-             
-            // Split buffer string by each new line
-            String text = inputBuffer.toString();
-            System.out.println("Input: " + text);
-             
-            // DEBUG_END
-            */
-                        
-            parseRssFeedXml( hc.openInputStream(), maxItemCount );
+
+			// If we find HTML, ussume it is redirection
+			if ((contentType != null) && (contentType.indexOf("html") >= 0)) {
+				if (m_redirect) {
+					//#ifdef DLOGGING
+					logger.severe("Error 2nd redirect.");
+					//#endif
+					System.out.println("Error 2nd redirect.");
+					throw new IOException("Error 2nd redirect.");
+				}
+				m_redirect = true;
+				RssFeed[] feeds =
+						HTMLLinkParser.parseFeeds(new EncodingUtil(is),
+											null,
+											null
+											//#ifdef DLOGGING
+											,logger,
+											fineLoggable,
+											finerLoggable,
+											finestLoggable
+											//#endif
+											);
+				if (feeds.length == 0) {
+					//#ifdef DLOGGING
+					logger.severe("Parsing HTML redirect cannot be " +
+								  "processed.");
+					//#endif
+					System.out.println(
+							"Parsing HTML redirect cannot be " +
+							"processed.");
+					throw new IOException("Parsing HTML redirect cannot be " +
+										  "processed.");
+				}
+				RssFeed svFeed = new RssFeed(m_rssFeed);
+				m_rssFeed.setUrl(feeds[0].getUrl());
+				try {
+					parseRssFeed(updFeed, maxItemCount);
+				} catch (Exception e) {
+					svFeed.copyTo(m_rssFeed);
+					throw e;
+				}
+				return;
+
+			}
+
+			if (lastMod == 0L) {
+				m_rssFeed.setUpddate(null);
+			} else if (updFeed && (m_rssFeed.getUpddate() != null)) {
+				if (m_rssFeed.getUpddate().equals(new Date(lastMod))) {
+					return;
+				}
+			}
+            parseRssFeedXml( is, maxItemCount );
+			m_rssFeed.setUpddate(new Date(lastMod));
         } catch(Exception e) {
+			//#ifdef DLOGGING
+			logger.severe("Error ", e);
+			//#endif
 			System.out.println("error " + e.getMessage());
+			e.printStackTrace();
             throw new Exception("Error while parsing feed: "
                     + e.toString());
         } finally {
             if (hc != null) hc.close();
 			//#ifdef DTEST
-            if (ris != null) ris.close();
+            try {
+				if (is != null) is.close();
+			} catch (IOException e) { }
+
 			//#endif
-            if (dis != null) dis.close();
         }
     }
     
@@ -174,13 +264,15 @@ public class RssFeedParser {
            entryElementName.equals("rdf")) {
             /** Feed is in RSS format */
             formatParser = new RssFormatParser();
-            Vector items = formatParser.parse( parser, maxItemCount );
+            Vector items = formatParser.parse( parser, m_rssFeed,
+					maxItemCount );
             m_rssFeed.setItems( items );
             
         } else if(entryElementName.equals("feed")) {
             /** Feed is in Atom format */
             formatParser = new AtomFormatParser();
-            Vector items = formatParser.parse( parser, maxItemCount );
+            Vector items = formatParser.parse( parser, m_rssFeed,
+					maxItemCount );
             m_rssFeed.setItems( items );
             
         } else {
@@ -191,4 +283,14 @@ public class RssFeedParser {
         
     }
     
+	//#ifdef DTEST
+    public void setLastMod(long m_lastMod) {
+        this.m_lastMod = m_lastMod;
+    }
+
+    public long getLastMod() {
+        return (m_lastMod);
+    }
+	//#endif
+
 }
