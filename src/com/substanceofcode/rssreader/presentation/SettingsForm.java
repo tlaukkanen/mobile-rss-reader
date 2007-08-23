@@ -26,16 +26,24 @@
 package com.substanceofcode.rssreader.presentation;
 
 import java.lang.IllegalArgumentException;
+import java.io.IOException;
+import java.util.Hashtable;
 
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Display;
+import javax.microedition.lcdui.Choice;
+import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.TextField;
+import javax.microedition.lcdui.StringItem;
+import javax.microedition.lcdui.Item;
+
+import com.substanceofcode.utils.Settings;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -54,8 +62,11 @@ public class SettingsForm extends Form implements CommandListener {
     private Command m_cancelCommand;
     
     private TextField m_itemCountField;
-    private TextField m_logLevelField;
+    private ChoiceGroup m_markUnreadItems;
+    private StringItem m_memUsedItem;
+    private StringItem m_memAvailItem;
 	//#ifdef DLOGGING
+//@    private TextField m_logLevelField;
 //@    private Logger logger = Logger.getLogger("SettingsForm");
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
@@ -80,14 +91,60 @@ public class SettingsForm extends Form implements CommandListener {
         
         m_itemCountField = new TextField("Max item count in feed",
                 String.valueOf(maxCount), 3, TextField.NUMERIC);
+		//#ifdef DMIDP20
+		m_itemCountField.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
         this.append( m_itemCountField );
+		String [] choices = {"Mark", "No mark"};
+        m_markUnreadItems = new ChoiceGroup("Mark unread items",
+				                            Choice.EXCLUSIVE, choices, null);
+		//#ifdef DMIDP20
+		m_markUnreadItems.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_markUnreadItems );
 		//#ifdef DLOGGING
 //@        m_logLevelField = new TextField("Logging level",
 //@                logger.getLevel().getName(), 20, TextField.ANY);
+		//#ifdef DMIDP20
+//@		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
 //@        this.append( m_logLevelField );
 		//#endif
+        m_memUsedItem = new StringItem("Memory used", "");
+		//#ifdef DMIDP20
+		m_memUsedItem.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_memUsedItem );
+        m_memAvailItem = new StringItem("Memory available", "");
+		//#ifdef DMIDP20
+		m_memAvailItem.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_memAvailItem );
+		updateForm();
     }
     
+	public void updateForm() {
+		Hashtable memInfo = null;
+        RssReaderSettings settings = m_midlet.getSettings();
+        boolean markUnreadItems = settings.getMarkUnreadItems();
+		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
+		m_markUnreadItems.setSelectedFlags( selectedItems );
+		try {
+			Settings m_settings = Settings.getInstance(m_midlet);
+			memInfo = m_settings.getSettingMemInfo();
+		} catch (Exception e) {
+			memInfo = new Hashtable(0);
+		}
+
+        if (memInfo.size() == 0) {
+			m_memUsedItem.setText("0");
+			m_memAvailItem.setText("0");
+		} else {
+			m_memUsedItem.setText((String)memInfo.get("used"));
+			m_memAvailItem.setText((String)memInfo.get("available"));
+		}
+	}
+
     public void commandAction(Command command, Displayable displayable) {
         if(command==m_okCommand) {
             // Save settings
@@ -95,10 +152,14 @@ public class SettingsForm extends Form implements CommandListener {
             try {
                 int maxCount = Integer.parseInt( m_itemCountField.getString() );
                 settings.setMaximumItemCountInFeed( maxCount );
+				boolean markUnreadItems = m_markUnreadItems.isSelected(0);
+                settings.setMarkUnreadItems( markUnreadItems );
 				//#ifdef DLOGGING
 //@				try {
-//@					logger.setLevel(Level.parse(
-//@							m_logLevelField.getString().toUpperCase()));
+//@					String logLevel =
+//@						m_logLevelField.getString().toUpperCase();
+//@					logger.setLevel(Level.parse(logLevel));
+//@					settings.setLogLevel( logLevel );
 //@				} catch (IllegalArgumentException e) {
 //@					Alert invalidData = new Alert("Invalid Log Level",
 //@									"Invalid Log Level " +
