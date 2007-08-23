@@ -73,6 +73,7 @@ public class RssReaderMIDlet extends MIDlet
     private Hashtable   m_rssFeeds;         // The bookmark URLs
     private Thread      m_netThread;        // The thread for networking
     private boolean     m_getPage;          // The noticy flag for HTTP
+    private boolean     m_saveBookmarks;    // The save bookmarks flag
     private boolean     m_getModPage;       // The noticy flag for modified HTTP
     private boolean     m_refreshAllFeeds;  // The notify flag for all feeds
     private boolean     m_refreshUpdFeeds;  // The notify flag for updated feeds
@@ -272,6 +273,8 @@ public class RssReaderMIDlet extends MIDlet
             System.err.println("Error while getting mark image: " + e.toString());
         }
         
+		initializeLoadingForm("Loading items...");
+		m_display.setCurrent( m_loadForm );
         /** Initialize GUI items */
         initializeBookmarkList();
         initializeAddBookmarkForm();
@@ -546,6 +549,11 @@ public class RssReaderMIDlet extends MIDlet
 						m_getFeedList = false;
                     }
                 }
+				if ( m_saveBookmarks ) {
+					saveBkMrkSettings(false);
+					m_display.setCurrent( m_bookmarkList );
+					m_saveBookmarks = false;
+				}
                 lngStart = System.currentTimeMillis();
                 lngTimeTaken = System.currentTimeMillis()-lngStart;
                 if(lngTimeTaken<100)
@@ -892,7 +900,9 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Save bookmarks without exit (don't free up bookmarks)  */
         if( c == m_SaveCommand ){
-			saveBkMrkSettings(false);
+			initializeLoadingForm("Saving data...");
+			m_display.setCurrent( m_loadForm );
+			m_saveBookmarks = true;
         }
         
         /** Save currently edited (or added) RSS feed's properties */
