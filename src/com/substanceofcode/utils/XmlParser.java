@@ -46,6 +46,7 @@ public class XmlParser {
     private boolean m_currentElementContainsText = false;
     private String fileEncoding = "ISO8859_1";  // See EncodingUtil
     private String docEncoding = "";  // See EncodingUtil
+
     private EncodingUtil encodingUtil = null;
     private String namespace = null;
     private boolean getPrologue = true;
@@ -191,7 +192,7 @@ public class XmlParser {
 		boolean endParsing = false;
 		
 		String endElementName = "";
-		String text = null;
+		String text = "";
 		try {
 			StringBuffer textBuffer = new StringBuffer();
 			int inputCharacter;
@@ -323,6 +324,14 @@ public class XmlParser {
 
     public String getNamespace() {
         return (namespace);
+    }
+
+    public void setDocEncoding(String docEncoding) {
+        this.docEncoding = docEncoding;
+    }
+
+    public String getDocEncoding() {
+        return (docEncoding);
     }
 
 }
