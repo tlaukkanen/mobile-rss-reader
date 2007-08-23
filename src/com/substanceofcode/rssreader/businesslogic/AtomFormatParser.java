@@ -22,6 +22,7 @@
 
 package com.substanceofcode.rssreader.businesslogic;
 
+import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businessentities.RssItem;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
@@ -69,12 +70,17 @@ public class AtomFormatParser implements FeedFormatParser{
     }
     
     /** Parse Atom feed */
-    public Vector parse(XmlParser parser, int maxItemCount) throws IOException {
+    public Vector parse(XmlParser parser, RssFeed feed,
+			            int maxItemCount) throws IOException {
         /** Atom item properties */
-        String title = null;
-        String description = null;
-        String link = null;
-        String date = null;
+        String title = "";
+        String description = "";
+        String summary = "";
+        String link = "";
+        String relLink = "";
+        String selfLink = "";
+        String enclosure = "";
+        String date = "";
         
         Vector items = new Vector();
         
@@ -94,7 +100,34 @@ public class AtomFormatParser implements FeedFormatParser{
             if( elementName.equals("entry") ) {
                 /** Save previous entry */
                 if(title.length()>0) {
-                    RssItem item = new RssItem(title, link, description);
+					if (description.equals("")) {
+						if (!summary.equals("")) {
+							description = summary;
+						}
+					}
+					if (link.equals("")) {
+						if (!selfLink.equals("")) {
+							link = selfLink;
+						} else if (!relLink.equals("")) {
+							link = relLink;
+						}
+					}
+                    Date pubDate = null;
+					// Check date in case we cannot find it.
+					if (!date.equals("")) {
+						pubDate = RssFormatParser.parseDcDate(date);
+					}
+                    RssItem item;
+                    if(pubDate!=null) {
+                        item = new RssItem(title, link, description, pubDate,
+								           enclosure, true);
+					} else {
+						item = new RssItem(title, link, description);
+						if (!enclosure.equals("")) {
+							item.setEnclosure(enclosure);
+						}
+						item.setUnreadItem(true);
+					}
                     items.addElement( item );
                     if(items.size()==maxItemCount) {
                         return items;
@@ -106,17 +139,48 @@ public class AtomFormatParser implements FeedFormatParser{
                 description = "";
                 link = "";
                 date = "";
+                enclosure = "";
+				summary = "";
+				relLink = "";
+				selfLink = "";
             }
             else if( elementName.equals("title") ) {
                 title = parser.getText();
+                title = StringUtil.replace(title, "\n", " ");
                 title = StringUtil.removeHtml( title );
             }
             else if( elementName.equals("link") ) {
-                link = parser.getText();
+                String clink = parser.getText();
+				// Some atoms have href= attribute.
+                if (clink.equals("")) {
+					String hlink = parser.getAttributeValue("href");
+					if (hlink != null) {
+						clink = hlink;
+					}
+				}
+				String rel = parser.getAttributeValue("rel");
+				if (rel == null) {
+					link = clink;
+				} else {
+					if (rel.equals("enclosure")) {
+						 enclosure = clink;
+					} else if (rel.equals("related")) {
+						 relLink = clink;
+					} else if (rel.equals("self")) {
+						 selfLink = clink;
+					}
+				}
             }
             else if( elementName.equals("content")) {
                 description = parser.getText();
                 description = StringUtil.removeHtml( description );
+			}
+            else if( elementName.equals("summary")) {
+                summary = parser.getText();
+                summary = StringUtil.removeHtml( summary );
+			}
+            else if( elementName.equals("published")) {
+                date = parser.getText();
             }
             
             /** Parse next element */            
@@ -125,23 +189,36 @@ public class AtomFormatParser implements FeedFormatParser{
 
         /** Save previous entry */
         if(title.length()>0) {
-            RssItem item = new RssItem(title, link, description);
+			if (description.equals("")) {
+				description = summary;
+			}
+			if (link.equals("")) {
+				if (!selfLink.equals("")) {
+					link = selfLink;
+				} else if (!relLink.equals("")) {
+					link = relLink;
+				}
+			}
+		    Date pubDate = null;
+			// Check date in case we cannot find it.
+			if (!date.equals("")) {
+				pubDate = RssFormatParser.parseDcDate(date);
+			}
+			RssItem item;
+			if(pubDate!=null) {
+				item = new RssItem(title, link, description, pubDate,
+								   enclosure, true);
+			} else {
+				item = new RssItem(title, link, description);
+				item.setUnreadItem(true);
+				if (!enclosure.equals("")) {
+					item.setEnclosure(enclosure);
+				}
+			}
             items.addElement( item );
         }        
                         
         return items;
-    }
-    
-    /**
-     * Method converts string representation of xsd:dateTime to Date class object.
-     *
-     * @input dateString    String should be in the following format
-     *                      [-]CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
-     * @return              Converted date object.
-     */
-    private Date parseXsdDate(String dateString) {
-        Date result = null;
-        return result;
     }
     
 }
