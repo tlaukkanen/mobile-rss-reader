@@ -150,7 +150,6 @@ public class EncodingUtil {
 		char [] nchars = new char[1];
 		nchars[0] = (char)((((int)str.charAt(0) & 255) << 8) |
 		            (((int)(str.charAt(0)) >> 8) & 255));
-		//str.charAt(0) = (char)0;//undo
 		return new String(nchars);
 	}
 
