@@ -39,10 +39,14 @@ import javax.microedition.rms.*;
  */
 public class Settings {
     
+    public static final int MAX_REGIONS = 6;
+    public static final String SETTINGS_NAME = "RssReader-setttings-vers";
+    public static final String SETTINGS_VERS = "2";
     private static Settings m_store;
     private MIDlet          m_midlet;
     private boolean         m_valuesChanged = false;
     private Hashtable       m_properties = new Hashtable();
+    private int             m_region;
     
     /**
      * Singleton pattern is used to return 
@@ -60,7 +64,7 @@ public class Settings {
     private Settings( MIDlet midlet )
     throws IOException, RecordStoreException {
         m_midlet = midlet;
-        load();
+        load(0);
     }
     
     /** Return true if value exists in record store */
@@ -102,13 +106,22 @@ public class Settings {
     }
     
     /** Get string property */
-    public String getStringProperty( String name, String defaultValue ) {
+    public String getStringProperty(int region, String name,
+			                        String defaultValue ) {
+		if (region != m_region) {
+			try {
+				load(region);
+			} catch (Exception e) {
+				System.out.println("load error");
+				return defaultValue;
+			}
+		}
         Object value = getProperty( name );
         return ( value != null ) ? value.toString() : defaultValue;
     }
     
     /** Load properties from record store */
-    private synchronized void load()
+    private synchronized void load(int region)
     throws IOException, RecordStoreException {
         RecordStore rs = null;
         ByteArrayInputStream bin = null;
@@ -116,24 +129,46 @@ public class Settings {
         
         m_valuesChanged = false;
         m_properties.clear();
+		boolean currentSettings = true;
         
         try {
             rs = RecordStore.openRecordStore("Store", true );
-            if( rs.getNumRecords() == 0 ) {
-                rs.addRecord( null, 0, 0 );
-            } else {
-                byte[] data = rs.getRecord( 1 );
+			int numRecs = rs.getNumRecords();
+            if( numRecs > 0 ) {
+				if ( numRecs < MAX_REGIONS ) {
+					currentSettings = false;
+				}
+                byte[] data = rs.getRecord( region + 1 );
                 if( data != null ) {
                     bin = new ByteArrayInputStream( data );
                     din = new DataInputStream( bin );
                     int num = din.readInt();
                     while( num-- > 0 ) {
                         String name = din.readUTF();
-                        String value = din.readUTF();
-                        m_properties.put( name, value );
+                        String value;
+						if (currentSettings) {
+							int blen = din.readInt();
+							byte [] bvalue = new byte[blen];
+							din.read(bvalue);
+							value = new String(bvalue);
+						} else {
+							value = din.readUTF();
+						}
+						m_properties.put( name, value );
                     }
                 }
             }
+			for (int ic = numRecs; ic < MAX_REGIONS; ic++) {
+				rs.addRecord( null, 0, 0 );
+			}
+			if (!currentSettings && ( numRecs > 0 ) && (region == 0)) {
+				// If not current settings, save them to udate to
+				// current.
+				save(0, true);
+				// Update bookmark region too.
+				save(1, true);
+			}
+			m_region = region;
         } finally {
             if( din != null ) {
                 try { din.close(); } catch( Exception e ){}
@@ -145,8 +180,9 @@ public class Settings {
         }
     }
     
-    /** Save property Hashtable to record store */
-    public synchronized void save( boolean force )
+    /** Save property Hashtable to record store.
+        Use MAX_REGIONS records in store to help with running out of memory.  */
+    public synchronized void save( int region, boolean force )
             throws IOException, RecordStoreException {
         if( !m_valuesChanged && !force ) return;
         
@@ -157,19 +193,29 @@ public class Settings {
                 DataOutputStream( bout );
         
         try {
+			Object vers = null;
+            if ( m_properties.containsKey(SETTINGS_NAME) ) {
+				vers = m_properties.get(SETTINGS_NAME);
+			}
+			m_properties.put(SETTINGS_NAME, SETTINGS_VERS);
             dout.writeInt( m_properties.size() );
             Enumeration e = m_properties.keys();
             while( e.hasMoreElements() ) {
                 String name = (String) e.nextElement();
                 String value = m_properties.get( name ).toString();
                 dout.writeUTF( name );
-                dout.writeUTF( value );
+				byte[] bvalue = value.getBytes();
+                dout.writeInt( bvalue.length );
+                dout.write( bvalue, 0, bvalue.length );
             }
             
             byte[] data = bout.toByteArray();
             
             rs = RecordStore.openRecordStore( "Store", false );
-            rs.setRecord( 1, data, 0, data.length );
+            rs.setRecord( (region + 1), data, 0, data.length );
+			if ( vers != null) {
+				m_properties.put(SETTINGS_NAME, vers);
+			}
         } finally {
             try { dout.close(); } catch( Exception e ){}
             
@@ -177,6 +223,37 @@ public class Settings {
                 try { rs.closeRecordStore(); } catch( Exception e ){}
             }
         }
+    }
+    
+    /** Get memory usage of the record store */
+    public synchronized Hashtable getSettingMemInfo()
+		throws IOException, RecordStoreException {
+		try {
+        
+			RecordStore rs = null;
+			Hashtable memInfo = null;
+			
+			try {
+				
+				rs = RecordStore.openRecordStore( "Store", false );
+				memInfo = new Hashtable(2);
+				memInfo.put("used", Integer.toString(rs.getSize()));
+				memInfo.put("available", Integer.toString(
+						rs.getSizeAvailable()));
+				return memInfo;
+			} finally {
+				
+				if( rs != null ) {
+					try { rs.closeRecordStore(); } catch( Exception e ){}
+				}
+			}
+		} catch (RecordStoreNotFoundException re) {
+			return new Hashtable(0);
+		} catch (Exception e) {
+			System.out.println("Error in getSettingMemInfo()");
+			e.printStackTrace();
+			return new Hashtable(0);
+		}
     }
     
     /** Set a boolean property */
