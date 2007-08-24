@@ -45,6 +45,7 @@ public class Settings {
     private static Settings m_store;
     private MIDlet          m_midlet;
     private boolean         m_valuesChanged = false;
+    private boolean         m_initialized = true;
     private Hashtable       m_properties = new Hashtable();
     private int             m_region;
     
@@ -134,7 +135,11 @@ public class Settings {
         try {
             rs = RecordStore.openRecordStore("Store", true );
 			int numRecs = rs.getNumRecords();
-            if( numRecs > 0 ) {
+            if( numRecs == 0 ) {
+				if (region == 0) {
+					m_initialized = false;
+				}
+			} else {
 				if ( numRecs < MAX_REGIONS ) {
 					currentSettings = false;
 				}
@@ -276,6 +281,6 @@ public class Settings {
 
 	/** Get properties size to allow us to know if it was from a load or not.
 	  **/
-	public boolean isInitialized() { return m_properties.size() != 0; }
+	public boolean isInitialized() { return m_initialized; }
 
 }
