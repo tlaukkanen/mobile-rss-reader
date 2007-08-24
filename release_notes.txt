@@ -12,15 +12,19 @@ v1.5 (July 23th 2007)
 + Open links in device browser
 + Allow long feed URLs
 
+v1.9 (August 14rd 2007)
++ Support ISO8859-1, windows-1252, UTF-8, UTF-16 (partial support 
++ Fixed import feeds replacing current feed and importing only 1 feed.
+
 v1.10 (August 23rd 2007)
 + Reduced memory overflows while saving
 + Fix '|' in header name and item 
 + Prompt to delete feed
 + Fix delete of feed and add with the same name
-+ Full support for ISO8859-1, windows-1252, UTF-8, UTF-16
++ Full/fixed support for ISO8859-1, windows-1252, UTF-8, UTF-16
 + Support for some redirects
 + Optionally mark unread items in feed
-+ Shoe memory usage
++ Show memory usage
 + Prepare to allow saving of log level for test version.
 + Replace HTML entities and numeric entitites from OPML title
 + Read all unread items in list
@@ -33,3 +37,6 @@ v1.10 (August 23rd 2007)
 + Show error for import feed parsing error
 + Show and open enclosure
 + Support more time formats
+
+v1.10.1 (August 24rd 2007)
++ Fixed about not being shown the first time of use
