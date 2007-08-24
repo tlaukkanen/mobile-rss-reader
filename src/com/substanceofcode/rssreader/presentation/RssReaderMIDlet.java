@@ -236,6 +236,14 @@ public class RssReaderMIDlet extends MIDlet
         m_curBookmark = -1;
         m_maxRssItemCount = 10;
         
+		// To get proper initialization, need to 
+		try {
+			m_settings = Settings.getInstance(this);
+			firstTime = !m_settings.isInitialized();
+        } catch(Exception e) {
+            System.err.println("Error while getting settings: " + e.toString());
+        }
+
         m_appSettings = RssReaderSettings.getInstance(this);
 		//#ifdef DLOGGING
 //@		if (m_appSettings.getLogLevel().equals("")) {
@@ -248,12 +256,6 @@ public class RssReaderMIDlet extends MIDlet
 //@		finestLoggable = logger.isLoggable(Level.FINEST);
 //@		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
 		//#endif
-		try {
-			m_settings = Settings.getInstance(this);
-			firstTime = !m_settings.isInitialized();
-        } catch(Exception e) {
-            System.err.println("Error while getting settings: " + e.toString());
-        }
 
 		try {
 			try {
@@ -275,6 +277,7 @@ public class RssReaderMIDlet extends MIDlet
         
 		initializeLoadingForm("Loading items...");
 		m_display.setCurrent( m_loadForm );
+
         /** Initialize GUI items */
         initializeBookmarkList();
         initializeAddBookmarkForm();
@@ -289,6 +292,23 @@ public class RssReaderMIDlet extends MIDlet
         
         m_display.setCurrent(m_bookmarkList);
         
+		if( firstTime ) {
+			try {
+				firstTime = false;
+				// Set Max item count to default so that it is initialized.
+				m_appSettings.setMaximumItemCountInFeed(
+						m_appSettings.getMaximumItemCountInFeed());
+				saveBkMrkSettings(false);
+				Alert m_about = getAbout();
+				m_display.setCurrent( m_about, m_bookmarkList );
+			} catch(Exception e) {
+				System.err.println("Error while getting/updating settings: " + e.toString());
+				m_display.setCurrent( m_bookmarkList );
+			}
+		} else {
+            m_display.setCurrent( m_bookmarkList );
+		}
+
         /** Initialize thread for http connection operations */
         m_netThread = new Thread(this);
         m_netThread.start();
@@ -707,22 +727,6 @@ public class RssReaderMIDlet extends MIDlet
      * the exit command and listener.
      */
     public void startApp() {
-		if( firstTime ) {
-			try {
-				firstTime = false;
-				// Set Max item count to default so that it is initialized.
-				m_appSettings.setMaximumItemCountInFeed(
-						m_appSettings.getMaximumItemCountInFeed());
-				saveBkMrkSettings(false);
-				Alert m_about = getAbout();
-				m_display.setCurrent( m_about, m_bookmarkList );
-			} catch(Exception e) {
-				System.err.println("Error while getting/updating settings: " + e.toString());
-				m_display.setCurrent( m_bookmarkList );
-			}
-		} else {
-            m_display.setCurrent( m_bookmarkList );
-		}
     }
     
     /**
@@ -732,7 +736,7 @@ public class RssReaderMIDlet extends MIDlet
 	 */
 	private Alert getAbout() {
 		Alert about = new Alert("About RssReader",
-"RssReader v1.10 " +
+"RssReader v1.10.1 " +
  "Copyright (C) 2005-2006 Tommi Laukkanen " +
  "http://www.substanceofcode.com.  " +
  "This program is distributed in the hope that it will be useful, " +
