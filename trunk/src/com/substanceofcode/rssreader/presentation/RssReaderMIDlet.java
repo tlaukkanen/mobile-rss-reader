@@ -182,6 +182,8 @@ public class RssReaderMIDlet extends MIDlet
 //@				m_debug = (Form)eForms.nextElement();
 //@				logger.finest("form=" + m_debug);
 //@		}
+//@        logger = Logger.getLogger("RssReaderMIDlet");
+//@        logger.info("RssReaderMIDlet started.");
 		//#endif
 
 		/** Initialize encodingUtil. */
@@ -576,6 +578,7 @@ public class RssReaderMIDlet extends MIDlet
 						if (m_exit) {
 							destroyApp(false);
 							super.notifyDestroyed();
+							m_exit = false;
 						} else {
 							m_display.setCurrent( m_bookmarkList );
 							m_saveBookmarks = false;
@@ -808,8 +811,8 @@ public class RssReaderMIDlet extends MIDlet
 //#ifdef DLOGGING
 //@			logger.severe("saveBookmarks could not save.", error);
 //#endif
-			System.out.println("saveBookmarks could not save." + error + " " +
-					           error.getMessage());
+			System.out.println("Error saveBookmarks could not save.  " + error +
+					           " " + error.getMessage());
             Alert memoryAlert = new Alert(
                     "Out of memory", 
                     "Saving bookmarks without updated news items.",
@@ -907,8 +910,16 @@ public class RssReaderMIDlet extends MIDlet
         if( c == m_exitCommand ){
 			initializeLoadingForm("Exiting saving data...");
 			m_display.setCurrent( m_loadForm );
-			if ( !m_netThread.isAlive() ) {
-				m_netThread.start();
+			synchronized (this) {
+				if ( !m_netThread.isAlive() ) {
+					m_netThread.start();
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("Thread started.");}
+					//#endif
+					try {
+						m_netThread.sleep(1000L);
+					} catch (InterruptedException e) {}
+				}
 			}
 			m_exit = true;
         }
