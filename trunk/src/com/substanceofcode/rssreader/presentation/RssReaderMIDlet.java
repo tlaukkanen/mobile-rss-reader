@@ -74,6 +74,7 @@ public class RssReaderMIDlet extends MIDlet
     private Thread      m_netThread;        // The thread for networking
     private boolean     m_getPage;          // The noticy flag for HTTP
     private boolean     m_saveBookmarks;    // The save bookmarks flag
+    private boolean     m_exit;             // The exit application flag
     private boolean     m_getModPage;       // The noticy flag for modified HTTP
     private boolean     m_refreshAllFeeds;  // The notify flag for all feeds
     private boolean     m_refreshUpdFeeds;  // The notify flag for updated feeds
@@ -569,10 +570,17 @@ public class RssReaderMIDlet extends MIDlet
 						m_getFeedList = false;
                     }
                 }
-				if ( m_saveBookmarks ) {
-					saveBkMrkSettings(false);
-					m_display.setCurrent( m_bookmarkList );
-					m_saveBookmarks = false;
+				if ( m_exit || m_saveBookmarks ) {
+					synchronized (this) {
+						saveBkMrkSettings(m_exit);
+						if (m_exit) {
+							destroyApp(false);
+							super.notifyDestroyed();
+						} else {
+							m_display.setCurrent( m_bookmarkList );
+							m_saveBookmarks = false;
+						}
+					}
 				}
                 lngStart = System.currentTimeMillis();
                 lngTimeTaken = System.currentTimeMillis()-lngStart;
@@ -738,7 +746,7 @@ public class RssReaderMIDlet extends MIDlet
 		Alert about = new Alert("About RssReader",
 "RssReader v1.10.1 " +
  "Copyright (C) 2005-2006 Tommi Laukkanen " +
- "http://www.substanceofcode.com.  " +
+ "http://code.google.com/p/mobile-rss-reader/.  " +
  "This program is distributed in the hope that it will be useful, " +
  "but WITHOUT ANY WARRANTY; without even the implied warranty of " +
  "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the " +
@@ -897,9 +905,12 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Exit from MIDlet and save bookmarks */
         if( c == m_exitCommand ){
-			saveBkMrkSettings(true);
-            destroyApp(false);
-            notifyDestroyed();
+			initializeLoadingForm("Exiting saving data...");
+			m_display.setCurrent( m_loadForm );
+			if ( !m_netThread.isAlive() ) {
+				m_netThread.start();
+			}
+			m_exit = true;
         }
         
         /** Save bookmarks without exit (don't free up bookmarks)  */
