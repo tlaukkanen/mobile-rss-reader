@@ -747,8 +747,8 @@ public class RssReaderMIDlet extends MIDlet
 	 */
 	private Alert getAbout() {
 		Alert about = new Alert("About RssReader",
-"RssReader v1.10.1 " +
- "Copyright (C) 2005-2006 Tommi Laukkanen " +
+"RssReader v" + super.getAppProperty("MIDlet-Version") +
+ " Copyright (C) 2005-2006 Tommi Laukkanen " +
  "http://code.google.com/p/mobile-rss-reader/.  " +
  "This program is distributed in the hope that it will be useful, " +
  "but WITHOUT ANY WARRANTY; without even the implied warranty of " +
