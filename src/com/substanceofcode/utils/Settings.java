@@ -20,6 +20,8 @@
  *
  */
 
+// Expand to define logging define
+//#define DNOLOGGING
 package com.substanceofcode.utils;
 
 import java.io.*;
@@ -27,6 +29,11 @@ import java.util.*;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 import javax.microedition.rms.*;
+
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * A class for storing and retrieving application settings and properties.
@@ -48,6 +55,11 @@ public class Settings {
     private boolean         m_initialized = true;
     private Hashtable       m_properties = new Hashtable();
     private int             m_region;
+	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("Settings");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#endif
     
     /**
      * Singleton pattern is used to return 
@@ -135,9 +147,16 @@ public class Settings {
         try {
             rs = RecordStore.openRecordStore("Store", true );
 			int numRecs = rs.getNumRecords();
+			//#ifdef DLOGGING
+//@			if (fineLoggable) {logger.fine("region=" + region);}
+//@			if (finestLoggable) {logger.finest("numRecs=" + numRecs);}
+			//#endif
             if( numRecs == 0 ) {
 				if (region == 0) {
 					m_initialized = false;
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("m_initialized=" + m_initialized);}
+					//#endif
 				}
 			} else {
 				if ( numRecs < MAX_REGIONS ) {
@@ -150,6 +169,9 @@ public class Settings {
                     int num = din.readInt();
                     while( num-- > 0 ) {
                         String name = din.readUTF();
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("name=" + name);}
+						//#endif
                         String value;
 						if (currentSettings) {
 							int blen = din.readInt();
@@ -159,11 +181,17 @@ public class Settings {
 						} else {
 							value = din.readUTF();
 						}
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("value=" + value);}
+						//#endif
 						m_properties.put( name, value );
                     }
                 }
             }
 			for (int ic = numRecs; ic < MAX_REGIONS; ic++) {
+				//#ifdef DLOGGING
+//@				if (finestLoggable) {logger.finest("adding ic=" + ic);}
+				//#endif
 				rs.addRecord( null, 0, 0 );
 			}
 			if (!currentSettings && ( numRecs > 0 ) && (region == 0)) {
@@ -203,13 +231,22 @@ public class Settings {
 				vers = m_properties.get(SETTINGS_NAME);
 			}
 			m_properties.put(SETTINGS_NAME, SETTINGS_VERS);
+			//#ifdef DLOGGING
+//@			if (fineLoggable) {logger.fine("save region=" + region);}
+			//#endif
             dout.writeInt( m_properties.size() );
             Enumeration e = m_properties.keys();
             while( e.hasMoreElements() ) {
                 String name = (String) e.nextElement();
                 String value = m_properties.get( name ).toString();
+				//#ifdef DLOGGING
+//@				if (finestLoggable) {logger.finest("name=" + name);}
+				//#endif
                 dout.writeUTF( name );
 				byte[] bvalue = value.getBytes();
+				//#ifdef DLOGGING
+//@				if (finestLoggable) {logger.finest("value=" + value);}
+				//#endif
                 dout.writeInt( bvalue.length );
                 dout.write( bvalue, 0, bvalue.length );
             }
@@ -218,6 +255,9 @@ public class Settings {
             
             rs = RecordStore.openRecordStore( "Store", false );
             rs.setRecord( (region + 1), data, 0, data.length );
+			//#ifdef DLOGGING
+//@			if (fineLoggable) {logger.fine("stored region=" + region);}
+			//#endif
 			if ( vers != null) {
 				m_properties.put(SETTINGS_NAME, vers);
 			}
@@ -281,6 +321,11 @@ public class Settings {
 
 	/** Get properties size to allow us to know if it was from a load or not.
 	  **/
-	public boolean isInitialized() { return m_initialized; }
+	public boolean isInitialized() {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("m_initialized=" + m_initialized);}
+		//#endif
+		return m_initialized;
+	}
 
 }
