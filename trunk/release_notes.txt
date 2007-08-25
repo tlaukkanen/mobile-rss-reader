@@ -40,3 +40,4 @@ v1.10 (August 23rd 2007)
 
 v1.10.1 (August 24rd 2007)
 + Fixed about not being shown the first time of use
++ Fixed intermittent exit problem
