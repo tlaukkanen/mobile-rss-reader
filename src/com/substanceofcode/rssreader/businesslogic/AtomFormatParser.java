@@ -79,6 +79,7 @@ public class AtomFormatParser implements FeedFormatParser{
         String link = "";
         String relLink = "";
         String selfLink = "";
+        String altLink = "";
         String enclosure = "";
         String date = "";
         
@@ -110,6 +111,8 @@ public class AtomFormatParser implements FeedFormatParser{
 							link = selfLink;
 						} else if (!relLink.equals("")) {
 							link = relLink;
+						} else if (!altLink.equals("")) {
+							link = altLink;
 						}
 					}
                     Date pubDate = null;
@@ -143,6 +146,7 @@ public class AtomFormatParser implements FeedFormatParser{
 				summary = "";
 				relLink = "";
 				selfLink = "";
+				altLink = "";
             }
             else if( elementName.equals("title") ) {
                 title = parser.getText();
@@ -168,6 +172,8 @@ public class AtomFormatParser implements FeedFormatParser{
 						 relLink = clink;
 					} else if (rel.equals("self")) {
 						 selfLink = clink;
+					} else if (rel.equals("alternate")) {
+						 altLink = clink;
 					}
 				}
             }
@@ -197,6 +203,8 @@ public class AtomFormatParser implements FeedFormatParser{
 					link = selfLink;
 				} else if (!relLink.equals("")) {
 					link = relLink;
+				} else if (!altLink.equals("")) {
+					link = altLink;
 				}
 			}
 		    Date pubDate = null;
