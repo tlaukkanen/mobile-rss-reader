@@ -72,7 +72,8 @@ public class RssFormatParser implements FeedFormatParser {
                     Date pubDate = null;
 					// Check date in case we cannot find it.
 					if (!date.equals("")) {
-						if (date.indexOf("-") >= 0) {
+						int dpos = date.indexOf("-", 2);
+						if ((dpos > 0) && (date.indexOf('-', dpos + 1) > 0)) {
 							pubDate = parseDcDate(date);
 						} else {
 							pubDate = parseRssDate(date);
