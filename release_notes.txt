@@ -45,3 +45,9 @@ v1.10.1 (August 24rd 2007)
 v1.10.2 (August 24rd 2007)
 + Fixed infinate loop in emulator on exit.
 + Take version from mainifest file.
+
+v1.10.3 (August 28th 2007)
++ Fixed date formatting if it has '-' for RSS date.
++ Use alternate link for atoms of self and related are not present.
++ Rename New Items form to Unread Items form.
++ Remove unused test logging classes.
