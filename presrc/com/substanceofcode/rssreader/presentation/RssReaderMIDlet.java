@@ -1015,7 +1015,7 @@ public class RssReaderMIDlet extends MIDlet
 					}
 				}
 				if ( !firstItem ) {
-					m_unreadHeaderList.setTitle("New items:  " +
+					m_unreadHeaderList.setTitle("Unread items:  " +
 							                 m_unreadHeaderList.size());
 					m_display.setCurrent( m_unreadHeaderList );
 				} else {
