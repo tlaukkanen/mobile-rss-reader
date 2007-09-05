@@ -64,7 +64,11 @@ import net.sf.jlogmicro.util.logging.Level;
  * @version 1.0
  */
 public class RssReaderMIDlet extends MIDlet
-        implements CommandListener, Runnable {
+        implements CommandListener,
+		//#ifdef DMIDP20
+        ItemCommandListener,
+		//#endif
+        Runnable {
     
     // Attributes
     private Display     m_display;          // The display for this MIDlet
@@ -113,12 +117,15 @@ public class RssReaderMIDlet extends MIDlet
     private TextField   m_feedURLFilter;    // The feed URL filter string
     private TextField   m_feedListUsername; // The feed list username
     private TextField   m_feedListPassword; // The feed list password
+    private TextField   m_boxRtnItem;       // The list to return from for item
+    private TextBox     m_boxURL;           // The feed list URL box
     private ChoiceGroup m_importFormatGroup;// The import type choice group
     private SettingsForm m_settingsForm;    // The settings form
     
     // Commands
     private Command     m_addOkCmd;         // The OK command
     private Command     m_addCancelCmd;     // The Cancel command
+    private Command     m_pasteURLCmd;      // The Cancel command
     private Command     m_exitCommand;      // The exit command
     private Command     m_SaveCommand;      // The save without exit command
     private Command     m_addNewBookmark;   // The add new bookmark command
@@ -127,6 +134,7 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_editBookmark;     // The edit bookmark command
     private Command     m_delBookmark;      // The delete bookmark command
     private Command     m_backCommand;      // The back to header list command
+    private Command     m_pasteImportURLCmd;// The paste command
 	//#ifdef DMIDP20
     private Command     m_openLinkCmd;      // The open link command
     private Command     m_openEnclosureCmd; // The open enclosure command
@@ -150,6 +158,8 @@ public class RssReaderMIDlet extends MIDlet
 	//#endif
     private Command     m_importOkCmd;      // The OK command for importing
     private Command     m_importCancelCmd;  // The Cancel command for importing
+    private Command     m_boxOkCmd;         // The OK command for import box URL
+    private Command     m_boxCancelCmd;     // The Cancel command for import box URL
     private Command     m_settingsCmd;      // The show settings command
     private Command     m_AboutCmd;      // The show About
     private Command     m_updateAllCmd;     // The update all command
@@ -195,6 +205,7 @@ public class RssReaderMIDlet extends MIDlet
         /** Initialize commands */
         m_addOkCmd          = new Command("OK", Command.OK, 1);
         m_addCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
+        m_pasteURLCmd       = new Command("Allow paste", Command.CANCEL, 2);
         m_backCommand       = new Command("Back", Command.SCREEN, 1);
         m_exitCommand       = new Command("Exit", Command.SCREEN, 5);
         m_SaveCommand       = new Command("Save without exit", Command.SCREEN, 4);
@@ -221,6 +232,9 @@ public class RssReaderMIDlet extends MIDlet
 		//#endif
         m_importOkCmd       = new Command("OK", Command.OK, 1);
         m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
+        m_boxOkCmd          = new Command("OK", Command.OK, 1);
+        m_boxCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
+		m_pasteImportURLCmd = new Command("Allow paste", Command.SCREEN, 3);
         m_settingsCmd       = new Command("Settings", Command.SCREEN, 4);
         m_AboutCmd          = new Command("About", Command.SCREEN, 4);
         m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
@@ -287,7 +301,6 @@ public class RssReaderMIDlet extends MIDlet
         initializeHeadersList();
         initializeUnreadHhdrsList();
         //initializeLoadingForm();
-        initializeImportForm();
 	//#ifdef DLOGGING
         initializeDebugForm();
 	//#endif
@@ -402,6 +415,14 @@ public class RssReaderMIDlet extends MIDlet
         m_addNewBMForm = new Form("New bookmark");
         m_bmName = new TextField("Name", "", 64, TextField.ANY);
         m_bmURL  = new TextField("URL", "http://", 256, TextField.URL);
+		//#ifdef DMIDP20
+        RssReaderSettings settings = RssReaderSettings.getInstance(this);
+        boolean useTextBox = settings.getUseTextBox();
+		if (useTextBox) {
+			m_bmURL.setItemCommandListener(this);
+			m_bmURL.addCommand(m_pasteURLCmd);
+		}
+		//#endif
         m_bmUsername  = new TextField("Username (optional)", "", 64, TextField.ANY);
         m_bmPassword  = new TextField("Password (optional)", "", 64, TextField.PASSWORD);
         m_addNewBMForm.append( m_bmName );
@@ -421,8 +442,15 @@ public class RssReaderMIDlet extends MIDlet
         if(url.length()==0) {
             url = "http://";
         }
-        m_feedListURL = new TextField("URL", url, 256, TextField.URL);
-        m_importFeedsForm.append(m_feedListURL);
+		m_feedListURL = new TextField("URL", url, 256, TextField.URL);
+		//#ifdef DMIDP20
+        boolean useTextBox = settings.getUseTextBox();
+		if (useTextBox) {
+			m_feedListURL.setItemCommandListener(this);
+			m_feedListURL.addCommand(m_pasteImportURLCmd);
+		}
+		//#endif
+		m_importFeedsForm.append(m_feedListURL);
         
         String[] formats = {"OPML", "line by line", "HTML Links"};
         m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
@@ -443,7 +471,20 @@ public class RssReaderMIDlet extends MIDlet
         
         m_importFeedsForm.addCommand( m_importOkCmd );
         m_importFeedsForm.addCommand( m_importCancelCmd );
+		//#ifdef DMIDP10
+        m_importFeedsForm.addCommand( m_pasteImportURLCmd );
+		//#endif
+        m_importFeedsForm.addCommand( m_importCancelCmd );
         m_importFeedsForm.setCommandListener(this);
+    }
+    
+    /** Initialize URL text Box */
+    private void initializeURLBox(String url) {
+		m_boxURL = new TextBox("URL", url,
+								256, TextField.URL);
+        m_boxURL.addCommand( m_boxOkCmd );
+        m_boxURL.addCommand( m_boxCancelCmd );
+        m_boxURL.setCommandListener(this);
     }
     
 	//#ifdef DLOGGING
@@ -896,6 +937,7 @@ public class RssReaderMIDlet extends MIDlet
     public void commandAction(Command c, Displayable s) {
         /** Add new RSS feed bookmark */
         if( c == m_addNewBookmark ){
+			initializeAddBookmarkForm();
             m_curBookmark = -1;
             m_bmName.setString("");
             m_bmURL.setString("http://");
@@ -1118,7 +1160,7 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Get back to RSS feed bookmarks */
         if( c == m_backUnreadHdrCmd ){
-			m_unreadItems.removeAllElements(); 
+			m_unreadItems.removeAllElements();
             m_display.setCurrent( m_bookmarkList );
         }
         
@@ -1137,6 +1179,7 @@ public class RssReaderMIDlet extends MIDlet
 			// Reset current bookmark so that the added feeds do not
 			// get put into the same bookmark and overrite each other.
 			m_curBookmark = -1;
+			initializeImportForm();
             m_display.setCurrent( m_importFeedsForm );
         }
         
@@ -1220,6 +1263,25 @@ public class RssReaderMIDlet extends MIDlet
 			}
         }
         
+		//#ifdef DMIDP20
+
+        /** Paste into URL field from previous form.  */
+        if( c == m_boxOkCmd ) {
+			if ( m_boxRtnItem == m_bmURL ) {
+				m_bmURL.setString( m_boxURL.getString() );
+				m_display.setCurrentItem( m_bmURL );
+			} else if ( m_boxRtnItem == m_feedListURL ) {
+				m_feedListURL.setString( m_boxURL.getString() );
+				m_display.setCurrentItem( m_feedListURL );
+			}
+        }
+        
+        /** Cancel the box go back to the return form.  */
+        if( c == m_boxCancelCmd ) {
+			m_display.setCurrentItem( m_boxRtnItem );
+        }
+		//#endif
+        
         /** Settings form */
         if( c == m_settingsCmd ) {
             m_display.setCurrent( m_settingsForm );
@@ -1246,4 +1308,24 @@ public class RssReaderMIDlet extends MIDlet
 
     }
     
+	//#ifdef DMIDP20
+    /** Respond to commands from items */
+    public void commandAction(Command c, Item i) {
+        /** Put current import URL into URL box.  */
+		if( c == m_pasteImportURLCmd ) {
+			initializeURLBox(m_feedListURL.getString() );
+			m_boxRtnItem = m_feedListURL;
+			m_display.setCurrent( m_boxURL );
+		}
+
+        /** Put current import URL into URL box.  */
+		if( c == m_pasteURLCmd ) {
+			initializeURLBox( m_bmURL.getString() );
+			m_boxRtnItem = m_bmURL;
+			m_display.setCurrent( m_boxURL );
+		}
+
+	}
+	//#endif
+
 }
