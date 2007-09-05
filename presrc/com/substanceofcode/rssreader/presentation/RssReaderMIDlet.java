@@ -1195,6 +1195,11 @@ public class RssReaderMIDlet extends MIDlet
         if( c == m_copyLinkCmd ){
 			m_itemForm.set(citemLnkNbr, new TextField("Link:",
                 citem.getLink(), citem.getLink().length(), TextField.URL));
+			//#ifdef DMIDP10
+			m_display.setCurrent(m_itemForm);
+			//#else
+			m_display.setCurrentItem(m_itemForm.get(citemLnkNbr));
+			//#endif
         }
         
         /** Copy enclosure to clipboard.  */
@@ -1202,6 +1207,11 @@ public class RssReaderMIDlet extends MIDlet
 			m_itemForm.set(citemEnclNbr, new TextField("Enclosure:",
                 citem.getEnclosure(), citem.getEnclosure().length(),
 				TextField.URL));
+			//#ifdef DMIDP10
+			m_display.setCurrent(m_itemForm);
+			//#else
+			m_display.setCurrentItem(m_itemForm.get(citemEnclNbr));
+			//#endif
         }
         
 		//#ifdef DMIDP20
