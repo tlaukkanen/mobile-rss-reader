@@ -51,3 +51,9 @@ v1.10.3 (August 28th 2007)
 + Use alternate link for atoms of self and related are not present.
 + Rename New Items form to Unread Items form.
 + Remove unused test logging classes.
+
+v1.10.4 (September 4th 2007)
++ Fixed allowing pasting for some devices.  (Other devices may not have had
+  any problem)
++ Fixed redirect problem with capitalized HTML tags.
++ Show used/available memory in addition to DB memory used/available.
