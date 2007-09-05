@@ -59,6 +59,8 @@ v1.10.4 (September 4th 2007)
 + Show used/available memory in addition to DB memory used/available.
 + Allow copy of enclosure.
 + Give alert for out of memroy that is there until it is dismissed.
-+ Fixed initial run problem with bookmarks shown before about screen
-+ Fixed intermittent start hang with MIDP 1.0 version
-+ Added more logging for test version
++ Fixed initial run problem with bookmarks shown before about screen.
++ Fixed intermittent start hang with MIDP 1.0 version.
++ Added more logging for test version.
++ Set focus when setting copy link/enclosure (Focus does not work
+on all devices including the emulator.)
