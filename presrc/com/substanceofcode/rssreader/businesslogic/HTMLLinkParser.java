@@ -146,12 +146,15 @@ public class HTMLLinkParser extends FeedListParser {
 			}
 
 			text = StringUtil.replace(text, "\r", "");
-			String[] alinks = StringUtil.split(text, "<a");
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finer("text=" + text);}
+			//#endif
+			String[] alinks = StringUtil.split(text, "<a ");
 			
 			Vector vfeeds = new Vector();
 			for(int alinkIndex=0; alinkIndex<alinks.length; alinkIndex++) {
 				String alink = alinks[alinkIndex];
-				String[] calinks = StringUtil.split(alink, "<A");
+				String[] calinks = StringUtil.split(alink, "<A ");
 				for(int calinkIndex = 0; calinkIndex < calinks.length;
 						calinkIndex++) {
 					String calink = calinks[calinkIndex];
@@ -162,7 +165,10 @@ public class HTMLLinkParser extends FeedListParser {
 					String url;
 					int indexOfHref = calink.indexOf("href");
 					if (indexOfHref < 0) {
-						continue;
+						indexOfHref = calink.indexOf("HREF");
+						if (indexOfHref < 0) {
+							continue;
+						}
 					}
 					int indexOfBQuote = calink.indexOf("\"", indexOfHref);
 					if (indexOfBQuote < 0) {
