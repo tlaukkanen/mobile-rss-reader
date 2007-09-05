@@ -63,6 +63,9 @@ public class SettingsForm extends Form implements CommandListener {
     
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
+    private ChoiceGroup m_useTextBox;
+    private StringItem m_pgmMemUsedItem;
+    private StringItem m_pgmMemAvailItem;
     private StringItem m_memUsedItem;
     private StringItem m_memAvailItem;
 	//#ifdef DLOGGING
@@ -102,6 +105,13 @@ public class SettingsForm extends Form implements CommandListener {
 		m_markUnreadItems.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_markUnreadItems );
+		String [] txtChoices = {"Text (large) box", "Text (line) field"};
+        m_useTextBox = new ChoiceGroup("Text entry items",
+				                            Choice.EXCLUSIVE, txtChoices, null);
+		//#ifdef DMIDP20
+		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_useTextBox );
 		//#ifdef DLOGGING
 //@        m_logLevelField = new TextField("Logging level",
 //@                logger.getLevel().getName(), 20, TextField.ANY);
@@ -110,12 +120,22 @@ public class SettingsForm extends Form implements CommandListener {
 		//#endif
 //@        this.append( m_logLevelField );
 		//#endif
-        m_memUsedItem = new StringItem("Memory used", "");
+        m_pgmMemUsedItem = new StringItem("Application memory used", "");
+		//#ifdef DMIDP20
+		m_pgmMemUsedItem.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_pgmMemUsedItem );
+        m_pgmMemAvailItem = new StringItem("Application memory available", "");
+		//#ifdef DMIDP20
+		m_pgmMemAvailItem.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_pgmMemAvailItem );
+        m_memUsedItem = new StringItem("DB memory used", "");
 		//#ifdef DMIDP20
 		m_memUsedItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_memUsedItem );
-        m_memAvailItem = new StringItem("Memory available", "");
+        m_memAvailItem = new StringItem("DB memory available", "");
 		//#ifdef DMIDP20
 		m_memAvailItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
@@ -129,6 +149,9 @@ public class SettingsForm extends Form implements CommandListener {
         boolean markUnreadItems = settings.getMarkUnreadItems();
 		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
 		m_markUnreadItems.setSelectedFlags( selectedItems );
+        boolean useTextBox = settings.getUseTextBox();
+		boolean [] txtSelectedItems = {useTextBox, !useTextBox};
+		m_useTextBox.setSelectedFlags( txtSelectedItems );
 		try {
 			Settings m_settings = Settings.getInstance(m_midlet);
 			memInfo = m_settings.getSettingMemInfo();
@@ -136,6 +159,11 @@ public class SettingsForm extends Form implements CommandListener {
 			memInfo = new Hashtable(0);
 		}
 
+		m_pgmMemUsedItem.setText(
+				(Runtime.getRuntime().totalMemory() -
+				Runtime.getRuntime().freeMemory())/1024 + "kb");
+		m_pgmMemAvailItem.setText(
+				Runtime.getRuntime().freeMemory()/1024 + "kb");
         if (memInfo.size() == 0) {
 			m_memUsedItem.setText("0");
 			m_memAvailItem.setText("0");
@@ -154,6 +182,8 @@ public class SettingsForm extends Form implements CommandListener {
                 settings.setMaximumItemCountInFeed( maxCount );
 				boolean markUnreadItems = m_markUnreadItems.isSelected(0);
                 settings.setMarkUnreadItems( markUnreadItems );
+				boolean useTextBox = m_useTextBox.isSelected(0);
+				settings.setUseTextBox(useTextBox);
 				//#ifdef DLOGGING
 //@				try {
 //@					String logLevel =
