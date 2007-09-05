@@ -170,9 +170,9 @@ public class RssFeedParser {
 			if ((contentType != null) && (contentType.indexOf("html") >= 0)) {
 				if (m_redirect) {
 					//#ifdef DLOGGING
-//@					logger.severe("Error 2nd redirect.");
+//@					logger.severe("Error 2nd redirect url:  " + url);
 					//#endif
-					System.out.println("Error 2nd redirect.");
+					System.out.println("Error 2nd redirecturl:  " + url);
 					throw new IOException("Error 2nd redirect.");
 				}
 				m_redirect = true;
