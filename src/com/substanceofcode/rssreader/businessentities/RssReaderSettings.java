@@ -42,6 +42,7 @@ public class RssReaderSettings {
     private static final String IMPORT_USERNAME = "import-username";
     private static final String IMPORT_PASSWORD = "import-password";
     private static final String MARK_UNREAD_ITEMS = "mark-unread-items";
+    private static final String USE_TEXT_BOX = "use-text-box";
     private static final String LOG_LEVEL = "log-level";
     
     /** Creates a new instance of RssFeedReaderSettings */
@@ -113,6 +114,16 @@ public class RssReaderSettings {
     /** Set import URL password */
     public void setMarkUnreadItems(boolean markUnreadItems) {
         m_settings.setBooleanProperty( MARK_UNREAD_ITEMS, markUnreadItems);
+    }
+    
+    /** Get use text box */
+    public boolean getUseTextBox() {
+        return m_settings.getBooleanProperty( USE_TEXT_BOX, false);
+    }
+    
+    /** Set import URL password */
+    public void setUseTextBox(boolean useTextBox) {
+        m_settings.setBooleanProperty( USE_TEXT_BOX, useTextBox);
     }
     
 	//#ifdef DTEST
