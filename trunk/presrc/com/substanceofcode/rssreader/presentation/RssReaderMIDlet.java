@@ -125,7 +125,9 @@ public class RssReaderMIDlet extends MIDlet
     // Commands
     private Command     m_addOkCmd;         // The OK command
     private Command     m_addCancelCmd;     // The Cancel command
+	//#ifdef DMIDP20
     private Command     m_pasteURLCmd;      // The Cancel command
+	//#endif
     private Command     m_exitCommand;      // The exit command
     private Command     m_SaveCommand;      // The save without exit command
     private Command     m_addNewBookmark;   // The add new bookmark command
@@ -134,12 +136,15 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_editBookmark;     // The edit bookmark command
     private Command     m_delBookmark;      // The delete bookmark command
     private Command     m_backCommand;      // The back to header list command
+	//#ifdef DMIDP20
     private Command     m_pasteImportURLCmd;// The paste command
+	//#endif
 	//#ifdef DMIDP20
     private Command     m_openLinkCmd;      // The open link command
     private Command     m_openEnclosureCmd; // The open enclosure command
 	//#endif
     private Command     m_copyLinkCmd;    // The copy link command
+    private Command     m_copyEnclosureCmd; // The copy enclosure command
     private Command     m_openHeaderCmd;    // The open header command
     private Command     m_backHeaderCmd;    // The back to bookmark list command
     private Command     m_openUnreadHdrCmd;    // The open new header command
@@ -167,7 +172,8 @@ public class RssReaderMIDlet extends MIDlet
     
     // The controller of the application
     private Controller m_controller;
-    private int citemNbr = -1;
+    private int citemLnkNbr = -1;
+    private int citemEnclNbr = -1;
     private RssItem citem = null;
 	//#ifdef DLOGGING
     private Form m_debug;
@@ -189,145 +195,159 @@ public class RssReaderMIDlet extends MIDlet
 		for (Enumeration eForms =
 				logger.getParent().getForms().elements();
 				eForms.hasMoreElements();) {
-				m_debug = (Form)eForms.nextElement();
-				logger.finest("form=" + m_debug);
+			m_debug = (Form)eForms.nextElement();
+			logger.finest("form=" + m_debug);
 		}
         logger = Logger.getLogger("RssReaderMIDlet");
         logger.info("RssReaderMIDlet started.");
 		//#endif
-
-		/** Initialize encodingUtil. */
-		EncodingUtil.init();
-
-        /** Initialize controller */
-        m_controller = new Controller( this );
-        
-        /** Initialize commands */
-        m_addOkCmd          = new Command("OK", Command.OK, 1);
-        m_addCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
-        m_pasteURLCmd       = new Command("Allow paste", Command.CANCEL, 2);
-        m_backCommand       = new Command("Back", Command.SCREEN, 1);
-        m_exitCommand       = new Command("Exit", Command.SCREEN, 5);
-        m_SaveCommand       = new Command("Save without exit", Command.SCREEN, 4);
-        m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
-        m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
-        m_readUnreadItems      = new Command("Read unread items", Command.SCREEN, 1);
-        m_editBookmark      = new Command("Edit feed", Command.SCREEN, 2);
-        m_delBookmark       = new Command("Delete feed", Command.SCREEN, 3);
-        m_openHeaderCmd     = new Command("Open item", Command.SCREEN, 1);
-        m_openUnreadHdrCmd     = new Command("Open item", Command.SCREEN, 1);
-		//#ifdef DMIDP20
-        m_openLinkCmd       = new Command("Open link", Command.SCREEN, 1);
-        m_openEnclosureCmd  = new Command("Open enclosure", Command.SCREEN, 1);
-		//#endif
-        m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 1);
-        m_backHeaderCmd     = new Command("Back", Command.SCREEN, 2);
-        m_backUnreadHdrCmd     = new Command("Back", Command.SCREEN, 2);
-        m_updateCmd         = new Command("Update feed", Command.SCREEN, 2);
-        m_updateModCmd      = new Command("Update modified feed",
-										  Command.SCREEN, 2);
-        m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
-		//#ifdef DTEST
-        m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 3);
-		//#endif
-        m_importOkCmd       = new Command("OK", Command.OK, 1);
-        m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
-        m_boxOkCmd          = new Command("OK", Command.OK, 1);
-        m_boxCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
-		m_pasteImportURLCmd = new Command("Allow paste", Command.SCREEN, 3);
-        m_settingsCmd       = new Command("Settings", Command.SCREEN, 4);
-        m_AboutCmd          = new Command("About", Command.SCREEN, 4);
-        m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
-        m_updateAllModCmd   = new Command("Update modified all",
-				      					  Command.SCREEN, 2);
-	//#ifdef DLOGGING
-        m_debugCmd          = new Command("Debug Log", Command.SCREEN, 4);
-        m_backFrDebugCmd    = new Command("Back", Command.SCREEN, 2);
-	//#endif
-        
-        m_getPage = false;
-        m_getModPage = false;
-        m_refreshAllFeeds = false;
-        m_refreshUpdFeeds = false;
-        m_getFeedList = false;
-        m_curBookmark = -1;
-        m_maxRssItemCount = 10;
-        
-		// To get proper initialization, need to 
 		try {
-			m_settings = Settings.getInstance(this);
-			firstTime = !m_settings.isInitialized();
-        } catch(Exception e) {
-            System.err.println("Error while getting settings: " + e.toString());
-        }
 
-        m_appSettings = RssReaderSettings.getInstance(this);
+			/** Initialize encodingUtil. */
+			EncodingUtil.init();
+
+			/** Initialize controller */
+			m_controller = new Controller( this );
+			
+			/** Initialize commands */
+			m_addOkCmd          = new Command("OK", Command.OK, 1);
+			m_addCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
+			//#ifdef DMIDP20
+			m_pasteURLCmd       = new Command("Allow paste", Command.CANCEL, 2);
+			//#endif
+			m_backCommand       = new Command("Back", Command.SCREEN, 1);
+			m_exitCommand       = new Command("Exit", Command.SCREEN, 5);
+			m_SaveCommand       = new Command("Save without exit", Command.SCREEN, 4);
+			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
+			m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
+			m_readUnreadItems      = new Command("Read unread items", Command.SCREEN, 1);
+			m_editBookmark      = new Command("Edit feed", Command.SCREEN, 2);
+			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 3);
+			m_openHeaderCmd     = new Command("Open item", Command.SCREEN, 1);
+			m_openUnreadHdrCmd     = new Command("Open item", Command.SCREEN, 1);
+			//#ifdef DMIDP20
+			m_openLinkCmd       = new Command("Open link", Command.SCREEN, 1);
+			m_openEnclosureCmd  = new Command("Open enclosure", Command.SCREEN, 1);
+			//#endif
+			m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 1);
+			m_copyEnclosureCmd  = new Command("Copy enclosure", Command.SCREEN, 1);
+			m_backHeaderCmd     = new Command("Back", Command.SCREEN, 2);
+			m_backUnreadHdrCmd     = new Command("Back", Command.SCREEN, 2);
+			m_updateCmd         = new Command("Update feed", Command.SCREEN, 2);
+			m_updateModCmd      = new Command("Update modified feed",
+											  Command.SCREEN, 2);
+			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
+			//#ifdef DTEST
+			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 3);
+			//#endif
+			m_importOkCmd       = new Command("OK", Command.OK, 1);
+			m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
+			m_boxOkCmd          = new Command("OK", Command.OK, 1);
+			m_boxCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
+			//#ifdef DMIDP20
+			m_pasteImportURLCmd = new Command("Allow paste", Command.SCREEN, 3);
+			//#endif
+			m_settingsCmd       = new Command("Settings", Command.SCREEN, 4);
+			m_AboutCmd          = new Command("About", Command.SCREEN, 4);
+			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
+			m_updateAllModCmd   = new Command("Update modified all",
+											  Command.SCREEN, 2);
 		//#ifdef DLOGGING
-		if (m_appSettings.getLogLevel().equals("")) {
-			m_appSettings.setLogLevel(logger.getLevel().getName());
-		} else {
-			m_appSettings.setLogLevel(logger.getLevel().getName());
-		}
-		fineLoggable = logger.isLoggable(Level.FINE);
-		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
-		finestLoggable = logger.isLoggable(Level.FINEST);
-		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+			m_debugCmd          = new Command("Debug Log", Command.SCREEN, 4);
+			m_backFrDebugCmd    = new Command("Back", Command.SCREEN, 2);
 		//#endif
-
-		try {
+			
+			m_getPage = false;
+			m_getModPage = false;
+			m_refreshAllFeeds = false;
+			m_refreshUpdFeeds = false;
+			m_getFeedList = false;
+			m_curBookmark = -1;
+			m_maxRssItemCount = 10;
+			
+			// To get proper initialization, need to 
 			try {
-				// createImage("/icons/unread.png") does not always work
-				// with the emulator.  so, I do an alternate which is
-				// effectively the same thing.
-				m_unreadImage = Image.createImage("/icons/unread.png");
-			} catch(IOException e) {
-				//#ifdef DMIDP20
-				InputStream is =
-						this.getClass().getResourceAsStream("/icons/unread.png");
-				m_unreadImage = Image.createImage(is);
-				is.close();
-				//#endif
-			}
-        } catch(Exception e) {
-            System.err.println("Error while getting mark image: " + e.toString());
-        }
-        
-		initializeLoadingForm("Loading items...");
-		m_display.setCurrent( m_loadForm );
-
-        /** Initialize GUI items */
-        initializeBookmarkList();
-        initializeAddBookmarkForm();
-        initializeHeadersList();
-        initializeUnreadHhdrsList();
-        //initializeLoadingForm();
-	//#ifdef DLOGGING
-        initializeDebugForm();
-	//#endif
-        m_settingsForm = new SettingsForm(this);
-        
-        m_display.setCurrent(m_bookmarkList);
-        
-		if( firstTime ) {
-			try {
-				firstTime = false;
-				// Set Max item count to default so that it is initialized.
-				m_appSettings.setMaximumItemCountInFeed(
-						m_appSettings.getMaximumItemCountInFeed());
-				saveBkMrkSettings(false);
-				Alert m_about = getAbout();
-				m_display.setCurrent( m_about, m_bookmarkList );
+				m_settings = Settings.getInstance(this);
+				firstTime = !m_settings.isInitialized();
 			} catch(Exception e) {
-				System.err.println("Error while getting/updating settings: " + e.toString());
+				System.err.println("Error while getting settings: " + e.toString());
+			}
+
+			m_appSettings = RssReaderSettings.getInstance(this);
+			//#ifdef DLOGGING
+			if (m_appSettings.getLogLevel().equals("")) {
+				m_appSettings.setLogLevel(logger.getLevel().getName());
+			} else {
+				m_appSettings.setLogLevel(logger.getLevel().getName());
+			}
+			fineLoggable = logger.isLoggable(Level.FINE);
+			logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+			finestLoggable = logger.isLoggable(Level.FINEST);
+			logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+			//#endif
+
+			try {
+				try {
+					// createImage("/icons/unread.png") does not always work
+					// with the emulator.  so, I do an alternate which is
+					// effectively the same thing.
+					m_unreadImage = Image.createImage("/icons/unread.png");
+				} catch(IOException e) {
+					//#ifdef DMIDP20
+					InputStream is =
+							this.getClass().getResourceAsStream("/icons/unread.png");
+					m_unreadImage = Image.createImage(is);
+					is.close();
+					//#endif
+				}
+			} catch(Exception e) {
+				System.err.println("Error while getting mark image: " + e.toString());
+			}
+			
+			initializeLoadingForm("Loading items...");
+			m_display.setCurrent( m_loadForm );
+
+			/** Initialize GUI items */
+			initializeBookmarkList();
+			initializeAddBookmarkForm();
+			initializeHeadersList();
+			initializeUnreadHhdrsList();
+			//initializeLoadingForm();
+		//#ifdef DLOGGING
+			initializeDebugForm();
+		//#endif
+			m_settingsForm = new SettingsForm(this);
+			
+			m_display.setCurrent(m_bookmarkList);
+			
+			if( firstTime ) {
+				try {
+					firstTime = false;
+					// Set Max item count to default so that it is initialized.
+					m_appSettings.setMaximumItemCountInFeed(
+							m_appSettings.getMaximumItemCountInFeed());
+					saveBkMrkSettings(false);
+					Alert m_about = getAbout();
+					m_display.setCurrent( m_about, m_bookmarkList );
+				} catch(Exception e) {
+					System.err.println("Error while getting/updating settings: " + e.toString());
+					m_display.setCurrent( m_bookmarkList );
+				}
+			} else {
 				m_display.setCurrent( m_bookmarkList );
 			}
-		} else {
-            m_display.setCurrent( m_bookmarkList );
-		}
 
-        /** Initialize thread for http connection operations */
-        m_netThread = new Thread(this);
-        m_netThread.start();
+			/** Initialize thread for http connection operations */
+			m_netThread = new Thread(this);
+			m_netThread.start();
+
+		}catch(Throwable t) {
+			//#ifdef DLOGGING
+			logger.severe("RssReaderMIDlet constructor ", t);
+			//#endif
+			/** Error while parsing RSS feed */
+			System.out.println("RssReaderMIDlet constructor " + t.getMessage());
+		}
     }
     
     /** Get application settings */
@@ -398,8 +418,29 @@ public class RssReaderMIDlet extends MIDlet
 			// Reset internal region to 0.
 			m_settings.getStringProperty(0, "bookmarks", "");
         } catch(Exception e) {
+			//#ifdef DLOGGING
+			logger.severe("Error while initializing bookmark list: ", e);
+			//#endif
             System.err.println("Error while initializing bookmark list: " + e.toString());
-        }
+        } catch(OutOfMemoryError e) {
+			//#ifdef DLOGGING
+			logger.severe("Error while initializing bookmark list: ", e);
+			//#endif
+            System.err.println("Error while initializing bookmark list: " + e.toString());
+            Alert memoryAlert = new Alert(
+                    "Out of memory", 
+                    "Loading bookmarks without all news items.",
+                    null,
+                    AlertType.WARNING);
+			memoryAlert.setTimeout(Alert.FOREVER);
+            m_display.setCurrent( memoryAlert, m_loadForm );
+		}catch(Throwable t) {
+			//#ifdef DLOGGING
+			logger.severe("Error while initializing bookmark list: ", t);
+			//#endif
+			/** Error while parsing RSS feed */
+			System.out.println("Error while initializing bookmark list: " + t.getMessage());
+		}
     }
     
     /** Initialize loading form */
@@ -471,7 +512,7 @@ public class RssReaderMIDlet extends MIDlet
         
         m_importFeedsForm.addCommand( m_importOkCmd );
         m_importFeedsForm.addCommand( m_importCancelCmd );
-		//#ifdef DMIDP10
+		//#ifdef DMIDP20
         m_importFeedsForm.addCommand( m_pasteImportURLCmd );
 		//#endif
         m_importFeedsForm.addCommand( m_importCancelCmd );
@@ -737,6 +778,11 @@ public class RssReaderMIDlet extends MIDlet
 		}
 		//#endif
         m_itemForm.addCommand( m_copyLinkCmd );
+		//#ifdef DMIDP20
+		if (!item.getEnclosure().equals("")) {
+			m_itemForm.addCommand( m_copyEnclosureCmd );
+		}
+		//#endif
         m_itemForm.addCommand( m_backCommand );
         m_itemForm.setCommandListener(this);
         m_itemForm.setTitle(item.getTitle());
@@ -757,10 +803,10 @@ public class RssReaderMIDlet extends MIDlet
 			senclosure = new StringItem("Enclosure:", item.getEnclosure());
 		}
 		//#endif
-        citemNbr  = m_itemForm.append(slink);
+        citemLnkNbr  = m_itemForm.append(slink);
 		// TODO get number of this or delete all and add.
 		if (senclosure != null) {
-			m_itemForm.append(senclosure);
+			citemEnclNbr = m_itemForm.append(senclosure);
 		}
         
         // Add item's date if it is available
@@ -855,6 +901,7 @@ public class RssReaderMIDlet extends MIDlet
                     "Saving bookmarks without updated news items.",
                     null,
                     AlertType.WARNING);
+			memoryAlert.setTimeout(Alert.FOREVER);
             m_display.setCurrent( memoryAlert );
             
             /** Save feeds without items */
@@ -1111,8 +1158,15 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Copy link to clipboard.  */
         if( c == m_copyLinkCmd ){
-			m_itemForm.set(citemNbr, new TextField("Link:",
+			m_itemForm.set(citemLnkNbr, new TextField("Link:",
                 citem.getLink(), citem.getLink().length(), TextField.URL));
+        }
+        
+        /** Copy enclosure to clipboard.  */
+        if( c == m_copyEnclosureCmd ){
+			m_itemForm.set(citemEnclNbr, new TextField("Enclosure:",
+                citem.getEnclosure(), citem.getEnclosure().length(),
+				TextField.URL));
         }
         
 		//#ifdef DMIDP20
