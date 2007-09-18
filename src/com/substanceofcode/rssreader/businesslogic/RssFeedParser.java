@@ -52,6 +52,8 @@ public class RssFeedParser {
     
     private RssFeed m_rssFeed;  // The RSS feed
     private boolean m_redirect = false;  // The RSS feed
+    private boolean m_getTitleOnly = false;  // The RSS feed
+
 	//#ifdef DTEST
 //@    private long m_lastMod;  // Last modification used for testing.
 //@
@@ -87,9 +89,9 @@ public class RssFeedParser {
         InputStream is = null;
         String response = "";
 		long lastMod = 0L;
+		String url = m_rssFeed.getUrl();
         try {
 			String contentType = null;
-			String url = m_rssFeed.getUrl();
 			//#ifdef DTEST
 //@			if (url.indexOf("file://") == 0) {
 //@				is = this.getClass().getResourceAsStream( url.substring(7));
@@ -162,52 +164,38 @@ public class RssFeedParser {
 				is = hc.openInputStream();
 				lastMod = hc.getLastModified();
 				contentType = hc.getHeaderField("content-type");
+				//#ifdef DLOGGING
+//@				if (fineLoggable) {logger.fine("responce code=" + hc.getResponseCode());}
+//@				if (fineLoggable) {logger.fine("responce location=" + hc.getHeaderField("location"));}
+//@				if (finestLoggable) {
+//@					for (int ic = 0; ic < 20; ic++) {
+//@						logger.finest("hk=" + ic + "," +
+//@								hc.getHeaderFieldKey(ic));
+//@						logger.finest("hf=" + ic + "," +
+//@								hc.getHeaderField(ic));
+//@					}
+//@				}
+				//#endif
+				if (((hc.getResponseCode() == hc.HTTP_MOVED_TEMP) ||
+				    (hc.getResponseCode() == hc.HTTP_MOVED_PERM) ||
+				    (hc.getResponseCode() == hc.HTTP_TEMP_REDIRECT)) &&
+					 (hc.getHeaderField("location") != null)) {
+					parseHeaderRedirect(updFeed,
+									    hc.getHeaderField("location"),
+									    maxItemCount);
+					return;
+				}
 			//#ifdef DTEST
 //@			}
 			//#endif
 
+			//#ifdef DLOGGING
+//@			if (finestLoggable) {logger.finest("contentType=" + contentType);}
+			//#endif
 			// If we find HTML, ussume it is redirection
 			if ((contentType != null) && (contentType.indexOf("html") >= 0)) {
-				if (m_redirect) {
-					//#ifdef DLOGGING
-//@					logger.severe("Error 2nd redirect url:  " + url);
-					//#endif
-					System.out.println("Error 2nd redirecturl:  " + url);
-					throw new IOException("Error 2nd redirect.");
-				}
-				m_redirect = true;
-				RssFeed[] feeds =
-						HTMLLinkParser.parseFeeds(new EncodingUtil(is),
-											null,
-											null
-											//#ifdef DLOGGING
-//@											,logger,
-//@											fineLoggable,
-//@											finerLoggable,
-//@											finestLoggable
-											//#endif
-											);
-				if (feeds.length == 0) {
-					//#ifdef DLOGGING
-//@					logger.severe("Parsing HTML redirect cannot be " +
-//@								  "processed.");
-					//#endif
-					System.out.println(
-							"Parsing HTML redirect cannot be " +
-							"processed.");
-					throw new IOException("Parsing HTML redirect cannot be " +
-										  "processed.");
-				}
-				RssFeed svFeed = new RssFeed(m_rssFeed);
-				m_rssFeed.setUrl(feeds[0].getUrl());
-				try {
-					parseRssFeed(updFeed, maxItemCount);
-				} catch (Exception e) {
-					svFeed.copyTo(m_rssFeed);
-					throw e;
-				}
+				parseHTMLRedirect(updFeed, url, is, maxItemCount);
 				return;
-
 			}
 
 			if (lastMod == 0L) {
@@ -219,6 +207,13 @@ public class RssFeedParser {
 			}
             parseRssFeedXml( is, maxItemCount );
 			m_rssFeed.setUpddate(new Date(lastMod));
+        } catch(IllegalArgumentException e) {
+			//#ifdef DLOGGING
+//@			logger.severe("Error possible bad url " + url, e);
+			//#endif
+			System.out.println("error " + e.getMessage());
+			e.printStackTrace();
+            throw new Exception("Error while parsing feed: " + e.toString());
         } catch(Exception e) {
 			//#ifdef DLOGGING
 //@			logger.severe("Error ", e);
@@ -238,6 +233,78 @@ public class RssFeedParser {
         }
     }
     
+	/** Read HTML and if it has links, redirect and parse the XML. */
+	private void parseHeaderRedirect(boolean updFeed, String url,
+								     int maxItemCount)
+	throws Exception {
+		if (m_redirect) {
+			//#ifdef DLOGGING
+//@			logger.severe("Error 2nd header redirect url:  " + url);
+			//#endif
+			System.out.println("Error 2nd header redirecturl:  " + url);
+			throw new IOException("Error 2nd header redirect.");
+		}
+		m_redirect = true;
+		RssFeed svFeed = new RssFeed(m_rssFeed);
+		m_rssFeed.setUrl(url);
+		try {
+			parseRssFeed(updFeed, maxItemCount);
+			m_rssFeed.setUrl(svFeed.getUrl());
+		} catch (Exception e) {
+			svFeed.copyTo(m_rssFeed);
+			throw e;
+		}
+		return;
+
+	}
+
+	/** Read HTML and if it has links, redirect and parse the XML. */
+	private void parseHTMLRedirect(boolean updFeed, String url,
+								   InputStream is, int maxItemCount)
+	throws Exception {
+		if (m_redirect) {
+			//#ifdef DLOGGING
+//@			logger.severe("Error 2nd redirect url:  " + url);
+			//#endif
+			System.out.println("Error 2nd redirecturl:  " + url);
+			throw new IOException("Error 2nd redirect.");
+		}
+		m_redirect = true;
+		RssFeed[] feeds =
+				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
+									null,
+									null
+									//#ifdef DLOGGING
+//@									,logger,
+//@									fineLoggable,
+//@									finerLoggable,
+//@									finestLoggable
+									//#endif
+									);
+		if (feeds.length == 0) {
+			//#ifdef DLOGGING
+//@			logger.severe("Parsing HTML redirect cannot be " +
+//@						  "processed.");
+			//#endif
+			System.out.println(
+					"Parsing HTML redirect cannot be " +
+					"processed.");
+			throw new IOException("Parsing HTML redirect cannot be " +
+								  "processed.");
+		}
+		RssFeed svFeed = new RssFeed(m_rssFeed);
+		m_rssFeed.setUrl(feeds[0].getUrl());
+		try {
+			parseRssFeed(updFeed, maxItemCount);
+			m_rssFeed.setUrl(svFeed.getUrl());
+		} catch (Exception e) {
+			svFeed.copyTo(m_rssFeed);
+			throw e;
+		}
+		return;
+
+	}
+
     /**
      * Nasty RSS feed XML parser.
      * Seems to work with all RSS 0.91, 0.92 and 2.0.
@@ -266,17 +333,21 @@ public class RssFeedParser {
             /** Feed is in RSS format */
             formatParser = new RssFormatParser();
             Vector items = formatParser.parse( parser, m_rssFeed,
-					maxItemCount );
+					maxItemCount, m_getTitleOnly );
             m_rssFeed.setItems( items );
             
         } else if(entryElementName.equals("feed")) {
             /** Feed is in Atom format */
             formatParser = new AtomFormatParser();
             Vector items = formatParser.parse( parser, m_rssFeed,
-					maxItemCount );
+					maxItemCount, m_getTitleOnly );
             m_rssFeed.setItems( items );
             
+			// TODO handle HTML redirect
         } else {
+			//#ifdef DLOGGING
+//@			logger.severe("Unable to parse feed type:  " + entryElementName);
+			//#endif
             /** Unknown feed */
             throw new IOException("Unable to parse feed. Feed format is not supported.");
             
@@ -293,5 +364,13 @@ public class RssFeedParser {
 //@        return (m_lastMod);
 //@    }
 	//#endif
+
+    public void setGetTitleOnly(boolean m_getTitleOnly) {
+        this.m_getTitleOnly = m_getTitleOnly;
+    }
+
+    public boolean isGetTitleOnly() {
+        return (m_getTitleOnly);
+    }
 
 }
