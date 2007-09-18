@@ -46,7 +46,8 @@ import javax.microedition.rms.*;
  */
 public class Settings {
     
-    public static final int MAX_REGIONS = 6;
+    public static final int OLD_MAX_REGIONS = 1;
+    public static final int MAX_REGIONS = 10;
     public static final String SETTINGS_NAME = "RssReader-setttings-vers";
     public static final String SETTINGS_VERS = "2";
     private static Settings m_store;
@@ -159,9 +160,12 @@ public class Settings {
 					//#endif
 				}
 			} else {
-				if ( numRecs < MAX_REGIONS ) {
+				if ( numRecs == OLD_MAX_REGIONS ) {
 					currentSettings = false;
 				}
+				//#ifdef DLOGGING
+//@				if (fineLoggable) {logger.fine("currentSettings=" + currentSettings);}
+				//#endif
                 byte[] data = rs.getRecord( region + 1 );
                 if( data != null ) {
                     bin = new ByteArrayInputStream( data );
