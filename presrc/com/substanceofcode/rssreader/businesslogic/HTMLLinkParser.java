@@ -26,10 +26,12 @@
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.utils.EncodingStreamReader;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
@@ -95,19 +97,40 @@ public class HTMLLinkParser extends FeedListParser {
 										 boolean finestLoggable
 										//#endif
 			                           ) {
+		EncodingStreamReader encodingStreamReader =
+			encodingUtil.getEncodingStreamReader();
 		// Init in case we get a severe error.
         RssFeed[] feeds = new RssFeed[0];
 		String docEncoding = "";  // Default for HTML is ISO8859_1?
 		try {
 			// Prepare buffer for input data
 			StringBuffer inputBuffer = new StringBuffer();
-			String fileEncoding = encodingUtil.getFileEncoding();
+			String fileEncoding =
+				encodingStreamReader.getFileEncoding();
 			
 			// Read all data to buffer
 			int inputCharacter;
 			try {
-				while ((inputCharacter = encodingUtil.read()) != -1) {
+				int lt = 0;
+				while ((inputCharacter =
+							encodingStreamReader.read()) != -1) {
 					inputBuffer.append((char)inputCharacter);
+					if (inputCharacter == '<') {
+						if (lt++ > 2) {
+							break;
+						}
+					}
+				}
+				if (inputCharacter != -1) {
+					InputStreamReader is;
+					if (encodingStreamReader.isModEncoding()) {
+						is = encodingStreamReader;
+					} else {
+						is = encodingStreamReader.getInputStream();
+					}
+					while ((inputCharacter = is.read()) != -1) {
+						inputBuffer.append((char)inputCharacter);
+					}
 				}
 			} catch (IOException ex) {
 				ex.printStackTrace();
@@ -146,9 +169,6 @@ public class HTMLLinkParser extends FeedListParser {
 			}
 
 			text = StringUtil.replace(text, "\r", "");
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finer("text=" + text);}
-			//#endif
 			String[] alinks = StringUtil.split(text, "<a ");
 			
 			Vector vfeeds = new Vector();
