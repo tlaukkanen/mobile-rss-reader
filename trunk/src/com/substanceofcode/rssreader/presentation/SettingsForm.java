@@ -116,7 +116,7 @@ public class SettingsForm extends Form implements CommandListener {
 		//#endif
 		//#ifdef DLOGGING
 //@        m_logLevelField = new TextField("Logging level",
-//@                logger.getLevel().getName(), 20, TextField.ANY);
+//@                logger.getParent().getLevel().getName(), 20, TextField.ANY);
 		//#ifdef DMIDP20
 //@		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
@@ -194,7 +194,7 @@ public class SettingsForm extends Form implements CommandListener {
 //@				try {
 //@					String logLevel =
 //@						m_logLevelField.getString().toUpperCase();
-//@					logger.setLevel(Level.parse(logLevel));
+//@					logger.getParent().setLevel(Level.parse(logLevel));
 //@					settings.setLogLevel( logLevel );
 //@				} catch (IllegalArgumentException e) {
 //@					Alert invalidData = new Alert("Invalid Log Level",
