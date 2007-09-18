@@ -64,3 +64,17 @@ v1.10.4 (September 4th 2007)
 + Added more logging for test version.
 + Set focus when setting copy link/enclosure (Focus does not work
 on all devices including the emulator.)
+
+v1.10.5 (September 17th 2007)
++ Allow non utf-16 to be faster.
++ Allow windows single quote for attributes.
++ Fixed attributes not handling encoding.
++ Allow descending sort of unread items dates.
++ Don't give error if missing title.
++ Allow reading of missing titles from OPML.
++ Get redirection from URLs with redirection statuses.
++ More error messages for feed problems.
++ Test logging changes (not in released binaries.  In test only).
++ Fixed add new bookmark not showing previous user name/password.
++ Increased size of bookmarks that can be restored.
++ Logging changes (for test only).
