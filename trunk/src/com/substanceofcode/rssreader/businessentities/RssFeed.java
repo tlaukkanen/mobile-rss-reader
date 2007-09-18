@@ -36,7 +36,7 @@ import java.util.*;
 public class RssFeed{
     
     private String m_url  = "";
-    private String m_name = "";
+    private String m_name = "";
     private String m_username = "";
     private String m_password = "";
     private Date m_upddate = null;
@@ -132,6 +132,10 @@ public class RssFeed{
         return m_name;
     }
     
+    public void setName(String m_name) {
+        this.m_name = m_name;
+    }
+
     /** Return bookmark's URL */
     public String getUrl(){
         return m_url;
