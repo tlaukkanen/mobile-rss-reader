@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?><opml version="1.0">
+<head>
+	<title>Netvibes.com Subscriptions</title>
+</head>
+<body>
+<outline title="Basics" text="Basics">
+	<outline type="rss" title="Desktop it. V3" text="Desktop it. V3" xmlUrl="http://desktop-it.blogspot.com/feeds/posts/default?alt=rss" htmlUrl="http://desktop-it.blogspot.com/index.html" />
+</outline>
+<outline title="Tech" text="Tech">
+	<outline type="rss" title="Slashdot" text="Slashdot" xmlUrl="http://rss.slashdot.org/Slashdot/slashdot" htmlUrl="http://slashdot.org/" />
+	<outline type="rss" title="ebooks" text="ebooks" xmlUrl="http://ebookshare.net/plus/rss/index.xml" htmlUrl="http://www.mp3nova.org" />
+	<outline type="rss" title="PodTech.net: Technology and Entertainment Video Network" text="PodTech.net: Technology and Entertainment Video Network" xmlUrl="http://www.podtech.net/home/feed/" htmlUrl="http://www.PodTech.net/" />
+	<outline type="rss" title="Paul Thurrott's Internet Nexus" text="Paul Thurrott's Internet Nexus" xmlUrl="http://www.internet-nexus.com/rss.xml" htmlUrl="http://www.internet-nexus.com/default.htm" />
+	<outline type="rss" title="WinBeta" text="WinBeta" xmlUrl="http://www.winbeta.org/modules.php?modname=backend&amp;action=rdf&amp;id=1" htmlUrl="http://www.winbeta.org" />
+	<outline type="rss" title="Windows IT Pro" text="Windows IT Pro" xmlUrl="http://feeds.penton.com/windowsitpro/wininfo" htmlUrl="http://www.windowsitpro.com" />
+	<outline type="rss" title="Ars Technica" text="Ars Technica" xmlUrl="http://feeds.arstechnica.com/arstechnica/BAaf" htmlUrl="http://arstechnica.com/index.ars" />
+	<outline type="rss" title="Neowin.net" text="Neowin.net" xmlUrl="http://www.neowin.net/fb.php?page=all" htmlUrl="http://www.neowin.net" />
+	<outline type="rss" title="Our Picks - News, articles and reviews" text="Our Picks - News, articles and reviews" xmlUrl="http://feeds.feedburner.com/OurPicks" htmlUrl="http://www.our-picks.com" />
+	<outline type="rss" title="TechNet Magazine Blog" text="TechNet Magazine Blog" xmlUrl="http://blogs.technet.com/tnmag/rss.xml" htmlUrl="http://blogs.technet.com/tnmag/default.aspx" />
+	<outline type="rss" title="Lifehacker" text="Lifehacker" xmlUrl="http://www.lifehacker.com/excerpts.xml" htmlUrl="http://www.lifehacker.com/" />
+	<outline type="rss" title="Greg's Head" text="Greg's Head" xmlUrl="http://www.raizlabs.com/blog/?feed=rss2" htmlUrl="http://www.raizlabs.com/blog" />
+	<outline type="rss" title="PC Magazine: Bill Machrone: ExtremeTech" text="PC Magazine: Bill Machrone: ExtremeTech" xmlUrl="http://rssnewsapps.ziffdavis.com/pcmag_commentary.xml" htmlUrl="http://www.pcmag.com" />
+	<outline type="rss" title="TECH.BLORGE.com" text="TECH.BLORGE.com" xmlUrl="http://tech.blorge.com/feed/" htmlUrl="http://tech.blorge.com" />
+	<outline type="rss" title="Rondam Ramblings" text="Rondam Ramblings" xmlUrl="http://rondam.blogspot.com/feeds/posts/default?alt=rss" htmlUrl="http://rondam.blogspot.com/" />
+	<outline type="rss" title="PC Magazine: John C. Dvorak" text="PC Magazine: John C. Dvorak" xmlUrl="http://rssnewsapps.ziffdavis.com/PCMAG_dvorak.xml" htmlUrl="http://www.pcmag.com" />
+	<outline type="rss" title="Official Google Blog" text="Official Google Blog" xmlUrl="http://googleblog.blogspot.com/feeds/posts/default?alt=rss" htmlUrl="http://googleblog.blogspot.com/index.html" />
+	<outline type="rss" title="Windows Vista Security" text="Windows Vista Security" xmlUrl="http://blogs.msdn.com/windowsvistasecurity/rss.xml" htmlUrl="http://blogs.msdn.com/windowsvistasecurity/default.aspx" />
+	<outline type="rss" title="Smashing Magazine" text="Smashing Magazine" xmlUrl="http://www.smashingmagazine.com/wp-rss.php" htmlUrl="http://www.smashingmagazine.com" />
+	<outline type="rss" title="the nokia phone blog" text="the nokia phone blog" xmlUrl="http://www.nokiaphoneblog.com/index.xml" htmlUrl="http://www.nokiaphoneblog.com/" />
+	<outline type="rss" title="zdnet.com - All about Microsoft" text="zdnet.com - All about Microsoft" xmlUrl="http://blogs.zdnet.com/microsoft/?feed=rss2" htmlUrl="http://blogs.zdnet.com/microsoft" />
+	<outline type="rss" title="S60Tips.com" text="S60Tips.com" xmlUrl="http://feeds.feedburner.com/s60tips" htmlUrl="http://www.s60tips.com" />
+	<outline type="rss" title="MobileHub" text="MobileHub" xmlUrl="http://feeds.feedburner.com/generationmp3/mobilehub" htmlUrl="http://www.generationmp3.com/mobilehub/index.php/" />
+	<outline type="rss" title="zdnet.com - Googling Google" text="zdnet.com - Googling Google" xmlUrl="http://blogs.zdnet.com/Google/wp-rss2.php" htmlUrl="http://blogs.zdnet.com/Google" />
+	<outline type="rss" title="zdnet.com - The Apple Core" text="zdnet.com - The Apple Core" xmlUrl="http://blogs.zdnet.com/Apple/wp-rss2.php" htmlUrl="http://blogs.zdnet.com/Apple&amp;part=rss&amp;tag=feed&amp;subj=zdblog" />
+</outline>
+<outline title="News" text="News">
+	<outline type="rss" title="Indiatimes - Times of India" text="Indiatimes - Times of India" xmlUrl="http://timesofindia.indiatimes.com/rssfeedsdefault.cms" htmlUrl="http://timesofindia.indiatimes.com" />
+	<outline type="rss" title="BBC News | News Front Page | World Edition" text="BBC News | News Front Page | World Edition" xmlUrl="http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml" htmlUrl="http://news.bbc.co.uk/go/rss/-/2/hi/default.stm" />
+	<outline type="rss" title="International Herald Tribune" text="International Herald Tribune" xmlUrl="http://www.iht.com/rss/frontpage.xml" htmlUrl="http://www.iht.com/pages/index.php" />
+</outline>
+<outline title="Movies" text="Movies">
+	<outline type="rss" title="top movies" text="top movies" xmlUrl="http://i.rottentomatoes.com/syndication/rss/top_movies.xml" htmlUrl="http://www.rottentomatoes.com/movies/box_office.php" />
+	<outline type="rss" title="PEOPLE.com: Top Headlines" text="PEOPLE.com: Top Headlines" xmlUrl="http://rss.people.com/web/people/rss/topheadlines/index.xml" htmlUrl="http://people.aol.com/people/news" />
+</outline>
+<outline title="Downloads" text="Downloads">
+	<outline type="rss" title="TorrentSpy - smallville" text="TorrentSpy - smallville" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=smallville" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - prison break" text="TorrentSpy - prison break" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=prison+break" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - axxo" text="TorrentSpy - axxo" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=axxo" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - greys anatomy" text="TorrentSpy - greys anatomy" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=greys+anatomy" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - house" text="TorrentSpy - house" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=house" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - sleeper cell" text="TorrentSpy - sleeper cell" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=sleeper+cell" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - lost" text="TorrentSpy - lost" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=lost" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - csi" text="TorrentSpy - csi" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=csi" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - rmvb" text="TorrentSpy - rmvb" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=rmvb" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - one tree hill" text="TorrentSpy - one tree hill" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=one+tree+hill" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - 24" text="TorrentSpy - 24" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=24" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - entourage" text="TorrentSpy - entourage" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=entourage" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - heroes" text="TorrentSpy - heroes" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=heroes" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - the unit" text="TorrentSpy - the unit" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=the+unit" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - dexter" text="TorrentSpy - dexter" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=dexter" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - top gear" text="TorrentSpy - top gear" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=top+gear" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - hidden palms" text="TorrentSpy - hidden palms" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=hidden+palms" htmlUrl="http://www.torrentspy.com" />
+	<outline type="rss" title="TorrentSpy - demonoid" text="TorrentSpy - demonoid" xmlUrl="http://www.torrentspy.com/rss.asp?mode=search&amp;query=demonoid" htmlUrl="http://www.torrentspy.com" />
+</outline>
+<outline title="mobile world news" text="mobile world news">
+	<outline type="rss" title="Mobile Messaging 2.0" text="Mobile Messaging 2.0" xmlUrl="http://feeds.feedburner.com/MobileMessaging20" htmlUrl="http://mobilemessaging2.com" />
+	<outline type="rss" title="SMS Text News" text="SMS Text News" xmlUrl="http://feeds.feedburner.com/SmsTextNews" htmlUrl="http://www.smstextnews.com/" />
+	<outline type="rss" title="The Wireless Dispatch" text="The Wireless Dispatch" xmlUrl="http://feeds.feedburner.com/TheWirelessDispatch" htmlUrl="http://wirelessdispatch.blogspot.com/" />
+	<outline type="rss" title="Mobile Point View by Paul Ruppert" text="Mobile Point View by Paul Ruppert" xmlUrl="http://feeds.feedburner.com/MobilePointView" htmlUrl="http://paulrruppert.typepad.com/blog/" />
+	<outline type="rss" title="TheFunded.com" text="TheFunded.com" xmlUrl="http://feeds.feedburner.com/TheFunded" htmlUrl="http://www.thefunded.com/" />
+</outline>
+</body></opml>
