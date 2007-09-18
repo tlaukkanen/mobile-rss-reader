@@ -73,16 +73,18 @@ public class OpmlParser extends FeedListParser {
 					System.out.println("Parsing <outline> tag");
 					
 					title = parser.getAttributeValue( "text" );
-					title = XmlParser.replaceAlphaEntities(title);
-					// No need to convert from UTF-8 to Unicode using replace
-					// umlauts now because it is done with new String...,encoding.
+					if (title != null) {
+						title = XmlParser.replaceAlphaEntities(title);
+						// No need to convert from UTF-8 to Unicode using replace
+						// umlauts now because it is done with new String...,encoding.
 
-					// Replace numeric entities including &#8217;, &#8216;
-					// &#8220;, and &#8221;
-					title = EncodingUtil.replaceNumEntity(title);
+						// Replace numeric entities including &#8217;, &#8216;
+						// &#8220;, and &#8221;
+						title = EncodingUtil.replaceNumEntity(title);
 
-					// Replace special chars like left quote, etc.
-					title = EncodingUtil.replaceSpChars(title);
+						// Replace special chars like left quote, etc.
+						title = EncodingUtil.replaceSpChars(title);
+					}
 					if ((link = parser.getAttributeValue( "xmlUrl" )) == null) {
 						if (opmlDirectory) {
 							link = parser.getAttributeValue( "url" );
@@ -99,8 +101,9 @@ public class OpmlParser extends FeedListParser {
 					 * OPML composed of other OPML.  These have url attribute
 					 * instead of link attribute.
 					 */
-					if(( link != null ) &&( link.length()>0 ) &&
-						(( feedNameFilter == null) ||
+					if(( link != null ) &&
+						( link.length()>0 ) && (( feedNameFilter == null) ||
+							(title == null) ||
 							(title.toLowerCase().indexOf(feedNameFilter) >= 0))
 						&& (( feedURLFilter == null) ||
 							( link.toLowerCase().indexOf(feedURLFilter) >=0))) {
@@ -114,14 +117,17 @@ public class OpmlParser extends FeedListParser {
             
         } catch (Exception ex) {
             System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
+			ex.printStackTrace();
+            return null;
+        } catch (Throwable t) {
+            System.err.println("OpmlParser.parseFeeds(): Exception " + t.toString());
+			t.printStackTrace();
             return null;
         }
         
         /** Create array */
         RssFeed[] feeds = new RssFeed[ rssFeeds.size() ];
-        for(int feedIndex=0; feedIndex<rssFeeds.size(); feedIndex++) {
-            feeds[ feedIndex ] = (RssFeed)rssFeeds.elementAt(feedIndex);
-        }
+        rssFeeds.copyInto(feeds);
         return feeds;
     }
     
