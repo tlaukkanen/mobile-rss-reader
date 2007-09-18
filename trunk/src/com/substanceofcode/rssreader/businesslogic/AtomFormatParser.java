@@ -71,7 +71,8 @@ public class AtomFormatParser implements FeedFormatParser{
     
     /** Parse Atom feed */
     public Vector parse(XmlParser parser, RssFeed feed,
-			            int maxItemCount) throws IOException {
+			            int maxItemCount, boolean getTitleOnly)
+	throws IOException {
         /** Atom item properties */
         String title = "";
         String description = "";
@@ -88,9 +89,18 @@ public class AtomFormatParser implements FeedFormatParser{
         /** Parse to first entry element */
         while(!parser.getName().equals("entry")) {
             System.out.println("Parsing to first entry");
-            if(parser.parse()==XmlParser.END_DOCUMENT) {
-                System.out.println("No entries found.");
-                return items;
+            switch (parser.parse()) {
+				case XmlParser.END_DOCUMENT:
+					System.out.println("No entries found.");
+					return items;
+				case XmlParser.ELEMENT:
+					if (getTitleOnly && parser.getName().equals("title") ) {
+						feed.setName(parser.getText());
+						return items;
+					}
+					break;
+				default:
+					break;
             }
         }
         
