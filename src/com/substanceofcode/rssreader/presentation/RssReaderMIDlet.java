@@ -775,15 +775,17 @@ public class RssReaderMIDlet extends MIDlet
 						int [] indexes = new int[m_unreadItems.size()];
 						long [] ldates = new long[m_unreadItems.size()];
 						Vector vsorted = new Vector(m_unreadItems.size());
+						Vector vunsorted = new Vector(m_unreadItems.size());
 						RssItem [] uitems = new RssItem[m_unreadItems.size()];
 						m_unreadItems.copyInto(uitems);
 						int kc = 0;
 						for (int ic = 0; ic < uitems.length; ic++) {
-							indexes[kc] = ic;
 							if (uitems[ic].getDate() == null) {
 								vsorted.addElement(uitems[ic]);
 							} else {
+								indexes[kc] = kc;
 								ldates[kc++] = uitems[ic].getDate().getTime();
+								vunsorted.addElement(uitems[ic]);
 								//#ifdef DLOGGING
 //@								if (finestLoggable) {logger.finest("kc,date=" + ic + "," + new Date(ldates[kc - 1]));}
 								//#endif
@@ -791,27 +793,44 @@ public class RssReaderMIDlet extends MIDlet
 						}
 						uitems = null;
 						SortUtil.sortLongs( indexes, ldates, 0, kc - 1);
-						uitems = new RssItem[indexes.length];
-						m_unreadItems.copyInto(uitems);
+						uitems = new RssItem[kc];
+						vunsorted.copyInto(uitems);
+						vunsorted = null;
 						for (int ic = 0; ic < kc ; ic++) {
 							//#ifdef DLOGGING
-//@							if (finestLoggable) {logger.finest("ic,index,date=" + ic + "," + indexes[ic] + "," + new Date(ldates[indexes[ic]]));}
+//@							if (finestLoggable) {logger.finest("ic,index,date=" + ic + "," + indexes[ic] + "," + new Date(ldates[indexes[ic]]) + "," + uitems[indexes[ic]].getDate());}
 							//#endif
 							vsorted.addElement(uitems[indexes[ic]]);
 						}
-						boolean firstItem = true;
-						for( int ic = vsorted.size(); ic > 0; ic-- ){
+						uitems = null;
+						m_unreadItems.removeAllElements();
+						//#ifdef DMIDP20
+						m_unreadHeaderList.deleteAll();
+						//#else
+//@						while(m_unreadHeaderList.size()>0) {
+//@
+//@							m_unreadHeaderList.delete(0);
+//@
+//@						}
+						//#endif
+						for( int ic = vsorted.size() - 1; ic > 0; ic-- ){
 						
-							RssFeed feed = (RssFeed)vsorted.elementAt(ic);
-							/**
-							 * Show currently selected RSS feed
-							 * headers without updating them
-							 */
-							fillUnreadHdrsList( firstItem, feed );
-							if ( firstItem ) {
-								firstItem = false;
-							}
+							RssItem r = (RssItem)vsorted.elementAt(ic);
+							m_unreadHeaderList.append( r.getTitle(), null );
+							m_unreadItems.addElement(r);
 						}
+					} catch(OutOfMemoryError e) {
+						//#ifdef DLOGGING
+//@						logger.severe("Error while initializing bookmark list: ", e);
+						//#endif
+						System.err.println("Error while initializing bookmark list: " + e.toString());
+						Alert memoryAlert = new Alert(
+								"Out of memory", 
+								"Loading bookmarks without all news items.",
+								null,
+								AlertType.WARNING);
+						memoryAlert.setTimeout(Alert.FOREVER);
+						m_display.setCurrent( memoryAlert, m_unreadHeaderList );
 					} catch (Throwable t) {
 						//#ifdef DLOGGING
 //@						logger.severe("Sort dates error.", t);
@@ -1268,7 +1287,7 @@ public class RssReaderMIDlet extends MIDlet
             if( m_bookmarkList.size()>0 ){
 				boolean firstItem = true;
 				for( int ic = 0; ic < m_bookmarkList.size(); ic++ ){
-                
+				
 					RssFeed feed = (RssFeed)m_rssFeeds.get(
 							m_bookmarkList.getString(ic));
 					if( feed.getItems().size()>0 ) {
@@ -1284,7 +1303,7 @@ public class RssReaderMIDlet extends MIDlet
 				}
 				if ( !firstItem ) {
 					m_unreadHeaderList.setTitle("Unread items:  " +
-							                 m_unreadHeaderList.size());
+											 m_unreadHeaderList.size());
 					m_display.setCurrent( m_unreadHeaderList );
 					m_unreadItems.trimToSize();
 				} else {
