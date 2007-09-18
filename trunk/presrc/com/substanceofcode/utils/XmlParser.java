@@ -26,6 +26,7 @@ package com.substanceofcode.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 //#ifdef DLOGGING
@@ -47,6 +48,8 @@ public class XmlParser {
     private String fileEncoding = "ISO8859_1";  // See EncodingUtil
     private String docEncoding = "";  // See EncodingUtil
     private EncodingUtil encodingUtil = null;
+    private EncodingStreamReader m_encodingStreamReader;
+    private InputStreamReader m_inputStream;
     private String namespace = null;
     private boolean getPrologue = true;
     private int nextChar;
@@ -65,11 +68,14 @@ public class XmlParser {
     /** Creates a new instance of XmlParser */
     public XmlParser(InputStream inputStream) {
 		encodingUtil = new EncodingUtil(inputStream);
-		fileEncoding = encodingUtil.getFileEncoding();
+		m_encodingStreamReader =
+			encodingUtil.getEncodingStreamReader();
+		fileEncoding = m_encodingStreamReader.getFileEncoding();
+		m_inputStream = m_encodingStreamReader.getInputStream();
     }
 
     /** Parse next element */
-    public int parse() throws IOException {
+    private int parseStream(InputStreamReader is) throws IOException {
 		StringBuffer inputBuffer = new StringBuffer();
 		
 		boolean parsingElementName = false;
@@ -79,7 +85,7 @@ public class XmlParser {
 		boolean prologueFound = false;
 				
         char c;
-        int inputCharacter = encodingUtil.read();
+        int inputCharacter = is.read();
 		try {
 			while ((inputCharacter != -1) && !elementFound) {
                 c = (char)inputCharacter;
@@ -98,18 +104,24 @@ public class XmlParser {
 					}
 				}
 				if(parsingElementName) {
-					if(c==' ' || c=='/' || c==':') {
-						// For specified namespace, put it into element name
-						if ((c==':') && (namespace != null) &&
-							namespace.equals(m_currentElementName)) {
-							m_currentElementName += c;
-						} else {
-							parsingElementName = false;
-							parsingElementData = true;
-						}
-					}
-					else if(c!='>') {
-						m_currentElementName += c;
+					switch (c) {
+						case ' ':
+						case '/':
+						case ':':
+							// For specified namespace, put it into element name
+							if ((c==':') && (namespace != null) &&
+								namespace.equals(m_currentElementName)) {
+								m_currentElementName += c;
+							} else {
+								parsingElementName = false;
+								parsingElementData = true;
+							}
+							break;
+						default:
+							if(c!='>') {
+								m_currentElementName += c;
+							}
+							break;
 					}
 				}              
 				if(c=='<') {
@@ -149,7 +161,7 @@ public class XmlParser {
 				}    
 
 				if(!elementFound){
-                    inputCharacter = encodingUtil.read();
+                    inputCharacter = is.read();
 				}
 			}
 			
@@ -168,6 +180,7 @@ public class XmlParser {
 			logger.severe("parse read error ");
 //#endif
 			System.out.println("parse read error " + e + " " + e.getMessage());
+			e.printStackTrace();
 			throw e;
 		}
 		if( inputCharacter == -1 ) {
@@ -177,13 +190,25 @@ public class XmlParser {
 		}
     }
     
+    /** Parse next element */
+    public int parse() throws IOException {
+		if (m_encodingStreamReader.isModEncoding()) {
+			return parseStream(m_encodingStreamReader);
+		} else {
+			return parseStream(m_inputStream);
+		}
+	}
+		
     /** Get element name */
     public String getName() {
+		//#ifdef DLOGGING
+		if (finerLoggable) {logger.finer("m_currentElementName=" + m_currentElementName);}
+		//#endif
         return m_currentElementName;
     }
     
     /** Get element text including inner xml */
-    public String getText() throws IOException {
+    private String getTextStream(InputStreamReader is) throws IOException {
         
 		if(!m_currentElementContainsText) {
 			return "";
@@ -205,7 +230,7 @@ public class XmlParser {
 			elementNameChars[0] = m_currentElementName.charAt( m_currentElementName.length()-3 );
 			elementNameChars[1] = m_currentElementName.charAt( m_currentElementName.length()-2 );
 			elementNameChars[2] = m_currentElementName.charAt( m_currentElementName.length()-1 );
-			while (((inputCharacter = encodingUtil.read()) != -1) &&
+			while (((inputCharacter = is.read()) != -1) &&
 					!endParsing) {
 				c = (char)inputCharacter;
 				lastChars[0] = lastChars[1];
@@ -258,12 +283,22 @@ public class XmlParser {
 //#endif
 			System.out.println("getText Could not read a char run time." + t +
 					           " " + t.getMessage());
+			t.printStackTrace();
 		}
 		//#ifdef DLOGGING
 		if (finerLoggable) {logger.finer("text=" + text);}
 		//#endif
 		return text;
     }
+
+    /** Get element text including inner xml */
+    public String getText() throws IOException {
+		if (m_encodingStreamReader.isModEncoding()) {
+			return getTextStream(m_encodingStreamReader);
+		} else {
+			return getTextStream(m_inputStream);
+		}
+	}
 
 	/**
 	  Replace alphabetic entities.
@@ -300,11 +335,32 @@ public class XmlParser {
 			/** Check the attribute value end index */
 			int valueEndIndex = m_currentElementData.indexOf("\"", valueStartIndex);
 			if( valueEndIndex<0 ) {
-				return null;
+				/** Check using windows quote account for other unexplained
+				    quotes */
+				if ((valueStartIndex + 1) < m_currentElementData.length()) {
+					String beginQuote = m_currentElementData.substring(
+							valueStartIndex - 1, valueStartIndex);
+					valueEndIndex = m_currentElementData.indexOf(beginQuote,
+							valueStartIndex);
+				}
+				if( valueEndIndex<0 ) {
+					return null;
+				}
 			}
 			
 			/** Parse value */
 			String value = m_currentElementData.substring(valueStartIndex, valueEndIndex);
+			if (!docEncoding.equals("")) {
+				// We read the bytes in as ISO8859_1, so we must get them
+				// out as that and then encode as they should be.
+				if (fileEncoding.equals("")) {
+					value = new String(value.getBytes(),
+									  docEncoding);
+				} else {
+					value = new String(value.getBytes(
+								fileEncoding), docEncoding);
+				}
+			}
 					
 			return value;
 		} catch (Throwable t) {
