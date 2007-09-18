@@ -156,6 +156,16 @@ public abstract class FeedListParser implements Runnable{
              * and return it to the caller
              */
             return parseFeeds(hc.openInputStream());
+        } catch(IllegalArgumentException e) {
+			//#ifdef DLOGGING
+			logger.severe("parseFeeds possible bad url error with " + m_url,
+						  e);
+			//#endif
+			if ((m_url != null) && (m_url.indexOf("file://") == 0)) {
+				System.err.println("Cannot process file.");
+			}
+            throw new Exception("Error while parsing RSS data: " 
+								+ e.toString());
         } catch(Exception e) {
 			//#ifdef DLOGGING
 			logger.severe("parseFeeds error with " + m_url, e);
