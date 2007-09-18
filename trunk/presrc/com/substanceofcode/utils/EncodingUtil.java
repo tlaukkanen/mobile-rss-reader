@@ -31,7 +31,6 @@ import java.io.UnsupportedEncodingException;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.LogManager;
 import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
@@ -62,18 +61,14 @@ public class EncodingUtil {
     public static String A_UMLAUTE = new String(CA_UMLAUTE);
     private static final char [] CO_UMLAUTE = {(char)246};
     public static String O_UMLAUTE = new String(CO_UMLAUTE);
+    private static final char [] CWIN_QUOTE = {(char)39};
+    public static String WIN_QUOTE = new String(CWIN_QUOTE);
     
-    private InputStreamReader m_inputStream = null;
-    private String fileEncoding = "ISO8859_1";  // See below
-    private String docEncoding = "";  // Default for XML is UTF-8.
-    private boolean modEncoding = true;  // First mod encoding to account for
+    private EncodingStreamReader m_encodingStreamReader;
+    private String m_docEncoding = "";  // Default for XML is UTF-8.
 	                                    // unexpected UTF-16.
-    private boolean modUTF16 = false;  // First mod encoding to account for
-    private static boolean vmBigEndian = false;  // J2ME VM big endian
-    private static boolean docBigEndian = false;  // Doc big endian
-    private boolean getPrologue = true;
-    private boolean firstChar = true;
-    private boolean secondChar = false;
+    private static boolean m_vmBigEndian = false;  // J2ME VM big endian
+    private boolean m_getPrologue = true;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("EncodingUtil");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
@@ -82,48 +77,20 @@ public class EncodingUtil {
     
     /** Creates a new instance of EncodingUtil */
     public EncodingUtil(InputStream inputStream) {
-		// Open with as this will allow us to read the bytes from any
-		// encoding., then after we get the prologue, convert the strings
-		// with new String(...,encoding);
-		try {
-			m_inputStream = new InputStreamReader(inputStream, "ISO8859_1");
-		} catch (UnsupportedEncodingException e) {
-//#ifdef DLOGGING
-			logger.severe("init read Could not open stream with encoding " +
-						  fileEncoding);
-//#endif
-			System.out.println("init read Could not open stream with " +
-					           "encoding " + fileEncoding + e + " " +
-					           e.getMessage());
-			try {
-				fileEncoding = "UTF-8";
-				m_inputStream = new InputStreamReader(inputStream, "UTF-8");
-			} catch (UnsupportedEncodingException e2) {
-//#ifdef DLOGGING
-				logger.severe("init read Could not open stream with " +
-							  "encoding " + fileEncoding);
-//#endif
-				System.out.println("init read Could not open stream with " +
-						           "encoding " + fileEncoding + e2 + " " +
-						           e2.getMessage());
-				m_inputStream = new InputStreamReader(inputStream);
-				fileEncoding = "";
-				modEncoding = false;
-			}
-		}
+		m_encodingStreamReader = new EncodingStreamReader(inputStream);
     }
 
     /** Determine big/little endian for character constants.  */
     public static void init() {
-		vmBigEndian = ((ULEFT_SGL_QUOTE & 255) == 24);
+		m_vmBigEndian = ((ULEFT_SGL_QUOTE & 255) == 24);
 		//#ifdef DLOGGING
 		Logger log = Logger.getLogger("EncodingUtil");
-		log.fine("vmBigEndian=" + vmBigEndian);
+		log.fine("m_vmBigEndian=" + m_vmBigEndian);
 		log.fine("whole,halves=" + (int)ULEFT_SGL_QUOTE + "," +
 				 (((int)ULEFT_SGL_QUOTE >> 8) & 255) + "," +
 				  ((int)ULEFT_SGL_QUOTE & 255));
 		//#endif
-		if (!vmBigEndian) {
+		if (!m_vmBigEndian) {
 			//#ifdef DLOGGING
 			log.fine("left double quote whole,halves=" +
 					 (int)CLEFT_DBL_QUOTE[0] +
@@ -142,6 +109,9 @@ public class EncodingUtil {
 			RIGHT_SGL_QUOTE = switchBytes(RIGHT_SGL_QUOTE);
 			NON_BREAKING_SP = switchBytes(NON_BREAKING_SP);
 			LONG_DASH = switchBytes(LONG_DASH);
+			A_UMLAUTE = switchBytes(A_UMLAUTE);
+			O_UMLAUTE = switchBytes(O_UMLAUTE);
+			WIN_QUOTE = switchBytes(WIN_QUOTE);
 		}
 	}
 
@@ -151,74 +121,6 @@ public class EncodingUtil {
 		nchars[0] = (char)((((int)str.charAt(0) & 255) << 8) |
 		            (((int)(str.charAt(0)) >> 8) & 255));
 		return new String(nchars);
-	}
-
-	/**
-	  Read the next character.  For UTF-16, read two bytes when
-	  we discover this.
-	  */
-	public int read() throws IOException {
-    
-		try {
-			int inputCharacter = m_inputStream.read();
-			if (modEncoding) {
-				if (getPrologue || modUTF16) {
-					// If we get 0 character during prologue, it must be
-					// first or second byte of UTF-16.  Throw it out.
-					// If little endian, we need to read the next character.
-					if (firstChar) {
-						if (modUTF16) {
-							// If we know that this is UTF-16 from
-							// encoding, put the bytes together correctly.
-							// In this case, we are not in prolog, so
-							// both bytes may be meaningful.
-							int secondCharacter = m_inputStream.read();
-							if (docBigEndian) {
-								inputCharacter <<= 8;
-								inputCharacter |= secondCharacter;
-							} else {
-								secondCharacter <<= 8;
-								secondCharacter |= inputCharacter;
-							}
-						} else {
-							if (inputCharacter == 0) {
-								// This is UTF-16, read second character
-								inputCharacter = m_inputStream.read();
-								docBigEndian = true;
-							} else {
-								firstChar = false;
-								secondChar = true;
-							}
-						}
-					} else if (secondChar) {
-						// If 0 character, it is UTF-16 and little endian.
-						if (inputCharacter == 0) {
-							inputCharacter = m_inputStream.read();
-							docBigEndian = false;
-						}
-						firstChar = true;
-						secondChar = false;
-					}
-				}
-			}
-			return inputCharacter;
-		} catch (IOException e) {
-//#ifdef DLOGGING
-			logger.severe("read Could not read a char io error." + e + " " +
-					           e.getMessage());
-//#endif
-			System.out.println("read Could not read a char io error." + e + " " +
-					           e.getMessage());
-			throw e;
-		} catch (Throwable t) {
-//#ifdef DLOGGING
-			logger.severe("read Could not read a char run time." + t + " " +
-					           t.getMessage());
-//#endif
-			System.out.println("read Could not read a char run time." + t + " " +
-					           t.getMessage());
-			return -1;
-		}
 	}
 
 	/**  Determine the encoding based on what is passed in as well
@@ -233,60 +135,66 @@ public class EncodingUtil {
            cencoding = "UTF-8";
         }
         cencoding = cencoding.toUpperCase();
+		boolean modUTF16 = m_encodingStreamReader.isModUTF16();
+		boolean modEncoding = m_encodingStreamReader.isModEncoding();
         if ((cencoding.equals("UTF-8") || cencoding.equals("UTF8"))) {
-           docEncoding = "UTF-8";
+           m_docEncoding = "UTF-8";
            modEncoding = false;
         } else if ((cencoding.equals("UTF-16") || cencoding.equals("UTF16"))) {
            modUTF16 = true;
         } else if (cencoding.indexOf("ISO-8859") == 0) {
-           docEncoding = StringUtil.replace(cencoding, "ISO-",
+           m_docEncoding = StringUtil.replace(cencoding, "ISO-",
                                           "ISO");
             
-           docEncoding = StringUtil.replace(docEncoding, "-", "_");
-           if (docEncoding.equals("ISO8859_1")) {
-               docEncoding = "";
+           m_docEncoding = StringUtil.replace(m_docEncoding, "-", "_");
+           if (m_docEncoding.equals("ISO8859_1")) {
+               m_docEncoding = "";
            }
            modEncoding = false;
         } else if (cencoding.indexOf("WINDOWS-12") == 0) {
-            docEncoding = StringUtil.replace(cencoding, "WINDOW-",
+            m_docEncoding = StringUtil.replace(cencoding, "WINDOW-",
                                              "Cp");
            modEncoding = false;
         }
-		if (!docEncoding.equals("")) {
+		if (!m_docEncoding.equals("")) {
 			try {
-				String a = new String("a".getBytes(), docEncoding);
+				String a = new String("a".getBytes(), m_docEncoding);
 			} catch (UnsupportedEncodingException e) {
 				//#ifdef DLOGGING
 				logger.severe("UnsupportedEncodingException error for " +
-							   "encoding: " + docEncoding);
+							   "encoding: " + m_docEncoding);
 				//#endif
 				System.out.println("UnsupportedEncodingException error for " +
-							   "encoding: " + docEncoding + " " + e + " " +
+							   "encoding: " + m_docEncoding + " " + e + " " +
 							   e.getMessage());
 				// If encoding problem, use the main encoding as it is
 				// close enough.
-				if (docEncoding.indexOf("ISO8859") >= 0) {
-					docEncoding = "ISO8859_1";
-				} else if (docEncoding.indexOf("Cp12") >= 0) {
-					docEncoding = "Cp1252";
+				if (m_docEncoding.indexOf("ISO8859") >= 0) {
+					m_docEncoding = "ISO8859_1";
+				} else if (m_docEncoding.indexOf("Cp12") >= 0) {
+					m_docEncoding = "Cp1252";
 				}
 				try {
-					String a = new String("a".getBytes(), docEncoding);
+					String a = new String("a".getBytes(), m_docEncoding);
 				} catch (UnsupportedEncodingException e2) {
 					//#ifdef DLOGGING
 					logger.severe("UnsupportedEncodingException error for " +
-								   "encoding: " + docEncoding);
+								   "encoding: " + m_docEncoding);
 					//#endif
 					System.out.println("UnsupportedEncodingException error " +
-							           "for encoding: " + docEncoding + " "
+							           "for encoding: " + m_docEncoding + " "
 									   + e + " " + e.getMessage());
-					docEncoding = "";
+					m_docEncoding = "";
 				}
 			}
 		}
+		m_encodingStreamReader.setModEncoding(modEncoding);
+		m_encodingStreamReader.setModUTF16(modUTF16);
 
 		//#ifdef DLOGGING
-        logger.fine("docEncoding=" + docEncoding);
+        if (fineLoggable) {logger.fine("m_docEncoding=" + m_docEncoding);}
+        if (fineLoggable) {logger.fine("modEncoding=" + modEncoding);}
+        if (fineLoggable) {logger.fine("modUTF16=" + modUTF16);}
 		//#endif
     }
 
@@ -346,28 +254,20 @@ public class EncodingUtil {
         return s;
     }
     
-    public void setDocEncoding(String docEncoding) {
-        this.docEncoding = docEncoding;
+    public void setDocEncoding(String m_docEncoding) {
+        this.m_docEncoding = m_docEncoding;
     }
 
     public String getDocEncoding() {
-        return (docEncoding);
+        return (m_docEncoding);
     }
 
-    public void setModEncoding(boolean modEncoding) {
-        this.modEncoding = modEncoding;
+    public void setEncodingStreamReader(EncodingStreamReader m_encodingStreamReader) {
+        this.m_encodingStreamReader = m_encodingStreamReader;
     }
 
-    public boolean isModEncoding() {
-        return (modEncoding);
-    }
-
-    public void setFileEncoding(String fileEncoding) {
-        this.fileEncoding = fileEncoding;
-    }
-
-    public String getFileEncoding() {
-        return (fileEncoding);
+    public EncodingStreamReader getEncodingStreamReader() {
+        return (m_encodingStreamReader);
     }
 
 }
