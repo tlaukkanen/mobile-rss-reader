@@ -20,7 +20,14 @@
  *
  */
 
+// Expand to define logging define
+//#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
+
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businessentities.RssItem;
@@ -38,12 +45,19 @@ import java.util.Vector;
  */
 public class RssFormatParser implements FeedFormatParser {
     
+	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("RssFormatParser");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#endif
+
     /** Creates a new instance of RssFormatParser */
     public RssFormatParser() {
     }
     
     public Vector parse(XmlParser parser, RssFeed feed,
-			            int maxItemCount) throws IOException {
+			            int maxItemCount, boolean getTitleOnly)
+	throws IOException {
         /** RSS item properties */
         String title = "";
         String description = "";
@@ -55,9 +69,18 @@ public class RssFormatParser implements FeedFormatParser {
         
         /** Parse to first entry element */
         while(!parser.getName().equals("item")) {
-            if(parser.parse()==XmlParser.END_DOCUMENT) {
-                System.out.println("No entries found.");
-                return items;
+            switch (parser.parse()) {
+				case XmlParser.END_DOCUMENT:
+					System.out.println("No entries found.");
+					return items;
+				case XmlParser.ELEMENT:
+					if (getTitleOnly && parser.getName().equals("title") ) {
+						feed.setName(parser.getText());
+						return items;
+					}
+					break;
+				default:
+					break;
             }
         }
         
@@ -305,10 +328,22 @@ public class RssFormatParser implements FeedFormatParser {
             pubDate = getCal(dayOfMonth, month, year, hours, minutes, seconds);
             
         } catch(Exception ex) {
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssFormatParser");
+//@			logger.warning("parseDcDate error while converting date " +
+//@						   "string to object: " +
+//@                    dateString, ex);
+			//#endif
             // TODO: Add exception handling code
             System.err.println("parseDcDate error while converting date string to object: " +
                     dateString + "," + ex.toString());
         } catch(Throwable t) {
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssFormatParser");
+//@			logger.severe("parseDcDate error while converting date " +
+//@						   "string to object: " +
+//@                    dateString, t);
+			//#endif
             // TODO: Add exception handling code
             System.err.println("parseDcDate error while converting date string to object: " +
                     dateString + "," + t.toString());
