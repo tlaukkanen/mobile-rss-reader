@@ -21,11 +21,11 @@
  */
 
 // Expand to define test define
-//#define DNOTEST
+//#define DTEST
 // Expand to define MIDP define
 //#define DMIDP20
 // Expand to define logging define
-//#define DNOLOGGING
+//#define DLOGGING
 
 package com.substanceofcode.rssreader.presentation;
 
@@ -51,11 +51,11 @@ import javax.microedition.rms.*;
 import javax.microedition.lcdui.*;
 
 //#ifdef DLOGGING
-//@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
-//@import net.sf.jlogmicro.util.logging.Level;
-//@import net.sf.jlogmicro.util.logging.FormHandler;
-//@import net.sf.jlogmicro.util.logging.RecStoreHandler;
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.LogManager;
+import net.sf.jlogmicro.util.logging.Level;
+import net.sf.jlogmicro.util.logging.FormHandler;
+import net.sf.jlogmicro.util.logging.RecStoreHandler;
 //#endif
 
 /**
@@ -105,7 +105,7 @@ public class RssReaderMIDlet extends MIDlet
     private int             m_curBookmark;  // The currently selected item
     private RssFeedParser   m_curRssParser; // The currently selected RSS
 	//#ifdef DLOGGING
-//@	private RecordStore     m_recStore = null; // Rec store
+	private RecordStore     m_recStore = null; // Rec store
 	//#endif
     
     // GUI items
@@ -164,13 +164,13 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_updateModCmd;     // The update modified headers command
     private Command     m_importFeedListCmd;// The import feed list command
 	//#ifdef DTEST
-//@    private Command     m_importCurrFeedListCmd;// The import feed list command and default current seleected feed
+    private Command     m_importCurrFeedListCmd;// The import feed list command and default current seleected feed
 	//#endif
 	//#ifdef DLOGGING
-//@    private Command     m_debugCmd; // The back to bookmark list command
-//@	                                      // from debug form
-//@    private Command     m_backFrDebugCmd; // The back to bookmark list command
-//@	                                      // from debug form
+    private Command     m_debugCmd; // The back to bookmark list command
+	                                      // from debug form
+    private Command     m_backFrDebugCmd; // The back to bookmark list command
+	                                      // from debug form
 	//#endif
     private Command     m_importOkCmd;      // The OK command for importing
     private Command     m_importCancelCmd;  // The Cancel command for importing
@@ -187,10 +187,10 @@ public class RssReaderMIDlet extends MIDlet
     private int citemEnclNbr = -1;
     private RssItem citem = null;
 	//#ifdef DLOGGING
-//@    private Form m_debug;
-//@    private Logger logger;
-//@    private boolean fineLoggable;
-//@    private boolean finestLoggable;
+    private Form m_debug;
+    private Logger logger;
+    private boolean fineLoggable;
+    private boolean finestLoggable;
 	//#endif
     
     public RssReaderMIDlet() {
@@ -198,22 +198,22 @@ public class RssReaderMIDlet extends MIDlet
         
 		//#ifdef DLOGGING
 		//#ifdef DCLDCV10
-//@        LogManager.getLogManager().readConfiguration(this);
+        LogManager.getLogManager().readConfiguration(this);
 		//#else
 //@        LogManager.readConfiguration(this);
 		//#endif
-//@        logger = Logger.getLogger("RssReaderMIDlet");
-//@		for (Enumeration eHandlers = logger.getParent().getHandlers().elements();
-//@				eHandlers.hasMoreElements();) {
-//@			Object ohandler = eHandlers.nextElement();
-//@			if (ohandler instanceof FormHandler) {
-//@				m_debug = ((FormHandler)ohandler).getForm();
-//@				logger.finest("form=" + m_debug);
-//@			}
-//@		}
-//@        logger = Logger.getLogger("RssReaderMIDlet");
-//@        logger.info("RssReaderMIDlet started.");
-//@        logger.info("RssReaderMIDlet has form handler=" + (m_debug != null));
+        logger = Logger.getLogger("RssReaderMIDlet");
+		for (Enumeration eHandlers = logger.getParent().getHandlers().elements();
+				eHandlers.hasMoreElements();) {
+			Object ohandler = eHandlers.nextElement();
+			if (ohandler instanceof FormHandler) {
+				m_debug = ((FormHandler)ohandler).getForm();
+				logger.finest("form=" + m_debug);
+			}
+		}
+        logger = Logger.getLogger("RssReaderMIDlet");
+        logger.info("RssReaderMIDlet started.");
+        logger.info("RssReaderMIDlet has form handler=" + (m_debug != null));
 		//#endif
 		try {
 
@@ -254,7 +254,7 @@ public class RssReaderMIDlet extends MIDlet
 											  Command.SCREEN, 2);
 			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
 			//#ifdef DTEST
-//@			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 3);
+			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 3);
 			//#endif
 			m_importOkCmd       = new Command("OK", Command.OK, 1);
 			m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 2);
@@ -269,8 +269,8 @@ public class RssReaderMIDlet extends MIDlet
 			m_updateAllModCmd   = new Command("Update modified all",
 											  Command.SCREEN, 2);
 		//#ifdef DLOGGING
-//@			m_debugCmd          = new Command("Debug Log", Command.SCREEN, 4);
-//@			m_backFrDebugCmd    = new Command("Back", Command.SCREEN, 2);
+			m_debugCmd          = new Command("Debug Log", Command.SCREEN, 4);
+			m_backFrDebugCmd    = new Command("Back", Command.SCREEN, 2);
 		//#endif
 			
 			m_getPage = false;
@@ -292,17 +292,17 @@ public class RssReaderMIDlet extends MIDlet
 
 			m_appSettings = RssReaderSettings.getInstance(this);
 			//#ifdef DLOGGING
-//@			if (m_appSettings.getLogLevel().equals("")) {
-//@				m_appSettings.setLogLevel(
-//@						logger.getParent().getLevel().getName());
-//@			} else {
-//@				logger.getParent().setLevel(
-//@				Level.parse(m_appSettings.getLogLevel()));
-//@			}
-//@			fineLoggable = logger.isLoggable(Level.FINE);
-//@			logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
-//@			finestLoggable = logger.isLoggable(Level.FINEST);
-//@			logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+			if (m_appSettings.getLogLevel().equals("")) {
+				m_appSettings.setLogLevel(
+						logger.getParent().getLevel().getName());
+			} else {
+				logger.getParent().setLevel(
+				Level.parse(m_appSettings.getLogLevel()));
+			}
+			fineLoggable = logger.isLoggable(Level.FINE);
+			logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+			finestLoggable = logger.isLoggable(Level.FINEST);
+			logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
 			//#endif
 
 			try {
@@ -332,7 +332,7 @@ public class RssReaderMIDlet extends MIDlet
 
 		}catch(Throwable t) {
 			//#ifdef DLOGGING
-//@			logger.severe("RssReaderMIDlet constructor ", t);
+			logger.severe("RssReaderMIDlet constructor ", t);
 			//#endif
 			/** Error while executing constructor */
 			System.out.println("RssReaderMIDlet constructor " + t.getMessage());
@@ -348,10 +348,11 @@ public class RssReaderMIDlet extends MIDlet
 			initializeHeadersList();
 			initializeUnreadHhdrsList();
 			//initializeLoadingForm();
+			initializeImportForm();
 		//#ifdef DLOGGING
-//@			if (m_debug != null) {
-//@				initializeDebugForm();
-//@			}
+			if (m_debug != null) {
+				initializeDebugForm();
+			}
 		//#endif
 			m_settingsForm = new SettingsForm(this);
 			
@@ -374,7 +375,7 @@ public class RssReaderMIDlet extends MIDlet
 
 		}catch(Throwable t) {
 			//#ifdef DLOGGING
-//@			logger.severe("initForms ", t);
+			logger.severe("initForms ", t);
 			//#endif
 			/** Error while initializing forms */
 			System.out.println("initForms " + t.getMessage());
@@ -406,15 +407,15 @@ public class RssReaderMIDlet extends MIDlet
 					                         "Are you sure you want to delete?" );
             m_bookmarkList.addCommand( m_importFeedListCmd );
 			//#ifdef DTEST
-//@            m_bookmarkList.addCommand( m_importCurrFeedListCmd );
+            m_bookmarkList.addCommand( m_importCurrFeedListCmd );
 			//#endif
             m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_updateAllCmd );
             m_bookmarkList.addCommand( m_updateAllModCmd );
 	//#ifdef DLOGGING
-//@			if (m_debug != null) {
-//@				m_bookmarkList.addCommand( m_debugCmd );
-//@			}
+			if (m_debug != null) {
+				m_bookmarkList.addCommand( m_debugCmd );
+			}
 	//#endif
             m_bookmarkList.addCommand( m_AboutCmd );
             m_bookmarkList.setCommandListener( this );
@@ -453,12 +454,12 @@ public class RssReaderMIDlet extends MIDlet
 			m_settings.getStringProperty(0, "bookmarks", "");
         } catch(Exception e) {
 			//#ifdef DLOGGING
-//@			logger.severe("Error while initializing bookmark list: ", e);
+			logger.severe("Error while initializing bookmark list: ", e);
 			//#endif
             System.err.println("Error while initializing bookmark list: " + e.toString());
         } catch(OutOfMemoryError e) {
 			//#ifdef DLOGGING
-//@			logger.severe("Error while initializing bookmark list: ", e);
+			logger.severe("Error while initializing bookmark list: ", e);
 			//#endif
             System.err.println("Error while initializing bookmark list: " + e.toString());
             Alert memoryAlert = new Alert(
@@ -470,7 +471,7 @@ public class RssReaderMIDlet extends MIDlet
             m_display.setCurrent( memoryAlert, m_loadForm );
 		}catch(Throwable t) {
 			//#ifdef DLOGGING
-//@			logger.severe("Error while initializing bookmark list: ", t);
+			logger.severe("Error while initializing bookmark list: ", t);
 			//#endif
 			/** Error while parsing RSS feed */
 			System.out.println("Error while initializing bookmark list: " + t.getMessage());
@@ -585,10 +586,10 @@ public class RssReaderMIDlet extends MIDlet
     }
     
 	//#ifdef DLOGGING
-//@    public void initializeDebugForm() {
-//@        m_debug.addCommand( m_backFrDebugCmd );
-//@        m_debug.setCommandListener(this);
-//@	}
+    public void initializeDebugForm() {
+        m_debug.addCommand( m_backFrDebugCmd );
+        m_debug.setCommandListener(this);
+	}
 	//#endif
 
     /** Run method is used to get RSS feed with HttpConnection */
@@ -616,7 +617,7 @@ public class RssReaderMIDlet extends MIDlet
                         m_display.setCurrent( m_headerList );
                     }catch(Exception e) {
 						//#ifdef DLOGGING
-//@						logger.severe("Parsing feeds.", e);
+						logger.severe("Parsing feeds.", e);
 						//#endif
                         /** Error while parsing RSS feed */
                         System.out.println("Error: " + e.getMessage());
@@ -625,8 +626,8 @@ public class RssReaderMIDlet extends MIDlet
                         m_display.setCurrent( m_loadForm );
                     }catch(Throwable t) {
 						//#ifdef DLOGGING
-//@						logger.severe("Parsing feeds on " +
-//@                                m_curRssParser.getRssFeed().getUrl(), t);
+						logger.severe("Parsing feeds on " +
+                                m_curRssParser.getRssFeed().getUrl(), t);
 						//#endif
                         /** Error while parsing RSS feed */
                         System.out.println("Error: " + t.getMessage());
@@ -651,8 +652,8 @@ public class RssReaderMIDlet extends MIDlet
                                 m_loadForm.append("ok\n");
                             } catch(Exception ex) {
 								//#ifdef DLOGGING
-//@								logger.severe("Error parsing feed " +
-//@										      feed.getName(), ex);
+								logger.severe("Error parsing feed " +
+										      feed.getName(), ex);
 								//#endif
                                 m_loadForm.append("Error\n");
 								System.out.println("Error feed " +
@@ -662,16 +663,16 @@ public class RssReaderMIDlet extends MIDlet
                         m_display.setCurrent( m_bookmarkList );
                     } catch(Exception ex) {
 						//#ifdef DLOGGING
-//@						logger.severe("Error parsing feeds from:\n" +
-//@                                m_curRssParser.getRssFeed().getUrl(), ex);
+						logger.severe("Error parsing feeds from:\n" +
+                                m_curRssParser.getRssFeed().getUrl(), ex);
 						//#endif
                         m_loadForm.append("\nError parsing feed from:\n" +
                                 m_curRssParser.getRssFeed().getUrl());
                         m_display.setCurrent( m_loadForm );
                     } catch(Throwable t) {
 						//#ifdef DLOGGING
-//@						logger.severe("Error parsing feeds from:\n" +
-//@                                m_curRssParser.getRssFeed().getUrl(), t);
+						logger.severe("Error parsing feeds from:\n" +
+                                m_curRssParser.getRssFeed().getUrl(), t);
 						//#endif
                         m_loadForm.append("\nError parsing feed from:\n" +
                                 m_curRssParser.getRssFeed().getUrl());
@@ -697,7 +698,7 @@ public class RssReaderMIDlet extends MIDlet
 											"feed " +
 											feeds[feedIndex].getUrl());
 									//#ifdef DLOGGING
-//@									if (finestLoggable) {logger.finest("Getting title for url=" + feeds[feedIndex].getUrl());}
+									if (finestLoggable) {logger.finest("Getting title for url=" + feeds[feedIndex].getUrl());}
 									//#endif
 									RssFeedParser fparser =
 											new RssFeedParser(
@@ -712,8 +713,8 @@ public class RssReaderMIDlet extends MIDlet
 										m_loadForm.append("ok\n");
 									} catch(Exception ex) {
 										//#ifdef DLOGGING
-//@										logger.severe("Error parsing feed",
-//@													  ex);
+										logger.severe("Error parsing feed",
+													  ex);
 										//#endif
 										m_loadForm.append("Error\n");
 									}
@@ -738,7 +739,7 @@ public class RssReaderMIDlet extends MIDlet
                     } catch(Exception ex) {
                         // TODO: Add exception handling
 						//#ifdef DLOGGING
-//@						logger.severe("Error while parsing feed list: ", ex);
+						logger.severe("Error while parsing feed list: ", ex);
 						//#endif
                         System.err.println("Error while parsing feed list: " + ex.toString());
 						ex.printStackTrace();
@@ -754,7 +755,7 @@ public class RssReaderMIDlet extends MIDlet
                     } catch(Throwable t) {
                         // TODO: Add exception handling
 						//#ifdef DLOGGING
-//@						logger.severe("Error while parsing feed list: ", t);
+						logger.severe("Error while parsing feed list: ", t);
 						//#endif
                         System.err.println("Error while parsing feed list: " + t.toString());
 						t.printStackTrace();
@@ -787,7 +788,7 @@ public class RssReaderMIDlet extends MIDlet
 								ldates[kc++] = uitems[ic].getDate().getTime();
 								vunsorted.addElement(uitems[ic]);
 								//#ifdef DLOGGING
-//@								if (finestLoggable) {logger.finest("kc,date=" + ic + "," + new Date(ldates[kc - 1]));}
+								if (finestLoggable) {logger.finest("kc,date=" + ic + "," + new Date(ldates[kc - 1]));}
 								//#endif
 							}
 						}
@@ -798,7 +799,7 @@ public class RssReaderMIDlet extends MIDlet
 						vunsorted = null;
 						for (int ic = 0; ic < kc ; ic++) {
 							//#ifdef DLOGGING
-//@							if (finestLoggable) {logger.finest("ic,index,date=" + ic + "," + indexes[ic] + "," + new Date(ldates[indexes[ic]]) + "," + uitems[indexes[ic]].getDate());}
+							if (finestLoggable) {logger.finest("ic,index,date=" + ic + "," + indexes[ic] + "," + new Date(ldates[indexes[ic]]) + "," + uitems[indexes[ic]].getDate());}
 							//#endif
 							vsorted.addElement(uitems[indexes[ic]]);
 						}
@@ -821,7 +822,7 @@ public class RssReaderMIDlet extends MIDlet
 						}
 					} catch(OutOfMemoryError e) {
 						//#ifdef DLOGGING
-//@						logger.severe("Error while initializing bookmark list: ", e);
+						logger.severe("Error while initializing bookmark list: ", e);
 						//#endif
 						System.err.println("Error while initializing bookmark list: " + e.toString());
 						Alert memoryAlert = new Alert(
@@ -833,7 +834,7 @@ public class RssReaderMIDlet extends MIDlet
 						m_display.setCurrent( memoryAlert, m_unreadHeaderList );
 					} catch (Throwable t) {
 						//#ifdef DLOGGING
-//@						logger.severe("Sort dates error.", t);
+						logger.severe("Sort dates error.", t);
 						//#endif
 						System.out.println("Sort dates error." + t + " " +
 										   t.getMessage());
@@ -1089,7 +1090,7 @@ public class RssReaderMIDlet extends MIDlet
             m_settings.setStringProperty("bookmarks",bookmarks);
         } catch(OutOfMemoryError error) {
 //#ifdef DLOGGING
-//@			logger.severe("saveBookmarks could not save.", error);
+			logger.severe("saveBookmarks could not save.", error);
 //#endif
 			System.out.println("Error saveBookmarks could not save.  " + error +
 					           " " + error.getMessage());
@@ -1112,7 +1113,7 @@ public class RssReaderMIDlet extends MIDlet
             m_settings.setStringProperty("bookmarks",bookmarks);
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-//@			logger.severe("saveBookmarks could not save.", t);
+			logger.severe("saveBookmarks could not save.", t);
 //#endif
 			System.out.println("saveBookmarks could not save." + t + " " +
 					           t.getMessage());
@@ -1133,8 +1134,8 @@ public class RssReaderMIDlet extends MIDlet
 			}
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-//@			logger.severe("updateHeaders could not update." + t + " " +
-//@					           t.getMessage());
+			logger.severe("updateHeaders could not update." + t + " " +
+					           t.getMessage());
 //#endif
 			System.out.println("updateHeaders could not update." + t + " " +
 					           t.getMessage());
@@ -1164,13 +1165,13 @@ public class RssReaderMIDlet extends MIDlet
 			m_settings.save(0, false);
 		} catch(Exception e) {
 			//#ifdef DLOGGING
-//@			logger.severe("Saving feeds.", e);
+			logger.severe("Saving feeds.", e);
 			//#endif
 			/** Error while parsing RSS feed */
 			System.out.println("Error saving: " + e + e.getMessage());
 		} catch(Throwable t) {
 			//#ifdef DLOGGING
-//@			logger.severe("Saving feeds.", t);
+			logger.severe("Saving feeds.", t);
 			//#endif
 			/** Error while parsing RSS feed */
 			System.out.println("Error saving: " + t + t.getMessage());
@@ -1196,7 +1197,7 @@ public class RssReaderMIDlet extends MIDlet
 				if ( !m_netThread.isAlive() ) {
 					m_netThread.start();
 					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("Thread started.");}
+					if (finestLoggable) {logger.finest("Thread started.");}
 					//#endif
 					try {
 						m_netThread.sleep(1000L);
@@ -1240,7 +1241,7 @@ public class RssReaderMIDlet extends MIDlet
 				}
 			}catch(Throwable t) {
 				//#ifdef DLOGGING
-//@				logger.severe("Editing feeds.", t);
+				logger.severe("Editing feeds.", t);
 				//#endif
 				/** Error while parsing RSS feed */
 				System.out.println("Error editing feeds: " + t.getMessage());
@@ -1396,8 +1397,8 @@ public class RssReaderMIDlet extends MIDlet
 				m_display.setCurrent( m_itemRrnForm );
 			} catch (ConnectionNotFoundException e) {
 				//#ifdef DLOGGING
-//@				logger.severe("Error opening link " + citem.getLink(),
-//@							  e);
+				logger.severe("Error opening link " + citem.getLink(),
+							  e);
 				//#endif
 				Alert badLink = new Alert("Could not connect to link",
 								"Bad link:  " + citem.getLink(), null,
@@ -1417,8 +1418,8 @@ public class RssReaderMIDlet extends MIDlet
 				m_display.setCurrent( m_itemRrnForm );
 			} catch (ConnectionNotFoundException e) {
 				//#ifdef DLOGGING
-//@				logger.severe("Error opening link " + citem.getEnclosure(),
-//@							  e);
+				logger.severe("Error opening link " + citem.getEnclosure(),
+							  e);
 				//#endif
 				Alert badLink = new Alert("Could not connect to link",
 								"Bad link:  " + citem.getEnclosure(), null,
@@ -1461,18 +1462,18 @@ public class RssReaderMIDlet extends MIDlet
         }
         
 		//#ifdef DTEST
-//@		/** Show import feed list form and default file */
-//@		if( c == m_importCurrFeedListCmd ) {
-//@			if( m_bookmarkList.size()>0 ) {
-//@                m_curBookmark = m_bookmarkList.getSelectedIndex();
-//@                RssFeed bm = (RssFeed)m_rssFeeds.get(
-//@                        m_bookmarkList.getString(m_curBookmark));
-//@				updateImportForm();
-//@				m_feedListURL.setString(bm.getUrl());
-//@				m_curBookmark = -1;
-//@				m_display.setCurrent( m_importFeedsForm );
-//@			}
-//@        }
+		/** Show import feed list form and default file */
+		if( c == m_importCurrFeedListCmd ) {
+			if( m_bookmarkList.size()>0 ) {
+                m_curBookmark = m_bookmarkList.getSelectedIndex();
+                RssFeed bm = (RssFeed)m_rssFeeds.get(
+                        m_bookmarkList.getString(m_curBookmark));
+				updateImportForm();
+				m_feedListURL.setString(bm.getUrl());
+				m_curBookmark = -1;
+				m_display.setCurrent( m_importFeedsForm );
+			}
+        }
 		//#endif
 
         /** Import list of feeds */
@@ -1491,7 +1492,7 @@ public class RssReaderMIDlet extends MIDlet
                 String username = m_feedListUsername.getString();
                 String password = m_feedListPassword.getString();
 				//#ifdef DLOGGING
-//@				if (finestLoggable) {logger.finest("m_getFeedTitleList=" + m_getFeedTitleList);}
+				if (finestLoggable) {logger.finest("m_getFeedTitleList=" + m_getFeedTitleList);}
 				//#endif
                 
                 // Save settings
@@ -1524,7 +1525,7 @@ public class RssReaderMIDlet extends MIDlet
                 
             } catch(Exception ex) {
 				//#ifdef DLOGGING
-//@				logger.severe("Error importing feeds ", ex);
+				logger.severe("Error importing feeds ", ex);
 				//#endif
                 // TODO: Show alarm
 				Alert importAlert = new Alert(
@@ -1536,7 +1537,7 @@ public class RssReaderMIDlet extends MIDlet
 				m_display.setCurrent( importAlert, m_importFeedsForm );
             } catch(Throwable t) {
 				//#ifdef DLOGGING
-//@				logger.severe("Error importing feeds ", t);
+				logger.severe("Error importing feeds ", t);
 				//#endif
                 // TODO: Show alarm
 				Alert importAlert = new Alert(
@@ -1591,16 +1592,16 @@ public class RssReaderMIDlet extends MIDlet
 		}
 
 	//#ifdef DLOGGING
-//@        /** Show about */
-//@		if( c == m_debugCmd ) {
-//@			m_display.setCurrent( m_debug );
-//@		}
-//@
-//@        /** Back to bookmarks */
-//@		if( c == m_backFrDebugCmd ) {
-//@			m_display.setCurrent( m_bookmarkList );
-//@		}
-//@
+        /** Show about */
+		if( c == m_debugCmd ) {
+			m_display.setCurrent( m_debug );
+		}
+
+        /** Back to bookmarks */
+		if( c == m_backFrDebugCmd ) {
+			m_display.setCurrent( m_bookmarkList );
+		}
+
 	//#endif
 
     }
