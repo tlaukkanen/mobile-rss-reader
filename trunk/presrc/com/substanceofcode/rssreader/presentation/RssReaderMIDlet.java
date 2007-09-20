@@ -348,6 +348,7 @@ public class RssReaderMIDlet extends MIDlet
 			initializeHeadersList();
 			initializeUnreadHhdrsList();
 			//initializeLoadingForm();
+			initializeImportForm();
 		//#ifdef DLOGGING
 			if (m_debug != null) {
 				initializeDebugForm();
