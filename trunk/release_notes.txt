@@ -78,3 +78,6 @@ v1.10.5 (September 17th 2007)
 + Fixed add new bookmark not showing previous user name/password.
 + Increased size of bookmarks that can be restored.
 + Logging changes (for test only).
+
+v1.10.6 (September 20th 2007)
++ Fix serious problem with import not working
