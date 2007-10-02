@@ -21,7 +21,7 @@
  */
 
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 
 package com.substanceofcode.rssreader.presentation;
 
@@ -47,9 +47,9 @@ import org.kablog.kgui.KFileSelectorMgr;
 import com.substanceofcode.utils.Settings;
 
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.LogManager;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -76,11 +76,11 @@ public class SettingsForm extends Form implements CommandListener {
     private StringItem m_memUsedItem;
     private StringItem m_memAvailItem;
 	//#ifdef DLOGGING
-    private TextField m_logLevelField;
-    private Logger logger = Logger.getLogger("SettingsForm");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private TextField m_logLevelField;
+//@    private Logger logger = Logger.getLogger("SettingsForm");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of SettingsForm */
@@ -141,9 +141,9 @@ public class SettingsForm extends Form implements CommandListener {
         this.append( m_pgm_cldc_vers );
         m_pgm_jsr75 = new StringItem("Program JSR 75 available:",
 		//#ifdef DJSR75
-				"true");
+//@				"true");
 		//#else
-//@				"false");
+				"false");
 		//#endif
 		//#ifdef DMIDP20
 		m_pgm_jsr75.setLayout(Item.LAYOUT_BOTTOM);
@@ -168,12 +168,12 @@ public class SettingsForm extends Form implements CommandListener {
 		//#endif
         this.append( m_jsr75 );
 		//#ifdef DLOGGING
-        m_logLevelField = new TextField("Logging level",
-                logger.getParent().getLevel().getName(), 20, TextField.ANY);
+//@        m_logLevelField = new TextField("Logging level",
+//@                logger.getParent().getLevel().getName(), 20, TextField.ANY);
 		//#ifdef DMIDP20
-		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
+//@		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_logLevelField );
+//@        this.append( m_logLevelField );
 		//#endif
         m_pgmMemUsedItem = new StringItem("Application memory used", "");
 		//#ifdef DMIDP20
@@ -244,21 +244,21 @@ public class SettingsForm extends Form implements CommandListener {
 				settings.setUseTextBox(useTextBox);
 				//#endif
 				//#ifdef DLOGGING
-				try {
-					String logLevel =
-						m_logLevelField.getString().toUpperCase();
-					logger.getParent().setLevel(Level.parse(logLevel));
-					settings.setLogLevel( logLevel );
-				} catch (IllegalArgumentException e) {
-					Alert invalidData = new Alert("Invalid Log Level",
-									"Invalid Log Level " +
-									m_logLevelField.getString(),
-									null,
-									AlertType.ERROR);
-					invalidData.setTimeout(Alert.FOREVER);
-					Display.getDisplay(m_midlet).setCurrent(invalidData, this);
-					return;
-				}
+//@				try {
+//@					String logLevel =
+//@						m_logLevelField.getString().toUpperCase();
+//@					logger.getParent().setLevel(Level.parse(logLevel));
+//@					settings.setLogLevel( logLevel );
+//@				} catch (IllegalArgumentException e) {
+//@					Alert invalidData = new Alert("Invalid Log Level",
+//@									"Invalid Log Level " +
+//@									m_logLevelField.getString(),
+//@									null,
+//@									AlertType.ERROR);
+//@					invalidData.setTimeout(Alert.FOREVER);
+//@					Display.getDisplay(m_midlet).setCurrent(invalidData, this);
+//@					return;
+//@				}
 				//#endif
             } catch(Exception e) {
                 System.err.println("Error: " + e.toString());
