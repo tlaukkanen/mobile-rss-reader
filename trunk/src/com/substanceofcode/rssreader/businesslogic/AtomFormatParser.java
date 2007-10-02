@@ -35,38 +35,10 @@ import java.util.Vector;
  *
  * @author Tommi
  */
-public class AtomFormatParser implements FeedFormatParser{
+public class AtomFormatParser implements FeedFormatParser {
     
     /** Creates a new instance of AtomParser */
     public AtomFormatParser() {
-    }
-    
-    public Vector parse(InputStream inputStream, int maxItemCount) {
-        
-        Vector items = new Vector();
-
-            // Prepare buffer for input data
-            StringBuffer inputBuffer = new StringBuffer();
-            
-            
-             
-            // Read all data to buffer
-            int inputCharacter;
-            try {
-                inputStream.reset();
-                while ((inputCharacter = inputStream.read()) != -1 &&
-                        inputBuffer.length()<1000) {
-                    inputBuffer.append((char)inputCharacter);
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-             
-            // Split buffer string by each new line
-            String text = inputBuffer.toString();
-            System.out.println("Input: " + text);        
-                
-        return items;
     }
     
     /** Parse Atom feed */
