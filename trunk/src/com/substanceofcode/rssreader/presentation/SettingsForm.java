@@ -21,7 +21,7 @@
  */
 
 // Expand to define logging define
-//#define DNOLOGGING
+//#define DLOGGING
 
 package com.substanceofcode.rssreader.presentation;
 
@@ -43,12 +43,13 @@ import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
+import org.kablog.kgui.KFileSelectorMgr;
 import com.substanceofcode.utils.Settings;
 
 //#ifdef DLOGGING
-//@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
-//@import net.sf.jlogmicro.util.logging.Level;
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.LogManager;
+import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -63,19 +64,23 @@ public class SettingsForm extends Form implements CommandListener {
     
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
-	//#ifdef DMIDP20
     private ChoiceGroup m_useTextBox;
-	//#endif
+    private StringItem m_pgm_midp_vers;
+    private StringItem m_pgm_cldc_vers;
+    private StringItem m_pgm_jsr75;
+    private StringItem m_midp_vers;
+    private StringItem m_cldc_vers;
+    private StringItem m_jsr75;
     private StringItem m_pgmMemUsedItem;
     private StringItem m_pgmMemAvailItem;
     private StringItem m_memUsedItem;
     private StringItem m_memAvailItem;
 	//#ifdef DLOGGING
-//@    private TextField m_logLevelField;
-//@    private Logger logger = Logger.getLogger("SettingsForm");
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private TextField m_logLevelField;
+    private Logger logger = Logger.getLogger("SettingsForm");
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of SettingsForm */
@@ -108,19 +113,67 @@ public class SettingsForm extends Form implements CommandListener {
 		//#endif
         this.append( m_markUnreadItems );
 		String [] txtChoices = {"Text (large) box", "Text (line) field"};
-		//#ifdef DMIDP20
         m_useTextBox = new ChoiceGroup("Text entry items",
 				                            Choice.EXCLUSIVE, txtChoices, null);
-		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
-        this.append( m_useTextBox );
-		//#endif
-		//#ifdef DLOGGING
-//@        m_logLevelField = new TextField("Logging level",
-//@                logger.getParent().getLevel().getName(), 20, TextField.ANY);
 		//#ifdef DMIDP20
-//@		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
+		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-//@        this.append( m_logLevelField );
+        this.append( m_useTextBox );
+        m_pgm_midp_vers = new StringItem("Program MIDP version:",
+		//#ifdef DMIDP20
+				"MIDP-2.0");
+		//#else
+//@				"MIDP-1.0");
+		//#endif
+		//#ifdef DMIDP20
+		m_pgm_midp_vers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_pgm_midp_vers );
+        m_pgm_cldc_vers = new StringItem("Program CLDC version:",
+				//#ifdef DCLDCV11
+//@				"CLDC-1.1");
+				//#else
+				"CLDC-1.0");
+				//#endif
+		//#ifdef DMIDP20
+		m_pgm_cldc_vers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_pgm_cldc_vers );
+        m_pgm_jsr75 = new StringItem("Program JSR 75 available:",
+		//#ifdef DJSR75
+				"true");
+		//#else
+//@				"false");
+		//#endif
+		//#ifdef DMIDP20
+		m_pgm_jsr75.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_pgm_jsr75 );
+        m_midp_vers = new StringItem("Phone MIDP version:",
+				System.getProperty("microedition.profiles"));
+		//#ifdef DMIDP20
+		m_midp_vers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_midp_vers );
+        m_cldc_vers = new StringItem("Phone CLDC version:",
+				System.getProperty("microedition.configuration"));
+		//#ifdef DMIDP20
+		m_cldc_vers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_cldc_vers );
+        m_jsr75 = new StringItem("Phone JSR 75 available:",
+				new Boolean(KFileSelectorMgr.isJsr75Enabled()).toString());
+		//#ifdef DMIDP20
+		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_jsr75 );
+		//#ifdef DLOGGING
+        m_logLevelField = new TextField("Logging level",
+                logger.getParent().getLevel().getName(), 20, TextField.ANY);
+		//#ifdef DMIDP20
+		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_logLevelField );
 		//#endif
         m_pgmMemUsedItem = new StringItem("Application memory used", "");
 		//#ifdef DMIDP20
@@ -191,21 +244,21 @@ public class SettingsForm extends Form implements CommandListener {
 				settings.setUseTextBox(useTextBox);
 				//#endif
 				//#ifdef DLOGGING
-//@				try {
-//@					String logLevel =
-//@						m_logLevelField.getString().toUpperCase();
-//@					logger.getParent().setLevel(Level.parse(logLevel));
-//@					settings.setLogLevel( logLevel );
-//@				} catch (IllegalArgumentException e) {
-//@					Alert invalidData = new Alert("Invalid Log Level",
-//@									"Invalid Log Level " +
-//@									m_logLevelField.getString(),
-//@									null,
-//@									AlertType.ERROR);
-//@					invalidData.setTimeout(Alert.FOREVER);
-//@					Display.getDisplay(m_midlet).setCurrent(invalidData, this);
-//@					return;
-//@				}
+				try {
+					String logLevel =
+						m_logLevelField.getString().toUpperCase();
+					logger.getParent().setLevel(Level.parse(logLevel));
+					settings.setLogLevel( logLevel );
+				} catch (IllegalArgumentException e) {
+					Alert invalidData = new Alert("Invalid Log Level",
+									"Invalid Log Level " +
+									m_logLevelField.getString(),
+									null,
+									AlertType.ERROR);
+					invalidData.setTimeout(Alert.FOREVER);
+					Display.getDisplay(m_midlet).setCurrent(invalidData, this);
+					return;
+				}
 				//#endif
             } catch(Exception e) {
                 System.err.println("Error: " + e.toString());
