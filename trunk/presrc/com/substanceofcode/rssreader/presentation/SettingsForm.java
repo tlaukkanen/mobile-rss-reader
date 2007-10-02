@@ -205,10 +205,8 @@ public class SettingsForm extends Form implements CommandListener {
 		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
 		m_markUnreadItems.setSelectedFlags( selectedItems );
         boolean useTextBox = settings.getUseTextBox();
-		//#ifdef DMIDP20
 		boolean [] txtSelectedItems = {useTextBox, !useTextBox};
 		m_useTextBox.setSelectedFlags( txtSelectedItems );
-		//#endif
 		try {
 			Settings m_settings = Settings.getInstance(m_midlet);
 			memInfo = m_settings.getSettingMemInfo();
@@ -239,10 +237,8 @@ public class SettingsForm extends Form implements CommandListener {
                 settings.setMaximumItemCountInFeed( maxCount );
 				boolean markUnreadItems = m_markUnreadItems.isSelected(0);
                 settings.setMarkUnreadItems( markUnreadItems );
-				//#ifdef DMIDP20
 				boolean useTextBox = m_useTextBox.isSelected(0);
 				settings.setUseTextBox(useTextBox);
-				//#endif
 				//#ifdef DLOGGING
 				try {
 					String logLevel =
