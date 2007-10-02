@@ -21,7 +21,7 @@
  */
 
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 
 package com.substanceofcode.rssreader.businesslogic;
 
@@ -37,9 +37,9 @@ import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.LogManager;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -54,10 +54,10 @@ import net.sf.jlogmicro.util.logging.Level;
 public class HTMLLinkParser extends FeedListParser {
     
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("HTMLLinkParser");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private Logger logger = Logger.getLogger("HTMLLinkParser");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
     /** Creates a new instance of HTMLLinkParser */
@@ -72,15 +72,15 @@ public class HTMLLinkParser extends FeedListParser {
 											m_feedNameFilter,
 											m_feedURLFilter
 											//#ifdef DLOGGING
-											,logger
-											,fineLoggable
-											,finerLoggable
-											,finestLoggable
+//@											,logger
+//@											,fineLoggable
+//@											,finerLoggable
+//@											,finestLoggable
 											//#endif
 											);
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-			logger.severe("parseFeeds error.", t);
+//@			logger.severe("parseFeeds error.", t);
 //#endif
 			System.out.println("parseFeeds error." + t + " " + t.getMessage());
 			return null;
@@ -91,10 +91,10 @@ public class HTMLLinkParser extends FeedListParser {
 										String feedNameFilter,
 										String feedURLFilter
 										//#ifdef DLOGGING
-										,Logger logger,
-										 boolean fineLoggable,
-										 boolean finerLoggable,
-										 boolean finestLoggable
+//@										,Logger logger,
+//@										 boolean fineLoggable,
+//@										 boolean finerLoggable,
+//@										 boolean finestLoggable
 										//#endif
 			                           ) {
 		EncodingStreamReader encodingStreamReader =
@@ -179,7 +179,7 @@ public class HTMLLinkParser extends FeedListParser {
 						calinkIndex++) {
 					String calink = calinks[calinkIndex];
 					//#ifdef DLOGGING
-					if (finerLoggable) {logger.finer("calink=" + calink);}
+//@					if (finerLoggable) {logger.finer("calink=" + calink);}
 					//#endif
 					String name;
 					String url;
@@ -200,7 +200,7 @@ public class HTMLLinkParser extends FeedListParser {
 					}
 					url = calink.substring(indexOfBQuote + 1, indexOfEQuote);
 					//#ifdef DLOGGING
-					if (finerLoggable) {logger.finer("url=" + url);}
+//@					if (finerLoggable) {logger.finer("url=" + url);}
 					//#endif
 					// If filtering is requesting, continue if it does not match.
 					if ((feedURLFilter != null) &&
@@ -226,7 +226,7 @@ public class HTMLLinkParser extends FeedListParser {
 					}
 					name = calink.substring(indexOfGt + 1, indexOfELink);
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest("name 1=" + name);}
+//@					if (finestLoggable) {logger.finest("name 1=" + name);}
 					//#endif
 					if ((feedNameFilter != null) &&
 						(name.toLowerCase().indexOf(feedNameFilter) < 0)) {
@@ -246,7 +246,7 @@ public class HTMLLinkParser extends FeedListParser {
 			vfeeds.copyInto(feeds);
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-			logger.severe("parseFeeds error.", t);
+//@			logger.severe("parseFeeds error.", t);
 //#endif
 			System.out.println("parseFeeds error." + t + " " + t.getMessage());
 		}
