@@ -535,7 +535,7 @@ public class RssReaderMIDlet extends MIDlet
 			//#else
 //@			m_addNewBMForm.addCommand(m_pasteURLCmd);
 			//#endif
-		};
+		}
 	}
 
     /** Initialize import form */
