@@ -27,7 +27,6 @@
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssFeed;
-import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
 import javax.microedition.io.*;
@@ -48,14 +47,10 @@ import net.sf.jlogmicro.util.logging.Level;
  * @author  Tommi Laukkanen
  * @version 1.0
  */
-public class RssFeedParser {
+public class RssFeedParser extends URLHandler {
     
     private RssFeed m_rssFeed;  // The RSS feed
-    private boolean m_redirect = false;  // The RSS feed
-    private boolean m_getTitleOnly = false;  // The RSS feed
-	//#ifdef DTEST
-    private long m_lastMod;  // Last modification used for testing.
-	//#endif
+    private boolean m_getTitleOnly = false;  // The RSS feed
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("RssFeedParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
@@ -83,158 +78,61 @@ public class RssFeedParser {
     public void parseRssFeed(boolean updFeed, int maxItemCount)
     throws IOException, Exception {
         
-        HttpConnection hc = null;
-        InputStream is = null;
-        String response = "";
-		long lastMod = 0L;
 		String url = m_rssFeed.getUrl();
-        try {
-			String contentType = null;
-			//#ifdef DTEST
-			if (url.indexOf("file://") == 0) {
-				is = this.getClass().getResourceAsStream( url.substring(7));
-				if (is == null) {
-					throw new IOException("Cannot read jar file " + url);
-				}
-				int dotPos = url.lastIndexOf('.');
-				if (dotPos >= 0) {
-					contentType = url.substring(dotPos + 1);
-				}
-				lastMod = m_lastMod;
-			} else {
-			//#endif
-				/**
-				 * Open an HttpConnection with the Web server
-				 * The default request method is GET
-				 */
-				hc = (HttpConnection) Connector.open( url );
-				hc.setRequestMethod(HttpConnection.GET);
-				/** Some web servers requires these properties */
-				//hc.setRequestProperty("User-Agent",
-				//        "Profile/MIDP-1.0 Configuration/CLDC-1.0");
-				hc.setRequestProperty("Content-Length", "0");
-				hc.setRequestProperty("Connection", "close");
-				
-				/** Add credentials if they are defined */
-				if( m_rssFeed.getUsername().length()>0) {
-					/**
-					 * Add authentication header in HTTP request. Basic authentication
-					 * should be formatted like this:
-					 *     Authorization: Basic QWRtaW46Zm9vYmFy
-					 */
-					String username = m_rssFeed.getUsername();
-					String password = m_rssFeed.getPassword();
-					String userPass;
-					Base64 b64 = new Base64();
-					userPass = username + ":" + password;
-					userPass = b64.encode(userPass.getBytes());
-					hc.setRequestProperty("Authorization", "Basic " + userPass);
-				}
-				
-				/**
-				 * Get a DataInputStream from the HttpConnection
-				 * and forward it to XML parser
-				 */
-				
-				/*
-				// DEBUG_START
-				// Prepare buffer for input data
-				InputStream is = hc.openInputStream();
-				StringBuffer inputBuffer = new StringBuffer();
-				 
-				// Read all data to buffer
-				int inputCharacter;
-				try {
-					while ((inputCharacter = is.read()) != -1) {
-						inputBuffer.append((char)inputCharacter);
-					}
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-				 
-				// Split buffer string by each new line
-				String text = inputBuffer.toString();
-				System.out.println("Input: " + text);
-				 
-				// DEBUG_END
-				*/
-							
-				is = hc.openInputStream();
-				lastMod = hc.getLastModified();
-				contentType = hc.getHeaderField("content-type");
-				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("responce code=" + hc.getResponseCode());}
-				if (fineLoggable) {logger.fine("responce location=" + hc.getHeaderField("location"));}
-				if (finestLoggable) {
-					for (int ic = 0; ic < 20; ic++) {
-						logger.finest("hk=" + ic + "," +
-								hc.getHeaderFieldKey(ic));
-						logger.finest("hf=" + ic + "," +
-								hc.getHeaderField(ic));
-					}
-				}
-				//#endif
-				if (((hc.getResponseCode() == hc.HTTP_MOVED_TEMP) ||
-				    (hc.getResponseCode() == hc.HTTP_MOVED_PERM) ||
-				    (hc.getResponseCode() == hc.HTTP_TEMP_REDIRECT)) &&
-					 (hc.getHeaderField("location") != null)) {
-					parseHeaderRedirect(updFeed,
-									    hc.getHeaderField("location"),
-									    maxItemCount);
-					return;
-				}
-			//#ifdef DTEST
-			}
-			//#endif
-
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("contentType=" + contentType);}
-			//#endif
-			// If we find HTML, ussume it is redirection
-			if ((contentType != null) && (contentType.indexOf("html") >= 0)) {
-				parseHTMLRedirect(updFeed, url, is, maxItemCount);
+		try {
+			super.handleOpen(url, m_rssFeed.getUsername(),
+					  m_rssFeed.getPassword());
+			if (m_needRedirect) {
+				m_needRedirect = false;
+				parseHeaderRedirect(updFeed, m_location, maxItemCount);
 				return;
 			}
-
-			if (lastMod == 0L) {
-				m_rssFeed.setUpddate(null);
-			} else if (updFeed && (m_rssFeed.getUpddate() != null)) {
-				if (m_rssFeed.getUpddate().equals(new Date(lastMod))) {
-					return;
-				}
+			// If we find HTML, usually it is redirection
+			if ((m_contentType != null) && (m_contentType.indexOf("html") >= 0)) {
+				parseHTMLRedirect(updFeed, url, m_inputStream,
+								  maxItemCount);
+			} else {
+				if (m_lastMod == 0L) {
+					m_rssFeed.setUpddate(null);
+				} else if (updFeed && (m_rssFeed.getUpddate() != null)) {
+					if (m_rssFeed.getUpddate().equals(new Date(m_lastMod))) {
+						return;
+					}
+ 				}
+				parseRssFeedXml( m_inputStream, maxItemCount );
+				m_rssFeed.setUpddate(new Date(m_lastMod));
 			}
-            parseRssFeedXml( is, maxItemCount );
-			m_rssFeed.setUpddate(new Date(lastMod));
-        } catch(IllegalArgumentException e) {
-			//#ifdef DLOGGING
-			logger.severe("Error possible bad url " + url, e);
-			//#endif
-			System.out.println("error " + e.getMessage());
-			e.printStackTrace();
-            throw new Exception("Error while parsing feed: " + e.toString());
         } catch(Exception e) {
 			//#ifdef DLOGGING
-			logger.severe("Error ", e);
+			logger.severe("parseRssFeed error with " + url, e);
 			//#endif
-			System.out.println("error " + e.getMessage());
-			e.printStackTrace();
-            throw new Exception("Error while parsing feed: "
+			if ((url != null) && (url.indexOf("file://") == 0)) {
+				System.err.println("Cannot process file.");
+			}
+            throw new Exception("Error while parsing RSS data: " 
                     + e.toString());
-        } finally {
-            if (hc != null) hc.close();
-			//#ifdef DTEST
-            try {
-				if (is != null) is.close();
-			} catch (IOException e) { }
-
+        } catch(Throwable t) {
+			//#ifdef DLOGGING
+			logger.severe("parseRssFeed error with " + url, t);
 			//#endif
-        }
+			if ((url != null) && (url.indexOf("file://") == 0)) {
+				System.err.println("Cannot process file.");
+			}
+            throw new Exception("Error while parsing RSS data: " 
+								+ t.toString());
+        } finally {
+			super.handleClose();
+		}
     }
     
+    protected void handleHeaderRedirect(String url)
+	throws IOException, Exception {
+	}
+
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private void parseHeaderRedirect(boolean updFeed, String url,
 								     int maxItemCount)
-	throws Exception {
+    throws IOException, Exception {
 		if (m_redirect) {
 			//#ifdef DLOGGING
 			logger.severe("Error 2nd header redirect url:  " + url);
@@ -247,10 +145,8 @@ public class RssFeedParser {
 		m_rssFeed.setUrl(url);
 		try {
 			parseRssFeed(updFeed, maxItemCount);
+		} finally {
 			m_rssFeed.setUrl(svFeed.getUrl());
-		} catch (Exception e) {
-			svFeed.copyTo(m_rssFeed);
-			throw e;
 		}
 		return;
 
@@ -259,48 +155,15 @@ public class RssFeedParser {
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private void parseHTMLRedirect(boolean updFeed, String url,
 								   InputStream is, int maxItemCount)
-	throws Exception {
-		if (m_redirect) {
-			//#ifdef DLOGGING
-			logger.severe("Error 2nd redirect url:  " + url);
-			//#endif
-			System.out.println("Error 2nd redirecturl:  " + url);
-			throw new IOException("Error 2nd redirect.");
-		}
-		m_redirect = true;
-		RssFeed[] feeds =
-				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
-									null,
-									null
-									//#ifdef DLOGGING
-									,logger,
-									fineLoggable,
-									finerLoggable,
-									finestLoggable
-									//#endif
-									);
-		if (feeds.length == 0) {
-			//#ifdef DLOGGING
-			logger.severe("Parsing HTML redirect cannot be " +
-						  "processed.");
-			//#endif
-			System.out.println(
-					"Parsing HTML redirect cannot be " +
-					"processed.");
-			throw new IOException("Parsing HTML redirect cannot be " +
-								  "processed.");
-		}
+    throws IOException, Exception {
+		String newUrl = super.parseHTMLRedirect(url, is);
 		RssFeed svFeed = new RssFeed(m_rssFeed);
-		m_rssFeed.setUrl(feeds[0].getUrl());
+		m_rssFeed.setUrl(newUrl);
 		try {
 			parseRssFeed(updFeed, maxItemCount);
+		} finally {
 			m_rssFeed.setUrl(svFeed.getUrl());
-		} catch (Exception e) {
-			svFeed.copyTo(m_rssFeed);
-			throw e;
 		}
-		return;
-
 	}
 
     /**
@@ -353,16 +216,6 @@ public class RssFeedParser {
         
     }
     
-	//#ifdef DTEST
-    public void setLastMod(long m_lastMod) {
-        this.m_lastMod = m_lastMod;
-    }
-
-    public long getLastMod() {
-        return (m_lastMod);
-    }
-	//#endif
-
     public void setGetTitleOnly(boolean m_getTitleOnly) {
         this.m_getTitleOnly = m_getTitleOnly;
     }
