@@ -81,3 +81,10 @@ v1.10.5 (September 17th 2007)
 
 v1.10.6 (September 20th 2007)
 + Fix serious problem with import not working
+
+v1.10.7 (October 2nd 2007)
++ Give error for forbidden and not found
++ Allow optional prevention of redirect for bad HTML mime types
++ Allow files in memory for feed files and import files
++ Allow paste for MIDP-1.0 (dependent on device)
++ Show program and device midp, cldc, jsr75 settings on settings form
