@@ -69,8 +69,8 @@ public class HTMLLinkParser extends FeedListParser {
 		// Init in case we get a severe error.
 		try {
 			return HTMLLinkParser.parseFeeds(new EncodingUtil(is),
-											feedNameFilter,
-											feedURLFilter
+											m_feedNameFilter,
+											m_feedURLFilter
 											//#ifdef DLOGGING
 											,logger
 											,fineLoggable
@@ -243,9 +243,7 @@ public class HTMLLinkParser extends FeedListParser {
 			}
 
 			feeds = new RssFeed[ vfeeds.size() ];
-			for(int linkIndex=0; linkIndex<feeds.length; linkIndex++) {
-				feeds[linkIndex] = (RssFeed)vfeeds.elementAt(linkIndex);
-			}
+			vfeeds.copyInto(feeds);
 		} catch (Throwable t) {
 //#ifdef DLOGGING
 			logger.severe("parseFeeds error.", t);
