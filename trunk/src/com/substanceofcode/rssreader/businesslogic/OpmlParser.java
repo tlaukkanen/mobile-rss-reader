@@ -102,11 +102,11 @@ public class OpmlParser extends FeedListParser {
 					 * instead of link attribute.
 					 */
 					if(( link != null ) &&
-						( link.length()>0 ) && (( feedNameFilter == null) ||
+						( link.length()>0 ) && (( m_feedNameFilter == null) ||
 							(title == null) ||
-							(title.toLowerCase().indexOf(feedNameFilter) >= 0))
-						&& (( feedURLFilter == null) ||
-							( link.toLowerCase().indexOf(feedURLFilter) >=0))) {
+							(title.toLowerCase().indexOf(m_feedNameFilter) >= 0))
+						&& (( m_feedURLFilter == null) ||
+							( link.toLowerCase().indexOf(m_feedURLFilter) >=0))) {
 						RssFeed feed = new RssFeed(title, link, "", "");
 						rssFeeds.addElement( feed );
 					}
