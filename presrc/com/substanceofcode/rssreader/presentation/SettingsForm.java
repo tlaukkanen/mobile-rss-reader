@@ -43,6 +43,7 @@ import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
+import org.kablog.kgui.KFileSelectorMgr;
 import com.substanceofcode.utils.Settings;
 
 //#ifdef DLOGGING
@@ -63,9 +64,13 @@ public class SettingsForm extends Form implements CommandListener {
     
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
-	//#ifdef DMIDP20
     private ChoiceGroup m_useTextBox;
-	//#endif
+    private StringItem m_pgm_midp_vers;
+    private StringItem m_pgm_cldc_vers;
+    private StringItem m_pgm_jsr75;
+    private StringItem m_midp_vers;
+    private StringItem m_cldc_vers;
+    private StringItem m_jsr75;
     private StringItem m_pgmMemUsedItem;
     private StringItem m_pgmMemAvailItem;
     private StringItem m_memUsedItem;
@@ -108,12 +113,60 @@ public class SettingsForm extends Form implements CommandListener {
 		//#endif
         this.append( m_markUnreadItems );
 		String [] txtChoices = {"Text (large) box", "Text (line) field"};
-		//#ifdef DMIDP20
         m_useTextBox = new ChoiceGroup("Text entry items",
 				                            Choice.EXCLUSIVE, txtChoices, null);
+		//#ifdef DMIDP20
 		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
-        this.append( m_useTextBox );
 		//#endif
+        this.append( m_useTextBox );
+        m_pgm_midp_vers = new StringItem("Program MIDP version:",
+		//#ifdef DMIDP20
+				"MIDP-2.0");
+		//#else
+				"MIDP-1.0");
+		//#endif
+		//#ifdef DMIDP20
+		m_pgm_midp_vers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_pgm_midp_vers );
+        m_pgm_cldc_vers = new StringItem("Program CLDC version:",
+				//#ifdef DCLDCV11
+				"CLDC-1.1");
+				//#else
+				"CLDC-1.0");
+				//#endif
+		//#ifdef DMIDP20
+		m_pgm_cldc_vers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_pgm_cldc_vers );
+        m_pgm_jsr75 = new StringItem("Program JSR 75 available:",
+		//#ifdef DJSR75
+				"true");
+		//#else
+				"false");
+		//#endif
+		//#ifdef DMIDP20
+		m_pgm_jsr75.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_pgm_jsr75 );
+        m_midp_vers = new StringItem("Phone MIDP version:",
+				System.getProperty("microedition.profiles"));
+		//#ifdef DMIDP20
+		m_midp_vers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_midp_vers );
+        m_cldc_vers = new StringItem("Phone CLDC version:",
+				System.getProperty("microedition.configuration"));
+		//#ifdef DMIDP20
+		m_cldc_vers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_cldc_vers );
+        m_jsr75 = new StringItem("Phone JSR 75 available:",
+				new Boolean(KFileSelectorMgr.isJsr75Enabled()).toString());
+		//#ifdef DMIDP20
+		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_jsr75 );
 		//#ifdef DLOGGING
         m_logLevelField = new TextField("Logging level",
                 logger.getParent().getLevel().getName(), 20, TextField.ANY);
