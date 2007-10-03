@@ -1749,11 +1749,7 @@ public class RssReaderMIDlet extends MIDlet
 			initializeURLBox(m_feedListURL.getString() );
 			m_boxRtnItem = m_feedListURL;
 			m_boxRtnForm = m_importFeedsForm;
-			//#ifdef DMIDP20
-			m_display.setCurrentItem( m_feedListURL );
-			//#else
-			m_display.setCurrent( m_importFeedsForm );
-			//#endif
+			m_display.setCurrent( m_boxURL );
 		}
 
         /** Put current import URL into URL box.  */
@@ -1761,11 +1757,7 @@ public class RssReaderMIDlet extends MIDlet
 			initializeURLBox( m_bmURL.getString() );
 			m_boxRtnItem = m_bmURL;
 			m_boxRtnForm = m_addNewBMForm;
-			//#ifdef DMIDP20
-			m_display.setCurrentItem( m_bmURL );
-			//#else
-			m_display.setCurrent( m_addNewBMForm );
-			//#endif
+			m_display.setCurrent( m_boxURL );
 		}
 
     }
