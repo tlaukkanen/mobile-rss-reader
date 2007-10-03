@@ -520,14 +520,7 @@ public class RssReaderMIDlet extends MIDlet
     /** Update bookmark adding/editing form */
     private void updateAddBookmarkForm(String title) {
         m_addNewBMForm.setTitle(title);
-        RssReaderSettings settings = RssReaderSettings.getInstance(this);
-        boolean useTextBox = settings.getUseTextBox();
-		//#ifdef DMIDP20
-		m_bmURL.setItemCommandListener(null);
-		m_bmURL.removeCommand(m_pasteURLCmd);
-		//#else
-//@		m_addNewBMForm.removeCommand(m_pasteURLCmd);
-		//#endif
+        boolean useTextBox = m_appSettings.getUseTextBox();
 		if (useTextBox) {
 			//#ifdef DMIDP20
 			m_bmURL.setItemCommandListener(this);
@@ -535,14 +528,20 @@ public class RssReaderMIDlet extends MIDlet
 			//#else
 //@			m_addNewBMForm.addCommand(m_pasteURLCmd);
 			//#endif
+		} else {
+			//#ifdef DMIDP20
+			m_bmURL.setItemCommandListener(null);
+			m_bmURL.removeCommand(m_pasteURLCmd);
+			//#else
+//@			m_addNewBMForm.removeCommand(m_pasteURLCmd);
+			//#endif
 		}
 	}
 
     /** Initialize import form */
     private void initializeImportForm() {
         m_importFeedsForm = new Form("Import feeds");
-        RssReaderSettings settings = RssReaderSettings.getInstance(this);
-        String url = settings.getImportUrl();
+        String url = m_appSettings.getImportUrl();
         if(url.length()==0) {
             url = "http://";
         }
@@ -558,11 +557,11 @@ public class RssReaderMIDlet extends MIDlet
         m_feedURLFilter = new TextField("URL filter string (optional)", "", 256, TextField.ANY);
         m_importFeedsForm.append(m_feedURLFilter);
         
-        String username = settings.getImportUrlUsername();
+        String username = m_appSettings.getImportUrlUsername();
         m_feedListUsername  = new TextField("Username (optional)", username, 64, TextField.ANY);
         m_importFeedsForm.append(m_feedListUsername);
         
-        String password = settings.getImportUrlPassword();
+        String password = m_appSettings.getImportUrlPassword();
         m_feedListPassword  = new TextField("Password (optional)", password, 64, TextField.PASSWORD);
         m_importFeedsForm.append(m_feedListPassword);
         String[] titleInfo =
@@ -589,21 +588,20 @@ public class RssReaderMIDlet extends MIDlet
     
     /** Update import form */
     private void updateImportForm() {
-        RssReaderSettings settings = RssReaderSettings.getInstance(this);
-        boolean useTextBox = settings.getUseTextBox();
+        boolean useTextBox = m_appSettings.getUseTextBox();
 		if (useTextBox) {
 			//#ifdef DMIDP20
 			m_feedListURL.setItemCommandListener(this);
 			m_feedListURL.addCommand(m_pasteImportURLCmd);
 			//#else
-//@			m_addNewBMForm.addCommand(m_pasteImportURLCmd);
+//@			m_importFeedsForm.addCommand(m_pasteImportURLCmd);
 			//#endif
 		} else {
 			//#ifdef DMIDP20
 			m_feedListURL.setItemCommandListener(null);
 			m_feedListURL.removeCommand(m_pasteImportURLCmd);
 			//#else
-//@			m_addNewBMForm.removeCommand(m_pasteImportURLCmd);
+//@			m_importFeedsForm.removeCommand(m_pasteImportURLCmd);
 			//#endif
 		}
 	}
@@ -1575,10 +1573,9 @@ public class RssReaderMIDlet extends MIDlet
 				//#endif
                 
                 // Save settings
-                RssReaderSettings settings = RssReaderSettings.getInstance(this);
-                settings.setImportUrl(url);
-                settings.setImportUrlUsername(username);
-                settings.setImportUrlPassword(password);
+                m_appSettings.setImportUrl(url);
+                m_appSettings.setImportUrlUsername(username);
+                m_appSettings.setImportUrlPassword(password);
                 if(selectedImportType==2) {
                     // Use line by line parser
                     m_listParser = new HTMLLinkParser(url, username, password);
