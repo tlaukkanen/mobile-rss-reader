@@ -1,0 +1,545 @@
+<?xml version="1.0"?>
+
+<project name="RSSReader" default="build" basedir="." >
+
+	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
+
+	<property name="device.props" value="" />
+	<property name="build.template" value="" />
+	<echo message="presrc=" />
+	<property name="DEBUG" value="DEBUG" />
+	<property name="target" value="../target" />
+	<property name="tmpres" value="${target}/tmpres" />
+	<property name="dist" value="${target}/dist" />
+	<property name="dist.midp10" value="${target}/dist/midp10" />
+	<property name="dist.midp20" value="${target}/dist/midp20" />
+	<property name="dist.midp20.jsr75" value="${target}/dist/midp20_jsr75" />
+	<property name="dist.midp20.jsr75_jsr238" value="${target}/dist/midp20_jsr75_jsr238" />
+	<property name="build" value="${target}/build" />
+	<property name="build.midp10" value="${target}/build/midp10" />
+	<property name="build.midp20" value="${target}/build/midp20" />
+	<property name="build.midp20.jsr75" value="${target}/build/midp20_jsr75" />
+	<property name="build.midp20.jsr75.jsr238" value="${target}/build/midp20_jsr75.jsr238" />
+	<property name="classes" value="${target}/classes" />
+	<property name="tmppreprocess" value="${target}/tmppreprocess" />
+	<property file="${basedir}/wtk-build${device.props}.properties${build.template}" />
+	<echo message="unproc.src=${unproc.src}" />
+
+	<!-- Define the tasks. -->
+
+	<!-- clean up the project -->
+	<target name="clean">
+		<delete dir="${target}" />
+	</target>
+
+	<!-- clean up the compile -->
+	<target name="clean.compile">
+		<delete dir="${classes}" />
+	</target>
+
+	<target name="test.prepare" unless="no.test" >
+	    <echo message="Using test properties" />
+	    <echo message="no.release=${no.release}" />
+		<property file="${basedir}/test.properties" />
+	</target>
+
+	<target name="release.prepare" unless="no.release" >
+	    <echo message="Using release properties" />
+		<property file="${basedir}/release.properties" />
+	</target>
+
+	<target name="staging.prepare" unless="no.staging" >
+	    <echo message="Using release staging properties" />
+		<property file="${basedir}/staging.properties" />
+	</target>
+
+	<!-- prepare the target folder -->
+	<target name="prepare" depends="test.prepare,release.prepare" >
+		<!-- Define the Wireless Toolkit home directory. Needed by the tasks. -->
+		<!-- Define some additional properties for this project. Not required. -->
+		<property file="${basedir}/optional.properties" />
+		<property name="propdir" value="${basedir}" />
+		<property file="${basedir}/${wtk.properties}" />
+		<!-- changed -->
+		<mkdir dir="${target}" />
+		<mkdir dir="${classes}" />
+		<property name="EMULATOR" value="true" />
+		<property name="main" value="${target}/main" />
+		<property name="svnexport" value="${build}/svnexport" />
+		<property name="compiled" value="${build}/${file.prefix}pcompiled" />
+		<property name="preverified" value="${build}/${file.prefix}preverified" />
+		<property name="preprocessed" value="${build}/${file.prefix}preprocessed" />
+		<property name="obfuscated" value="${build}/${file.prefix}obfuscated" />
+	</target>
+
+	<taskdef resource="antenna.properties" >
+	  <classpath>
+		<pathelement location="${antenna.home}/antenna-bin-0.9.15-beta.jar" />
+	  </classpath>
+	</taskdef>
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+      <classpath>
+        <pathelement location="${antcontrib.home}/ant-contrib-1.0b3.jar"/>
+      </classpath>
+    </taskdef>
+
+	<!--
+	<taskdef resource="svntask.properties" >
+	  <classpath>
+		<pathelement location="${svnant.home}/svnant.jar" />
+		<pathelement location="${svnant.home}/svnClientAdapter.jar" />
+	  </classpath>
+	</taskdef>
+	-->
+
+	<!--
+	<taskdef resource="com/idaremedia/svn4ant/client/antlib.xml" >
+	  <classpath>
+		<pathelement location="${svnant.home}/dependencies/antx/lib/AntX_tasks.jar" />
+		<pathelement location="${svnant.home}/dependencies/antx/lib/JWare_apis.jar" />
+		<pathelement location="${svnant.home}/dependencies/antx/src.jar" />
+		<pathelement location="${svnant.home}/dependencies/javasvn/lib/ganymed.jar" />
+		<pathelement location="${svnant.home}/dependencies/javasvn/lib/svnkit-cli.jar" />
+		<pathelement location="${svnant.home}/dependencies/javasvn/lib/svnkit.jar" />
+	  </classpath>
+	</taskdef>
+	-->
+
+	<target name="display.props" >
+	    <echo message="DMIDPVERS=${DMIDPVERS}" />
+	    <echo message="DCLDCVERS=${DCLDCVERS}" />
+	    <echo message="DJSR75=${DJSR75}" />
+	    <echo message="DJSR238=${DJSR238}" />
+	    <echo message="DTESTDEF=${DTESTDEF}" />
+	    <echo message="wtk.optionalpda.enabled=${wtk.optionalpda.enabled}" />
+	    <echo message="DLOGDEF=${DLOGDEF}" />
+	    <echo message="no.test=${no.test}" />
+	    <echo message="no.staging=${no.staging}" />
+	    <echo message="no.release=${no.release}" />
+	    <echo message="need.test.res=${need.test.res}" />
+	    <echo message="manifestsrc=${manifestsrc}" />
+	</target>
+
+	<target name="preprocess" depends="prepare" if="need.preprocess" >
+		<antcall target="display.props" />
+		<antcall target="copy.unproc.comp" />
+		<antcall target="all.src.preprocessed" />
+		<delete dir="${tmppreprocess}" />
+		<mkdir dir="${tmppreprocess}" />
+		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF}" />
+		<copy todir="${comp.src}" overwrite="true" >
+			<fileset dir="${tmppreprocess}" includes="**/*.java" />
+			<filterset >
+				<filter token="DMIDPVERS" value="//#define ${DMIDPVERS}" />
+				<filter token="DJSR75" value="//#define ${DJSR75}" />
+				<filter token="DJSR238" value="//#define ${DJSR238}" />
+				<filter token="DTESTDEF" value="//#define ${DTESTDEF}" />
+				<filter token="DLOGDEF" value="//#define ${DLOGDEF}" />
+				<filter token="MIDLETVERS" value="${MIDLETVERS}${SUFFIXVERS}" />
+			</filterset>
+		</copy>
+		<antcall target="copy.comp.src" />
+	</target>
+
+	<target name="copy.comp.src" depends="prepare" if="copy.comp.src" >
+		<copy todir="${src}" overwrite="true" >
+			<fileset dir="${comp.src}" includes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="copy.unproc.comp" depends="prepare" if="copy.unproc.comp" >
+		<copy todir="${comp.src}" overwrite="true" >
+			<fileset dir="${unproc.src}" includes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="copy.comp.svn" depends="prepare" if="copy.comp.svn" >
+		<copy todir="${src}" overwrite="true" >
+			<fileset dir="${comp.src}" />
+		</copy>
+	</target>
+
+	<!-- TODO Fix for non WTK -->
+	<target name="all.src.preprocessed" depends="prepare" if="all.src.preprocessed" >
+		<delete includeEmptyDirs="true" >
+			<fileset dir="${midlet.home}/${src}" includes="**/*.java" />
+		</delete>
+		<mkdir dir="${midlet.home}/${src}" />
+	</target>
+
+	<target name="wtk.src.copy" if="src.controlled.copy" >
+		<delete dir="${wtk.src}" />
+		<copy todir="${wtk.src}" >
+			<fileset dir="${comp.src}" includes="**/*.java" />
+		</copy>
+	</target>
+
+	<path id="project.classpath">
+		<pathelement location="lib/JLogMicro.jar" />
+	</path>
+
+	<target name="compile.1.0">
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk1.0.properties" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<target name="compile.2.0">
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0.properties" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<target name="compile.2.0.cldc1.1">
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0cldc1.1.properties" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<target name="compile.2.0.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.compile.1.0" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk1.0.properties" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.compile.2.0" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk1.0.properties" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.compile.2.0.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="compile.2.0.jsr238" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0jsr238.properties" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<target name="compile" depends="prepare">
+
+		<!-- Copy a JAD file from the WTK's demo applications.
+             Caution: Ant only copies this the first time. Also
+             make a directory to compile into. -->
+
+		<antcall target="preprocess" />
+		<!-- Compile everything, but don't preverify (yet). -->
+		<antcall target="display.props" />
+
+		<echo message="add.jars=${add.jars}" />
+		<antcall target="add.jars" />
+		<antcall target="copy.jar.src" />
+		<antcall target="wtk.src.copy" />
+		<antcall target="display.props" />
+		<wtkbuild srcdir="${comp.src}" destdir="${classes}" preverify="false" />
+		<antcall target="copy.comp.src" />
+
+	</target>
+
+	<target name="add.jars" if="add.jars" >
+		<unjar src="${ext.jar}" dest="${classes}" />
+		<delete includeEmptyDirs="true" >
+			<fileset dir="${classes}/META-INF" />
+			<fileset dir="${classes}" includes="**/*.jad" />
+			<fileset dir="${classes}" includes="**/*MIDlet*" />
+		</delete>
+	</target>
+
+	<target name="copy.jar.src" if="copy.jar.src" >
+		<copy todir="${comp.src}" >
+			<fileset dir="${jarsrc}" excludes="**/*MIDlet*" />
+		</copy>
+	</target>
+
+	<target name="copy.res" if="need.res" >
+		<copy todir="${tmpres}/${res.todir}" >
+			<fileset dir="${res.dir}" />
+		</copy>
+	</target>
+
+	<target name="copy.test.res" if="need.test.res" >
+		<copy todir="${tmpres}/${res.test.todir}" >
+			<fileset dir="${res.test.dir}" />
+		</copy>
+	</target>
+
+	<target name="build" depends="prepare" >
+		<antcall target="display.props" />
+		<!-- Copy a JAD file from the WTK's demo applications.
+             Caution: Ant only copies this the first time. Also
+             make a directory to compile into. -->
+		<mkdir dir="${bin}" />
+		<delete dir="${tmpres}" />
+		<mkdir dir="${tmpres}" />
+
+		<antcall target="copy.res" />
+		<antcall target="copy.test.res" />
+
+		<filterset id="midlet.info" >
+			<filter token="MIDPVERS" value="${wtk.midp.version}" />
+			<filter token="CLDCVERS" value="${wtk.cldc.version}" />
+			<filter token="MIDLETVERS" value="${MIDLETVERS}" />
+			<filter token="JMIDPVERS" value="${JMIDPVERS}" />
+			<filter token="JCLDCVERS" value="${JCLDCVERS}" />
+			<filter token="EMULATOR" value="${EMULATOR}" />
+		</filterset>
+
+		<copy file="${jadsrc}/${project.name}.jad" todir="${bin}" overwrite="true" >
+			<filterset refid="midlet.info" />
+		</copy>
+
+		<copy file="${manifestsrc}/manifest.mf" todir="${bin}" overwrite="true" >
+			<filterset refid="midlet.info" />
+		</copy>
+
+		<echo message="MIDLETVERS=${MIDLETVERS}" />
+
+		<!-- Package everything. Most of the necessary information is
+             contained in the JAD file. Also preverify the result this
+             time. To obfuscate everything, set the corresponding
+             parameter to "true" (requires RetroGuard or ProGuard). The
+             version parameter increments the MIDlet-Version by one. -->
+
+	    <echo message="obfuscate=${obfuscate}" />
+		<!-- package and preverify -->
+		<wtkpackage jarfile="${bin}/${project.name}.jar" jadfile="${bin}/${project.name}.jad" manifest="${bin}/manifest.mf" cldc="${JCLDCVERS}" profile="${JMIDPVERS}" preverify="true" obfuscate="${obfuscate}" >
+
+			<!-- Package our newly compiled classes and the
+                 resources from the WTK's demo application. -->
+
+			<fileset dir="${classes}" />
+			<fileset dir="${tmpres}" />
+
+		</wtkpackage>
+
+		<wtkobfuscate jarfile="${bin}/${project.name}.jar" obfuscator="proguard" if="keep.obfuscate" >
+			<argument value="-keep public class ${obfuscate.classes}" />
+		</wtkobfuscate>
+		<!-- does not work.
+		<wtkmakeprc jarfile="${bin}/${project.name}.jar" />
+		-->
+		<echo message="${rim.home}\\m&quot;" />
+		<copy file="${bin}/${project.name}.jad" tofile="${bin}/${file.prefix}${project.name}.jad" />
+		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${file.prefix}${project.name}.jar" />
+		<copy file="${bin}/${file.prefix}${project.name}.jar" todir="${dist}" />
+		<copy file="${bin}/${file.prefix}${project.name}.jad" todir="${dist}" />
+		<copy file="${bin}/${project.name}.jar" tofile="${build}/${file.prefix}${build.jar}" />
+		<copy file="${bin}/manifest.mf" todir="${build}/${file.prefix}manifest.mf" overwrite="true" />
+
+	</target>
+
+	<target name="create.rim.files" depends="prepare" >
+		<exec executable="${rim.home}\\bin\\rapc" >
+			<arg value="import=&quot;${rim.home}\\lib\\net_rim_api.jar&quot;" />
+			<arg value="codename=${project.name}" />
+			<arg value="-midlet" />
+			<arg value="jad=${bin}\\${project.name}.jad" />
+			<arg value="${bin}\\${project.name}.jar" />
+		</exec>
+		<move file="${project.name}.cso" tofile="${dist}/${file.prefix}${project.name}.cso" />
+		<move file="${project.name}.cod" tofile="${dist}/${file.prefix}${project.name}.cod" />
+		<move file="${project.name}.debug" tofile="${dist}/${file.prefix}${project.name}.debug" />
+	</target>
+
+	<target name="svn.op.dist" >
+		<delete dir="${op.dir}" />
+		<mkdir dir="${op.dir}" />
+
+		<if>
+			<equals arg1="${need.svn.preprocessed}" arg2="true" />
+			<then>
+			<exec executable="svn" dir="${op.dir}" >
+				<arg value="${svn.op}" />
+				<arg value="${svn.url}" />
+				<arg value="${svn.src}" />
+			</exec>
+			</then>
+		</if>
+
+		<if>
+			<equals arg1="${need.svn.preprocessed}" arg2="true" />
+			<then>
+			<move todir="${op.dir}/src" >
+				<fileset dir="${op.dir}/${svn.src}/src" />
+			</move>
+			<move todir="${op.dir}/presrc" >
+				<fileset dir="${op.dir}/${svn.src}/presrc" />
+			</move>
+			<move todir="${op.dir}/testdata" >
+				<fileset dir="${op.dir}/${svn.src}/testdata" />
+			</move>
+			<move todir="${op.dir}" >
+				<fileset file="${op.dir}/${svn.src}/release_notes.txt" />
+			</move>
+			<delete dir="${op.dir}/${svn.src}" />
+			</then>
+		</if>
+		<!--
+		<svn javahl="false" >
+			<export srcUrl="${svn.url}" srcPath="${svn.src}" destPath="${op.dir}" />
+		</svn>
+		-->
+	</target>
+
+	<!-- Distribute expoted source to ${preprocessed} -->
+	<target name="dist.preprocessed" if="need.dist.preprocessed" >
+		<delete dir="${preprocessed}" />
+		<mkdir dir="${preprocessed}" />
+		<copy todir="${preprocessed}/src" >
+			<fileset dir="${comp.src}" includes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="dist.svn" if="need.dist.svn" >
+		<antcall target="svn.op.dist" >
+			<param name="svn.op" value="export" />
+			<param name="op.dir" value="${svnexport}" />
+		</antcall>
+	</target>
+
+	<target name="dist.svn.dirs" depends="prepare" if="need.dist.svn.dirs" >
+		<antcall target="svn.op.dist" >
+			<param name="svn.op" value="checkout" />
+			<param name="op.dir" value="${main}" />
+		</antcall>
+	</target>
+
+	<!-- Distribute the version (e.g. MIDP-1.0, MIDP-2.0, etc) to -->
+	<!-- it's target/build and target/dist target/main -->
+		 
+	<target name="dist.version" depends="prepare" >
+		<property name="no.test" value="true" />
+		<delete dir="${dist.vers}" />
+		<mkdir dir="${dist.vers}" />
+		<!-- delete TODO
+		<delete dir="${build.vers}" />
+		<mkdir dir="${build.vers}" />
+		-->
+		<antcall target="clean.compile" />
+		<antcall target="compile" />
+		<antcall target="dist.preprocessed" />
+
+		<delete dir="${compiled}" />
+		<copy todir="${compiled}" >
+			<fileset dir="${classes}" />
+		</copy>
+		<antcall target="build" inheritAll="true" >
+			<param name="build.jar" value="before-obfuscation.jar" />
+		</antcall>
+		<delete dir="${preverified}" />
+		<mkdir dir="${preverified}" />
+		<unjar src="${build}/${file.prefix}before-obfuscation.jar" dest="${preverified}" />
+		<antcall target="build" >
+			<param name="build.jar" value="obfuscated.jar" />
+		</antcall>
+		<if>
+			<equals arg1="${need.rim}" arg2="true" />
+			<then>
+			<antcall target="create.rim.files" inheritAll="true" />
+			</then>
+		</if>
+		<delete dir="${obfuscated}" />
+		<mkdir dir="${obfuscated}" />
+		<unjar src="${build}/${file.prefix}obfuscated.jar" dest="${obfuscated}" />
+		<delete dir="${obfuscated}/MANIFEST.MF" />
+	</target>
+
+	<target name="dist.midp.1.0" unless="no.1.0" >
+		<antcall target="dist.version" inheritAll="yes" >
+			<param name="wtk.properties" value="wtk1.0.properties" />
+			<param name="dist.vers" value="${dist.midp10}" />
+			<param name="build.vers" value="${build.midp10}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0" unless="no.2.0" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.properties" />
+			<param name="dist.vers" value="${dist.midp20}" />
+			<param name="build.vers" value="${build.midp20}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr75" unless="no.2.0.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties" />
+			<param name="dist.vers" value="${dist.midp20.jsr75}" />
+			<param name="build.vers" value="${build.midp20.jsr75}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr238" unless="no.2.0.jsr238" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0jsr238.properties" />
+			<param name="dist.vers" value="${dist.midp20.jsr75}" />
+			<param name="build.vers" value="${build.midp20.jsr75}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.dev.status" >
+		<antcall target="clean" />
+		<delete dir="${dist}" />
+		<mkdir dir="${dist}" />
+		<delete dir="${build}" />
+		<mkdir dir="${build}" />
+		<antcall target="dist.svn.dirs" />
+		<antcall target="dist.midp.1.0" />
+		<antcall target="dist.midp.2.0" />
+		<antcall target="dist.midp.2.0.jsr75" />
+	</target>
+
+	<target name="dist" >
+		<antcall target="dist.dev.status" inheritAll="true" >
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="copy.device.bin" depends="prepare" >
+		<mkdir dir="${midlet.home}/${bin}" />
+		<copy file="${bin}/${project.name}.jar" tofile="${midlet.home}/${bin}/${project.name}.jar" overwrite="true" />
+		<copy file="${bin}/${project.name}.jad" tofile="${midlet.home}/${bin}/${project.name}.jad" />
+	</target>
+
+	<!-- Start the MIDlet suite -->
+	<target name="run" depends="prepare" >
+		<wtkrun jadfile="${midlet.home}/${bin}/${project.name}.jad" device="DefaultColorPhone" wait="false" />
+
+	</target>
+
+</project>
