@@ -20,7 +20,7 @@ Application features:
   * Update all/updated feeds with single command 
   * Open item link or enclosure in device browser (Only on version midp20_ for MIDP 2.0 on most recent phones starting a yr ago) 
  
-= MeMory =
+= #MeMory =
 = Details =
 
 The import feature has filters. This is because there are some OPML files that have 1,500 (SIC) links. This would cause the program to run out of memory not to memtion be unmanagable. Say you only want the ones that are about Tech. Use the name filter with 'Tech' in it to get just the ones with Tech. Some sites have an HTML file (URL) with links to RSS. This file will likely have both links for RSS and other links. Usually, the RSS links have a pattern in them like rss or xml. Put rss or xml in the link filter to just import these. Usually to use the HTML link feature, you will need to open the page with view source and see what to use as the filter. 
