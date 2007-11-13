@@ -1,7 +1,7 @@
 #labels Featured
 List of features and uses
 = Introduction 
-[Install Install software]
+
 The free RSS feed reader is an J2ME MIDP application that is able to read most RSS servers/feed versions. RSS is a lightweight XML format designed for sharing headlines and other content like blogs and news. Data is stored on the device and updated on request. This uses the internet which service providers charge extra for, so you would best get an unlimited data from your service provider. This should work with most recent devices as they have MIDP 2.0. If it does not work, use the midp10_... version which is for older versions. This is licensed under GPL. Source code authored by Tommi Laukkanen is at http://code.google.com/p/mobile-rss-reader/ 
 
 Application features:
