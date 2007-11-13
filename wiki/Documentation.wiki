@@ -49,7 +49,7 @@ To install/copy RSSReader to the phone, you will need some communication
 method between your computer and your phone to be working (e-mail, cable, 
 bluetooth, or infrared), and copy the midp10_RSSReader.jar, midp20_RSSReader.jar,
 midp20_jsr75_RSSReader.jar file  
-(that is in the <a href="http://code.google.com/p/mobile-rss-reader/downloads/list">zip file (this link) ) from the  
+(that is in the zip file (this link) ) from the  
 computer to the phone. If you have an old phone (that uses MIDP  
 1.0), copy midp10_RSSReader.jar. The detailed steps are different 
 from one phone to other, so please read the manual of your phone  
@@ -60,12 +60,12 @@ and the help of your communication program.
 Alternatively, you can use your phone browser to download  
 RSSReader directly from this web.
 
-Just enter this url for MIDP-2.0 (see above): 
+Just enter this url for MIDP-2.0 (see below): 
 http://mobile-rss-reader.googlecode.com/files/midp20_RSSReader-10.7.jar
 
 
 
-Just enter this url for MIDP-2.0 and JSR-75 (see above): 
+Just enter this url for MIDP-2.0 and JSR-75 (see below): 
 http://mobile-rss-reader.googlecode.com/files/midp20_jsr75_RSSReader-10.7.jar
 
  
@@ -73,3 +73,15 @@ http://mobile-rss-reader.googlecode.com/files/midp20_jsr75_RSSReader-10.7.jar
 If your phone is old, use this url: 
 http://mobile-rss-reader.googlecode.com/files/midp10_RSSReader-10.7.jar
 
+
+ == Reading from phone memory == 
+Feeds and imports of feeds can be done from phone memory with phones with
+JSR-75.  You can find this out by looking at technical specs for your phone,
+looking up your phone at this web site.
+http://www.mobref.com/device.
+Or you can run the program without JSR-75 (midp20_RSSReader...)
+going to settings and looking for phone jsr75 and if true, you can use jsr75
+version (midp20_jsr75_RSSReader...). 
+It is important to check before trying to run the JSR-75 version as if phone
+does not support JSR75 the JSR-75 program (midp20_jsr75_RSSReader... will
+not work or run) but not harm the phone.
