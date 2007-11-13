@@ -1,0 +1,41 @@
+#Documentations for Mobile RSS Reader
+= Introduction =
+
+ == Summary == 
+
+The free RSS feed reader is a cell phone (mobile) J2ME MIDP  application that
+is able to read most RSS servers/feed versions. RSS is a lightweight XML format
+designed for sharing headlines and other content like blogs and news.   
+Data
+is stored on the device and updated on request.  This uses the internet which
+service providers charge extra for, so you would best get an unlimited data
+from your service provider.  
+This should work with most recent devices as
+they have MIDP 2.0 
+program beginning with midp20_RSSReader... 
+If it does not work, use the MIDP 1.0 
+program beginning with midp10_RSSReader... 
+for older versions.  
+This is licensed under GPL.
+Source code authored by Tommi Laukkanen is at http://code.google.com/p/mobile-rss-reader/
+For more documentation go to http://mobilerssreader.sourceforge.net/
+
+ *   Add RSS feed bookmarks 
+ *   Parse RSS feeds 
+ *   Browse RSS feed headers 
+ *   Read topics 
+ *   Read all unread topics 
+ *   Supports ISO8859_1, windows-1252, UTF-8 , and UTF-16 
+ *   Update all/updated feeds with single command 
+ *   Open item link or enclosure in device browser  (Only on program
+midp20_RSSReader... for MIDP 2.0 on most recent phones starting a yr ago)
+ *   Update all/updated feeds with single command 
+ *   Open item link or enclosure in device browser  (Only on versions
+midp20_RSSReader... or midp20_jsr75_RSSReader...)  for MIDP 2.0 (see above)
+ *   Save on exit or request
+ *   Import and synchronize RSS feed lists from internet or
+phone memory
+   #   OPML
+   #   HTML hyperlinks 
+   #   Line by line
+using formats and filter feeds based on name and URL (except v1.10.5)
