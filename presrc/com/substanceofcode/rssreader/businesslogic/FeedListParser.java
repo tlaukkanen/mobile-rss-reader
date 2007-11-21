@@ -33,6 +33,7 @@ import java.io.InputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
+import com.substanceofcode.utils.CauseException;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
@@ -50,10 +51,12 @@ public abstract class FeedListParser implements Runnable{
     private String m_url;
     private String m_username;
     private String m_password;
-	protected String feedNameFilter;
-	protected String feedURLFilter;
+	protected String m_feedNameFilter;
+	protected String m_feedURLFilter;
+	protected boolean m_redirectHtml = false;
     private boolean m_ready;
     private boolean m_successfull = false;
+    private CauseException m_ex = null;
     private RssFeed[] m_feeds;
     
 	//#ifdef DLOGGING
@@ -99,6 +102,7 @@ public abstract class FeedListParser implements Runnable{
 			//#endif
             // TODO: Add exception handling
             System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
+			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
         } finally {
             m_ready = true;
         }        
@@ -196,23 +200,35 @@ public abstract class FeedListParser implements Runnable{
     abstract RssFeed[] parseFeeds(InputStream is);
     
     public void setFeedNameFilter(String feedNameFilter) {
-        this.feedNameFilter = feedNameFilter.toLowerCase();
+        this.m_feedNameFilter = feedNameFilter.toLowerCase();
     }
 
     public String getFeedNameFilter() {
-        return (feedNameFilter);
+        return (m_feedNameFilter);
     }
 
     public void setFeedURLFilter(String feedURLFilter) {
-        this.feedURLFilter = feedURLFilter.toLowerCase();
+        this.m_feedURLFilter = feedURLFilter.toLowerCase();
     }
 
     public String getFeedURLFilter() {
-        return (feedURLFilter);
+        return (m_feedURLFilter);
     }
 
     public boolean isSuccessfull() {
         return (m_successfull);
+    }
+
+    public void setRedirectHtml(boolean m_redirectHtml) {
+        this.m_redirectHtml = m_redirectHtml;
+    }
+
+    public boolean isRedirectHtml() {
+        return (m_redirectHtml);
+    }
+
+    public CauseException getEx() {
+        return (m_ex);
     }
 
 }
