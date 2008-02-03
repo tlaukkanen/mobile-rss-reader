@@ -55,7 +55,6 @@ import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.rms.*;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
@@ -64,6 +63,7 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.Item;
 // If not using the test UI define the J2ME UI's
 //#ifndef DTESTUI
+import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.TextBox;
@@ -71,6 +71,7 @@ import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.StringItem;
 //#else
 // If using the test UI define the Test UI's
+import com.substanceofcode.testlcdui.ChoiceGroup;
 import com.substanceofcode.testlcdui.Form;
 import com.substanceofcode.testlcdui.List;
 import com.substanceofcode.testlcdui.TextBox;
@@ -129,6 +130,7 @@ public class RssReaderMIDlet extends MIDlet
     // Index in bookmarks to auto test by opening in edit
 	// This counts up until the bookmark size is reached.
     private int         m_bookmarkIndex = -1;
+    private int         m_bookmarkLastIndex = -1; // Last place when import current was selected
 	//#endif
 	// Tells us if this is the first time program was used.  This is
 	// done by seeing if max item count is set.  We also set it after
@@ -180,8 +182,9 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_addOkCmd;         // The OK command
 	//#ifdef DTESTUI
 	private Command     m_testRssCmd;       // Tet UI rss headers command
-	private Command     m_testOpmlCmd;      // Tet UI rss opml command
+	private Command     m_testImportCmd;      // Tet UI rss import command
 	private Command     m_testBMCmd;        // Tet UI bookmarks list command
+	private Command     m_testRtnCmd;       // Tet UI return to prev command
 	//#endif
     private Command     m_addCancelCmd;     // The Cancel command
     private Command     m_pasteURLCmd;      // The allow paste command
@@ -243,6 +246,10 @@ public class RssReaderMIDlet extends MIDlet
     public RssReaderMIDlet() {
         m_display = Display.getDisplay(this);
         
+		//#ifdef DTEST
+		System.out.println("JavaME encoding=" +
+				System.getProperty("microedition.encoding"));
+		//#endif
 		//#ifdef DLOGGING
 		//#ifdef DCLDCV10
         LogManager.getLogManager().readConfiguration(this);
@@ -274,8 +281,9 @@ public class RssReaderMIDlet extends MIDlet
 			m_addOkCmd          = new Command("OK", Command.OK, 1);
 			//#ifdef DTESTUI
 			m_testRssCmd        = new Command("Test headers/items", Command.SCREEN, 9);
-			m_testOpmlCmd       = new Command("Test bookmarks imported", Command.SCREEN, 9);
+			m_testImportCmd       = new Command("Test bookmarks imported", Command.SCREEN, 9);
 			m_testBMCmd         = new Command("Test bookmarks shown", Command.SCREEN, 9);
+			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 10);
 			//#endif
 			m_addCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
 			m_BMFileCmd         = new Command("Find files", Command.SCREEN, 3);
@@ -470,6 +478,7 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_updateAllModCmd );
 			//#ifdef DTESTUI
             m_bookmarkList.addCommand( m_testBMCmd );
+            m_bookmarkList.addCommand( m_testRtnCmd );
 			//#endif
 	//#ifdef DLOGGING
 			if (m_debug != null) {
@@ -631,7 +640,7 @@ public class RssReaderMIDlet extends MIDlet
 		//#endif
         m_importFeedsForm.addCommand( m_importCancelCmd );
 		//#ifdef DTESTUI
-        m_importFeedsForm.addCommand( m_testOpmlCmd );
+        m_importFeedsForm.addCommand( m_testImportCmd );
 		//#endif
         m_importFeedsForm.setCommandListener(this);
     }
@@ -693,14 +702,19 @@ public class RssReaderMIDlet extends MIDlet
 				// open the header so that it's items can be listed
 				// with test UI classes.
 				// Need to change the selection to match the m_headerIndex.
-				if( (m_headerList.size()>0 ) && (m_headerIndex >= 0)) {
+				if ((m_headerIndex < m_headerList.size()) &&
+				    (m_headerIndex >= 0)) {
 					if (m_headerList.getSelectedIndex() >= 0) {
 						m_headerList.setSelectedIndex(
 								m_headerList.getSelectedIndex(), false);
 					}
 					m_headerList.setSelectedIndex(m_headerIndex, true);
-					m_headerIndex--;
+					m_headerIndex++;
 					commandAction(m_openHeaderCmd, m_headerList);
+					if (m_headerIndex >= m_headerList.size()) {
+						System.out.println("Test UI Test Rss items last");
+						m_headerIndex = -1;
+					}
 				}
 				//#endif
 
@@ -790,7 +804,9 @@ public class RssReaderMIDlet extends MIDlet
 							m_getFeedTitleList = false;
 						} else if(m_listParser.isReady()) {
                             // Feed list parsing is ready
+							//#ifndef DTESTUI
                             System.out.println("Feed list parsing is ready");
+							//#endif
 							if(!m_listParser.isSuccessfull()) {
 								throw m_listParser.getEx();
 							}
@@ -839,7 +855,9 @@ public class RssReaderMIDlet extends MIDlet
 							m_getFeedList      = false;
 							m_getFeedTitleList = false;
                         } else {
+							//#ifndef DTESTUI
                             System.out.println("Feed list parsing isn't ready");
+							//#endif
                         }
                     } catch(Exception ex) {
                         // TODO: Add exception handling
@@ -881,13 +899,16 @@ public class RssReaderMIDlet extends MIDlet
 				if ((m_bookmarkIndex < m_bookmarkList.size()) &&
 				    (m_bookmarkIndex >= 0)) {
 					if (m_bookmarkIndex < m_bookmarkList.size()) {
-						m_bookmarkList.setSelectedIndex(
-								m_bookmarkList.getSelectedIndex(), false);
+						if (m_bookmarkList.getSelectedIndex() >= 0) {
+							m_bookmarkList.setSelectedIndex(
+									m_bookmarkList.getSelectedIndex(), false);
+						}
 						m_bookmarkList.setSelectedIndex(m_bookmarkIndex, true);
 						commandAction(m_editBookmark, m_bookmarkList);
 						m_bookmarkIndex++;
 					} else if (m_bookmarkIndex >= m_bookmarkList.size()) {
 						m_bookmarkIndex = -1;
+						System.out.println("Test UI Test Rss feeds last");
 					}
 				}
 
@@ -1170,7 +1191,7 @@ public class RssReaderMIDlet extends MIDlet
 		//#ifdef DTESTUI
 		// After intializing the form (which was already logged by
 		// testui classes), simulate the back command
-		if ( (m_headerList.size()>0) && (m_headerIndex >= 0)) {
+		if ((m_headerIndex < m_headerList.size()) && (m_headerIndex >= 0)) {
 			commandAction( m_backCommand, m_itemForm );
 		}
 		//#endif
@@ -1485,7 +1506,8 @@ public class RssReaderMIDlet extends MIDlet
         /** Indicate that we want to test the headers/items.  */
         if( c == m_testRssCmd) {
             if( m_headerList.size()>0 ) {
-				m_headerIndex = m_headerList.size() - 1;
+				m_headerIndex = 0;
+				System.out.println("Test UI Test Rss items start m_headerIndex=" + m_headerIndex);
 			}
 		}
 		//#endif
@@ -1638,6 +1660,7 @@ public class RssReaderMIDlet extends MIDlet
 		if( c == m_importCurrFeedListCmd ) {
 			if( m_bookmarkList.size()>0 ) {
                 m_curBookmark = m_bookmarkList.getSelectedIndex();
+				m_bookmarkLastIndex = m_curBookmark;
                 RssFeed bm = (RssFeed)m_rssFeeds.get(
                         m_bookmarkList.getString(m_curBookmark));
 				updateImportForm();
@@ -1652,15 +1675,29 @@ public class RssReaderMIDlet extends MIDlet
         /** Auto edit feeds/bookmarks to */
         if( c == m_testBMCmd ) {
 			m_bookmarkIndex = 0;
-			commandAction(m_importOkCmd, m_importFeedsForm);
+			System.out.println("Test UI Test Rss feeds m_bookmarkIndex=" + m_bookmarkIndex);
 		}
 		//#endif
 
 		//#ifdef DTESTUI
         /** Import list of feeds and auto edit bookmarks/feeds */
-        if( c == m_testOpmlCmd ) {
+        if( c == m_testImportCmd ) {
 			m_bookmarkIndex = m_bookmarkList.size();
+			System.out.println("Test UI Test Rss feeds m_bookmarkIndex=" + m_bookmarkIndex);
 			commandAction(m_importOkCmd, m_importFeedsForm);
+		}
+		//#endif
+
+		//#ifdef DTESTUI
+        /** Go back to last position */
+        if( c == m_testRtnCmd ) {
+			if (m_bookmarkLastIndex != 1) {
+				if (m_bookmarkList.getSelectedIndex() >= 0) {
+					m_bookmarkList.setSelectedIndex(
+							m_bookmarkList.getSelectedIndex(), false);
+				}
+				m_bookmarkList.setSelectedIndex( m_bookmarkLastIndex, true );
+			}
 		}
 		//#endif
 
