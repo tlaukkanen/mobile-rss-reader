@@ -1,7 +1,5 @@
  /*
  * EncodingUtil.java
- TODO fix &nbsp; not being always replaced in rss-nick-utf8.xml Users = Customers
- at bottom.
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
  * http://www.substanceofcode.com
