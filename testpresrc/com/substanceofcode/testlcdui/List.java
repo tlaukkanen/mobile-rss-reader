@@ -35,60 +35,70 @@ import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Image;
 
+import com.substanceofcode.testutil.TestOutput;
+
+/**
+ * List.
+ *
+ * Test GUI class to log methods on the List class.
+ *
+ * @author  Irving Bunton
+ * @version 1.0
+ */
 public class List extends javax.microedition.lcdui.List
 implements CommandListener {
 
-	private String title;
-	private Command m_testCmd = new Command("Test selections", Command.SCREEN, 9);
+	private String m_title;
 	private CommandListener m_cmdListener;
 
 	public List(String title, int listType) {
 		super(title, listType);
-		System.out.println("Test UI List Title: " + title);
-		this.title = title;
-		System.out.println("Test UI List listType: " + listType);
+		TestOutput.println("Test UI List Title: " + title);
+		this.m_title = title;
+		TestOutput.println("Test UI List listType: " + listType);
 	}
 
 	// TODO log stringElements
 	public List(String title, int listType, String[] stringElements,
 				    Image[] imageElements) {
 		super(title, listType, stringElements, imageElements);
-		System.out.println("Test UI List Title: " + title);
-		System.out.println("Test UI List listType: " + listType);
+		TestOutput.println("Test UI List Title: " + title);
+		TestOutput.println("Test UI List listType: " + listType);
+		this.m_title = title;
 	}
 
 	public int append(String stringPart, Image imagePart) {
 		int rtn = super.append(stringPart, imagePart);
-		System.out.println("Test UI List append: " + stringPart);
-		System.out.println("Test UI List append int: " + rtn);
+		TestOutput.println("Test UI List append: [" + m_title + "]," + stringPart);
+		TestOutput.println("Test UI List append int: [" + m_title + "]," + rtn);
 		return rtn;
 	}
 
 	public void insert(int elementnum, String stringPart, Image imagePart) {
 		super.insert(elementnum, stringPart, imagePart);
-		System.out.println("Test UI List insert: " + stringPart);
-		System.out.println("Test UI List insert elementnum: " + elementnum);
+		TestOutput.println("Test UI List insert: [" + m_title + "]," + stringPart);
+		TestOutput.println("Test UI List insert elementnum: [" + m_title + "]," + elementnum);
 	}
 
 	public void set(int elementnum, String stringPart, Image imagePart) {
 		try {
 			super.set(elementnum, stringPart, imagePart);
 		} catch (Throwable t) {
-			System.out.println("Test UI List set: " + t.getMessage());
+			TestOutput.println("Test UI List set: [" + m_title + "]," + t.getMessage());
 			t.printStackTrace();
 		}
-		System.out.println("Test UI List set: " + stringPart);
-		System.out.println("Test UI List set elementnum: " + elementnum);
+		TestOutput.println("Test UI List set: [" + m_title + "]," + stringPart);
+		TestOutput.println("Test UI List set elementnum: [" + m_title + "]," + elementnum);
 	}
 
 	public int getSelectedIndex() {
 		try {
 			int rtn = super.getSelectedIndex();
-			System.out.println("Test UI List " + title + " getSelectedIndex: " + rtn);
+			TestOutput.println("Test UI List getSelectedIndex: [" + m_title + "]," +rtn);
 			return rtn;
 		} catch (Throwable t) {
-			System.out.println("Test UI List getSelectedIndex: " +
-					t.getMessage());
+			TestOutput.println("Test UI List getSelectedIndex: [" +
+					m_title + "]," + t.getMessage());
 			t.printStackTrace();
 			return -1;
 		}
@@ -97,10 +107,11 @@ implements CommandListener {
 	public boolean isSelected(int elementnum) {
 		try {
 			boolean rtn = super.isSelected(elementnum);
+			TestOutput.println("Test UI List isSelected: [" + m_title + "]," + elementnum);
 			return rtn;
 		} catch (Throwable t) {
 			t.printStackTrace();
-			System.out.println("Test UI List isSelected: " + t.getMessage());
+			TestOutput.println("Test UI List isSelected: [" + m_title + "]," + t.getMessage());
 			return false;
 		}
 	}
@@ -108,7 +119,7 @@ implements CommandListener {
 	public void delete(int elementnum) {
 		try {
 			super.delete(elementnum);
-			System.out.println("Test UI List delete elementnum: " + elementnum);
+			TestOutput.println("Test UI List delete elementnum: [" + m_title + "]," + elementnum);
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -117,34 +128,49 @@ implements CommandListener {
 	//#ifdef DMIDP20
 	public void deleteAll() {
 		super.deleteAll();
-		System.out.println("Test UI List delete all");
+		TestOutput.println("Test UI List delete all [" + m_title + "]");
 	}
 	//#endif
 
-	public void commandAction(Command cmd, Displayable disp) {
+	public void outputCmdAct(Command cmd, Displayable disp, Command selCmd) {
 		//#ifdef DMIDP20
-		System.out.println("Test UI List command,displayable=" + cmd.getLabel() + "," + super.getTitle());
+		String dispDtl = super.getTitle();
 		//#else
-		System.out.println("Test UI List command,displayable=" + cmd.getLabel() + "," + super.getTitle());
+		String dispDtl = this;
 		//#endif
+		String lblCmd = cmd.getLabel();
+		if (cmd == selCmd) {
+			lblCmd = "Implicit select";
+			final int sel = super.getSelectedIndex();
+			if (sel >= 0) {
+				dispDtl += "," + super.getString(sel);
+			}
+		}
+
+		TestOutput.println("Test UI List command,displayable=" + lblCmd + "," + dispDtl);
+	}
+
+	public void commandAction(Command cmd, Displayable disp) {
+		outputCmdAct(cmd, disp,
+				javax.microedition.lcdui.List.SELECT_COMMAND);
 		m_cmdListener.commandAction(cmd, this);
 	}
 
-	public void setSelectedIndex(int elementNum,
-                                 boolean selected) {
+	public void setSelectedIndex(int elementNum, boolean selected) {
 		try {
 			super.setSelectedIndex(elementNum, selected);
-			System.out.println("Test UI List " + title + " setSelectedIndex: " + elementNum);
+			TestOutput.println("Test UI List [" + m_title + "] setSelectedIndex: " + elementNum);
 		} catch (Throwable t) {
-			System.out.println("Test UI List " + title +
-					" getSelectedIndex: " + t.getMessage());
+			TestOutput.println("Test UI List [" + m_title +
+					"] getSelectedIndex: " + t.getMessage());
 			t.printStackTrace();
 		}
 	}
 
-    public void setCommandListener(CommandListener m_cmdListener) {
+    public void setCommandListener(CommandListener cmdListener) {
+		TestOutput.println("Test UI List Setting command listner for listener,this,Title: " + cmdListener + "," + this + ",[" + m_title + "]");
 		super.setCommandListener(this);
-        this.m_cmdListener = m_cmdListener;
+        this.m_cmdListener = cmdListener;
     }
 
 }
