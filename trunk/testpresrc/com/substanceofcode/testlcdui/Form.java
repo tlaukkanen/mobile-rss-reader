@@ -42,7 +42,7 @@ import com.substanceofcode.testutil.TestOutput;
 /**
  * Form.
  *
- * Test GUI class to log actions on the Form class.
+ * Test GUI class to log methods on the Form class.
  *
  * @author  Irving Bunton
  * @version 1.0
