@@ -22,6 +22,10 @@
 
 // Expand to define logging define
 //#define DNOLOGGING
+// Expand to define itunes define
+//#define DNOITUNES
+// Expand to define test ui define
+//#define DNOTESTUI
 
 package com.substanceofcode.rssreader.presentation;
 
@@ -32,18 +36,30 @@ import java.util.Hashtable;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Choice;
-import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+//#ifndef DTESTUI
+import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.StringItem;
+//#else
+//@// If using the test UI define the Test UI's
+//@import com.substanceofcode.testlcdui.ChoiceGroup;
+//@import com.substanceofcode.testlcdui.Form;
+//@import com.substanceofcode.testlcdui.List;
+//@import com.substanceofcode.testlcdui.TextBox;
+//@import com.substanceofcode.testlcdui.TextField;
+//@import com.substanceofcode.testlcdui.StringItem;
+//#endif
 import javax.microedition.lcdui.Item;
 
-import org.kablog.kgui.KFileSelectorMgr;
+//#ifdef DJSR75
+//@import org.kablog.kgui.KFileSelectorMgr;
+//#endif
 import com.substanceofcode.utils.Settings;
 
 //#ifdef DLOGGING
@@ -65,11 +81,13 @@ public class SettingsForm extends Form implements CommandListener {
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
     private ChoiceGroup m_useTextBox;
-    private StringItem m_pgm_midp_vers;
-    private StringItem m_pgm_cldc_vers;
-    private StringItem m_pgm_jsr75;
-    private StringItem m_midp_vers;
-    private StringItem m_cldc_vers;
+    private ChoiceGroup m_feedListOpen;
+    private ChoiceGroup m_itunesEnabled;
+    private StringItem m_pgmMidpVers;
+    private StringItem m_pgCldVers;
+    private StringItem m_pgmJsr75;
+    private StringItem m_midpVers;
+    private StringItem m_cldcVers;
     private StringItem m_jsr75;
     private StringItem m_pgmMemUsedItem;
     private StringItem m_pgmMemAvailItem;
@@ -91,7 +109,7 @@ public class SettingsForm extends Form implements CommandListener {
         m_okCommand = new Command("OK", Command.SCREEN, 1);
         this.addCommand( m_okCommand );
         
-        m_cancelCommand = new Command("Cancel", Command.SCREEN, 2);
+        m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
         this.addCommand( m_cancelCommand );
         
         this.setCommandListener( this );
@@ -119,50 +137,72 @@ public class SettingsForm extends Form implements CommandListener {
 		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_useTextBox );
-        m_pgm_midp_vers = new StringItem("Program MIDP version:",
+		String [] itunesEnabledChoices = {"Don't show Itunes data",
+				"Show Itunes data"};
+        m_itunesEnabled = new ChoiceGroup("Choose to use Itunes data",
+				                            Choice.EXCLUSIVE,
+											itunesEnabledChoices,
+											null);
+		//#ifdef DMIDP20
+		m_itunesEnabled.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+		//#ifdef DITUNES
+//@        this.append( m_itunesEnabled );
+		//#endif
+		String [] feedBackChoices = {"Open item first", "Back first"};
+        m_feedListOpen = new ChoiceGroup("Choose feed list menu first item",
+				                            Choice.EXCLUSIVE, feedBackChoices,
+											null);
+		//#ifdef DMIDP20
+		m_feedListOpen.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_feedListOpen );
+        m_pgmMidpVers = new StringItem("Program MIDP version:",
 		//#ifdef DMIDP20
 				"MIDP-2.0");
 		//#else
 //@				"MIDP-1.0");
 		//#endif
 		//#ifdef DMIDP20
-		m_pgm_midp_vers.setLayout(Item.LAYOUT_BOTTOM);
+		m_pgmMidpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgm_midp_vers );
-        m_pgm_cldc_vers = new StringItem("Program CLDC version:",
+        this.append( m_pgmMidpVers );
+        m_pgCldVers = new StringItem("Program CLDC version:",
 				//#ifdef DCLDCV11
 //@				"CLDC-1.1");
 				//#else
 				"CLDC-1.0");
 				//#endif
 		//#ifdef DMIDP20
-		m_pgm_cldc_vers.setLayout(Item.LAYOUT_BOTTOM);
+		m_pgCldVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgm_cldc_vers );
-        m_pgm_jsr75 = new StringItem("Program JSR 75 available:",
+        this.append( m_pgCldVers );
+        m_pgmJsr75 = new StringItem("Program JSR 75 available:",
 		//#ifdef DJSR75
 //@				"true");
 		//#else
 				"false");
 		//#endif
 		//#ifdef DMIDP20
-		m_pgm_jsr75.setLayout(Item.LAYOUT_BOTTOM);
+		m_pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgm_jsr75 );
-        m_midp_vers = new StringItem("Phone MIDP version:",
+        this.append( m_pgmJsr75 );
+        m_midpVers = new StringItem("Phone MIDP version:",
 				System.getProperty("microedition.profiles"));
 		//#ifdef DMIDP20
-		m_midp_vers.setLayout(Item.LAYOUT_BOTTOM);
+		m_midpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_midp_vers );
-        m_cldc_vers = new StringItem("Phone CLDC version:",
+        this.append( m_midpVers );
+        m_cldcVers = new StringItem("Phone CLDC version:",
 				System.getProperty("microedition.configuration"));
 		//#ifdef DMIDP20
-		m_cldc_vers.setLayout(Item.LAYOUT_BOTTOM);
+		m_cldcVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_cldc_vers );
+        this.append( m_cldcVers );
         m_jsr75 = new StringItem("Phone JSR 75 available:",
-				new Boolean(KFileSelectorMgr.isJsr75Enabled()).toString());
+				new Boolean(System.getProperty(
+				"microedition.io.file.FileConnection.version")
+				!= null).toString());
 		//#ifdef DMIDP20
 		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
@@ -205,8 +245,14 @@ public class SettingsForm extends Form implements CommandListener {
 		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
 		m_markUnreadItems.setSelectedFlags( selectedItems );
         boolean useTextBox = settings.getUseTextBox();
-		boolean [] txtSelectedItems = {useTextBox, !useTextBox};
-		m_useTextBox.setSelectedFlags( txtSelectedItems );
+		boolean [] boolSelectedItems = {useTextBox, !useTextBox};
+		m_useTextBox.setSelectedFlags( boolSelectedItems );
+        boolean itunesEnabled = settings.getItunesEnabled();
+		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
+		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
+        boolean feedListOpen = settings.getFeedListOpen();
+		boolean [] boolFeedListOpen = {feedListOpen, !feedListOpen};
+		m_feedListOpen.setSelectedFlags( boolFeedListOpen );
 		try {
 			Settings m_settings = Settings.getInstance(m_midlet);
 			memInfo = m_settings.getSettingMemInfo();
@@ -229,6 +275,9 @@ public class SettingsForm extends Form implements CommandListener {
 	}
 
     public void commandAction(Command command, Displayable displayable) {
+		//#ifdef DTESTUI
+//@		super.outputCmdAct(command, displayable);
+		//#endif
         if(command==m_okCommand) {
             // Save settings
             RssReaderSettings settings = m_midlet.getSettings();
@@ -239,6 +288,14 @@ public class SettingsForm extends Form implements CommandListener {
                 settings.setMarkUnreadItems( markUnreadItems );
 				boolean useTextBox = m_useTextBox.isSelected(0);
 				settings.setUseTextBox(useTextBox);
+				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
+				//#ifdef DITUNES
+//@				settings.setItunesEnabled( itunesEnabled );
+				//#else
+				settings.setItunesEnabled( false );
+				//#endif
+				boolean feedListOpen = m_feedListOpen.isSelected(0);
+				settings.setFeedListOpen( feedListOpen);
 				//#ifdef DLOGGING
 //@				try {
 //@					String logLevel =
