@@ -21,9 +21,9 @@
  */
 
 // Expand to define test define
-//#define DTEST
+//#define DNOTEST
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -35,9 +35,9 @@ import java.io.*;
 
 import com.substanceofcode.utils.EncodingUtil;
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.LogManager;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -52,10 +52,10 @@ public class RssFeedParser extends URLHandler {
     private RssItunesFeed m_rssFeed;  // The RSS feed
     private boolean m_getTitleOnly = false;  // The RSS feed
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("RssFeedParser");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private Logger logger = Logger.getLogger("RssFeedParser");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Create new instance of RssFeedParser */
@@ -126,7 +126,7 @@ public class RssFeedParser extends URLHandler {
 			}
         } catch(Exception e) {
 			//#ifdef DLOGGING
-			logger.severe("parseRssFeedUrl error with " + url, e);
+//@			logger.severe("parseRssFeedUrl error with " + url, e);
 			//#endif
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
@@ -135,7 +135,7 @@ public class RssFeedParser extends URLHandler {
                     + e.toString());
         } catch(Throwable t) {
 			//#ifdef DLOGGING
-			logger.severe("parseRssFeedUrl error with " + url, t);
+//@			logger.severe("parseRssFeedUrl error with " + url, t);
 			//#endif
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
@@ -153,10 +153,10 @@ public class RssFeedParser extends URLHandler {
     throws IOException, Exception {
 		if (m_redirect) {
 			//#ifdef DLOGGING
-			logger.severe("Error 2nd redirect url:  " + url);
+//@			logger.severe("Error 2nd redirect url:  " + url);
 			//#endif
-			System.out.println("Error 2nd redirecturl:  " + url);
-			throw new IOException("Error url " + m_redirectURL +
+			System.out.println("Error 2nd redirect url:  " + url);
+			throw new IOException("Error url " + m_redirectUrl +
 					" to 2nd redirect url:  " + url);
 		}
 		m_redirect = true;
@@ -209,10 +209,9 @@ public class RssFeedParser extends URLHandler {
             m_rssFeed = formatParser.parse( parser, m_rssFeed,
 					maxItemCount, m_getTitleOnly );
             
-			// TODO handle HTML redirect
         } else {
 			//#ifdef DLOGGING
-			logger.severe("Unable to parse feed type:  " + entryElementName);
+//@			logger.severe("Unable to parse feed type:  " + entryElementName);
 			//#endif
             /** Unknown feed */
             throw new IOException("Unable to parse feed. Feed format is not supported.");
