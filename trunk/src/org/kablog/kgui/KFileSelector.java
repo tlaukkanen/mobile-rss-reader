@@ -23,20 +23,21 @@
 
 // Expand to define DJSR75 define
 //#define DNOJSR75
-
-package org.kablog.kgui;
-
-import java.io.*;
-import java.util.*;
-import javax.microedition.lcdui.*;
-
-
-
-
-public interface KFileSelector
-  extends KViewChild
-{
-
+//#ifdef DJSR75
+//@
+//@package org.kablog.kgui;
+//@
+//@import java.io.*;
+//@import java.util.*;
+//@import javax.microedition.lcdui.*;
+//@
+//@
+//@
+//@
+//@public interface KFileSelector
+//@  extends KViewChild
+//@{
+//@
 //#ifdef DJSR75
 //@public  String getFileName();
 //@
@@ -49,5 +50,6 @@ public interface KFileSelector
 //@public String getSelectedURL();
 //@
 //#endif
-
-} //interface KFileFileSelector
+//@
+//@} //interface KFileFileSelector
+//#endif
