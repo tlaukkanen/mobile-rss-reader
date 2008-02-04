@@ -27,12 +27,13 @@
 //#define DNOJSR75
 // Expand to define logging define
 //#define DNOLOGGING
-
-package org.kablog.kgui;
-
-import javax.microedition.lcdui.*;
-import javax.microedition.midlet.MIDlet;
-
+//#ifdef DJSR75
+//@
+//@package org.kablog.kgui;
+//@
+//@import javax.microedition.lcdui.*;
+//@import javax.microedition.midlet.MIDlet;
+//@
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
@@ -40,17 +41,17 @@ import javax.microedition.midlet.MIDlet;
 //@import net.sf.jlogmicro.util.logging.FormHandler;
 //@import net.sf.jlogmicro.util.logging.RecStoreHandler;
 //#endif
-
-/**
- *
- * @author  Todd C. Stellanova
- */
-public class KFileSelectorMgr
+//@
+//@/**
+//@ *
+//@ * @author  Todd C. Stellanova
+//@ */
+//@public class KFileSelectorMgr
 //#ifdef DJSR75
 //@implements KViewParent 
 //#endif
-{
-
+//@{
+//@
 	//#ifdef DJSR75
 //@	protected MIDlet midlet;
 //@	protected TextField txtFld;
@@ -65,12 +66,12 @@ public class KFileSelectorMgr
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 	//#endif
-
-	static public boolean isJsr75Enabled() {
-		return (System.getProperty(
-					"microedition.io.file.FileConnection.version") != null);
-	}
-
+//@
+//@	static public boolean isJsr75Enabled() {
+//@		return (System.getProperty(
+//@					"microedition.io.file.FileConnection.version") != null);
+//@	}
+//@
 	//#ifdef DJSR75
 //@    /**
 //@     * When the camView is done capturing an image, it calls this method.
@@ -160,4 +161,5 @@ public class KFileSelectorMgr
 //@    }
 //@
 	//#endif
-}
+//@}
+//#endif
