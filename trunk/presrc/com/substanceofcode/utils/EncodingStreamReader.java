@@ -53,7 +53,7 @@ public class EncodingStreamReader extends InputStreamReader {
     private boolean firstChar = true;
     private boolean secondChar = false;
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("EncodingUtil");
+    private Logger logger = Logger.getLogger("EncodingStreamReader");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
