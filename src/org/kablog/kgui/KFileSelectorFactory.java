@@ -5,24 +5,25 @@
 // Expand to define logging define
 //#define DNOLOGGING
 
-package org.kablog.kgui;
-
-import javax.microedition.midlet.MIDlet;
-
+//#ifdef DJSR75
+//@package org.kablog.kgui;
+//@
+//@import javax.microedition.midlet.MIDlet;
+//@
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
-
-public class KFileSelectorFactory {
+//@
+//@public class KFileSelectorFactory {
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("KFileSelectorImpl");
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
-
+//@
 	//#ifdef DJSR75
 //@	public static KFileSelector getInstance(MIDlet midlet, String title,
 //@											String defaultDir, String iconDir) {
@@ -63,4 +64,5 @@ public class KFileSelectorFactory {
 //@
 //@	}
 	//#endif
-}
+//@}
+//#endif
