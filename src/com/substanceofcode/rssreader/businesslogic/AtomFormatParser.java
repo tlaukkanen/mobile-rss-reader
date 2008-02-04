@@ -20,10 +20,21 @@
  *
  */
 
+// Expand to define test define
+//#define DNOTEST
+// Expand to define test ui define
+//#define DNOTESTUI
+// Expand to define logging define
+//#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
-import com.substanceofcode.rssreader.businessentities.RssFeed;
-import com.substanceofcode.rssreader.businessentities.RssItem;
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
+
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
 import java.io.IOException;
@@ -37,178 +48,323 @@ import java.util.Vector;
  */
 public class AtomFormatParser implements FeedFormatParser {
     
+	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("RssFormatParser");
+	//#endif
+	private boolean m_hasExt = false;
+	//#ifdef DLOGGING
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#endif
+	/** Atom item properties */
+	private String m_title = "";
+	private String m_language = "";
+	private String m_description = "";
+	private String m_summary = "";
+	private String m_author = "";
+	private String m_link = "";
+	private String m_relLink = "";
+	private String m_selfLink = "";
+	private String m_altLink = "";
+	private String m_enclosure = "";
+	private String m_date = "";
+	private ExtParser m_extParser = new ExtParser();
+
     /** Creates a new instance of AtomParser */
     public AtomFormatParser() {
     }
     
     /** Parse Atom feed */
-    public Vector parse(XmlParser parser, RssFeed feed,
+    public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
 			            int maxItemCount, boolean getTitleOnly)
 	throws IOException {
-        /** Atom item properties */
-        String title = "";
-        String description = "";
-        String summary = "";
-        String link = "";
-        String relLink = "";
-        String selfLink = "";
-        String altLink = "";
-        String enclosure = "";
-        String date = "";
         
         Vector items = new Vector();
+		m_extParser.parseNamespaces(parser);
+		m_language = parser.getAttributeValue("xml:lang");
+		if (m_language == null) {
+			m_language = "";
+		}
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("m_language=" + m_language);}
+		//#endif
+		m_hasExt = m_extParser.isHasExt();
+		RssItunesFeed feed = cfeed;
+        feed.setItems(items);
         
         /** Parse to first entry element */
         while(!parser.getName().equals("entry")) {
-            System.out.println("Parsing to first entry");
+			//#ifdef DTEST
+			//#ifndef DTESTUI
+//@            System.out.println("Parsing to first entry");
+			//#endif
+			//#endif
             switch (parser.parse()) {
 				case XmlParser.END_DOCUMENT:
 					System.out.println("No entries found.");
-					return items;
+					return feed;
 				case XmlParser.ELEMENT:
-					if (getTitleOnly && parser.getName().equals("title") ) {
-						feed.setName(parser.getText());
-						return items;
+					String elementName = parser.getName();
+					char elemChar = elementName.charAt(0);
+					if (parseCommon(parser, elemChar, elementName)) {
+						if ((elemChar == 't') && 
+								getTitleOnly && elementName.equals("title") ) {
+							feed.setName(m_title);
+							return feed;
+						}
+					}
+					if ((elemChar == 's') &&
+						elementName.equals("subtitle") ) {
+						m_description = parser.getText();
+						m_description = StringUtil.removeHtml(
+								m_description );
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("m_description=" + m_description);}
+						//#endif
+						continue;
+					}
+					if (m_hasExt) {
+						m_extParser.parseExtItem(parser, elemChar,
+												 elementName);
 					}
 					break;
 				default:
 					break;
             }
         }
+
+		feed.setLink(m_link);
+		// Atom has not feed level date.
+		feed.setDate(null);
+		if (m_extParser.isItunes()) {
+			feed = m_extParser.getFeedInstance(feed, m_language,
+					m_title, m_description);
+		}
         
-        int parsingResult = parser.parse();
-        while( parsingResult!=XmlParser.END_DOCUMENT ) {
+		reset();
+
+        int parsingResult;
+        while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
             String elementName = parser.getName();
+            if (elementName.length() == 0) {
+				continue;
+			}
             
-            if( elementName.equals("entry") ) {
+			char elemChar = elementName.charAt(0);
+            if( (elemChar == 'e') &&
+				 elementName.equals("entry") ) {
                 /** Save previous entry */
-                if(title.length()>0) {
-					if (description.equals("")) {
-						if (!summary.equals("")) {
-							description = summary;
-						}
+                if(m_title.length()>0) {
+					if (m_description.length() == 0) {
+						m_description = m_summary;
 					}
-					if (link.equals("")) {
-						if (!selfLink.equals("")) {
-							link = selfLink;
-						} else if (!relLink.equals("")) {
-							link = relLink;
-						} else if (!altLink.equals("")) {
-							link = altLink;
+					if (m_link.length() == 0) {
+						if (m_selfLink.length() != 0) {
+							m_link = m_selfLink;
+						} else if (m_relLink.length() != 0) {
+							m_link = m_relLink;
+						} else if (m_altLink.length() != 0) {
+							m_link = m_altLink;
 						}
 					}
                     Date pubDate = null;
 					// Check date in case we cannot find it.
-					if (!date.equals("")) {
-						pubDate = RssFormatParser.parseDcDate(date);
+					if (m_date.equals("") && m_extParser.isHasExt()) {
+						m_date = m_extParser.getDate();
 					}
-                    RssItem item;
-                    if(pubDate!=null) {
-                        item = new RssItem(title, link, description, pubDate,
-								           enclosure, true);
+					if (m_date.length() > 0) {
+						pubDate = RssFormatParser.parseRssDate(m_date);
+					}
+                    RssItunesItem item;
+					if (m_hasExt) {
+						item = m_extParser.createItem(m_title, m_link,
+								m_description, pubDate, m_enclosure, true,
+								m_author);
 					} else {
-						item = new RssItem(title, link, description);
-						if (!enclosure.equals("")) {
-							item.setEnclosure(enclosure);
-						}
-						item.setUnreadItem(true);
+						item = new RssItunesItem(m_title, m_link,
+								m_description, pubDate,
+										   m_enclosure, true);
 					}
                     items.addElement( item );
                     if(items.size()==maxItemCount) {
-                        return items;
+                        return feed;
                     }
                 }                
                 
                 /** New entry */
-                title = "";
-                description = "";
-                link = "";
-                date = "";
-                enclosure = "";
-				summary = "";
-				relLink = "";
-				selfLink = "";
-				altLink = "";
-            }
-            else if( elementName.equals("title") ) {
-                title = parser.getText();
-                title = StringUtil.replace(title, "\n", " ");
-                title = StringUtil.removeHtml( title );
-            }
-            else if( elementName.equals("link") ) {
-                String clink = parser.getText();
-				// Some atoms have href= attribute.
-                if (clink.equals("")) {
-					String hlink = parser.getAttributeValue("href");
-					if (hlink != null) {
-						clink = hlink;
-					}
+				/** reset */
+				reset();
+            } else {
+				if (parseCommon(parser, elemChar, elementName)) {
+					continue;
 				}
-				String rel = parser.getAttributeValue("rel");
-				if (rel == null) {
-					link = clink;
-				} else {
-					if (rel.equals("enclosure")) {
-						 enclosure = clink;
-					} else if (rel.equals("related")) {
-						 relLink = clink;
-					} else if (rel.equals("self")) {
-						 selfLink = clink;
-					} else if (rel.equals("alternate")) {
-						 altLink = clink;
-					}
-				}
-            }
-            else if( elementName.equals("content")) {
-                description = parser.getText();
-                description = StringUtil.removeHtml( description );
+				parseItem(parser, elemChar, elementName);
 			}
-            else if( elementName.equals("summary")) {
-                summary = parser.getText();
-                summary = StringUtil.removeHtml( summary );
-			}
-            else if( elementName.equals("published")) {
-                date = parser.getText();
-            }
-            
-            /** Parse next element */            
-            parsingResult = parser.parse();
-        }
-
+		}
+				
         /** Save previous entry */
-        if(title.length()>0) {
-			if (description.equals("")) {
-				description = summary;
+        if(m_title.length()>0) {
+			if (m_description.length() == 0) {
+				m_description = m_summary;
 			}
-			if (link.equals("")) {
-				if (!selfLink.equals("")) {
-					link = selfLink;
-				} else if (!relLink.equals("")) {
-					link = relLink;
-				} else if (!altLink.equals("")) {
-					link = altLink;
+			if (m_link.length() == 0) {
+				if (m_selfLink.length() != 0) {
+					m_link = m_selfLink;
+				} else if (m_relLink.length() != 0) {
+					m_link = m_relLink;
+				} else if (m_altLink.length() != 0) {
+					m_link = m_altLink;
 				}
 			}
 		    Date pubDate = null;
-			// Check date in case we cannot find it.
-			if (!date.equals("")) {
-				pubDate = RssFormatParser.parseDcDate(date);
+			// Check m_date in case we cannot find it.
+			if (m_date.length() != 0) {
+				pubDate = RssFormatParser.parseRssDate(m_date);
 			}
-			RssItem item;
-			if(pubDate!=null) {
-				item = new RssItem(title, link, description, pubDate,
-								   enclosure, true);
+			RssItunesItem item;
+			if (m_hasExt) {
+				item = m_extParser.createItem(m_title, m_link,
+						m_description, pubDate, m_enclosure, true, m_author);
 			} else {
-				item = new RssItem(title, link, description);
-				item.setUnreadItem(true);
-				if (!enclosure.equals("")) {
-					item.setEnclosure(enclosure);
-				}
+				item = new RssItunesItem(m_title, m_link, m_description, pubDate,
+								   m_enclosure, true);
 			}
             items.addElement( item );
-        }        
+        }
                         
-        return items;
+        return feed;
     }
     
+	private void reset() {
+		m_title = "";
+		m_language = "";
+		m_description = "";
+		m_author = "";
+		m_link = "";
+		m_date = "";
+		m_enclosure = "";
+		m_summary = "";
+		m_relLink = "";
+		m_selfLink = "";
+		m_altLink = "";
+		if (m_hasExt) {
+			m_extParser.reset();
+		}
+	}
+
+	/* Parse the fields common to feed and item. */
+	private boolean parseCommon(XmlParser parser, char elemChar,
+			String elementName)
+	throws IOException {
+		switch (elemChar) {
+			case 't':
+				if( elementName.equals("title") ) {
+					m_title = parser.getText();
+					m_title = StringUtil.removeHtml( m_title );
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("m_title=" + m_title);}
+					//#endif
+					return true;
+				}
+				break;
+			case 'l':
+				if( elementName.equals("link") ) {
+					String clink = parser.getText();
+					// Some atoms have href= attribute.
+					if (clink.length() == 0) {
+						String hlink = parser.getAttributeValue("href");
+						if (hlink != null) {
+							clink = hlink;
+						}
+					}
+					String rel = parser.getAttributeValue("rel");
+					if ((rel == null) || (rel.length() == 0)) {
+						m_link = clink;
+						return true;
+					} else {
+						switch (rel.charAt(0)) {
+							case 'e':
+								// Only get the first m_enclosure.  Atom's can have
+								// multiple enclosures for the same item.
+								if (rel.equals("enclosure") && m_enclosure.equals("")) {
+									 m_enclosure = clink;
+									 return true;
+								}
+								break;
+							case 'r':
+								if (rel.equals("related")) {
+									m_relLink = clink;
+									return true;
+								}
+								break;
+							case 's':
+								if (rel.equals("self")) {
+									m_selfLink = clink;
+									return true;
+								}
+								break;
+							case 'a':
+								if (rel.equals("alternate")) {
+									m_altLink = clink;
+									return true;
+								}
+								break;
+							default:
+						}
+					}
+				}
+				break;
+
+			default:
+		}
+		return false;
+	}
+
+	/* Parse the item to get it's fields */
+	void parseItem(XmlParser parser, char elemChar, String elementName)
+	throws IOException {
+		switch (elemChar) {
+			case 'a':
+				if( m_hasExt && elementName.equals("author") ) {
+					m_author = parser.getText();
+					m_author = StringUtil.removeHtml( m_author );
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("m_author=" + m_author);}
+					//#endif
+					return;
+				}
+				break;
+			case 'c':
+				if( elementName.equals("content")) {
+					m_description = parser.getText();
+					m_description = StringUtil.removeHtml( m_description );
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("content=m_description=" + m_description);}
+					//#endif
+					return;
+				}
+				break;
+			case 's':
+				if( elementName.equals("summary")) {
+					m_summary = parser.getText();
+					m_summary = StringUtil.removeHtml( m_summary );
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("m_summary=" + m_summary);}
+					//#endif
+					return;
+				};
+				break;
+			case 'p':
+				if( elementName.equals("published")) {
+					m_date = parser.getText();
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("published=m_date=" + m_date);}
+					//#endif
+					return;
+				}
+				break;
+			default:
+		}
+	}
+
 }
