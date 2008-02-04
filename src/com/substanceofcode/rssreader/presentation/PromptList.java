@@ -22,6 +22,8 @@
 
 // Expand to define MIDP define
 //#define DMIDP20
+// Expand to define test define
+//#define DNOTEST
 // Expand to define test ui define
 //#define DNOTESTUI
 // Expand to define logging define
@@ -39,12 +41,10 @@ import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Image;
-//#ifdef DTESTUI
-//@import com.substanceofcode.testlcdui.Form;
-//@import com.substanceofcode.testlcdui.List;
-//#else
-import javax.microedition.lcdui.Form;
+//#ifndef DTESTUI
 import javax.microedition.lcdui.List;
+//#else
+//@import com.substanceofcode.testlcdui.List;
 //#endif
 
 //#ifdef DLOGGING
@@ -94,6 +94,10 @@ public class PromptList extends List implements CommandListener {
 
 	/* Prompt if command is in prompt camands.  */
 	public void commandAction(Command cmd, Displayable disp) {
+		//#ifdef DTESTUI
+//@		super.outputCmdAct(cmd, disp,
+//@				javax.microedition.lcdui.List.SELECT_COMMAND);
+		//#endif
         try {
 			if (promptCommands.containsKey(cmd)) {
 				if ((promptAlert == null) || !disp.equals(promptAlert)) {
@@ -148,6 +152,9 @@ public class PromptList extends List implements CommandListener {
 	}
 
     public void setCommandListener(CommandListener cmdListener) {
+		//#ifdef DTEST
+//@		System.out.println("PromptList Setting command listner for listener,this,Title: " + cmdListener + "," + this);
+		//#endif
 		super.setCommandListener(this);
         this.cmdListener = cmdListener;
     }
