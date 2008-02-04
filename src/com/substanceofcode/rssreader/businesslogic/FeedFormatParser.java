@@ -23,7 +23,7 @@
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.utils.XmlParser;
-import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import java.io.IOException;
 import java.util.Vector;
 
@@ -35,7 +35,7 @@ import java.util.Vector;
  */
 public interface FeedFormatParser {
 
-    public Vector parse(XmlParser parser, RssFeed feed,
+    public RssItunesFeed parse(XmlParser parser, RssItunesFeed feed,
 			int maxItemCount, boolean getTitleOnly) throws IOException;
     
 }
