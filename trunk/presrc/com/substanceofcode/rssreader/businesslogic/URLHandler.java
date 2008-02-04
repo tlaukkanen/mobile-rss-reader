@@ -3,7 +3,7 @@
  * URLHandler.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
- * Copyright (C) 2007 Irving Bunton
+ * Contributions from Irving Bunton
  * http://www.substanceofcode.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+
+// Expand to define MIDP define
+@DMIDPVERS@
+// Expand to define DJSR75 define
+@DJSR75@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -32,6 +37,11 @@ import javax.microedition.io.ConnectionNotFoundException;
 import java.io.InputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
+//#ifdef DMIDP20
+import javax.microedition.io.HttpsConnection;
+import javax.microedition.pki.CertificateException;
+//#endif
+import javax.microedition.io.InputConnection;
 //#ifdef DJSR75
 import javax.microedition.io.file.FileConnection;
 //#endif
@@ -53,11 +63,13 @@ import com.substanceofcode.utils.CauseException;
 public abstract class URLHandler {
     
     protected boolean m_redirect = false;  // The URL is redirected
+    protected String m_redirectUrl = "";  // The URL is redirected URL
     protected boolean m_needRedirect = false;  // The URL needs to be redirected
     protected String m_location; // The URL location
     protected long m_lastMod = 0L;  // Last modification
     protected InputStream m_inputStream;  // Last modification
     protected HttpConnection m_hc = null;
+    protected InputConnection m_ic = null;
 	//#ifdef DJSR75
     protected FileConnection m_fc = null;
 	//#endif
@@ -78,7 +90,7 @@ public abstract class URLHandler {
 	throws IOException, Exception {
         
         try {
-			if (url.indexOf("file://") == 0) {
+			if (url.startsWith("file://")) {
 				//#ifdef DJSR75
 				/*
 				 * Open an FileConnection with the file system 
@@ -87,12 +99,14 @@ public abstract class URLHandler {
 				m_lastMod = m_fc.lastModified();
 				m_inputStream = m_fc.openInputStream();
 				//#else
-				throw new IOException("This version does not support file " +
-									  "access (file://).  Get jsr75 version. " +
-									  " check settings to see of your device " +
-									  "support jsr75.");
+				/*
+				 * Open an InputConnection with the file system.
+				 * The trick is knowing the URL.
+				 */
+				m_ic = (InputConnection) Connector.open( url, Connector.READ );
+				m_inputStream = m_ic.openInputStream();
 				//#endif
-			} else if (url.indexOf("jar://") == 0) {
+			} else if (url.startsWith("jar://")) {
 				// If testing, allow opening of files in the jar.
 				m_inputStream = this.getClass().getResourceAsStream( url.substring(6));
 				if (m_inputStream == null) {
@@ -104,10 +118,20 @@ public abstract class URLHandler {
 				}
 			} else {
 				/**
-				 * Open an HttpConnection with the Web server
+				 * Open an HttpConnection or HttpsConnection with the Web server
 				 * The default request method is GET
 				 */
-				m_hc = (HttpConnection) Connector.open( url );
+				if (url.startsWith("https:")) {
+					//#ifdef DMIDP20
+					 m_hc = (HttpsConnection) Connector.open( url );
+					//#else
+					 // If not supporting https, allow method to throw the
+					 // error.
+					m_hc = (HttpConnection) Connector.open( url );
+					//#endif
+				} else {
+					m_hc = (HttpConnection) Connector.open( url );
+				}
 				m_hc.setRequestMethod(HttpConnection.GET);
 				/** Some web servers requires these properties */
 				m_hc.setRequestProperty("User-Agent", 
@@ -174,7 +198,7 @@ public abstract class URLHandler {
 			logger.severe("handleOpen possible bad url error with " + url,
 						  e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
 
@@ -182,20 +206,31 @@ public abstract class URLHandler {
 									  url, e);
         } catch(ConnectionNotFoundException e) {
 			//#ifdef DLOGGING
-			logger.severe("handleOpen security error with " + url, e);
+			logger.severe("handleOpen connection error with " + url, e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
             throw new CauseException("Bad URL/File or protocol error while " +
 									 "opening: " + url, e);
+		//#ifdef DMIDP20
+        } catch(CertificateException e) {
+			//#ifdef DLOGGING
+			logger.severe("handleOpen https security error with " + url, e);
+			//#endif
+			if ((url != null) && url.startsWith("file://")) {
+				System.err.println("Cannot process file.");
+			}
+            throw new CauseException("Bad URL/File or protocol error or " +
+					"certifacate error while opening: " + url, e);
+		//#endif
         } catch(IOException e) {
 			throw e;
         } catch(SecurityException e) {
 			//#ifdef DLOGGING
 			logger.severe("handleOpen security error with " + url, e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
             throw new CauseException("Security error while oening " +
@@ -204,7 +239,7 @@ public abstract class URLHandler {
 			//#ifdef DLOGGING
 			logger.severe("handleOpen internal error with " + url, e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && (url.startsWith("file://"))) {
 				System.err.println("Cannot process file.");
 			}
             throw new CauseException("Internal error while parsing " +
@@ -227,11 +262,14 @@ public abstract class URLHandler {
 			logger.severe("Error 2nd redirect url:  " + url);
 			//#endif
 			System.out.println("Error 2nd redirect url:  " + url);
-			throw new IOException("Error 2nd redirect url:  " + url);
+			throw new IOException("Error url " + m_redirectUrl +
+					" to 2nd redirect url:  " + url);
 		}
 		m_redirect = true;
-		com.substanceofcode.rssreader.businessentities.RssFeed[] feeds =
+		m_redirectUrl = url;
+		com.substanceofcode.rssreader.businessentities.RssItunesFeed[] feeds =
 				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
+									url,
 									null,
 									null
 									//#ifdef DLOGGING
