@@ -38,6 +38,16 @@ import javax.microedition.lcdui.ItemCommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Image;
 
+import com.substanceofcode.testutil.TestOutput;
+
+/**
+ * StringItem.
+ *
+ * Test GUI class to log methods on the StringItem class.
+ *
+ * @author  Irving Bunton
+ * @version 1.0
+ */
 public class StringItem extends javax.microedition.lcdui.StringItem
 //#ifdef DMIDP20
 implements ItemCommandListener
@@ -50,34 +60,34 @@ implements ItemCommandListener
 
 	public StringItem(String label, String text) {
 		super(label, text);
-		System.out.println("Test UI String Item Label: " + label);
-		System.out.println("Test UI String Item text: " + text);
+		TestOutput.println("Test UI String Item Label: " + label);
+		TestOutput.println("Test UI String Item text: " + text);
 	}
 
 	//#ifdef DMIDP20
 	public StringItem(String label, String text,  int appearance) {
 		super(label, text, appearance);
-		System.out.println("Test UI String Item Label: " + label);
-		System.out.println("Test UI String Item text: " + text);
-		System.out.println("Test UI String Item appearance: " + appearance);
+		TestOutput.println("Test UI String Item Label: " + label);
+		TestOutput.println("Test UI String Item text: " + text);
+		TestOutput.println("Test UI String Item appearance: " + appearance);
 	}
 	//#endif
 
 	public String getText() {
 		String rtn = super.getText();
-		System.out.println("Test UI String Item getText: " + getLabel() + "," +rtn);
+		TestOutput.println("Test UI String Item getText: [" + getLabel() + "]," +rtn);
 		return rtn;
 	}
 
 	public void setText(String text) {
 		super.setText(text);
-		System.out.println("Test UI String Item setString: " + getLabel() + "," + text);
+		TestOutput.println("Test UI String Item setString: [" + getLabel() + "]," + text);
 		return;
 	}
 
 	//#ifdef DMIDP20
 	public void commandAction(Command cmd, Item item) {
-		System.out.println("Test UI StringItem command,item=" + cmd.getLabel() + "," + item.getLabel());
+		TestOutput.println("Test UI StringItem command,item=" + cmd.getLabel() + "," + item.getLabel());
 		m_itemCmdListener.commandAction(cmd, item);
 	}
 
