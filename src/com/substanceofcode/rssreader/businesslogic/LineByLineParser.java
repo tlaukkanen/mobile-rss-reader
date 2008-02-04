@@ -22,7 +22,7 @@
 
 package com.substanceofcode.rssreader.businesslogic;
 
-import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.utils.StringUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +41,7 @@ public class LineByLineParser extends FeedListParser {
         super(url, username, password);
     }
 
-    public RssFeed[] parseFeeds(InputStream is) {
+    public RssItunesFeed[] parseFeeds(InputStream is) {
         // Prepare buffer for input data
         StringBuffer inputBuffer = new StringBuffer();
         
@@ -60,7 +60,7 @@ public class LineByLineParser extends FeedListParser {
         text = StringUtil.replace(text, "\r", "");
         String[] lines = StringUtil.split(text, "\n");
         
-        RssFeed[] feeds = new RssFeed[ lines.length ];
+        RssItunesFeed[] feeds = new RssItunesFeed[ lines.length ];
         for(int lineIndex=0; lineIndex<lines.length; lineIndex++) {
             String line = lines[lineIndex];
             String name;
@@ -79,7 +79,7 @@ public class LineByLineParser extends FeedListParser {
 			  (url.toLowerCase().indexOf(m_feedURLFilter) < 0))) {
 				continue;
 			}
-            feeds[lineIndex] = new RssFeed(name, url, "", "");
+            feeds[lineIndex] = new RssItunesFeed(name, url, "", "");
         }
         
         return feeds;        
