@@ -1,7 +1,8 @@
 /*
  * HTMLAutoLinkParser.java
  *
- * Copyright (C) 2005-2006 Tommi Laukkanen
+ * Copyright (C) 2007-2008 Tommi Laukkanen
+ * Copyright (C) 2007-2008 Irving Bunton
  * http://www.substanceofcode.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,10 +45,8 @@ import com.substanceofcode.utils.StringUtil;
 
 /**
  * HTMLAutoLinkParser class is used when we are parsing RSS feed list 
- * using HTML hyperlinks &lt;a href="link"&gt;Name&lt;/a&gt;.
- * For example, the BBC page has such links with URL rss.xml, so one
- * would use URL http://news.bbc.co.uk/2/hi/help/3223484.stm with
- * URL search string as rss.xml to weed out the unrelated links.
+ * using HTML autolinks &lt;link href="link" title="Name"/&gt;.
+ * These have type with application/atom or rss.
  *
  * @author Irving Bunton
  */
