@@ -37,6 +37,16 @@ import javax.microedition.lcdui.ImageItem;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.StringItem;
 
+import com.substanceofcode.testutil.TestOutput;
+
+/**
+ * Form.
+ *
+ * Test GUI class to log actions on the Form class.
+ *
+ * @author  Irving Bunton
+ * @version 1.0
+ */
 public class Form extends javax.microedition.lcdui.Form
 implements CommandListener {
 
@@ -44,18 +54,18 @@ implements CommandListener {
 
 	public Form(String title) {
 		super(title);
-		System.out.println("Test UI Form Title: " + title);
+		TestOutput.println("Test UI Form Title: " + title);
 	}
 
 	// TODO log items
 	public Form(String title, Item[] items) {
 		super(title, items);
-		System.out.println("Test UI Form Title: " + title);
+		TestOutput.println("Test UI Form Title: " + title);
 	}
 
 	public int append(Item item) {
 		int rtn = super.append(item);
-		System.out.println("Test UI Form append: " + super.getTitle() + "," + item.getLabel());
+		TestOutput.println("Test UI Form append: [" + super.getTitle() + "]," + item.getLabel());
 		String strValue;
 		if (item instanceof TextField) {
 			strValue = ((TextField)item).getString();
@@ -66,21 +76,21 @@ implements CommandListener {
 		} else {
 			return rtn;
 		}
-		System.out.println("Test UI Form append string: " + super.getTitle() + "," + strValue);
-		System.out.println("Test UI Form append int: " + super.getTitle() + "," + rtn);
+		TestOutput.println("Test UI Form append string: [" + super.getTitle() + "]," + strValue);
+		TestOutput.println("Test UI Form append int: [" + super.getTitle() + "]," + rtn);
 		return rtn;
 	}
 
 	public int append(String stringPart) {
 		int rtn = super.append(stringPart);
-		System.out.println("Test UI Form append: " + super.getTitle() + "," + stringPart);
-		System.out.println("Test UI Form append int: " + super.getTitle() + "," + rtn);
+		TestOutput.println("Test UI Form append: [" + super.getTitle() + "]," + stringPart);
+		TestOutput.println("Test UI Form append int: [" + super.getTitle() + "]," + rtn);
 		return rtn;
 	}
 
 	public void insert(int elementnum, Item item) {
 		super.insert(elementnum, item);
-		System.out.println("Test UI Form insert: " + super.getTitle() + "," + item.getLabel());
+		TestOutput.println("Test UI Form insert: [" + super.getTitle() + "]," + item.getLabel());
 		String strValue;
 		if (item instanceof TextField) {
 			strValue = ((TextField)item).getString();
@@ -91,8 +101,8 @@ implements CommandListener {
 		} else {
 			return;
 		}
-		System.out.println("Test UI Form insert string: " + super.getTitle() + "," + strValue);
-		System.out.println("Test UI Form insert elementnum: " + super.getTitle() + "," + elementnum);
+		TestOutput.println("Test UI Form insert string: [" + super.getTitle() + "]," + strValue);
+		TestOutput.println("Test UI Form insert elementnum: [" + super.getTitle() + "]," + elementnum);
 	}
 
 	public void set(int elementnum, Item item) {
@@ -106,11 +116,11 @@ implements CommandListener {
 			} else {
 				return;
 			}
-			System.out.println("Test UI Form set string: " + super.getTitle() + "," + strValue);
-			System.out.println("Test UI Form set elementnum: " + super.getTitle() + "," + elementnum);
+			TestOutput.println("Test UI Form set string: [" + super.getTitle() + "]," + strValue);
+			TestOutput.println("Test UI Form set elementnum: [" + super.getTitle() + "]," + elementnum);
 		} catch (Throwable t) {
-			System.err.println("Test UI Form set elementnum " +
-					super.getTitle() + "," + t.getMessage());
+			System.err.println("Test UI Form set elementnum [" +
+					super.getTitle() + "]," + t.getMessage());
 			t.printStackTrace();
 		}
 		return;
@@ -119,10 +129,10 @@ implements CommandListener {
 	public void delete(int elementnum) {
 		try {
 			super.delete(elementnum);
-			System.out.println("Test UI Form delete elementnum: " + super.getTitle() + "," + elementnum);
+			TestOutput.println("Test UI Form delete elementnum: [" + super.getTitle() + "]," + elementnum);
 		} catch (Throwable t) {
-			System.err.println("Test UI Form delete elementnum: " +
-					super.getTitle() + "," + t.getMessage());
+			System.err.println("Test UI Form delete elementnum: [" +
+					super.getTitle() + "]," + t.getMessage());
 			t.printStackTrace();
 		}
 	}
@@ -130,16 +140,20 @@ implements CommandListener {
 	//#ifdef DMIDP20
 	public void deleteAll() {
 		super.deleteAll();
-		System.out.println("Test UI Form delete all " + super.getTitle());
+		TestOutput.println("Test UI Form delete all [" + super.getTitle() + "]");
 	}
 	//#endif
 
-	public void commandAction(Command cmd, Displayable disp) {
+	public void outputCmdAct(Command cmd, Displayable disp) {
 		//#ifdef DMIDP20
-		System.out.println("Test UI Form command,displayable=" + super.getTitle() + "," + cmd.getLabel() + "," + disp.getTitle());
+		TestOutput.println("Test UI Form command,displayable=[" + super.getTitle() + "]," + cmd.getLabel() + "," + disp.getTitle());
 		//#else
-		System.out.println("Test UI Form command,displayable=" + super.getTitle() + "," + cmd.getLabel() + "," + super.getClass().getName());
+		TestOutput.println("Test UI Form command,displayable=[" + super.getTitle() + "]," + cmd.getLabel() + "," + super.getClass().getName());
 		//#endif
+	}
+
+	public void commandAction(Command cmd, Displayable disp) {
+		outputCmdAct(cmd, disp);
 		m_cmdListener.commandAction(cmd, disp);
 	}
 
