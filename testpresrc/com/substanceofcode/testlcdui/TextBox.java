@@ -35,6 +35,16 @@ import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Image;
 
+import com.substanceofcode.testutil.TestOutput;
+
+/**
+ * TextBox.
+ *
+ * Test GUI class to log methods on the TextBox class.
+ *
+ * @author  Irving Bunton
+ * @version 1.0
+ */
 public class TextBox extends javax.microedition.lcdui.TextBox
 implements CommandListener {
 
@@ -44,29 +54,29 @@ implements CommandListener {
 	public TextBox(String title, String text,  int maxSize, int constraints) {
 		super(title, text,  maxSize, constraints);
 		this.m_title = title;
-		System.out.println("Test UI List Title: " + title);
-		System.out.println("Test UI List text: " + text);
-		System.out.println("Test UI List maxSize: " + maxSize);
-		System.out.println("Test UI List constraints: " + constraints);
+		TestOutput.println("Test UI List Title: " + title);
+		TestOutput.println("Test UI List text: " + text);
+		TestOutput.println("Test UI List maxSize: " + maxSize);
+		TestOutput.println("Test UI List constraints: " + constraints);
 	}
 
 	public String getString() {
 		String rtn = super.getString();
-		System.out.println("Test UI List getString: " + m_title + "," + rtn);
+		TestOutput.println("Test UI List getString: " + m_title + "," + rtn);
 		return rtn;
 	}
 
 	public void setString(String text) {
 		super.setString(text);
-		System.out.println("Test UI List setString: " + m_title + "," + text);
+		TestOutput.println("Test UI List setString: " + m_title + "," + text);
 		return;
 	}
 
 	public void commandAction(Command cmd, Displayable disp) {
 		//#ifdef DMIDP20
-		System.out.println("Test UI TextField command,displayable=" + cmd.getLabel() + "," + disp.getTitle());
+		TestOutput.println("Test UI TextField command,displayable=" + cmd.getLabel() + "," + disp.getTitle());
 		//#else
-		System.out.println("Test UI TextField command,displayable=" + cmd.getLabel() + "," + super.getClass().getName());
+		TestOutput.println("Test UI TextField command,displayable=" + cmd.getLabel() + "," + super.getClass().getName());
 		//#endif
 		m_cmdListener.commandAction(cmd, this);
 	}
