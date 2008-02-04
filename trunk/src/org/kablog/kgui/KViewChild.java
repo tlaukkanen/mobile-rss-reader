@@ -25,18 +25,19 @@
 // Expand to define DJSR75 define
 //#define DNOJSR75
 
-package org.kablog.kgui;
-
-import javax.microedition.midlet.*;
-import javax.microedition.lcdui.*;
-
-/**
- *
- * @author  Todd C. Stellanova
- * @version
- */
-public interface KViewChild  {
-    
+//#ifdef DJSR75
+//@package org.kablog.kgui;
+//@
+//@import javax.microedition.midlet.*;
+//@import javax.microedition.lcdui.*;
+//@
+//@/**
+//@ *
+//@ * @author  Todd C. Stellanova
+//@ * @version
+//@ */
+//@public interface KViewChild  {
+//@    
 //#ifdef DJSR75
 //@     /**
 //@     * @param The callback client interested in receiving finished status.
@@ -48,4 +49,5 @@ public interface KViewChild  {
 //@    */
 //@    public void doCleanup();
 //#endif
-}
+//@}
+//#endif
