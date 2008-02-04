@@ -38,6 +38,16 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.ItemCommandListener;
 //#endif
 
+import com.substanceofcode.testutil.TestOutput;
+
+/**
+ * TextField.
+ *
+ * Test GUI class to log methods on the TextField class.
+ *
+ * @author  Irving Bunton
+ * @version 1.0
+ */
 public class TextField extends javax.microedition.lcdui.TextField 
 //#ifdef DMIDP20
 implements ItemCommandListener
@@ -47,31 +57,30 @@ implements ItemCommandListener
 	//#ifdef DMIDP20
 	private ItemCommandListener m_itemCmdListener;
 	//#endif
-	private String title;
 
 	public TextField(String label, String text,  int maxSize, int constraints) {
 		super(label, text,  maxSize, constraints);
-		System.out.println("Test UI Text Field Label: " + label);
-		System.out.println("Test UI Text Field text: " + text);
-		System.out.println("Test UI Text Field maxSize: " + maxSize);
-		System.out.println("Test UI Text Field constraints: " + constraints);
+		TestOutput.println("Test UI Text Field Label: " + label);
+		TestOutput.println("Test UI Text Field text: " + text);
+		TestOutput.println("Test UI Text Field maxSize: " + maxSize);
+		TestOutput.println("Test UI Text Field constraints: " + constraints);
 	}
 
 	public String getString() {
 		String rtn = super.getString();
-		System.out.println("Test UI Text Field getString: " + super.getLabel() + "," + rtn);
+		TestOutput.println("Test UI Text Field getString: " + super.getLabel() + "," + rtn);
 		return rtn;
 	}
 
 	public void setString(String text) {
 		super.setString(text);
-		System.out.println("Test UI Text Field setString: " + super.getLabel() + "," + text);
+		TestOutput.println("Test UI Text Field setString: " + super.getLabel() + "," + text);
 		return;
 	}
 
 	//#ifdef DMIDP20
 	public void commandAction(Command cmd, Item item) {
-		System.out.println("Test UI StringItem command,item=" + cmd.getLabel() + "," + item.getLabel());
+		TestOutput.println("Test UI StringItem command,item=" + cmd.getLabel() + "," + item.getLabel());
 		m_itemCmdListener.commandAction(cmd, item);
 	}
 
