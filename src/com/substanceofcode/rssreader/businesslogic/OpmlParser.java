@@ -22,7 +22,7 @@
 
 package com.substanceofcode.rssreader.businesslogic;
 
-import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.utils.XmlParser;
 import javax.microedition.io.*;
 import java.util.*;
@@ -48,7 +48,7 @@ public class OpmlParser extends FeedListParser {
     }
     
     /** Parse OPML list */
-    public RssFeed[] parseFeeds(InputStream is) {
+    public RssItunesFeed[] parseFeeds(InputStream is) {
         /** Initialize item collection */
         Vector rssFeeds = new Vector();
         
@@ -56,13 +56,18 @@ public class OpmlParser extends FeedListParser {
         XmlParser  parser = new XmlParser(is);
         try {
             
+			// The first element is the main tag.
             int elementType = parser.parse();
 			// If we found the prologue, get the next entry.
 			if( elementType == XmlParser.PROLOGUE ) {
 				elementType = parser.parse();
 			}
+			if (elementType == XmlParser.END_DOCUMENT ) {
+				return null;
+			}
             
-            while( elementType != XmlParser.END_DOCUMENT ) {
+			EncodingUtil encodingUtil = parser.getEncodingUtil();
+            do {
 				/** RSS item properties */
 				String title = "";
 				String link = "";
@@ -74,7 +79,7 @@ public class OpmlParser extends FeedListParser {
 					
 					title = parser.getAttributeValue( "text" );
 					if (title != null) {
-						title = XmlParser.replaceAlphaEntities(title);
+						title = EncodingUtil.replaceAlphaEntities(title);
 						// No need to convert from UTF-8 to Unicode using replace
 						// umlauts now because it is done with new String...,encoding.
 
@@ -83,8 +88,17 @@ public class OpmlParser extends FeedListParser {
 						title = EncodingUtil.replaceNumEntity(title);
 
 						// Replace special chars like left quote, etc.
-						title = EncodingUtil.replaceSpChars(title);
+						// Since we have already converted to unicode, we want
+						// to replace with uni chars.
+						title = encodingUtil.replaceSpChars(title);
 					}
+					/** 
+					 * Create new RSS item and add it do RSS document's item
+					 * collection.  Account for wrong OPML which is an
+					 * OPML composed of other OPML.  These have url attribute
+					 * instead of link attribute.
+					 */
+
 					if ((link = parser.getAttributeValue( "xmlUrl" )) == null) {
 						if (opmlDirectory) {
 							link = parser.getAttributeValue( "url" );
@@ -95,25 +109,24 @@ public class OpmlParser extends FeedListParser {
 					System.out.println("Title:       " + title);
 					System.out.println("Link:        " + link);
 					
-					/** 
-					 * Create new RSS item and add it do RSS document's item
-					 * collection.  Account for wrong OPML which is an
-					 * OPML composed of other OPML.  These have url attribute
-					 * instead of link attribute.
-					 */
-					if(( link != null ) &&
-						( link.length()>0 ) && (( m_feedNameFilter == null) ||
-							(title == null) ||
-							(title.toLowerCase().indexOf(m_feedNameFilter) >= 0))
-						&& (( m_feedURLFilter == null) ||
-							( link.toLowerCase().indexOf(m_feedURLFilter) >=0))) {
-						RssFeed feed = new RssFeed(title, link, "", "");
-						rssFeeds.addElement( feed );
+					if(( link == null ) || ( link.length() == 0 )) {
+						continue;
 					}
+					if (( m_feedNameFilter != null) &&
+						((title != null) &&
+						(title.toLowerCase().indexOf(m_feedNameFilter) < 0))) {
+						continue;
+					}
+					if (( m_feedURLFilter != null) &&
+						( link.toLowerCase().indexOf(m_feedURLFilter) < 0)) {
+						continue;
+					}
+					RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
+					rssFeeds.addElement( feed );
 				}
 				
-				elementType = parser.parse();
-            };
+			}
+            while( parser.parse() != XmlParser.END_DOCUMENT );
             
         } catch (Exception ex) {
             System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
@@ -126,7 +139,7 @@ public class OpmlParser extends FeedListParser {
         }
         
         /** Create array */
-        RssFeed[] feeds = new RssFeed[ rssFeeds.size() ];
+        RssItunesFeed[] feeds = new RssItunesFeed[ rssFeeds.size() ];
         rssFeeds.copyInto(feeds);
         return feeds;
     }
