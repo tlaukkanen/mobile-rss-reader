@@ -21,13 +21,14 @@
  */
 
 // Expand to define logging define
-//#define DNOLOGGING
+//#define DLOGGING
 
 package com.substanceofcode.rssreader.businesslogic;
 
-import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.utils.EncodingStreamReader;
 import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.HTMLParser;
 import com.substanceofcode.utils.XmlParser;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,9 +38,9 @@ import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
 //#ifdef DLOGGING
-//@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
-//@import net.sf.jlogmicro.util.logging.Level;
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.LogManager;
+import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -54,10 +55,10 @@ import com.substanceofcode.utils.EncodingUtil;
 public class HTMLLinkParser extends FeedListParser {
     
 	//#ifdef DLOGGING
-//@    private Logger logger = Logger.getLogger("HTMLLinkParser");
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private Logger logger = Logger.getLogger("HTMLLinkParser");
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
     /** Creates a new instance of HTMLLinkParser */
@@ -65,193 +66,160 @@ public class HTMLLinkParser extends FeedListParser {
         super(url, username, password);
     }
 
-    public RssFeed[] parseFeeds(InputStream is) {
+    public RssItunesFeed[] parseFeeds(InputStream is) {
 		// Init in case we get a severe error.
 		try {
 			return HTMLLinkParser.parseFeeds(new EncodingUtil(is),
+											m_url,
 											m_feedNameFilter,
 											m_feedURLFilter
 											//#ifdef DLOGGING
-//@											,logger
-//@											,fineLoggable
-//@											,finerLoggable
-//@											,finestLoggable
+											,logger
+											,fineLoggable
+											,finerLoggable
+											,finestLoggable
 											//#endif
 											);
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-//@			logger.severe("parseFeeds error.", t);
+			logger.severe("parseFeeds error.", t);
 //#endif
 			System.out.println("parseFeeds error." + t + " " + t.getMessage());
 			return null;
 		}
 	}
         
-    static public RssFeed[] parseFeeds(EncodingUtil encodingUtil,
+    static public RssItunesFeed[] parseFeeds(EncodingUtil encodingUtil,
+										String url,
 										String feedNameFilter,
 										String feedURLFilter
 										//#ifdef DLOGGING
-//@										,Logger logger,
-//@										 boolean fineLoggable,
-//@										 boolean finerLoggable,
-//@										 boolean finestLoggable
+										,Logger logger,
+										 boolean fineLoggable,
+										 boolean finerLoggable,
+										 boolean finestLoggable
 										//#endif
 			                           ) {
-		EncodingStreamReader encodingStreamReader =
-			encodingUtil.getEncodingStreamReader();
-		// Init in case we get a severe error.
-        RssFeed[] feeds = new RssFeed[0];
-		String docEncoding = "";  // Default for HTML is ISO8859_1?
-		try {
-			// Prepare buffer for input data
-			StringBuffer inputBuffer = new StringBuffer();
-			String fileEncoding =
-				encodingStreamReader.getFileEncoding();
-			
-			// Read all data to buffer
-			int inputCharacter;
-			try {
-				int lt = 0;
-				while ((inputCharacter =
-							encodingStreamReader.read()) != -1) {
-					inputBuffer.append((char)inputCharacter);
-					if (inputCharacter == '<') {
-						if (lt++ > 2) {
+        /** Initialize item collection */
+        Vector rssFeeds = new Vector();
+        
+        /** Initialize XML parser and parse OPML XML */
+        HTMLParser parser = new HTMLParser(encodingUtil);
+        try {
+            
+			// The first element is the main tag.
+            int elementType = parser.parse();
+			// If we found the prologue, get the next entry.
+			if( elementType == XmlParser.PROLOGUE ) {
+				elementType = parser.parse();
+			}
+			if (elementType == XmlParser.END_DOCUMENT ) {
+				return null;
+			}
+            
+			boolean bodyFound = false;
+            do {
+				if (elementType == HTMLParser.REDIRECT_URL) {
+					RssItunesFeed [] feeds = new RssItunesFeed[1];
+					feeds[0] = new RssItunesFeed("", parser.getRedirectUrl(),
+							"", "");
+					return feeds;
+				}
+				/** RSS item properties */
+				String title = "";
+				String link = "";
+												
+				String tagName = parser.getName();
+				//#ifdef DLOGGING
+				if (finerLoggable) {logger.finer("tagname: " + tagName);}
+				//#endif
+				if (tagName.length() == 0) {
+					continue;
+				}
+				switch (tagName.charAt(0)) {
+					case 'm':
+					case 'M':
+						if (bodyFound) {
 							break;
 						}
-					}
-				}
-				if (inputCharacter != -1) {
-					InputStreamReader is;
-					if (encodingStreamReader.isModEncoding()) {
-						is = encodingStreamReader;
-					} else {
-						is = encodingStreamReader.getInputStream();
-					}
-					while ((inputCharacter = is.read()) != -1) {
-						inputBuffer.append((char)inputCharacter);
-					}
-				}
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-			
-			// Split buffer string by each new line
-			String text = inputBuffer.toString();
-			int pcharset;
-			if ((pcharset = text.indexOf("charset=")) > 0) {
-				int plt;
-				if (((plt = text.lastIndexOf('<', pcharset)) != -1) &&
-					(plt < pcharset)) {
-					int pgt = text.indexOf(">", plt);
-					String meta = text.substring(plt, pgt);
-					pcharset = meta.indexOf("charset=");
-					int pquot = meta.indexOf("\"", pcharset);
-					String encoding = meta.substring(pcharset + 8, pquot);
-					encodingUtil.getEncoding(encoding);
-					docEncoding = encodingUtil.getDocEncoding();
-				}
-			}
+						if (parser.isMetaFound()) {
+							//TODO do re-direct
+						}
+						break;
+					case 'b':
+					case 'B':
+						bodyFound = parser.isBodyFound();
+						break;
+					case 'a':
+					case 'A':
+						//#ifdef DLOGGING
+						if (finerLoggable) {logger.finer("Parsing <a> tag");}
+						//#endif
+						
+						title = parser.getText();
+						// Title can be 0 as this is used also for
+						// getting 
+						title = title.trim();
+						title = StringUtil.removeHtml( title );
 
-			if (!docEncoding.equals("")) {
-				try {
-					if (fileEncoding.equals("")) {
-						text = new String(text.getBytes(), docEncoding);
-					} else {
-						text = new String(text.getBytes(fileEncoding), docEncoding);
-					}
-				} catch (UnsupportedEncodingException e) {
-					// We should not get here as EncodingUtil checks if
-					// this is supported.
-					System.out.println("UnsupportedEncodingException " + e +
-									   e.getMessage());
-				}
-			}
-
-			text = StringUtil.replace(text, "\r", "");
-			String[] alinks = StringUtil.split(text, "<a ");
-			
-			Vector vfeeds = new Vector();
-			for(int alinkIndex=0; alinkIndex<alinks.length; alinkIndex++) {
-				String alink = alinks[alinkIndex];
-				String[] calinks = StringUtil.split(alink, "<A ");
-				for(int calinkIndex = 0; calinkIndex < calinks.length;
-						calinkIndex++) {
-					String calink = calinks[calinkIndex];
-					//#ifdef DLOGGING
-//@					if (finerLoggable) {logger.finer("calink=" + calink);}
-					//#endif
-					String name;
-					String url;
-					int indexOfHref = calink.indexOf("href");
-					if (indexOfHref < 0) {
-						indexOfHref = calink.indexOf("HREF");
-						if (indexOfHref < 0) {
+						if (((link = parser.getAttributeValue( "href" ))
+									== null) || ( link.length() == 0 )) {
 							continue;
 						}
-					}
-					int indexOfBQuote = calink.indexOf("\"", indexOfHref);
-					if (indexOfBQuote < 0) {
-						continue;
-					}
-					int indexOfEQuote = calink.indexOf("\"", indexOfBQuote + 1);
-					if (indexOfEQuote < 0) {
-						continue;
-					}
-					url = calink.substring(indexOfBQuote + 1, indexOfEQuote);
-					//#ifdef DLOGGING
-//@					if (finerLoggable) {logger.finer("url=" + url);}
-					//#endif
-					// If filtering is requesting, continue if it does not match.
-					if ((feedURLFilter != null) &&
-						(url.toLowerCase().indexOf(feedURLFilter) < 0)) {
-						continue;
-					}
-					int indexOfGt = calink.indexOf('>', indexOfEQuote);
-					if (indexOfGt < 0) {
-						continue;
-					}
-					int aindexOfELink = calink.indexOf("</a>", indexOfGt);
-					int caindexOfELink = calink.indexOf("</A>", indexOfGt);
-					int indexOfELink = -1;
-					if ((aindexOfELink > 0) && ((caindexOfELink < 0) ||
-						(aindexOfELink < caindexOfELink))) {
-						indexOfELink = aindexOfELink;
-					} else if ((caindexOfELink > 0) && ((aindexOfELink < 0) ||
-						(caindexOfELink < aindexOfELink))) {
-						indexOfELink = caindexOfELink;
-					}
-					if (indexOfELink < 0) {
-						continue;
-					}
-					name = calink.substring(indexOfGt + 1, indexOfELink);
-					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("name 1=" + name);}
-					//#endif
-					if ((feedNameFilter != null) &&
-						(name.toLowerCase().indexOf(feedNameFilter) < 0)) {
-						continue;
-					}
-					name = name.trim();
-					// Replace special chars like left quote, etc.
-					name = XmlParser.replaceAlphaEntities(name);
-					name = encodingUtil.replaceNumEntity(name);
-					name = encodingUtil.replaceSpChars(name);
-					name = StringUtil.removeHtml(name);
-					vfeeds.addElement(new RssFeed(name, url, "", ""));
+						link = link.trim();
+						if ( link.length() == 0 ) {
+							continue;
+						}
+						if (link.charAt(0) == '/') {
+							link = url + link;
+						}
+						// TODO handle  relative links better
+						if (!link.startsWith("http:") &&
+						    !link.startsWith("file:") &&
+							 !link.startsWith("jar:")) {
+							//#ifdef DLOGGING
+							if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
+							//#endif
+							continue;
+						}
+						
+						/** Debugging information */
+						//#ifdef DLOGGING
+						if (finerLoggable) {logger.finer("Title:       " + title);}
+						if (finerLoggable) {logger.finer("Link:        " + link);}
+						//#endif
+						if (( feedURLFilter != null) &&
+							( link.toLowerCase().indexOf(feedURLFilter) < 0)) {
+							continue;
+						}
+						
+						if (( feedNameFilter != null) &&
+							((title != null) &&
+							(title.toLowerCase().indexOf(feedNameFilter) < 0))) {
+							continue;
+						}
+						RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
+						rssFeeds.addElement( feed );
+						break;
+					default:
 				}
-			}
-
-			feeds = new RssFeed[ vfeeds.size() ];
-			vfeeds.copyInto(feeds);
-		} catch (Throwable t) {
-//#ifdef DLOGGING
-//@			logger.severe("parseFeeds error.", t);
-//#endif
-			System.out.println("parseFeeds error." + t + " " + t.getMessage());
-		}
+            }
+            while( (elementType = parser.parse()) != XmlParser.END_DOCUMENT );
+            
+        } catch (Exception ex) {
+            System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
+			ex.printStackTrace();
+            return null;
+        } catch (Throwable t) {
+            System.err.println("OpmlParser.parseFeeds(): Exception " + t.toString());
+			t.printStackTrace();
+            return null;
+        }
         
-        return feeds;        
+        /** Create array */
+        RssItunesFeed[] feeds = new RssItunesFeed[ rssFeeds.size() ];
+        rssFeeds.copyInto(feeds);
+        return feeds;
     }
     
 }
