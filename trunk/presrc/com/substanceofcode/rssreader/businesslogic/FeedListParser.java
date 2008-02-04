@@ -25,13 +25,9 @@
 @DLOGDEF@
 package com.substanceofcode.rssreader.businesslogic;
 
-import com.substanceofcode.rssreader.businessentities.RssFeed;
-import com.substanceofcode.utils.Base64;
-import java.io.DataInputStream;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.microedition.io.Connector;
-import javax.microedition.io.HttpConnection;
 
 import com.substanceofcode.utils.CauseException;
 //#ifdef DLOGGING
@@ -45,19 +41,20 @@ import net.sf.jlogmicro.util.logging.Level;
  *
  * @author Tommi Laukkanen
  */
-public abstract class FeedListParser implements Runnable{
+public abstract class FeedListParser extends URLHandler implements Runnable{
     
     private Thread m_parsingThread;
-    private String m_url;
-    private String m_username;
-    private String m_password;
+	protected String m_url;
+	protected String m_username;
+	protected String m_password;
 	protected String m_feedNameFilter;
 	protected String m_feedURLFilter;
 	protected boolean m_redirectHtml = false;
+	protected RssItunesFeed[] m_feeds;
     private boolean m_ready;
     private boolean m_successfull = false;
     private CauseException m_ex = null;
-    private RssFeed[] m_feeds;
+    private boolean m_redirect = false;  // The RSS feed is redirected
     
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("FeedListParser");
@@ -68,16 +65,20 @@ public abstract class FeedListParser implements Runnable{
 
     /** Creates a new instance of FeedListParser */
     public FeedListParser(String url, String username, String password) {
+		super();
         m_parsingThread = new Thread(this);
-        m_url = url;
-        m_username = username;
-        m_password = password;
+		m_url = url;
+		m_username = username;
+		m_password = m_password;
     }
     
     /** Start parsing the feed list */
     public void startParsing() {
         m_ready = false;
         m_parsingThread.start();
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine("Thread started=" + m_parsingThread);}
+		//#endif
     }
     
     /** Check whatever parsing is ready or not */
@@ -86,15 +87,26 @@ public abstract class FeedListParser implements Runnable{
     }
     
     /** Get feed list */
-    public RssFeed[] getFeeds() {
+    public RssItunesFeed[] getFeeds() {
         return m_feeds;
     }
     
     /** Parsing thread */
     public void run() {
         try {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine("Thread running=" + this);}
+			//#endif
             m_feeds = parseFeeds();
 			m_successfull = true;
+        } catch( IOException ex ) {
+			//#ifdef DLOGGING
+			logger.severe("FeedListParser.run(): Error while parsing " +
+					      "feeds: " + m_url, ex);
+			//#endif
+            // TODO: Add exception handling
+            System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
+			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
         } catch( Exception ex ) {
 			//#ifdef DLOGGING
 			logger.severe("FeedListParser.run(): Error while parsing " +
@@ -103,6 +115,15 @@ public abstract class FeedListParser implements Runnable{
             // TODO: Add exception handling
             System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
 			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
+        } catch( Throwable t ) {
+			//#ifdef DLOGGING
+			logger.severe("FeedListParser.run(): Error while parsing " +
+					      "feeds: " + m_url, t);
+			//#endif
+            // TODO: Add exception handling
+            System.err.println("FeedListParser.run(): Error while parsing feeds: " + t.toString());
+			m_ex = new CauseException("Internal error while parsing feed " +
+									  m_url, t);
         } finally {
             m_ready = true;
         }        
@@ -110,105 +131,108 @@ public abstract class FeedListParser implements Runnable{
     
     
     /** Get feeds from selected url */
-    public RssFeed[] parseFeeds() throws IOException, Exception {
+    public RssItunesFeed[] parseFeeds() throws IOException, Exception {
         
-        HttpConnection hc = null;
-		//#ifdef DTEST
-        InputStream ris = null;
-		//#endif
-        DataInputStream dis = null;
-        String response = "";
-        try {
-			//#ifdef DTEST
-			// If testing, allow opening of files in the jar.
-			if (m_url.indexOf("file://") == 0) {
-				ris = this.getClass().getResourceAsStream( m_url.substring(7));
-				if (ris == null) {
-					new IOException("No file found:  " + m_url);
-				}
-				return parseFeeds(ris);
+		try {
+			super.handleOpen(m_url, m_username, m_password);
+			if (m_needRedirect) {
+				m_needRedirect = false;
+				m_feeds = parseHeaderRedirect(m_location);
+				return m_feeds;
 			}
-			//#endif
-            /**
-             * Open an HttpConnection with the Web server
-             * The default request method is GET
-             */
-            hc = (HttpConnection) Connector.open( m_url );
-            hc.setRequestMethod(HttpConnection.GET);
-            /** Some web servers requires these properties */
-            hc.setRequestProperty("User-Agent", 
-                    "Profile/MIDP-1.0 Configuration/CLDC-1.0");
-            hc.setRequestProperty("Content-Length", "0");
-            hc.setRequestProperty("Connection", "close");
 
-            /** Add credentials if they are defined */
-            if( m_username.length()>0) {
-                /** 
-                 * Add authentication header in HTTP request. Basic authentication
-                 * should be formatted like this:
-                 *     Authorization: Basic QWRtaW46Zm9vYmFy
-                 */
-                String userPass;
-                Base64 b64 = new Base64();
-                userPass = m_username + ":" + m_password;
-                userPass = b64.encode(userPass.getBytes());
-                hc.setRequestProperty("Authorization", "Basic " + userPass);
-            }            
-            
-            /** 
-             * Get a DataInputStream from the HttpConnection 
-             * and return it to the caller
-             */
-            return parseFeeds(hc.openInputStream());
-        } catch(IllegalArgumentException e) {
 			//#ifdef DLOGGING
-			logger.severe("parseFeeds possible bad url error with " + m_url,
-						  e);
+			if (fineLoggable) {logger.fine("m_redirectHtml=" + m_redirectHtml);}
 			//#endif
-			if ((m_url != null) && (m_url.indexOf("file://") == 0)) {
-				System.err.println("Cannot process file.");
+			// If we find HTML, usually it is redirection
+			if (m_redirectHtml && (m_contentType != null) &&
+					(m_contentType.indexOf("html") >= 0)) {
+				return parseHTMLRedirect();
+			} else {
+				return parseFeeds(m_inputStream);
 			}
-            throw new Exception("Error while parsing RSS data: " 
-								+ e.toString());
         } catch(Exception e) {
 			//#ifdef DLOGGING
-			logger.severe("parseFeeds error with " + m_url, e);
+			logger.severe("Import error with " + m_url, e);
 			//#endif
-			if ((m_url != null) && (m_url.indexOf("file://") == 0)) {
+			if ((m_url != null) && m_url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new Exception("Error while parsing RSS data: " 
-                    + e.toString());
+            throw new CauseException("Error while parsing import data: " 
+                    + e.toString(), e);
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 			logger.severe("parseFeeds error with " + m_url, t);
 			//#endif
-			if ((m_url != null) && (m_url.indexOf("file://") == 0)) {
+			if ((m_url != null) && m_url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new Exception("Error while parsing RSS data: " 
-								+ t.toString());
+            throw new CauseException("Internal error while parsing RSS data",
+									 t);
         } finally {
-            if (hc != null) hc.close();
-			//#ifdef DTEST
-            if (ris != null) ris.close();
-			//#endif
-            if (dis != null) dis.close();
-        }
+			super.handleClose();
+		}
     }    
     
-    abstract RssFeed[] parseFeeds(InputStream is);
-    
-    public void setFeedNameFilter(String feedNameFilter) {
-        this.m_feedNameFilter = feedNameFilter.toLowerCase();
+	/** If header shows redirect, handle it here. */
+	private RssItunesFeed[] parseHeaderRedirect(String newUrl)
+    throws IOException, Exception {
+		if (m_redirect) {
+			//#ifdef DLOGGING
+			logger.severe("Error 2nd header redirect url:  " + newUrl);
+			//#endif
+			System.out.println("Error 2nd header redirect url " +
+					m_redirectUrl + " to 2nd redirect " + newUrl);
+			throw new IOException("Error 2nd header redirect url " +
+					m_redirectUrl + " to 2nd redirect " + newUrl);
+		}
+		m_redirect = true;
+		m_redirectUrl = m_url;
+		String svUrl = m_url;
+		m_url = newUrl;
+		try {
+			return parseFeeds();
+		} finally {
+			m_url = newUrl;
+		}
+	}
+
+	/** Read HTML and if it has links, redirect and parse the XML. */
+	private RssItunesFeed[] parseHTMLRedirect()
+    throws IOException, Exception {
+		String svUrl = m_url;
+		m_url = super.parseHTMLRedirect(m_url, m_inputStream);
+		try {
+			return parseFeeds();
+		} finally {
+			m_url = svUrl;
+		}
+	}
+
+    abstract RssItunesFeed[] parseFeeds(InputStream is);
+
+    public void setFeedNameFilter(String m_feedNameFilter) {
+        if (m_feedNameFilter == null) {
+			this.m_feedNameFilter = null;
+		} else if (m_feedNameFilter.length() == 0) {
+			this.m_feedNameFilter = null;
+		} else {
+			this.m_feedNameFilter = m_feedNameFilter.toLowerCase();
+		}
     }
 
     public String getFeedNameFilter() {
         return (m_feedNameFilter);
     }
 
-    public void setFeedURLFilter(String feedURLFilter) {
-        this.m_feedURLFilter = feedURLFilter.toLowerCase();
+    public void setFeedURLFilter(String m_feedURLFilter) {
+        if (m_feedURLFilter == null) {
+			this.m_feedURLFilter = null;
+		} else if (m_feedURLFilter.length() == 0) {
+			this.m_feedURLFilter = null;
+		} else {
+			this.m_feedURLFilter = m_feedURLFilter.toLowerCase();
+		}
     }
 
     public String getFeedURLFilter() {
@@ -229,6 +253,10 @@ public abstract class FeedListParser implements Runnable{
 
     public CauseException getEx() {
         return (m_ex);
+    }
+
+    public String getUrl() {
+        return (m_url);
     }
 
 }
