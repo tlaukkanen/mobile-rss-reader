@@ -22,44 +22,49 @@
  * Created on June 17, 2003, 12:23 PM
  */
 
-package org.kablog.kgui;
+// Expand to define test define
+//#define DNOTEST
 
-import javax.microedition.midlet.*;
-import javax.microedition.lcdui.*;
-
-
-/**
-:f /opt/WTK2.5.1/apps/RSSReader/mobile-rss-reader/presrc/org/kablog/kgui/KViewParent.java
- *
- * @author  Todd C. Stellanova
- * @version
- */
-public interface KViewParent {
-    
-    /**
-     * @param view -- the view that has completed operation.
-     */
-    public void childFinished(KViewChild child);
-    
-    /**
-     * We've updated the child's status.
-     */
-    public void childStatusChanged(KViewChild child, int statusType, int status);
-
-    
-    /**
-     * @param newView object to make visible, if possible.
-     */
-    public void reqSetVisible(Displayable newView);
-    
-    /**
-    * @param runny Object to run at a deferred time.
-	*/
-	public void addDeferredAction(Runnable runny);
-    
-    /**
-     * Display a debug message somehow
-     */
-     public void displayDbgMsg(String msg, AlertType type);
-
-}
+//#ifdef DJSR75
+//@package org.kablog.kgui;
+//@
+//@import javax.microedition.midlet.*;
+//@import javax.microedition.lcdui.*;
+//@
+//@
+//@/**
+//@:f /opt/WTK2.5.1/apps/RSSReader/mobile-rss-reader/presrc/org/kablog/kgui/KViewParent.java
+//@ *
+//@ * @author  Todd C. Stellanova
+//@ * @version
+//@ */
+//@public interface KViewParent {
+//@    
+//@    /**
+//@     * @param view -- the view that has completed operation.
+//@     */
+//@    public void childFinished(KViewChild child);
+//@    
+//@    /**
+//@     * We've updated the child's status.
+//@     */
+//@    public void childStatusChanged(KViewChild child, int statusType, int status);
+//@
+//@    
+//@    /**
+//@     * @param newView object to make visible, if possible.
+//@     */
+//@    public void reqSetVisible(Displayable newView);
+//@    
+//@    /**
+//@    * @param runny Object to run at a deferred time.
+//@	*/
+//@	public void addDeferredAction(Runnable runny);
+//@    
+//@    /**
+//@     * Display a debug message somehow
+//@     */
+//@     public void displayDbgMsg(String msg, AlertType type);
+//@
+//@}
+//#endif
