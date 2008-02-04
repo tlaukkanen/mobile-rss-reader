@@ -49,7 +49,7 @@ import java.util.Vector;
 public class AtomFormatParser implements FeedFormatParser {
     
 	//#ifdef DLOGGING
-//@    private Logger logger = Logger.getLogger("RssFormatParser");
+//@    private Logger logger = Logger.getLogger("AtomFormatParser");
 	//#endif
 	private boolean m_hasExt = false;
 	//#ifdef DLOGGING
