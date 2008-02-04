@@ -1160,6 +1160,8 @@ public class RssReaderMIDlet extends MIDlet
 							m_unreadHeaderList.append( r.getTitle(), null );
 							m_unreadItems.addElement(r);
 						}
+						m_sortUnread = false;
+						m_display.setCurrent( m_unreadHeaderList );
 					} catch(OutOfMemoryError e) {
 						//#ifdef DLOGGING
 //@						logger.severe("Error while initializing bookmark list: ", e);
@@ -1167,7 +1169,7 @@ public class RssReaderMIDlet extends MIDlet
 						System.err.println("Error while initializing bookmark list: " + e.toString());
 						Alert memoryAlert = new Alert(
 								"Out of memory", 
-								"Loading bookmarks without all news items.",
+								"Loading unread all news items.",
 								null,
 								AlertType.WARNING);
 						memoryAlert.setTimeout(Alert.FOREVER);
@@ -1179,9 +1181,13 @@ public class RssReaderMIDlet extends MIDlet
 						System.out.println("Throwable Sort dates error." + t +
 								" " + t.getMessage());
 						t.printStackTrace();
-					} finally {
-						m_sortUnread = false;
-						m_display.setCurrent( m_unreadHeaderList );
+						Alert memoryAlert = new Alert(
+								"Internal error", 
+								"Loading unread all news items.",
+								null,
+								AlertType.WARNING);
+						memoryAlert.setTimeout(Alert.FOREVER);
+						m_display.setCurrent( memoryAlert, m_unreadHeaderList );
 					}
 				}
 
@@ -1260,8 +1266,8 @@ public class RssReaderMIDlet extends MIDlet
         RssItunesFeed feed = m_curRssParser.getRssFeed();
         m_headerList.setTitle( feed.getName() );
 		boolean markUnreadItems = m_appSettings.getMarkUnreadItems();
-        Vector vitems = feed.getItems();
-        int itemLen = vitems.size();
+        final Vector vitems = feed.getItems();
+        final int itemLen = vitems.size();
         for(int i=0; i < itemLen; i++){
             RssItunesItem r = (RssItunesItem)vitems.elementAt(i);
 			if (markUnreadItems && r.isUnreadItem()) {
@@ -1289,7 +1295,7 @@ public class RssReaderMIDlet extends MIDlet
 			m_unreadItems.removeAllElements();
         }
         Vector vitems = feed.getItems();
-        int itemLen = vitems.size();
+        final int itemLen = vitems.size();
         for(int i=0; i < itemLen; i++){
             RssItunesItem r = (RssItunesItem)vitems.elementAt(i);
 			if (r.isUnreadItem()) {
@@ -1628,7 +1634,7 @@ public class RssReaderMIDlet extends MIDlet
 				
 				/** Save feeds without items */
 				bookmarks.setLength(0);
-				int bsize = m_bookmarkList.size();
+				final int bsize = m_bookmarkList.size();
 				for( int i=0; i<bsize; i++) {
 					String name = m_bookmarkList.getString(i);
 					if( name.length() == 0) {
@@ -1837,7 +1843,7 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Read unread items */
         if( c == m_readUnreadItems ) {
-            int bsize = m_bookmarkList.size();
+            final int bsize = m_bookmarkList.size();
             if( bsize > 0 ){
 				boolean firstItem = true;
 				for( int ic = 0; ic < bsize; ic++ ){
