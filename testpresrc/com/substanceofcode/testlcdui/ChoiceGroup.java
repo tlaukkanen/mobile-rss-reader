@@ -38,6 +38,16 @@ import javax.microedition.lcdui.ItemCommandListener;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Image;
 
+import com.substanceofcode.testutil.TestOutput;
+
+/**
+ * ChoiceGroup.
+ *
+ * Test GUI class to log actions on the Form class.
+ *
+ * @author  Irving Bunton
+ * @version 1.0
+ */
 public class ChoiceGroup extends javax.microedition.lcdui.ChoiceGroup
 //#ifdef DMIDP20
 implements ItemCommandListener
@@ -50,57 +60,57 @@ implements ItemCommandListener
 
 	public ChoiceGroup(String label, int choiceType) {
 		super(label, choiceType);
-		System.out.println("Test UI ChoiceGroup Title: " + label);
-		System.out.println("Test UI ChoiceGroup choiceType: " + choiceType);
+		TestOutput.println("Test UI ChoiceGroup Label: " + label);
+		TestOutput.println("Test UI ChoiceGroup choiceType: " + choiceType);
 	}
 
 	// TODO log stringElements
 	public ChoiceGroup(String label, int choiceType, String[] stringElements,
 				    Image[] imageElements) {
 		super(label, choiceType, stringElements, imageElements);
-		System.out.println("Test UI ChoiceGroup Label: " + label);
-		System.out.println("Test UI ChoiceGroup listType: " + label + "," + choiceType);
+		TestOutput.println("Test UI ChoiceGroup Label: " + label);
+		TestOutput.println("Test UI ChoiceGroup listType: " + label + "," + choiceType);
 		if ((stringElements != null) && (stringElements.length > 0)) {
-			System.out.println("Test UI ChoiceGroup stringElements start: " + label);
+			TestOutput.println("Test UI ChoiceGroup stringElements start: " + label);
 			for (int ic = 0; ic < stringElements.length; ic++) {
-				System.out.println("Test UI ChoiceGroup listType: " + label + "," + stringElements[ic]);
+				TestOutput.println("Test UI ChoiceGroup listType: " + label + "," + stringElements[ic]);
 			}
-			System.out.println("Test UI ChoiceGroup stringElements end: " + label);
+			TestOutput.println("Test UI ChoiceGroup stringElements end: " + label);
 		}
 	}
 
 	public int append(String stringPart, Image imagePart) {
 		int rtn = super.append(stringPart, imagePart);
-		System.out.println("Test UI ChoiceGroup append: " + stringPart);
-		System.out.println("Test UI ChoiceGroup append int: " + rtn);
+		TestOutput.println("Test UI ChoiceGroup append: [" + super.getLabel() + "]," + stringPart);
+		TestOutput.println("Test UI ChoiceGroup append int: [" + super.getLabel() + "]," + rtn);
 		return rtn;
 	}
 
 	public void insert(int elementnum, String stringPart, Image imagePart) {
 		super.insert(elementnum, stringPart, imagePart);
-		System.out.println("Test UI ChoiceGroup insert: " + stringPart);
-		System.out.println("Test UI ChoiceGroup insert elementnum: " + elementnum);
+		TestOutput.println("Test UI ChoiceGroup insert: [" + super.getLabel() + "]," + stringPart);
+		TestOutput.println("Test UI ChoiceGroup insert elementnum: [" + super.getLabel() + "]," + elementnum);
 	}
 
 	public void set(int elementnum, String stringPart, Image imagePart) {
 		try {
 			super.set(elementnum, stringPart, imagePart);
 		} catch (Throwable t) {
-			System.out.println("Test UI ChoiceGroup set: " + t.getMessage());
+			TestOutput.println("Test UI ChoiceGroup set: [" + super.getLabel() + "]," + t.getMessage());
 			t.printStackTrace();
 		}
-		System.out.println("Test UI ChoiceGroup set: " + stringPart);
-		System.out.println("Test UI ChoiceGroup set elementnum: " + elementnum);
+		TestOutput.println("Test UI ChoiceGroup set: [" + super.getLabel() + "]," + stringPart);
+		TestOutput.println("Test UI ChoiceGroup set elementnum: [" + super.getLabel() + "]," + elementnum);
 	}
 
 	public int getSelectedIndex() {
 		try {
 			int rtn = super.getSelectedIndex();
-			System.out.println("Test UI ChoiceGroup " + super.getLabel() + " getSelectedIndex: " + rtn);
+			TestOutput.println("Test UI ChoiceGroup [" + super.getLabel() + "] getSelectedIndex: " + rtn);
 			return rtn;
 		} catch (Throwable t) {
-			System.out.println("Test UI ChoiceGroup getSelectedIndex: " +
-					t.getMessage());
+			TestOutput.println("Test UI ChoiceGroup getSelectedIndex: [" +
+					super.getLabel() + "]," + t.getMessage());
 			t.printStackTrace();
 			return -1;
 		}
@@ -109,10 +119,11 @@ implements ItemCommandListener
 	public boolean isSelected(int elementnum) {
 		try {
 			boolean rtn = super.isSelected(elementnum);
+			TestOutput.println("Test UI ChoiceGroup isSelected: [" + super.getLabel() + "]," + elementnum);
 			return rtn;
 		} catch (Throwable t) {
 			t.printStackTrace();
-			System.out.println("Test UI ChoiceGroup isSelected: " + t.getMessage());
+			TestOutput.println("Test UI ChoiceGroup isSelected: [" + super.getLabel() + "]," + t.getMessage());
 			return false;
 		}
 	}
@@ -120,7 +131,7 @@ implements ItemCommandListener
 	public void delete(int elementnum) {
 		try {
 			super.delete(elementnum);
-			System.out.println("Test UI ChoiceGroup delete elementnum: " + elementnum);
+			TestOutput.println("Test UI ChoiceGroup delete elementnum: [" + super.getLabel() + "]," + elementnum);
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -129,18 +140,38 @@ implements ItemCommandListener
 	//#ifdef DMIDP20
 	public void deleteAll() {
 		super.deleteAll();
-		System.out.println("Test UI ChoiceGroup delete all");
+		TestOutput.println("Test UI ChoiceGroup delete all [" + super.getLabel() + "]");
 	}
 	//#endif
+
+	public void setSelectedFlags( boolean [] selectedArray ) {
+		super.setSelectedFlags(selectedArray);
+		TestOutput.println("Test UI ChoiceGroup start setSelectedIndex [" + super.getLabel() + "]");
+		for (int ic = 0; ic < selectedArray.length ; ic++) {
+			TestOutput.println("Test UI ChoiceGroup [" + super.getLabel() + "], flag: " + ic + "," + selectedArray[ic]);
+		}
+		TestOutput.println("Test UI ChoiceGroup end setSelectedIndex [" + super.getLabel() + "]");
+	}
+
+	public int getSelectedFlags( boolean [] selectedArray ) {
+		int rtn = super.getSelectedFlags(selectedArray);
+		TestOutput.println("Test UI ChoiceGroup start getSelectedIndex [" + super.getLabel() + "]");
+		for (int ic = 0; ic < selectedArray.length ; ic++) {
+			TestOutput.println("Test UI ChoiceGroup [" + super.getLabel() + "], flag: " + ic + "," + selectedArray[ic]);
+		}
+		TestOutput.println("Test UI ChoiceGroup end getSelectedIndex [" + super.getLabel() + "]");
+		TestOutput.println("Test UI ChoiceGroup return [" + super.getLabel() + "]," + rtn);
+		return rtn;
+	}
 
 	public void setSelectedIndex(int elementNum,
                                  boolean selected) {
 		try {
 			super.setSelectedIndex(elementNum, selected);
-			System.out.println("Test UI ChoiceGroup " + super.getLabel() + " setSelectedIndex: " + elementNum);
+			TestOutput.println("Test UI ChoiceGroup [" + super.getLabel() + "] setSelectedIndex: " + elementNum);
 		} catch (Throwable t) {
-			System.out.println("Test UI ChoiceGroup " + super.getLabel() +
-					" getSelectedIndex: " + t.getMessage());
+			TestOutput.println("Test UI ChoiceGroup [" + super.getLabel() +
+					"] getSelectedIndex: " + t.getMessage());
 			t.printStackTrace();
 		}
 	}
@@ -148,9 +179,9 @@ implements ItemCommandListener
 	//#ifdef DMIDP20
 	public void commandAction(Command cmd, Item item) {
 		//#ifdef DMIDP20
-		System.out.println("Test UI StringItem command,item=" + cmd.getLabel() + "," + item.getLabel());
+		TestOutput.println("Test UI StringItem command,item=" + cmd.getLabel() + "," + item.getLabel());
 		//#else
-		System.out.println("Test UI StringItem command,displayable=" + cmd.getLabel() + "," + super.getClass().getName());
+		TestOutput.println("Test UI StringItem command,displayable=" + cmd.getLabel() + "," + super.getClass().getName());
 		//#endif
 		m_itemCmdListener.commandAction(cmd, item);
 	}
