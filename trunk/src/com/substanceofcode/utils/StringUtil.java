@@ -20,9 +20,16 @@
  *
  */
 
+// Expand to define logging define
+//#define DNOLOGGING
 package com.substanceofcode.utils;
-
+//TODO test </a> html. test no http (or using base?)
 import java.util.Vector;
+
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  *
@@ -30,6 +37,13 @@ import java.util.Vector;
  */
 public class StringUtil {
     
+	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("HTMLParser");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#endif
+
     /** Creates a new instance of StringUtil */
     private StringUtil() {
     }
@@ -54,10 +68,10 @@ public class StringUtil {
         nodes.addElement( original );
         
         // Create splitted string array
-        String[] result = new String[ nodes.size() ];
-        if( nodes.size()>0 ) {
-            for(int loop=0; loop<nodes.size(); loop++)
-                result[loop] = (String)nodes.elementAt(loop);
+		int nsize = nodes.size();
+        String[] result = new String[ nsize ];
+        if( nsize >0 ) {
+			nodes.copyInto(result);
         }
         return result;
     }
@@ -107,24 +121,36 @@ public class StringUtil {
      * @return      String without HTML tags (eg. cat)
      */
     public static String removeHtml(String text) {
+		//#ifdef DLOGGING
+//@		Logger logger = Logger.getLogger("StringUtil");
+//@		boolean finerLoggable = logger.isLoggable(Level.FINER);
+		//#endif
         try{
-            int idx = text.indexOf("<");
+            int idx = text.indexOf('<');
             if (idx == -1) return text;
             
-            String plainText = "";
+            StringBuffer plainText = new StringBuffer("");
             String htmlText = text;
-            int htmlStartIndex = htmlText.indexOf("<", 0);
+            int htmlStartIndex = htmlText.indexOf('<');
             if(htmlStartIndex == -1) {
                 return text;
             }
             while (htmlStartIndex>=0) {
-                plainText += htmlText.substring(0,htmlStartIndex);
-                int htmlEndIndex = htmlText.indexOf(">", htmlStartIndex);
+                plainText.append(htmlText.substring(0,htmlStartIndex));
+                int htmlEndIndex = htmlText.indexOf('>', htmlStartIndex);
+				// If we have unmatched '<' without '>' stop or we
+				// get into infinate loop.
+                if (htmlEndIndex < 0) {
+					//#ifdef DLOGGING
+//@					if (finerLoggable) {logger.finer("No end > for htmlStartIndex,htmlText=" + htmlStartIndex + "," + htmlText);}
+//@					if (finerLoggable) {logger.finer("plainText=" + plainText);}
+					//#endif
+					break;
+				}
                 htmlText = htmlText.substring(htmlEndIndex+1);
-                htmlStartIndex = htmlText.indexOf("<", 0);
+                htmlStartIndex = htmlText.indexOf('<');
             }
-            plainText = plainText.trim();
-            return plainText;
+            return plainText.toString().trim();
         } catch(Exception e) {
             System.err.println("Error while removing HTML: " +
 					           e.getClass().getName() + " " + e.toString());
