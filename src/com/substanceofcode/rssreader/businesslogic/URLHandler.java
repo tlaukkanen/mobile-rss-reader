@@ -3,7 +3,7 @@
  * URLHandler.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
- * Copyright (C) 2007 Irving Bunton
+ * Contributions from Irving Bunton
  * http://www.substanceofcode.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,9 +22,9 @@
  *
  */
 // Expand to define test define
-//#define DNOTEST
+//#define DTEST
 // Expand to define logging define
-//#define DNOLOGGING
+//#define DLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
 import java.io.IOException;
@@ -32,14 +32,15 @@ import javax.microedition.io.ConnectionNotFoundException;
 import java.io.InputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
+import javax.microedition.io.InputConnection;
 //#ifdef DJSR75
 //@import javax.microedition.io.file.FileConnection;
 //#endif
 
 //#ifdef DLOGGING
-//@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
-//@import net.sf.jlogmicro.util.logging.Level;
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.LogManager;
+import net.sf.jlogmicro.util.logging.Level;
 //#endif
 import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.EncodingUtil;
@@ -58,16 +59,17 @@ public abstract class URLHandler {
     protected long m_lastMod = 0L;  // Last modification
     protected InputStream m_inputStream;  // Last modification
     protected HttpConnection m_hc = null;
+    protected InputConnection m_ic = null;
 	//#ifdef DJSR75
 //@    protected FileConnection m_fc = null;
 	//#endif
     protected String m_contentType = null;  // Last modification
     
 	//#ifdef DLOGGING
-//@    private Logger logger = Logger.getLogger("URLHandler");
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private Logger logger = Logger.getLogger("URLHandler");
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
 	public URLHandler() {
@@ -78,7 +80,7 @@ public abstract class URLHandler {
 	throws IOException, Exception {
         
         try {
-			if (url.indexOf("file://") == 0) {
+			if (url.startsWith("file://")) {
 				//#ifdef DJSR75
 //@				/*
 //@				 * Open an FileConnection with the file system 
@@ -87,12 +89,14 @@ public abstract class URLHandler {
 //@				m_lastMod = m_fc.lastModified();
 //@				m_inputStream = m_fc.openInputStream();
 				//#else
-				throw new IOException("This version does not support file " +
-									  "access (file://).  Get jsr75 version. " +
-									  " check settings to see of your device " +
-									  "support jsr75.");
+				/*
+				 * Open an InputConnection with the file system.
+				 * The trick is knowing the URL.
+				 */
+				m_ic = (InputConnection) Connector.open( url, Connector.READ );
+				m_inputStream = m_ic.openInputStream();
 				//#endif
-			} else if (url.indexOf("jar://") == 0) {
+			} else if (url.startsWith("jar://")) {
 				// If testing, allow opening of files in the jar.
 				m_inputStream = this.getClass().getResourceAsStream( url.substring(6));
 				if (m_inputStream == null) {
@@ -135,17 +139,17 @@ public abstract class URLHandler {
 				m_contentType = m_hc.getHeaderField("content-type");
 				m_location = m_hc.getHeaderField("location");
 				//#ifdef DLOGGING
-//@				if (fineLoggable) {logger.fine("responce code=" + respCode);}
-//@				if (fineLoggable) {logger.fine("responce message=" + respMsg);}
-//@				if (fineLoggable) {logger.fine("responce location=" + m_hc.getHeaderField("location"));}
-//@				if (finestLoggable) {
-//@					for (int ic = 0; ic < 20; ic++) {
-//@						logger.finest("hk=" + ic + "," +
-//@								m_hc.getHeaderFieldKey(ic));
-//@						logger.finest("hf=" + ic + "," +
-//@								m_hc.getHeaderField(ic));
-//@					}
-//@				}
+				if (fineLoggable) {logger.fine("responce code=" + respCode);}
+				if (fineLoggable) {logger.fine("responce message=" + respMsg);}
+				if (fineLoggable) {logger.fine("responce location=" + m_hc.getHeaderField("location"));}
+				if (finestLoggable) {
+					for (int ic = 0; ic < 20; ic++) {
+						logger.finest("hk=" + ic + "," +
+								m_hc.getHeaderFieldKey(ic));
+						logger.finest("hf=" + ic + "," +
+								m_hc.getHeaderField(ic));
+					}
+				}
 				//#endif
 				// Don't do HTML redirect as wa may want to process an HTML.
 				if ((respCode == HttpConnection.HTTP_NOT_FOUND) ||
@@ -166,15 +170,15 @@ public abstract class URLHandler {
 				}
 			}
 			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("m_contentType=" + m_contentType);}
+			if (finestLoggable) {logger.finest("m_contentType=" + m_contentType);}
 			//#endif
             
         } catch(IllegalArgumentException e) {
 			//#ifdef DLOGGING
-//@			logger.severe("handleOpen possible bad url error with " + url,
-//@						  e);
+			logger.severe("handleOpen possible bad url error with " + url,
+						  e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
 
@@ -182,9 +186,9 @@ public abstract class URLHandler {
 									  url, e);
         } catch(ConnectionNotFoundException e) {
 			//#ifdef DLOGGING
-//@			logger.severe("handleOpen security error with " + url, e);
+			logger.severe("handleOpen security error with " + url, e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
             throw new CauseException("Bad URL/File or protocol error while " +
@@ -193,25 +197,25 @@ public abstract class URLHandler {
 			throw e;
         } catch(SecurityException e) {
 			//#ifdef DLOGGING
-//@			logger.severe("handleOpen security error with " + url, e);
+			logger.severe("handleOpen security error with " + url, e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
             throw new CauseException("Security error while oening " +
 									 ": " + url, e);
         } catch(Exception e) {
 			//#ifdef DLOGGING
-//@			logger.severe("handleOpen internal error with " + url, e);
+			logger.severe("handleOpen internal error with " + url, e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && (url.startsWith("file://"))) {
 				System.err.println("Cannot process file.");
 			}
             throw new CauseException("Internal error while parsing " +
 									 ": ", e);
         } catch(Throwable t) {
 			//#ifdef DLOGGING
-//@			logger.severe("handleOpen internal error with " + url, t);
+			logger.severe("handleOpen internal error with " + url, t);
 			//#endif
 			t.printStackTrace();
             throw new CauseException("Internal error while parsing RSS data " +
@@ -224,27 +228,28 @@ public abstract class URLHandler {
     throws IOException, Exception {
 		if (m_redirect) {
 			//#ifdef DLOGGING
-//@			logger.severe("Error 2nd redirect url:  " + url);
+			logger.severe("Error 2nd redirect url:  " + url);
 			//#endif
 			System.out.println("Error 2nd redirect url:  " + url);
 			throw new IOException("Error 2nd redirect url:  " + url);
 		}
 		m_redirect = true;
-		com.substanceofcode.rssreader.businessentities.RssFeed[] feeds =
+		com.substanceofcode.rssreader.businessentities.RssItunesFeed[] feeds =
 				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
+									url,
 									null,
 									null
 									//#ifdef DLOGGING
-//@									,logger,
-//@									fineLoggable,
-//@									finerLoggable,
-//@									finestLoggable
+									,logger,
+									fineLoggable,
+									finerLoggable,
+									finestLoggable
 									//#endif
 									);
 		if ((feeds == null) || (feeds.length == 0)) {
 			//#ifdef DLOGGING
-//@			logger.severe("Parsing HTML redirect cannot be " +
-//@						  "processed.");
+			logger.severe("Parsing HTML redirect cannot be " +
+						  "processed.");
 			//#endif
 			System.out.println(
 					"Parsing HTML redirect cannot be " +
