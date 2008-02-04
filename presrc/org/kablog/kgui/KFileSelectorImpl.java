@@ -23,6 +23,8 @@
 
 // Expand to define DJSR75 define
 @DJSR75@
+// Expand to define test define
+@DTESTDEF@
 // Expand to define logging define
 @DLOGDEF@
 
@@ -32,9 +34,7 @@ package org.kablog.kgui;
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.*;
-//#ifdef DJSR75
 import javax.microedition.io.file.*;
-//#endif
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 
@@ -45,14 +45,10 @@ import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 public class KFileSelectorImpl 
-  //#ifdef DJSR75
  extends List
   implements KFileSelector, CommandListener
   , FileSystemListener, Runnable
-  //#endif
 {
-	//#ifdef DJSR75
-	// protected   Image ROOT_IMAGE;
 	protected   Image UPDIR_IMAGE;
 	protected   Image FOLDER_IMAGE;
 	protected   Image FILE_IMAGE;
@@ -81,7 +77,9 @@ public class KFileSelectorImpl
 	protected String title = null;
 	protected String defaultDir = null;
 	protected String iconDir = "";
+	//#ifdef DTEST
 	private static final boolean bDebug = false;
+	//#endif
 	protected boolean bCurFolderIsARoot = true;
 	protected boolean itemSelected = false;
 	protected boolean cancelCmd = false;
@@ -100,7 +98,9 @@ public class KFileSelectorImpl
 
 		try {
 
+			//#ifdef DTEST
 			if (bDebug) System.out.println("MFS building cmds....");
+			//#endif
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("MFS building cmds....");}
 			//#endif
@@ -110,11 +110,13 @@ public class KFileSelectorImpl
 			super.setSelectCommand(openCommand);
 			super.setCommandListener(this);
 
+			//#ifdef DTEST
 			if (bDebug) 
 			{
 				System.out.println("--- file sep: '" + FILE_SEPARATOR + "'");
 				System.out.println("--- file sep_alt: '" + FILE_SEPARATOR_ALT + "'");
 			}
+			//#endif
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("--- file sep: '" + FILE_SEPARATOR + "'");}
 			if (fineLoggable) {logger.fine("--- file sep_alt: '" + FILE_SEPARATOR_ALT + "'");}
@@ -160,7 +162,9 @@ public class KFileSelectorImpl
 				//#endif
 			}
 		} catch(Exception imgOpenEx) {
+			//#ifdef DTEST
 			if (bDebug) System.out.println("--- icons ex: " + imgOpenEx);
+			//#endif
 			//#ifdef DLOGGING
 			logger.severe("--- icons ex: ", imgOpenEx);
 			//#endif
@@ -170,7 +174,9 @@ public class KFileSelectorImpl
 	}
 
 	public void init() {
+		//#ifdef DTEST
 		if (bDebug) System.out.println("MFS load images....");
+		//#endif
 		//ROOT_IMAGE = Image.createImage("root_icon.png");
 		FOLDER_IMAGE = getImage(iconDir + "/folder_icon.png");
 		FILE_IMAGE = getImage(iconDir + "/file_icon.png");
@@ -281,7 +287,9 @@ public class KFileSelectorImpl
 	{
 
 		try {
+			//#ifdef DTEST
 			if (bDebug) System.out.println("cmd action: " + c);
+			//#endif
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("disp,cmd=" + d.getTitle() + "," + c.getLabel());}
 			//#endif
@@ -310,7 +318,9 @@ public class KFileSelectorImpl
 
 	public void resetRoots()
 	{
+		//#ifdef DTEST
 		if (bDebug) System.out.println("resetRoots...");
+		//#endif
 		//#ifdef DLOGGING
 		if (fineLoggable) {logger.fine("resetRoots...");}
 		//#endif
@@ -319,8 +329,9 @@ public class KFileSelectorImpl
 
 		if (defaultDir != null)
 		{
-			if (bDebug)
-				System.out.println("default.dir: " + defaultDir);
+			//#ifdef DTEST
+			if (bDebug) System.out.println("default.dir: " + defaultDir);
+			//#endif
 			try
 			{
 				currentRoot = (FileConnection) Connector.open(  defaultDir,  Connector.READ);
@@ -328,7 +339,9 @@ public class KFileSelectorImpl
 			}
 			catch (Exception e)
 			{
+				//#ifdef DTEST
 				if (bDebug) System.out.println("### resetroot ex: " + e);
+				//#endif
 				//#ifdef DLOGGING
 				logger.severe("KFileSelectorImpl constructor ", e);
 				//#endif
@@ -346,8 +359,9 @@ public class KFileSelectorImpl
 
 	protected void displayAllRoots()
 	{
-		if (bDebug) 
-			System.out.println("displayAllRoots...");
+		//#ifdef DTEST
+		if (bDebug) System.out.println("displayAllRoots...");
+		//#endif
 
 		super.setTitle(title);
 		super.deleteAll();
@@ -355,8 +369,9 @@ public class KFileSelectorImpl
 		while (roots.hasMoreElements())
 		{
 			String root = (String) roots.nextElement();
-			if (bDebug) 
-				System.out.println("root: " + root);
+			//#ifdef DTEST
+			if (bDebug) System.out.println("root: " + root);
+			//#endif
 			super.append(root.substring(1), FOLDER_IMAGE);
 		}
 		currentRoot = null;
@@ -369,7 +384,9 @@ public class KFileSelectorImpl
 
 	protected void loadRoots()
 	{
+		//#ifdef DTEST
 		if (bDebug) System.out.println("loadRoots...");
+		//#endif
 
 		bCurFolderIsARoot = true;
 
@@ -385,8 +402,9 @@ public class KFileSelectorImpl
 				rootsList.addElement(FILE_SEPARATOR + (String) roots.nextElement());
 			}
 		} catch (Throwable e) {
-			if (bDebug) 
-				System.out.println("### load roots: " + e);
+			//#ifdef DTEST
+			if (bDebug) System.out.println("### load roots: " + e);
+			//#endif
 		}
 	}//loadRoots
 
@@ -394,9 +412,11 @@ public class KFileSelectorImpl
 	protected void openSelected()
 	{
 
-		if (bDebug) System.out.println("openSelected....");
 		int selectedIndex = super.getSelectedIndex();
+		//#ifdef DTEST
+		if (bDebug) System.out.println("openSelected....");
 		if (bDebug) System.out.println("selectedIndex: " + selectedIndex);
+		//#endif
 		//#ifdef DLOGGING
 		if (fineLoggable) {logger.fine("openSelected selectedIndex: " + selectedIndex);}
 		//#endif
@@ -404,7 +424,9 @@ public class KFileSelectorImpl
 		if (selectedIndex >= 0)
 		{
 			selectedFile = super.getString(selectedIndex);
+			//#ifdef DTEST
 			if (bDebug) System.out.println("selectedFile: " + selectedFile);
+			//#endif
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("openSelected selectedFile: " + selectedFile);}
 			//#endif
@@ -417,19 +439,25 @@ public class KFileSelectorImpl
 					{
 						if (null == currentRoot)
 						{
+							//#ifdef DTEST
 							if (bDebug) System.out.println("new currentRoot...");
+							//#endif
 							currentRoot = (FileConnection) Connector.open("file:///" + selectedFile, Connector.READ);
 						}
 						else
 						{
+							//#ifdef DTEST
 							if (bDebug) System.out.println("set cur root conn...");
+							//#endif
 							currentRoot.setFileConnection(selectedFile);
 						}
 						displayCurrentRoot();
 					}
 					catch (SecurityException e)
 					{
+						//#ifdef DTEST
 						if (bDebug) System.out.println("### open file: " + e);
+						//#endif
 						//#ifdef DLOGGING
 						logger.severe("openSelected security exception selected:  " + selectedFile, e);
 						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
@@ -460,7 +488,9 @@ public class KFileSelectorImpl
 							Display.getDisplay(midlet).setCurrent(
 									illegalAlert, this );
 						}
+						//#ifdef DTEST
 						if (bDebug) System.out.println("### open file: " + e);
+						//#endif
 						//#ifdef DLOGGING
 						logger.severe("openSelected illegal argument selected:  " + selectedFile, e);
 						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
@@ -469,7 +499,9 @@ public class KFileSelectorImpl
 					}
 					catch (Exception e)
 					{
+						//#ifdef DTEST
 						if (bDebug) System.out.println("### open file: " + e);
+						//#endif
 						//#ifdef DLOGGING
 						logger.severe("openSelected exception selected:  " + selectedFile, e);
 						//#endif
@@ -478,7 +510,9 @@ public class KFileSelectorImpl
 				else if (selectedFile.equals(UP_DIR))
 				{
 					String curRootName = currentRoot.getPath()  + currentRoot.getName();
+					//#ifdef DTEST
 					if (bDebug) System.out.println("curRootName: " + curRootName);
+					//#endif
 					String curShortName = null;
 					if (curRootName.charAt(0) == '/') {
 						curShortName = curRootName.substring(1);
@@ -506,7 +540,9 @@ public class KFileSelectorImpl
 							//#ifdef DLOGGING
 							logger.severe("KFileSelectorImpl openSelected at dir " + currentRoot.getPath() + "," + currentRoot.getName(), e);
 							//#endif
+							//#ifdef DTEST
 							if (bDebug) System.out.println("### setfileConn: " + e);
+							//#endif
 						}
 						catch (IllegalArgumentException e)
 						{
@@ -517,8 +553,9 @@ public class KFileSelectorImpl
 				}
 				else
 				{
-					if (bDebug) 
-						System.out.println("user selected: " + selectedFile);
+					//#ifdef DTEST
+					if (bDebug) System.out.println("user selected: " + selectedFile);
+					//#endif
 
 					//the user has selected a particular file
 
@@ -530,7 +567,9 @@ public class KFileSelectorImpl
 				}
 			}
 			else {
+				//#ifdef DTEST
 				if (bDebug) System.out.println("### no selected file???");
+				//#endif
 
 			}
 		}
@@ -542,8 +581,9 @@ public class KFileSelectorImpl
 		if (null != currentRoot)
 		{
 			selectedURL = currentRoot.getURL() + selectedFile;	
-			if (bDebug)
-				System.out.println("=== Selected URL: " + selectedURL);
+			//#ifdef DTEST
+			if (bDebug) System.out.println("=== Selected URL: " + selectedURL);
+			//#endif
 
 			try {currentRoot.close();}
 			catch(IOException ioEx) {}
@@ -558,7 +598,9 @@ public class KFileSelectorImpl
 
 	protected void displayCurrentRoot()
 	{
+		//#ifdef DTEST
 		if (bDebug) System.out.println("displayCurrentRoot...");
+		//#endif
 
 		try
 		{
@@ -619,7 +661,9 @@ public class KFileSelectorImpl
 			//#ifdef DLOGGING
 			logger.severe("KFileSelectorImpl constructor", e);
 			//#endif
+			//#ifdef DTEST
 			if (bDebug) System.out.println("### displayRoot ex: " + e);
+			//#endif
 		}
 
 	}//displayCurrentRoot
@@ -660,13 +704,17 @@ public class KFileSelectorImpl
 				thumbImage = Image.createImage(datablock,0,datablock.length);
 			}
 			catch (java.lang.OutOfMemoryError oom) {
+				//#ifdef DTEST
 				if (bDebug) System.err.println("### OOM on createImage: "  + Runtime.getRuntime().freeMemory());
+				//#endif
 			}
 			catch (Exception ex) {
+				//#ifdef DTEST
 				if (bDebug)  {
 					System.err.println("### Couldn't create image: " + ex);
 					ex.printStackTrace();
 				}
+				//#endif
 
 			}
 		}
@@ -675,7 +723,9 @@ public class KFileSelectorImpl
 			thumbImage = FILE_IMAGE;
 		}
 
+		//#ifdef DTEST
 		if (bDebug) System.out.println("...getThumbnail");
+		//#endif
 
 		return thumbImage;
 	}//getThumbnail
@@ -691,21 +741,25 @@ public class KFileSelectorImpl
 
 					long availSize = 0;
 
-					if (bDebug) 
-						System.out.println("selectedURL: " + selectedURL);
+					//#ifdef DTEST
+					if (bDebug) System.out.println("selectedURL: " + selectedURL);
+					//#endif
 
 					currentRoot = (FileConnection) Connector.open(selectedURL);
 
 					//currentRoot.setFileConnection(selectedFile); //relative to current directory
 
-					if (bDebug) 
-						System.out.println(" getting data...");
+					//#ifdef DTEST
+					if (bDebug) System.out.println(" getting data...");
+					//#endif
 					availSize = currentRoot.fileSize();
-					if (bDebug) 
-						System.out.println("file availSize: " + availSize);
+					//#ifdef DTEST
+					if (bDebug) System.out.println("file availSize: " + availSize);
+					//#endif
 
-					if (bDebug && !currentRoot.canRead())
-						System.out.println("### can't read???");
+					//#ifdef DTEST
+					if (bDebug && !currentRoot.canRead()) System.out.println("### can't read???");
+					//#endif
 
 
 					if (availSize > 0)
@@ -714,28 +768,38 @@ public class KFileSelectorImpl
 						try {
 							//DataInputStream is = currentRoot.openDataInputStream();
 							InputStream is = currentRoot.openInputStream();
+							//#ifdef DTEST
 							if (bDebug) System.out.println("Creating new file block [" + availSize + "]");
+							//#endif
 
 							System.gc();
 							fileDataBlock = new byte[(int)availSize];
+							//#ifdef DTEST
 							if (bDebug) System.out.println("Allocated: " + availSize);
+							//#endif
 
 							is.read(fileDataBlock);
 							is.close();
 
+							//#ifdef DTEST
 							if (bDebug) System.out.println("...data read.");
+							//#endif
 						}
 						catch (IOException ioEx)
 						{
+							//#ifdef DTEST
 							if (bDebug) {
 								System.err.println("### ioEx: " + ioEx);
 
 								ioEx.printStackTrace();
 							}
+							//#endif
 						}
 						catch (java.lang.OutOfMemoryError oom)
 						{
+							//#ifdef DTEST
 							if (bDebug) System.err.println("### OOM new fileDataBlock: "  + Runtime.getRuntime().freeMemory());
+							//#endif
 						}
 					}
 
@@ -744,18 +808,24 @@ public class KFileSelectorImpl
 				}
 				catch (IOException ioEx)
 				{
+					//#ifdef DTEST
 					if (bDebug) System.out.println("### read file ioex: " + ioEx);
+					//#endif
 				}
 				catch (Exception ex)
 				{
+					//#ifdef DTEST
 					if (bDebug) System.out.println("### read file ex: " + ex);
+					//#endif
 
 				}
 			}
 		}
 		else
 		{
+			//#ifdef DTEST
 			if (bDebug) System.out.println("Existing fileDataBlock [" + fileDataBlock.length + "]");
+			//#endif
 		}
 
 		return fileDataBlock;
@@ -765,6 +835,7 @@ public class KFileSelectorImpl
 
 	public void rootChanged(int changeType, String strArg)
 	{
+		//#ifdef DTEST
 		if (bDebug) {
 			//that's nice...
 			if (changeType == FileSystemListener.ROOT_ADDED) 
@@ -774,6 +845,7 @@ public class KFileSelectorImpl
 
 			System.out.println("strArg: " + strArg);
 		}
+		//#endif
 	}
 
 	public String getSelectedURL() {
@@ -796,25 +868,18 @@ public class KFileSelectorImpl
         return (midlet);
     }
 
-	//#endif
-
 } //class KFileSelectorImpl
 
 class KFileSelectorKicker
-//#ifdef DJSR75
 implements Runnable
-//#endif
 {
 	
 	public KFileSelectorKicker(KFileSelectorImpl aTarget) {
 		
-		//#ifdef DJSR75
 		target = aTarget;
-		//#endif
 		
 	}
 
-	//#ifdef DJSR75
 	
 	public void run() {
 		
@@ -825,6 +890,5 @@ implements Runnable
 	}
 	
 	KFileSelectorImpl target;
-	//#endif
 }
 //#endif
