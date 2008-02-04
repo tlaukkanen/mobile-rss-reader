@@ -42,6 +42,8 @@ public class RssReaderSettings {
     private static final String IMPORT_USERNAME = "import-username";
     private static final String IMPORT_PASSWORD = "import-password";
     private static final String MARK_UNREAD_ITEMS = "mark-unread-items";
+    private static final String FEED_LIST_OPEN = "feed-list-open";
+    private static final String ITUNES_ENABLED = "itunes-enabled";
     private static final String USE_TEXT_BOX = "use-text-box";
     private static final String LOG_LEVEL = "log-level";
     
@@ -116,6 +118,26 @@ public class RssReaderSettings {
         m_settings.setBooleanProperty( MARK_UNREAD_ITEMS, markUnreadItems);
     }
     
+    /** Get feed list back is first command */
+    public boolean getFeedListOpen() {
+        return m_settings.getBooleanProperty( FEED_LIST_OPEN, true);
+    }
+    
+    /** Set feed list back is first command */
+    public void setFeedListOpen(boolean feedListOpen) {
+        m_settings.setBooleanProperty( FEED_LIST_OPEN, feedListOpen);
+    }
+    
+    /** Get itunes enabled */
+    public boolean getItunesEnabled() {
+        return m_settings.getBooleanProperty( ITUNES_ENABLED, false);
+    }
+    
+    /** Set feed list back is first command */
+    public void setItunesEnabled(boolean itunesEnabled) {
+        m_settings.setBooleanProperty( ITUNES_ENABLED, itunesEnabled);
+    }
+    
     /** Get use text box */
     public boolean getUseTextBox() {
         return m_settings.getBooleanProperty( USE_TEXT_BOX, false);
@@ -124,6 +146,11 @@ public class RssReaderSettings {
     /** Set import URL password */
     public void setUseTextBox(boolean useTextBox) {
         m_settings.setBooleanProperty( USE_TEXT_BOX, useTextBox);
+    }
+    
+    /** Get settings version */
+    public String getSettingsVers() {
+        return m_settings.getStringProperty( 0, Settings.SETTINGS_NAME, "");
     }
     
 	//#ifdef DTEST
