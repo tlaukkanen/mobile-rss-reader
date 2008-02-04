@@ -1,4 +1,8 @@
 /*
+   TODO don't remove carriage return
+   TODO remove extra spaces between date elements: Thu, 19 Jul  2007 00:00:00 N
+   TODO remove extra spaces between description item 7 of imbed
+
  * RssFormatParser.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
@@ -23,14 +27,13 @@
 // Expand to define logging define
 //#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
-
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
-import com.substanceofcode.rssreader.businessentities.RssFeed;
-import com.substanceofcode.rssreader.businessentities.RssItem;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
 import java.io.IOException;
@@ -47,138 +50,274 @@ public class RssFormatParser implements FeedFormatParser {
     
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssFormatParser");
+	//#endif
+	/** RSS item properties */
+	private boolean m_hasExt = false;
+	//#ifdef DLOGGING
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
+	private String m_title = "";
+	private String m_author = "";
+	private String m_description = "";
+	private String m_link = "";
+	private String m_language = "";
+	private String m_date = "";
+	private String m_enclosure = "";
+	private ExtParser m_extParser = new ExtParser();
 
     /** Creates a new instance of RssFormatParser */
     public RssFormatParser() {
     }
     
-    public Vector parse(XmlParser parser, RssFeed feed,
+    public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
 			            int maxItemCount, boolean getTitleOnly)
 	throws IOException {
-        /** RSS item properties */
-        String title = "";
-        String description = "";
-        String link = "";
-        String date = "";
-        String enclosure = "";
         
         Vector items = new Vector();
+		m_extParser.parseNamespaces(parser);
+		m_hasExt = m_extParser.isHasExt();
+		RssItunesFeed feed = cfeed;
+        feed.setItems(items);
         
         /** Parse to first entry element */
         while(!parser.getName().equals("item")) {
             switch (parser.parse()) {
 				case XmlParser.END_DOCUMENT:
 					System.out.println("No entries found.");
-					return items;
+					return feed;
 				case XmlParser.ELEMENT:
-					if (getTitleOnly && parser.getName().equals("title") ) {
-						feed.setName(parser.getText());
-						return items;
+					String elementName = parser.getName();
+					if (elementName.length() == 0) {
+						continue;
+					}
+					char elemChar = elementName.charAt(0);
+					if (parseCommon(parser, elemChar, elementName)) {
+						if ((elemChar == 't') && 
+								getTitleOnly && elementName.equals("title") ) {
+							feed.setName(m_title);
+							return feed;
+						}
+						continue;
+					}
+					switch (elemChar) {
+						case 'l':
+							 if (elementName.equals("language")) {
+								 m_language = parser.getText();
+								 //#ifdef DLOGGING
+//@								 if (finestLoggable) {logger.finest("m_language=" + m_language);}
+								 //#endif
+								 continue;
+							 }
+							 break;
+						case 'i':
+							 if (elementName.equals("image")) {
+								 // Skip image text as it includes link
+								 // and title.
+								 String itext = parser.getText();
+								 //#ifdef DLOGGING
+//@								 if (finestLoggable) {logger.finest("m_language=" + m_language);}
+								 //#endif
+								 continue;
+							 }
+							 break;
+						default:
+							 break;
+					}
+					if (m_hasExt) {
+						m_extParser.parseExtItem(parser, elemChar, elementName);
 					}
 					break;
 				default:
 					break;
             }
         }
+		feed.setLink(m_link);
+		if (m_date.length() > 0) {
+			Date pubDate = parseRssDate(m_date);
+			feed.setDate(pubDate);
+		} else {
+			feed.setDate(null);
+		}
+		if (m_extParser.isItunes()) {
+			feed = m_extParser.getFeedInstance(feed, m_language, m_title,
+					m_description);
+		}
         
-        int parsingResult = parser.parse();
-        while( parsingResult!=XmlParser.END_DOCUMENT ) {
+		reset();
+
+		/** Parse next element */            
+        int parsingResult;
+        while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
             String elementName = parser.getName();
-            
-            if( elementName.equals("item") ) {
-                /** Save previous entry */
-                if(title.length()>0) {
-                    RssItem item;
-                    Date pubDate = null;
-					// Check date in case we cannot find it.
-					if (!date.equals("")) {
-						int dpos = date.indexOf("-", 2);
-						if ((dpos > 0) && (date.indexOf('-', dpos + 1) > 0)) {
-							pubDate = parseDcDate(date);
-						} else {
-							pubDate = parseRssDate(date);
-						}
-					}
-                    if(pubDate!=null) {
-                        item = new RssItem(title, link, description, pubDate,
-										   enclosure, true);
-                    } else {
-                        item = new RssItem(title, link, description);
-						item.setUnreadItem(true);
-						if (!enclosure.equals("")) {
-							item.setEnclosure(enclosure);
-						}
-                    }
-                    items.addElement( item );
-                    if(items.size()==maxItemCount) {
-                        return items;
-                    }
-                }                
-                
-                /** New entry */
-                title = "";
-                description = "";
-                link = "";
-                date = "";
-                enclosure = "";
-            }
-            else if( elementName.equals("title") ) {
-                title = parser.getText();
-                title = StringUtil.replace(title, "\n", " ");
-                title = StringUtil.removeHtml( title );
-            }
-            else if( elementName.equals("link") ) {
-                link = parser.getText();
-            }
-            else if( elementName.equals("description")) {
-                description = parser.getText();
-                description = StringUtil.removeHtml( description );
-            }
-            else if( elementName.equals("pubDate") ||
-                     elementName.equals("dc:date")) {
-                date = parser.getText();
+            if (elementName.length() == 0) {
+				continue;
 			}
-            else if( elementName.equals("enclosure") ) {
-                String cenclosure = parser.getAttributeValue("url");
-                if (cenclosure != null) {
-                	enclosure = cenclosure;
-				}
-            }
             
-            /** Parse next element */            
-            parsingResult = parser.parse();
+			char elemChar = elementName.charAt(0);
+            switch (elemChar) {
+				case 'i':
+					if (elementName.equals("item") ) {
+						/** Save previous entry */
+						if(m_title.length()>0) {
+							RssItunesItem item;
+							Date pubDate = null;
+							// Check date in case we cannot find it.
+							if (m_date.equals("") && m_extParser.isHasExt()) {
+								m_date = m_extParser.getDate();
+							}
+							if (m_date.length() > 0) {
+								pubDate = parseRssDate(m_date);
+							}
+							if (m_hasExt) {
+								item = m_extParser.createItem(m_title, m_link,
+										m_description, pubDate, m_enclosure, true,
+										m_author);
+							} else {
+								item = new RssItunesItem(m_title, m_link,
+										m_description, pubDate,
+										m_enclosure, true);
+							}
+							items.addElement( item );
+							if(items.size()==maxItemCount) {
+								return feed;
+							}
+						}                
+
+						/** New entry */
+						/** reset */
+						reset();
+						continue;
+					}
+					break;
+				case 't':
+					// Textinput has required sub element description.
+					// We don't want the overriding description.
+					if (elementName.equals("textinput") ) {
+						String textData = parser.getText();
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("skipping textinput data=" + textData);}
+						//#endif
+						continue;
+					}
+					break;
+				default:
+			}
+			parseItem(parser, elemChar, elementName);
+            
         }
 
         /** Save previous entry */
-        if(title.length()>0) {
-            RssItem item;
+        if(m_title.length()>0) {
+            RssItunesItem item;
             Date pubDate = null;
-			if ((date != null) && !date.equals("")) {
-				if (date.indexOf("-") >= 0) {
-					pubDate = parseDcDate(date);
-				} else {
-					pubDate = parseRssDate(date);
-				}
+			if (m_date.length() > 0) {
+				pubDate = parseRssDate(m_date);
 			}
-            if(pubDate!=null) {
-                item = new RssItem(title, link, description, pubDate,
-								   enclosure, true);
-            } else {
-                item = new RssItem(title, link, description);
-				item.setUnreadItem(true);
-				if (!enclosure.equals("")) {
-					item.setEnclosure(enclosure);
-				}
-            }
+			if (m_hasExt) {
+				item = m_extParser.createItem(m_title, m_link,
+						m_description, pubDate, m_enclosure, true, m_author);
+			} else {
+				item = new RssItunesItem(m_title, m_link, m_description, pubDate,
+								   m_enclosure, true);
+			}
             items.addElement( item );
         }        
                         
-        return items;
+		return feed;
     }
     
+	private void reset() {
+		m_title = "";
+		m_author = "";
+		m_description = "";
+		m_link = "";
+		m_language = "";
+		m_date = "";
+		m_enclosure = "";
+		if (m_hasExt) {
+			m_extParser.reset();
+		}
+	}
+
+	/* Parse the fields common to feed and item. */
+	private boolean parseCommon(XmlParser parser, char elemChar,
+			String elementName)
+	throws IOException {
+		switch (elemChar) {
+			case 'p':
+				if( elementName.equals("pubDate")) {
+					m_date = parser.getText();
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("m_date=" + m_date);}
+					//#endif
+					return true;
+				}
+				break;
+			case 't':
+				if( elementName.equals("title") ) {
+					m_title = parser.getText().replace('\n', ' ');
+					m_title = StringUtil.removeHtml( m_title );
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("m_title=" + m_title);}
+					//#endif
+					return true;
+				}
+				break;
+			case 'd':
+				if( elementName.equals("description")) {
+					m_description = parser.getText();
+					m_description = StringUtil.removeHtml( m_description );
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("m_description=" + m_description);}
+					//#endif
+					return true;
+				}
+				break;
+			case 'l':
+				if( elementName.equals("link") ) {
+					m_link = parser.getText();
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("m_link=" + m_link);}
+					//#endif
+					return true;
+				}
+				break;
+			default:
+		}
+		return false;
+	}
+
+	/* Parse the item to get it's fields */
+	void parseItem(XmlParser parser, char elemChar, String elementName)
+	throws IOException {
+		switch (elemChar) {
+			case 'a':
+				if( elementName.equals("author")) {
+					m_author = parser.getText();
+					return;
+				}
+				break;
+			case 'e':
+				if( elementName.equals("enclosure") ) {
+					String cenclosure = parser.getAttributeValue("url");
+					if (cenclosure != null) {
+						m_enclosure = cenclosure;
+						return;
+					}
+					return;
+				}
+				break;
+			default:
+		}
+		if (parseCommon(parser, elemChar, elementName)) {
+			return;
+		}
+		if (m_hasExt) {
+			m_extParser.parseExtItem(parser, elemChar, elementName);
+		}
+	}
+
 	/** Get calendar date. **/
 	public static Date getCal(int dayOfMonth, int month, int year, int hours,
 			           int minutes, int seconds) throws Exception {
@@ -194,12 +333,28 @@ public class RssFormatParser implements FeedFormatParser {
 		return cal.getTime();
 	}
 
+	/**  Parse the standard RSS date and Dublin Core (dc) date. */
+	static Date parseRssDate(String date) {
+		Date pubDate = null;
+		int dpos = date.indexOf('-', 2);
+		if ((dpos > 0) && (date.indexOf('-', dpos + 1) > 0)) {
+			pubDate = parseDcDate(date);
+		} else {
+			pubDate = parseStdDate(date);
+		}
+		//#ifdef DLOGGING
+//@		Logger logger = Logger.getLogger("RssFormatParser");
+//@		logger.finest("date,pubDate=" + date + "," + pubDate);
+		//#endif
+		return pubDate;
+	}
+
     /**
      * Parse RSS date format to Date object.
      * Example of RSS date:
      * Sat, 23 Sep 2006 22:25:11 +0000
      */
-    public static Date parseRssDate(String dateString) {
+    public static Date parseStdDate(String dateString) {
         Date pubDate = null;
         try {
             // Split date string to values
@@ -233,6 +388,13 @@ public class RssFormatParser implements FeedFormatParser {
                 timeIndex = 5;
                 gmtIndex = 6;
             } else if( columnCount<5 || columnCount>6 ) {
+				//#ifdef DLOGGING
+//@				Logger logger = Logger.getLogger("RssFormatParser");
+//@				logger.warning("Invalid date format: " + dateString);
+				//#endif
+				for (int ic = 0; ic < dateString.length(); ic++) {
+					System.out.println("date=" + ic + "," + dateString.charAt(ic) + "," + (int)dateString.charAt(ic));
+				}
                 throw new Exception("Invalid date format: " + dateString);
             }
             
@@ -267,12 +429,24 @@ public class RssFormatParser implements FeedFormatParser {
             
         } catch(Exception ex) {
             // TODO: Add exception handling code
-            System.err.println("parseRssDate error while converting date string to object: " + 
+            System.err.println("parseStdDate error while converting date string to object: " + 
                     dateString + "," + ex.toString());
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssFormatParser");
+//@			logger.severe("parseStdDate  error while converting date " +
+//@						   "string to object: " +
+//@                    dateString, ex);
+			//#endif
         } catch(Throwable t) {
             // TODO: Add exception handling code
-            System.err.println("parseRssDate error while converting date string to object: " + 
+            System.err.println("parseStdDate error while converting date string to object: " + 
                     dateString + "," + t.toString());
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssFormatParser");
+//@			logger.severe("parseStdDate  error while converting date " +
+//@						   "string to object: " +
+//@                    dateString, t);
+			//#endif
         }
         return pubDate;
     }
