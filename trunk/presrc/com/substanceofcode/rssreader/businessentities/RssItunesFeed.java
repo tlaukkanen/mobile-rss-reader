@@ -43,7 +43,6 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class RssItunesFeed extends RssFeed{
     
-    
 	// Make max summary same as max description (actual max is 50K)
     public static int MAX_SUMMARY = 500;
 	// Beginning of data that has 0 itunes info.
