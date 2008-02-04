@@ -21,7 +21,7 @@
  */
 
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 
 package com.substanceofcode.rssreader.businesslogic;
 
@@ -38,9 +38,9 @@ import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.LogManager;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -55,10 +55,10 @@ import net.sf.jlogmicro.util.logging.Level;
 public class HTMLLinkParser extends FeedListParser {
     
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("HTMLLinkParser");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private Logger logger = Logger.getLogger("HTMLLinkParser");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
     /** Creates a new instance of HTMLLinkParser */
@@ -74,15 +74,15 @@ public class HTMLLinkParser extends FeedListParser {
 											m_feedNameFilter,
 											m_feedURLFilter
 											//#ifdef DLOGGING
-											,logger
-											,fineLoggable
-											,finerLoggable
-											,finestLoggable
+//@											,logger
+//@											,fineLoggable
+//@											,finerLoggable
+//@											,finestLoggable
 											//#endif
 											);
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-			logger.severe("parseFeeds error.", t);
+//@			logger.severe("parseFeeds error.", t);
 //#endif
 			System.out.println("parseFeeds error." + t + " " + t.getMessage());
 			return null;
@@ -94,10 +94,10 @@ public class HTMLLinkParser extends FeedListParser {
 										String feedNameFilter,
 										String feedURLFilter
 										//#ifdef DLOGGING
-										,Logger logger,
-										 boolean fineLoggable,
-										 boolean finerLoggable,
-										 boolean finestLoggable
+//@										,Logger logger,
+//@										 boolean fineLoggable,
+//@										 boolean finerLoggable,
+//@										 boolean finestLoggable
 										//#endif
 			                           ) {
         /** Initialize item collection */
@@ -131,7 +131,7 @@ public class HTMLLinkParser extends FeedListParser {
 												
 				String tagName = parser.getName();
 				//#ifdef DLOGGING
-				if (finerLoggable) {logger.finer("tagname: " + tagName);}
+//@				if (finerLoggable) {logger.finer("tagname: " + tagName);}
 				//#endif
 				if (tagName.length() == 0) {
 					continue;
@@ -142,18 +142,17 @@ public class HTMLLinkParser extends FeedListParser {
 						if (bodyFound) {
 							break;
 						}
-						if (parser.isMetaFound()) {
-							//TODO do re-direct
-						}
 						break;
 					case 'b':
 					case 'B':
-						bodyFound = parser.isBodyFound();
+						if (!bodyFound) {
+							bodyFound = parser.isBodyFound();
+						}
 						break;
 					case 'a':
 					case 'A':
 						//#ifdef DLOGGING
-						if (finerLoggable) {logger.finer("Parsing <a> tag");}
+//@						if (finerLoggable) {logger.finer("Parsing <a> tag");}
 						//#endif
 						
 						title = parser.getText();
@@ -170,23 +169,40 @@ public class HTMLLinkParser extends FeedListParser {
 						if ( link.length() == 0 ) {
 							continue;
 						}
-						if (link.charAt(0) == '/') {
-							link = url + link;
-						}
-						// TODO handle  relative links better
-						if (!link.startsWith("http:") &&
-						    !link.startsWith("file:") &&
-							 !link.startsWith("jar:")) {
-							//#ifdef DLOGGING
-							if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
-							//#endif
-							continue;
+						if (link.indexOf("://") >= 0) {
+							if (!link.startsWith("http:") &&
+								!link.startsWith("https:") &&
+								!link.startsWith("file:") &&
+								 !link.startsWith("jar:")) {
+								//#ifdef DLOGGING
+//@								if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
+								//#endif
+								continue;
+							}
+						} else {
+							if (link.charAt(0) == '/') {
+								int purl = url.indexOf("://");
+								if ((purl + 4) >= url.length()) {
+									//#ifdef DLOGGING
+//@									if (finerLoggable) {logger.finer("Url too short=" + url + "," + purl);}
+									//#endif
+									continue;
+								}
+								int pslash = url.indexOf("/", purl + 3);
+								String burl = url;
+								if (pslash >= 0) {
+									burl = url.substring(0, pslash);
+								}
+								link = burl + link;
+							} else {
+								link = url + "/" + link;
+							}
 						}
 						
 						/** Debugging information */
 						//#ifdef DLOGGING
-						if (finerLoggable) {logger.finer("Title:       " + title);}
-						if (finerLoggable) {logger.finer("Link:        " + link);}
+//@						if (finerLoggable) {logger.finer("Title:       " + title);}
+//@						if (finerLoggable) {logger.finer("Link:        " + link);}
 						//#endif
 						if (( feedURLFilter != null) &&
 							( link.toLowerCase().indexOf(feedURLFilter) < 0)) {
@@ -207,11 +223,11 @@ public class HTMLLinkParser extends FeedListParser {
             while( (elementType = parser.parse()) != XmlParser.END_DOCUMENT );
             
         } catch (Exception ex) {
-            System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
+            System.err.println("HTMLLinkParser.parseFeeds(): Exception " + ex.toString());
 			ex.printStackTrace();
             return null;
         } catch (Throwable t) {
-            System.err.println("OpmlParser.parseFeeds(): Exception " + t.toString());
+            System.err.println("HTMLLinkParser.parseFeeds(): Exception " + t.toString());
 			t.printStackTrace();
             return null;
         }
