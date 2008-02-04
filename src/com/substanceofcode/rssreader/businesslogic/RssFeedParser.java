@@ -21,12 +21,12 @@
  */
 
 // Expand to define test define
-//#define DNOTEST
+//#define DTEST
 // Expand to define logging define
-//#define DNOLOGGING
+//#define DLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
-import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
 import javax.microedition.io.*;
@@ -35,9 +35,9 @@ import java.io.*;
 
 import com.substanceofcode.utils.EncodingUtil;
 //#ifdef DLOGGING
-//@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
-//@import net.sf.jlogmicro.util.logging.Level;
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.LogManager;
+import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -49,22 +49,22 @@ import com.substanceofcode.utils.EncodingUtil;
  */
 public class RssFeedParser extends URLHandler {
     
-    private RssFeed m_rssFeed;  // The RSS feed
+    private RssItunesFeed m_rssFeed;  // The RSS feed
     private boolean m_getTitleOnly = false;  // The RSS feed
 	//#ifdef DLOGGING
-//@    private Logger logger = Logger.getLogger("RssFeedParser");
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-//@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private Logger logger = Logger.getLogger("RssFeedParser");
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean finerLoggable = logger.isLoggable(Level.FINER);
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
-    /** Create new instance of RssDocument */
-    public RssFeedParser(RssFeed rssFeed) {
+    /** Create new instance of RssFeedParser */
+    public RssFeedParser(RssItunesFeed rssFeed) {
         m_rssFeed = rssFeed;
     }
     
     /** Return RSS feed */
-    public RssFeed getRssFeed() {
+    public RssItunesFeed getRssFeed() {
         return m_rssFeed;
     }
     
@@ -77,8 +77,23 @@ public class RssFeedParser extends URLHandler {
      */
     public void parseRssFeed(boolean updFeed, int maxItemCount)
     throws IOException, Exception {
+		// Set this here as the instance of this class is reused
+		// for update of the current feed.
+		m_redirect = false;
+		parseRssFeedUrl(m_rssFeed.getUrl(), updFeed, maxItemCount);
+	}
         
-		String url = m_rssFeed.getUrl();
+    /**
+     * Send a GET request to web server and parse feeds from response.
+     *
+     * @input url to parse
+     * @input updFeed Do updated feeds only.
+     * @input maxItemCount Maximum item count for the feed.
+     *
+     */
+    public void parseRssFeedUrl(String url, boolean updFeed, int maxItemCount)
+    throws IOException, Exception {
+        
 		try {
 			super.handleOpen(url, m_rssFeed.getUsername(),
 					  m_rssFeed.getPassword());
@@ -94,28 +109,35 @@ public class RssFeedParser extends URLHandler {
 			} else {
 				if (m_lastMod == 0L) {
 					m_rssFeed.setUpddate(null);
-				} else if (updFeed && (m_rssFeed.getUpddate() != null)) {
-					if (m_rssFeed.getUpddate().equals(new Date(m_lastMod))) {
-						return;
+				} else {
+					// If we're only processing if the feed is updated,
+					// check if we previously had a update value.
+					// If so and it does equals the new one, return
+					if (updFeed) {
+						Date updDate = m_rssFeed.getUpddate();
+	  					if ((updDate != null) && updDate.equals(new
+							Date(m_lastMod))) {
+							return;
+						}
 					}
  				}
-				parseRssFeedXml( m_inputStream, maxItemCount );
+				parseRssFeedXml( m_inputStream, maxItemCount);
 				m_rssFeed.setUpddate(new Date(m_lastMod));
 			}
         } catch(Exception e) {
 			//#ifdef DLOGGING
-//@			logger.severe("parseRssFeed error with " + url, e);
+			logger.severe("parseRssFeedUrl error with " + url, e);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
             throw new Exception("Error while parsing RSS data: " 
                     + e.toString());
         } catch(Throwable t) {
 			//#ifdef DLOGGING
-//@			logger.severe("parseRssFeed error with " + url, t);
+			logger.severe("parseRssFeedUrl error with " + url, t);
 			//#endif
-			if ((url != null) && (url.indexOf("file://") == 0)) {
+			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
             throw new Exception("Error while parsing RSS data: " 
@@ -125,29 +147,21 @@ public class RssFeedParser extends URLHandler {
 		}
     }
     
-    protected void handleHeaderRedirect(String url)
-	throws IOException, Exception {
-	}
-
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private void parseHeaderRedirect(boolean updFeed, String url,
 								     int maxItemCount)
     throws IOException, Exception {
 		if (m_redirect) {
 			//#ifdef DLOGGING
-//@			logger.severe("Error 2nd header redirect url:  " + url);
+			logger.severe("Error 2nd redirect url:  " + url);
 			//#endif
-			System.out.println("Error 2nd header redirecturl:  " + url);
-			throw new IOException("Error 2nd header redirect.");
+			System.out.println("Error 2nd redirecturl:  " + url);
+			throw new IOException("Error url " + m_redirectURL +
+					" to 2nd redirect url:  " + url);
 		}
 		m_redirect = true;
-		RssFeed svFeed = new RssFeed(m_rssFeed);
-		m_rssFeed.setUrl(url);
-		try {
-			parseRssFeed(updFeed, maxItemCount);
-		} finally {
-			m_rssFeed.setUrl(svFeed.getUrl());
-		}
+		m_redirectUrl = url;
+		parseRssFeedUrl(url, updFeed, maxItemCount);
 		return;
 
 	}
@@ -157,13 +171,8 @@ public class RssFeedParser extends URLHandler {
 								   InputStream is, int maxItemCount)
     throws IOException, Exception {
 		String newUrl = super.parseHTMLRedirect(url, is);
-		RssFeed svFeed = new RssFeed(m_rssFeed);
-		m_rssFeed.setUrl(newUrl);
-		try {
-			parseRssFeed(updFeed, maxItemCount);
-		} finally {
-			m_rssFeed.setUrl(svFeed.getUrl());
-		}
+		RssItunesFeed svFeed = new RssItunesFeed(m_rssFeed);
+		parseRssFeedUrl(newUrl, updFeed, maxItemCount);
 	}
 
     /**
@@ -177,8 +186,6 @@ public class RssFeedParser extends URLHandler {
         
         /** Initialize XML parser and parse feed */
         XmlParser parser = new XmlParser(is);
-		// Account for some Chinese (and other) rss.
-        parser.setNamespace("dc");
         
         /** <?xml...*/
         int parsingResult = parser.parse();
@@ -193,21 +200,19 @@ public class RssFeedParser extends URLHandler {
            entryElementName.equals("rdf")) {
             /** Feed is in RSS format */
             formatParser = new RssFormatParser();
-            Vector items = formatParser.parse( parser, m_rssFeed,
+            m_rssFeed = formatParser.parse( parser, m_rssFeed,
 					maxItemCount, m_getTitleOnly );
-            m_rssFeed.setItems( items );
             
         } else if(entryElementName.equals("feed")) {
             /** Feed is in Atom format */
             formatParser = new AtomFormatParser();
-            Vector items = formatParser.parse( parser, m_rssFeed,
+            m_rssFeed = formatParser.parse( parser, m_rssFeed,
 					maxItemCount, m_getTitleOnly );
-            m_rssFeed.setItems( items );
             
 			// TODO handle HTML redirect
         } else {
 			//#ifdef DLOGGING
-//@			logger.severe("Unable to parse feed type:  " + entryElementName);
+			logger.severe("Unable to parse feed type:  " + entryElementName);
 			//#endif
             /** Unknown feed */
             throw new IOException("Unable to parse feed. Feed format is not supported.");
