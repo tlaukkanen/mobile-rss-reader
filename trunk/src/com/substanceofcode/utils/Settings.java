@@ -24,7 +24,12 @@
 //#define DNOLOGGING
 package com.substanceofcode.utils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
@@ -49,7 +54,15 @@ public class Settings {
     public static final int OLD_MAX_REGIONS = 1;
     public static final int MAX_REGIONS = 10;
     public static final String SETTINGS_NAME = "RssReader-setttings-vers";
-    public static final String SETTINGS_VERS = "2";
+	// The first settings did not have a version, so it ends up being
+	// "" by default
+    public static final String FIRST_SETTINGS_VERS = "";
+    public static final String ITUNES_CAPABLE_VERS = "3";
+	//#ifdef DCOMPATIBILITY2
+//@    public static final String SETTINGS_VERS = "2";
+	//#else
+    public static final String SETTINGS_VERS = ITUNES_CAPABLE_VERS;
+	//#endif
     private static Settings m_store;
     private MIDlet          m_midlet;
     private boolean         m_valuesChanged = false;
@@ -152,6 +165,10 @@ public class Settings {
 //@			if (fineLoggable) {logger.fine("region=" + region);}
 //@			if (finestLoggable) {logger.finest("numRecs=" + numRecs);}
 			//#endif
+			//#ifdef DTEST
+//@			System.out.println("region=" + region);
+//@			System.out.println("numRecs=" + numRecs);
+			//#endif
             if( numRecs == 0 ) {
 				if (region == 0) {
 					m_initialized = false;
@@ -181,7 +198,27 @@ public class Settings {
 							int blen = din.readInt();
 							byte [] bvalue = new byte[blen];
 							din.read(bvalue);
-							value = new String(bvalue);
+							try {
+								value = new String(bvalue, "UTF-8");
+							} catch (UnsupportedEncodingException e) {
+								value = new String(bvalue);
+								//#ifdef DLOGGING
+//@								logger.severe("cannot convert load name=" + name, e);
+								//#endif
+								/** Error while executing constructor */
+								System.out.println("cannot convert load name=" +
+										name + e.getMessage());
+								e.printStackTrace();
+							} catch (IOException e) {
+								value = new String(bvalue);
+								//#ifdef DLOGGING
+//@								logger.severe("cannot convert load name=" + name, e);
+								//#endif
+								/** Error while executing constructor */
+								System.out.println("cannot convert load name=" +
+										name + e.getMessage());
+								e.printStackTrace();
+							}
 						} else {
 							value = din.readUTF();
 						}
@@ -206,6 +243,20 @@ public class Settings {
 				save(1, true);
 			}
 			m_region = region;
+		} catch (Exception e) {
+			//#ifdef DLOGGING
+//@			logger.severe("load ", e);
+			//#endif
+			/** Error while executing constructor */
+			System.out.println("load " + e.getMessage());
+			e.printStackTrace();
+		} catch (Throwable e) {
+			//#ifdef DLOGGING
+//@			logger.severe("load throwable ", e);
+			//#endif
+			/** Error while executing constructor */
+			System.out.println("load throwable " + e.getMessage());
+			e.printStackTrace();
         } finally {
             if( din != null ) {
                 try { din.close(); } catch( Exception e ){}
@@ -230,11 +281,17 @@ public class Settings {
                 DataOutputStream( bout );
         
         try {
-			Object vers = null;
+			String vers = null;
             if ( m_properties.containsKey(SETTINGS_NAME) ) {
-				vers = m_properties.get(SETTINGS_NAME);
+				vers = (String)m_properties.get(SETTINGS_NAME);
 			}
+			// Put version only if it is not DCOMPATIBILITY1 which is
+			// the settings based on the first few versions before
+			// the setting store was changed as the first few
+			// versions did not have settings version in properties.
+			//#ifndef DCOMPATIBILITY1
 			m_properties.put(SETTINGS_NAME, SETTINGS_VERS);
+			//#endif
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("save region=" + region);}
 			//#endif
@@ -247,7 +304,29 @@ public class Settings {
 //@				if (finestLoggable) {logger.finest("name=" + name);}
 				//#endif
                 dout.writeUTF( name );
-				byte[] bvalue = value.getBytes();
+				byte[] bvalue;
+				try {
+					bvalue = value.getBytes("UTF-8");
+
+				} catch (UnsupportedEncodingException uee) {
+					bvalue = value.getBytes();
+					//#ifdef DLOGGING
+//@					logger.severe("cannot convert save name=" + name, uee);
+					//#endif
+					/** Error while executing constructor */
+					System.out.println("cannot convert save name=" +
+							name + uee.getMessage());
+					uee.printStackTrace();
+				} catch (IOException ioe) {
+					bvalue = value.getBytes();
+					//#ifdef DLOGGING
+//@					logger.severe("cannot convert save name=" + name, ioe);
+					//#endif
+					/** Error while executing constructor */
+					System.out.println("cannot convert save name=" +
+							name + ioe.getMessage());
+					ioe.printStackTrace();
+				}
 				//#ifdef DLOGGING
 //@				if (finestLoggable) {logger.finest("value=" + value);}
 				//#endif
@@ -262,9 +341,25 @@ public class Settings {
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("stored region=" + region);}
 			//#endif
+			//#ifndef DCOMPATIBILITY1
 			if ( vers != null) {
 				m_properties.put(SETTINGS_NAME, vers);
 			}
+			//#endif
+		} catch (Exception e) {
+			//#ifdef DLOGGING
+//@			logger.severe("catch ", e);
+			//#endif
+			/** Error while executing constructor */
+			System.out.println("catch " + e.getMessage());
+			e.printStackTrace();
+		} catch (Throwable e) {
+			//#ifdef DLOGGING
+//@			logger.severe("catch throwable ", e);
+			//#endif
+			/** Error while executing constructor */
+			System.out.println("catch throwable " + e.getMessage());
+			e.printStackTrace();
         } finally {
             try { dout.close(); } catch( Exception e ){}
             
