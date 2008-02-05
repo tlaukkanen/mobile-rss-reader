@@ -1,2 +1,3 @@
 #!/bin/sh
-printf "Location:http://rssreader.freewebpage.org/testdata/netvibes-subscriptions-opml.xml\n\n";
+#Test data
+printf "Location:http://mobilerssreader.sourceforge.net/testdata/netvibes-subscriptions-opml.xml\n\n";
