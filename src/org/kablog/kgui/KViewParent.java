@@ -22,6 +22,8 @@
  * Created on June 17, 2003, 12:23 PM
  */
 
+// Expand to define DJSR75 define
+//#define DNOJSR75
 // Expand to define test define
 //#define DNOTEST
 
