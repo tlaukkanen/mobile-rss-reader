@@ -23,6 +23,8 @@
  * 
  */
 
+// Expand to define MIDP define
+//#define DMIDP20
 // Expand to define DJSR75 define
 //#define DNOJSR75
 // Expand to define logging define
@@ -33,6 +35,8 @@
 //@
 //@import javax.microedition.lcdui.*;
 //@import javax.microedition.midlet.MIDlet;
+//@
+//@import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 //@
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -47,13 +51,11 @@
 //@ * @author  Todd C. Stellanova
 //@ */
 //@public class KFileSelectorMgr
-//#ifdef DJSR75
 //@implements KViewParent 
-//#endif
 //@{
 //@
-	//#ifdef DJSR75
-//@	protected MIDlet midlet;
+//@	protected RssReaderMIDlet midlet;
+//@	protected Form txtFrm;
 //@	protected TextField txtFld;
 //@	protected KFileSelector fileSelectorView; 
 //@    protected KViewParent viewParent;
@@ -65,25 +67,23 @@
 //@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
-	//#endif
 //@
-//@	static public boolean isJsr75Enabled() {
-//@		return (System.getProperty(
-//@					"microedition.io.file.FileConnection.version") != null);
-//@	}
-//@
-	//#ifdef DJSR75
 //@    /**
-//@     * When the camView is done capturing an image, it calls this method.
+//@     * When the we're is done capturing an XML or multi-media, it calls this
+//@	   method.
 //@     */
-//@    public void childFinished(KViewChild child) {   
+//@    final public void childFinished(KViewChild child) {   
 //@		try {
 //@			if (fileSelectorView.getSelectedURL() != null) {
 //@				txtFld.setString(fileSelectorView.getSelectedURL());
 //@			}
 //@			fileSelectorView.doCleanup();
 //@			fileSelectorView = null;
-//@			ready = true;
+			//#ifdef DMIDP20
+//@			midlet.setCurrentItem( txtFld );
+			//#else
+//@			midlet.setCurrent( txtFrm );
+			//#endif
 //@		} catch (Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("Sort dates error.", t);
@@ -94,39 +94,38 @@
 //@		}
 //@	}
 //@        
-//@	public void doLaunchSelector(MIDlet midlet, TextField txtFld) {
+//@	/* Start the file selector list. */
+//@	final public void doLaunchSelector(RssReaderMIDlet midlet, Form txtFrm, TextField txtFld) {
 //@
 //@		System.out.println("doLaunchSelector...");
 //@		this.midlet = midlet;
+//@		this.txtFrm = txtFrm;
 //@		this.txtFld = txtFld;
 //@
 //@		fileSelectorView = null;
 //@
-//@		if (isJsr75Enabled())
+//@		try {
+//@			fileSelectorView = KFileSelectorFactory.getInstance(
+//@					midlet, "Find import file", null, "/icons" );
+//@			fileSelectorView.setViewParent(this);
+//@			Display.getDisplay(midlet).setCurrent((List)fileSelectorView);
+//@		}
+//@		catch (Exception ex)
 //@		{
-//@			try {
-//@				fileSelectorView = KFileSelectorFactory.getInstance(
-//@						midlet, "Find import file", null, "/icons" );
-//@				fileSelectorView.setViewParent(this);
-//@				Display.getDisplay(midlet).setCurrent((List)fileSelectorView);
-//@			}
-//@			catch (Exception ex)
-//@			{
-//@				if (bDebug) System.out.println("### selector fail: " + ex);
-//@			}
+//@			if (bDebug) System.out.println("### selector fail: " + ex);
 //@		}
 //@
 //@	}//doLaunchSelector
 //@
 //@	/** We've updated the child's status.
 //@	 */
-//@	public void childStatusChanged(KViewChild child, int statusType, int status) {
+//@	final public void childStatusChanged(KViewChild child, int statusType, int status) {
 //@		if (bDebug) System.out.println("Child status changed: " + status);
 //@	} 
 //@
 //@    /** @param newView object o make visible, if possible.
 //@     */
-//@    public void reqSetVisible(Displayable newView) {
+//@    final public void reqSetVisible(Displayable newView) {
 //@    	if (viewParent != null) {
 //@			viewParent.reqSetVisible(newView);
 //@		} else {
@@ -136,18 +135,20 @@
 //@    
 //@    /** @param The callback client interested in receiving finished status.
 //@     */
-//@    public void setViewParent(KViewParent parent) {
+//@    final public void setViewParent(KViewParent parent) {
 //@        this.viewParent = parent;
 //@    }
 //@    
 //@    /** 
 //@     Display a debug message somehow
 //@     */
-//@    public void displayDbgMsg(String msg, AlertType type) {
+//@    final public void displayDbgMsg(String msg, AlertType type) {
 //@         if (bDebug) System.out.println("dbgMsg: " + msg);
 //@	}
 //@
-//@    public void addDeferredAction(Runnable runny)
+//@	/* Add a deferred action.  This is either passed on to our parent or
+//@	   run as a thread now. */
+//@    final public void addDeferredAction(Runnable runny)
 //@    {
 //@    	if (viewParent != null) {
 //@			viewParent.addDeferredAction(runny);
@@ -156,10 +157,5 @@
 //@		}
 //@    }
 //@
-//@    public boolean isReady() {
-//@        return (ready);
-//@    }
-//@
-	//#endif
 //@}
 //#endif
