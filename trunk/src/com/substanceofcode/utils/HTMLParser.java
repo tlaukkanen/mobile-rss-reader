@@ -89,7 +89,8 @@ public class HTMLParser extends XmlParser {
 							//#ifdef DLOGGING
 //@							if (finerLoggable) {logger.finer("Body found without encoding set.");}
 							//#endif
-							m_encodingUtil.getEncoding("ISO-8859-1");
+							m_encodingUtil.getEncoding(m_fileEncoding,
+									"ISO-8859-1");
 							m_docEncoding = m_encodingUtil.getDocEncoding();
 							m_encoding_set = true;
 						}
@@ -122,7 +123,8 @@ public class HTMLParser extends XmlParser {
 							//#ifdef DLOGGING
 //@							if (finerLoggable) {logger.finer("encoding=" + encoding);}
 							//#endif
-							m_encodingUtil.getEncoding(encoding);
+							m_encodingUtil.getEncoding(m_fileEncoding,
+									encoding);
 							m_docEncoding = m_encodingUtil.getDocEncoding();
 							m_encoding_set = true;
 						} else {
