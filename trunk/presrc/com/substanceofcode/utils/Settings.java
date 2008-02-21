@@ -195,7 +195,7 @@ public class Settings {
 						//#endif
                         String value;
 						if (currentSettings) {
-							int blen = din.readInt();
+							final int blen = din.readInt();
 							byte [] bvalue = new byte[blen];
 							din.read(bvalue);
 							try {
