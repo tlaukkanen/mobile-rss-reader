@@ -92,6 +92,8 @@ public class KFileSelectorImpl
     private boolean finerLoggable = logger.isLoggable(Level.FINER);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
+
+	/* Create the list and initialization. */
 	public KFileSelectorImpl()
 	{
 		super(null, List.IMPLICIT);
@@ -136,6 +138,7 @@ public class KFileSelectorImpl
 
 	} //constructor
 
+	/* Get image.  Need retry to handle sometimes failure. */
 	private Image getImage(String imagePath) {
 		Image rtnImage = null;
 
@@ -144,7 +147,6 @@ public class KFileSelectorImpl
 				// createImage("/icons/(image)") does not always work
 				// with the emulator.  so, I do an alternate which is
 				// effectively the same thing.
-				rtnImage = Image.createImage(imagePath);
 				rtnImage = Image.createImage(imagePath);
 			} catch(IOException e) {
 				//#ifdef DMIDP20
@@ -173,6 +175,7 @@ public class KFileSelectorImpl
 		}
 	}
 
+	/* Initialize.  Get images. */
 	public void init() {
 		//#ifdef DTEST
 		if (bDebug) System.out.println("MFS load images....");
@@ -196,6 +199,7 @@ public class KFileSelectorImpl
 		init();
 	}
 
+	/* Thread run method used to execute actions.  */
 	public void run() {
 		try {
 			while (true) {
@@ -263,8 +267,6 @@ public class KFileSelectorImpl
 	}//setViewParent
 
 
-
-
 	/**
 	 * Cleanup any allocated resources immediately.
 	 */
@@ -316,6 +318,7 @@ public class KFileSelectorImpl
 	}//commandAction
 
 
+	/* Show current or all root directories.  */
 	public void resetRoots()
 	{
 		//#ifdef DTEST
@@ -357,6 +360,7 @@ public class KFileSelectorImpl
 
 
 
+	/* Display all roots. */
 	protected void displayAllRoots()
 	{
 		//#ifdef DTEST
@@ -382,6 +386,7 @@ public class KFileSelectorImpl
 
 
 
+	/* Load roots into rootsList array. */
 	protected void loadRoots()
 	{
 		//#ifdef DTEST
@@ -409,6 +414,7 @@ public class KFileSelectorImpl
 	}//loadRoots
 
 
+	/* Open the selected directory or file. */
 	protected void openSelected()
 	{
 
@@ -562,6 +568,8 @@ public class KFileSelectorImpl
 
 					//parent.childFinished(this);
 
+					// Clean up in separate thread.  This also saves
+					// the selectedURL and sends childFinished.
 					parent.addDeferredAction(new KFileSelectorKicker(this));
 
 				}
@@ -576,6 +584,7 @@ public class KFileSelectorImpl
 	}//openSelected
 
 
+	/* Finish completion. */
 	protected void doNotifyOpComplete() {
 
 		if (null != currentRoot)
@@ -596,6 +605,7 @@ public class KFileSelectorImpl
 	}
 
 
+	/* Display the current root. */
 	protected void displayCurrentRoot()
 	{
 		//#ifdef DTEST
@@ -668,6 +678,7 @@ public class KFileSelectorImpl
 
 	}//displayCurrentRoot
 
+	/* Get the selected file name. */
 	public String getFileName()
 	{
 		return selectedFile;
@@ -730,6 +741,7 @@ public class KFileSelectorImpl
 		return thumbImage;
 	}//getThumbnail
 
+	/* Get data from the selected file. */
 	public byte[] getFileData()
 	{
 
@@ -833,6 +845,7 @@ public class KFileSelectorImpl
 	}//getFileData
 
 
+	/* Method to listen for changes in root. */
 	public void rootChanged(int changeType, String strArg)
 	{
 		//#ifdef DTEST
@@ -848,14 +861,18 @@ public class KFileSelectorImpl
 		//#endif
 	}
 
+	/* Get selected URL. */
 	public String getSelectedURL() {
 		return (selectedURL);
 	}
 
+	/* Set list of file patterns to add to file list.  If null, all files
+	   are selected. */
     public void setFilePatterns(String[] filePatterns) {
         this.filePatterns = filePatterns;
     }
 
+	/* Set list of file patterns to add to file list.  */
     public String[] getFilePatterns() {
         return (filePatterns);
     }
@@ -870,10 +887,12 @@ public class KFileSelectorImpl
 
 } //class KFileSelectorImpl
 
-class KFileSelectorKicker
+/* Class to handle the completion of the OP through a thread. */
+final class KFileSelectorKicker
 implements Runnable
 {
 	
+	/* Create.  Save target to run. */
 	public KFileSelectorKicker(KFileSelectorImpl aTarget) {
 		
 		target = aTarget;
@@ -881,6 +900,7 @@ implements Runnable
 	}
 
 	
+	/* Complete the Op when we run if we have a target.  */
 	public void run() {
 		
 		if (null != target) {
