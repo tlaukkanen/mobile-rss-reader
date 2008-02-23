@@ -35,7 +35,6 @@ import javax.microedition.lcdui.*;
 
 
 /**
-:f /opt/WTK2.5.1/apps/RSSReader/mobile-rss-reader/presrc/org/kablog/kgui/KViewParent.java
  *
  * @author  Todd C. Stellanova
  * @version
