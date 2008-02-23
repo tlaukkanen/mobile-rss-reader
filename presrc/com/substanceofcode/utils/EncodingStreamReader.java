@@ -30,6 +30,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
+import com.substanceofcode.utils.EncodingUtil;
+
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.Level;
@@ -43,7 +45,7 @@ import net.sf.jlogmicro.util.logging.Level;
 public class EncodingStreamReader extends InputStreamReader {
     
     private InputStreamReader m_inputStream = null;
-    private String fileEncoding = "ISO8859_1";  // See below
+    private String m_fileEncoding = "ISO8859_1";  // See below
     private boolean modEncoding = true;  // First mod encoding to account for
 	                                    // unexpected UTF-16.
     private boolean modUTF16 = false;  // First mod encoding to account for
@@ -58,35 +60,37 @@ public class EncodingStreamReader extends InputStreamReader {
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
-    /** Creates a new instance of EncodingUtil */
+    /** Creates a new instance of EncodingStreamReader */
     public EncodingStreamReader(InputStream inputStream) {
 		super((InputStream)new ByteArrayInputStream(" ".getBytes()));
 		// Open with as this will allow us to read the bytes from any
 		// encoding., then after we get the prologue, convert the strings
 		// with new String(...,encoding);
 		try {
-			m_inputStream = new InputStreamReader(inputStream, "ISO8859_1");
+			m_inputStream = new InputStreamReader(inputStream,
+					EncodingUtil.getIsoEncoding());
+			m_fileEncoding = EncodingUtil.getIsoEncoding();
 		} catch (UnsupportedEncodingException e) {
 //#ifdef DLOGGING
 			logger.severe("init read Could not open stream with encoding " +
-						  fileEncoding);
+						  m_fileEncoding);
 //#endif
 			System.out.println("init read Could not open stream with " +
-					           "encoding " + fileEncoding + e + " " +
+					           "encoding " + m_fileEncoding + e + " " +
 					           e.getMessage());
 			try {
-				fileEncoding = "UTF-8";
+				m_fileEncoding = "UTF-8";
 				m_inputStream = new InputStreamReader(inputStream, "UTF-8");
 			} catch (UnsupportedEncodingException e2) {
 //#ifdef DLOGGING
 				logger.severe("init read Could not open stream with " +
-							  "encoding " + fileEncoding);
+							  "encoding " + m_fileEncoding);
 //#endif
 				System.out.println("init read Could not open stream with " +
-						           "encoding " + fileEncoding + e2 + " " +
+						           "encoding " + m_fileEncoding + e2 + " " +
 						           e2.getMessage());
 				m_inputStream = new InputStreamReader(inputStream);
-				fileEncoding = "";
+				m_fileEncoding = "";
 				modEncoding = false;
 			}
 		}
@@ -183,11 +187,11 @@ public class EncodingStreamReader extends InputStreamReader {
     }
 
     public void setFileEncoding(String fileEncoding) {
-        this.fileEncoding = fileEncoding;
+        this.m_fileEncoding = fileEncoding;
     }
 
     public String getFileEncoding() {
-        return (fileEncoding);
+        return (m_fileEncoding);
     }
 
     public void setGetPrologue(boolean m_getPrologue) {
