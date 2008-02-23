@@ -20,10 +20,14 @@
  *
  */
 
-// Expand to define logging define
-//#define DNOLOGGING
+// Expand to define MIDP define
+//#define DMIDP20
+// Expand to define DJSR75 define
+//#define DNOJSR75
 // Expand to define itunes define
 //#define DNOITUNES
+// Expand to define logging define
+//#define DNOLOGGING
 // Expand to define test ui define
 //#define DNOTESTUI
 
@@ -83,6 +87,7 @@ public class SettingsForm extends Form implements CommandListener {
     private ChoiceGroup m_useTextBox;
     private ChoiceGroup m_feedListOpen;
     private ChoiceGroup m_itunesEnabled;
+    private TextField m_wordCountField;
     private StringItem m_pgmMidpVers;
     private StringItem m_pgCldVers;
     private StringItem m_pgmJsr75;
@@ -93,6 +98,7 @@ public class SettingsForm extends Form implements CommandListener {
     private StringItem m_pgmMemAvailItem;
     private StringItem m_memUsedItem;
     private StringItem m_memAvailItem;
+    private StringItem m_threadsUsed;
 	//#ifdef DLOGGING
 //@    private TextField m_logLevelField;
 //@    private Logger logger = Logger.getLogger("SettingsForm");
@@ -157,6 +163,13 @@ public class SettingsForm extends Form implements CommandListener {
 		m_feedListOpen.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_feedListOpen );
+        int maxWordCount = settings.getMaxWordCountInDesc();
+        m_wordCountField = new TextField("Max word count desc abbrev",
+                String.valueOf(maxCount), 3, TextField.NUMERIC);
+		//#ifdef DMIDP20
+		m_wordCountField.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_wordCountField );
         m_pgmMidpVers = new StringItem("Program MIDP version:",
 		//#ifdef DMIDP20
 				"MIDP-2.0");
@@ -235,12 +248,20 @@ public class SettingsForm extends Form implements CommandListener {
 		m_memAvailItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_memAvailItem );
+        m_threadsUsed = new StringItem("Active Threads:", "");
+		//#ifdef DMIDP20
+		m_threadsUsed.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_threadsUsed );
 		updateForm();
     }
     
+	/* Update form items that change per run. */
 	public void updateForm() {
 		Hashtable memInfo = null;
         RssReaderSettings settings = m_midlet.getSettings();
+        int maxCount = settings.getMaximumItemCountInFeed();
+        m_itemCountField.setString(String.valueOf(maxCount));
         boolean markUnreadItems = settings.getMarkUnreadItems();
 		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
 		m_markUnreadItems.setSelectedFlags( selectedItems );
@@ -260,11 +281,11 @@ public class SettingsForm extends Form implements CommandListener {
 			memInfo = new Hashtable(0);
 		}
 
-		m_pgmMemUsedItem.setText(
-				(Runtime.getRuntime().totalMemory() -
-				Runtime.getRuntime().freeMemory())/1024 + "kb");
-		m_pgmMemAvailItem.setText(
-				Runtime.getRuntime().freeMemory()/1024 + "kb");
+		System.gc();
+		long totalMem = Runtime.getRuntime().totalMemory();
+		long freeMem = Runtime.getRuntime().freeMemory();
+		m_pgmMemUsedItem.setText(((totalMem - freeMem)/1024L) + "kb");
+		m_pgmMemAvailItem.setText((freeMem/1024L) + "kb");
         if (memInfo.size() == 0) {
 			m_memUsedItem.setText("0");
 			m_memAvailItem.setText("0");
@@ -272,6 +293,7 @@ public class SettingsForm extends Form implements CommandListener {
 			m_memUsedItem.setText((String)memInfo.get("used"));
 			m_memAvailItem.setText((String)memInfo.get("available"));
 		}
+		m_threadsUsed.setText(Integer.toString(Thread.activeCount()));
 	}
 
     public void commandAction(Command command, Displayable displayable) {
@@ -296,6 +318,8 @@ public class SettingsForm extends Form implements CommandListener {
 				//#endif
 				boolean feedListOpen = m_feedListOpen.isSelected(0);
 				settings.setFeedListOpen( feedListOpen);
+                int maxWordCount = Integer.parseInt( m_wordCountField.getString() );
+                settings.setMaxWordCountInDesc( maxWordCount );
 				//#ifdef DLOGGING
 //@				try {
 //@					String logLevel =
