@@ -22,9 +22,9 @@
  */
 
 // Expand to define test define
-//#define DTEST
+//#define DNOTEST
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 package com.substanceofcode.utils;
 
 import java.io.IOException;
@@ -37,8 +37,8 @@ import java.util.Vector;
 import com.substanceofcode.utils.CauseException;
 
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -165,12 +165,12 @@ public class EncodingUtil {
 	Vector m_excs = null; // Exceptions encountered
 
 	//#ifdef DTEST
-    final private static boolean m_debugTrace = false;  // True if want to trace more
+//@    final private static boolean m_debugTrace = false;  // True if want to trace more
 	//#endif
 	//#ifdef DLOGGING
-    final private Logger logger = Logger.getLogger("EncodingUtil");
-    final private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    final private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    final private Logger logger = Logger.getLogger("EncodingUtil");
+//@    final private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    final private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of EncodingUtil */
@@ -306,7 +306,7 @@ public class EncodingUtil {
 				}
 				m_excs.addElement(ce);
 				//#ifdef DLOGGING
-				logger.severe(ce.getMessage(), e);
+//@				logger.severe(ce.getMessage(), e);
 				//#endif
 				System.out.println(ce.getMessage());
 				// If encoding problem, use the main encoding as it is
@@ -335,7 +335,7 @@ public class EncodingUtil {
 							m_docEncoding, e2);
 					m_excs.addElement(ce2);
 					//#ifdef DLOGGING
-					logger.severe(ce2.getMessage(), e2);
+//@					logger.severe(ce2.getMessage(), e2);
 					//#endif
 					System.out.println(ce2.getMessage());
 					m_docEncoding = "";
@@ -346,19 +346,19 @@ public class EncodingUtil {
 		m_encodingStreamReader.setModUTF16(modUTF16);
 
 		//#ifdef DLOGGING
-        if (fineLoggable) {logger.fine("hasIso8859Encoding=" + hasIso8859Encoding);}
-        if (fineLoggable) {logger.fine("isoEncoding=" + isoEncoding);}
-        if (fineLoggable) {logger.fine("hasWinEncoding=" + hasWinEncoding);}
-        if (fineLoggable) {logger.fine("winEncoding=" + winEncoding);}
-        if (fineLoggable) {logger.fine("encoding=" + encoding);}
-        if (fineLoggable) {logger.fine("cencoding=" + cencoding);}
-        if (fineLoggable) {logger.fine("docEncoding=" + docEncoding);}
-        if (fineLoggable) {logger.fine("m_docEncoding=" + m_docEncoding);}
-        if (fineLoggable) {logger.fine("fileEncoding=" + fileEncoding);}
-        if (fineLoggable) {logger.fine("m_windows=" + m_windows);}
-        if (fineLoggable) {logger.fine("m_utf=" + m_utf);}
-        if (fineLoggable) {logger.fine("modEncoding=" + modEncoding);}
-        if (fineLoggable) {logger.fine("modUTF16=" + modUTF16);}
+//@        if (fineLoggable) {logger.fine("hasIso8859Encoding=" + hasIso8859Encoding);}
+//@        if (fineLoggable) {logger.fine("isoEncoding=" + isoEncoding);}
+//@        if (fineLoggable) {logger.fine("hasWinEncoding=" + hasWinEncoding);}
+//@        if (fineLoggable) {logger.fine("winEncoding=" + winEncoding);}
+//@        if (fineLoggable) {logger.fine("encoding=" + encoding);}
+//@        if (fineLoggable) {logger.fine("cencoding=" + cencoding);}
+//@        if (fineLoggable) {logger.fine("docEncoding=" + docEncoding);}
+//@        if (fineLoggable) {logger.fine("m_docEncoding=" + m_docEncoding);}
+//@        if (fineLoggable) {logger.fine("fileEncoding=" + fileEncoding);}
+//@        if (fineLoggable) {logger.fine("m_windows=" + m_windows);}
+//@        if (fineLoggable) {logger.fine("m_utf=" + m_utf);}
+//@        if (fineLoggable) {logger.fine("modEncoding=" + modEncoding);}
+//@        if (fineLoggable) {logger.fine("modUTF16=" + modUTF16);}
 		//#endif
     }
 
@@ -407,19 +407,19 @@ public class EncodingUtil {
 							if (m_winIsoConvx80[(int)cchr - 0x80] != 0x01) {
 								ntext[jc++] = m_winIsoConvx80[(int)cchr - 0x80];
 								//#ifdef DTEST
-								if (m_debugTrace) {System.out.println("array cchr,conv=" + cchr + "," + Integer.toHexString(cchr) + "," + ntext[jc - 1] + "," + Integer.toHexString(ntext[jc - 1]));}
+//@								if (m_debugTrace) {System.out.println("array cchr,conv=" + cchr + "," + Integer.toHexString(cchr) + "," + ntext[jc - 1] + "," + Integer.toHexString(ntext[jc - 1]));}
 								//#endif
 							}
 						} else {
 							ntext[jc++] = cchr;
 							//#ifdef DTEST
-							if (m_debugTrace) {System.out.println("cchr,conv=" + cchr + "," + Integer.toHexString(cchr) + "," + ntext[jc - 1] + "," + Integer.toHexString(ntext[jc - 1]));}
+//@							if (m_debugTrace) {System.out.println("cchr,conv=" + cchr + "," + Integer.toHexString(cchr) + "," + ntext[jc - 1] + "," + Integer.toHexString(ntext[jc - 1]));}
 							//#endif
 						}
 					}
 					text = new String(ntext, 0, jc);
 					//#ifdef DTEST
-					if (m_debugTrace) {System.out.println( "text,len=" + text + "," + text.length());}
+//@					if (m_debugTrace) {System.out.println( "text,len=" + text + "," + text.length());}
 					//#endif
 				}
 			} else if (isUtf && !midpUni) {
@@ -428,8 +428,8 @@ public class EncodingUtil {
 			text = text.replace(CNON_BREAKING_SP, ' ');
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-            logger.severe("replaceSpChars error ", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@            logger.severe("replaceSpChars error ", t);
 			//#endif
             System.out.println("replaceSpChars error " + t + "," +
 					           t.getMessage());
@@ -512,8 +512,8 @@ public class EncodingUtil {
 			text = new String(ntext, 0, jc);
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-            logger.severe("replaceSpUniWinChars error ", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@            logger.severe("replaceSpUniWinChars error ", t);
 			//#endif
             System.out.println("replaceSpUniWinChars error " + t + "," +
 					           t.getMessage());
@@ -585,8 +585,8 @@ public class EncodingUtil {
 							  s.substring(index02 + 1);
 				} catch (NumberFormatException e) {
 					//#ifdef DLOGGING
-					Logger logger = Logger.getLogger("EncodingUtil");
-					logger.severe("replaceNumEntity NumberFormatException error  for " + snum, e);
+//@					Logger logger = Logger.getLogger("EncodingUtil");
+//@					logger.severe("replaceNumEntity NumberFormatException error  for " + snum, e);
 					//#endif
 					System.out.println("replaceNumEntity error " + e + "," +
 									   e.getMessage());
@@ -596,8 +596,8 @@ public class EncodingUtil {
 			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-            logger.severe("replaceNumEntity error ", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@            logger.severe("replaceNumEntity error ", t);
 			//#endif
             System.out.println("replaceNumEntity error " + t + "," +
 					           t.getMessage());
@@ -649,7 +649,7 @@ public class EncodingUtil {
 	public static Hashtable initAlphaIso88591() {
 
 		//#ifdef DTEST
-		System.out.println( "m_midpIso=" + m_midpIso);
+//@		System.out.println( "m_midpIso=" + m_midpIso);
 		//#endif
 		final char isoLatin1Values[] =
 			{0xC0, 0xC1, 0xC2, 0xC3, 0xC4,
@@ -674,8 +674,8 @@ public class EncodingUtil {
 			initHtmlCommEnts(convEntities);
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("initAlphaIso88591", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("initAlphaIso88591", t);
 			//#endif
 		}
 		return convEntities;
@@ -687,7 +687,7 @@ public class EncodingUtil {
 	public static Hashtable initAlphaCp1252() {
 
 		//#ifdef DTEST
-		System.out.println( "m_midpWin=" + m_midpWin);
+//@		System.out.println( "m_midpWin=" + m_midpWin);
 		//#endif
 		char isoLatin1Values[] =
 			{0xC0, 0xC1, 0xC2, 0xC3, 0xC4,
@@ -722,8 +722,8 @@ public class EncodingUtil {
 			initHtmlCommEnts(convEntities);
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("initAlphaCp1252", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("initAlphaCp1252", t);
 			//#endif
 		}
 		return convEntities;
@@ -734,7 +734,7 @@ public class EncodingUtil {
 	public static void initEntVals(Hashtable convEntities, String[] entities, char[] entValues) {
 		try {
 			//#ifdef DTEST
-			System.out.println( "Entities, values len=" + entities.length + "," + entValues.length);
+//@			System.out.println( "Entities, values len=" + entities.length + "," + entValues.length);
 			//#endif
 			for (int ic = 0; (ic < entities.length) && (ic < entValues.length);
 					ic++) {
@@ -746,16 +746,16 @@ public class EncodingUtil {
 					convEntities.put(entities[ic], value);
 				} catch (Throwable t) {
 					//#ifdef DLOGGING
-					Logger logger = Logger.getLogger("EncodingUtil");
-					logger.severe("initEntVals convert error bvalue=" +
-							Integer.toHexString(cvalue[0]), t);
+//@					Logger logger = Logger.getLogger("EncodingUtil");
+//@					logger.severe("initEntVals convert error bvalue=" +
+//@							Integer.toHexString(cvalue[0]), t);
 					//#endif
 				}
 			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("initEntVals", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("initEntVals", t);
 			//#endif
 		}
 	}
@@ -770,7 +770,7 @@ public class EncodingUtil {
 		char [] convTable = new char[0x9f - 0x80 + 1];
 		try {
 			//#ifdef DTEST
-			System.out.println( "convTable.length=" + convTable.length);
+//@			System.out.println( "convTable.length=" + convTable.length);
 			//#endif
 			convTable[0x80 - 0x80] = 0x20AC; //EURO SIGN
 			convTable[0x81 - 0x80] = 0x01;
@@ -806,8 +806,8 @@ public class EncodingUtil {
 			convTable[0x9F - 0x80] = 0x0178; //LATIN CAPITAL LETTER Y WITH DIAERESIS
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("initWinIsoConv", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("initWinIsoConv", t);
 			//#endif
 		}
 		return convTable;
@@ -823,7 +823,7 @@ public class EncodingUtil {
 		char [] convTable = new char[0x9f - 0x80 + 1];
 		try {
 			//#ifdef DTEST
-			System.out.println( "convTable.length=" + convTable.length);
+//@			System.out.println( "convTable.length=" + convTable.length);
 			//#endif
 			for (int ic = 0; ic < convTable.length; ic++) {
 				char cc = (char)(ic + 0x80);
@@ -856,8 +856,8 @@ public class EncodingUtil {
 			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("initUniWinConvx80", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("initUniWinConvx80", t);
 			//#endif
 		}
 		return convTable;
@@ -882,31 +882,31 @@ public class EncodingUtil {
 				rtn = convStr.charAt(0) == CLEFT_SGL_QUOTE;
 			} catch (UnsupportedEncodingException e) {
 				//#ifdef DTEST
-				System.out.println( "Unsupported encoding Cp1252");
+//@				System.out.println( "Unsupported encoding Cp1252");
 				//#endif
 				//#ifdef DLOGGING
-				Logger logger = Logger.getLogger("EncodingUtil");
-				logger.severe("UnsupportedEncodingException Cp1252", e);
+//@				Logger logger = Logger.getLogger("EncodingUtil");
+//@				logger.severe("UnsupportedEncodingException Cp1252", e);
 				//#endif
 				try {
 					String convStr2 = new String(blftSgl, "Cp1252");
 					rtn = convStr2.charAt(0) == CLEFT_SGL_QUOTE;
 				} catch (UnsupportedEncodingException e2) {
 					//#ifdef DTEST
-					System.out.println( "Unsupported encoding WINDOWS-1252");
+//@					System.out.println( "Unsupported encoding WINDOWS-1252");
 					//#endif
 					//#ifdef DLOGGING
-					logger.severe("UnsupportedEncodingException Cp1252", e2);
+//@					logger.severe("UnsupportedEncodingException Cp1252", e2);
 					//#endif
 				}
 			}
 			//#ifdef DTEST
-			System.out.println( "initConvWinUni()=" + rtn);
+//@			System.out.println( "initConvWinUni()=" + rtn);
 			//#endif
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("initConvWinUni", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("initConvWinUni", t);
 			//#endif
 		}
 		return rtn;
@@ -920,28 +920,28 @@ public class EncodingUtil {
 				return "ISO8859_1";
 			} catch (UnsupportedEncodingException e) {
 				//#ifdef DTEST
-				System.out.println( "Unsupported encoding ISO8859_1");
+//@				System.out.println( "Unsupported encoding ISO8859_1");
 				//#endif
 				//#ifdef DLOGGING
-				Logger logger = Logger.getLogger("EncodingUtil");
-				logger.severe("initIsoEncoding UnsupportedEncodingException ISO8859_1", e);
+//@				Logger logger = Logger.getLogger("EncodingUtil");
+//@				logger.severe("initIsoEncoding UnsupportedEncodingException ISO8859_1", e);
 				//#endif
 				try {
 					String convStr2 = new String("a".getBytes(), "ISO-8859-1");
 					return "ISO-8859-1";
 				} catch (UnsupportedEncodingException e2) {
 					//#ifdef DTEST
-					System.out.println("initIsoEncoding Unsupported encoding ISO-8859-1");
+//@					System.out.println("initIsoEncoding Unsupported encoding ISO-8859-1");
 					//#endif
 					//#ifdef DLOGGING
-					logger.severe("initIsoEncoding UnsupportedEncodingException ISO-8859-1", e2);
+//@					logger.severe("initIsoEncoding UnsupportedEncodingException ISO-8859-1", e2);
 					//#endif
 				}
 			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("initIsoEncoding initConvWinUni", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("initIsoEncoding initConvWinUni", t);
 			//#endif
 		}
 		return "ISO8859_1";
@@ -962,11 +962,11 @@ public class EncodingUtil {
 				}
 				m_statExcs.addElement(ce);
 				//#ifdef DTEST
-				System.out.println(ce.getMessage());
+//@				System.out.println(ce.getMessage());
 				//#endif
 				//#ifdef DLOGGING
-				Logger logger = Logger.getLogger("EncodingUtil");
-				logger.severe(ce.getMessage(), e);
+//@				Logger logger = Logger.getLogger("EncodingUtil");
+//@				logger.severe(ce.getMessage(), e);
 				//#endif
 				try {
 					String convStr2 = new String("a".getBytes(), "WINDOWS-1252");
@@ -978,17 +978,17 @@ public class EncodingUtil {
 							" trying to convert encoding WINDOWS-1252.", e2);
 					m_statExcs.addElement(ce2);
 					//#ifdef DTEST
-					System.out.println(ce2.getMessage());
+//@					System.out.println(ce2.getMessage());
 					//#endif
 					//#ifdef DLOGGING
-					logger.severe(ce2.getMessage(), e2);
+//@					logger.severe(ce2.getMessage(), e2);
 					//#endif
 				}
 			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("initWinEncoding() initConvWinUni", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("initWinEncoding() initConvWinUni", t);
 			//#endif
 		}
 		return "Cp1252";
@@ -1009,11 +1009,11 @@ public class EncodingUtil {
 				}
 				m_statExcs.addElement(ce);
 				//#ifdef DTEST
-				System.out.println(ce.getMessage());
+//@				System.out.println(ce.getMessage());
 				//#endif
 				//#ifdef DLOGGING
-				Logger logger = Logger.getLogger("EncodingUtil");
-				logger.severe(ce.getMessage(), e);
+//@				Logger logger = Logger.getLogger("EncodingUtil");
+//@				logger.severe(ce.getMessage(), e);
 				//#endif
 				try {
 					String convStr2 = new String("a".getBytes(), "WINDOWS-1252");
@@ -1025,17 +1025,17 @@ public class EncodingUtil {
 							" trying to convert encoding WINDOWS-1252.", e2);
 					m_statExcs.addElement(ce2);
 					//#ifdef DTEST
-					System.out.println(ce2.getMessage());
+//@					System.out.println(ce2.getMessage());
 					//#endif
 					//#ifdef DLOGGING
-					logger.severe(ce2.getMessage(), e2);
+//@					logger.severe(ce2.getMessage(), e2);
 					//#endif
 				}
 			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("hasWinEncoding initConvWinUni", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("hasWinEncoding initConvWinUni", t);
 			//#endif
 		}
 		return false;
@@ -1049,28 +1049,28 @@ public class EncodingUtil {
 				return true;
 			} catch (UnsupportedEncodingException e) {
 				//#ifdef DTEST
-				System.out.println( "Unsupported encoding ISO8859_1");
+//@				System.out.println( "Unsupported encoding ISO8859_1");
 				//#endif
 				//#ifdef DLOGGING
-				Logger logger = Logger.getLogger("EncodingUtil");
-				logger.severe("hasIso8859Encoding UnsupportedEncodingException ISO8859_1", e);
+//@				Logger logger = Logger.getLogger("EncodingUtil");
+//@				logger.severe("hasIso8859Encoding UnsupportedEncodingException ISO8859_1", e);
 				//#endif
 				try {
 					String convStr2 = new String("a".getBytes(), "ISO-8859-1");
 					return true;
 				} catch (UnsupportedEncodingException e2) {
 					//#ifdef DTEST
-					System.out.println("hasIso8859Encoding Unsupported encoding ISO-8859-1");
+//@					System.out.println("hasIso8859Encoding Unsupported encoding ISO-8859-1");
 					//#endif
 					//#ifdef DLOGGING
-					logger.severe("initIsoEncoding UnsupportedEncodingException ISO-8859-1", e2);
+//@					logger.severe("initIsoEncoding UnsupportedEncodingException ISO-8859-1", e2);
 					//#endif
 				}
 			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("EncodingUtil");
-			logger.severe("hasIso8859Encoding initConvWinUni", t);
+//@			Logger logger = Logger.getLogger("EncodingUtil");
+//@			logger.severe("hasIso8859Encoding initConvWinUni", t);
 			//#endif
 		}
 		return false;
@@ -1101,34 +1101,34 @@ public class EncodingUtil {
     }
 
 	//#ifdef DTEST
-    public static String[] getIsoCommonEntities() {
-        return (m_isoCommonEntities);
-    }
-
-    public static Hashtable getConvIso88591() {
-        return (m_convIso88591);
-    }
-
-    public static Hashtable getConvCp1252() {
-        return (m_convCp1252);
-    }
-
-    static public String[] getIsoSpecialEntities() {
-        return (m_isoSpecialEntities);
-    }
-
-    static public String getWinEncoding() {
-        return (m_winEncoding);
-    }
-
-    public static boolean isConvWinUni() {
-        return (m_convWinUni);
-    }
-
-    public static boolean isHasWinEncoding() {
-        return (m_hasWinEncoding);
-    }
-
+//@    public static String[] getIsoCommonEntities() {
+//@        return (m_isoCommonEntities);
+//@    }
+//@
+//@    public static Hashtable getConvIso88591() {
+//@        return (m_convIso88591);
+//@    }
+//@
+//@    public static Hashtable getConvCp1252() {
+//@        return (m_convCp1252);
+//@    }
+//@
+//@    static public String[] getIsoSpecialEntities() {
+//@        return (m_isoSpecialEntities);
+//@    }
+//@
+//@    static public String getWinEncoding() {
+//@        return (m_winEncoding);
+//@    }
+//@
+//@    public static boolean isConvWinUni() {
+//@        return (m_convWinUni);
+//@    }
+//@
+//@    public static boolean isHasWinEncoding() {
+//@        return (m_hasWinEncoding);
+//@    }
+//@
 	//#endif
 
     static public String getIsoEncoding() {
