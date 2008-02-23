@@ -129,7 +129,7 @@ public class StringUtil {
             int idx = text.indexOf('<');
             if (idx == -1) return text;
             
-            StringBuffer plainText = new StringBuffer("");
+            StringBuffer plainText = new StringBuffer();
             String htmlText = text;
             int htmlStartIndex = htmlText.indexOf('<');
             if(htmlStartIndex == -1) {
