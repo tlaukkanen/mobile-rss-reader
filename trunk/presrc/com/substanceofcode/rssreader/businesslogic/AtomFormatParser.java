@@ -154,7 +154,7 @@ public class AtomFormatParser implements FeedFormatParser {
             if( (elemChar == 'e') &&
 				 elementName.equals("entry") ) {
                 /** Save previous entry */
-                if(m_title.length()>0) {
+				if((m_title.length()>0) || (m_description.length()>0)) {
 					if (m_description.length() == 0) {
 						m_description = m_summary;
 					}
@@ -203,7 +203,7 @@ public class AtomFormatParser implements FeedFormatParser {
 		}
 				
         /** Save previous entry */
-        if(m_title.length()>0) {
+		if((m_title.length()>0) || (m_description.length()>0)) {
 			if (m_description.length() == 0) {
 				m_description = m_summary;
 			}
