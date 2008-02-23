@@ -45,25 +45,25 @@ import net.sf.jlogmicro.util.logging.Level;
 public class XmlParser {
     
     /** Current XML element name (eg. <title> = title) */
-    protected StringBuffer m_currentElementName = new StringBuffer("");
-    protected StringBuffer m_currentElementData = new StringBuffer("");
+    final protected StringBuffer m_currentElementName = new StringBuffer();
+    final protected StringBuffer m_currentElementData = new StringBuffer();
     protected boolean m_currentElementContainsText = false;
 	//#ifdef DTEST
     boolean m_debugTrace = false;  // True to add extra trace
 	//#endif
     protected String m_fileEncoding = "ISO8859_1";  // See EncodingUtil
-    protected String m_docEncoding = "";  // See EncodingUtil
+    protected String m_docEncoding = "";  // See EncodingUtil
     protected String m_defEncoding = "UTF-8";  // Default doc encoding
-    protected EncodingUtil m_encodingUtil = null;
+    protected EncodingUtil m_encodingUtil = null;
     protected EncodingStreamReader m_encodingStreamReader;
 	protected InputStreamReader m_inputStream;
     private String [] m_namespaces = null;
     private boolean m_getPrologue = true;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("XmlParser");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    final private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    final private boolean finerLoggable = logger.isLoggable(Level.FINER);
+    final private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Enumerations for parse function */
@@ -179,7 +179,8 @@ public class XmlParser {
 						// to treat as default UTF-8 encoding for XML.
 						if (m_getPrologue) {
 							m_getPrologue = false;
-							m_encodingUtil.getEncoding(m_defEncoding);
+							m_encodingUtil.getEncoding(m_fileEncoding,
+									m_defEncoding);
 							m_docEncoding = m_encodingUtil.getDocEncoding();
 						}
 					} else if (m_getPrologue && prologueFound) {
@@ -202,7 +203,8 @@ public class XmlParser {
 								//#endif
 								cencoding = m_defEncoding;
 							}
-							m_encodingUtil.getEncoding(cencoding);
+							m_encodingUtil.getEncoding(m_fileEncoding,
+									cencoding);
 							// Get doc encoding.  The encoding to translate
 							// the bytes into.
 							m_docEncoding = m_encodingUtil.getDocEncoding();
@@ -314,7 +316,8 @@ public class XmlParser {
 							elementNameChars, 0);
 					break;
 			}
-			String endCurrentElement = m_currentElementName.insert(0, "</").toString();
+			final String endCurrentElement = m_currentElementName.insert(
+					0, "</").toString();
 			while (((inputCharacter = is.read()) != -1) &&
 					!endParsing) {
 				c = (char)inputCharacter;
