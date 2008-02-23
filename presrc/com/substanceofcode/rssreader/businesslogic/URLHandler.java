@@ -126,7 +126,7 @@ public abstract class URLHandler {
 					 m_hc = (HttpsConnection) Connector.open( url );
 					//#else
 					 // If not supporting https, allow method to throw the
-					 // error.
+					 // error.  Some implementations do allow this to work.
 					m_hc = (HttpConnection) Connector.open( url );
 					//#endif
 				} else {
@@ -300,7 +300,12 @@ public abstract class URLHandler {
 		} catch (IOException e) { }
 		try {
 			if (m_hc != null) m_hc.close();
-		} catch (IOException e) { }
+		} catch (IOException e) {
+			//#ifdef DLOGGING
+			logger.warning("handleOpen possible bad open url error with " +
+					m_hc.getURL(), e);
+			//#endif
+		}
 		//#ifdef DJSR75
 		try {
 			if (m_fc != null) m_fc.close();
