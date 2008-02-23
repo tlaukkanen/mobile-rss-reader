@@ -21,9 +21,9 @@
  *
  */
 // Expand to define itunes define
-//#define DITUNES
+//#define DNOITUNES
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -31,8 +31,8 @@ import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -52,11 +52,11 @@ public class RssItunesFeed extends RssFeed{
     private static byte[] BANO_EXPLICIT = {BNO_EXPLICIT};
     private static String NO_EXPLICIT = new String(BANO_EXPLICIT);
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("RssItunesFeed");
+//@    private Logger logger = Logger.getLogger("RssItunesFeed");
 	//#endif
 	//#ifdef DLOGGING
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
@@ -111,14 +111,14 @@ public class RssItunesFeed extends RssFeed{
 							String summary,
 							byte explicit) {
 		//#ifdef DITUNES
-		this.m_itunes = itunes;
-		this.m_title = title;
-		this.m_description = description;
-		this.m_language = language;
-		this.m_author = author;
-		this.m_subtitle = subtitle;
-		this.m_summary = summary;
-		this.m_explicit = explicit;
+//@		this.m_itunes = itunes;
+//@		this.m_title = title;
+//@		this.m_description = description;
+//@		this.m_language = language;
+//@		this.m_author = author;
+//@		this.m_subtitle = subtitle;
+//@		this.m_summary = summary;
+//@		this.m_explicit = explicit;
 		//#endif
 	}
 
@@ -191,52 +191,52 @@ public class RssItunesFeed extends RssFeed{
 			// TODO itunes enabled
 
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("nodes.length=" + nodes.length);}
+//@			if (finestLoggable) {logger.finest("nodes.length=" + nodes.length);}
 			//#endif
 			//#ifdef DITUNES
-			int ITUNES = 0;
-			m_itunes = nodes[ITUNES].equals("1");
-			
-			if (m_itunes) {
-				int TITLE = 1;
-				m_title = nodes[TITLE];
-				if (hasPipe) {
-					m_title = m_title.replace('\n', '|');
-				}
-				
-				int DESCRIPTION = 2;
-				m_description = nodes[DESCRIPTION];
-				if (hasPipe) {
-					m_description = m_description.replace('\n', '|');
-				}
-				
-				int LANGUAGE = 3;
-				m_language = nodes[LANGUAGE];
-				
-				int AUTHOR = 4;
-				m_author = nodes[AUTHOR];
-				if (hasPipe) {
-					m_author = m_author.replace('\n', '|');
-				}
-				
-				int SUBTITLE = 5;
-				m_subtitle = nodes[SUBTITLE];
-				if (hasPipe) {
-					m_subtitle = m_subtitle.replace('\n', '|');
-				}
-				
-				int SUMMARY = 6;
-				String m_summary = nodes[SUMMARY];
-				if (hasPipe) {
-					m_summary = m_summary.replace('\n', '|');
-				}
-
-				int EXPLICIT = 7;
-				String explicit = nodes[EXPLICIT];
-				if (explicit.length() > 0) {
-					m_explicit = (byte)Integer.parseInt(explicit);
-				}
-			}
+//@			int ITUNES = 0;
+//@			m_itunes = nodes[ITUNES].equals("1");
+//@			
+//@			if (m_itunes) {
+//@				int TITLE = 1;
+//@				m_title = nodes[TITLE];
+//@				if (hasPipe) {
+//@					m_title = m_title.replace('\n', '|');
+//@				}
+//@				
+//@				int DESCRIPTION = 2;
+//@				m_description = nodes[DESCRIPTION];
+//@				if (hasPipe) {
+//@					m_description = m_description.replace('\n', '|');
+//@				}
+//@				
+//@				int LANGUAGE = 3;
+//@				m_language = nodes[LANGUAGE];
+//@				
+//@				int AUTHOR = 4;
+//@				m_author = nodes[AUTHOR];
+//@				if (hasPipe) {
+//@					m_author = m_author.replace('\n', '|');
+//@				}
+//@				
+//@				int SUBTITLE = 5;
+//@				m_subtitle = nodes[SUBTITLE];
+//@				if (hasPipe) {
+//@					m_subtitle = m_subtitle.replace('\n', '|');
+//@				}
+//@				
+//@				int SUMMARY = 6;
+//@				String m_summary = nodes[SUMMARY];
+//@				if (hasPipe) {
+//@					m_summary = m_summary.replace('\n', '|');
+//@				}
+//@
+//@				int EXPLICIT = 7;
+//@				String explicit = nodes[EXPLICIT];
+//@				if (explicit.length() > 0) {
+//@					m_explicit = (byte)Integer.parseInt(explicit);
+//@				}
+//@			}
 			//#endif
 
 			super.init(false, NBR_ITUNES_FEED_INFO, true,
@@ -256,13 +256,13 @@ public class RssItunesFeed extends RssFeed{
 		String subtitle = "";
 		String summary = "";
 		//#ifdef DITUNES
-		if (m_itunes) {
-			title = m_title.replace('|', '\n');
-			description = m_description.replace('|', '\n');
-			author = m_author.replace('|', '\n');
-			subtitle = m_subtitle.replace('|', '\n');
-			summary = m_summary.replace('|', '\n');
-		}
+//@		if (m_itunes) {
+//@			title = m_title.replace('|', '\n');
+//@			description = m_description.replace('|', '\n');
+//@			author = m_author.replace('|', '\n');
+//@			subtitle = m_subtitle.replace('|', '\n');
+//@			summary = m_summary.replace('|', '\n');
+//@		}
 		//#endif
         String storeString = (m_itunes ? "1" : "") + "|" + title + "|" +
 			description + "|" + m_language + "|" +
@@ -278,14 +278,14 @@ public class RssItunesFeed extends RssFeed{
 	public void copyTo(RssItunesFeed toFeed) {
 		super.copyTo(toFeed);
 		//#ifdef DITUNES
-		toFeed.m_items = this.m_items;
-		toFeed.m_title = this.m_title;
-		toFeed.m_description = this.m_description;
-		toFeed.m_language = this.m_language;
-		toFeed.m_author = this.m_author;
-		toFeed.m_subtitle = this.m_subtitle;
-		toFeed.m_summary = this.m_summary;
-		toFeed.m_explicit = this.m_explicit;
+//@		toFeed.m_items = this.m_items;
+//@		toFeed.m_title = this.m_title;
+//@		toFeed.m_description = this.m_description;
+//@		toFeed.m_language = this.m_language;
+//@		toFeed.m_author = this.m_author;
+//@		toFeed.m_subtitle = this.m_subtitle;
+//@		toFeed.m_summary = this.m_summary;
+//@		toFeed.m_explicit = this.m_explicit;
 		//#endif
 	}
     
@@ -296,31 +296,31 @@ public class RssItunesFeed extends RssFeed{
 		}
 		if (feed.m_itunes != m_itunes) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_itunes,this=" + feed.m_itunes + "," + m_itunes);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_itunes,this=" + feed.m_itunes + "," + m_itunes);}
 			//#endif
 			return false;
 		}
 		if (!feed.m_language.equals(this.m_language)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_language,this=" + feed.m_language + "," + m_language);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_language,this=" + feed.m_language + "," + m_language);}
 			//#endif
 			return false;
 		}
 		if (!feed.m_author.equals(this.m_author)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_author,this=" + feed.m_author + "," + m_author);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_author,this=" + feed.m_author + "," + m_author);}
 			//#endif
 			return false;
 		}
 		if (!feed.m_summary.equals(this.m_summary)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_summary,this=" + feed.m_summary + "," + m_summary);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_summary,this=" + feed.m_summary + "," + m_summary);}
 			//#endif
 			return false;
 		}
 		if (feed.m_explicit != m_explicit) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_explicit,this=" + feed.m_explicit + "," + m_explicit);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_explicit,this=" + feed.m_explicit + "," + m_explicit);}
 			//#endif
 			return false;
 		}
@@ -411,9 +411,9 @@ public class RssItunesFeed extends RssFeed{
     public boolean isItunes() {
 		// If itunes, allow it.  If not itunes, make it seem that it is not.
 		//#ifdef DITUNES
-        return (m_itunes);
+//@        return (m_itunes);
 		//#else
-//@        return (false);
+        return (false);
 		//#endif
     }
 
