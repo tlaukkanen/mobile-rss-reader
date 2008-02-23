@@ -20,6 +20,10 @@
  *
  */
 
+// Expand to define itunes define
+//#define DNOITUNES
+// Expand to define test define
+//#define DNOTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Settings;
@@ -38,6 +42,7 @@ public class RssReaderSettings {
     private static RssReaderSettings m_singleton;    
     
     private static final String MAX_ITEM_COUNT = "max-item-count";
+    private static final String MAX_WORD_COUNT = "max-word-count";
     private static final String IMPORT_URL = "import-url";
     private static final String IMPORT_USERNAME = "import-username";
     private static final String IMPORT_PASSWORD = "import-password";
@@ -73,6 +78,17 @@ public class RssReaderSettings {
     /** Set maximum item count in feed */
     public void setMaximumItemCountInFeed(int maxCount) {
         m_settings.setIntProperty(MAX_ITEM_COUNT, maxCount);
+    }
+    
+    /** Get maximum word count in description */
+    public int getMaxWordCountInDesc() {
+        int maxCount = m_settings.getIntProperty(MAX_WORD_COUNT, 10);
+        return maxCount;
+    }
+    
+    /** Set maximum word count in description */
+    public void setMaxWordCountInDesc(int maxCount) {
+        m_settings.setIntProperty(MAX_WORD_COUNT, maxCount);
     }
     
     /** Get import URL address */
@@ -130,7 +146,11 @@ public class RssReaderSettings {
     
     /** Get itunes enabled */
     public boolean getItunesEnabled() {
+		//#ifdef DITUNES
+//@        return m_settings.getBooleanProperty( ITUNES_ENABLED, true);
+		//#else
         return m_settings.getBooleanProperty( ITUNES_ENABLED, false);
+		//#endif
     }
     
     /** Set feed list back is first command */
@@ -154,16 +174,16 @@ public class RssReaderSettings {
     }
     
 	//#ifdef DTEST
-    /** Get log level */
-    public String getLogLevel() {
-        String log_level = m_settings.getStringProperty(0, LOG_LEVEL, "");
-        return log_level;
-    }
-    
-    /** Set import URL password */
-    public void setLogLevel(String log_level) {
-        m_settings.setStringProperty( LOG_LEVEL, log_level);
-    }
-    
+//@    /** Get log level */
+//@    public String getLogLevel() {
+//@        String log_level = m_settings.getStringProperty(0, LOG_LEVEL, "");
+//@        return log_level;
+//@    }
+//@    
+//@    /** Set import URL password */
+//@    public void setLogLevel(String log_level) {
+//@        m_settings.setStringProperty( LOG_LEVEL, log_level);
+//@    }
+//@    
 	//#endif
 }
