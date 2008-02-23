@@ -298,7 +298,7 @@ public class RssItunesItem extends RssItem {
 			case (byte)2:
 				return "yes";
 			default:
-				return "no";
+				return "unspecified";
 		}
     }
 
