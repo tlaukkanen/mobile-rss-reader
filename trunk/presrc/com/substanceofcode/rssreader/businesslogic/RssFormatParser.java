@@ -159,7 +159,7 @@ public class RssFormatParser implements FeedFormatParser {
 				case 'i':
 					if (elementName.equals("item") ) {
 						/** Save previous entry */
-						if(m_title.length()>0) {
+						if((m_title.length()>0) || (m_description.length()>0)) {
 							RssItunesItem item;
 							Date pubDate = null;
 							// Check date in case we cannot find it.
@@ -208,7 +208,7 @@ public class RssFormatParser implements FeedFormatParser {
         }
 
         /** Save previous entry */
-        if(m_title.length()>0) {
+        if((m_title.length()>0) || (m_description.length()>0)) {
             RssItunesItem item;
             Date pubDate = null;
 			if (m_date.length() > 0) {
