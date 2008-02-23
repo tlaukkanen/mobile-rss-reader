@@ -22,9 +22,9 @@
  */
 
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 // Expand to define itunes define
-//#define DITUNES
+//#define DNOITUNES
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -33,8 +33,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Hashtable;
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -59,11 +59,11 @@ public class RssItunesItem extends RssItem {
 	// can later be modified to contain them).
     private static int INT_ITUNES_INDICATOR = NBR_ITUNES_INFO;
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("RssItunesItem");
+//@    private Logger logger = Logger.getLogger("RssItunesItem");
 	//#endif
 	//#ifdef DLOGGING
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     private boolean m_itunes = false;
     private String m_author = "";   // The RSS item description
@@ -102,14 +102,14 @@ public class RssItunesItem extends RssItem {
 					String duration) {
 		super(title, link, desc, date, enclosure, unreadItem);
 		//#ifdef DITUNES
-		m_itunes = itunes;
-		if (m_itunes) {
-			m_author = author;
-			m_subtitle = subtitle;
-			m_summary = summary;
-			m_explicit = explicit;
-			m_duration = duration;
-		}
+//@		m_itunes = itunes;
+//@		if (m_itunes) {
+//@			m_author = author;
+//@			m_subtitle = subtitle;
+//@			m_summary = summary;
+//@			m_explicit = explicit;
+//@			m_duration = duration;
+//@		}
 		//#endif
     }
     
@@ -117,15 +117,15 @@ public class RssItunesItem extends RssItem {
     public RssItunesItem(RssItem item) {
 		super(item);
 		//#ifdef DITUNES
-		if (item instanceof RssItunesItem) {
-			RssItunesItem ititem = (RssItunesItem)item;
-			this.m_itunes = ititem.m_itunes;
-			this.m_author = ititem.m_author;
-			this.m_subtitle = ititem.m_subtitle;
-			this.m_summary = ititem.m_summary;
-			this.m_explicit = ititem.m_explicit;
-			this.m_duration = ititem.m_duration;
-		}
+//@		if (item instanceof RssItunesItem) {
+//@			RssItunesItem ititem = (RssItunesItem)item;
+//@			this.m_itunes = ititem.m_itunes;
+//@			this.m_author = ititem.m_author;
+//@			this.m_subtitle = ititem.m_subtitle;
+//@			this.m_summary = ititem.m_summary;
+//@			this.m_explicit = ititem.m_explicit;
+//@			this.m_duration = ititem.m_duration;
+//@		}
 		//#endif
     }
     
@@ -135,11 +135,11 @@ public class RssItunesItem extends RssItem {
 		String subtitle = "";
 		String summary = "";
 		//#ifdef DITUNES
-		if (m_itunes) {
-			author = m_author.replace('|', (char)1);
-			subtitle = m_subtitle.replace('|', (char)1);
-			summary = m_summary.replace('|', (char)1);
-		}
+//@		if (m_itunes) {
+//@			author = m_author.replace('|', (char)1);
+//@			subtitle = m_subtitle.replace('|', (char)1);
+//@			summary = m_summary.replace('|', (char)1);
+//@		}
 		//#endif
         String preData = (m_itunes ? "1" : "") + "|" +
 			author + "|" + subtitle + "|" + summary + "|" +
@@ -210,40 +210,40 @@ public class RssItunesItem extends RssItem {
 			 * title | link | date | enclosure | unreadItem | desc
 			 */
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("nodes.length=" + nodes.length);}
+//@			if (finestLoggable) {logger.finest("nodes.length=" + nodes.length);}
 			//#endif
 			//#ifdef DITUNES
-			int ITUNES = 0;
-			m_itunes = nodes[ITUNES].equals("1");
-			
-			if (m_itunes) {
-				int AUTHOR = 1;
-				m_author = nodes[AUTHOR];
-				if (hasPipe) {
-					m_author = m_author.replace((char)1, '|');
-				}
-				
-				int SUBTITLE = 2;
-				m_subtitle = nodes[SUBTITLE];
-				if (hasPipe) {
-					m_subtitle = m_subtitle.replace((char)1, '|');
-				}
-				
-				int SUMMARY = 3;
-				m_summary = nodes[SUMMARY];
-				if (hasPipe) {
-					m_summary = m_summary.replace((char)1, '|');
-				}
-
-				int EXPLICIT = 4;
-				String explicit = nodes[EXPLICIT];
-				if (explicit.length() > 0) {
-					m_explicit = (byte)Integer.parseInt(explicit);
-				}
-
-				int DURATION = 5;
-				m_duration = nodes[DURATION];
-			}
+//@			int ITUNES = 0;
+//@			m_itunes = nodes[ITUNES].equals("1");
+//@			
+//@			if (m_itunes) {
+//@				int AUTHOR = 1;
+//@				m_author = nodes[AUTHOR];
+//@				if (hasPipe) {
+//@					m_author = m_author.replace((char)1, '|');
+//@				}
+//@				
+//@				int SUBTITLE = 2;
+//@				m_subtitle = nodes[SUBTITLE];
+//@				if (hasPipe) {
+//@					m_subtitle = m_subtitle.replace((char)1, '|');
+//@				}
+//@				
+//@				int SUMMARY = 3;
+//@				m_summary = nodes[SUMMARY];
+//@				if (hasPipe) {
+//@					m_summary = m_summary.replace((char)1, '|');
+//@				}
+//@
+//@				int EXPLICIT = 4;
+//@				String explicit = nodes[EXPLICIT];
+//@				if (explicit.length() > 0) {
+//@					m_explicit = (byte)Integer.parseInt(explicit);
+//@				}
+//@
+//@				int DURATION = 5;
+//@				m_duration = nodes[DURATION];
+//@			}
 			//#endif
 
 			super.init(NBR_ITUNES_INFO, true, hasPipe, nodes);
@@ -317,33 +317,33 @@ public class RssItunesItem extends RssItem {
 		}
 		if (!item.m_author.equals(m_author)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_author,this=" + item.m_author + "," + m_author);}
+//@			if (finestLoggable) {logger.finest("unequal item.m_author,this=" + item.m_author + "," + m_author);}
 			//#endif
 			return false;
 		}
 		if (!item.m_subtitle.equals(m_subtitle)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_subtitle,this=" + item.m_subtitle + "," + m_subtitle);}
+//@			if (finestLoggable) {logger.finest("unequal item.m_subtitle,this=" + item.m_subtitle + "," + m_subtitle);}
 			//#endif
 			return false;
 		}
 		if (!item.m_summary.equals(m_summary)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_summary,this=" + item.m_summary + "," + m_summary);}
+//@			if (finestLoggable) {logger.finest("unequal item.m_summary,this=" + item.m_summary + "," + m_summary);}
 			//#endif
 			return false;
 		}
 
 		if (item.m_explicit != m_explicit) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_explicit,this=" + item.m_explicit + "," + m_explicit);}
+//@			if (finestLoggable) {logger.finest("unequal item.m_explicit,this=" + item.m_explicit + "," + m_explicit);}
 			//#endif
 			return false;
 		}
 
 		if (!item.m_duration.equals(m_duration)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_duration,this=" + item.m_duration + "," + m_duration);}
+//@			if (finestLoggable) {logger.finest("unequal item.m_duration,this=" + item.m_duration + "," + m_duration);}
 			//#endif
 			return false;
 		}
@@ -352,17 +352,17 @@ public class RssItunesItem extends RssItem {
 
     public void setItunes(boolean itunes) {
 		//#ifdef DITUNES
-        this.m_itunes = itunes;
+//@        this.m_itunes = itunes;
 		//#else
-//@        this.m_itunes = false;
+        this.m_itunes = false;
 		//#endif
     }
 
     public boolean isItunes() {
 		//#ifdef DITUNES
-        return (m_itunes);
+//@        return (m_itunes);
 		//#else
-//@        return (false);
+        return (false);
 		//#endif
     }
 
