@@ -52,7 +52,11 @@ import net.sf.jlogmicro.util.logging.Level;
 public class Settings {
     
     public static final int OLD_MAX_REGIONS = 1;
+	//#ifdef DCOMPATIBILITY2
     public static final int MAX_REGIONS = 10;
+	//#else
+    public static final int MAX_REGIONS = 15;
+	//#endif
     public static final String SETTINGS_NAME = "RssReader-setttings-vers";
 	// The first settings did not have a version, so it ends up being
 	// "" by default
