@@ -21,9 +21,9 @@
  */
 
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 // Expand to define itunes define
-//#define DITUNES
+//#define DNOITUNES
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -32,8 +32,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -51,11 +51,11 @@ public class RssFeed{
     public static String STR_TWO = new String(CBTWO);
     public static int ITUNES_ITEMS = 8;
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("RssFeed");
+//@    private Logger logger = Logger.getLogger("RssFeed");
 	//#endif
 	//#ifdef DLOGGING
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     protected String m_url  = "";
     protected String m_name = "";
@@ -93,8 +93,8 @@ public class RssFeed{
         m_password = password;
         m_upddate = upddate;
 		//#ifdef DITUNES
-        m_link = link;
-        m_date = date;
+//@        m_link = link;
+//@        m_date = date;
 		//#endif
         m_category = category;
     }
@@ -107,8 +107,8 @@ public class RssFeed{
 		this.m_password = feed.m_password;
 		this.m_upddate = feed.m_upddate;
 		//#ifdef DITUNES
-		this.m_link = feed.m_link;
-		this.m_date = feed.m_date;
+//@		this.m_link = feed.m_link;
+//@		this.m_date = feed.m_date;
 		//#endif
 		this.m_category = feed.m_category;
 		this.m_items = new Vector();
@@ -160,7 +160,7 @@ public class RssFeed{
 			 */
 			int NAME = 0;
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + NAME ]);}
+//@			if (finestLoggable) {logger.finest("startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + NAME ]);}
 			//#endif
 			m_name = nodes[ startIndex + NAME ];
 			
@@ -227,15 +227,15 @@ public class RssFeed{
 			}
 			if (iTunesCapable) {
 				//#ifdef DITUNES
-				int LINK = 5;
-				if (nodes[startIndex + LINK].length() > 0) {
-					m_link = nodes[startIndex + LINK];
-				}
-				int DATE = 6;
-				String fdateString = nodes[startIndex + DATE];
-				if (fdateString.length() > 0) {
-					m_date = new Date(Long.parseLong(fdateString, 16));
-				}
+//@				int LINK = 5;
+//@				if (nodes[startIndex + LINK].length() > 0) {
+//@					m_link = nodes[startIndex + LINK];
+//@				}
+//@				int DATE = 6;
+//@				String fdateString = nodes[startIndex + DATE];
+//@				if (fdateString.length() > 0) {
+//@					m_date = new Date(Long.parseLong(fdateString, 16));
+//@				}
 				//#endif
 				int CATEGORY = 7;
 				if (nodes[startIndex + CATEGORY].length() > 0) {
@@ -372,8 +372,8 @@ public class RssFeed{
 		toFeed.m_password = this.m_password;
 		toFeed.m_upddate = this.m_upddate;
 		//#ifdef DITUNES
-		toFeed.m_link = this.m_link;
-		toFeed.m_date = this.m_date;
+//@		toFeed.m_link = this.m_link;
+//@		toFeed.m_date = this.m_date;
 		//#endif
 		toFeed.m_category = this.m_category;
 		toFeed.m_items = new Vector();
@@ -389,25 +389,25 @@ public class RssFeed{
 	public boolean equals(RssFeed feed) {
 		if (!feed.m_url.equals(this.m_url)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_url,this=" + feed.m_url + "," + m_url);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_url,this=" + feed.m_url + "," + m_url);}
 			//#endif
 			return false;
 		}
 		if (!feed.m_name.equals(this.m_name)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_name,this=" + feed.m_name + "," + m_name);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_name,this=" + feed.m_name + "," + m_name);}
 			//#endif
 			return false;
 		}
 		if (!feed.m_username.equals(this.m_username)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_password,this=" + feed.m_password + "," + m_password);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_password,this=" + feed.m_password + "," + m_password);}
 			//#endif
 			return false;
 		}
 		if (!feed.m_password.equals(this.m_password)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_password,this=" + feed.m_password + "," + m_password);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_password,this=" + feed.m_password + "," + m_password);}
 			//#endif
 			return false;
 		}
@@ -416,19 +416,19 @@ public class RssFeed{
 			if (feed.m_date.equals(this.m_date)) {
 			} else {
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
+//@				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 				//#endif
 				return false;
 			}
 		} else {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
+//@			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 			//#endif
 			return false;
 		}
 		if (!feed.m_link.equals(m_link)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_link,this=" + feed.m_link + "," + m_link);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_link,this=" + feed.m_link + "," + m_link);}
 			//#endif
 			return false;
 		}
@@ -437,19 +437,19 @@ public class RssFeed{
 			if (feed.m_date.equals(this.m_date)) {
 			} else {
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
+//@				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 				//#endif
 				return false;
 			}
 		} else {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
+//@			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 			//#endif
 			return false;
 		}
 		if (feed.m_category != this.m_category) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_category,this=" + feed.m_category + "," + m_category);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_category,this=" + feed.m_category + "," + m_category);}
 			//#endif
 			return false;
 		}
@@ -457,7 +457,7 @@ public class RssFeed{
 		int ilen = m_items.size();
 		if (flen != ilen) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal size feed,this=" + flen + "," + ilen);}
+//@			if (finestLoggable) {logger.finest("unequal size feed,this=" + flen + "," + ilen);}
 			//#endif
 			return false;
 		}
@@ -468,7 +468,7 @@ public class RssFeed{
 		for (int ic = 0; ic < ilen; ic++) {
 			if (!fitems[ic].equals(ritems[ic])) {
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("unequal ic,fitems[ic],ritems[ic]" + ic + "," + fitems[ic] + "," + ritems[ic]);}
+//@				if (finestLoggable) {logger.finest("unequal ic,fitems[ic],ritems[ic]" + ic + "," + fitems[ic] + "," + ritems[ic]);}
 				//#endif
 				return false;
 			}
@@ -539,9 +539,9 @@ public class RssFeed{
 
     public void setLink(String link) {
 		//#ifdef DITUNES
-		if (!link.equals(m_url)) {
-			this.m_link = link;
-		}
+//@		if (!link.equals(m_url)) {
+//@			this.m_link = link;
+//@		}
 		//#endif
     }
 
@@ -551,7 +551,7 @@ public class RssFeed{
 
     public void setDate(Date date) {
 		//#ifdef DITUNES
-        this.m_date = date;
+//@        this.m_date = date;
 		//#endif
     }
 
