@@ -310,7 +310,7 @@ public class RssFeed{
     /** Return record store string for feed only.  This excludes items which
 	    are put into store string by RssItunesFeed.  */
     public String getStoreString(boolean serializeItems, boolean encoded){
-        StringBuffer serializedItems = new StringBuffer("");
+        StringBuffer serializedItems = new StringBuffer();
         if( serializeItems ) {
 			int ilen = m_items.size();
 			RssItunesItem [] ritems = new RssItunesItem[ilen];
@@ -503,7 +503,7 @@ public class RssFeed{
 
     /** Write record as a string */
     public String toString(){
-        StringBuffer serializedItems = new StringBuffer("");
+        StringBuffer serializedItems = new StringBuffer();
 		int ilen = m_items.size();
 		RssItunesItem [] ritems = new RssItunesItem[ilen];
 		m_items.copyInto(ritems);
