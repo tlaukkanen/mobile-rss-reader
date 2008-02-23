@@ -21,7 +21,7 @@
  */
 
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 package com.substanceofcode.utils;
 
 import java.io.IOException;
@@ -33,8 +33,8 @@ import java.io.UnsupportedEncodingException;
 import com.substanceofcode.utils.EncodingUtil;
 
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -57,9 +57,9 @@ public class EncodingStreamReader extends InputStreamReader {
     private boolean firstChar = true;
     private boolean secondChar = false;
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("EncodingStreamReader");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private Logger logger = Logger.getLogger("EncodingStreamReader");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of EncodingStreamReader */
@@ -74,8 +74,8 @@ public class EncodingStreamReader extends InputStreamReader {
 			m_fileEncoding = EncodingUtil.getIsoEncoding();
 		} catch (UnsupportedEncodingException e) {
 //#ifdef DLOGGING
-			logger.severe("init read Could not open stream with encoding " +
-						  m_fileEncoding);
+//@			logger.severe("init read Could not open stream with encoding " +
+//@						  m_fileEncoding);
 //#endif
 			System.out.println("init read Could not open stream with " +
 					           "encoding " + m_fileEncoding + e + " " +
@@ -85,8 +85,8 @@ public class EncodingStreamReader extends InputStreamReader {
 				m_inputStream = new InputStreamReader(inputStream, "UTF-8");
 			} catch (UnsupportedEncodingException e2) {
 //#ifdef DLOGGING
-				logger.severe("init read Could not open stream with " +
-							  "encoding " + m_fileEncoding);
+//@				logger.severe("init read Could not open stream with " +
+//@							  "encoding " + m_fileEncoding);
 //#endif
 				System.out.println("init read Could not open stream with " +
 						           "encoding " + m_fileEncoding + e2 + " " +
@@ -159,16 +159,16 @@ public class EncodingStreamReader extends InputStreamReader {
 			return inputCharacter;
 		} catch (IOException e) {
 //#ifdef DLOGGING
-			logger.severe("read Could not read a char io error." + e + " " +
-					           e.getMessage());
+//@			logger.severe("read Could not read a char io error." + e + " " +
+//@					           e.getMessage());
 //#endif
 			System.out.println("read Could not read a char io error." + e + " " +
 					           e.getMessage());
 			throw e;
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-			logger.severe("read Could not read a char run time." + t + " " +
-					           t.getMessage());
+//@			logger.severe("read Could not read a char run time." + t + " " +
+//@					           t.getMessage());
 //#endif
 			System.out.println("read Could not read a char run time." + t + " " +
 					           t.getMessage());
