@@ -21,7 +21,7 @@
  */
 
 // Expand to define logging define
-//#define DLOGGING
+//#define DNOLOGGING
 package com.substanceofcode.utils;
 
 import java.io.ByteArrayInputStream;
@@ -36,8 +36,8 @@ import javax.microedition.midlet.*;
 import javax.microedition.rms.*;
 
 //#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /**
@@ -52,7 +52,11 @@ import net.sf.jlogmicro.util.logging.Level;
 public class Settings {
     
     public static final int OLD_MAX_REGIONS = 1;
-    public static final int MAX_REGIONS = 10;
+	//#ifdef DCOMPATIBILITY2
+//@    public static final int MAX_REGIONS = 10;
+	//#else
+    public static final int MAX_REGIONS = 15;
+	//#endif
     public static final String SETTINGS_NAME = "RssReader-setttings-vers";
 	// The first settings did not have a version, so it ends up being
 	// "" by default
@@ -70,9 +74,9 @@ public class Settings {
     private Hashtable       m_properties = new Hashtable();
     private int             m_region;
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("Settings");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private Logger logger = Logger.getLogger("Settings");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /**
@@ -162,18 +166,18 @@ public class Settings {
             rs = RecordStore.openRecordStore("Store", true );
 			int numRecs = rs.getNumRecords();
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("region=" + region);}
-			if (finestLoggable) {logger.finest("numRecs=" + numRecs);}
+//@			if (fineLoggable) {logger.fine("region=" + region);}
+//@			if (finestLoggable) {logger.finest("numRecs=" + numRecs);}
 			//#endif
 			//#ifdef DTEST
-			System.out.println("region=" + region);
-			System.out.println("numRecs=" + numRecs);
+//@			System.out.println("region=" + region);
+//@			System.out.println("numRecs=" + numRecs);
 			//#endif
             if( numRecs == 0 ) {
 				if (region == 0) {
 					m_initialized = false;
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest("m_initialized=" + m_initialized);}
+//@					if (finestLoggable) {logger.finest("m_initialized=" + m_initialized);}
 					//#endif
 				}
 			} else {
@@ -181,7 +185,7 @@ public class Settings {
 					currentSettings = false;
 				}
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("currentSettings=" + currentSettings);}
+//@				if (fineLoggable) {logger.fine("currentSettings=" + currentSettings);}
 				//#endif
                 byte[] data = rs.getRecord( region + 1 );
                 if( data != null ) {
@@ -191,7 +195,7 @@ public class Settings {
                     while( num-- > 0 ) {
                         String name = din.readUTF();
 						//#ifdef DLOGGING
-						if (finestLoggable) {logger.finest("name=" + name);}
+//@						if (finestLoggable) {logger.finest("name=" + name);}
 						//#endif
                         String value;
 						if (currentSettings) {
@@ -203,7 +207,7 @@ public class Settings {
 							} catch (UnsupportedEncodingException e) {
 								value = new String(bvalue);
 								//#ifdef DLOGGING
-								logger.severe("cannot convert load name=" + name, e);
+//@								logger.severe("cannot convert load name=" + name, e);
 								//#endif
 								/** Error while executing constructor */
 								System.out.println("cannot convert load name=" +
@@ -212,7 +216,7 @@ public class Settings {
 							} catch (IOException e) {
 								value = new String(bvalue);
 								//#ifdef DLOGGING
-								logger.severe("cannot convert load name=" + name, e);
+//@								logger.severe("cannot convert load name=" + name, e);
 								//#endif
 								/** Error while executing constructor */
 								System.out.println("cannot convert load name=" +
@@ -223,7 +227,7 @@ public class Settings {
 							value = din.readUTF();
 						}
 						//#ifdef DLOGGING
-						if (finestLoggable) {logger.finest("value=" + value);}
+//@						if (finestLoggable) {logger.finest("value=" + value);}
 						//#endif
 						m_properties.put( name, value );
                     }
@@ -231,7 +235,7 @@ public class Settings {
             }
 			for (int ic = numRecs; ic < MAX_REGIONS; ic++) {
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("adding ic=" + ic);}
+//@				if (finestLoggable) {logger.finest("adding ic=" + ic);}
 				//#endif
 				rs.addRecord( null, 0, 0 );
 			}
@@ -245,14 +249,14 @@ public class Settings {
 			m_region = region;
 		} catch (Exception e) {
 			//#ifdef DLOGGING
-			logger.severe("load ", e);
+//@			logger.severe("load ", e);
 			//#endif
 			/** Error while executing constructor */
 			System.out.println("load " + e.getMessage());
 			e.printStackTrace();
 		} catch (Throwable e) {
 			//#ifdef DLOGGING
-			logger.severe("load throwable ", e);
+//@			logger.severe("load throwable ", e);
 			//#endif
 			/** Error while executing constructor */
 			System.out.println("load throwable " + e.getMessage());
@@ -293,7 +297,7 @@ public class Settings {
 			m_properties.put(SETTINGS_NAME, SETTINGS_VERS);
 			//#endif
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("save region=" + region);}
+//@			if (fineLoggable) {logger.fine("save region=" + region);}
 			//#endif
             dout.writeInt( m_properties.size() );
             Enumeration e = m_properties.keys();
@@ -301,7 +305,7 @@ public class Settings {
                 String name = (String) e.nextElement();
                 String value = m_properties.get( name ).toString();
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("name=" + name);}
+//@				if (finestLoggable) {logger.finest("name=" + name);}
 				//#endif
                 dout.writeUTF( name );
 				byte[] bvalue;
@@ -311,7 +315,7 @@ public class Settings {
 				} catch (UnsupportedEncodingException uee) {
 					bvalue = value.getBytes();
 					//#ifdef DLOGGING
-					logger.severe("cannot convert save name=" + name, uee);
+//@					logger.severe("cannot convert save name=" + name, uee);
 					//#endif
 					/** Error while executing constructor */
 					System.out.println("cannot convert save name=" +
@@ -320,7 +324,7 @@ public class Settings {
 				} catch (IOException ioe) {
 					bvalue = value.getBytes();
 					//#ifdef DLOGGING
-					logger.severe("cannot convert save name=" + name, ioe);
+//@					logger.severe("cannot convert save name=" + name, ioe);
 					//#endif
 					/** Error while executing constructor */
 					System.out.println("cannot convert save name=" +
@@ -328,7 +332,7 @@ public class Settings {
 					ioe.printStackTrace();
 				}
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("value=" + value);}
+//@				if (finestLoggable) {logger.finest("value=" + value);}
 				//#endif
                 dout.writeInt( bvalue.length );
                 dout.write( bvalue, 0, bvalue.length );
@@ -339,7 +343,7 @@ public class Settings {
             rs = RecordStore.openRecordStore( "Store", false );
             rs.setRecord( (region + 1), data, 0, data.length );
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("stored region=" + region);}
+//@			if (fineLoggable) {logger.fine("stored region=" + region);}
 			//#endif
 			//#ifndef DCOMPATIBILITY1
 			if ( vers != null) {
@@ -348,14 +352,14 @@ public class Settings {
 			//#endif
 		} catch (Exception e) {
 			//#ifdef DLOGGING
-			logger.severe("catch ", e);
+//@			logger.severe("catch ", e);
 			//#endif
 			/** Error while executing constructor */
 			System.out.println("catch " + e.getMessage());
 			e.printStackTrace();
 		} catch (Throwable e) {
 			//#ifdef DLOGGING
-			logger.severe("catch throwable ", e);
+//@			logger.severe("catch throwable ", e);
 			//#endif
 			/** Error while executing constructor */
 			System.out.println("catch throwable " + e.getMessage());
@@ -422,7 +426,7 @@ public class Settings {
 	  **/
 	public boolean isInitialized() {
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("m_initialized=" + m_initialized);}
+//@		if (finestLoggable) {logger.finest("m_initialized=" + m_initialized);}
 		//#endif
 		return m_initialized;
 	}
