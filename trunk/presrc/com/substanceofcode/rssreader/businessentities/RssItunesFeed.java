@@ -125,19 +125,39 @@ public class RssItunesFeed extends RssFeed{
 	/** Create feed from an existing feed.  **/
 	public RssItunesFeed(RssFeed feed) {
 		super(feed);
-		//#ifdef DITUNES
-		if (feed instanceof RssItunesFeed) {
-			RssItunesFeed itfeed = (RssItunesFeed)feed;
-			this.m_itunes = itfeed.m_itunes;
-			if (this.m_itunes) {
-				this.m_language = itfeed.m_language;
-				this.m_author = itfeed.m_author;
-				this.m_subtitle = itfeed.m_subtitle;
-				this.m_summary = itfeed.m_summary;
-				this.m_explicit = itfeed.m_explicit;
+		try {
+        
+			if (feed instanceof RssItunesFeed) {
+				RssItunesFeed itfeed = (RssItunesFeed)feed;
+				this.m_itunes = itfeed.m_itunes;
+				if (this.m_itunes) {
+					this.m_language = itfeed.m_language;
+					this.m_author = itfeed.m_author;
+					this.m_subtitle = itfeed.m_subtitle;
+					this.m_summary = itfeed.m_summary;
+					this.m_explicit = itfeed.m_explicit;
+				}
+			} else {
+				final Vector cvitems = feed.getItems();
+				if (cvitems.size() > 0) {
+					RssItem[] citems = new RssItem[cvitems.size()];
+					cvitems.copyInto(citems);
+					Vector nvitems = new Vector();
+					for (int ic = 0; ic < citems.length; ic++) {
+						final RssItem item = citems[ic];
+						if (item instanceof RssItunesItem) {
+							nvitems.addElement((RssItunesItem)item);
+						} else {
+							nvitems.addElement(new RssItunesItem(item));
+						}
+					}
+					m_items = nvitems;
+				}
 			}
-		}
-		//#endif
+        } catch(Throwable e) {
+            System.err.println("RssItunesFeed contructor : " + e.toString());
+			e.printStackTrace();
+        }
 	}
     
 	/** Deserialize the object
@@ -307,24 +327,6 @@ public class RssItunesFeed extends RssFeed{
 		return true;
 	}
     
-    /** Return RSS feed items */
-    public Vector getItems() {
-        return m_items;
-    }
-    
-    /** Set items */
-    public void setItems(Vector items) {
-        m_items = items;
-    }
-    
-    public void setUpddate(Date upddate) {
-        this.m_upddate = upddate;
-    }
-
-    public Date getUpddate() {
-        return (m_upddate);
-    }
-
     public void setCategory(int category) {
         this.m_category = category;
     }
@@ -398,7 +400,7 @@ public class RssItunesFeed extends RssFeed{
 			case (byte)2:
 				return "yes";
 			default:
-				return "no";
+				return "unspecified";
 		}
     }
 
