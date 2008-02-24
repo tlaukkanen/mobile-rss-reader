@@ -50,6 +50,9 @@ import com.substanceofcode.testutil.TestOutput;
 public class Form extends javax.microedition.lcdui.Form
 implements CommandListener {
 
+	//#ifdef DMIDP10
+	private String m_title;
+	//#endif
 	private CommandListener m_cmdListener;
 
 	public Form(String title) {
@@ -60,12 +63,15 @@ implements CommandListener {
 	// TODO log items
 	public Form(String title, Item[] items) {
 		super(title, items);
+		//#ifdef DMIDP10
+		this.m_title = title;
+		//#endif
 		TestOutput.println("Test UI Form Title: " + title);
 	}
 
 	public int append(Item item) {
 		int rtn = super.append(item);
-		TestOutput.println("Test UI Form append: [" + super.getTitle() + "]," + item.getLabel());
+		TestOutput.println("Test UI Form append: [" + getTitle() + "]," + item.getLabel());
 		String strValue;
 		if (item instanceof TextField) {
 			strValue = ((TextField)item).getString();
@@ -76,21 +82,21 @@ implements CommandListener {
 		} else {
 			return rtn;
 		}
-		TestOutput.println("Test UI Form append string: [" + super.getTitle() + "]," + strValue);
-		TestOutput.println("Test UI Form append int: [" + super.getTitle() + "]," + rtn);
+		TestOutput.println("Test UI Form append string: [" + getTitle() + "]," + strValue);
+		TestOutput.println("Test UI Form append int: [" + getTitle() + "]," + rtn);
 		return rtn;
 	}
 
 	public int append(String stringPart) {
 		int rtn = super.append(stringPart);
-		TestOutput.println("Test UI Form append: [" + super.getTitle() + "]," + stringPart);
-		TestOutput.println("Test UI Form append int: [" + super.getTitle() + "]," + rtn);
+		TestOutput.println("Test UI Form append: [" + getTitle() + "]," + stringPart);
+		TestOutput.println("Test UI Form append int: [" + getTitle() + "]," + rtn);
 		return rtn;
 	}
 
 	public void insert(int elementnum, Item item) {
 		super.insert(elementnum, item);
-		TestOutput.println("Test UI Form insert: [" + super.getTitle() + "]," + item.getLabel());
+		TestOutput.println("Test UI Form insert: [" + getTitle() + "]," + item.getLabel());
 		String strValue;
 		if (item instanceof TextField) {
 			strValue = ((TextField)item).getString();
@@ -101,8 +107,8 @@ implements CommandListener {
 		} else {
 			return;
 		}
-		TestOutput.println("Test UI Form insert string: [" + super.getTitle() + "]," + strValue);
-		TestOutput.println("Test UI Form insert elementnum: [" + super.getTitle() + "]," + elementnum);
+		TestOutput.println("Test UI Form insert string: [" + getTitle() + "]," + strValue);
+		TestOutput.println("Test UI Form insert elementnum: [" + getTitle() + "]," + elementnum);
 	}
 
 	public void set(int elementnum, Item item) {
@@ -116,11 +122,11 @@ implements CommandListener {
 			} else {
 				return;
 			}
-			TestOutput.println("Test UI Form set string: [" + super.getTitle() + "]," + strValue);
-			TestOutput.println("Test UI Form set elementnum: [" + super.getTitle() + "]," + elementnum);
+			TestOutput.println("Test UI Form set string: [" + getTitle() + "]," + strValue);
+			TestOutput.println("Test UI Form set elementnum: [" + getTitle() + "]," + elementnum);
 		} catch (Throwable t) {
 			System.err.println("Test UI Form set elementnum [" +
-					super.getTitle() + "]," + t.getMessage());
+					getTitle() + "]," + t.getMessage());
 			t.printStackTrace();
 		}
 		return;
@@ -129,10 +135,10 @@ implements CommandListener {
 	public void delete(int elementnum) {
 		try {
 			super.delete(elementnum);
-			TestOutput.println("Test UI Form delete elementnum: [" + super.getTitle() + "]," + elementnum);
+			TestOutput.println("Test UI Form delete elementnum: [" + getTitle() + "]," + elementnum);
 		} catch (Throwable t) {
 			System.err.println("Test UI Form delete elementnum: [" +
-					super.getTitle() + "]," + t.getMessage());
+					getTitle() + "]," + t.getMessage());
 			t.printStackTrace();
 		}
 	}
@@ -140,17 +146,25 @@ implements CommandListener {
 	//#ifdef DMIDP20
 	public void deleteAll() {
 		super.deleteAll();
-		TestOutput.println("Test UI Form delete all [" + super.getTitle() + "]");
+		TestOutput.println("Test UI Form delete all [" + getTitle() + "]");
 	}
 	//#endif
 
 	public void outputCmdAct(Command cmd, Displayable disp) {
-		//#ifdef DMIDP20
-		TestOutput.println("Test UI Form command,displayable=[" + super.getTitle() + "]," + cmd.getLabel() + "," + disp.getTitle());
-		//#else
-		TestOutput.println("Test UI Form command,displayable=[" + super.getTitle() + "]," + cmd.getLabel() + "," + super.getClass().getName());
-		//#endif
+		String dispTitle = "";
+		if (disp instanceof Form) {
+			dispTitle = ((Form)disp).getTitle();
+		} else if (disp instanceof List) {
+			dispTitle = ((List)disp).getTitle();
+		}
+		TestOutput.println("Test UI Form command,displayable,dispsame=[" + getTitle() + "]," + cmd.getLabel() + "," + getTitle() + "," + disp.equals(this));
 	}
+
+	//#ifdef DMIDP10
+	public String getTitle() {
+		return m_title;
+	}
+	//#endif
 
 	public void commandAction(Command cmd, Displayable disp) {
 		outputCmdAct(cmd, disp);
