@@ -132,22 +132,29 @@ implements CommandListener {
 	}
 	//#endif
 
+	//#ifdef DMIDP10
+	public String getTitle() {
+		return m_title;
+	}
+	//#endif
+
 	public void outputCmdAct(Command cmd, Displayable disp, Command selCmd) {
-		//#ifdef DMIDP20
-		String dispDtl = super.getTitle();
-		//#else
-		String dispDtl = this;
-		//#endif
+		String dispTitle = "";
+		if (disp instanceof Form) {
+			dispTitle = ((Form)disp).getTitle();
+		} else if (disp instanceof List) {
+			dispTitle = ((List)disp).getTitle();
+		}
 		String lblCmd = cmd.getLabel();
 		if (cmd == selCmd) {
 			lblCmd = "Implicit select";
 			final int sel = super.getSelectedIndex();
 			if (sel >= 0) {
-				dispDtl += "," + super.getString(sel);
+				dispTitle += "," + super.getString(sel);
 			}
 		}
 
-		TestOutput.println("Test UI List command,displayable=" + lblCmd + "," + dispDtl);
+		TestOutput.println("Test UI List command,displayable,dispsame=[" + getTitle() + "]," + lblCmd + "," + dispTitle + "," + disp.equals(this));
 	}
 
 	public void commandAction(Command cmd, Displayable disp) {
