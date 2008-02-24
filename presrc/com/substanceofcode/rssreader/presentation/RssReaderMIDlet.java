@@ -1470,7 +1470,8 @@ public class RssReaderMIDlet extends MIDlet
     
     /** Update all RSS feeds */
     final private void updateAllHeaders(final boolean updModHdr) {
-        showLoadingForm("Updating all feeds...", m_bookmarkList);
+        showLoadingForm("Updating all " + (updModHdr ? "modified " : "") +
+				"feeds...", m_bookmarkList);
 		if (updModHdr) {
 			m_refreshUpdFeeds = true;
 		} else {
