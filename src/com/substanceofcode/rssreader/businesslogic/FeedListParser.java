@@ -45,7 +45,6 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
     
     private Thread m_parsingThread;
 	protected String m_url;
-
 	protected String m_username;
 	protected String m_password;
 	protected String m_feedNameFilter;
@@ -116,6 +115,18 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
             // TODO: Add exception handling
             System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
 			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
+        } catch( OutOfMemoryError t ) {
+			System.gc();
+			m_feeds = null;
+			//#ifdef DLOGGING
+//@			logger.severe("FeedListParser.run(): Out Of Memory Error while " +
+//@					"parsing feeds: " + m_url, t);
+			//#endif
+            // TODO: Add exception handling
+            System.err.println("FeedListParser.run(): " +
+					"Out Of Memory Error while parsing feeds: " + t.toString());
+			m_ex = new CauseException("Out Of Memory Error while parsing " +
+					"feed " + m_url, t);
         } catch( Throwable t ) {
 			//#ifdef DLOGGING
 //@			logger.severe("FeedListParser.run(): Error while parsing " +
@@ -161,6 +172,17 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 			}
             throw new CauseException("Error while parsing import data: " 
                     + e.toString(), e);
+        } catch(OutOfMemoryError t) {
+			m_feeds = null;
+			System.gc();
+			//#ifdef DLOGGING
+//@			logger.severe("Out Of Memory Error with " + m_url, t);
+			//#endif
+			if ((m_url != null) && m_url.startsWith("file://")) {
+				System.err.println("Cannot process file.");
+			}
+            throw new CauseException("Out Of Memory Error while parsing RSS " +
+					"data", t);
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("parseFeeds error with " + m_url, t);
