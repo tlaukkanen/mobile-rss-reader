@@ -162,6 +162,10 @@ public class RssReaderMIDlet extends MIDlet
     // Get import form using URL from current bookmark
     private boolean     m_getTestImportForm = false; // Get import form 
 	//#endif
+	//#ifdef DTESTUI
+	boolean m_headerNext = false; // Flag to control opening the next header
+	boolean m_itemNext = false; // Flag to control opening the next item
+	//#endif
     private byte[]      m_importSave = null; // Import form save
     private byte[]      m_addBMSave = null; // Edit bookmark form save
 	//#ifdef DTESTUI
@@ -698,17 +702,28 @@ public class RssReaderMIDlet extends MIDlet
 				// open the header so that it's items can be listed
 				// with test UI classes.
 				// Need to change the selection to match the m_headerIndex.
-				if ((m_headerIndex >= 0) && (m_headerTestList != null) &&
+				if (m_headerNext && (m_headerIndex >= 0) &&
+						(m_headerTestList != null) &&
 				    (m_headerIndex < m_headerTestList.size()) &&
 					(m_display.getCurrent() == m_headerTestList)) {
+					m_headerNext = false;
 					if (m_headerTestList.getSelectedIndex() >= 0) {
 						m_headerTestList.setSelectedIndex(
 								m_headerTestList.getSelectedIndex(), false);
 					}
 					m_headerTestList.setSelectedIndex(m_headerIndex, true);
-					m_headerIndex++;
 					m_headerTestList.commandAction(List.SELECT_COMMAND,
 							m_headerTestList);
+				}
+				// After intializing the form (which was already logged by
+				// testui classes), simulate the back command
+				if (m_itemNext && (m_headerIndex >= 0) &&
+						(m_headerTestList != null) &&
+					(m_headerIndex < m_headerTestList.size()) &&
+					(m_display.getCurrent() == m_itemForm )) {
+					m_itemNext = false;
+					commandAction( m_backCommand, m_itemForm );
+					m_headerIndex++;
 					if (m_headerIndex >= m_headerTestList.size()) {
 						System.out.println("Test UI Test Rss items last");
 						m_headerIndex = -1;
@@ -1148,23 +1163,10 @@ public class RssReaderMIDlet extends MIDlet
 		if (title.length() > 0) {
 			m_itemForm = new Form( title );
 		} else {
-			m_itemForm = new Form( item.getDescription() );
+			m_itemForm = new Form( getItemDescription(item) );
 		}
         m_itemForm.addCommand( m_backCommand );
 		final String sienclosure = item.getEnclosure();
-		//#ifdef DMIDP20
-        m_itemForm.addCommand( m_openLinkCmd );
-		if (sienclosure.length() != 0) {
-			m_itemForm.addCommand( m_openEnclosureCmd );
-		}
-		//#endif
-        m_itemForm.addCommand( m_copyLinkCmd );
-		//#ifdef DMIDP20
-		if (sienclosure.length() != 0) {
-			m_itemForm.addCommand( m_copyEnclosureCmd );
-		}
-		//#endif
-        m_itemForm.setCommandListener(this);
 		final String desc = item.getDescription();
 		if ((title.length()>0) && (desc.length()>0)) {
 			m_itemForm.append(new StringItem(title + "\n", desc));
@@ -1193,7 +1195,6 @@ public class RssReaderMIDlet extends MIDlet
 			}
 			m_itemForm.append(new StringItem("Explicit:", item.getExplicit()));
 		}
-        StringItem senclosure = null;
 		String linkLabel = "Link:";
         String link = item.getLink();
 		//#ifdef DITUNES
@@ -1202,25 +1203,23 @@ public class RssReaderMIDlet extends MIDlet
 			linkLabel = "Feed link:";
 		}
 		//#endif
-		//#ifdef DMIDP20
-        StringItem slink = new StringItem(linkLabel, link, Item.HYPERLINK);
-		if (sienclosure.length() != 0) {
-			senclosure = new StringItem("Enclosure:", sienclosure,
-													  Item.HYPERLINK);
-		}
-		//#else
-        StringItem slink = new StringItem(linkLabel, link);
-		if (sienclosure.length() != 0) {
-			senclosure = new StringItem("Enclosure:", sienclosure);
-		}
-		//#endif
 		if (link.length() > 0) {
+			//#ifdef DMIDP20
+			StringItem slink = new StringItem(linkLabel, link, Item.HYPERLINK);
+			//#else
+			StringItem slink = new StringItem(linkLabel, link);
+			//#endif
 			citemLnkNbr  = m_itemForm.append(slink);
 		} else {
 			citemLnkNbr  = -1;
 		}
-		// TODO get number of this or delete all and add.
-		if (senclosure != null) {
+		if (sienclosure.length() > 0) {
+			//#ifdef DMIDP20
+			StringItem senclosure = new StringItem("Enclosure:", sienclosure,
+													  Item.HYPERLINK);
+			//#else
+			StringItem senclosure = new StringItem("Enclosure:", sienclosure);
+			//#endif
 			citemEnclNbr = m_itemForm.append(senclosure);
 		} else {
 			citemEnclNbr  = -1;
@@ -1240,13 +1239,30 @@ public class RssReaderMIDlet extends MIDlet
         }
 
 		m_itemRrnForm = prevList;
+		//#ifdef DMIDP20
+		if (link.length() > 0) {
+			m_itemForm.addCommand( m_copyLinkCmd );
+		}
+		if (sienclosure.length() > 0) {
+			m_itemForm.addCommand( m_copyEnclosureCmd );
+		}
+		if (link.length() > 0) {
+			m_itemForm.addCommand( m_openLinkCmd );
+		}
+		//#endif
+		//#ifdef DMIDP20
+		if (sienclosure.length() > 0) {
+			m_itemForm.addCommand( m_openEnclosureCmd );
+		}
+		//#endif
+        m_itemForm.setCommandListener(this);
 		//#ifdef DTEST
 		System.out.println("itemForm size=" + (beginMem - Runtime.getRuntime().freeMemory()));
 		//#endif
     }
 
 	/** Get the max words configured from the descritption. */
-	final private String getItemDescription( final RssItunesItem item ) {
+	final public String getItemDescription( final RssItunesItem item ) {
 		final String [] parts = StringUtil.split(item.getDescription(), " ");
 		StringBuffer sb = new StringBuffer();
         final int wordCount = Math.min(parts.length,
@@ -1715,14 +1731,16 @@ public class RssReaderMIDlet extends MIDlet
         /** Get back to RSS feed headers */
         if( c == m_backCommand ){
             setCurrent( m_itemRrnForm );
+			//#ifdef DTESTUI
+			if (m_headerIndex >= 0) {
+				m_headerNext = true;
+			}
+			//#endif
         }
         
         /** Copy link to clipboard.  */
         if( c == m_copyLinkCmd ){
 			String link = citem.getLink();
-			if (link.length() == 0) {
-				link = m_curRssParser.getRssFeed().getLink();
-			}
 			m_itemForm.set(citemLnkNbr, new TextField("Link:", link,
 					link.length(), TextField.URL));
 			//#ifdef DMIDP10
@@ -2445,21 +2463,15 @@ public class RssReaderMIDlet extends MIDlet
 				if( super.size()>0 ) {
 					RssItunesFeed feed = m_curRssParser.getRssFeed();
 					int selIdx;
-					RssItunesItem item = (RssItunesItem)feed.getItems().elementAt(
-							(selIdx = super.getSelectedIndex()) );
+					RssItunesItem item = (RssItunesItem)feed.getItems(
+							).elementAt((selIdx = super.getSelectedIndex()) );
 					super.set(selIdx, super.getString(selIdx),
 							null );
 					item.setUnreadItem(false);
 					initializeItemForm( item, this );
 					setCurrent( m_itemForm );
 					//#ifdef DTESTUI
-					// After intializing the form (which was already logged by
-					// testui classes), simulate the back command
-					if ((m_headerIndex >= 0) && (m_headerTestList != null) &&
-						(m_headerIndex < m_headerTestList.size())) {
-						setCurrent( m_itemForm );
-						m_midlet.commandAction( m_backCommand, m_itemForm );
-					}
+					m_itemNext = true;
 					//#endif
 				}
 			}
@@ -2475,6 +2487,9 @@ public class RssReaderMIDlet extends MIDlet
 				m_loadForm.removeRef(this);
 				//#ifdef DTESTUI
 				m_headerTestList = null;
+				m_headerIndex = -1;
+				m_headerNext = false;
+				m_itemNext = false;
 				//#endif
 			}
 			
@@ -2496,8 +2511,10 @@ public class RssReaderMIDlet extends MIDlet
 			/** Indicate that we want to test the headers/items.  */
 			if( c == m_testRssCmd) {
 				if( super.size()>0 ) {
-					m_headerIndex = 0;
 					m_headerTestList = this;
+					m_headerNext = true;
+					m_itemNext = false;
+					m_headerIndex = 0;
 					System.out.println("Test UI Test Rss items start m_headerIndex=" + m_headerIndex);
 				}
 			}
