@@ -60,9 +60,11 @@ import net.sf.jlogmicro.util.logging.Level;
  *
  * @author Tommi Laukkanen
  */
-final public class AllNewsList extends List implements CommandListener {
+final public class AllNewsList extends List
+implements CommandListener, Runnable  {
     
     private RssReaderMIDlet m_midlet;
+	private boolean     m_process = true;   // Flag to continue looping
     private boolean     m_sort      = false; // Process sort
     private boolean     m_sortByDate = false; // Sort by date
     private boolean     m_showAll = false;  // Show both read and unread.
@@ -71,7 +73,19 @@ final public class AllNewsList extends List implements CommandListener {
     private boolean     m_sortUnread = false; // Sort unread items
     private boolean     m_needCleanup = false; // True if we're finished.
     private boolean     m_markUnreadItems;     // Mark unread items.
+    private boolean     m_needWakeup = false;   // Flag to show need to wakeup
+	//#ifdef DTESTUI
+    private boolean     m_testNews = false;     // True if auto testing news.
+	boolean m_newsNext = false; // Flag to control opening the next header
+	boolean m_itemNext = false; // Flag to control opening the next item
+	//#endif
+	//#ifdef DTESTUI
+	private int         m_newsIndex = -1; // Index in headers to auto test
+	private int         m_newsLen = -1; // Length of headers
+	//#endif
     private Image       m_unreadImage;
+    private List m_bookmarkList;
+    private Hashtable m_rssFeeds;
     private final static String TITLE = "River of News";
     private Command     m_openUnreadHdrCmd;    // The open header command
     private Command     m_sortUnreadItemsCmd;  // The sort unread items by date command
@@ -83,6 +97,9 @@ final public class AllNewsList extends List implements CommandListener {
     private Command     m_markReadCmd;      // Mark the item as read
     private Command     m_markUnReadCmd;    // Mark the item as unread
     private Command     m_backUnreadHdrCmd;    // The back to bookmark list command
+	//#ifdef DTESTUI
+	private Command     m_testNewsCmd;       // Tet UI rss news command
+	//#endif
     private Vector      m_itemFeeds = new Vector();
     private Vector      m_allItems = new Vector();
     private Vector      m_unreadItems = new Vector();
@@ -98,11 +115,21 @@ final public class AllNewsList extends List implements CommandListener {
     
     /** Creates a new instance of AllNewsList
 	    unreadImage - if non-null, put image for unread items for all list. */
-    public AllNewsList(final RssReaderMIDlet midlet, Image unreadImage) {
+    public AllNewsList(final RssReaderMIDlet midlet,
+					   final List bookmarkList, final Hashtable rssFeeds,
+					   Image unreadImage) {
+
         //super(TITLE, List.IMPLICIT);
         super("Unread Headers", List.IMPLICIT);
 		m_midlet = midlet;
+		m_bookmarkList = bookmarkList;
+		m_rssFeeds = rssFeeds;
 		m_unreadImage = unreadImage;
+		//#ifdef DCLDCV11
+		new Thread(this, "AllNewsList").start();
+		//#else
+		new Thread(this).start();
+		//#endif
     }
 
     /** Initialize new RSS headers list */
@@ -123,6 +150,9 @@ final public class AllNewsList extends List implements CommandListener {
 		m_markReadCmd = new Command("Mark read", Command.SCREEN, 7);
 		m_markUnReadCmd = new Command("Mark unread", Command.SCREEN, 8);
 		m_backUnreadHdrCmd  = new Command("Back", Command.BACK, 9);
+		//#ifdef DTESTUI
+		m_testNewsCmd        = new Command("Test news/items", Command.SCREEN, 10);
+		//#endif
         super.addCommand(m_openUnreadHdrCmd);
         super.addCommand(m_sortUnreadItemsCmd);
         super.addCommand(m_sortReadItemsCmd);
@@ -133,6 +163,9 @@ final public class AllNewsList extends List implements CommandListener {
         super.addCommand(m_markReadCmd);
         super.addCommand(m_markUnReadCmd);
         super.addCommand(m_backUnreadHdrCmd);
+		//#ifdef DTESTUI
+        super.addCommand(m_testNewsCmd);
+		//#endif
         super.setCommandListener(this);
     }
     
@@ -258,13 +291,15 @@ final public class AllNewsList extends List implements CommandListener {
 		uitems = null;
 		RssItunesItem[] sitems = new RssItunesItem[vsorted.size()];
 		vsorted.copyInto(sitems);
+		vsorted = null;
 		unsortedItems.removeAllElements();
 		for( int ic = 0; ic < sitems.length; ic++){
 			unsortedItems.addElement(sitems[ic]);
 		}
 		ufeeds = null;
-		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedUnsorted.size()];
-		vfeedUnsorted.copyInto(sfeeds);
+		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedSorted.size()];
+		vfeedSorted.copyInto(sfeeds);
+		vfeedSorted = null;
 		m_itemFeeds.removeAllElements();
 		for( int ic = 0; ic < sitems.length; ic++){
 			m_itemFeeds.addElement(sfeeds[ic]);
@@ -341,11 +376,14 @@ final public class AllNewsList extends List implements CommandListener {
 			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
 			final int unreadIdx = m_unreadItems.indexOf(m_item);
-			if (updateIt && (m_unreadImage != null)) {
+			if (updateIt && (m_unreadImage != null) && m_item.isUnreadItem()) {
 				super.set(selIdx, super.getString(selIdx), null);
 			}
 		} else if (m_showUnread) {
 			super.delete(selIdx);
+			if (selIdx > 0) {
+				super.setSelectedIndex(selIdx - 1, true);
+			}
 			m_item = (RssItunesItem)m_unreadItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
 			if (updateIt) {
@@ -368,43 +406,105 @@ final public class AllNewsList extends List implements CommandListener {
 	}
 
     /** Run method is used to get RSS feed with HttpConnection */
-    final public void run(final List bookmarkList, final Hashtable rssFeeds) {
+    final public void run() {
 
-		/* Sort the read or unread items. */
-		if ( m_sort ) {
-			if (m_showAll) {
-				sortAllItems( m_dateSort, bookmarkList, rssFeeds );
-			} else if (m_sortUnread) {
-				sortUnreadItems( m_dateSort, bookmarkList, rssFeeds );
-			} else {
-				sortReadItems( m_dateSort, bookmarkList, rssFeeds );
+        long lngStart;
+        long lngTimeTaken;
+        while(m_process) {
+            try {
+				/* Sort the read or unread items. */
+				if ( m_sort ) {
+					m_sort = false;
+					if (m_showAll) {
+						sortAllItems( m_dateSort, m_bookmarkList, m_rssFeeds );
+					} else if (m_sortUnread) {
+						sortUnreadItems( m_dateSort, m_bookmarkList, m_rssFeeds );
+					} else {
+						sortReadItems( m_dateSort, m_bookmarkList, m_rssFeeds );
+					}
+					m_midlet.setCurrent(this);
+				}
+			}catch(OutOfMemoryError t) {
+				m_midlet.recordExcForm("\nOut Of Memory Error sorting items", t);
+			}catch(Throwable t) {
+				m_midlet.recordExcForm("\nInternal error sorting items", t);
 			}
+			lngStart = System.currentTimeMillis();
+			lngTimeTaken = System.currentTimeMillis()-lngStart;
+			if(lngTimeTaken<100L) {
+				synchronized(this) {
+					if (!m_needWakeup) {
+						try {
+							super.wait(75L-lngTimeTaken);
+						} catch (InterruptedException e) {
+							break;
+						}
+					}
+					m_needWakeup = false;
+				}
+			}
+
+			//#ifdef DTESTUI
+			// If there are headers, and the header index is >= 0,
+			// open the header so that it's items can be listed
+			// with test UI classes.
+			// Need to change the selection to match the m_newsIndex.
+			if (m_newsNext && (m_newsIndex >= 0) && m_testNews &&
+				(m_newsIndex < super.size()) &&
+				(m_midlet.getCurrent() == this)) {
+				m_newsNext = false;
+				if (super.getSelectedIndex() >= 0) {
+					super.setSelectedIndex(
+							super.getSelectedIndex(), false);
+				}
+				super.setSelectedIndex(m_newsIndex, true);
+				commandAction(List.SELECT_COMMAND, this);
+			}
+			// After intializing the form (which was already logged by
+			// testui classes), simulate the back command
+			if (m_itemNext && (m_newsIndex >= 0) && m_testNews &&
+				(m_newsIndex < super.size()) && m_midlet.isItemForm()) {
+				m_itemNext = false;
+				m_midlet.backFrItemForm();
+				// If size the same, we are not doing unread, so increase.
+				if (m_newsLen == super.size()) {
+					m_newsIndex++;
+				}
+				if (m_newsIndex >= super.size()) {
+					System.out.println("Test UI Test Rss items last");
+					m_newsIndex = -1;
+				}
+			}
+			//#endif
+		}
+
+	}
+
+	/* Notify us that we are finished. */
+	final public void wakeUp() {
+    
+		synchronized(this) {
+			m_needWakeup = true;
+			super.notify();
+		}
+	}
+
+	//#ifdef DTESTUI
+	/** If auto testing news, set flag that says that we're going back to
+	    the news menu from item. */
+	final public void gotoNews() {
+		if (m_testNews) {
 			if (super.size() == 0) {
-				alertNoQualfiy(false);
+				m_testNews = false;
+				m_newsLen = -1;
+				m_newsIndex = -1;
+				m_newsNext = false;
+				m_itemNext = false;
 			}
-			m_midlet.showNewsList();
-			m_sort = false;
+			m_newsNext = true;
 		}
-
 	}
-
-	/** Tell the user that nothing qualified. */
-	final public void alertNoQualfiy(final boolean initSort) {
-		String msg;
-		if (initSort) {
-			msg = "Choose an item to sort by.";
-		} else if (m_sortUnread) {
-			msg = "No unread items to sort.  Choose " +
-				"another item to sort by.";
-		} else if (m_showAll) {
-			msg = "No items to sort.  Choose " +
-				"another item to sort by.";
-		} else {
-			msg = "No read items to sort.  Choose " +
-				"another item to sort by.";
-		}
-		super.append(msg, null);
-	}
+	//#endif
 
     /** Respond to commands */
     final public void commandAction(final Command c, final Displayable s) {
@@ -412,42 +512,42 @@ final public class AllNewsList extends List implements CommandListener {
 		super.outputCmdAct(c, s, javax.microedition.lcdui.List.SELECT_COMMAND);
 		//#endif
         if( c == m_sortUnreadItemsCmd ) {
-			m_midlet.initializeLoadingForm("Sorting items...", this);
-			m_midlet.showLoadingForm();
+			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = true;
 			m_dateSort = true;
 			m_showAll = false;
 			m_sort = true;
+			wakeUp();
         }
         
         /** Read read items date sorted */
         if( c == m_sortReadItemsCmd ) {
-			m_midlet.initializeLoadingForm("Sorting items...", this);
-			m_midlet.showLoadingForm();
+			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = false;
 			m_dateSort = true;
 			m_showAll = false;
 			m_sort = true;
+			wakeUp();
         }
         
         /** Read unread items feed sorted */
         if( c == m_sortUnreadFeedsCmd ) {
-			m_midlet.initializeLoadingForm("Sorting items...", this);
-			m_midlet.showLoadingForm();
+			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = true;
 			m_dateSort = false;
 			m_showAll = false;
 			m_sort = true;
+			wakeUp();
         }
         
         /** Read read items feed sorted */
         if( c == m_sortReadFeedsCmd ) {
-			m_midlet.initializeLoadingForm("Sorting items...", this);
-			m_midlet.showLoadingForm();
+			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = false;
 			m_dateSort = false;
 			m_showAll = false;
 			m_sort = true;
+			wakeUp();
         }
         
         if( (c == m_openUnreadHdrCmd) || (c == List.SELECT_COMMAND) ) {
@@ -455,27 +555,31 @@ final public class AllNewsList extends List implements CommandListener {
 				getUpdSel(true);
 				m_midlet.initializeItemForm( m_feed, m_item, this );
 				m_midlet.showItemForm();
+				//#ifdef DTESTUI
+				m_itemNext = true;
+				//#endif
             }
 		} else if( c == m_sortAllDateCmd ) {
-			m_midlet.initializeLoadingForm("Sorting items...", this);
-			m_midlet.showLoadingForm();
+			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = false;
 			m_dateSort = true;
 			m_showAll = true;
 			m_sort = true;
+			wakeUp();
 		} else if( c == m_sortAllFeedsCmd ) {
-			m_midlet.initializeLoadingForm("Sorting items...", this);
-			m_midlet.showLoadingForm();
+			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = false;
 			m_dateSort = false;
 			m_showAll = true;
 			m_sort = true;
+			wakeUp();
 		} else if( c == m_markReadCmd ) {
             if( super.size()>0){
 				getUpdSel(false);
 				m_item.setUnreadItem(false);
 				m_midlet.initializeLoadingForm("Sorting items...", this);
 				m_sort = true;
+				wakeUp();
             }
 		} else if( c == m_markUnReadCmd ) {
             if( super.size()>0){
@@ -483,17 +587,37 @@ final public class AllNewsList extends List implements CommandListener {
 				m_item.setUnreadItem(true);
 				m_midlet.initializeLoadingForm("Sorting items...", this);
 				m_sort = true;
+				wakeUp();
             }
         /** Get back to RSS feed bookmarks */
 		} else if( c == m_backUnreadHdrCmd ){
+			//#ifdef DTESTUI
+			m_testNews = false;
+			m_newsLen = -1;
+			m_newsIndex = -1;
+			m_newsNext = false;
+			m_itemNext = false;
+			//#endif
+			m_process = false;
+			m_midlet.removeRef(this);
 			m_midlet.showBookmarkList();
-			m_needCleanup = true;
+
+			//#ifdef DTESTUI
+			/** Indicate that we want to test the headers/items.  */
+		} else if( c == m_testNewsCmd) {
+			if( super.size()>0 ) {
+				m_itemNext = false;
+				m_newsIndex = 0;
+				m_newsLen = super.size();
+				System.out.println("Test UI Test News items start m_newsIndex=" + m_newsIndex);
+				m_newsNext = true;
+				m_testNews = true;
+				wakeUp();
+			}
+			//#endif
+
 		}
         
 	}
-
-    final public boolean isNeedCleanup() {
-        return (m_needCleanup);
-    }
 
 }
