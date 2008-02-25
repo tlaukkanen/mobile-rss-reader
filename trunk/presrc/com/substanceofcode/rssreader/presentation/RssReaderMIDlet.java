@@ -202,8 +202,8 @@ public class RssReaderMIDlet extends MIDlet
     private PromptList  m_bookmarkList;     // The bookmark list
 	//#ifdef DTESTUI
     private HeaderList  m_headerTestList;       // The header list
+    private AllNewsList m_unreadHeaderTestList; // The test header list for unread items
 	//#endif
-    private AllNewsList m_unreadHeaderList; // The header list for unread items
     private List        m_itemRrnForm;      // The list to return from for item
     private Form        m_itemForm;         // The item form
     private LoadingForm m_loadForm;         // The "loading..." form
@@ -638,11 +638,6 @@ public class RssReaderMIDlet extends MIDlet
     }
     
     /** Show loading form */
-    final public void showNewsList() {
-        setCurrent( m_unreadHeaderList );
-    }
-    
-    /** Show loading form */
     final public void showLoadingForm() {
         setCurrent( m_loadForm );
     }
@@ -996,28 +991,22 @@ public class RssReaderMIDlet extends MIDlet
 				/* Sort the read or unread items. */
 				if ( m_runNews ) {
 					try {
-						if (m_unreadHeaderList == null) {
-							m_unreadHeaderList = new AllNewsList(this,
+						AllNewsList unreadHeaderList = new AllNewsList(this,
+							m_bookmarkList, m_rssFeeds,
 									m_appSettings.getMarkUnreadItems() ?
 									m_unreadImage : null);
-							m_unreadHeaderList.initializeUnreadHhdrsList();
-							m_unreadHeaderList.sortUnreadItems( true,
-									m_bookmarkList, m_rssFeeds );
-							if (m_unreadHeaderList.size() == 0) {
-								m_unreadHeaderList.alertNoQualfiy(true);
-							}
-							setCurrent( m_unreadHeaderList );
-						} else if (m_unreadHeaderList.isNeedCleanup()) {
-							m_unreadHeaderList = null;
-							m_runNews = false;
-						} else {
-							m_unreadHeaderList.run(m_bookmarkList, m_rssFeeds);
-						}
+						//#ifdef DTESTUI
+						m_unreadHeaderTestList = unreadHeaderList;
+						//#endif
+						unreadHeaderList.initializeUnreadHhdrsList();
+						unreadHeaderList.sortUnreadItems( true,
+								m_bookmarkList, m_rssFeeds );
+						setCurrent( unreadHeaderList );
                     }catch(OutOfMemoryError t) {
 						recordExcForm("\nOut Of Memory Error sorting items", t);
-						m_runNews = false;
                     }catch(Throwable t) {
 						recordExcForm("\nInternal error sorting items", t);
+					} finally {
 						m_runNews = false;
 					}
 				}
@@ -1094,7 +1083,7 @@ public class RssReaderMIDlet extends MIDlet
     }
 	
 	/* Record the exception in the loading form, log it and give std error. */
-	final private void recordExcForm(final String causeMsg, final Throwable e) {
+	final public void recordExcForm(final String causeMsg, final Throwable e) {
 		final CauseException ce = new CauseException(causeMsg, e);
 		m_loadForm.addExc(ce);
 		//#ifdef DLOGGING
@@ -1131,6 +1120,13 @@ public class RssReaderMIDlet extends MIDlet
 		wakeUp();
 	}
 
+	//#ifdef DTESTUI
+	/* Get current displayable. */
+	final public Displayable getCurrent() {
+		return m_display.getCurrent();
+	}
+	//#endif
+
 	/* Set current displayable and wake up the thread. */
 	final public void setCurrent(Alert alert, Displayable disp) {
 		m_display.setCurrent( alert, disp );
@@ -1151,8 +1147,21 @@ public class RssReaderMIDlet extends MIDlet
         setCurrent( m_itemForm );
     }
     
+	//#ifdef DTESTUI
+	/** Cause item form to go back to the prev form. */
+    final public void backFrItemForm() {
+		commandAction( m_backCommand, m_itemForm );
+    }
+    
+    /** Show item form */
+    final public boolean isItemForm() {
+        return (m_display.getCurrent() == m_itemForm);
+    }
+	//#endif
+    
     /** Initialize RSS item form */
-    final public void initializeItemForm(final RssItunesItem item,
+    final public void initializeItemForm(final RssItunesFeed feed,
+								   final RssItunesItem item,
 								   List prevList) {
         System.out.println("Create new item form");
 		final String title = item.getTitle();
@@ -1193,13 +1202,19 @@ public class RssReaderMIDlet extends MIDlet
 			if (duration.length() > 0) {
 				m_itemForm.append(new StringItem("Duration:", duration));
 			}
-			m_itemForm.append(new StringItem("Explicit:", item.getExplicit()));
+			String expLabel = "Explicit:";
+			String explicit = item.getExplicit();
+			if (explicit.equals(RssItunesItem.UNSPECIFIED)) {
+				expLabel = "Feed explicit:";
+				explicit = feed.getExplicit();
+			}
+			m_itemForm.append(new StringItem(expLabel, explicit));
 		}
 		String linkLabel = "Link:";
         String link = item.getLink();
 		//#ifdef DITUNES
 		if (link.length() == 0) {
-			link = m_curRssParser.getRssFeed().getLink();
+			link = feed.getLink();
 			linkLabel = "Feed link:";
 		}
 		//#endif
@@ -1230,7 +1245,7 @@ public class RssReaderMIDlet extends MIDlet
         Date itemDate = item.getDate();
 		//#ifdef DITUNES
         if(itemDate==null) {
-			itemDate = m_curRssParser.getRssFeed().getDate();
+			itemDate = feed.getDate();
 			dateLabel = "Feed date:";
 		}
 		//#endif
@@ -1624,6 +1639,11 @@ public class RssReaderMIDlet extends MIDlet
 		}
 	}
 
+	/** Remove the ref to this displayable so that the memory can be freed. */
+	final public void removeRef(final Displayable disp) {
+		m_loadForm.removeRef(disp);
+	}
+
     /** Respond to commands */
     public void commandAction(final Command c, final Displayable s) {
 		//#ifdef DLOGGING
@@ -1734,6 +1754,8 @@ public class RssReaderMIDlet extends MIDlet
 			//#ifdef DTESTUI
 			if (m_headerIndex >= 0) {
 				m_headerNext = true;
+			} else if (m_unreadHeaderTestList != null) {
+				m_unreadHeaderTestList.gotoNews();
 			}
 			//#endif
         }
@@ -2391,6 +2413,7 @@ public class RssReaderMIDlet extends MIDlet
 		}
 		
 		//#ifdef DTEST
+		/** Test that the feed is not ruined by being stored and restored. */
 		final private void testFeed() {
 			RssItunesFeed feed = m_curRssParser.getRssFeed();
 			String store = feed.getStoreString(true, true);
@@ -2401,12 +2424,16 @@ public class RssReaderMIDlet extends MIDlet
 			if (finestLoggable) {logger.finest("feed1,2 eq=" + feedEq);}
 			//#endif
 			if (!feedEq) {
+				//#ifdef DLOGGING
+				logger.severe("Itunes feed does not match name=" + feed.getName());
+				//#endif
 				System.out.println("feed=" + feed + "," + feed.toString());
 				System.out.println("feed store=" + store);
 			}
 		}
 		//#endif
 
+		//#ifdef DITUNES
 		/** Initialize RSS bookmark feed details form */
 		final private Form initializeDisplayForm( final RssItunesFeed feed ) {
 			Form displayDtlForm = new Form( feed.getName() );
@@ -2417,24 +2444,24 @@ public class RssReaderMIDlet extends MIDlet
 				if (language.length() > 0) {
 					displayDtlForm.append(new StringItem("Language:", language));
 				}
-				String author = feed.getAuthor();
+				final String author = feed.getAuthor();
 				if (author.length() > 0) {
 					displayDtlForm.append(new StringItem("Author:", author));
 				}
-				String subtitle = feed.getSubtitle();
+				final String subtitle = feed.getSubtitle();
 				if (subtitle.length() > 0) {
 					displayDtlForm.append(new StringItem("Subtitle:", subtitle));
 				}
-				String summary = feed.getSummary();
+				final String summary = feed.getSummary();
 				if (summary.length() > 0) {
 					displayDtlForm.append(new StringItem("Summary:", summary));
 				}
 				displayDtlForm.append(new StringItem("Explicit:", feed.getExplicit()));
-				String title = feed.getTitle();
+				final String title = feed.getTitle();
 				if (title.length() > 0) {
 					displayDtlForm.append(new StringItem("title:", title));
 				}
-				String description = feed.getDescription();
+				final String description = feed.getDescription();
 				if (description.length() > 0) {
 					displayDtlForm.append(new StringItem("Description:", description));
 				}
@@ -2448,6 +2475,7 @@ public class RssReaderMIDlet extends MIDlet
 			displayDtlForm.append(slink);
 			return displayDtlForm;
 		}
+		//#endif
 		
 		/** Respond to commands */
 		public void commandAction(final Command c, final Displayable s) {
@@ -2468,7 +2496,7 @@ public class RssReaderMIDlet extends MIDlet
 					super.set(selIdx, super.getString(selIdx),
 							null );
 					item.setUnreadItem(false);
-					initializeItemForm( item, this );
+					initializeItemForm( feed, item, this );
 					setCurrent( m_itemForm );
 					//#ifdef DTESTUI
 					m_itemNext = true;
@@ -2519,6 +2547,7 @@ public class RssReaderMIDlet extends MIDlet
 				}
 			}
 			//#endif
+
 		}
 	}
 
