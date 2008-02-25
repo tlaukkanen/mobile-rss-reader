@@ -121,9 +121,6 @@ public class ExtParser {
 		} else {
 			m_subtitle = StringUtil.removeHtml(m_subtitle);
 		}
-		if (m_explicit == (byte)-1) {
-			m_explicit = (byte)0;
-		}
 		feed.modifyItunes(true, title, desc, m_language, m_author, m_subtitle,
 						  m_summary, m_explicit);
 		return feed;
@@ -158,9 +155,6 @@ public class ExtParser {
 		}
 		if (m_author.length() == 0) {
 			m_author = m_creator;
-		}
-		if (m_explicit == (byte)-1) {
-			m_explicit = (byte)0;
 		}
 		return new RssItunesItem(title, link, desc, date,
 			        enclosure, unreadItem,
@@ -345,8 +339,11 @@ public class ExtParser {
 					else if (sexplicit.toLowerCase().equals("clean")) {
 						m_explicit = (byte)1;
 					}
-					else {
+					else if (sexplicit.toLowerCase().equals("no")) {
 						m_explicit = (byte)0;
+					}
+					else {
+						m_explicit = (byte)-1;
 					}
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_explicit=" + m_explicit);}
