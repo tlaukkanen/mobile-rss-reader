@@ -48,9 +48,6 @@ public class RssItunesFeed extends RssFeed{
 	// Beginning of data that has 0 itunes info.
 	// Number of Itunes info
     private static int NBR_ITUNES_FEED_INFO = 8;
-    private static byte BNO_EXPLICIT = (byte)-1;
-    private static byte[] BANO_EXPLICIT = {BNO_EXPLICIT};
-    private static String NO_EXPLICIT = new String(BANO_EXPLICIT);
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssItunesFeed");
 	//#endif
@@ -69,7 +66,7 @@ public class RssItunesFeed extends RssFeed{
     protected String m_author = "";   // The RSS feed author
     protected String m_subtitle = "";   // The RSS feed subtitle
     protected String m_summary = "";   // The RSS feed summary
-    private byte m_explicit = BNO_EXPLICIT;   // The RSS feed explicit
+    private byte m_explicit = RssItunesItem.BNO_EXPLICIT;   // The RSS feed explicit
     
     /** Creates a new instance of RSSBookmark */
     public RssItunesFeed(){
@@ -226,15 +223,17 @@ public class RssItunesFeed extends RssFeed{
 //@				}
 //@				
 //@				int SUMMARY = 6;
-//@				String m_summary = nodes[SUMMARY];
+//@				m_summary = nodes[SUMMARY];
 //@				if (hasPipe) {
 //@					m_summary = m_summary.replace('\n', '|');
 //@				}
 //@
 //@				int EXPLICIT = 7;
-//@				String explicit = nodes[EXPLICIT];
+//@				final String explicit = nodes[EXPLICIT];
 //@				if (explicit.length() > 0) {
 //@					m_explicit = (byte)Integer.parseInt(explicit);
+//@				} else {
+//@					m_explicit = RssItunesItem.BNO_EXPLICIT;
 //@				}
 //@			}
 			//#endif
@@ -267,7 +266,7 @@ public class RssItunesFeed extends RssFeed{
         String storeString = (m_itunes ? "1" : "") + "|" + title + "|" +
 			description + "|" + m_language + "|" +
                 author + "|" + subtitle + "|" + summary + "|" +
-                 ((m_explicit == BNO_EXPLICIT) ? "" :
+                 ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
 						 Integer.toString((int)m_explicit)) + "|" +
 			super.getStoreString(serializeItems, encoded);
         return storeString;
@@ -340,7 +339,7 @@ public class RssItunesFeed extends RssFeed{
         String storeString = m_itunes + "|" + m_title + "|" +
 			m_description + "|" + m_language + "|" +
 			m_author + "|" + m_subtitle + "|" + m_summary + "|" +
-                 ((m_explicit == BNO_EXPLICIT) ? "" :
+                 ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
 						 Integer.toString((int)m_explicit)) + "|" +
 				 super.toString();
         return storeString;
@@ -400,7 +399,7 @@ public class RssItunesFeed extends RssFeed{
 			case (byte)2:
 				return "yes";
 			default:
-				return "unspecified";
+				return RssItunesItem.UNSPECIFIED;
 		}
     }
 
