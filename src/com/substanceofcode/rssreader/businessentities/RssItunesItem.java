@@ -50,14 +50,15 @@ public class RssItunesItem extends RssItem {
     public static int MAX_SUMMARY = 500;
 	// Beginning of data that has 0 itunes info.
 	// Number of Itunes info
-    private static int NBR_ITUNES_INFO = 6;
-    private static byte BNO_EXPLICIT = (byte)-1;
-    private static byte[] BANO_EXPLICIT = {BNO_EXPLICIT};
-    private static String NO_EXPLICIT = new String(BANO_EXPLICIT);
+    final private static int NBR_ITUNES_INFO = 6;
+    final protected static byte BNO_EXPLICIT = (byte)-1;
+    final private static byte[] BANO_EXPLICIT = {BNO_EXPLICIT};
+    final private static String NO_EXPLICIT = new String(BANO_EXPLICIT);
+    final public static String UNSPECIFIED = "unspecified";
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
 	// can later be modified to contain them).
-    private static int INT_ITUNES_INDICATOR = NBR_ITUNES_INFO;
+    final private static int INT_ITUNES_INDICATOR = NBR_ITUNES_INFO;
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssItunesItem");
 	//#endif
@@ -298,7 +299,7 @@ public class RssItunesItem extends RssItem {
 			case (byte)2:
 				return "yes";
 			default:
-				return "unspecified";
+				return UNSPECIFIED;
 		}
     }
 
