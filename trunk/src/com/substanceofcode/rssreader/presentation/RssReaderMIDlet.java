@@ -2364,9 +2364,6 @@ public class RssReaderMIDlet extends MIDlet
 			m_updateCmd         = new Command("Update feed", Command.SCREEN, 2);
 			m_updateModCmd      = new Command("Update modified feed",
 											  Command.SCREEN, 2);
-			//#ifdef DMIDP20
-			super.setSelectCommand(m_openHeaderCmd);
-			//#endif
 			super.addCommand(m_updateCmd);
 			super.addCommand(m_updateModCmd);
 			//#ifdef DTESTUI
