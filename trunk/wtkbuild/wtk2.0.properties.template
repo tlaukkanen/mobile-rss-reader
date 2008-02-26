@@ -15,4 +15,4 @@ JCLDCVERS = CLDC-1.0
 file.prefix = midp20_
 bin = ../bin20
 MIDLETVERS = ${MIDLETVERSROOT}
-SUFFIXVERS = -2.0
+SUFFIXVERS = 2.0
