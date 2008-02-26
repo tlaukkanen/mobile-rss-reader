@@ -1185,7 +1185,7 @@ public class RssReaderMIDlet extends MIDlet
 			m_itemForm.append(new StringItem("Description\n", desc));
 		}
 		citem = item;
-		if (m_itunesEnabled && item.isItunes()) {
+		if (m_itunesEnabled && (item.isItunes() || feed.isItunes())) {
 			final String author = item.getAuthor();
 			if (author.length() > 0) {
 				m_itemForm.append(new StringItem("Author:", author));
