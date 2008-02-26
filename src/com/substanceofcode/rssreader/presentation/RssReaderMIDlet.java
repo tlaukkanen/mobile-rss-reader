@@ -1118,12 +1118,6 @@ public class RssReaderMIDlet extends MIDlet
 		//#endif
 		m_display.setCurrent( disp );
 		wakeUp();
-		if (m_display.getCurrent() != disp) {
-			try {
-				m_netThread.sleep(100L);
-			} catch (InterruptedException e) {}
-			m_display.setCurrent( disp );
-		}
 	}
 
 	//#ifdef DTESTUI
