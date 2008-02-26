@@ -14,4 +14,4 @@ JCLDCVERS = CLDC-1.1
 file.prefix = midp20_cldc11_
 bin = ../bin20cldc11
 MIDLETVERS = ${MIDLETVERSROOT}
-SUFFIXVERS = -2.0-cldc-1.1
+SUFFIXVERS = 2.0-cldc-1.1
