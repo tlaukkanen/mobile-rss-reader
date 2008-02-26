@@ -6,30 +6,50 @@
 
 	<property name="device.props" value="" />
 	<property name="build.template" value="" />
+	<property name="wtk.template" value="" />
+	<property name="beta.vers" value="" />
+	<echo message="build.template=${build.template}" />
+	<echo message="wtk.properties=${wtk.properties}" />
+	<echo message="wtk.template=${wtk.template}" />
+	<echo message="release.template=${release.template}" />
+	<echo message="test.template=${test.template}" />
+	<echo message="optional.template=${optional.template}" />
+	<echo message="DLOGDEF=${DLOGDEF}" />
 	<echo message="presrc=" />
 	<property name="DEBUG" value="DEBUG" />
 	<property name="target" value="../target" />
 	<property name="tmpres" value="${target}/tmpres" />
+	<property name="webtestdata" value="${target}/webtestdata" />
+	<property name="filetestdata" value="${target}/filetestdata" />
 	<property name="dist" value="${target}/dist" />
 	<property name="dist.midp10" value="${target}/dist/midp10" />
 	<property name="dist.midp20" value="${target}/dist/midp20" />
 	<property name="dist.midp20.jsr75" value="${target}/dist/midp20_jsr75" />
+	<property name="dist.midp20.itunes.jsr75" value="${target}/dist/midp20_itunes_jsr75" />
 	<property name="dist.midp20.jsr75_jsr238" value="${target}/dist/midp20_jsr75_jsr238" />
 	<property name="build" value="${target}/build" />
 	<property name="build.midp10" value="${target}/build/midp10" />
 	<property name="build.midp20" value="${target}/build/midp20" />
+	<property name="build.midp20.itunes.jsr75" value="${target}/build/midp20_itunes_jsr75" />
 	<property name="build.midp20.jsr75" value="${target}/build/midp20_jsr75" />
+	<property name="build.midp20.itunes.jsr75" value="${target}/build/midp20_itunes_jsr75" />
 	<property name="build.midp20.jsr75.jsr238" value="${target}/build/midp20_jsr75.jsr238" />
 	<property name="classes" value="${target}/classes" />
 	<property name="tmppreprocess" value="${target}/tmppreprocess" />
 	<property file="${basedir}/wtk-build${device.props}.properties${build.template}" />
+	<!-- DCOMPATDEF is used to test compatibility store/restore of date -->
+	<property name="DCOMPATDEF" value="DNOCOMPAT" />
 	<echo message="unproc.src=${unproc.src}" />
+	<fail message="Must set comp.src to src directory to put the source to compile." unless="comp.src" />
 
 	<!-- Define the tasks. -->
 
 	<!-- clean up the project -->
-	<target name="clean">
+	<target name="clean" >
 		<delete dir="${target}" />
+		<antcall target="clean.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+		</antcall>
 	</target>
 
 	<!-- clean up the compile -->
@@ -37,15 +57,46 @@
 		<delete dir="${classes}" />
 	</target>
 
+	<!-- TODO -->
+	<target name="clean.version">
+		<delete dir="${classes}" />
+	</target>
+
 	<target name="test.prepare" unless="no.test" >
 	    <echo message="Using test properties" />
 	    <echo message="no.release=${no.release}" />
-		<property file="${basedir}/test.properties" />
+		<property file="${basedir}/test.properties${test.template}" />
+		<antcall target="test.buildno" />
+		<property file="${basedir}/test_buildinfo.properties${test.template}" />
+	    <echo message="build.number=${build.number}" />
+	</target>
+
+	<target name="test.buildno" unless="test.buildinfo" >
+	    <echo message="Using test properties" />
+	    <echo message="no.release=${no.release}" />
+		<propertyfile file="${basedir}/test_buildinfo.properties${test.template}" comment="RSS Reader test build information">
+		  <entry key="date" type="date" value="now" pattern="yyyyMMddHHmm" />
+		  <entry key="build.number" type="int" default="0001" operation="+" pattern="0000" />
+		</propertyfile>
+		<property name="test.buildno" value="true" />
 	</target>
 
 	<target name="release.prepare" unless="no.release" >
 	    <echo message="Using release properties" />
-		<property file="${basedir}/release.properties" />
+		<property file="${basedir}/release.properties${release.template}" />
+	    <echo message="RELEASE=${RELEASE}" />
+	    <echo message="build.number=${build.number}" />
+		<antcall target="release.buildno" />
+		<property file="${basedir}/release_buildinfo.properties${release.template}" />
+	    <echo message="build.number=${build.number}" />
+	</target>
+
+	<target name="release.buildno" unless="release.buildno" >
+		<propertyfile file="${basedir}/release_buildinfo.properties${release.template}" comment="RSS Reader test build information">
+		  <entry key="date" type="date" value="now" pattern="yyyyMMddHHmm" />
+		  <entry key="build.number" type="int" default="0001" operation="+" pattern="0000" />
+		</propertyfile>
+		<property name="release.buildno" value="true" />
 	</target>
 
 	<target name="staging.prepare" unless="no.staging" >
@@ -57,24 +108,50 @@
 	<target name="prepare" depends="test.prepare,release.prepare" >
 		<!-- Define the Wireless Toolkit home directory. Needed by the tasks. -->
 		<!-- Define some additional properties for this project. Not required. -->
-		<property file="${basedir}/optional.properties" />
+		<property file="${basedir}/optional.properties${optional.template}" />
 		<property name="propdir" value="${basedir}" />
 		<property file="${basedir}/${wtk.properties}" />
+		<property name="stage" value="" />
+		<property name="build.prefix" value="${file.prefix}${stage}" />
+		<property name="buildinfo" value="${SUFFIXVERS}-${stage}b${build.number}" />
 		<!-- changed -->
 		<mkdir dir="${target}" />
 		<mkdir dir="${classes}" />
 		<property name="EMULATOR" value="true" />
 		<property name="main" value="${target}/main" />
 		<property name="svnexport" value="${build}/svnexport" />
-		<property name="compiled" value="${build}/${file.prefix}pcompiled" />
-		<property name="preverified" value="${build}/${file.prefix}preverified" />
-		<property name="preprocessed" value="${build}/${file.prefix}preprocessed" />
-		<property name="obfuscated" value="${build}/${file.prefix}obfuscated" />
+		<property name="compiled" value="${build}/${build.prefix}pcompiled" />
+		<property name="preverified" value="${build}/${build.prefix}preverified" />
+		<property name="preprocessed" value="${build}/${build.prefix}preprocessed" />
+		<property name="obfuscated" value="${build}/${build.prefix}obfuscated" />
+		<filterset id="defile.filter" >
+			<filter token="DMIDPVERS" value="//#define ${DMIDPVERS}" />
+			<filter token="DCLDCVERS" value="//#define ${DCLDCVERS}" />
+			<filter token="DITUNESDEF" value="//#define ${DITUNESDEF}" />
+			<filter token="DJSR75" value="//#define ${DJSR75}" />
+			<filter token="DJSR238" value="//#define ${DJSR238}" />
+			<filter token="DTESTDEF" value="//#define ${DTESTDEF}" />
+			<filter token="DCOMPATDEF" value="//#define ${DCOMPATDEF}" />
+			<filter token="DTESTUIDEF" value="//#define ${DTESTUIDEF}" />
+			<filter token="DLOGDEF" value="//#define ${DLOGDEF}" />
+			<filter token="PROGVERS" value="${buildinfo}" />
+		</filterset>
+		<filterset id="midlet.info" >
+			<filter token="MIDPVERS" value="${wtk.midp.version}" />
+			<filter token="CLDCVERS" value="${wtk.cldc.version}" />
+			<filter token="MIDLETVERS" value="${MIDLETVERS}" />
+			<filter token="PROGVERS" value="${buildinfo}" />
+			<filter token="JMIDPVERS" value="${JMIDPVERS}" />
+			<filter token="JCLDCVERS" value="${JCLDCVERS}" />
+			<filter token="EMULATOR" value="${EMULATOR}" />
+		</filterset>
+
 	</target>
 
+    <echo message="location='${antenna.home}/${antenna.jar}'" />
 	<taskdef resource="antenna.properties" >
 	  <classpath>
-		<pathelement location="${antenna.home}/antenna-bin-0.9.15-beta.jar" />
+		<pathelement location="${antenna.home}/${antenna.jar}" />
 	  </classpath>
 	</taskdef>
 
@@ -107,11 +184,19 @@
 	-->
 
 	<target name="display.props" >
+	    <echo message="src=${src}" />
+	    <echo message="presrc=${presrc}" />
+	    <echo message="compat.presrc=${compat.presrc}" />
+	    <echo message="testui.presrc=${testui.presrc}" />
+	    <echo message="build.number=${build.number}" />
 	    <echo message="DMIDPVERS=${DMIDPVERS}" />
 	    <echo message="DCLDCVERS=${DCLDCVERS}" />
+	    <echo message="DITUNESDEF=${DITUNESDEF}" />
 	    <echo message="DJSR75=${DJSR75}" />
 	    <echo message="DJSR238=${DJSR238}" />
 	    <echo message="DTESTDEF=${DTESTDEF}" />
+	    <echo message="DTESTUIDEF=${DTESTUIDEF}" />
+	    <echo message="DCOMPATDEF=${DCOMPATDEF}" />
 	    <echo message="wtk.optionalpda.enabled=${wtk.optionalpda.enabled}" />
 	    <echo message="DLOGDEF=${DLOGDEF}" />
 	    <echo message="no.test=${no.test}" />
@@ -121,34 +206,61 @@
 	    <echo message="manifestsrc=${manifestsrc}" />
 	</target>
 
-	<target name="preprocess" depends="prepare" if="need.preprocess" >
+	<!-- Preprocess source using antenna preprocessor.  If preproccess -->
+	<!-- is not used, this copies the src to the directory to compile -->
+	<!-- comp.src. -->
+	<target name="preprocess" depends="prepare" if="presrc" >
 		<antcall target="display.props" />
+		<!-- Delete directory to compile so that we start fresh for cases -->
+		<!-- when we delete a file. -->
+		<delete dir="${comp.src}" />
+		<mkdir dir="${comp.src}" />
+		<!-- Copy unpreprocessed source to compiled src dir -->
 		<antcall target="copy.unproc.comp" />
-		<antcall target="all.src.preprocessed" />
 		<delete dir="${tmppreprocess}" />
 		<mkdir dir="${tmppreprocess}" />
-		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF}" />
+		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
+		<echo message="Preprocess test UI if set ${testui.presrc}." />
+		<wtkpreprocess srcdir="${testui.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" printsymbols="true" if="testui.presrc" />
+		<echo message="Preprocess compatiblity code if set ${compat.presrc}." />
+		<wtkpreprocess srcdir="${compat.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" if="compat.presrc" />
+		<echo message="Preprocess jar src if set ${jar.presrc}." />
+		<wtkpreprocess srcdir="${jar.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" if="jar.presrc" />
 		<copy todir="${comp.src}" overwrite="true" >
 			<fileset dir="${tmppreprocess}" includes="**/*.java" />
-			<filterset >
-				<filter token="DMIDPVERS" value="//#define ${DMIDPVERS}" />
-				<filter token="DJSR75" value="//#define ${DJSR75}" />
-				<filter token="DJSR238" value="//#define ${DJSR238}" />
-				<filter token="DTESTDEF" value="//#define ${DTESTDEF}" />
-				<filter token="DLOGDEF" value="//#define ${DLOGDEF}" />
-				<filter token="MIDLETVERS" value="${MIDLETVERS}${SUFFIXVERS}" />
-			</filterset>
+			<filterset refid="defile.filter" />
 		</copy>
-		<antcall target="copy.comp.src" />
+		<antcall target="delete.test.src" >
+			<param name="dsrc" value="${comp.src}" />
+		</antcall>
+		<antcall target="wtk.src.copy" />
+		<zip destfile="${zipdir}/${build.prefix}src.zip" basedir="${comp.src}" update="true" />
 	</target>
 
-	<target name="copy.comp.src" depends="prepare" if="copy.comp.src" >
+	<!-- Copy preprocessed src to unprocessed source to allow the -->
+	<!-- src to be checked in or compiled with Netbeans -->
+	<target name="copy.comp.src" depends="prepare" if="unproc.src" >
 		<copy todir="${src}" overwrite="true" >
+			<!-- remove compatibility classes as these are kept in compatsrc -->
+			<!-- remove testui classes as these are kept in testui -->
 			<fileset dir="${comp.src}" includes="**/*.java" />
 		</copy>
+		<antcall target="delete.test.src" >
+			<param name="dsrc" value="${src}" />
+		</antcall>
 	</target>
 
-	<target name="copy.unproc.comp" depends="prepare" if="copy.unproc.comp" >
+	<!-- Delete preprocessed test src in src -->
+	<target name="delete.test.src" depends="prepare" if="no.test">
+		<echo message="Deleting test src ${dsrc}." />
+		<delete includeemptydirs="true" failonerror="false" >
+			<!-- remove testui classes as these are kept in testui -->
+			<fileset dir="${dsrc}" includes="**/Compatibility*,**/testutil/**,**/testlcdui/*.java" />
+			<fileset dir="${dsrc}/net" />
+		</delete>
+	</target>
+
+	<target name="copy.unproc.comp" depends="prepare" if="unproc.src" >
 		<copy todir="${comp.src}" overwrite="true" >
 			<fileset dir="${unproc.src}" includes="**/*.java" />
 		</copy>
@@ -160,15 +272,7 @@
 		</copy>
 	</target>
 
-	<!-- TODO Fix for non WTK -->
-	<target name="all.src.preprocessed" depends="prepare" if="all.src.preprocessed" >
-		<delete includeEmptyDirs="true" >
-			<fileset dir="${midlet.home}/${src}" includes="**/*.java" />
-		</delete>
-		<mkdir dir="${midlet.home}/${src}" />
-	</target>
-
-	<target name="wtk.src.copy" if="src.controlled.copy" >
+	<target name="wtk.src.copy" if="wtk.src" >
 		<delete dir="${wtk.src}" />
 		<copy todir="${wtk.src}" >
 			<fileset dir="${comp.src}" includes="**/*.java" />
@@ -178,70 +282,6 @@
 	<path id="project.classpath">
 		<pathelement location="lib/JLogMicro.jar" />
 	</path>
-
-	<target name="compile.1.0">
-		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk1.0.properties" />
-			<param name="no.staging" value="true" />
-			<param name="no.release" value="true" />
-		</antcall>
-	</target>
-
-	<target name="compile.2.0">
-		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk2.0.properties" />
-			<param name="no.staging" value="true" />
-			<param name="no.release" value="true" />
-		</antcall>
-	</target>
-
-	<target name="compile.2.0.cldc1.1">
-		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk2.0cldc1.1.properties" />
-			<param name="no.staging" value="true" />
-			<param name="no.release" value="true" />
-		</antcall>
-	</target>
-
-	<target name="compile.2.0.jsr75" >
-		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk2.0jsr75.properties" />
-			<param name="no.staging" value="true" />
-			<param name="no.release" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.compile.1.0" >
-		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk1.0.properties" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.compile.2.0" >
-		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk1.0.properties" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.compile.2.0.jsr75" >
-		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk2.0jsr75.properties" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="compile.2.0.jsr238" >
-		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk2.0jsr238.properties" />
-			<param name="no.staging" value="true" />
-			<param name="no.release" value="true" />
-		</antcall>
-	</target>
 
 	<target name="compile" depends="prepare">
 
@@ -259,8 +299,21 @@
 		<antcall target="wtk.src.copy" />
 		<antcall target="display.props" />
 		<wtkbuild srcdir="${comp.src}" destdir="${classes}" preverify="false" />
-		<antcall target="copy.comp.src" />
 
+	</target>
+
+	<target name="build.testdata" depends="prepare" >
+		<echo message="project.test.url=${project.test.url}" />
+		<delete dir="${webtestdata}" />
+		<copy todir="${webtestdata}" >
+			<fileset dir="../testdata" />
+		</copy>
+		<replace dir="${webtestdata}" token="jar://" value="${project.test.url}" />
+		<delete dir="${filetestdata}" />
+		<copy todir="${filetestdata}" >
+			<fileset dir="../testdata" />
+		</copy>
+		<replace dir="${filetestdata}" token="jar://" value="${file.test.url}" />
 	</target>
 
 	<target name="add.jars" if="add.jars" >
@@ -275,6 +328,32 @@
 	<target name="copy.jar.src" if="copy.jar.src" >
 		<copy todir="${comp.src}" >
 			<fileset dir="${jarsrc}" excludes="**/*MIDlet*" />
+		</copy>
+	</target>
+
+	<!-- Copy compatsrc to target src directory. -->
+	<target name="copy.compat" if="copy.compat" >
+		<echo message="copy.compat=${copy.compat}" />
+		<copy todir="${comp.src}" overwrite="true" >
+			<fileset dir="${compat.src}" includes="**/*.java" />
+		</copy>
+	</target>
+
+	<!-- Copy testui to target src directory. -->
+	<target name="copy.testui" if="copy.testui" >
+		<echo message="copy.testui=${copy.testui}" />
+		<copy todir="${comp.src}" overwrite="true" >
+			<fileset dir="${testui.src}" includes="**/*.java" />
+			<filterset refid="defile.filter" />
+		</copy>
+	</target>
+
+	<!-- Copy testui to target src directory. -->
+	<target name="copy.unproc.testui" if="copy.unproc.testui" >
+		<echo message="copy.unproc.testui=${copy.unproc.testui}" />
+		<copy todir="${comp.src}" overwrite="true" >
+			<fileset dir="${testui.src}" includes="**/*.java" />
+			<filterset refid="defile.filter" />
 		</copy>
 	</target>
 
@@ -301,15 +380,6 @@
 
 		<antcall target="copy.res" />
 		<antcall target="copy.test.res" />
-
-		<filterset id="midlet.info" >
-			<filter token="MIDPVERS" value="${wtk.midp.version}" />
-			<filter token="CLDCVERS" value="${wtk.cldc.version}" />
-			<filter token="MIDLETVERS" value="${MIDLETVERS}" />
-			<filter token="JMIDPVERS" value="${JMIDPVERS}" />
-			<filter token="JCLDCVERS" value="${JCLDCVERS}" />
-			<filter token="EMULATOR" value="${EMULATOR}" />
-		</filterset>
 
 		<copy file="${jadsrc}/${project.name}.jad" todir="${bin}" overwrite="true" >
 			<filterset refid="midlet.info" />
@@ -342,16 +412,20 @@
 		<wtkobfuscate jarfile="${bin}/${project.name}.jar" obfuscator="proguard" if="keep.obfuscate" >
 			<argument value="-keep public class ${obfuscate.classes}" />
 		</wtkobfuscate>
-		<!-- does not work.
-		<wtkmakeprc jarfile="${bin}/${project.name}.jar" />
-		-->
+		<wtkmakeprc jarfile="${bin}/${project.name}.jar" name="${project.name}"  highres="true" creator="${prc.creater}" longname="${prc.longname}" />
 		<echo message="${rim.home}\\m&quot;" />
-		<copy file="${bin}/${project.name}.jad" tofile="${bin}/${file.prefix}${project.name}.jad" />
-		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${file.prefix}${project.name}.jar" />
-		<copy file="${bin}/${file.prefix}${project.name}.jar" todir="${dist}" />
-		<copy file="${bin}/${file.prefix}${project.name}.jad" todir="${dist}" />
-		<copy file="${bin}/${project.name}.jar" tofile="${build}/${file.prefix}${build.jar}" />
-		<copy file="${bin}/manifest.mf" todir="${build}/${file.prefix}manifest.mf" overwrite="true" />
+		<!-- Include version in the file so that they can be uploaded to -->
+		<!-- download sites where the name must be unique.  -->
+
+		<copy file="${bin}/${project.name}.jad" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" />
+		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" />
+		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" todir="${dist}" />
+		<mkdir dir="${dist}/${build.prefix}prc" />
+		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
+		<copy file="${bin}/${project.name}.jar" tofile="${build}/${build.prefix}${build.jar}" />
+		<!-- Manifest changes based on MIDP/JSR's so use prefixes to -->
+		<!-- identify which is which -->
+		<copy file="${bin}/manifest.mf" todir="${build}/${build.prefix}manifest-${FMIDLETVERSROOT}.mf" overwrite="true" />
 
 	</target>
 
@@ -363,9 +437,9 @@
 			<arg value="jad=${bin}\\${project.name}.jad" />
 			<arg value="${bin}\\${project.name}.jar" />
 		</exec>
-		<move file="${project.name}.cso" tofile="${dist}/${file.prefix}${project.name}.cso" />
-		<move file="${project.name}.cod" tofile="${dist}/${file.prefix}${project.name}.cod" />
-		<move file="${project.name}.debug" tofile="${dist}/${file.prefix}${project.name}.debug" />
+		<move file="${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cso" />
+		<move file="${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cod" />
+		<move file="${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.debug" />
 	</target>
 
 	<target name="svn.op.dist" >
@@ -455,7 +529,7 @@
 		</antcall>
 		<delete dir="${preverified}" />
 		<mkdir dir="${preverified}" />
-		<unjar src="${build}/${file.prefix}before-obfuscation.jar" dest="${preverified}" />
+		<unjar src="${build}/${build.prefix}before-obfuscation.jar" dest="${preverified}" />
 		<antcall target="build" >
 			<param name="build.jar" value="obfuscated.jar" />
 		</antcall>
@@ -467,13 +541,258 @@
 		</if>
 		<delete dir="${obfuscated}" />
 		<mkdir dir="${obfuscated}" />
-		<unjar src="${build}/${file.prefix}obfuscated.jar" dest="${obfuscated}" />
+		<unjar src="${build}/${build.prefix}obfuscated.jar" dest="${obfuscated}" />
 		<delete dir="${obfuscated}/MANIFEST.MF" />
+		<delete file="${project.name}.jar" />
 	</target>
 
+	<!-- Compile using WTK with MIDP-1.0 and test -->
+	<target name="compile.1.0">
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile using WTK with MIDP-2.0 and test -->
+	<target name="compile.2.0">
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Future as CLDC-1.1 features not used -->
+	<!-- Compile using WTK with MIDP-2.0 CLDC-1.1 and test -->
+	<target name="compile.2.0.cldc1.1">
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0cldc1.1.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile using WTK with MIDP-2.0 and JSR-75 and test -->
+	<target name="compile.2.0.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Run using WTK with MIDP-2.0 and JSR-75 and test -->
+	<target name="run.2.0.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+		<antcall target="build" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+		<antcall target="run" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile using WTK with MIDP-2.0, JSR-75, previous code and test -->
+	<target name="compile.2.0.jsr75.test" >
+		<antcall target="display.props" />
+		<antcall target="compile" inheritAll="true" >
+			<param name="src" value="${src}" />
+			<param name="unproc.src" value="${unproc.src}" />
+			<param name="presrc" value="${presrc}" />
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile using WTK with MIDP-2.0, Itunes, JSR-75 and test -->
+	<target name="compile.2.0.itunes.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Preprocess for MIDP 1.0 as a release (no test) -->
+	<!-- This puts the code into src directory for use with NetBeans, etc. -->
+	<target name="dist.preprocess.1.0" >
+		<antcall target="preprocess" >
+			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+		<!-- Copy preprocessed src to unprocessed source to allow the -->
+		<!-- src to be checked in or compiled with Netbeans -->
+		<antcall target="copy.comp.src" >
+			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Preprocess for MIDP 2.0 as a release (no test) -->
+	<!-- This puts the code into src directory. -->
+	<target name="dist.preprocess.2.0" >
+		<antcall target="preprocess" >
+			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+		<!-- Copy preprocessed src to unprocessed source to allow the -->
+		<!-- src to be checked in or compiled with Netbeans -->
+		<antcall target="copy.comp.src" >
+			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Preprocess for MIDP 2.0 and JSR-75 as a release (no test) -->
+	<!-- This puts the code into src directory for use with NetBeans, etc. -->
+	<target name="dist.preprocess.2.0.jsr75" >
+		<antcall target="preprocess" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+		<!-- Copy preprocessed src to unprocessed source to allow the -->
+		<!-- src to be checked in or compiled with Netbeans -->
+		<antcall target="copy.comp.src" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Preprocess for MIDP 2.0, and Itunes as a release (no test) -->
+	<!-- This puts the code into src directory for use with NetBeans, etc. -->
+	<target name="dist.preprocess.2.0.itunes" >
+		<antcall target="preprocess" >
+			<param name="wtk.properties" value="wtk2.0.itunes.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+		<!-- Copy preprocessed src to unprocessed source to allow the -->
+		<!-- src to be checked in or compiled with Netbeans -->
+		<antcall target="copy.comp.src" >
+			<param name="wtk.properties" value="wtk2.0.itunes.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Preprocess for MIDP 2.0, Itunes, and JSR-75 as a release (no test) -->
+	<!-- This puts the code into src directory for use with NetBeans, etc. -->
+	<target name="dist.preprocess.2.0.itunes.jsr75" >
+		<antcall target="preprocess" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+		<!-- Copy preprocessed src to unprocessed source to allow the -->
+		<!-- src to be checked in or compiled with Netbeans -->
+		<antcall target="copy.comp.src" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Future preprocess for MIDP 2.0 and JSR-238 as a release (no test) -->
+	<!-- This puts the code into src directory for use with NetBeans, etc. -->
+	<target name="dist.preprocess.2.0.jsr238" >
+		<antcall target="preprocess" >
+			<param name="wtk.properties" value="wtk2.0jsr238.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+		<antcall target="copy.comp.src" >
+			<param name="wtk.properties" value="wtk2.0jsr238.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- test preprocess for MIDP 2.0 and JSR-75 as a release (no test) -->
+	<!-- This puts the code into src directory for use with NetBeans, etc. -->
+	<target name="test.preprocess.2.0.itunes.jsr75" >
+		<antcall target="preprocess" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="no.release" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+		<!-- Copy preprocessed src to unprocessed source to allow the -->
+		<!-- src to be checked in or compiled with Netbeans -->
+		<antcall target="copy.comp.src" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="no.release" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile for MIDP 1.0 as a release (no test) -->
+	<target name="dist.compile.1.0" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile for MIDP 2.0 as a release (no test) -->
+	<target name="dist.compile.2.0" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile for MIDP 2.0 and JSR-75 for release -->
+	<target name="dist.compile.2.0.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile for MIDP 2.0 and Itunes and JSR-75 for release -->
+	<target name="dist.compile.2.0.itunes.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Future.  No code for JSR-238 now. -->
+	<!-- Compile for MIDP 1.0 as a release (no test) -->
+	<target name="compile.2.0.jsr238" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0jsr238.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- These are do create release versions for MIDP-1.0, MIDP-2.0, -->
+	<!-- MIDP-2.0 itunes, MIDP-2.0 and JSR-75, and MIDP-2.0 itunes and -->
+	<!--JSR-75 -->
 	<target name="dist.midp.1.0" unless="no.1.0" >
 		<antcall target="dist.version" inheritAll="yes" >
-			<param name="wtk.properties" value="wtk1.0.properties" />
+			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp10}" />
 			<param name="build.vers" value="${build.midp10}" />
 			<param name="no.test" value="true" />
@@ -483,7 +802,7 @@
 
 	<target name="dist.midp.2.0" unless="no.2.0" >
 		<antcall target="dist.version" inheritAll="true" >
-			<param name="wtk.properties" value="wtk2.0.properties" />
+			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20}" />
 			<param name="build.vers" value="${build.midp20}" />
 			<param name="no.test" value="true" />
@@ -493,7 +812,7 @@
 
 	<target name="dist.midp.2.0.jsr75" unless="no.2.0.jsr75" >
 		<antcall target="dist.version" inheritAll="true" >
-			<param name="wtk.properties" value="wtk2.0jsr75.properties" />
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.jsr75}" />
 			<param name="build.vers" value="${build.midp20.jsr75}" />
 			<param name="no.test" value="true" />
@@ -501,11 +820,75 @@
 		</antcall>
 	</target>
 
+	<target name="dist.midp.2.0.itunes.jsr75" unless="no.2.0.itunes.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
+			<param name="build.vers" value="${build.midp20.itunes.jsr75}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
 	<target name="dist.midp.2.0.jsr238" unless="no.2.0.jsr238" >
 		<antcall target="dist.version" inheritAll="true" >
-			<param name="wtk.properties" value="wtk2.0jsr238.properties" />
+			<param name="wtk.properties" value="wtk2.0jsr238.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.jsr75}" />
 			<param name="build.vers" value="${build.midp20.jsr75}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Package MIDP 1.0 version. -->
+	<target name="package.midp.1.0"  >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp10}" />
+			<param name="build.vers" value="${build.midp10}" />
+			<param name="no.release" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Package MIDP 2.0 version. -->
+	<target name="package.midp.2.0"  >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20}" />
+			<param name="build.vers" value="${build.midp20}" />
+			<param name="no.release" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Package MIDP 2.0 with JSR-75 version. -->
+	<target name="package.midp.2.0.jsr75" unless="no.2.0.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.jsr75}" />
+			<param name="build.vers" value="${build.midp20.jsr75}" />
+			<param name="no.release" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Package MIDP 2.0 with itunes version with JSR-75 version. -->
+	<target name="package.midp.2.0.itunes.jsr75" unless="no.2.0.itunes.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
+			<param name="build.vers" value="${build.midp20.itunes.jsr75}" />
+			<param name="no.release" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="run.midp.2.0.itunes.jsr75" unless="no.2.0.itunes.jsr75" >
+		<antcall target="run" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
+			<param name="build.vers" value="${build.midp20.itunes.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -519,8 +902,9 @@
 		<mkdir dir="${build}" />
 		<antcall target="dist.svn.dirs" />
 		<antcall target="dist.midp.1.0" />
-		<antcall target="dist.midp.2.0" />
 		<antcall target="dist.midp.2.0.jsr75" />
+		<antcall target="dist.midp.2.0.itunes.jsr75" />
+		<antcall target="dist.midp.2.0" />
 	</target>
 
 	<target name="dist" >
@@ -538,7 +922,7 @@
 
 	<!-- Start the MIDlet suite -->
 	<target name="run" depends="prepare" >
-		<wtkrun jadfile="${midlet.home}/${bin}/${project.name}.jad" device="DefaultColorPhone" wait="false" />
+		<wtkrun jadfile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" device="DefaultColorPhone" wait="false" />
 
 	</target>
 
