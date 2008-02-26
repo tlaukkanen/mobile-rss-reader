@@ -1118,6 +1118,12 @@ public class RssReaderMIDlet extends MIDlet
 		//#endif
 		m_display.setCurrent( disp );
 		wakeUp();
+		if (m_display.getCurrent() != disp) {
+			try {
+				m_netThread.sleep(100L);
+			} catch (InterruptedException e) {}
+			m_display.setCurrent( disp );
+		}
 	}
 
 	//#ifdef DTESTUI
@@ -2435,7 +2441,7 @@ public class RssReaderMIDlet extends MIDlet
 
 		//#ifdef DITUNES
 //@		/** Initialize RSS bookmark feed details form */
-//@		final private Form initializeDisplayForm( final RssItunesFeed feed ) {
+//@		final private Form initializeDetailsForm( final RssItunesFeed feed ) {
 //@			Form displayDtlForm = new Form( feed.getName() );
 //@			displayDtlForm.addCommand( m_backCommand );
 //@			displayDtlForm.setCommandListener(this);
@@ -2466,13 +2472,21 @@ public class RssReaderMIDlet extends MIDlet
 //@					displayDtlForm.append(new StringItem("Description:", description));
 //@				}
 //@			}
-			//#ifdef DMIDP20
-//@			StringItem slink = new StringItem("Link:", feed.getLink(),
-//@											  Item.HYPERLINK);
-			//#else
-//@			StringItem slink = new StringItem("Link:", feed.getLink());
-			//#endif
-//@			displayDtlForm.append(slink);
+//@			final String link = feed.getLink();
+//@			if (link.length() > 0) {
+				//#ifdef DMIDP20
+//@				StringItem slink = new StringItem("Link:", link,
+//@												  Item.HYPERLINK);
+				//#else
+//@				StringItem slink = new StringItem("Link:", link);
+				//#endif
+//@				displayDtlForm.append(slink);
+//@			}
+//@			final Date feedDate = feed.getDate();
+//@			if (feedDate != null) {
+//@				displayDtlForm.append(new StringItem("Date:",
+//@							feedDate.toString()));
+//@			}
 //@			return displayDtlForm;
 //@		}
 		//#endif
@@ -2524,7 +2538,7 @@ public class RssReaderMIDlet extends MIDlet
 			//#ifdef DITUNES
 //@			/** Display Itune's feed detail */
 //@			if( c == m_bookmarkDetailsCmd ) {
-//@				Form displayDtlForm = initializeDisplayForm(
+//@				Form displayDtlForm = initializeDetailsForm(
 //@						m_curRssParser.getRssFeed() );
 //@				setCurrent( displayDtlForm );
 //@			}
