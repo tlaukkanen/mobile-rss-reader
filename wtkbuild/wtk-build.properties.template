@@ -1,7 +1,8 @@
 antenna.home = C:/mostdownloads/j2me/sourceforge/antenna
+#antenna.jar = antenna-bin-0.9.15-beta.jar
+antenna.jar = antenna-bin-1.0.0.jar
 antcontrib.home = C:/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
 wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
-#:!ls C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
 #
@@ -9,16 +10,24 @@ svn.home = C:\\PROGRA~1\\COLLAB~1
 #svn.home = C:\\PROGRA~1\\TORTOI~1
 #rim.home = C:\\Program Files\\Research In Motion\\BlackBerry JDE 4.2.1
 rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
-wtk.home = C:/opt/WTK2.5.1
+#wtk.home = C:/opt/WTK2.5.1
+wtk.home = C:/opt/WTK2.5.2
 wtk.encoding = UTF-8
 #wtk.optionalpda.enabled = false
 midlet.name = RssReaderMIDlet
 midlet.class = com.substanceofcode.rssreader.presentation.${midlet.name}
 logging.package = net.sf.jlogmicro.util.logging
 obfuscate.classes = ${midlet.class},${logging.package}.ConsoleHandler,${logging.package}.FormHandler,${logging.package}.RecStoreHandler,${logging.package}.SimpleFormatter
+project.test.url = http://mobilerssreader.sourceforge.net/testdata
+file.test.url = file:///root1/testdata
 project.name = RSSReader
 midlet.home = ${wtk.home}/apps/${project.name}
-MIDLETVERSROOT = 1.10.8
+prc.creater = MRSS
+prc.longname = RSS/News/Blog Reader
+MIDLETVERSROOT = 1.11
+#Need vers with '_' to allow uploading to sites that get confused by to
+#many '.'
+FMIDLETVERSROOT = 1_11
 #Location of manifest source
 manifestsrc = ../manifestsrc
 #? src = src
@@ -31,7 +40,6 @@ presrc = ../presrc
 #Copy unpreprocessed source to compile src dir.
 #(The unpreprocessed may include preprocessed from previous
 #run, but the preprocessed will get overwriten).
-copy.unproc.comp = true
 #Unpreprocessed source diretory.  This may have preprocessed src if we
 #are writing the preprocessed src back to the svn src.
 unproc.src = ../src
@@ -39,12 +47,15 @@ unproc.src = ../src
 #is usually done to override the unmodified src.
 #If all the files in src are created by the preprocessor, uncomment this.
 #all.src.preprocessed = true
-copy.comp.src = true
+#Deprecated.  Copy preprocessed src to src directory to allow it to be
+#checked in.  Now, this is done automatically when unproc.src is specified.
+#copy.comp.src = true
 src = ../src
-need.preprocess = true
 src.controlled.copy = true
 #Specify the WTK source directory to be replaced
-wtk.src = ../../src
+#wtk.src = ../../src
+wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReader/src
+zipdir = ../zipedsrc
 need.svn.preprocessed = true
 svn.home = C:\\PROGRA~1\\COLLAB~1
 svn.url =  https://mobile-rss-reader.googlecode.com/svn/trunk/
@@ -58,5 +69,10 @@ res.todir = icons
 #add.jars = true
 #copy.jar.src = true
 #jarsrc = ../../../JLogMicro/jlogmicro/src
+#Allows adding of compatiblity classes to test upward compatibility of RMS
+#stored data
+#compat.presrc = ../compatpresrc
+#Compile test ui
+#testui.presrc = ../testpresrc
 jadsrc = ../jadsrc
 debug = debug
