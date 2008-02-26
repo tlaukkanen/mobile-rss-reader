@@ -449,7 +449,7 @@
 		<if>
 			<equals arg1="${need.svn.preprocessed}" arg2="true" />
 			<then>
-			<exec executable="svn" dir="${op.dir}" >
+			<exec executable="${svn.pgm}" dir="${op.dir}" >
 				<arg value="${svn.op}" />
 				<arg value="${svn.url}" />
 				<arg value="${svn.src}" />
@@ -905,6 +905,7 @@
 		<antcall target="dist.midp.2.0.jsr75" />
 		<antcall target="dist.midp.2.0.itunes.jsr75" />
 		<antcall target="dist.midp.2.0" />
+		<antcall target="dist.preprocess.2.0" />
 	</target>
 
 	<target name="dist" >
