@@ -10,6 +10,7 @@ svn.home = C:\\PROGRA~1\\COLLAB~1
 #svn.home = C:\\PROGRA~1\\TORTOI~1
 #rim.home = C:\\Program Files\\Research In Motion\\BlackBerry JDE 4.2.1
 rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
+svn.pgm = svn.exe
 #wtk.home = C:/opt/WTK2.5.1
 wtk.home = C:/opt/WTK2.5.2
 wtk.encoding = UTF-8
