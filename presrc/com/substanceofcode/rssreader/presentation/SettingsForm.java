@@ -228,22 +228,22 @@ public class SettingsForm extends Form implements CommandListener {
 		//#endif
         this.append( m_logLevelField );
 		//#endif
-        m_pgmMemUsedItem = new StringItem("Application memory used", "");
+        m_pgmMemUsedItem = new StringItem("Application memory used:", "");
 		//#ifdef DMIDP20
 		m_pgmMemUsedItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_pgmMemUsedItem );
-        m_pgmMemAvailItem = new StringItem("Application memory available", "");
+        m_pgmMemAvailItem = new StringItem("Application memory available:", "");
 		//#ifdef DMIDP20
 		m_pgmMemAvailItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_pgmMemAvailItem );
-        m_memUsedItem = new StringItem("DB memory used", "");
+        m_memUsedItem = new StringItem("DB memory used:", "");
 		//#ifdef DMIDP20
 		m_memUsedItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_memUsedItem );
-        m_memAvailItem = new StringItem("DB memory available", "");
+        m_memAvailItem = new StringItem("DB memory available:", "");
 		//#ifdef DMIDP20
 		m_memAvailItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
