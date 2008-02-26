@@ -151,6 +151,10 @@ v1.11
 
 Known problems:
 
+- Sometimes when using River of News, the sort does not complete leaving the
+  "Sorting items..." screen displayed.  By using the back key and trying again
+  the same menu item usually resolves this.  Or picking another item and coming
+  back to the problem item.
 - Phone must support MP3 links, etc to play enclosures (many phones do not
   allow an MP3 to be read from a URL, but play them from the file system)
 
