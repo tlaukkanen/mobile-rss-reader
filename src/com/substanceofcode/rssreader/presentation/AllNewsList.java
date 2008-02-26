@@ -22,6 +22,8 @@
 
 // Expand to define MIDP define
 //#define DMIDP20
+// Expand to define itunes define
+//#define DNOITUNES
 // Expand to define logging define
 //#define DNOLOGGING
 // Expand to define test ui define
@@ -211,11 +213,25 @@ implements CommandListener, Runnable  {
 		} else {
 			fillItems( m_allItems);
 		}
-		super.setTitle("All items " + (sortByDate ? "date" : "feed") +
-				" sorted:  " + super.size());
+
+		updTitle();
 	}
 
-	/* Sort items unread. */
+	/** Update the title. */
+	final public void updTitle() {
+		if (m_showAll) {
+			super.setTitle("All items " + (m_sortByDate ? "date" : "feed") +
+					" sorted:  " + super.size());
+		} else if (m_showUnread) {
+			super.setTitle("Unread items " + (m_sortByDate ? "date" : "feed") +
+					" sorted:  " + super.size());
+		} else {
+			super.setTitle("Read items " + (m_sortByDate ? "date" : "feed") +
+					" sorted:  " + super.size());
+		}
+	}
+
+	/** Sort items unread. */
 	final public void sortUnreadItems(final boolean sortByDate,
 								final List bookmarkList,
 								final Hashtable rssFeeds) {
@@ -238,8 +254,7 @@ implements CommandListener, Runnable  {
 		} else {
 			fillItems( m_readItems);
 		}
-		super.setTitle("Read items " + (sortByDate ? "date" : "feed") +
-				" sorted:  " + super.size());
+		updTitle();
 	}
 
 	/* Sort items read or unread vector and put into GUI list. */
@@ -259,12 +274,25 @@ implements CommandListener, Runnable  {
 		m_itemFeeds.copyInto(ufeeds);
 		int kc = 0;
 		for (int ic = 0; ic < uitems.length; ic++) {
-			if (uitems[ic].getDate() == null) {
+			//#ifdef DITUNES
+//@			Date sortDate = uitems[ic].getDate();
+//@			if (sortDate == null)
+//@			{
+//@				sortDate = ufeeds[ic].getDate();
+				//#ifdef DLOGGING
+//@				if (m_finestLoggable) {m_logger.finest("Using feed date for item=" + ic + "," + ufeeds[ic].getName() + "," + sortDate + "," + uitems[ic].getTitle());}
+				//#endif
+//@			}
+			//#else
+			final Date sortDate = uitems[ic].getDate();
+			//#endif
+			if (sortDate == null)
+			{
 				vsorted.addElement(uitems[ic]);
 				vfeedSorted.addElement(ufeeds[ic]);
 			} else {
 				indexes[kc] = kc;
-				ldates[kc++] = uitems[ic].getDate().getTime();
+				ldates[kc++] = sortDate.getTime();
 				vunsorted.addElement(uitems[ic]);
 				vfeedUnsorted.addElement(ufeeds[ic]);
 				//#ifdef DLOGGING
@@ -403,6 +431,45 @@ implements CommandListener, Runnable  {
 		if (updateIt) {
 			m_item.setUnreadItem(false);
 		}
+	}
+
+	/* Update the lists for mark or unmark. */
+	final private void updMarkSel(boolean markUnread) {
+		int selIdx = super.getSelectedIndex();
+		if (selIdx == -1) {
+			super.setSelectedIndex(0, true);
+			selIdx = 0;
+		}
+		if (m_showAll) {
+			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+			if (m_unreadImage != null) {
+				if (!markUnread && m_item.isUnreadItem()) {
+					super.set(selIdx, super.getString(selIdx), null);
+				} else if (markUnread && !m_item.isUnreadItem()) {
+					super.set(selIdx, super.getString(selIdx), m_unreadImage);
+				}
+			}
+			m_item.setUnreadItem(markUnread);
+		} else {
+			if ((m_showUnread && !markUnread) ||
+					(!m_showUnread && markUnread)) {
+				super.delete(selIdx);
+				if (selIdx > 0) {
+					super.setSelectedIndex(selIdx - 1, true);
+				}
+				if (m_showUnread) {
+					m_item = (RssItunesItem)m_unreadItems.elementAt(selIdx);
+					m_unreadItems.removeElementAt(selIdx);
+				} else {
+					m_item = (RssItunesItem)m_readItems.elementAt(selIdx);
+					m_readItems.removeElementAt(selIdx);
+				}
+				m_item.setUnreadItem(markUnread);
+				m_itemFeeds.removeElementAt(selIdx);
+			}
+			updTitle();
+		}
+
 	}
 
     /** Run method is used to get RSS feed with HttpConnection */
@@ -575,19 +642,12 @@ implements CommandListener, Runnable  {
 			wakeUp();
 		} else if( c == m_markReadCmd ) {
             if( super.size()>0){
-				getUpdSel(false);
-				m_item.setUnreadItem(false);
-				m_midlet.initializeLoadingForm("Sorting items...", this);
-				m_sort = true;
-				wakeUp();
+				updMarkSel(false);
+
             }
 		} else if( c == m_markUnReadCmd ) {
             if( super.size()>0){
-				getUpdSel(false);
-				m_item.setUnreadItem(true);
-				m_midlet.initializeLoadingForm("Sorting items...", this);
-				m_sort = true;
-				wakeUp();
+				updMarkSel(true);
             }
         /** Get back to RSS feed bookmarks */
 		} else if( c == m_backUnreadHdrCmd ){
