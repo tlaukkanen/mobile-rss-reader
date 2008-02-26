@@ -15,4 +15,4 @@ JCLDCVERS = CLDC-1.0
 file.prefix = midp20_itunes_jsr75_
 bin = ../bin20itunesjsr75
 MIDLETVERS = ${MIDLETVERSROOT}
-SUFFIXVERS = -2.0-itunes
+SUFFIXVERS = 2.0-itunes
