@@ -15,4 +15,4 @@ JCLDCVERS = CLDC-1.0
 file.prefix = midp20_jsr75_
 bin = ../bin20jsr75
 MIDLETVERS = ${MIDLETVERSROOT}
-SUFFIXVERS = 
+SUFFIXVERS =  2.0-jsr75
