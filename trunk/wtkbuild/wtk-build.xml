@@ -78,6 +78,7 @@
 		  <entry key="date" type="date" value="now" pattern="yyyyMMddHHmm" />
 		  <entry key="build.number" type="int" default="0001" operation="+" pattern="0000" />
 		</propertyfile>
+	    <echo message="Release buildinfo update." />
 		<property name="test.buildno" value="true" />
 	</target>
 
@@ -96,6 +97,7 @@
 		  <entry key="date" type="date" value="now" pattern="yyyyMMddHHmm" />
 		  <entry key="build.number" type="int" default="0001" operation="+" pattern="0000" />
 		</propertyfile>
+	    <echo message="Release buildinfo update." />
 		<property name="release.buildno" value="true" />
 	</target>
 
@@ -420,6 +422,7 @@
 		<copy file="${bin}/${project.name}.jad" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" />
 		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" />
 		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" todir="${dist}" />
+		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" todir="${dist}" />
 		<mkdir dir="${dist}/${build.prefix}prc" />
 		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
 		<copy file="${bin}/${project.name}.jar" tofile="${build}/${build.prefix}${build.jar}" />
@@ -427,6 +430,12 @@
 		<!-- identify which is which -->
 		<copy file="${bin}/manifest.mf" todir="${build}/${build.prefix}manifest-${FMIDLETVERSROOT}.mf" overwrite="true" />
 
+		<copy todir="${dist}" >
+			<fileset file="${docs}/README.txt" />
+			<filterset>
+				<filter token="STAGE" value="${stage}" />
+			</filterset>
+		</copy>
 	</target>
 
 	<target name="create.rim.files" depends="prepare" >
@@ -468,6 +477,9 @@
 			</move>
 			<move todir="${op.dir}/testdata" >
 				<fileset dir="${op.dir}/${svn.src}/testdata" />
+			</move>
+			<move todir="${op.dir}/wtkbuild" >
+				<fileset dir="${op.dir}/${svn.src}/wtkbuild" />
 			</move>
 			<move todir="${op.dir}" >
 				<fileset file="${op.dir}/${svn.src}/release_notes.txt" />
@@ -900,6 +912,7 @@
 		<mkdir dir="${dist}" />
 		<delete dir="${build}" />
 		<mkdir dir="${build}" />
+		<mkdir dir="${dist}" />
 		<antcall target="dist.svn.dirs" />
 		<antcall target="dist.midp.1.0" />
 		<antcall target="dist.midp.2.0.jsr75" />
