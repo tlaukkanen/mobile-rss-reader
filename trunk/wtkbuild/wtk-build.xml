@@ -478,6 +478,9 @@
 			<move todir="${op.dir}/testdata" >
 				<fileset dir="${op.dir}/${svn.src}/testdata" />
 			</move>
+			<move todir="${op.dir}/zipedsrc" >
+				<fileset dir="${op.dir}/${svn.src}/zipedsrc" />
+			</move>
 			<move todir="${op.dir}/wtkbuild" >
 				<fileset dir="${op.dir}/${svn.src}/wtkbuild" />
 			</move>
