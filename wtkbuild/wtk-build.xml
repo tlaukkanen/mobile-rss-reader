@@ -909,19 +909,35 @@
 		</antcall>
 	</target>
 
-	<target name="dist.dev.status" >
+	<target name="dist.dev.status" depends="release.buildno,release.prepare" >
 		<antcall target="clean" />
 		<delete dir="${dist}" />
 		<mkdir dir="${dist}" />
 		<delete dir="${build}" />
 		<mkdir dir="${build}" />
 		<mkdir dir="${dist}" />
+	    <echo message="main build.number=${build.number}" />
 		<antcall target="dist.svn.dirs" />
-		<antcall target="dist.midp.1.0" />
-		<antcall target="dist.midp.2.0.jsr75" />
-		<antcall target="dist.midp.2.0.itunes.jsr75" />
-		<antcall target="dist.midp.2.0" />
-		<antcall target="dist.preprocess.2.0" />
+		<antcall target="dist.midp.1.0" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.2.0.jsr75" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.2.0.itunes.jsr75" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.2.0" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.preprocess.2.0" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
 	</target>
 
 	<target name="dist" >
