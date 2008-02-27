@@ -451,7 +451,7 @@
 		<move file="${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.debug" />
 	</target>
 
-	<target name="svn.op.dist" >
+	<target name="svn.op.dist" unless="skip.svn.op" >
 		<delete dir="${op.dir}" />
 		<mkdir dir="${op.dir}" />
 
