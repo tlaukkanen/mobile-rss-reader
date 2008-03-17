@@ -321,30 +321,30 @@ public class RssReaderMIDlet extends MIDlet
 			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 10);
 			//#endif
 			m_backCommand       = new Command("Back", Command.BACK, 1);
-			m_exitCommand       = new Command("Exit", Command.SCREEN, 5);
-			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 4);
+			m_exitCommand       = new Command("Exit", Command.SCREEN, 11);
+			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 10);
 			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
 			m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
-			m_readUnreadItems   = new Command("River of news", Command.SCREEN, 1);
-			m_editBookmark      = new Command("Edit feed", Command.SCREEN, 2);
-			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 3);
+			m_readUnreadItems   = new Command("River of news", Command.SCREEN, 3);
+			m_editBookmark      = new Command("Edit feed", Command.SCREEN, 4);
+			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 5);
 			//#ifdef DMIDP20
 			m_openLinkCmd       = new Command("Open link", Command.SCREEN, 2);
 			m_openEnclosureCmd  = new Command("Open enclosure", Command.SCREEN, 2);
 			//#endif
 			m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 1);
 			m_copyEnclosureCmd  = new Command("Copy enclosure", Command.SCREEN, 1);
-			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 3);
+			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 6);
 			//#ifdef DTEST
-			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 3);
+			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 6);
 			//#endif
 			m_boxOkCmd          = new Command("OK", Command.OK, 1);
 			m_boxCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
-			m_settingsCmd       = new Command("Settings", Command.SCREEN, 4);
+			m_settingsCmd       = new Command("Settings", Command.SCREEN, 7);
 			m_aboutCmd          = new Command("About", Command.SCREEN, 4);
-			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 2);
+			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 8);
 			m_updateAllModCmd   = new Command("Update modified all",
-											  Command.SCREEN, 2);
+											  Command.SCREEN, 9);
 			//#ifdef DTESTUI
 			m_testEncCmd        = new Command("Testing Form", Command.SCREEN, 4);
 			//#endif
@@ -511,8 +511,6 @@ public class RssReaderMIDlet extends MIDlet
 		//#endif
         try {
             m_bookmarkList = new PromptList(this, "Bookmarks", List.IMPLICIT);
-            m_bookmarkList.addCommand( m_exitCommand );
-            m_bookmarkList.addCommand( m_saveCommand );
             m_bookmarkList.addCommand( m_addNewBookmark );
             m_bookmarkList.addCommand( m_openBookmark );
             m_bookmarkList.addCommand( m_readUnreadItems );
@@ -526,6 +524,8 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_updateAllCmd );
             m_bookmarkList.addCommand( m_updateAllModCmd );
+            m_bookmarkList.addCommand( m_saveCommand );
+            m_bookmarkList.addCommand( m_exitCommand );
 			//#ifdef DTESTUI
             m_bookmarkList.addCommand( m_testBMCmd );
             m_bookmarkList.addCommand( m_testRtnCmd );
@@ -656,6 +656,16 @@ public class RssReaderMIDlet extends MIDlet
 		setCurrent( m_loadForm );
 	}
 
+    /** Set title and addmessage for loading form */
+    final public void setLoadingFinished(final String title, String msg) {
+		if (title != null) {
+			m_loadForm.setTitle(title);
+		}
+		if (msg != null) {
+			m_loadForm.appendMsg(msg);
+		}
+    }
+    
     /** Initialize import form */
     
     /** Initialize URL text Box */
