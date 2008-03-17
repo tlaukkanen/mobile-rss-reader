@@ -31,14 +31,10 @@
 //@import java.util.*;
 //@import javax.microedition.lcdui.*;
 //@
-//@
-//@
-//@
 //@public interface KFileSelector
 //@  extends KViewChild
 //@{
 //@
-//#ifdef DJSR75
 //@public  String getFileName();
 //@
 //@public  String getFileMimeType();
@@ -49,7 +45,6 @@
 //@
 //@public String getSelectedURL();
 //@
-//#endif
 //@
 //@} //interface KFileFileSelector
 //#endif
