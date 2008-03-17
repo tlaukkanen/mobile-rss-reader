@@ -45,6 +45,7 @@ midp10_@STAGE@RSSReader.jar - MIDP 1.0 jar
 midp20_ programs/directories (without jsr75_) are for phones with MIDP 2.0.
 This should work for all recent phones.  
 
+midp20_@STAGE@prc/RSSReader.prc - MIDP 2.0 IBM WME PRC version
 midp20_RSSReader.cod - MIDP 2.0 IBM WME PRC versiond
 midp20_RSSReader.cso - MIDP 2.0 Blackberry COD
 midp20_RSSReader.debug - MIDP 2.0 debug
@@ -61,6 +62,7 @@ midp20_jsr72_ programs .  For newer phones and usually with media (e.g. MP3)
 		if it says true, it supports jsr75 (this is different than progarm
 		jsr75 which shows the version of the progam not the phone).
 
+midp20_jsr75_@STAGE@prc/RSSReader.prc - MIDP 2.0 and JSR-75 IBM WME PRC version
 midp20_jsr75_RSSReader.cod - MIDP 2.0 and JSR-75 IBM WME PRC version
 midp20_jsr75_RSSReader.cso - MIDP 2.0 and JSR-75 Blackberry COD
 midp20_jsr75_RSSReader.debug - MIDP 2.0 and JSR-75 debug
@@ -77,6 +79,7 @@ midp20_itunes_jsr72_ programs .  For usually smartphones and usually with
 		phones midp20_jsr72_ programs.  Also see above for using Itunes
 		versions.
 
+midp20_itunes_jsr75_@STAGE@prc/RSSReader.prc - MIDP 2.0, JSR-75, and Itunes IBM WME PRC version
 midp20_itunes_jsr75_@STAGE@RSSReader.cod - MIDP 2.0, itunes and JSR-75 IBM WME PRC version
 midp20_itunes_jsr75_@STAGE@RSSReader.cso - MIDP 2.0, itunes and JSR-75 Blackberry COD
 midp20_itunes_jsr75_@STAGE@RSSReader.debug - MIDP 2.0, itunes and JSR-75 debug
