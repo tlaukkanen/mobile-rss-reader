@@ -74,10 +74,7 @@
 	<target name="test.buildno" unless="test.buildinfo" >
 	    <echo message="Using test properties" />
 	    <echo message="no.release=${no.release}" />
-		<propertyfile file="${basedir}/test_buildinfo.properties${test.template}" comment="RSS Reader test build information">
-		  <entry key="date" type="date" value="now" pattern="yyyyMMddHHmm" />
-		  <entry key="build.number" type="int" default="0001" operation="+" pattern="0000" />
-		</propertyfile>
+		<buildnumber file="${basedir}/test_buildinfo.properties${test.template}" />
 	    <echo message="Release buildinfo update." />
 		<property name="test.buildno" value="true" />
 	</target>
@@ -93,10 +90,7 @@
 	</target>
 
 	<target name="release.buildno" unless="release.buildno" >
-		<propertyfile file="${basedir}/release_buildinfo.properties${release.template}" comment="RSS Reader test build information">
-		  <entry key="date" type="date" value="now" pattern="yyyyMMddHHmm" />
-		  <entry key="build.number" type="int" default="0001" operation="+" pattern="0000" />
-		</propertyfile>
+		<buildnumber file="${basedir}/release_buildinfo.properties${release.template}" />
 	    <echo message="Release buildinfo update." />
 		<property name="release.buildno" value="true" />
 	</target>
@@ -275,7 +269,9 @@
 	</target>
 
 	<target name="wtk.src.copy" if="wtk.src" >
-		<delete dir="${wtk.src}" />
+		<delete includeEmptyDirs="true" >
+			<fileset dir="${wtk.src}" includes="**/*.java" />
+		</delete>
 		<copy todir="${wtk.src}" >
 			<fileset dir="${comp.src}" includes="**/*.java" />
 		</copy>
@@ -415,7 +411,6 @@
 			<argument value="-keep public class ${obfuscate.classes}" />
 		</wtkobfuscate>
 		<wtkmakeprc jarfile="${bin}/${project.name}.jar" name="${project.name}"  highres="true" creator="${prc.creater}" longname="${prc.longname}" />
-		<echo message="${rim.home}\\m&quot;" />
 		<!-- Include version in the file so that they can be uploaded to -->
 		<!-- download sites where the name must be unique.  -->
 
@@ -443,12 +438,12 @@
 			<arg value="import=&quot;${rim.home}\\lib\\net_rim_api.jar&quot;" />
 			<arg value="codename=${project.name}" />
 			<arg value="-midlet" />
-			<arg value="jad=${bin}\\${project.name}.jad" />
-			<arg value="${bin}\\${project.name}.jar" />
+			<arg value="jad=${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" />
+			<arg value="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" />
 		</exec>
-		<move file="${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cso" />
-		<move file="${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cod" />
-		<move file="${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.debug" />
+		<move file="${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cso" />
+		<move file="${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cod" />
+		<move file="${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.debug" />
 	</target>
 
 	<target name="svn.op.dist" unless="skip.svn.op" >
