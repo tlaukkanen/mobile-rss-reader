@@ -38,7 +38,6 @@
 //@ */
 //@public interface KViewChild  {
 //@    
-//#ifdef DJSR75
 //@     /**
 //@     * @param The callback client interested in receiving finished status.
 //@     */
@@ -48,6 +47,5 @@
 //@    * Cleanup any allocated resources immediately.
 //@    */
 //@    public void doCleanup();
-//#endif
 //@}
 //#endif
