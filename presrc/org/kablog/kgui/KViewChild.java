@@ -38,7 +38,6 @@ import javax.microedition.lcdui.*;
  */
 public interface KViewChild  {
     
-//#ifdef DJSR75
      /**
      * @param The callback client interested in receiving finished status.
      */
@@ -48,6 +47,5 @@ public interface KViewChild  {
     * Cleanup any allocated resources immediately.
     */
     public void doCleanup();
-//#endif
 }
 //#endif
