@@ -418,8 +418,7 @@ implements CommandListener, Runnable  {
 				m_unreadItems.removeElementAt(selIdx);
 				m_itemFeeds.removeElementAt(selIdx);
 			}
-			super.setTitle("Unread items " + (m_sortByDate ? "date" : "feed") +
-					" sorted:  " + super.size());
+			updTitle();
 		} else {
 			m_item = (RssItunesItem)m_readItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
@@ -489,6 +488,8 @@ implements CommandListener, Runnable  {
 					} else {
 						sortReadItems( m_dateSort, m_bookmarkList, m_rssFeeds );
 					}
+					m_midlet.setLoadingFinished("Sorting finished",
+							"Sorting finished use back to return.");
 					m_midlet.setCurrent(this);
 				}
 			}catch(OutOfMemoryError t) {
