@@ -321,7 +321,7 @@ public class RssReaderMIDlet extends MIDlet
 //@			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 10);
 			//#endif
 			m_backCommand       = new Command("Back", Command.BACK, 1);
-			m_exitCommand       = new Command("Exit", Command.SCREEN, 11);
+			m_exitCommand       = new Command("Exit", Command.SCREEN, 14);
 			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 10);
 			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
 			m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
@@ -340,8 +340,8 @@ public class RssReaderMIDlet extends MIDlet
 			//#endif
 			m_boxOkCmd          = new Command("OK", Command.OK, 1);
 			m_boxCancelCmd      = new Command("Cancel", Command.CANCEL, 2);
-			m_settingsCmd       = new Command("Settings", Command.SCREEN, 7);
-			m_aboutCmd          = new Command("About", Command.SCREEN, 4);
+			m_settingsCmd       = new Command("Settings", Command.SCREEN, 11);
+			m_aboutCmd          = new Command("About", Command.SCREEN, 12);
 			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 8);
 			m_updateAllModCmd   = new Command("Update modified all",
 											  Command.SCREEN, 9);
@@ -521,11 +521,12 @@ public class RssReaderMIDlet extends MIDlet
 			//#ifdef DTEST
 //@            m_bookmarkList.addCommand( m_importCurrFeedListCmd );
 			//#endif
-            m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_updateAllCmd );
             m_bookmarkList.addCommand( m_updateAllModCmd );
             m_bookmarkList.addCommand( m_saveCommand );
+            m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addCommand( m_exitCommand );
+            m_bookmarkList.addCommand( m_aboutCmd );
 			//#ifdef DTESTUI
 //@            m_bookmarkList.addCommand( m_testBMCmd );
 //@            m_bookmarkList.addCommand( m_testRtnCmd );
@@ -538,7 +539,6 @@ public class RssReaderMIDlet extends MIDlet
 //@				m_bookmarkList.addCommand( m_debugCmd );
 //@			}
 	//#endif
-            m_bookmarkList.addCommand( m_aboutCmd );
             m_bookmarkList.setCommandListener( this );
 			//#ifdef DTEST
 //@			System.gc();
