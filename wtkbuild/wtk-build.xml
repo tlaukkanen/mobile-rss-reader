@@ -470,6 +470,12 @@
 			<move todir="${op.dir}/presrc" >
 				<fileset dir="${op.dir}/${svn.src}/presrc" />
 			</move>
+			<move todir="${op.dir}/testpresrc" >
+				<fileset dir="${op.dir}/${svn.src}/testpresrc" />
+			</move>
+			<move todir="${op.dir}/compatpresrc" >
+				<fileset dir="${op.dir}/${svn.src}/compatpresrc" />
+			</move>
 			<move todir="${op.dir}/testdata" >
 				<fileset dir="${op.dir}/${svn.src}/testdata" />
 			</move>
