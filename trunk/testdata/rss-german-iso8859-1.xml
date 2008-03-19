@@ -18,6 +18,13 @@
       <link>http://www.zeit.de/index</link>
     </image>
     <item>
+      <link>http://www.zeit.de/news/artikel/2007/08/12/2356403.xml?from=rss</link>
+      <category>Afghanistan und Pakistan</category>
+      <title></title>
+      <description>Die Stammesführer aus Afghanistan und Pakistan verhandeln auf der sogenannten Friedens-Dschirga in Kabul über die grenzüberschreitende Gewalt der Taliban. Währenddessen blasen die Aufständischen zum Großangriff.</description>
+      <guid>http://www.zeit.de/news/artikel/2007/08/12/2356403.xml</guid>
+    </item>
+    <item>
       <link>http://www.zeit.de/2007/33/Links-Lafontaine?from=rss</link>
       <category>Projekt Links</category>
       <title>Linkspartei: Lafontaines Populismus ist von gestern</title>
@@ -109,13 +116,6 @@ interessanten Gründen. Ein Video</description>
       <title>Regenfälle: Fehmarn säuft ab</title>
       <description>Erst der Süden, jetzt der Norden: Heftige Regenfälle haben in Ostholstein zu Überschwemmungen geführt. Besonders betroffen war die Ostseeinsel Fehmarn. </description>
       <guid>http://www.zeit.de/online/2007/33/unwetter-norddeutschland</guid>
-    </item>
-    <item>
-      <link>http://www.zeit.de/news/artikel/2007/08/12/2356403.xml?from=rss</link>
-      <category>Afghanistan und Pakistan</category>
-      <title></title>
-      <description>Die Stammesführer aus Afghanistan und Pakistan verhandeln auf der sogenannten Friedens-Dschirga in Kabul über die grenzüberschreitende Gewalt der Taliban. Währenddessen blasen die Aufständischen zum Großangriff.</description>
-      <guid>http://www.zeit.de/news/artikel/2007/08/12/2356403.xml</guid>
     </item>
     <item>
       <link>http://www.zeit.de/2007/33/Rudy-Giuliani?from=rss</link>
