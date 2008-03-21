@@ -321,7 +321,7 @@ public class RssReaderMIDlet extends MIDlet
 			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 10);
 			//#endif
 			m_backCommand       = new Command("Back", Command.BACK, 1);
-			m_exitCommand       = new Command("Exit", Command.SCREEN, 14);
+			m_exitCommand       = new Command("Exit", Command.EXIT, 14);
 			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 10);
 			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
 			m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
@@ -871,10 +871,15 @@ public class RssReaderMIDlet extends MIDlet
                             }
                         }
 						if (errFound) {
-							m_loadForm.setTitle(
-									"One or more exceptions or errors.");
+							setLoadingFinished(
+									"Finished with one or more exceptions " +
+									"or errors.",
+									"Updating finished with one or more " +
+									"exceptions or errors..");
 							setCurrent( m_loadForm );
 						} else {
+							setLoadingFinished("Updating finished",
+									"Updating finished use back to return.");
 							setCurrent( m_bookmarkList );
 						}
                     } catch(Exception ex) {
@@ -1753,8 +1758,10 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Read unread items date sorted */
         if( c == m_readUnreadItems ) {
-			showLoadingForm("Sorting items...", m_bookmarkList);
-			m_runNews = true;
+			if (m_bookmarkList.size() > 0) {
+				showLoadingForm("Sorting items...", m_bookmarkList);
+				m_runNews = true;
+			}
         }
         
         /** Open RSS feed's selected topic */
