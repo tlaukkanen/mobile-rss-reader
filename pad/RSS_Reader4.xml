@@ -46,14 +46,14 @@
 		<Program_Install_Support>No Install Support</Program_Install_Support>
 		<Program_OS_Support>Pocket PC,RIM,Symbian,Java</Program_OS_Support>
 		<Program_Language>English</Program_Language>
-		<Program_Change_Info>Allow files in memory for feed files and import files</Program_Change_Info>
+		<Program_Change_Info>New river of news options to sort by date/feed for all/read/unread items</Program_Change_Info>
 		<Program_Specific_Category>Internet</Program_Specific_Category>
 		<Program_Category_Class>Network &amp; Internet::Other</Program_Category_Class>
 		<Program_System_Requirements>Symbian, Windows Mobile, or Java enabled phone</Program_System_Requirements>
 		<File_Info>
-			<File_Size_Bytes>814733</File_Size_Bytes>
-			<File_Size_K>795</File_Size_K>
-			<File_Size_MB>0.78</File_Size_MB>
+			<File_Size_Bytes>788830</File_Size_Bytes>
+			<File_Size_K>770</File_Size_K>
+			<File_Size_MB>0.75</File_Size_MB>
 		</File_Info>
 		<Expire_Info>
 			<Has_Expire_Info>N</Has_Expire_Info>
