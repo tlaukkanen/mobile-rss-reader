@@ -112,7 +112,7 @@ public class SettingsForm extends Form implements CommandListener {
         super("Settings");
         m_midlet = midlet;
         
-        m_okCommand = new Command("OK", Command.SCREEN, 1);
+        m_okCommand = new Command("OK", Command.OK, 1);
         this.addCommand( m_okCommand );
         
         m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
