@@ -525,7 +525,8 @@ public class RssReaderMIDlet extends MIDlet
             m_bookmarkList.addCommand( m_updateAllModCmd );
             m_bookmarkList.addCommand( m_saveCommand );
             m_bookmarkList.addCommand( m_settingsCmd );
-            m_bookmarkList.addCommand( m_exitCommand );
+            m_bookmarkList.addPromptCommand( m_exitCommand,
+					                         "Are you sure you want to exit?" );
             m_bookmarkList.addCommand( m_aboutCmd );
 			//#ifdef DTESTUI
             m_bookmarkList.addCommand( m_testBMCmd );
