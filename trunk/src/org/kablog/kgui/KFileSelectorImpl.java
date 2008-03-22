@@ -63,7 +63,7 @@
 //@		new Command("Open", Command.ITEM, 1);    
 //@
 //@	private final Command cancelCommand =
-//@		new Command("Cancel", Command.CANCEL, 1);    
+//@		new Command("Cancel", Command.CANCEL, 2);    
 //@
 //@	private Vector rootsList = new Vector();
 //@
