@@ -137,6 +137,7 @@
 			<filter token="CLDCVERS" value="${wtk.cldc.version}" />
 			<filter token="MIDLETVERS" value="${MIDLETVERS}" />
 			<filter token="PROGVERS" value="${buildinfo}" />
+			<filter token="BUILDPREFIX" value="${build.prefix}" />
 			<filter token="JMIDPVERS" value="${JMIDPVERS}" />
 			<filter token="JCLDCVERS" value="${JCLDCVERS}" />
 			<filter token="EMULATOR" value="${EMULATOR}" />
@@ -383,6 +384,10 @@
 			<filterset refid="midlet.info" />
 		</copy>
 
+		<copy file="${alxsrc}/${project.name}.alx" todir="${bin}" overwrite="true" >
+			<filterset refid="midlet.info" />
+		</copy>
+
 		<copy file="${manifestsrc}/manifest.mf" todir="${bin}" overwrite="true" >
 			<filterset refid="midlet.info" />
 		</copy>
@@ -418,6 +423,7 @@
 		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" />
 		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" todir="${dist}" />
 		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" todir="${dist}" />
+		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.alx" todir="${dist}" />
 		<mkdir dir="${dist}/${build.prefix}prc" />
 		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
 		<copy file="${bin}/${project.name}.jar" tofile="${build}/${build.prefix}${build.jar}" />
