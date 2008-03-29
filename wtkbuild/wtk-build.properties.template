@@ -55,6 +55,7 @@ src = ../src
 src.controlled.copy = true
 #Specify the WTK source directory to be replaced
 #wtk.src = ../../src
+#wtk.src = C:/PROGRA~1/RESEAR~1/BLACKB~1.0/rimwtk
 wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReader/src
 zipdir = ../zipedsrc
 need.svn.preprocessed = true
@@ -77,4 +78,5 @@ res.todir = icons
 #testui.presrc = ../testpresrc
 docs = ../docs
 jadsrc = ../jadsrc
+alxsrc = ../alxsrc
 debug = debug
