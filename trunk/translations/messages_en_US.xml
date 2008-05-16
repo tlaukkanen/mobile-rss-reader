@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>Text for RSSReader.</comment>
+
+<!-- TODO add more text.  -->
+<!--###################################################################-->
+<!-- -----    RSSReader resources for J2ME                             -->
+<!-- -Copyright Tomas Darmovzal &amp; Josef Cacek 2003-2006-           -->
+<!--###################################################################-->
+
+    <entry key="alert.int.err"></entry>
+    <entry key="gui.alert.nooutput">Output file not filled</entry>
+    <entry key="gui.label.autoformat">Autoformat</entry>
+    <entry key="gui.label.chapterHelp">To insert chapter place the chapter name on the right place to chapter markup [*...*] (e.g. [*Chapter 1: The Meaning of life*]</entry>
+    <entry key="gui.label.course">Course</entry>
+    <entry key="gui.label.encoding">Encoding</entry>
+    <entry key="gui.label.outprefix">Output file (basename)</entry>
+    <entry key="gui.label.partsize.chars">characters</entry>
+    <entry key="gui.label.partsize">Size of parts</entry>
+    <entry key="gui.label.splashscreen">Splashscreen</entry>
+    <entry key="gui.label.text">Text (can be edited)</entry>
+    <entry key="gui.label.textdescription">Book description</entry>
+    <entry key="gui.label.textfile">Text file</entry>
+    <entry key="gui.label.textlist">List of books</entry>
+    <entry key="gui.label.textname">Book name</entry>
+    <entry key="gui.log.genfinished">Generating finished</entry>
+    <entry key="gui.log.genstarted">Generating J2ME application</entry>
+    <entry key="gui.status.error">Error: {0}</entry>
+    <entry key="gui.status.state">Status: {0} </entry>
+    <entry key="gui.tab.about">About</entry>
+    <entry key="gui.tab.listoftexts">List of books</entry>
+    <entry key="gui.tab.newtext">New book</entry>
+    <entry key="gui.tab.output">Output</entry>
+
+
+<!-- ##################################################################### -->
+<!-- #####    Exceptions/ALerts -->
+<!-- ##################################################################### -->
+
+    <entry key="exc.int.err">Internal error</entry>
+    <entry key="exc.int.proc">Internal error while processing</entry>
+    <entry key="exception.file.exist">File "{0}" doesn\'t exist.</entry>
+    <entry key="exception.file.read">File "{0}" can\'t be read.</entry>
+    <entry key="exception.file.write">File "{0}" doesn't exist or it\'s not possible write to it.</entry>
+    <entry key="exception.file.delete">Deleting file "{0}" failed.</entry>
+
+    <entry key="exception.charset">Charset "{0}" is not supported.</entry>
+    <entry key="exception.book.name">Book name can\'t be empty.</entry>
+    <entry key="exception.book.partSize">Size of part must be >={0}.</entry>
+    <entry key="exception.book.id">Book id "{0}" already exists in application.</entry>
+    <entry key="exception.directory">File "{0}" is not directory.</entry>
+    <entry key="exception.directory.create">Creating directory "{0}" failed.</entry>
+
+    <entry key="exception.property.set">Expression "{0}" is not in property format (key=value).</entry>
+    <entry key="exception.property.store">Properties cannot be stored to file "{0}".</entry>
+    <entry key="exception.property.mandatory">Mandatory property "{0}" is missing.</entry>
+
+    <entry key="exception.null">Can\'t use null for {0}.</entry>
+
+
+#####################################################################
+#####    EBookME resources (must begin with 'ebook.')
+#####################################################################
+
+# command
+    <entry key="cmd.ok">OK</entry>
+    <entry key="cmd.cancel">Cancel</entry>
+    <entry key="cmd.exit">Exit</entry>
+
+    <entry key="page.cmd.info">Info</entry>
+    <entry key="page.cmd.position">Position</entry>
+    <entry key="i.stop">Stopping</entry>
+    <entry key="i.delay">Delay: </entry>
+    <entry key="i.wait">Wait please</entry>
+    <entry key="i.end">End of data</entry>
+
+    <!-- # EBookPositionForm -->
+    <entry key="page.pos.head">Position</entry>
+    <entry key="page.pos.actual">Actual position</entry>
+</properties>

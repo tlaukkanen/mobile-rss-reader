@@ -1,0 +1,177 @@
+#####################################################################
+#####
+#####    Spanish Resources for EBookME and packager 
+#####    created by: Daniel Escobar
+#####    (keys with prefix 'ebook.' are reserved for EBookME appl.)
+#####
+#####################################################################
+
+#####################################################################
+#####    Packager strings
+#####################################################################
+
+# Packager
+packager.version=Versión de EBookME & Compresor: {0}
+packager.create.suite=Creando la suite MIDlet ...
+packager.output=Ficheros creados: "{0}.(jar|jad)"
+packager.temp.create=Creando directorio temporal ({0})
+packager.temp.delete=Borrando directorio temporal
+packager.books.write=Creando secciones de texto
+packager.unpack=Extrayendo la aplicación J2MEbase
+packager.manifest=Modificando MANIFEST.MF file
+packager.pack=Creando JAR (comprimiendo)
+packager.jad=Creando JAD
+
+packager.help=Compresor EBookME aplicación\nCopyright Tomas Darmovzal & Josef Cacek 2003-2006\nEl Compresor EBookME produce libros electrónicos como aplicaciones JME (J2ME) a partir de ficheros de texto.\nusted puede leer estos libros en términales de telefonía móvil que sean compatibles con JME (MIDP 1.0).\n\nUsage:\n\tjava -jar lib/packager.jar [options]\n\nOptions:\n\t--help,-h     muestra esta pantalla de ayuda\n\t--version,-v  print version\n\t-f<fileName>  cargar propiedades desde un fichero <fileName>\n\t-F<fileName>  Borrar las propiedades y cargar una nueva desde un fichero <fileName>\t-D<property=value>\n\t              añadir o reemplazar propiedad con un valor dado\n\nPropiedades predefinidas se cargan desde un fichero 'application.properties'.\nPuedes cambiar este fichero usando la opción -F (o modificando los parámetros predefinidos\ncon -f). Si desea usar las opciones -F y -D juntas, tiene que usar\nla -F primero.\n\nPara más información consulte el fichero README.TXT\n
+
+#####################################################################
+#####    EBookME packager resources for GUI
+#####################################################################
+
+gui.label.textfile=Texto file
+gui.label.encoding=Codificación
+gui.label.partsize=Tamaño de las partes
+gui.label.partsize.chars=caracteres
+gui.label.textname=Libro name
+gui.label.textdescription=Libro description
+gui.button.add=>>> Añadir >>>
+gui.label.textlist=Listado de libros
+gui.button.remove=Borrar seleccionados
+gui.button.next=>>> Siguiente >>>
+gui.label.outprefix=Fichero de salida (basename)
+gui.button.run=Generar aplicación J2ME
+gui.label.course=Transcurso
+gui.label.text=Texto (editable)
+gui.label.autoformat=Autoformat
+gui.label.splashscreen=Splashscreen
+#gui.label.chapterHelp=To insert chapter place the chapter name on the right place to chapter markup [*...*] (e.g. [*Chapter 1: The Meaning of life*]
+
+gui.tab.newtext=Nuevo libro
+gui.tab.listoftexts=Listado de libros
+gui.tab.output=Salida
+gui.tab.about=Acerca de...
+
+gui.frame.openfile=Abir texto file
+gui.frame.savefile=Guardar 
+
+ficherogui.alert.partsize=El tamaño de las secciones no se ha llenado correctamente. Se usará el valor predefinido ({0}).
+gui.alert.notext=No hay libro seleccionado
+gui.alert.nooutput=Fichero de salida no llenado
+
+gui.alert.err=Error durante la creación ({0})
+
+gui.status.state=Estátus: {0} 
+gui.status.error=Error: {0}
+
+gui.log.genstarted=Generando la aplicación J2ME
+gui.log.genfinished=Creación finalizada
+
+
+#aplicación de compresión EBookME\n
+#Copyright Tomas Darmovzal & Josef Cacek 2003-2006\n
+#El compresor EBookME produce libros como aplicaciones JME (J2ME) a partir de un fichero de texto.\n
+#Usted puede leer estos libros en términales de telefonía móvil que sean compatibles con JME (MIDP 1.0).\n\n
+#Usage:\n
+#\tjava -jar lib/packager.jar [options]\n\n
+#Options:\n
+#\t--help,-h     Muestra esta pantalla de ayuda\n
+#\t--version,-v  Versión imprimible\n
+#\t-f<fileName>  cargar propiedades de un fichero <fileName>\n
+#\t-F<fileName>  Borrar las propiedades y cargar una nueva desde un fichero <fileName>
+#\t-D<property=value>\n
+#\t              añadir o reemplazar propiedad con un valor dado\n\n
+#Propiedades predefinidas se cargan desde un fichero 'application.properties'.\n
+#Puedes cambiar este fichero usando la opción -F (o modificando los parámetros predefinidos\n
+#usando -f). Si desea usar las opciones -F y -D juntas, tiene que usar\n
+#la -F primero.\n\n
+#Para más información consulte el fichero README.TXT\n
+
+
+#####################################################################
+#####    Exceptions
+#####################################################################
+
+exception.file.exist=No existe el fichero "{0}".
+exception.file.read=El fichero no se puede leer "{0}".
+exception.file.write=El fichero no existe "{0}" o no se puede modificar.
+exception.file.delete=Error en el borrado del fichero "{0}".
+
+exception.charset=El conjunto de caracteres "{0}" no es compatible.
+exception.book.name=El nombre del libro no puede estar vacío.
+exception.book.partSize=El tamaño de la sección debe ser >={0}.
+exception.book.id=La id del libro "{0}" ya existe en application.
+exception.directory=El fichero "{0}" no es un carpeta.
+exception.directory.create=Error en la creación "{0}" de la carpeta.
+
+exception.property.set=La expresión "{0}" no tiene un formato adecuado (clave=valor).
+exception.property.store=Las propiedades no se pueden almacenar en el fichero "{0}".
+exception.property.mandatory=no se encuentra "{0}" la propiedad obligatoria.
+
+exception.null=No se puede usar el carácter vacío para {0}.
+
+
+#####################################################################
+#####    EBookME resources (must begin with 'ebook.')
+#####################################################################
+
+# command buttons
+ebook.btn.ok=OK
+ebook.btn.cancel=Cancel
+
+# EBookBooklist
+ebook.bl.choose=Elija libro
+
+# EBookCanvas
+ebook.cmd.info=Info
+ebook.cmd.light=Luz de fondo
+ebook.cmd.light.auto=AutoScroll light
+ebook.cmd.position=Posición
+ebook.cmd.exit=Salir
+ebook.cmd.font=Fuente
+ebook.cmd.color=Colores
+ebook.cmd.choose=Libros
+ebook.cmd.chapters=Capítulos
+ebook.i.stop=Parando
+ebook.i.delay=Retraso: 
+ebook.i.wait=Espere por favor
+ebook.i.read=Leyendo
+
+# EBookColorList
+ebook.cl.head=Colores
+ebook.cl.black=Negro
+ebook.cl.white=Blanco
+ebook.cl.blue=Azul
+ebook.cl.green=Verde
+
+# EBookFontList
+ebook.f.head=Fuentes
+ebook.f.proportional=Prop
+ebook.f.monospace=Mono
+ebook.f.normal=Nmal
+ebook.f.bold=Ngta
+ebook.f.small=Peq
+ebook.f.medium=Med
+ebook.f.large=Máx
+
+
+# EBookInfo
+ebook.i.head=Info
+ebook.i.bk.name=Nombre libro
+ebook.i.bk.desc=Descripción
+ebook.i.empty=<Vacío>
+ebook.i.copy.h=EbookME Licencia
+ebook.i.copy=Lector J2ME & Compresor J2SE están protegidos bajo licencia LGPL licencia\nCopyright (C) 2003-2005 Tomáš Darmovzal <tomas.darmovzal@seznam.cz>\nCopyright (C) 2005-2006 Josef Cacek <josef.cacek@atlas.cz>
+ebook.i.help.h=Ayuda
+ebook.i.help=Commands:\nSgte. pag. (7, 8, 9, 0, ABAJO, click en la parte inferior de la pantalla)\nPag. prev. (1, 2, 3, ARRIBA, click en la parte superior de la pantalla)\nSgte. línea (6, DERECHA, click por debajo del centro de la pantalla)\nAnt. línea (4, IZQUIERDA, click por encima del centro de la pantalla)\nAutoScroll enc./apg. (5)\nAcelerar scrolling (6, ABAJO, DERECHA)\nDecelerar scrolling (4, ARRIBA, IZQUIERDA)
+ebook.i.version=Versión
+
+# EBookPositionForm
+ebook.pos.head=Posición
+ebook.pos.actual=Posición actual
+
+# EBook - chapters form
+ebook.chap.head=Capítulos
+
+ebook.lig.head=Luz de fondo
+ebook.lig.auto=Autoscroll
+ebook.lig=Intensidad de la luz de fondo

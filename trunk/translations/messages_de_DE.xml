@@ -1,0 +1,178 @@
+#####################################################################
+#####
+#####    German Resources for EBookME and packager
+#####    created by: Andreas Schreiner
+#####    (keys with prefix 'ebook.' are reserved for EBookME appl.)
+#####
+#####################################################################
+
+#####################################################################
+#####    Packager strings
+#####################################################################
+
+# Packager
+packager.version=EBookME & packager Version: {0}
+packager.create.suite=Erzeuge MIDlet suite ...
+packager.output=Ausgabedateien: "{0}.(jar|jad)"
+packager.temp.create=Erzeuge temporäres Verzeichnis ({0})
+packager.temp.delete=Lösche temporäres Verzeichnis
+packager.books.write=Erzeuge Textsegmente
+packager.unpack=Entpacke J2ME Programmgerüst
+packager.manifest=Modifiziere Datei MANIFEST.MF
+packager.pack=Erzeuge JAR (verpacke)
+packager.jad=Erzeuge JAD
+
+packager.help=EBookME Packager Programm\nCopyright Tomas Darmovzal & Josef Cacek 2003-2006\nEBookME Packager erzeugt ebooks als JME (J2ME) Programme aus Textdateien.\nDiese ebooks können auf Mobilgeräten mit Java Unterstützung (JME/MIDP 1.0) gelesen werden.\n\nVerwendung:\n\tjava -jar lib/packager.jar [options]\n\nOptionen:\n\t--help,-h     zeige diese Hinweise\n\t--version,-v  zeige Version\n\t-f<Dateiname>  Einstellungen aus Datei laden <Dateiname>\n\t-F<Dateiname>  Einstellungen löschen und neu Laden aus Datei <Dateiname>\t-D<property=value>\n\t              Hinzufügen oder ersetzen der Einstellung mit angegebenem Namen\n\nStandardeinstellungen werden aus Datei 'application.properties' geladen.\nDiese Vorgabe kann durch Verwendung der -F Option geändert werden (oder die Standardeinstellungen\ndurch Verwendung von -f). Bei gemeinsamer Verwendung von -F und -D\nmuss die Option -F zuerst angegeben werden.\n\nMehr Informationen stehen in der Datei README.TXT.\n
+
+#####################################################################
+#####    EBookME packager resources for GUI
+#####################################################################
+
+gui.label.textfile=Textdatei
+gui.label.encoding=Textcodierung
+gui.label.partsize=Größe der Teilstücke
+gui.label.partsize.chars=Buchstaben
+gui.label.textname=Buchtitel
+gui.label.textdescription=Buchbeschreibung
+gui.button.add=>>> Hinzufügen >>>
+gui.label.textlist=Bücherliste
+gui.button.remove=Markierte entfernen
+gui.button.next=>>>  Nächste >>>
+gui.label.outprefix=Ebook speichern unter
+gui.button.run=Erzeuge J2ME Programm
+gui.label.course=Verlauf
+gui.label.text=Text (editierbar)
+gui.label.autoformat=Autoformat
+gui.label.splashscreen=Splashscreen
+#gui.label.chapterHelp=To insert chapter place the chapter name on the right place to chapter markup [*...*] (e.g. [*Chapter 1: The Meaning of life*]
+
+gui.tab.newtext=Neues Buch
+gui.tab.listoftexts=Bücherliste
+gui.tab.output=Ebook erzeugen
+gui.tab.about=Über EBook Packager
+
+gui.frame.openfile=Textdatei öffnen
+gui.frame.savefile=Datei speichern
+
+gui.alert.partsize=Ungültige Größe für Teilstücke angegeben. Es wird daher der Standardwert ({0}) verwendet.
+gui.alert.notext=Kein Buch ausgewählt
+gui.alert.nooutput=Ausgabedatei konnte nicht geschrieben werden
+
+gui.alert.err=Fehler bei der Erzeugung des J2ME Programms ({0})
+
+gui.status.state=Status: {0} 
+gui.status.error=Fehler: {0}
+
+gui.log.genstarted=Erzeuge J2ME Programm
+gui.log.genfinished=J2ME Programm erfolgreich erstellt
+
+
+#EBookME packager application\n
+#Copyright Tomas Darmovzal & Josef Cacek 2003-2006\n
+#EBookME packager creates ebooks as JME (J2ME) applications from text files.\n
+#You can read these ebooks on mobile devices which supports JME (MIDP 1.0).\n\n
+#Usage:\n
+#\tjava -jar lib/packager.jar [options]\n\n
+#Options:\n
+#\t--help,-h     show this help screen\n
+#\t--version,-v  print version\n
+#\t-f<fileName>  load properties from file <fileName>\n
+#\t-F<fileName>  clear properties and load new from file <fileName>
+#\t-D<property=value>\n
+#\t              add or replace property with given value\n\n
+#Default properties are loaded from file 'application.properties'.\n
+#You can change this file by using -F switch (or only modify default settings\n
+#by using -f). If you want to use -F and -D switches together, you have to use\n
+#the -F as the first.\n\n
+#For more informations read file README.TXT\n
+
+
+#####################################################################
+#####    Exceptions
+#####################################################################
+
+exception.file.exist=Datei "{0}" existiert nicht.
+exception.file.read=Datei "{0}" kann nicht gelesen werden.
+exception.file.write=Datei "{0}" existiert nicht oder erlaubt keinen Schreibzugriff.
+exception.file.delete=Löschen der Datei "{0}" fehlgeschlagen.
+
+exception.charset=Buchstabencodierung "{0}" wird nicht unterstützt.
+exception.book.name=Buchtitel darf nicht leer bleiben.
+exception.book.partSize=Größe der Teilstücke muss größer als {0} sein.
+exception.book.id=Buch Nr. "{0}" ist bereits im EBook vorhanden.
+exception.directory="{0}" ist kein Verzeichnis.
+exception.directory.create=Erzeugung von Verzeichnis "{0}" fehlgeschlagen.
+
+exception.property.set=Ausdruck "{0}" ist nicht korrekt angegeben (Bezeichnung=Wert).
+exception.property.store=Einstellungen können nicht in Datei "{0}" gespeichert werden.
+exception.property.mandatory=Notwendiger Einstellungswert "{0}" fehlt.
+
+exception.null=Für {0} muss ein Wert eingegeben werden.
+
+
+#####################################################################
+#####    EBookME resources (must begin with 'ebook.')
+#####################################################################
+
+# command buttons
+ebook.btn.ok=OK
+ebook.btn.cancel=Abbrechen
+
+# EBookBooklist
+ebook.bl.choose=Buch auswählen
+
+# EBookCanvas
+ebook.cmd.info=Info
+ebook.cmd.light=Hintergrundlicht
+ebook.cmd.light.auto=Autoscroll Hintergrundlicht
+ebook.cmd.position=Position
+ebook.cmd.exit=Beenden
+ebook.cmd.font=Schriftart
+ebook.cmd.color=Farben
+ebook.cmd.choose=Bücher
+ebook.cmd.chapters=Kapitels
+ebook.i.stop=Beenden
+ebook.i.delay=Verzögerung: 
+ebook.i.wait=Bitte warten
+ebook.i.read=Lesen
+
+# EBookColorList
+ebook.cl.head=Farben
+ebook.cl.black=Schwarz
+ebook.cl.white=Weiß
+ebook.cl.blue=Blau
+ebook.cl.green=Grün
+
+# EBookFontList
+ebook.f.head=Schriftart
+ebook.f.proportional=Prop
+ebook.f.monospace=Mono
+ebook.f.normal=Nor
+ebook.f.bold=Fett
+ebook.f.small=Min
+ebook.f.medium=Med
+ebook.f.large=Max
+
+
+# EBookInfo
+ebook.i.head=Info
+ebook.i.bk.name=Buchtitel
+ebook.i.bk.desc=Beschreibung
+ebook.i.empty=<Leer>
+ebook.i.copy.h=EbookME Lizenz
+ebook.i.copy=J2ME Reader & J2SE Packager stehen unter der LGPL Lizenz\nCopyright (C) 2003-2005 Tomas Darmovzal <tomas.darmovzal@seznam.cz>\nCopyright (C) 2005-2006 Josef Cacek <josef.cacek@atlas.cz>
+ebook.i.help.h=Hilfe
+ebook.i.help=Befehle:\nNächste Seite (7, 8, 9, 0, UNTEN, Klick auf den unteren Teil des Displays)\nVorige Seite (1, 2, 3, OBEN, Klick af den oberen Teil des Displays)\nNächste Zeile (6, RECHTS, Klick unerhalb der Displaymitte)\nVorige Zeile (4, LINKS, Klick oberhalb der Displaymitte\nAutoscroll on/off (5)\nSchneller Scrollen (6, UNTEN, RECHTS)\nLangsamer Scrollen (4, OBEN, LINKS)
+ebook.i.version=Version
+
+# EBookPositionForm
+ebook.pos.head=Position
+ebook.pos.actual=Aktuelle Position
+
+# EBook - chapters form
+ebook.chap.head=Kapitels
+
+ebook.lig.head=Hintergrundlicht
+ebook.lig.auto=Autoscroll
+ebook.lig=Helligkeit
+
