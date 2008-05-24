@@ -50,7 +50,7 @@ import java.util.Vector;
 public class LineByLineParser extends FeedListParser {
     
 	//#ifdef DLOGGING
-//@    private Logger m_logger = Logger.getLogger("XmlParser");
+//@    private Logger m_logger = Logger.getLogger("LineByLineParser");
 //@    final private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
 //@    final private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
 //@    final private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
