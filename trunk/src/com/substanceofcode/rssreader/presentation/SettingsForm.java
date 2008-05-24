@@ -61,10 +61,13 @@ import javax.microedition.lcdui.StringItem;
 //#endif
 import javax.microedition.lcdui.Item;
 
+import com.substanceofcode.rssreader.presentation.HelpForm;
+
 //#ifdef DJSR75
 //@import org.kablog.kgui.KFileSelectorMgr;
 //#endif
 import com.substanceofcode.utils.Settings;
+import cz.cacek.ebook.util.ResourceProviderME;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -81,12 +84,19 @@ public class SettingsForm extends Form implements CommandListener {
     private RssReaderMIDlet m_midlet;
     private Command m_okCommand;
     private Command m_cancelCommand;
+    private Command m_helpCommand;
     
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
     private ChoiceGroup m_useTextBox;
     private ChoiceGroup m_feedListOpen;
-    private ChoiceGroup m_itunesEnabled;
+	//#ifdef DITUNES
+//@    private ChoiceGroup m_itunesEnabled;
+	//#endif
+	//#ifdef DMIDP20
+    private ChoiceGroup m_pageEnabled;
+    private ChoiceGroup m_fontSize;
+	//#endif
     private TextField m_wordCountField;
     private StringItem m_pgmMidpVers;
     private StringItem m_pgCldVers;
@@ -112,12 +122,15 @@ public class SettingsForm extends Form implements CommandListener {
         super("Settings");
         m_midlet = midlet;
         
-        m_okCommand = new Command("OK", Command.OK, 1);
+        m_okCommand = UiUtil.getCmdRsc("cmd.ok", Command.OK, 1);
         this.addCommand( m_okCommand );
         
-        m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
+        m_cancelCommand = UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 2);
         this.addCommand( m_cancelCommand );
         
+        m_helpCommand = UiUtil.getCmdRsc("cmd.help", Command.HELP, 3);
+        this.addCommand( m_helpCommand );
+
         this.setCommandListener( this );
         
         RssReaderSettings settings = m_midlet.getSettings();
@@ -143,17 +156,34 @@ public class SettingsForm extends Form implements CommandListener {
 		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_useTextBox );
-		String [] itunesEnabledChoices = {"Don't show Itunes data",
-				"Show Itunes data"};
-        m_itunesEnabled = new ChoiceGroup("Choose to use Itunes data",
-				                            Choice.EXCLUSIVE,
-											itunesEnabledChoices,
-											null);
-		//#ifdef DMIDP20
-		m_itunesEnabled.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
 		//#ifdef DITUNES
+//@		String [] itunesEnabledChoices = {"Don't show Itunes data",
+//@				"Show Itunes data"};
+//@        m_itunesEnabled = new ChoiceGroup("Choose to use Itunes data",
+//@				                            Choice.EXCLUSIVE,
+//@											itunesEnabledChoices,
+//@											null);
+		//#ifdef DMIDP20
+//@		m_itunesEnabled.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
 //@        this.append( m_itunesEnabled );
+		//#endif
+		//#ifdef DMIDP20
+		String [] pageEnabledChoices = {
+			"Use commands to go back to previous screen",
+				"Also use keypad to go back to previous screen"};
+        m_pageEnabled = new ChoiceGroup("Choose to use keypad for item screen",
+				                            Choice.EXCLUSIVE,
+											pageEnabledChoices,
+											null);
+		m_pageEnabled.setLayout(Item.LAYOUT_BOTTOM);
+        this.append( m_pageEnabled );
+		String [] fontSizeChoices = {"Default font size", "Small", "Medium", "Large"};
+        m_fontSize = new ChoiceGroup("Choose font size", Choice.EXCLUSIVE,
+				fontSizeChoices,
+											null);
+		m_fontSize.setLayout(Item.LAYOUT_BOTTOM);
+        this.append( m_fontSize );
 		//#endif
 		String [] feedBackChoices = {"Open item first", "Back first"};
         m_feedListOpen = new ChoiceGroup("Choose feed list menu first item",
@@ -268,9 +298,20 @@ public class SettingsForm extends Form implements CommandListener {
         boolean useTextBox = settings.getUseTextBox();
 		boolean [] boolSelectedItems = {useTextBox, !useTextBox};
 		m_useTextBox.setSelectedFlags( boolSelectedItems );
-        boolean itunesEnabled = settings.getItunesEnabled();
-		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
-		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
+		//#ifdef DITUNES
+//@        boolean itunesEnabled = settings.getItunesEnabled();
+//@		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
+//@		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
+		//#endif
+		//#ifdef DMIDP20
+        boolean pageEnabled = settings.getPageEnabled();
+		boolean [] boolPageEnabled = {!pageEnabled, pageEnabled};
+		m_pageEnabled.setSelectedFlags( boolPageEnabled );
+        int fontSize = settings.getFontSize();
+		boolean [] boolfontSize = {false, false, false, false};
+		m_fontSize.setSelectedFlags( boolfontSize );
+		m_fontSize.setSelectedIndex( fontSize, true );
+		//#endif
         boolean feedListOpen = settings.getFeedListOpen();
 		boolean [] boolFeedListOpen = {feedListOpen, !feedListOpen};
 		m_feedListOpen.setSelectedFlags( boolFeedListOpen );
@@ -310,11 +351,17 @@ public class SettingsForm extends Form implements CommandListener {
                 settings.setMarkUnreadItems( markUnreadItems );
 				boolean useTextBox = m_useTextBox.isSelected(0);
 				settings.setUseTextBox(useTextBox);
-				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
 				//#ifdef DITUNES
+//@				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
 //@				settings.setItunesEnabled( itunesEnabled );
 				//#else
 				settings.setItunesEnabled( false );
+				//#endif
+				//#ifdef DMIDP20
+				boolean pageEnabled = !m_pageEnabled.isSelected(0);
+				settings.setPageEnabled( pageEnabled );
+				int fontSize = m_fontSize.getSelectedIndex();
+				settings.setFontSize( fontSize );
 				//#endif
 				boolean feedListOpen = m_feedListOpen.isSelected(0);
 				settings.setFeedListOpen( feedListOpen);
@@ -347,6 +394,18 @@ public class SettingsForm extends Form implements CommandListener {
         if(command==m_cancelCommand) {
             m_midlet.showBookmarkList();
         }
+
+        if(command==m_helpCommand) {
+			final HelpForm helpForm = new HelpForm(m_midlet, this);
+			helpForm.appendRsc("text.set.help");
+			helpForm.appendItemHelpRsc(m_useTextBox, "text.stxt.help");
+			//#ifdef DMIDP20
+			helpForm.appendItemHelpRsc(m_pageEnabled, "text.spg.help");
+			helpForm.appendItemHelpRsc(m_fontSize, "text.sfs.help");
+			//#endif
+            m_midlet.setCurrent(helpForm);
+        }
+
     }
     
 }
