@@ -39,6 +39,8 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businessentities.RssItem;
 import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseMemoryException;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
@@ -234,7 +236,7 @@ public class ExtParser {
     
 	/* Parse the item to get it's fields */
 	void parseExtItem(XmlParser parser, char elemChar, String elementName)
-	throws IOException {
+	throws IOException, CauseMemoryException, CauseException {
 		String subElem;
 		int elen = elementName.length();
 		boolean isItunes = false;
