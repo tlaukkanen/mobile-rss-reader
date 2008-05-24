@@ -29,7 +29,9 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import java.io.IOException;
 import java.io.InputStream;
 
+import cz.cacek.ebook.util.ResourceProviderME;
 import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseMemoryException;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
@@ -104,35 +106,39 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 			logger.severe("FeedListParser.run(): Error while parsing " +
 					      "feeds: " + m_url, ex);
 			//#endif
-            // TODO: Add exception handling
             System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
 			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
+        } catch( CauseMemoryException ex ) {
+			m_feeds = null;
+			System.gc();
+			m_ex = new CauseMemoryException("Out of memory error while " +
+					"parsing feed " + m_url, ex);
+			//#ifdef DLOGGING
+			logger.severe(m_ex.getMessage(), ex);
+			//#endif
         } catch( Exception ex ) {
 			//#ifdef DLOGGING
 			logger.severe("FeedListParser.run(): Error while parsing " +
 					      "feeds: " + m_url, ex);
 			//#endif
-            // TODO: Add exception handling
             System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
 			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
         } catch( OutOfMemoryError t ) {
-			System.gc();
 			m_feeds = null;
+			System.gc();
 			//#ifdef DLOGGING
 			logger.severe("FeedListParser.run(): Out Of Memory Error while " +
 					"parsing feeds: " + m_url, t);
 			//#endif
-            // TODO: Add exception handling
             System.err.println("FeedListParser.run(): " +
 					"Out Of Memory Error while parsing feeds: " + t.toString());
-			m_ex = new CauseException("Out Of Memory Error while parsing " +
-					"feed " + m_url, t);
+			m_ex = new CauseMemoryException("Out Of Memory Error while " +
+					"parsing feed " + m_url, t);
         } catch( Throwable t ) {
 			//#ifdef DLOGGING
 			logger.severe("FeedListParser.run(): Error while parsing " +
 					      "feeds: " + m_url, t);
 			//#endif
-            // TODO: Add exception handling
             System.err.println("FeedListParser.run(): Error while parsing feeds: " + t.toString());
 			m_ex = new CauseException("Internal error while parsing feed " +
 									  m_url, t);
@@ -143,7 +149,8 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
     
     
     /** Get feeds from selected url */
-    public RssItunesFeed[] parseFeeds() throws IOException, Exception {
+    public RssItunesFeed[] parseFeeds()
+    throws IOException, CauseMemoryException, CauseException, Exception {
         
 		try {
 			super.handleOpen(m_url, m_username, m_password);
@@ -163,15 +170,19 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 			} else {
 				return parseFeeds(m_inputStream);
 			}
+        } catch(CauseMemoryException e) {
+			throw e;
         } catch(Exception e) {
+            /* Error while parsing import data: */
+            CauseException ce = new CauseException(ResourceProviderME.get(
+						"exc.err.imp", m_url), e);
 			//#ifdef DLOGGING
-			logger.severe("Import error with " + m_url, e);
+			logger.severe(ce.getMessage(), e);
 			//#endif
 			if ((m_url != null) && m_url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Error while parsing import data: " 
-                    + e.toString(), e);
+            throw ce;
         } catch(OutOfMemoryError t) {
 			m_feeds = null;
 			System.gc();
@@ -181,8 +192,9 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 			if ((m_url != null) && m_url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Out Of Memory Error while parsing RSS " +
-					"data", t);
+            /* Out Of Memory Error while parsing RSS data */
+            throw new CauseMemoryException(ResourceProviderME.get(
+						"exc.om.rsd", m_url), t);
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 			logger.severe("parseFeeds error with " + m_url, t);
@@ -190,8 +202,8 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 			if ((m_url != null) && m_url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Internal error while parsing RSS data",
-									 t);
+            throw new CauseException(
+					"Internal error while parsing RSS data " + m_url, t);
         } finally {
 			super.handleClose();
 		}
@@ -199,7 +211,7 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
     
 	/** If header shows redirect, handle it here. */
 	private RssItunesFeed[] parseHeaderRedirect(String newUrl)
-    throws IOException, Exception {
+    throws IOException, CauseMemoryException, CauseException, Exception {
 		if (m_redirect) {
 			//#ifdef DLOGGING
 			logger.severe("Error 2nd header redirect url:  " + newUrl);
@@ -222,7 +234,7 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private RssItunesFeed[] parseHTMLRedirect()
-    throws IOException, Exception {
+    throws IOException, CauseMemoryException, CauseException, Exception {
 		String svUrl = m_url;
 		m_url = super.parseHTMLRedirect(m_url, m_inputStream);
 		try {
@@ -232,7 +244,8 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 		}
 	}
 
-    abstract RssItunesFeed[] parseFeeds(InputStream is);
+    abstract RssItunesFeed[] parseFeeds(InputStream is)
+    throws IOException, CauseMemoryException, CauseException, Exception;
 
     public void setFeedNameFilter(String m_feedNameFilter) {
         if (m_feedNameFilter == null) {
