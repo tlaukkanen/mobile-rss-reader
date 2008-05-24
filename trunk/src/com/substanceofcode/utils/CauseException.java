@@ -17,6 +17,8 @@
  *
  */
 
+// Expand to define logging define
+//#define DNOLOGGING
 package com.substanceofcode.utils;
 
 /**
@@ -24,8 +26,15 @@ package com.substanceofcode.utils;
  *
  * @author Irving Bunton
  */
-public class CauseException extends Exception {
+public class CauseException extends
+//#ifdef DLOGGING
+//@net.sf.jlogmicro.util.exception.CauseException
+//#else
+Exception
+//#endif
+{
     
+    private int MAX_CAUSES = 50;
     private Throwable cause = null;
     private boolean causeSet = false;
 
@@ -52,6 +61,27 @@ public class CauseException extends Exception {
 
     public Throwable getCause() {
         return (cause);
+    }
+
+    public Throwable getFirstCause() {
+		Throwable e = getCause();
+		if (e == null) {
+			return null;
+		}
+		for (int ic = 0; ic < MAX_CAUSES; ic++) {
+			if (e instanceof CauseException) {
+				CauseException ce = (CauseException)e;
+				if (ce.getCause() == null) {
+					return ce;
+				} else {
+					e = getCause();
+				}
+			} else {
+				return e;
+			}
+		}
+
+        return null;
     }
 
 }
