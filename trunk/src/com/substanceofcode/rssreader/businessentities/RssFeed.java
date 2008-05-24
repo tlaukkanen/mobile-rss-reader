@@ -63,7 +63,6 @@ public class RssFeed{
     protected String m_password = "";
     protected Date m_upddate = null;
     protected Date m_date = null;
-
     protected String m_link = "";   // The RSS feed link
     protected int m_category = -1; // The RSS feed category
     
@@ -128,7 +127,7 @@ public class RssFeed{
 
 		try {
         
-			String[] nodes = StringUtil.split( storeString, "|" );
+			String[] nodes = StringUtil.split( storeString, '|' );
 			init(firstSettings, 0, false, false, encoded, nodes);
         } catch(Exception e) {
             System.err.println("Error while rssfeed initialization : " + e.toString());
@@ -251,7 +250,7 @@ public class RssFeed{
 			String itemArrayData = nodes[ startIndex + ITEMS ];
 			
 			// Deserialize itemss
-			String[] serializedItems = StringUtil.split(itemArrayData, ".");
+			String[] serializedItems = StringUtil.split(itemArrayData, '.');
 			
 			for(int itemIndex=0; itemIndex<serializedItems.length; itemIndex++) {
 				String serializedItem = serializedItems[ itemIndex ];
@@ -310,7 +309,11 @@ public class RssFeed{
     
     /** Return record store string for feed only.  This excludes items which
 	    are put into store string by RssItunesFeed.  */
-    public String getStoreString(boolean serializeItems, boolean encoded){
+    public String getStoreString(final boolean saveHdr,
+			final boolean serializeItems, final boolean encoded){
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("saveHdr,serializeItems,encoded=" + saveHdr + "," + serializeItems + "," + encoded);}
+		//#endif
         StringBuffer serializedItems = new StringBuffer();
         if( serializeItems ) {
 			int ilen = m_items.size();
@@ -338,28 +341,34 @@ public class RssFeed{
 		} catch (UnsupportedEncodingException e) {
 			encodedPassword = b64.encode( m_password.getBytes() );
 		}
-	    String dateString;
-        if(m_date==null){
-            dateString = "";
-        } else {
-		    // We use base 16 (hex) for the date so that we can save some
-			// space for toString.
-            dateString = Long.toString( m_date.getTime(), 16 );
-        }
-        String updString;
-        if(m_upddate==null){
-            updString = "";
-        } else {
-		    // We use base 16 (hex) for the update date so that we can save some
-			// space for toString.
-            updString = Long.toString( m_upddate.getTime(), 16 );
-        }
+	    String exInfoString;
+		String updString;
+		if (saveHdr) {
+			String dateString;
+			if(m_date==null){
+				dateString = "";
+			} else {
+				// We use base 16 (hex) for the date so that we can save some
+				// space for toString.
+				dateString = Long.toString( m_date.getTime(), 16 );
+			}
+			if(m_upddate==null){
+				updString = "";
+			} else {
+				// We use base 16 (hex) for the update date so that we can save some
+				// space for toString.
+				updString = Long.toString( m_upddate.getTime(), 16 );
+			}
+			exInfoString = dateString + "|" +
+				((m_category == -1) ? "" : Integer.toString(m_category));
+		} else {
+			updString = "";
+			exInfoString = "|";
+		}
         String storeString = m_name + "|" +
                               m_url + "|" + username + "|" +
                 encodedPassword + "|" + updString + "|" +
-				m_link + "|" + dateString + "|" +
-				((m_category == -1) ? "" : Integer.toString(m_category)) +
-				"|" + serializedItems;
+				m_link + "|" + exInfoString + "|" + serializedItems;
         return storeString;
         
     }
