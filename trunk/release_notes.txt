@@ -150,6 +150,27 @@ v1.11
 + Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
+v1.11.1
++ Have help for some forms/lists
++ Create .alx files for Blackberry
++ Minor performance improvement in startup
++ Allow feeds with '^' in title, description, subtitle, summary,
+  and author.
++ Allow keypad to be used to go to previous screen for text fields on item form
++ Better workarounds for out of memory during exit
++ Save minimal data if force exit (e.g. kill using cancel on Symbian)
++ Fix bug when opening feeds on Sony Ericsson emulators and possiblely
+  affecting Sony Ericsson devices
++ Fix dates in yyyy-mm-dd format
++ Fix standard dates with 2 or more consecutive
++ Show progress of loading/saving bookmarks and updating all/modified feeds
++ Have Open item command name on headers screen instead of open command name
++ Give better error messages for problems (e.g. out of
+  memory)
++ Have resources file for future localization
++ Support BOM (Byte Order Mark) for UTF-8 and UTF-16 (includes line by line)
++ Fix problems with HTML hyperlinks which do not have quotes adding the '>' to
+  the URL.
 
 Known problems:
 
@@ -159,6 +180,4 @@ Known problems:
   back to the problem item.
 - Phone must support MP3 links, etc to play enclosures (many phones do not
   allow an MP3 to be read from a URL, but play them from the file system)
-- Does not handle feeds with '^' in title, description, subtitle, summary,
-  and author.
 
