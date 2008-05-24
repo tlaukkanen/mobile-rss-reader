@@ -35,7 +35,6 @@ import com.substanceofcode.utils.CauseMemoryException;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
