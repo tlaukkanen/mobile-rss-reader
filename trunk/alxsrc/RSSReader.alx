@@ -30,7 +30,7 @@
             </directory>
 
 			<files>
-				@BUILDPREFIX@_RSSReader.cod
+				@BUILDPREFIX@RSSReader_@FMIDLETVERSROOT@.cod
 			</files>
 		</fileset>
 	</application>
