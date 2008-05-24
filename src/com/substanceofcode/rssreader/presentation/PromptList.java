@@ -33,7 +33,7 @@ package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
 
-import javax.microedition.midlet.*;
+import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
@@ -107,9 +107,9 @@ public class PromptList extends List implements CommandListener {
 						(String)promptCommands.get(cmd), null,
 						AlertType.CONFIRMATION);
 				promptAlert.setTimeout(Alert.FOREVER);
-				cmdOK = new Command("OK", Command.OK, 0);
+				cmdOK = UiUtil.getCmdRsc("cmd.ok", Command.OK, 0);
 				promptAlert.addCommand(cmdOK);
-				cmdCancel = new Command("Cancel", Command.CANCEL, 0);
+				cmdCancel = UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 0);
 				promptAlert.addCommand(cmdCancel);
 				promptAlert.setCommandListener(this);
 				Display.getDisplay(midlet).setCurrent(promptAlert);
