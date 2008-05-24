@@ -46,16 +46,19 @@ public class EncodingStreamReader extends InputStreamReader {
     
     private InputStreamReader m_inputStream = null;
     private String m_fileEncoding = "ISO8859_1";  // See below
-    private boolean modEncoding = true;  // First mod encoding to account for
+    private boolean m_modEncoding = true;  // First mod encoding to account for
 	                                    // unexpected UTF-16.
-    private boolean modUTF16 = false;  // First mod encoding to account for
+    private boolean m_modUTF16 = false;  // First mod encoding to account for
 
-    private boolean m_utf16Doc = false; // utf-16 doc
+    private boolean m_utf16Doc = false; // definately utf-16 doc
 
-    private static boolean docBigEndian = false;  // Doc big endian
+    private boolean m_utfDoc = false; // definately utf-8 or utf-16 doc
+
+    private static boolean m_docBigEndian = false;  // Doc big endian
     private boolean m_getPrologue = true;
-    private boolean firstChar = true;
-    private boolean secondChar = false;
+    private boolean m_getBom = true;    // Get the Byte Order Mark
+    private boolean m_firstChar = true; // 1st of a possible 2 byte character
+    private boolean m_secondChar = false; // 2nd of a possible 2 byte character
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("EncodingStreamReader");
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
@@ -93,7 +96,7 @@ public class EncodingStreamReader extends InputStreamReader {
 						           e2.getMessage());
 				m_inputStream = new InputStreamReader(inputStream);
 				m_fileEncoding = "";
-				modEncoding = false;
+				m_modEncoding = false;
 			}
 		}
     }
@@ -106,22 +109,72 @@ public class EncodingStreamReader extends InputStreamReader {
     
 		try {
 			int inputCharacter = m_inputStream.read();
-			if (modEncoding) {
-				if (m_getPrologue || modUTF16) {
+			if (m_modEncoding) {
+				if (m_getPrologue || m_modUTF16) {
 					// If we get 0 character during prologue, it must be
 					// first or second byte of UTF-16.  Throw it out.
 					// If little endian, we need to read the next character.
-					if (firstChar) {
+					if (m_firstChar) {
+						if (m_getBom) {
+							m_getBom = false;
+							if (inputCharacter == 0x0ef) {
+								switch (inputCharacter = m_inputStream.read()) {
+									case -1:
+										return inputCharacter;
+									case 0xff:
+										m_modUTF16 = true;
+										m_utf16Doc = true;
+										m_utfDoc = true;
+										m_docBigEndian = true;
+										break;
+									case 0xfe:
+										m_modUTF16 = true;
+										m_utf16Doc = true;
+										m_utfDoc = true;
+										m_docBigEndian = false;
+										break;
+									case 0xbb:
+										if ((inputCharacter = m_inputStream.read())
+												== -1) {
+											return inputCharacter;
+										}
+										if (inputCharacter != 0xbf) {
+											//#ifdef DLOGGING
+//@											logger.severe("Invalid BOM for UTf-8 " +
+//@												"has last character " +
+//@												inputCharacter,
+//@												new Exception());
+											//#endif
+											return inputCharacter;
+										}
+										m_modUTF16 = false;
+										m_utf16Doc = false;
+										m_utfDoc = true;
+										m_modEncoding = false;
+										break;
+									default:
+										return inputCharacter;
+								}
+								//#ifdef DLOGGING
+//@								if (fineLoggable) {logger.fine("m_modUTF16,m_utf16Doc,m_utfDoc,m_modEncoding=" + m_modUTF16 + "," + m_utf16Doc + "," + m_utfDoc + "," + m_modEncoding);}
+								//#endif
+								/* Read 1st char after BOM. */
+								inputCharacter = m_inputStream.read();
+								if (m_modEncoding) {
+									return inputCharacter;
+								}
+							}
+						}
 						if (inputCharacter == -1) {
 							return inputCharacter;
 						}
-						if (modUTF16) {
+						if (m_modUTF16) {
 							// If we know that this is UTF-16 from
 							// encoding, put the bytes together correctly.
 							// In this case, we are not in prolog, so
 							// both bytes may be meaningful.
 							int secondCharacter = m_inputStream.read();
-							if (docBigEndian) {
+							if (m_docBigEndian) {
 								inputCharacter <<= 8;
 								inputCharacter |= secondCharacter;
 							} else {
@@ -132,27 +185,27 @@ public class EncodingStreamReader extends InputStreamReader {
 							if (inputCharacter == 0) {
 								// This is UTF-16, read second character
 								inputCharacter = m_inputStream.read();
-								docBigEndian = true;
+								m_docBigEndian = true;
 								m_utf16Doc = true;
 							} else {
-								firstChar = false;
-								secondChar = true;
+								m_firstChar = false;
+								m_secondChar = true;
 								if (m_utf16Doc) {
 									m_utf16Doc = false;
 								}
 							}
 						}
-					} else if (secondChar) {
+					} else if (m_secondChar) {
 						// If 0 character, it is UTF-16 and little endian.
 						if (inputCharacter == 0) {
 							inputCharacter = m_inputStream.read();
-							docBigEndian = false;
+							m_docBigEndian = false;
 							m_utf16Doc = true;
 						} else if (inputCharacter == -1) {
 							return inputCharacter;
 						}
-						firstChar = true;
-						secondChar = false;
+						m_firstChar = true;
+						m_secondChar = false;
 					}
 				}
 			}
@@ -160,7 +213,7 @@ public class EncodingStreamReader extends InputStreamReader {
 		} catch (IOException e) {
 //#ifdef DLOGGING
 //@			logger.severe("read Could not read a char io error." + e + " " +
-//@					           e.getMessage());
+//@					           e.getMessage(), e);
 //#endif
 			System.out.println("read Could not read a char io error." + e + " " +
 					           e.getMessage());
@@ -168,11 +221,11 @@ public class EncodingStreamReader extends InputStreamReader {
 		} catch (Throwable t) {
 //#ifdef DLOGGING
 //@			logger.severe("read Could not read a char run time." + t + " " +
-//@					           t.getMessage());
+//@					           t.getMessage(), t);
 //#endif
 			System.out.println("read Could not read a char run time." + t + " " +
 					           t.getMessage());
-			return -1;
+			throw new IOException("Could not read character " + t.getMessage());
 		}
 	}
 
@@ -181,11 +234,11 @@ public class EncodingStreamReader extends InputStreamReader {
 	}
 
     public void setModEncoding(boolean modEncoding) {
-        this.modEncoding = modEncoding;
+        this.m_modEncoding = modEncoding;
     }
 
     public boolean isModEncoding() {
-        return (modEncoding);
+        return (m_modEncoding);
     }
 
     public void setFileEncoding(String fileEncoding) {
@@ -213,19 +266,27 @@ public class EncodingStreamReader extends InputStreamReader {
     }
 
     public void setModUTF16(boolean modUTF16) {
-        this.modUTF16 = modUTF16;
+        this.m_modUTF16 = modUTF16;
     }
 
     public boolean isModUTF16() {
-        return (modUTF16);
+        return (m_modUTF16);
     }
 
-    public void setUtf16Doc(boolean m_utf16Doc) {
-        this.m_utf16Doc = m_utf16Doc;
+    public void setUtf16Doc(boolean utf16Doc) {
+        this.m_utf16Doc = utf16Doc;
     }
 
     public boolean isUtf16Doc() {
         return (m_utf16Doc);
+    }
+
+    public void setUtfDoc(boolean utfDoc) {
+        this.m_utfDoc = utfDoc;
+    }
+
+    public boolean isUtfDoc() {
+        return (m_utfDoc);
     }
 
 }
