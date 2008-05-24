@@ -27,6 +27,7 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import java.io.IOException;
 import java.util.Vector;
 
+import com.substanceofcode.utils.CauseException;
 
 /**
  * Interface contains methods for parsing general feed.
@@ -36,6 +37,7 @@ import java.util.Vector;
 public interface FeedFormatParser {
 
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed feed,
-			int maxItemCount, boolean getTitleOnly) throws IOException;
+			int maxItemCount, boolean getTitleOnly)
+	throws IOException, CauseException;
     
 }
