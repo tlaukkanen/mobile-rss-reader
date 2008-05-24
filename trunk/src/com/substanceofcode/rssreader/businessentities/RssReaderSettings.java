@@ -49,14 +49,18 @@ public class RssReaderSettings {
     private static final String MARK_UNREAD_ITEMS = "mark-unread-items";
     private static final String FEED_LIST_OPEN = "feed-list-open";
     private static final String ITUNES_ENABLED = "itunes-enabled";
+    private static final String PAGE_ENABLED = "page-enabled";
+    private static final String FONT_SIZE = "font-size";
     private static final String USE_TEXT_BOX = "use-text-box";
     private static final String LOG_LEVEL = "log-level";
+    private Exception m_loadExc = null;
     
     /** Creates a new instance of RssFeedReaderSettings */
     private RssReaderSettings(MIDlet midlet) {
         try {
             m_settings = Settings.getInstance(midlet);
         } catch (Exception ex) {
+			m_loadExc = ex;
             ex.printStackTrace();
         }
     }
@@ -93,7 +97,7 @@ public class RssReaderSettings {
     
     /** Get import URL address */
     public String getImportUrl() {
-        String url = m_settings.getStringProperty(0, IMPORT_URL, "");
+        String url = m_settings.getStringProperty(IMPORT_URL, "");
         return url;
     }
     
@@ -104,7 +108,7 @@ public class RssReaderSettings {
     
     /** Get import URL username */
     public String getImportUrlUsername() {
-        String username = m_settings.getStringProperty(0, IMPORT_USERNAME, "");
+        String username = m_settings.getStringProperty(IMPORT_USERNAME, "");
         return username;
     }
     
@@ -115,7 +119,7 @@ public class RssReaderSettings {
     
     /** Get import URL password */
     public String getImportUrlPassword() {
-        String password = m_settings.getStringProperty(0, IMPORT_PASSWORD, "");
+        String password = m_settings.getStringProperty(IMPORT_PASSWORD, "");
         return password;
     }
     
@@ -153,9 +157,29 @@ public class RssReaderSettings {
 		//#endif
     }
     
-    /** Set feed list back is first command */
+    /** Set itunes enabled */
     public void setItunesEnabled(boolean itunesEnabled) {
         m_settings.setBooleanProperty( ITUNES_ENABLED, itunesEnabled);
+    }
+    
+    /** Get page enabled */
+    public boolean getPageEnabled() {
+        return m_settings.getBooleanProperty( PAGE_ENABLED, false);
+    }
+    
+    /** Set page enabled */
+    public void setPageEnabled(boolean pageEnabled) {
+        m_settings.setBooleanProperty( PAGE_ENABLED, pageEnabled);
+    }
+    
+    /** Get font size */
+    public int getFontSize() {
+        return m_settings.getIntProperty( FONT_SIZE, 0);
+    }
+    
+    /** Set font size */
+    public void setFontSize(int fontSize) {
+        m_settings.setIntProperty( FONT_SIZE, fontSize);
     }
     
     /** Get use text box */
@@ -163,20 +187,20 @@ public class RssReaderSettings {
         return m_settings.getBooleanProperty( USE_TEXT_BOX, false);
     }
     
-    /** Set import URL password */
+    /** Set use text box */
     public void setUseTextBox(boolean useTextBox) {
         m_settings.setBooleanProperty( USE_TEXT_BOX, useTextBox);
     }
     
     /** Get settings version */
     public String getSettingsVers() {
-        return m_settings.getStringProperty( 0, Settings.SETTINGS_NAME, "");
+        return m_settings.getStringProperty(Settings.SETTINGS_NAME, "");
     }
     
 	//#ifdef DTEST
 //@    /** Get log level */
 //@    public String getLogLevel() {
-//@        String log_level = m_settings.getStringProperty(0, LOG_LEVEL, "");
+//@        String log_level = m_settings.getStringProperty(LOG_LEVEL, "");
 //@        return log_level;
 //@    }
 //@    
@@ -186,4 +210,9 @@ public class RssReaderSettings {
 //@    }
 //@    
 	//#endif
+
+    public Exception getLoadExc() {
+        return (m_loadExc);
+    }
+
 }
