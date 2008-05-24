@@ -20,6 +20,8 @@
  *
  */
 
+// Expand to define logging define
+//#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -28,6 +30,14 @@ import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
 import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseMemoryException;
+
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * OpmlParser is an utility class for aquiring and parsing a OPML lists.
@@ -42,13 +52,21 @@ public class OpmlParser extends FeedListParser {
 
 	private boolean opmlDirectory = false;
 
+	//#ifdef DLOGGING
+//@    private Logger m_logger = Logger.getLogger("OpmlParser");
+//@    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
+//@    private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
+//@    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
+	//#endif
+
     /** Constructor with url, username and password parameters. */
     public OpmlParser(String url, String username, String password) {
         super(url, username, password);
     }
     
     /** Parse OPML list */
-    public RssItunesFeed[] parseFeeds(InputStream is) {
+    public RssItunesFeed[] parseFeeds(InputStream is)
+    throws IOException, CauseMemoryException, CauseException, Exception {
         /** Initialize item collection */
         Vector rssFeeds = new Vector();
         
@@ -128,14 +146,42 @@ public class OpmlParser extends FeedListParser {
 			}
             while( parser.parse() != XmlParser.END_DOCUMENT );
             
+        } catch (CauseMemoryException ex) {
+			rssFeeds = null;
+			CauseMemoryException cex = new CauseMemoryException(
+					"Out of memory error while parsing OPML feed " +
+					m_url, ex);
+			throw cex;
         } catch (Exception ex) {
             System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
 			ex.printStackTrace();
-            return null;
+			//#ifdef DLOGGING
+//@			m_logger.severe("FeedListParser.run(): Error while parsing " +
+//@					        "feeds: " + m_url, ex);
+			//#endif
+			CauseException cex = new CauseException(
+					"Error while parsing Opml feed " + m_url, ex);
+			throw cex;
+        } catch (OutOfMemoryError ex) {
+			rssFeeds = null;
+			CauseMemoryException cex = new CauseMemoryException(
+					"Out of memory error while parsing OPML feed " +
+					m_url, ex);
+			//#ifdef DLOGGING
+//@			m_logger.severe("FeedListParser.run(): Error while parsing " +
+//@					        "feeds: " + m_url, ex);
+			//#endif
+			throw cex;
         } catch (Throwable t) {
             System.err.println("OpmlParser.parseFeeds(): Exception " + t.toString());
 			t.printStackTrace();
-            return null;
+			CauseException ex = new CauseException(
+					"Error while parsing Opml feed " + m_url, t);
+			//#ifdef DLOGGING
+//@			m_logger.severe("FeedListParser.run(): Error while parsing " +
+//@					        "feeds: " + m_url, ex);
+			//#endif
+			throw ex;
         }
         
         /** Create array */
