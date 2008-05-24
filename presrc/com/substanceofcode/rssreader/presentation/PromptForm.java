@@ -43,7 +43,7 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.Image;
 //#ifndef DTESTUI
-import javax.microedition.lcdui.List;
+import javax.microedition.lcdui.Form;
 //#else
 import com.substanceofcode.testlcdui.Form;
 //#endif
