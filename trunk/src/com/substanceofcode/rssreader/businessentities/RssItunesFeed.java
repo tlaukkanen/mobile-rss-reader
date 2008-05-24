@@ -48,6 +48,7 @@ public class RssItunesFeed extends RssFeed{
 	// Beginning of data that has 0 itunes info.
 	// Number of Itunes info
     private static int NBR_ITUNES_FEED_INFO = 8;
+    private static String EMPTY_ITUNES_FEED_INFO = "|||||||";
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssItunesFeed");
 	//#endif
@@ -59,14 +60,14 @@ public class RssItunesFeed extends RssFeed{
 	// contain ITunes items (or all may not contain any, but they
 	// can later be modified to contain them).
     private static int INT_ITUNES_INDICATOR = NBR_ITUNES_FEED_INFO;
-    private boolean m_itunes = false;
+    protected boolean m_itunes = false;
     protected String m_title = "";
     protected String m_description = "";
     protected String m_language = "";   // The RSS feed language
     protected String m_author = "";   // The RSS feed author
     protected String m_subtitle = "";   // The RSS feed subtitle
     protected String m_summary = "";   // The RSS feed summary
-    private byte m_explicit = RssItunesItem.BNO_EXPLICIT;   // The RSS feed explicit
+    protected byte m_explicit = RssItunesItem.BNO_EXPLICIT; // The RSS feed explicit
     
     /** Creates a new instance of RSSBookmark */
     public RssItunesFeed(){
@@ -166,7 +167,7 @@ public class RssItunesFeed extends RssFeed{
 		try {
         
 			boolean hasPipe = (storeString.indexOf('\n') >= 0);
-			String[] nodes = StringUtil.split( storeString, "|" );
+			String[] nodes = StringUtil.split( storeString, '|' );
 			RssItunesFeed feed = new RssItunesFeed();
 			feed.init(hasPipe, encoded, nodes);
 			return feed;
@@ -185,8 +186,6 @@ public class RssItunesFeed extends RssFeed{
 			 * m_itunes | m_title | m_description | m_language | m_author |
 			   m_subtitle | m_summary | m_explicit | rss feed fields
 			 */
-			// TODO itunes enabled
-
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("nodes.length=" + nodes.length);}
 			//#endif
@@ -248,27 +247,37 @@ public class RssItunesFeed extends RssFeed{
     }
     
     /** Return record store string */
-    public String getStoreString(boolean serializeItems, boolean encoded){
-		String title = "";
-		String description = "";
-		String author = "";
-		String subtitle = "";
-		String summary = "";
-		//#ifdef DITUNES
-//@		if (m_itunes) {
-//@			title = m_title.replace('|', '\n');
-//@			description = m_description.replace('|', '\n');
-//@			author = m_author.replace('|', '\n');
-//@			subtitle = m_subtitle.replace('|', '\n');
-//@			summary = m_summary.replace('|', '\n');
-//@		}
+    public String getStoreString(final boolean saveHdr,
+			final boolean serializeItems, final boolean encoded){
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("saveHdr,serializeItems,encoded=" + saveHdr + "," + serializeItems + "," + encoded);}
 		//#endif
-        String storeString = (m_itunes ? "1" : "") + "|" + title + "|" +
+		String itunesInfo;
+		if (saveHdr) {
+			String title = "";
+			String description = "";
+			String author = "";
+			String subtitle = "";
+			String summary = "";
+			//#ifdef DITUNES
+//@			if (m_itunes) {
+//@				title = m_title.replace('|', '\n');
+//@				description = m_description.replace('|', '\n');
+//@				author = m_author.replace('|', '\n');
+//@				subtitle = m_subtitle.replace('|', '\n');
+//@				summary = m_summary.replace('|', '\n');
+//@			}
+			//#endif
+			itunesInfo = (m_itunes ? "1" : "") + "|" + title + "|" +
 			description + "|" + m_language + "|" +
                 author + "|" + subtitle + "|" + summary + "|" +
                  ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
-						 Integer.toString((int)m_explicit)) + "|" +
-			super.getStoreString(serializeItems, encoded);
+						 Integer.toString((int)m_explicit));
+		} else {
+			itunesInfo = EMPTY_ITUNES_FEED_INFO;
+		}
+        String storeString = itunesInfo + "|" +
+			super.getStoreString(saveHdr, serializeItems, encoded);
         return storeString;
         
     }
@@ -277,7 +286,6 @@ public class RssItunesFeed extends RssFeed{
 	public void copyTo(RssItunesFeed toFeed) {
 		super.copyTo(toFeed);
 		//#ifdef DITUNES
-//@		toFeed.m_items = this.m_items;
 //@		toFeed.m_title = this.m_title;
 //@		toFeed.m_description = this.m_description;
 //@		toFeed.m_language = this.m_language;
