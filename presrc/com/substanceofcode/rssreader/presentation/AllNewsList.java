@@ -136,24 +136,34 @@ implements CommandListener, Runnable  {
 
     /** Initialize new RSS headers list */
     final public void initializeUnreadHhdrsList() {
-		m_openUnreadHdrCmd  = new Command("Open item", Command.SCREEN, 1);
-		m_sortUnreadItemsCmd = new Command("Unread date sorted",
+		/* Open item */
+		m_openUnreadHdrCmd  = UiUtil.getCmdRsc("cmd.op.i", Command.SCREEN, 1);
+		/* Unread date sorted */
+		m_sortUnreadItemsCmd = UiUtil.getCmdRsc("cmd.ud.s",
 										   Command.SCREEN, 1);
-		m_sortReadItemsCmd = new Command("Read date sorted",
+		/* Read date sorted */
+		m_sortReadItemsCmd = UiUtil.getCmdRsc("cmd.rd.s",
 										   Command.SCREEN, 2);
-		m_sortUnreadFeedsCmd = new Command("Unread feed sorted",
+		/* Unread feed sorted */
+		m_sortUnreadFeedsCmd = UiUtil.getCmdRsc("cmd.uf.s",
 										   Command.SCREEN, 3);
-		m_sortReadFeedsCmd = new Command("Read feed sorted",
+		/* Read feed sorted */
+		m_sortReadFeedsCmd = UiUtil.getCmdRsc("cmd.rf.s",
 										   Command.SCREEN, 4);
-		m_sortAllDateCmd = new Command("All date sorted",
+		/* All date sorted */
+		m_sortAllDateCmd = UiUtil.getCmdRsc("cmd.ad.s",
 										   Command.SCREEN, 5);
-		m_sortAllFeedsCmd = new Command("All feed sorted",
+		/* All feed sorted */
+		m_sortAllFeedsCmd = UiUtil.getCmdRsc("cmd.af.s",
 										   Command.SCREEN, 6);
-		m_markReadCmd = new Command("Mark read", Command.SCREEN, 7);
-		m_markUnReadCmd = new Command("Mark unread", Command.SCREEN, 8);
-		m_backUnreadHdrCmd  = new Command("Back", Command.BACK, 9);
+		/* Mark read */
+		m_markReadCmd = UiUtil.getCmdRsc("cmd.mk.r", Command.SCREEN, 7);
+		/* Mark unread */
+		m_markUnReadCmd = UiUtil.getCmdRsc("cmd.mk.u", Command.SCREEN, 8);
+		m_backUnreadHdrCmd  = UiUtil.getCmdRsc("cmd.back", Command.BACK, 9);
 		//#ifdef DTESTUI
-		m_testNewsCmd        = new Command("Test news/items", Command.SCREEN, 10);
+		/* Test news/items */
+		m_testNewsCmd        = UiUtil.getCmdRsc("cmd.t.nw", Command.SCREEN, 10);
 		//#endif
         super.addCommand(m_openUnreadHdrCmd);
         super.addCommand(m_sortUnreadItemsCmd);
@@ -580,7 +590,8 @@ implements CommandListener, Runnable  {
 		super.outputCmdAct(c, s, javax.microedition.lcdui.List.SELECT_COMMAND);
 		//#endif
         if( c == m_sortUnreadItemsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
+			/* Sorting items... */
+			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = true;
 			m_dateSort = true;
 			m_showAll = false;
@@ -590,7 +601,8 @@ implements CommandListener, Runnable  {
         
         /** Read read items date sorted */
         if( c == m_sortReadItemsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
+			/* Sorting items... */
+			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = false;
 			m_dateSort = true;
 			m_showAll = false;
@@ -600,7 +612,8 @@ implements CommandListener, Runnable  {
         
         /** Read unread items feed sorted */
         if( c == m_sortUnreadFeedsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
+			/* Sorting items... */
+			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = true;
 			m_dateSort = false;
 			m_showAll = false;
@@ -610,7 +623,8 @@ implements CommandListener, Runnable  {
         
         /** Read read items feed sorted */
         if( c == m_sortReadFeedsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
+			/* Sorting items... */
+			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = false;
 			m_dateSort = false;
 			m_showAll = false;
@@ -628,14 +642,16 @@ implements CommandListener, Runnable  {
 				//#endif
             }
 		} else if( c == m_sortAllDateCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
+			/* Sorting items... */
+			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = false;
 			m_dateSort = true;
 			m_showAll = true;
 			m_sort = true;
 			wakeUp();
 		} else if( c == m_sortAllFeedsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
+			/* Sorting items... */
+			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = false;
 			m_dateSort = false;
 			m_showAll = true;
