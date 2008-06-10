@@ -25,10 +25,10 @@ project.name = RSSReader
 midlet.home = ${wtk.home}/apps/${project.name}
 prc.creater = MRSS
 prc.longname = RSS/News/Blog Reader
-MIDLETVERSROOT = 1.11.1
+MIDLETVERSROOT = 1.11
 #Need vers with '_' to allow uploading to sites that get confused by to
 #many '.'
-FMIDLETVERSROOT = 1_11_1
+FMIDLETVERSROOT = 1_11
 #Location of manifest source
 manifestsrc = ../manifestsrc
 #? src = src
@@ -55,7 +55,6 @@ src = ../src
 src.controlled.copy = true
 #Specify the WTK source directory to be replaced
 #wtk.src = ../../src
-#wtk.src = C:/PROGRA~1/RESEAR~1/BLACKB~1.0/rimwtk
 wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReader/src
 zipdir = ../zipedsrc
 need.svn.preprocessed = true
@@ -67,7 +66,6 @@ svn.user =  ibuntonjr
 need.dist.svn.dirs = true
 need.res = true
 res.dir = ../src/icons
-msg.dir = ../translations
 res.todir = icons
 #add.jars = true
 #copy.jar.src = true
@@ -79,5 +77,4 @@ res.todir = icons
 #testui.presrc = ../testpresrc
 docs = ../docs
 jadsrc = ../jadsrc
-alxsrc = ../alxsrc
 debug = debug

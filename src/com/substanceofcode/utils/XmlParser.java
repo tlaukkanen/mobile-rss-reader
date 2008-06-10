@@ -32,11 +32,9 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
-
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 /**
@@ -48,17 +46,11 @@ public class XmlParser {
     
     /** Current XML element name (eg. <title> = title) */
     final protected StringBuffer m_currentElementName = new StringBuffer();
-	/** Element data includes element name (e.g. <title>rss) */
     final protected StringBuffer m_currentElementData = new StringBuffer();
     protected boolean m_currentElementContainsText = false;
 	//#ifdef DTEST
 //@    boolean m_debugTrace = false;  // True to add extra trace
 	//#endif
-	// The flag for if encoding set with BOM, prologue with encoding,
-	// or meta tag for HTMLParser.
-	protected boolean m_encoding_set = false; // The flag for if encoding set
-    // Allow some errors for get text and get attribute
-    protected boolean m_acceptErrors = true;  // Allow some errors 
     protected String m_fileEncoding = "ISO8859_1";  // See EncodingUtil
     protected String m_docEncoding = "";  // See EncodingUtil
     protected String m_defEncoding = "UTF-8";  // Default doc encoding
@@ -94,8 +86,7 @@ public class XmlParser {
     }
 
     /** Parse next element */
-    protected int parseStream(InputStreamReader is)
-	throws IOException, CauseMemoryException, CauseException {
+    protected int parseStream(InputStreamReader is) throws IOException {
 		StringBuffer inputBuffer = new StringBuffer();
 		
 		boolean parsingElementName = false;
@@ -188,22 +179,8 @@ public class XmlParser {
 						// to treat as default UTF-8 encoding for XML.
 						if (m_getPrologue) {
 							m_getPrologue = false;
-							m_encodingStreamReader.setGetPrologue(false);
-							// If BOM is present, use it's definition for
-							// default
-							if (m_encodingStreamReader.isUtfDoc()) {
-								if (m_encodingStreamReader.isUtf16Doc()) {
-									m_encodingUtil.getEncoding(m_fileEncoding,
-											"UTF-16");
-								} else {
-									m_encodingUtil.getEncoding(m_fileEncoding,
-											"UTF-8");
-								}
-								m_encoding_set = true;
-							} else {
-								m_encodingUtil.getEncoding(m_fileEncoding,
-										m_defEncoding);
-							}
+							m_encodingUtil.getEncoding(m_fileEncoding,
+									m_defEncoding);
 							m_docEncoding = m_encodingUtil.getDocEncoding();
 						}
 					} else if (m_getPrologue && prologueFound) {
@@ -216,7 +193,6 @@ public class XmlParser {
 						if (m_currentElementData.toString().
 							startsWith("<?xml ")) {
 							m_getPrologue = false;
-							m_encodingStreamReader.setGetPrologue(false);
 							//#ifdef DLOGGING
 //@							if (finestLoggable) {logger.finest("m_currentElementData.length()=" + m_currentElementData.length());}
 							//#endif
@@ -226,8 +202,6 @@ public class XmlParser {
 //@								if (finestLoggable) {logger.finest("Prologue cencoding,m_defEncoding=" + cencoding + "," + m_defEncoding);}
 								//#endif
 								cencoding = m_defEncoding;
-							} else {
-								m_encoding_set = true;
 							}
 							m_encodingUtil.getEncoding(m_fileEncoding,
 									cencoding);
@@ -277,29 +251,11 @@ public class XmlParser {
 			
 		} catch (IOException e) {
 //#ifdef DLOGGING
-//@			logger.severe("parse read error ", e);
+//@			logger.severe("parse read error ");
 //#endif
 			System.out.println("parse read error " + e + " " + e.getMessage());
 			e.printStackTrace();
 			throw e;
-		} catch (OutOfMemoryError e) {
-//#ifdef DLOGGING
-//@			logger.severe("Out of memory parse read error ", e);
-//#endif
-			System.out.println("Out of memory parse read error " + e + " " + e.getMessage());
-			e.printStackTrace();
-			CauseMemoryException ce = new CauseMemoryException(
-					"Parse read error. Out of memory.", e);
-			throw ce;
-		} catch (Throwable e) {
-//#ifdef DLOGGING
-//@			logger.severe("Internal error parse read error ", e);
-//#endif
-			System.out.println("Internal error parse read error " + e + " " + e.getMessage());
-			e.printStackTrace();
-			CauseException ce = new CauseException(
-					"Internal error parse read error. ", e);
-			throw ce;
 		}
 		if( inputCharacter == -1 ) {
 			return END_DOCUMENT;
@@ -309,8 +265,7 @@ public class XmlParser {
     }
     
     /** Parse next element */
-    public int parse()
-	throws IOException, CauseMemoryException, CauseException {
+    public int parse() throws IOException {
 		if (m_encodingStreamReader.isModEncoding()) {
 			return parseStream(m_encodingStreamReader);
 		} else {
@@ -328,8 +283,7 @@ public class XmlParser {
     
     /** Get element text including inner xml
 	  * If no text, return empty string "" */
-    private String getTextStream(InputStreamReader is)
-	throws IOException, CauseMemoryException, CauseException {
+    private String getTextStream(InputStreamReader is) throws IOException {
         
 		if(!m_currentElementContainsText) {
 			return "";
@@ -411,43 +365,24 @@ public class XmlParser {
 			/** Handle some entities and encoded characters */
 			text = StringUtil.replace(text, "<![CDATA[", "");
 			text = StringUtil.replace(text, "]]>", "");
-			if (text.indexOf('&') >= 0) {
-				text = m_encodingUtil.replaceAlphaEntities(text);
-				// No need to convert from UTF-8 to Unicode using replace
-				// umlauts now because it is done with new String...,encoding.
+			text = m_encodingUtil.replaceAlphaEntities(text);
+			// No need to convert from UTF-8 to Unicode using replace
+			// umlauts now because it is done with new String...,encoding.
 
-				// Replace numeric entities including &#8217;, &#8216;
-				// &#8220;, and &#8221;
-				text = EncodingUtil.replaceNumEntity(text);
-			}
+			// Replace numeric entities including &#8217;, &#8216;
+			// &#8220;, and &#8221;
+			text = EncodingUtil.replaceNumEntity(text);
 
 			// Replace special chars like left quote, etc.
 			text = m_encodingUtil.replaceSpChars(text);
 			
-		} catch (OutOfMemoryError t) {
-			CauseMemoryException ce = new CauseMemoryException(
-					"Unable to read text. Out of memory.", t);
-//#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), ce);
-//#endif
-			System.out.println("getTextStream Could not read a char run time." + t +
-					           " " + t.getMessage());
-			t.printStackTrace();
-			throw ce;
 		} catch (Throwable t) {
-			CauseException ce = new CauseException("Unable to read text. " +
-					"Internal error.", t);
 //#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), ce);
+//@			logger.severe("getTextStream Could not read a char run time.", t);
 //#endif
 			System.out.println("getTextStream Could not read a char run time." + t +
 					           " " + t.getMessage());
 			t.printStackTrace();
-			if (m_acceptErrors) {
-				return null;
-			} else {
-				throw ce;
-			}
 		}
 		//#ifdef DLOGGING
 //@		if (finerLoggable) {logger.finer("text=" + text);}
@@ -458,8 +393,7 @@ public class XmlParser {
     /** Get element text including inner xml
 	  * save some time by using the normal m_inputStream when we
 	  * know that we are not reading UTF-8/16. */
-    public String getText()
-	throws IOException, CauseMemoryException, CauseException {
+    public String getText() throws IOException {
 		if (m_encodingStreamReader.isModEncoding()) {
 			return getTextStream(m_encodingStreamReader);
 		} else {
@@ -470,8 +404,7 @@ public class XmlParser {
     /** 
      * Get attribute value from current element 
      */
-    public String getAttributeValue(String attributeName)
-	throws IOException, CauseMemoryException, CauseException {
+    public String getAttributeValue(String attributeName) {
         
 		try {
 			/** Check whatever the element contains given attribute */
@@ -518,28 +451,13 @@ public class XmlParser {
 			//#endif
 					
 			return value;
-		} catch (OutOfMemoryError e) {
-//#ifdef DLOGGING
-//@			logger.severe("Out of memory parse attribute error ", e);
-//#endif
-			System.out.println("Out of memory parse attribute error " + e + " " + e.getMessage());
-			e.printStackTrace();
-			CauseMemoryException ce = new CauseMemoryException(
-					"Parse attribute read error. Out of memory.", e);
-			throw ce;
 		} catch (Throwable t) {
 //#ifdef DLOGGING
 //@			logger.severe("getAttributeValue error.", t);
 //#endif
 			System.out.println("getAttributeValue error." + t + " " +
 					           t.getMessage());
-			if (m_acceptErrors) {
-				return null;
-			} else {
-				CauseException ce = new CauseException(
-						"Parse attribute read error. Internal error.", t);
-				throw ce;
-			}
+			return null;
 		}
     }
     

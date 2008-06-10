@@ -106,7 +106,6 @@
 		<!-- Define some additional properties for this project. Not required. -->
 		<property file="${basedir}/optional.properties${optional.template}" />
 		<property name="propdir" value="${basedir}" />
-		<property name="lang.file" value="messages_en_US.xml" />
 		<property file="${basedir}/${wtk.properties}" />
 		<property name="stage" value="" />
 		<property name="build.prefix" value="${file.prefix}${stage}" />
@@ -138,8 +137,6 @@
 			<filter token="CLDCVERS" value="${wtk.cldc.version}" />
 			<filter token="MIDLETVERS" value="${MIDLETVERS}" />
 			<filter token="PROGVERS" value="${buildinfo}" />
-			<filter token="BUILDPREFIX" value="${build.prefix}" />
-			<filter token="FMIDLETVERSROOT" value="${FMIDLETVERSROOT}" />
 			<filter token="JMIDPVERS" value="${JMIDPVERS}" />
 			<filter token="JCLDCVERS" value="${JCLDCVERS}" />
 			<filter token="EMULATOR" value="${EMULATOR}" />
@@ -362,8 +359,6 @@
 		<copy todir="${tmpres}/${res.todir}" >
 			<fileset dir="${res.dir}" />
 		</copy>
-		<mkdir dir="${tmpres}/data" />
-		<copy file="${msg.dir}/${lang.file}" tofile="${tmpres}/data/lang.xml" />
 	</target>
 
 	<target name="copy.test.res" if="need.test.res" >
@@ -385,10 +380,6 @@
 		<antcall target="copy.test.res" />
 
 		<copy file="${jadsrc}/${project.name}.jad" todir="${bin}" overwrite="true" >
-			<filterset refid="midlet.info" />
-		</copy>
-
-		<copy file="${alxsrc}/${project.name}.alx" todir="${bin}" overwrite="true" >
 			<filterset refid="midlet.info" />
 		</copy>
 
@@ -427,7 +418,6 @@
 		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" />
 		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" todir="${dist}" />
 		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" todir="${dist}" />
-		<copy file="${bin}/${project.name}.alx" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.alx" />
 		<mkdir dir="${dist}/${build.prefix}prc" />
 		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
 		<copy file="${bin}/${project.name}.jar" tofile="${build}/${build.prefix}${build.jar}" />
@@ -489,9 +479,6 @@
 			<move todir="${op.dir}/testdata" >
 				<fileset dir="${op.dir}/${svn.src}/testdata" />
 			</move>
-			<move todir="${op.dir}/translations" >
-				<fileset dir="${op.dir}/${svn.src}/translations" />
-			</move>
 			<move todir="${op.dir}/zipedsrc" >
 				<fileset dir="${op.dir}/${svn.src}/zipedsrc" />
 			</move>
@@ -539,13 +526,6 @@
 		 
 	<target name="dist.version" depends="prepare" >
 		<property name="no.test" value="true" />
-		<antcall target="act.dist.version" inheritAll="true" />
-	</target>
-
-	<!-- Distribute the version (e.g. MIDP-1.0, MIDP-2.0, etc) to -->
-	<!-- it's target/build and target/dist target/main -->
-		 
-	<target name="act.dist.version" depends="prepare" >
 		<delete dir="${dist.vers}" />
 		<mkdir dir="${dist.vers}" />
 		<!-- delete TODO
@@ -872,16 +852,6 @@
 			<param name="dist.vers" value="${dist.midp20.jsr75}" />
 			<param name="build.vers" value="${build.midp20.jsr75}" />
 			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.test.midp.2.0.itunes.jsr75" unless="no.2.0.itunes.jsr75" >
-		<antcall target="act.dist.version" inheritAll="true" >
-			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
-			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
-			<param name="build.vers" value="${build.midp20.itunes.jsr75}" />
-			<param name="no.release" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
 	</target>

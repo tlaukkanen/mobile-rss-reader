@@ -27,7 +27,7 @@
 // Expand to define test ui define
 @DTESTUIDEF@
 
-//#ifdef DTESTUI
+//#ifdef DTESTUIUNDO
 
 package com.substanceofcode.testutil.presentation;
 
@@ -114,6 +114,41 @@ public class EncodingList extends List implements CommandListener {
 				System.getProperty("microedition.encoding"), null);
 		super.append("Get bytes encoding: " + bytesEnc, null);
 		super.append("String encoding: " + strEnc, null);
+		for (int ic = 0; ic < EncodingUtil.CONV_CHARS.length; ic++) {
+			String wconv = "";
+			try {
+				byte [] bval = EncodingUtil.WCONV_CHARS[ic].getBytes();
+				if (bytesEnc.length() != 0) {
+					bval = EncodingUtil.WCONV_CHARS[ic].getBytes(bytesEnc);
+				}
+				if (strEnc.length() != 0) {
+					wconv = new String(bval, strEnc);
+				} else {
+					wconv = new String(bval);
+				}
+			} catch(Exception e) {
+				System.err.println("Error testing conversion: " + e.toString());
+				super.append("ic=" + ic + "Error testing conversion: " + e.toString(), null);
+				e.printStackTrace();
+				continue;
+			} catch(Throwable e) {
+				System.err.println("Error testing conversion: " + e.toString());
+				super.append("ic=" + ic + "Error testing conversion: " + e.toString(), null);
+				e.printStackTrace();
+				continue;
+			}
+			super.append("ic=" + ic, null);
+			for (int jc = 0; jc < wconv.length(); jc++) {
+				final char uchar = EncodingUtil.CONV_CHARS[ic].charAt(jc);
+				final char uwchar = wconv.charAt(jc);
+				final char wchar = EncodingUtil.WCONV_CHARS[ic].charAt(jc);
+				super.append("wc=" + jc + "," + uchar + "," + uwchar + "," + wchar, null);
+				super.append("wc=" + jc + "," + (int)uchar + "," + (int)uwchar + "," + (int)wchar, null);
+				if (uchar != uwchar) {
+					super.append("!= wc=" + jc + "," + uchar + "," + uwchar + "," + wchar, null);
+				}
+			}
+		}
 		super.setSelectedIndex(0, true);
 	}
 

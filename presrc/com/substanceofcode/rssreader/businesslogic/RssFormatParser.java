@@ -1,5 +1,6 @@
 /*
    TODO don't remove carriage return
+   TODO remove extra spaces between date elements: Thu, 19 Jul  2007 00:00:00 N
    TODO remove extra spaces between description item 7 of imbed
 
  * RssFormatParser.java
@@ -35,7 +36,6 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
-import com.substanceofcode.utils.CauseException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
@@ -72,7 +72,7 @@ public class RssFormatParser implements FeedFormatParser {
     
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
 			            int maxItemCount, boolean getTitleOnly)
-	throws IOException, CauseException {
+	throws IOException {
         
         Vector items = new Vector();
 		m_extParser.parseNamespaces(parser);
@@ -163,8 +163,7 @@ public class RssFormatParser implements FeedFormatParser {
 							RssItunesItem item;
 							Date pubDate = null;
 							// Check date in case we cannot find it.
-							if ((m_date.length() == 0) &&
-									m_extParser.isHasExt()) {
+							if (m_date.equals("") && m_extParser.isHasExt()) {
 								m_date = m_extParser.getDate();
 							}
 							if (m_date.length() > 0) {
@@ -244,7 +243,7 @@ public class RssFormatParser implements FeedFormatParser {
 	/* Parse the fields common to feed and item. */
 	private boolean parseCommon(XmlParser parser, char elemChar,
 			String elementName)
-	throws IOException, CauseException {
+	throws IOException {
 		switch (elemChar) {
 			case 'p':
 				if( elementName.equals("pubDate")) {
@@ -291,7 +290,7 @@ public class RssFormatParser implements FeedFormatParser {
 
 	/* Parse the item to get it's fields */
 	void parseItem(XmlParser parser, char elemChar, String elementName)
-	throws IOException, CauseException {
+	throws IOException {
 		switch (elemChar) {
 			case 'a':
 				if( elementName.equals("author")) {
@@ -337,7 +336,6 @@ public class RssFormatParser implements FeedFormatParser {
 	/**  Parse the standard RSS date and Dublin Core (dc) date. */
 	static Date parseRssDate(String date) {
 		Date pubDate = null;
-		date = date.trim();
 		int dpos = date.indexOf('-', 2);
 		if ((dpos > 0) && (date.indexOf('-', dpos + 1) > 0)) {
 			pubDate = parseDcDate(date);
@@ -373,12 +371,7 @@ public class RssFormatParser implements FeedFormatParser {
             int timeIndex = 4;
             int gmtIndex = 5;
             
-			int kc = 0;
-            while ((dateString.indexOf("  ") >= 0) &&
-					(kc++ < dateString.length())) {
-				dateString = StringUtil.replace(dateString, "  ", " ");
-			}
-            String[] values = StringUtil.split(dateString, ' ');
+            String[] values = StringUtil.split(dateString, " ");
             int columnCount = values.length;
             if( columnCount==5 ) {
                 // Expected format:
@@ -427,13 +420,12 @@ public class RssFormatParser implements FeedFormatParser {
             }
             
             // Time
-            String[] timeValues = StringUtil.split(values[ timeIndex ],':');
+            String[] timeValues = StringUtil.split(values[ timeIndex ],":");
             int hours = Integer.parseInt( timeValues[0] );
             int minutes = Integer.parseInt( timeValues[1] );
             int seconds = Integer.parseInt( timeValues[2] );
             
-            pubDate = getCal(dayOfMonth, month, year, hours,
-					minutes, seconds);
+            pubDate = getCal(dayOfMonth, month, year, hours, minutes, seconds);
             
         } catch(Exception ex) {
             // TODO: Add exception handling code
@@ -480,7 +472,7 @@ public class RssFormatParser implements FeedFormatParser {
 				dateString = dateString.substring(1);
 			}
             
-            String[] values = StringUtil.split(dateString, '-');
+            String[] values = StringUtil.split(dateString, "-");
 
             if( values.length<3 ) {
                 throw new Exception("Invalid date format: " + dateString);
@@ -491,21 +483,23 @@ public class RssFormatParser implements FeedFormatParser {
             // Month
             int month = Integer.parseInt( values[ monthIndex ] );
             
+            int dayOfMonthIndex = 0;
+            // Time
+            String[] dayTimeValues = StringUtil.split(values[ dayOfMonthTimeIndex ],":");
             // Day of month
             String sdayOfMonth = values[ dayOfMonthTimeIndex ].substring(0, 2);
 
             int dayOfMonth = Integer.parseInt( sdayOfMonth );
             
             String time = values[ dayOfMonthTimeIndex ].substring(3);
-            String [] timeValues = StringUtil.split(time, ':');
+            String [] timeValues = StringUtil.split(time, ":");
 
             int hours = Integer.parseInt( timeValues[0] );
             int minutes = Integer.parseInt( timeValues[1] );
             timeValues[2] = timeValues[2].substring( 0, 2 );
             int seconds = Integer.parseInt( timeValues[2] );
             
-            pubDate = getCal(dayOfMonth, month - 1 + Calendar.JANUARY, year,
-					hours, minutes, seconds);
+            pubDate = getCal(dayOfMonth, month, year, hours, minutes, seconds);
             
         } catch(Exception ex) {
 			//#ifdef DLOGGING

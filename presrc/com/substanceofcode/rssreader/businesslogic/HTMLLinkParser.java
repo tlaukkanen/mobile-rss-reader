@@ -37,8 +37,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
@@ -56,8 +54,6 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class HTMLLinkParser extends FeedListParser {
     
-    protected boolean m_acceptErrors = true;  // Allow some errors 
-
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("HTMLLinkParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
@@ -70,18 +66,13 @@ public class HTMLLinkParser extends FeedListParser {
         super(url, username, password);
     }
 
-	/** Parse HTML hyper links '<a' and create feeds from them based on
-	   link name and url if specified.
-	  */
-    public RssItunesFeed[] parseFeeds(InputStream is)
-    throws IOException, CauseMemoryException, CauseException, Exception {
+    public RssItunesFeed[] parseFeeds(InputStream is) {
 		// Init in case we get a severe error.
 		try {
 			return HTMLLinkParser.parseFeeds(new EncodingUtil(is),
 											m_url,
 											m_feedNameFilter,
-											m_feedURLFilter,
-											m_acceptErrors
+											m_feedURLFilter
 											//#ifdef DLOGGING
 											,logger
 											,fineLoggable
@@ -89,35 +80,26 @@ public class HTMLLinkParser extends FeedListParser {
 											,finestLoggable
 											//#endif
 											);
-		} catch (CauseException e) {
-			throw e;
 		} catch (Throwable t) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML Link feed " + m_url, t);
 //#ifdef DLOGGING
-			logger.severe(cex.getMessage(), cex);
+			logger.severe("parseFeeds error.", t);
 //#endif
-			System.err.println(cex.getMessage() + " " + t + " " + t.getMessage());
-			throw cex;
+			System.out.println("parseFeeds error." + t + " " + t.getMessage());
+			return null;
 		}
 	}
         
-	/** Parse HTML hyper links '<a' and create feeds from them based on
-	   link name and url if specified.
-	  */
     static public RssItunesFeed[] parseFeeds(EncodingUtil encodingUtil,
 										String url,
 										String feedNameFilter,
-										String feedURLFilter,
-										boolean acceptErrors
+										String feedURLFilter
 										//#ifdef DLOGGING
 										,Logger logger,
 										 boolean fineLoggable,
 										 boolean finerLoggable,
 										 boolean finestLoggable
 										//#endif
-			                           )
-    throws IOException, CauseMemoryException, CauseException, Exception {
+			                           ) {
         /** Initialize item collection */
         Vector rssFeeds = new Vector();
         
@@ -240,29 +222,14 @@ public class HTMLLinkParser extends FeedListParser {
             }
             while( (elementType = parser.parse()) != XmlParser.END_DOCUMENT );
             
-        } catch (CauseMemoryException ex) {
-			CauseMemoryException cex = new CauseMemoryException(
-					"Out of memory error while parsing HTML Link feed " + url,
-					ex);
-			throw cex;
         } catch (Exception ex) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML Link feed " + url, ex);
-            System.err.println(cex.getMessage() + " " + ex + " " + ex.toString());
+            System.err.println("HTMLLinkParser.parseFeeds(): Exception " + ex.toString());
 			ex.printStackTrace();
-//#ifdef DLOGGING
-			logger.severe(cex.getMessage(), cex);
-//#endif
-			throw cex;
+            return null;
         } catch (Throwable t) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML Link feed " + url, t);
-            System.err.println(cex.getMessage() + " " + t + " " + t.toString());
+            System.err.println("HTMLLinkParser.parseFeeds(): Exception " + t.toString());
 			t.printStackTrace();
-//#ifdef DLOGGING
-			logger.severe(cex.getMessage(), cex);
-//#endif
-			throw cex;
+            return null;
         }
         
         /** Create array */

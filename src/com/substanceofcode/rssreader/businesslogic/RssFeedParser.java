@@ -34,8 +34,6 @@ import java.util.*;
 import java.io.*;
 
 import com.substanceofcode.utils.EncodingUtil;
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
@@ -78,7 +76,7 @@ public class RssFeedParser extends URLHandler {
      *
      */
     public void parseRssFeed(boolean updFeed, int maxItemCount)
-	throws IOException, CauseException, Exception {
+    throws IOException, Exception {
 		// Set this here as the instance of this class is reused
 		// for update of the current feed.
 		m_redirect = false;
@@ -94,7 +92,7 @@ public class RssFeedParser extends URLHandler {
      *
      */
     public void parseRssFeedUrl(String url, boolean updFeed, int maxItemCount)
-	throws IOException, CauseException, Exception {
+    throws IOException, Exception {
         
 		try {
 			super.handleOpen(url, m_rssFeed.getUsername(),
@@ -126,21 +124,6 @@ public class RssFeedParser extends URLHandler {
 				parseRssFeedXml( m_inputStream, maxItemCount);
 				m_rssFeed.setUpddate(new Date(m_lastMod));
 			}
-		} catch (CauseMemoryException e) {
-			if (m_rssFeed != null) {
-				m_rssFeed.setItems(null);
-				m_rssFeed.setItems(new Vector());
-			}
-            CauseMemoryException ce =
-					new CauseMemoryException("Out of memory error while " +
-					"parsing RSS data: " + e.toString(), e);
-			//#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), e);
-			//#endif
-			if ((url != null) && url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-            throw ce;
         } catch(Exception e) {
 			//#ifdef DLOGGING
 //@			logger.severe("parseRssFeedUrl error with " + url, e);
@@ -148,23 +131,8 @@ public class RssFeedParser extends URLHandler {
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Error while parsing RSS data: " 
-                    + e.toString(), e);
-		} catch (OutOfMemoryError e) {
-			if (m_rssFeed != null) {
-				m_rssFeed.setItems(null);
-				m_rssFeed.setItems(new Vector());
-			}
-            CauseMemoryException ce =
-					new CauseMemoryException("Out of memory error while " +
-					"parsing RSS data: " + e.toString(), e);
-			//#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), e);
-			//#endif
-			if ((url != null) && url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-            throw ce;
+            throw new Exception("Error while parsing RSS data: " 
+                    + e.toString());
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("parseRssFeedUrl error with " + url, t);
@@ -172,8 +140,8 @@ public class RssFeedParser extends URLHandler {
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Error while parsing RSS data: " 
-								+ t.toString(), t);
+            throw new Exception("Error while parsing RSS data: " 
+								+ t.toString());
         } finally {
 			super.handleClose();
 		}
@@ -182,7 +150,7 @@ public class RssFeedParser extends URLHandler {
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private void parseHeaderRedirect(boolean updFeed, String url,
 								     int maxItemCount)
-	throws IOException, CauseException, Exception {
+    throws IOException, Exception {
 		if (m_redirect) {
 			//#ifdef DLOGGING
 //@			logger.severe("Error 2nd redirect url:  " + url);
@@ -201,7 +169,7 @@ public class RssFeedParser extends URLHandler {
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private void parseHTMLRedirect(boolean updFeed, String url,
 								   InputStream is, int maxItemCount)
-	throws IOException, CauseException, Exception {
+    throws IOException, Exception {
 		String newUrl = super.parseHTMLRedirect(url, is);
 		RssItunesFeed svFeed = new RssItunesFeed(m_rssFeed);
 		parseRssFeedUrl(newUrl, updFeed, maxItemCount);
@@ -212,7 +180,7 @@ public class RssFeedParser extends URLHandler {
      * Seems to work with all RSS 0.91, 0.92 and 2.0.
      */
     public void parseRssFeedXml(InputStream is, int maxItemCount)
-	throws IOException, CauseException {
+    throws IOException {
         /** Initialize item collection */
         m_rssFeed.getItems().removeAllElements();
         

@@ -52,6 +52,8 @@ public class RssItunesItem extends RssItem {
 	// Number of Itunes info
     final private static int NBR_ITUNES_INFO = 6;
     final protected static byte BNO_EXPLICIT = (byte)-1;
+    final private static byte[] BANO_EXPLICIT = {BNO_EXPLICIT};
+    final private static String NO_EXPLICIT = new String(BANO_EXPLICIT);
     final public static String UNSPECIFIED = "unspecified";
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
@@ -64,13 +66,14 @@ public class RssItunesItem extends RssItem {
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
-    protected boolean m_itunes = false;
-    protected String m_author = "";   // The RSS item author
-    protected String m_subtitle = "";   // The RSS item subtitle
-    protected String m_summary = "";   // The RSS item summary
-	//TODO Max summary of 4K
-    protected byte m_explicit = BNO_EXPLICIT;   // The RSS item explicit
-    protected String m_duration  = "";   // The RSS item duration
+    private boolean m_itunes = false;
+    private String m_author = "";   // The RSS item description
+    private String m_subtitle = "";   // The RSS item description
+    private String m_summary = "";   // The RSS item description
+	//TODO 4 values for m_explicit.  Fix duration descriptions above.
+	//TODO duration use 60 radius.  Max summary of 4K
+    private byte m_explicit = BNO_EXPLICIT;   // The RSS item explicit
+    private String m_duration  = "";   // The RSS item duration
 
     /** Creates a new instance of RssItunesItem.  Used by this class.  */
     public RssItunesItem() {
@@ -164,7 +167,7 @@ public class RssItunesItem extends RssItem {
 			
 		try {
 			boolean hasPipe = (data.indexOf((char)1) >= 0);
-			String[] nodes = StringUtil.split( data, '|');
+			String[] nodes = StringUtil.split( data, "|");
 			RssItunesItem item = new RssItunesItem();
 			item.init(hasPipe, nodes);
 			return item;

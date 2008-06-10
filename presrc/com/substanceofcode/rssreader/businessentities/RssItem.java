@@ -235,7 +235,7 @@ public class RssItem {
 		RssItem item = new RssItem();
 		try {
 			boolean hasPipe = (data.indexOf('\n') >= 0);
-			String[] nodes = StringUtil.split( data, '|');
+			String[] nodes = StringUtil.split( data, "|");
 			item.init(0, false, hasPipe, nodes);
 			return item;
 			

@@ -37,8 +37,6 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -79,7 +77,7 @@ public class AtomFormatParser implements FeedFormatParser {
     /** Parse Atom feed */
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
 			            int maxItemCount, boolean getTitleOnly)
-	throws IOException, CauseMemoryException, CauseException {
+	throws IOException {
         
         Vector items = new Vector();
 		m_extParser.parseNamespaces(parser);
@@ -257,7 +255,7 @@ public class AtomFormatParser implements FeedFormatParser {
 	/* Parse the fields common to feed and item. */
 	private boolean parseCommon(XmlParser parser, char elemChar,
 			String elementName)
-	throws IOException, CauseMemoryException, CauseException {
+	throws IOException {
 		switch (elemChar) {
 			case 't':
 				if( elementName.equals("title") ) {
@@ -324,7 +322,7 @@ public class AtomFormatParser implements FeedFormatParser {
 
 	/* Parse the item to get it's fields */
 	void parseItem(XmlParser parser, char elemChar, String elementName)
-	throws IOException, CauseMemoryException, CauseException {
+	throws IOException {
 		switch (elemChar) {
 			case 'a':
 				if( m_hasExt && elementName.equals("author") ) {

@@ -22,8 +22,6 @@
 
 // Expand to define logging define
 //#define DNOLOGGING
-// Expand to define test define
-//#define DNOTEST
 package com.substanceofcode.utils;
 
 import java.io.ByteArrayInputStream;
@@ -36,10 +34,6 @@ import java.util.*;
 import javax.microedition.lcdui.*;
 import javax.microedition.midlet.*;
 import javax.microedition.rms.*;
-
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseRecStoreException;
-import com.substanceofcode.utils.CauseMemoryException;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -68,17 +62,12 @@ public class Settings {
 	// "" by default
     public static final String FIRST_SETTINGS_VERS = "";
     public static final String ITUNES_CAPABLE_VERS = "3";
-    public static final String LATEST_VERS = "4";
-    public static final String ITEMS_ENCODED = "items-encoded";
 	//#ifdef DCOMPATIBILITY2
 //@    public static final String SETTINGS_VERS = "2";
-	//#elifdef DCOMPATIBILITY3
-//@    public static final String SETTINGS_VERS = ITUNES_CAPABLE_VERS;
 	//#else
-    public static final String SETTINGS_VERS = LATEST_VERS;
+    public static final String SETTINGS_VERS = ITUNES_CAPABLE_VERS;
 	//#endif
     private static Settings m_store;
-    final private static String RECORD_STORE_NAME = "Store";
     private MIDlet          m_midlet;
     private boolean         m_valuesChanged = false;
     private boolean         m_initialized = true;
@@ -95,7 +84,7 @@ public class Settings {
      * only one instance of record store
      */
     public static synchronized Settings getInstance( MIDlet midlet )
-    throws IOException, CauseRecStoreException, CauseException {
+    throws IOException, RecordStoreException {
         if( m_store == null ) {
             m_store = new Settings( midlet );
         }
@@ -104,7 +93,7 @@ public class Settings {
 
     /** Constructor */
     private Settings( MIDlet midlet )
-    throws IOException, CauseRecStoreException, CauseException {
+    throws IOException, RecordStoreException {
         m_midlet = midlet;
         load(0);
     }
@@ -149,58 +138,22 @@ public class Settings {
     
     /** Get string property */
     public String getStringProperty(int region, String name,
-			                        String defaultValue )
-	throws CauseRecStoreException, CauseException {
+			                        String defaultValue ) {
 		if (region != m_region) {
 			try {
 				load(region);
-			} catch (IOException e) {
-				CauseException ce = new CauseException(
-						"IOException while loading name,region=" +
-						name + "," + region);
-				//#ifdef DLOGGING
-//@				logger.severe(ce.getMessage(), e);
-				//#endif
-				/** Error while executing constructor */
-				System.out.println(ce.getMessage() + e.getMessage());
-				e.printStackTrace();
-				throw ce;
-			} catch (CauseRecStoreException e) {
-				throw e;
-			} catch (CauseException e) {
-				throw e;
 			} catch (Exception e) {
-				CauseException ce = new CauseException(
-						"Internal error during load name,region=" +
-						name + "," + region);
-				//#ifdef DLOGGING
-//@				logger.severe(ce.getMessage(), e);
-				//#endif
-				System.out.println(ce.getMessage() + e.getMessage());
-				e.printStackTrace();
-				throw ce;
+				System.out.println("load error");
+				return defaultValue;
 			}
 		}
         Object value = getProperty( name );
         return ( value != null ) ? value.toString() : defaultValue;
     }
     
-    /** Get string property */
-    public String getStringProperty(String name, String defaultValue ) {
-		try {
-			return getStringProperty(0, name, defaultValue );
-		} catch (Exception e) {
-			System.out.println("load error");
-			//#ifdef DLOGGING
-//@			logger.severe("getStringProperty error =" + name, e);
-			//#endif
-			return defaultValue;
-		}
-    }
-    
     /** Load properties from record store */
     private synchronized void load(int region)
-    throws IOException, CauseRecStoreException, CauseException {
+    throws IOException, RecordStoreException {
         RecordStore rs = null;
         ByteArrayInputStream bin = null;
         DataInputStream din = null;
@@ -210,9 +163,8 @@ public class Settings {
 		boolean currentSettings = true;
         
         try {
-            rs = RecordStore.openRecordStore(RECORD_STORE_NAME, true );
+            rs = RecordStore.openRecordStore("Store", true );
 			int numRecs = rs.getNumRecords();
-			boolean hasRec = false;
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("region=" + region);}
 //@			if (finestLoggable) {logger.finest("numRecs=" + numRecs);}
@@ -232,13 +184,10 @@ public class Settings {
 				if ( numRecs == OLD_MAX_REGIONS ) {
 					currentSettings = false;
 				}
-                byte[] data = rs.getRecord( region + 1 );
 				//#ifdef DLOGGING
-//@				if (fineLoggable) {logger.fine("currentSettings,data.length=" + currentSettings + "," + ((data == null) ? "null" : Integer.toString(data.length)));}
+//@				if (fineLoggable) {logger.fine("currentSettings=" + currentSettings);}
 				//#endif
-				//#ifdef DTEST
-//@				System.out.println("currentSettings,data.length=" + currentSettings + "," + ((data == null) ? "null" : Integer.toString(data.length)));
-				//#endif
+                byte[] data = rs.getRecord( region + 1 );
                 if( data != null ) {
                     bin = new ByteArrayInputStream( data );
                     din = new DataInputStream( bin );
@@ -298,16 +247,6 @@ public class Settings {
 				save(1, true);
 			}
 			m_region = region;
-		} catch (RecordStoreException e) {
-			//#ifdef DLOGGING
-//@			logger.severe("load ", e);
-			//#endif
-			/** Error while executing constructor */
-			System.out.println("load " + e.getMessage());
-			e.printStackTrace();
-			throw new CauseRecStoreException(
-					"RecordStoreException while loading region=" +
-					region, e);
 		} catch (Exception e) {
 			//#ifdef DLOGGING
 //@			logger.severe("load ", e);
@@ -315,19 +254,6 @@ public class Settings {
 			/** Error while executing constructor */
 			System.out.println("load " + e.getMessage());
 			e.printStackTrace();
-			throw new CauseException("Internal error while loading region=" +
-					region, e);
-		} catch (OutOfMemoryError e) {
-			m_properties.clear();
-			System.gc();
-			//#ifdef DLOGGING
-//@			logger.severe("load OutOfMemoryError ", e);
-			//#endif
-			/** Error while executing constructor */
-			System.out.println("load OutOfMemoryError " + e.getMessage());
-			e.printStackTrace();
-			throw new CauseMemoryException("Out of memory while loading " +
-					"region=" + region, e);
 		} catch (Throwable e) {
 			//#ifdef DLOGGING
 //@			logger.severe("load throwable ", e);
@@ -335,8 +261,6 @@ public class Settings {
 			/** Error while executing constructor */
 			System.out.println("load throwable " + e.getMessage());
 			e.printStackTrace();
-			throw new CauseException("Internal error while loading " +
-					"region=" + region, e);
         } finally {
             if( din != null ) {
                 try { din.close(); } catch( Exception e ){}
@@ -351,47 +275,35 @@ public class Settings {
     /** Save property Hashtable to record store.
         Use MAX_REGIONS records in store to help with running out of memory.  */
     public synchronized void save( int region, boolean force )
-	throws IOException, CauseMemoryException,
-		   CauseRecStoreException, CauseException {
+            throws IOException, RecordStoreException {
         if( !m_valuesChanged && !force ) return;
         
         RecordStore rs = null;
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        DataOutputStream dout = new DataOutputStream( bout );
+        ByteArrayOutputStream bout = new
+                ByteArrayOutputStream();
+        DataOutputStream dout = new
+                DataOutputStream( bout );
         
         try {
 			String vers = null;
             if ( m_properties.containsKey(SETTINGS_NAME) ) {
 				vers = (String)m_properties.get(SETTINGS_NAME);
 			}
-			//#ifndef DCOMPATIBILITY1
-			//#ifndef DCOMPATIBILITY2
-			//#ifndef DCOMPATIBILITY3
-			Hashtable cproperties = m_properties;
-			if (region > 0) {
-				cproperties = new Hashtable();
-				cproperties.put("bookmarks", m_properties.get("bookmarks"));
-				cproperties.put(ITEMS_ENCODED, m_properties.get(ITEMS_ENCODED));
-			}
-			//#endif
-			//#endif
-			//#endif
-
 			// Put version only if it is not DCOMPATIBILITY1 which is
 			// the settings based on the first few versions before
 			// the setting store was changed as the first few
 			// versions did not have settings version in properties.
 			//#ifndef DCOMPATIBILITY1
-			cproperties.put(SETTINGS_NAME, SETTINGS_VERS);
+			m_properties.put(SETTINGS_NAME, SETTINGS_VERS);
 			//#endif
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("save region=" + region);}
 			//#endif
-            dout.writeInt( cproperties.size() );
-            Enumeration e = cproperties.keys();
+            dout.writeInt( m_properties.size() );
+            Enumeration e = m_properties.keys();
             while( e.hasMoreElements() ) {
                 String name = (String) e.nextElement();
-                String value = cproperties.get( name ).toString();
+                String value = m_properties.get( name ).toString();
 				//#ifdef DLOGGING
 //@				if (finestLoggable) {logger.finest("name=" + name);}
 				//#endif
@@ -427,43 +339,17 @@ public class Settings {
             }
             
             byte[] data = bout.toByteArray();
-			//#ifdef DLOGGING
-//@			if (fineLoggable) {logger.fine("save data.length=" + data.length);}
-			//#endif
-			//#ifdef DTEST
-//@			System.out.println("save region,data.length=" + region + "," + data.length);
-			//#endif
             
-            rs = RecordStore.openRecordStore( RECORD_STORE_NAME, false );
+            rs = RecordStore.openRecordStore( "Store", false );
             rs.setRecord( (region + 1), data, 0, data.length );
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("stored region=" + region);}
 			//#endif
 			//#ifndef DCOMPATIBILITY1
 			if ( vers != null) {
-				cproperties.put(SETTINGS_NAME, vers);
+				m_properties.put(SETTINGS_NAME, vers);
 			}
 			//#endif
-		} catch (RecordStoreFullException e) {
-			//#ifdef DLOGGING
-//@			logger.severe("catch RecordStoreFullException ", e);
-			//#endif
-			/** Error while executing constructor */
-			System.out.println("catch RecordStoreFullException " +
-							   e.getMessage());
-			e.printStackTrace();
-			throw new CauseRecStoreException(
-					"RecordStoreFullException while saving.", e);
-		} catch (RecordStoreException e) {
-			//#ifdef DLOGGING
-//@			logger.severe("catch RecordStoreException ", e);
-			//#endif
-			/** Error while executing constructor */
-			System.out.println("catch RecordStoreException " +
-							   e.getMessage());
-			e.printStackTrace();
-			throw new CauseRecStoreException(
-					"RecordStoreException while saving.", e);
 		} catch (Exception e) {
 			//#ifdef DLOGGING
 //@			logger.severe("catch ", e);
@@ -471,27 +357,13 @@ public class Settings {
 			/** Error while executing constructor */
 			System.out.println("catch " + e.getMessage());
 			e.printStackTrace();
-			throw new CauseException("Internal error during save.", e);
-		} catch (OutOfMemoryError e) {
-			m_properties.clear();
-			System.gc();
-			//#ifdef DLOGGING
-//@			logger.severe("catch OutOfMemoryError ", e);
-			//#endif
-			/** Error while executing constructor */
-			System.out.println("catch OutOfMemoryError " + e.getMessage());
-			e.printStackTrace();
-			throw new CauseMemoryException("Out of memory while save.", e);
 		} catch (Throwable e) {
-			CauseException ce = new CauseException("Internal error while " +
-					"processing save.", e);
 			//#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), ce);
+//@			logger.severe("catch throwable ", e);
 			//#endif
 			/** Error while executing constructor */
-			System.out.println(ce.getMessage() + e.getMessage());
+			System.out.println("catch throwable " + e.getMessage());
 			e.printStackTrace();
-			throw ce;
         } finally {
             try { dout.close(); } catch( Exception e ){}
             
@@ -511,7 +383,7 @@ public class Settings {
 			
 			try {
 				
-				rs = RecordStore.openRecordStore( RECORD_STORE_NAME, false );
+				rs = RecordStore.openRecordStore( "Store", false );
 				memInfo = new Hashtable(2);
 				memInfo.put("used", Integer.toString(rs.getSize()));
 				memInfo.put("available", Integer.toString(
@@ -536,26 +408,6 @@ public class Settings {
     public void setBooleanProperty( String name, boolean value ) {
         setStringProperty( name, value ? "true" : "false" );
     }
-
-	//#ifdef DTEST
-//@	final static public void deleteStore() {
-//@		try {
-//@			RecordStore.deleteRecordStore( RECORD_STORE_NAME );
-//@		} catch (RecordStoreNotFoundException e) {
-			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("Settings");
-//@			logger.severe("Cannot deleteRecordStore " +
-//@					"RecordStoreNotFoundException " + RECORD_STORE_NAME, e);
-			//#endif
-//@		} catch (RecordStoreException e) {
-			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("Settings");
-//@			logger.severe("Cannot deleteRecordStore RecordStoreException " +
-//@					RECORD_STORE_NAME, e);
-			//#endif
-//@		}
-//@	}
-	//#endif
     
     /** Set an integer property */
     public void setIntProperty( String name, int value ) {

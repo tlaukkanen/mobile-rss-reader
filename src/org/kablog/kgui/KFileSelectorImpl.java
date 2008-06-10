@@ -44,8 +44,6 @@
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 //@
-//@import com.substanceofcode.rssreader.presentation.UiUtil;
-//@
 //@public class KFileSelectorImpl 
 //@ extends List
 //@  implements KFileSelector, CommandListener
@@ -62,10 +60,10 @@
 //@	private final static String UP_DIR = "..";
 //@
 //@	private final Command openCommand =
-//@		UiUtil.getCmdRsc("cmd.open", Command.ITEM, 1);    
+//@		new Command("Open", Command.ITEM, 1);    
 //@
 //@	private final Command cancelCommand =
-//@		UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 2);    
+//@		new Command("Cancel", Command.CANCEL, 2);    
 //@
 //@	private Vector rootsList = new Vector();
 //@

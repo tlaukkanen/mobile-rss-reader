@@ -54,7 +54,6 @@ import net.sf.jlogmicro.util.logging.Level;
 import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.CauseException;
-import cz.cacek.ebook.util.ResourceProviderME;
 
 /**
  * Base class for HTML Handlers.
@@ -244,14 +243,14 @@ public abstract class URLHandler {
 				System.err.println("Cannot process file.");
 			}
             throw new CauseException("Internal error while parsing " +
-									 ": " + url, e);
+									 ": ", e);
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 			logger.severe("handleOpen internal error with " + url, t);
 			//#endif
 			t.printStackTrace();
             throw new CauseException("Internal error while parsing RSS data " +
-								":l" + url, t);
+								"contact support: ", t);
         }
     }
     
@@ -270,7 +269,9 @@ public abstract class URLHandler {
 		m_redirectUrl = url;
 		com.substanceofcode.rssreader.businessentities.RssItunesFeed[] feeds =
 				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
-									url, null, null, true
+									url,
+									null,
+									null
 									//#ifdef DLOGGING
 									,logger,
 									fineLoggable,
@@ -279,13 +280,15 @@ public abstract class URLHandler {
 									//#endif
 									);
 		if ((feeds == null) || (feeds.length == 0)) {
-			/* Parsing HTML redirect cannot be processed. */
-			IOException ie = new IOException(ResourceProviderME.get("exc.ul.rdr"));
 			//#ifdef DLOGGING
-			logger.severe(ie.getMessage(), ie);
+			logger.severe("Parsing HTML redirect cannot be " +
+						  "processed.");
 			//#endif
-			System.out.println(ie.getMessage());
-			throw ie;
+			System.out.println(
+					"Parsing HTML redirect cannot be " +
+					"processed.");
+			throw new IOException("Parsing HTML redirect cannot be " +
+								  "processed.");
 		}
 		// Use last link as the site may have adds in the beginning.
 		return feeds[feeds.length - 1].getUrl();

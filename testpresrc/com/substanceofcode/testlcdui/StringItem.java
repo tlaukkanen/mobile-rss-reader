@@ -35,6 +35,8 @@ import javax.microedition.lcdui.Item;
 //#ifdef DMIDP20
 import javax.microedition.lcdui.ItemCommandListener;
 //#endif
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Image;
 
 import com.substanceofcode.testutil.TestOutput;
 

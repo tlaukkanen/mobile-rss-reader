@@ -37,8 +37,6 @@ import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.StringUtil;
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
@@ -68,8 +66,7 @@ public class HTMLAutoLinkParser extends FeedListParser {
         super(url, username, password);
     }
 
-    public RssItunesFeed[] parseFeeds(InputStream is)
-    throws IOException, CauseMemoryException, CauseException, Exception {
+    public RssItunesFeed[] parseFeeds(InputStream is) {
 		// Init in case we get a severe error.
 		try {
 			return HTMLAutoLinkParser.parseFeeds(new EncodingUtil(is),
@@ -85,16 +82,12 @@ public class HTMLAutoLinkParser extends FeedListParser {
 //@											,finestLoggable
 											//#endif
 											);
-        } catch (CauseException ex) {
-			throw ex;
 		} catch (Throwable t) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML auto link feed " + m_url, t);
 //#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
+//@			logger.severe("parseFeeds error.", t);
 //#endif
-			System.out.println(cex.getMessage() + " " + t + " " + t.getMessage());
-			throw cex;
+			System.out.println("parseFeeds error." + t + " " + t.getMessage());
+			return null;
 		}
 	}
         
@@ -111,8 +104,7 @@ public class HTMLAutoLinkParser extends FeedListParser {
 //@										 boolean finerLoggable,
 //@										 boolean finestLoggable
 										//#endif
-			                           )
-    throws IOException, CauseMemoryException, CauseException, Exception {
+			                           ) {
         /** Initialize item collection */
         Vector rssFeeds = new Vector();
         
@@ -236,29 +228,14 @@ public class HTMLAutoLinkParser extends FeedListParser {
 			}
             while( process && (parser.parse() != XmlParser.END_DOCUMENT) );
             
-        } catch (CauseMemoryException ex) {
-			CauseMemoryException cex = new CauseMemoryException(
-					"Out of memory error while parsing HTML auto link feed " +
-					url, ex);
-			throw cex;
         } catch (Exception ex) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML auto link feed " + url, ex);
-//#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
-//#endif
-			System.err.println(cex.getMessage() + " " + ex + " " + ex.getMessage());
+            System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
 			ex.printStackTrace();
-			throw cex;
+            return null;
         } catch (Throwable t) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML auto link feed " + url, t);
-//#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
-//#endif
-			System.err.println(cex.getMessage() + " " + t + " " + t.getMessage());
+            System.err.println("OpmlParser.parseFeeds(): Exception " + t.toString());
 			t.printStackTrace();
-			throw cex;
+            return null;
         }
         
         /** Create array */

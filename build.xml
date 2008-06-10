@@ -137,11 +137,4 @@
         </delete>
     </target>
    -->
-    <target name="pre-jar">
-		<echo message="Executing pre-jar" />
-		<mkdir dir="${buildsystem.baton}/data" />
-		<!-- This should be overrided by user's build.properties. -->
-		<property name="lang.file" value="messages_en_US.xml" />
-		<copy tofile="${buildsystem.baton}/data/lang.xml" file="translations/${language.file}" />
-    </target>
 </project>

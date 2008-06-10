@@ -47,23 +47,22 @@ import com.substanceofcode.testutil.TestOutput;
  * @author  Irving Bunton
  * @version 1.0
  */
-public class Form extends javax.microedition.lcdui.Form {
+public class Form extends javax.microedition.lcdui.Form
+implements CommandListener {
 
-	private Form cform;
 	//#ifdef DMIDP10
 	private String m_title;
 	//#endif
+	private CommandListener m_cmdListener;
 
 	public Form(String title) {
 		super(title);
-		cform = this;
 		TestOutput.println("Test UI Form Title: " + title);
 	}
 
 	// TODO log items
 	public Form(String title, Item[] items) {
 		super(title, items);
-		cform = this;
 		//#ifdef DMIDP10
 		this.m_title = title;
 		//#endif
@@ -167,25 +166,15 @@ public class Form extends javax.microedition.lcdui.Form {
 	}
 	//#endif
 
-    public void setCommandListener(CommandListener cmdListener) {
-		super.setCommandListener(new CmdHandler(cmdListener));
-    }
-
-	private class CmdHandler implements CommandListener {
-		private CommandListener m_cmdListener;
-
-		private CmdHandler (CommandListener cmdListener) {
-			m_cmdListener = cmdListener;
-		}
-
-		/* Prompt if command is in prompt camands.  */
-		public void commandAction(Command cmd, Displayable disp) {
-			//#ifdef DTESTUI
-			cform.outputCmdAct(cmd, disp);
-			//#endif
-			m_cmdListener.commandAction(cmd, disp);
-		}
+	public void commandAction(Command cmd, Displayable disp) {
+		outputCmdAct(cmd, disp);
+		m_cmdListener.commandAction(cmd, disp);
 	}
+
+    public void setCommandListener(CommandListener cmdListener) {
+		super.setCommandListener(this);
+        this.m_cmdListener = cmdListener;
+    }
 
 }
 

@@ -77,34 +77,6 @@ public class StringUtil {
     }
     
     /**
-     * Split string into multiple strings
-     * @param original      Original string
-     * @param separator     Separator character in original string
-     * @return              Splitted string array
-     */
-    public static String[] split(String original, char separator) {
-        Vector nodes = new Vector();
-        
-        // Parse nodes into vector
-        int index = original.indexOf(separator);
-        while(index>=0) {
-            nodes.addElement( original.substring(0, index) );
-            original = original.substring(index+1);
-            index = original.indexOf(separator);
-        }
-        // Get the last node
-        nodes.addElement( original );
-        
-        // Create splitted string array
-		int nsize = nodes.size();
-        String[] result = new String[ nsize ];
-        if( nsize >0 ) {
-			nodes.copyInto(result);
-        }
-        return result;
-    }
-    
-    /**
      * Join strings into one string
      * @param originals      Original strings
      * @param joinStr        Join string

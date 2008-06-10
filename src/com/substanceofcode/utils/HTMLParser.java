@@ -31,9 +31,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
-
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.Level;
@@ -45,6 +42,7 @@ import com.substanceofcode.utils.CauseMemoryException;
  */
 public class HTMLParser extends XmlParser {
     
+	private boolean m_encoding_set = false;
 	private boolean m_headerFound = false;
 	private boolean m_metaFound = false;
 	private boolean m_bodyFound = false;
@@ -72,8 +70,7 @@ public class HTMLParser extends XmlParser {
     }
 
     /** Parse next element */
-    protected int parseStream(InputStreamReader is)
-	throws IOException, CauseException {
+    protected int parseStream(InputStreamReader is) throws IOException {
 		int elementType = super.parseStream(is);
 		if (elementType != XmlParser.ELEMENT) {
 			return elementType;
@@ -93,7 +90,7 @@ public class HTMLParser extends XmlParser {
 //@							if (finerLoggable) {logger.finer("Body found without encoding set.");}
 							//#endif
 							m_encodingUtil.getEncoding(m_fileEncoding,
-									EncodingUtil.getIsoEncoding());
+									"ISO-8859-1");
 							m_docEncoding = m_encodingUtil.getDocEncoding();
 							m_encoding_set = true;
 						}
@@ -166,8 +163,7 @@ public class HTMLParser extends XmlParser {
     }
     
     /** Parse next element */
-    public int parse()
-	throws IOException, CauseException {
+    public int parse() throws IOException {
 		if (m_encodingStreamReader.isModEncoding()) {
 			return parseStream(m_encodingStreamReader);
 		} else {
@@ -176,8 +172,7 @@ public class HTMLParser extends XmlParser {
 	}
 		
     /** Get element text including inner xml */
-    private String getTextStream(InputStreamReader is)
-	throws IOException, CauseMemoryException, CauseException {
+    private String getTextStream(InputStreamReader is) throws IOException {
         
 		if(!m_currentElementContainsText) {
 			return "";
@@ -282,30 +277,13 @@ public class HTMLParser extends XmlParser {
 			// Replace special chars like left quote, etc.
 			text = m_encodingUtil.replaceSpChars(text);
 			
-		} catch (OutOfMemoryError t) {
-			CauseMemoryException ce = new CauseMemoryException(
-					"Unable to read text. Out of memory.", t);
+		} catch (Throwable t) {
 //#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), ce);
+//@			logger.severe("getTextStream Could not read a char run time.", t);
 //#endif
 			System.out.println("getTextStream Could not read a char run time." + t +
 					           " " + t.getMessage());
 			t.printStackTrace();
-			throw ce;
-		} catch (Throwable t) {
-			CauseException ce = new CauseException("Unable to read text. " +
-					"Internal error.", t);
-//#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), t);
-//#endif
-			System.out.println(ce.getMessage() + " " + t +
-					           " " + t.getMessage());
-			t.printStackTrace();
-			if (m_acceptErrors) {
-				return null;
-			} else {
-				throw ce;
-			}
 		}
 		//#ifdef DLOGGING
 //@		if (finerLoggable) {logger.finer("text=" + text);}
@@ -314,8 +292,7 @@ public class HTMLParser extends XmlParser {
     }
 
     /** Get element text including inner xml */
-    public String getText()
-	throws IOException, CauseException {
+    public String getText() throws IOException {
 		if (m_encodingStreamReader.isModEncoding()) {
 			return getTextStream(m_encodingStreamReader);
 		} else {
@@ -326,9 +303,7 @@ public class HTMLParser extends XmlParser {
     /** 
      * Get attribute value from current element 
      */
-    public String getAttributeValue(String attributeName)
-	throws IOException, CauseMemoryException, CauseException {
-        
+    public String getAttributeValue(String attributeName) {
         
 		try {
 			/** Check whatever the element contains given attribute */
@@ -389,15 +364,6 @@ public class HTMLParser extends XmlParser {
 			} else {
 				attribData = attribData.trim();
 				valueEndIndex = attribData.indexOf(' ');
-				int lpos = attribData.indexOf('>');
-				if (lpos > 0) {
-					if (valueEndIndex > 0) {
-						valueEndIndex = Math.min(lpos, valueEndIndex);
-					} else {
-						valueEndIndex = lpos;
-					}
-				}
-
 				if( valueEndIndex<0 ) {
 					valueEndIndex = attribData.length();
 				}
@@ -423,17 +389,12 @@ public class HTMLParser extends XmlParser {
 					
 			return value;
 		} catch (Throwable t) {
-			CauseException ce = new CauseException(
-					"Parse attribute read error. Internal error.", t);
 //#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), ce);
+//@			logger.severe("getAttributeValue error.", t);
 //#endif
-			System.out.println(ce.getMessage() + " " + t + " " + t.getMessage());
-			if (m_acceptErrors) {
-				return null;
-			} else {
-				throw ce;
-			}
+			System.out.println("getAttributeValue error." + t + " " +
+					           t.getMessage());
+			return null;
 		}
     }
 
