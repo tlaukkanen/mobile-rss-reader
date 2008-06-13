@@ -24,8 +24,11 @@
 	<property name="dist" value="${target}/dist" />
 	<property name="dist.midp10" value="${target}/dist/midp10" />
 	<property name="dist.midp20" value="${target}/dist/midp20" />
+	<property name="dist.midp20.cldc1.1" value="${target}/dist/midp20_cldc11" />
 	<property name="dist.midp20.jsr75" value="${target}/dist/midp20_jsr75" />
+	<property name="dist.midp20.cldc1.1.jsr75" value="${target}/dist/midp20_cldc11_jsr75" />
 	<property name="dist.midp20.itunes.jsr75" value="${target}/dist/midp20_itunes_jsr75" />
+	<property name="dist.midp20.cldc1.1.itunes.jsr75" value="${target}/dist/midp20_cldc11_itunes_jsr75" />
 	<property name="dist.midp20.jsr75_jsr238" value="${target}/dist/midp20_jsr75_jsr238" />
 	<property name="build" value="${target}/build" />
 	<property name="build.midp10" value="${target}/build/midp10" />
@@ -33,6 +36,7 @@
 	<property name="build.midp20.itunes.jsr75" value="${target}/build/midp20_itunes_jsr75" />
 	<property name="build.midp20.jsr75" value="${target}/build/midp20_jsr75" />
 	<property name="build.midp20.itunes.jsr75" value="${target}/build/midp20_itunes_jsr75" />
+	<property name="build.midp20.cldc1.1.itunes.jsr75" value="${target}/build/midp20_cldc11_itunes_jsr75" />
 	<property name="build.midp20.jsr75.jsr238" value="${target}/build/midp20_jsr75.jsr238" />
 	<property name="classes" value="${target}/classes" />
 	<property name="tmppreprocess" value="${target}/tmppreprocess" />
@@ -599,6 +603,15 @@
 		</antcall>
 	</target>
 
+	<!-- Compile using WTK with MIDP-2.0 and JSR-75 and test -->
+	<target name="compile.2.0.cldc1.1.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0cldc1.1.jsr75.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
 	<!-- Run using WTK with MIDP-2.0 and JSR-75 and test -->
 	<target name="run.2.0.jsr75" >
 		<antcall target="compile" >
@@ -635,6 +648,15 @@
 	<target name="compile.2.0.itunes.jsr75" >
 		<antcall target="compile" >
 			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile using WTK with MIDP-2.0, Itunes, JSR-75 and test -->
+	<target name="compile.2.0.cldc.1.1.itunes.jsr75" >
+		<antcall target="compile" >
+			<param name="wtk.properties" value="wtk2.0cldc1.1.itunes.jsr75.properties${wtk.template}" />
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
 		</antcall>
@@ -826,6 +848,16 @@
 		</antcall>
 	</target>
 
+	<target name="dist.midp.2.0.cldc.1.1" unless="no.2.0.cldc.1.1" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0cldc1.1.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.cldc11}" />
+			<param name="build.vers" value="${build.midp20.cldc11}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
 	<target name="dist.midp.2.0.jsr75" unless="no.2.0.jsr75" >
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
@@ -836,11 +868,31 @@
 		</antcall>
 	</target>
 
+	<target name="dist.midp.2.0.cldc.1.1.jsr75" unless="no.2.0.cldc.1.1.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0cldc1.1.jsr75.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.cldc11.jsr75}" />
+			<param name="build.vers" value="${build.midp20.cldc11.jsr75}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
 	<target name="dist.midp.2.0.itunes.jsr75" unless="no.2.0.itunes.jsr75" >
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
 			<param name="build.vers" value="${build.midp20.itunes.jsr75}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.itunes.jsr75" unless="no.2.0.cldc.1.1.itunes.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0cldc1.1.itunes.jsr75.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.cldc1.1.itunes.jsr75}" />
+			<param name="build.vers" value="${build.midp20.cldc1.1.itunes.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -927,7 +979,19 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		<antcall target="dist.midp.2.0.cldc.1.1.jsr75" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
 		<antcall target="dist.midp.2.0.itunes.jsr75" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.2.0.cldc.1.1.itunes.jsr75" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.2.0.cldc.1.1" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
