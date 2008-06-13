@@ -198,13 +198,13 @@ public class RssItunesFeed extends RssFeed{
 				int TITLE = 1;
 				m_title = nodes[TITLE];
 				if (hasPipe) {
-					m_title = m_title.replace('\n', '|');
+					m_title = m_title.replace(CONE, '|');
 				}
 				
 				int DESCRIPTION = 2;
 				m_description = nodes[DESCRIPTION];
 				if (hasPipe) {
-					m_description = m_description.replace('\n', '|');
+					m_description = m_description.replace(CONE, '|');
 				}
 				
 				int LANGUAGE = 3;
@@ -213,19 +213,19 @@ public class RssItunesFeed extends RssFeed{
 				int AUTHOR = 4;
 				m_author = nodes[AUTHOR];
 				if (hasPipe) {
-					m_author = m_author.replace('\n', '|');
+					m_author = m_author.replace(CONE, '|');
 				}
 				
 				int SUBTITLE = 5;
 				m_subtitle = nodes[SUBTITLE];
 				if (hasPipe) {
-					m_subtitle = m_subtitle.replace('\n', '|');
+					m_subtitle = m_subtitle.replace(CONE, '|');
 				}
 				
 				int SUMMARY = 6;
 				m_summary = nodes[SUMMARY];
 				if (hasPipe) {
-					m_summary = m_summary.replace('\n', '|');
+					m_summary = m_summary.replace(CONE, '|');
 				}
 
 				int EXPLICIT = 7;
@@ -256,11 +256,11 @@ public class RssItunesFeed extends RssFeed{
 		String summary = "";
 		//#ifdef DITUNES
 		if (m_itunes) {
-			title = m_title.replace('|', '\n');
-			description = m_description.replace('|', '\n');
-			author = m_author.replace('|', '\n');
-			subtitle = m_subtitle.replace('|', '\n');
-			summary = m_summary.replace('|', '\n');
+			title = m_title.replace('|', CONE);
+			description = m_description.replace('|', CONE);
+			author = m_author.replace('|', CONE);
+			subtitle = m_subtitle.replace('|', CONE);
+			summary = m_summary.replace('|', CONE);
 		}
 		//#endif
         String storeString = (m_itunes ? "1" : "") + "|" + title + "|" +
