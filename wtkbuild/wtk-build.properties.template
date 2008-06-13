@@ -25,10 +25,10 @@ project.name = RSSReader
 midlet.home = ${wtk.home}/apps/${project.name}
 prc.creater = MRSS
 prc.longname = RSS/News/Blog Reader
-MIDLETVERSROOT = 1.11
+MIDLETVERSROOT = 1.11.1
 #Need vers with '_' to allow uploading to sites that get confused by to
 #many '.'
-FMIDLETVERSROOT = 1_11
+FMIDLETVERSROOT = 1_11_1
 #Location of manifest source
 manifestsrc = ../manifestsrc
 #? src = src
