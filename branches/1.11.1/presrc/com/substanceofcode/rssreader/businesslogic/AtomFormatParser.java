@@ -154,9 +154,12 @@ public class AtomFormatParser implements FeedFormatParser {
             if( (elemChar == 'e') &&
 				 elementName.equals("entry") ) {
                 /** Save previous entry */
-				if((m_title.length()>0) || (m_description.length()>0)) {
-					if (m_description.length() == 0) {
+				boolean hasTitle = (m_title.length()>0);
+				boolean hasDesc = (m_description.length()>0);
+				if(hasTitle || hasDesc || (m_summary.length()>0)) {
+					if (!hasDesc) {
 						m_description = m_summary;
+						hasDesc = true;
 					}
 					if (m_link.length() == 0) {
 						if (m_selfLink.length() != 0) {
@@ -203,9 +206,12 @@ public class AtomFormatParser implements FeedFormatParser {
 		}
 				
         /** Save previous entry */
-		if((m_title.length()>0) || (m_description.length()>0)) {
-			if (m_description.length() == 0) {
+		boolean hasTitle = (m_title.length()>0);
+		boolean hasDesc = (m_description.length()>0);
+		if(hasTitle || hasDesc || (m_summary.length()>0)) {
+			if (!hasDesc) {
 				m_description = m_summary;
+				hasDesc = true;
 			}
 			if (m_link.length() == 0) {
 				if (m_selfLink.length() != 0) {
