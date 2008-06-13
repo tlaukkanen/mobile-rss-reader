@@ -52,8 +52,6 @@ public class RssItunesItem extends RssItem {
 	// Number of Itunes info
     final private static int NBR_ITUNES_INFO = 6;
     final protected static byte BNO_EXPLICIT = (byte)-1;
-    final private static byte[] BANO_EXPLICIT = {BNO_EXPLICIT};
-    final private static String NO_EXPLICIT = new String(BANO_EXPLICIT);
     final public static String UNSPECIFIED = "unspecified";
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
@@ -137,9 +135,9 @@ public class RssItunesItem extends RssItem {
 		String summary = "";
 		//#ifdef DITUNES
 //@		if (m_itunes) {
-//@			author = m_author.replace('|', (char)1);
-//@			subtitle = m_subtitle.replace('|', (char)1);
-//@			summary = m_summary.replace('|', (char)1);
+//@			author = m_author.replace('|', CONE);
+//@			subtitle = m_subtitle.replace('|', CONE);
+//@			summary = m_summary.replace('|', CONE);
 //@		}
 		//#endif
         String preData = (m_itunes ? "1" : "") + "|" +
@@ -221,19 +219,19 @@ public class RssItunesItem extends RssItem {
 //@				int AUTHOR = 1;
 //@				m_author = nodes[AUTHOR];
 //@				if (hasPipe) {
-//@					m_author = m_author.replace((char)1, '|');
+//@					m_author = m_author.replace(CONE, '|');
 //@				}
 //@				
 //@				int SUBTITLE = 2;
 //@				m_subtitle = nodes[SUBTITLE];
 //@				if (hasPipe) {
-//@					m_subtitle = m_subtitle.replace((char)1, '|');
+//@					m_subtitle = m_subtitle.replace(CONE, '|');
 //@				}
 //@				
 //@				int SUMMARY = 3;
 //@				m_summary = nodes[SUMMARY];
 //@				if (hasPipe) {
-//@					m_summary = m_summary.replace((char)1, '|');
+//@					m_summary = m_summary.replace(CONE, '|');
 //@				}
 //@
 //@				int EXPLICIT = 4;
