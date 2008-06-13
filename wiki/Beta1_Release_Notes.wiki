@@ -1,4 +1,4 @@
-#Release note history
+#Beta1 Release note history
 = Mobile RSS Reader Release Notes =
 
 Copyright (c) 2006-2007 Tommi Laukkanen
@@ -7,7 +7,7 @@ http://www.substanceofcode.com
 Contributors:
 Irving Bunton Jr
 
-==Release Notes==
+==Beta1 Release Notes==
 
 v1.5 (July 23th 2007)
   * Open links in device browser
