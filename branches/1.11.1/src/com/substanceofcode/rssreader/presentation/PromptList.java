@@ -33,7 +33,7 @@ package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
 
-import javax.microedition.midlet.*;
+import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
@@ -47,23 +47,18 @@ import javax.microedition.lcdui.List;
 //@import com.substanceofcode.testlcdui.List;
 //#endif
 
+import com.substanceofcode.rssreader.presentation.PromptMgr;
+
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /* List with optional commands added with addPromptCommand which if
    used, will give prompt message with OK/Cancel.  */
-public class PromptList extends List implements CommandListener {
-	private CommandListener cmdListener;
+public class PromptList extends List {
+	protected PromptMgr promptMgr;
 
-	private Hashtable promptCommands = new Hashtable();
-	private Command origCmd = null;
-	private Command cmdOK;
-	private Command cmdCancel;
-	protected MIDlet midlet;
-	private Alert promptAlert = null;
 	//#ifdef DLOGGING
 //@	private Logger logger = Logger.getLogger("PromptList");
 //@	private boolean fineLoggable = false;
@@ -72,11 +67,11 @@ public class PromptList extends List implements CommandListener {
 
 	public PromptList(MIDlet midlet, String title, int listType) {
 		super(title, listType);
-		this.midlet = midlet;
-		init();
+		init(midlet);
 	}
 
-	private void init() {
+	private void init(MIDlet midlet) {
+		promptMgr = new PromptMgr(midlet, this);
 		//#ifdef DLOGGING
 //@		fineLoggable = logger.isLoggable(Level.FINE);
 //@		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
@@ -88,75 +83,22 @@ public class PromptList extends List implements CommandListener {
 	public PromptList(MIDlet midlet, String title, int listType,
 			          String [] stringElements,  Image[] imageElements) {
 		super(title, listType, stringElements, imageElements);
-		this.midlet = midlet;
-		init();
-	}
-
-	/* Prompt if command is in prompt camands.  */
-	public void commandAction(Command cmd, Displayable disp) {
-		//#ifdef DTESTUI
-//@		super.outputCmdAct(cmd, disp,
-//@				javax.microedition.lcdui.List.SELECT_COMMAND);
-		//#endif
-        try {
-			if (promptCommands.containsKey(cmd)) {
-				if ((promptAlert == null) || !disp.equals(promptAlert)) {
-					origCmd = cmd;
-				}
-				promptAlert = new Alert(cmd.getLabel(),
-						(String)promptCommands.get(cmd), null,
-						AlertType.CONFIRMATION);
-				promptAlert.setTimeout(Alert.FOREVER);
-				cmdOK = new Command("OK", Command.OK, 0);
-				promptAlert.addCommand(cmdOK);
-				cmdCancel = new Command("Cancel", Command.CANCEL, 0);
-				promptAlert.addCommand(cmdCancel);
-				promptAlert.setCommandListener(this);
-				Display.getDisplay(midlet).setCurrent(promptAlert);
-				return;
-			} else if (cmd.equals(cmdOK)
-				//#ifdef DMIDP20
-			           || cmd.equals(Alert.DISMISS_COMMAND)
-				//#endif
-						) {
-				//#ifdef DLOGGING
-//@				if (fineLoggable) {
-//@					logger.fine("origCmd,type=" + origCmd.getLabel() + "," + origCmd.getCommandType());
-//@				}
-				//#endif
-				Display.getDisplay(midlet).setCurrent(this);
-				cmdListener.commandAction(origCmd, this);
-			} else if (cmd.equals(cmdCancel)) {
-				Display.getDisplay(midlet).setCurrent(this);
-				return;
-			} else {
-				Display.getDisplay(midlet).setCurrent(this);
-				cmdListener.commandAction(cmd, disp);
-			}
-		} catch (Throwable e) {
-			//#ifdef DLOGGING
-//@			logger.severe("commandAction caught ", e);
-			//#endif
-			System.out.println("commandAction caught " + e + " " + e.getMessage());
-		}
+		init(midlet);
 	}
 
 	public void addPromptCommand(Command cmd, String prompt) {
 		super.addCommand(cmd);
-		promptCommands.put(cmd, prompt);
+		promptMgr.addPromptCommand(cmd, prompt);
 	}
 
 	public void removeCommand(Command cmd) {
 		super.removeCommand(cmd);
-		promptCommands.remove(cmd);
+		promptMgr.removeCommand(cmd);
 	}
 
     public void setCommandListener(CommandListener cmdListener) {
-		//#ifdef DTEST
-//@		System.out.println("PromptList Setting command listner for listener,this,Title: " + cmdListener + "," + this);
-		//#endif
-		super.setCommandListener(this);
-        this.cmdListener = cmdListener;
+		super.setCommandListener(promptMgr);
+		promptMgr.setCommandListener(cmdListener);
     }
 
 }
