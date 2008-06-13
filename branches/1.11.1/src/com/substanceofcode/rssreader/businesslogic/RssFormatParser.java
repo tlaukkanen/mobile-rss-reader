@@ -159,7 +159,12 @@ public class RssFormatParser implements FeedFormatParser {
 				case 'i':
 					if (elementName.equals("item") ) {
 						/** Save previous entry */
-						if((m_title.length()>0) || (m_description.length()>0)) {
+						boolean hasTitle = (m_title.length()>0);
+						boolean hasDesc = (m_description.length()>0);
+						if(hasTitle || hasDesc) {
+							if (hasTitle && hasDesc) {
+								m_title = m_title.replace('\n', ' ');
+							}
 							RssItunesItem item;
 							Date pubDate = null;
 							// Check date in case we cannot find it.
@@ -208,7 +213,12 @@ public class RssFormatParser implements FeedFormatParser {
         }
 
         /** Save previous entry */
-        if((m_title.length()>0) || (m_description.length()>0)) {
+		boolean hasTitle = (m_title.length()>0);
+        boolean hasDesc = (m_description.length()>0);
+        if(hasTitle || hasDesc) {
+			if (hasTitle && hasDesc) {
+				m_title = m_title.replace('\n', ' ');
+			}
             RssItunesItem item;
             Date pubDate = null;
 			if (m_date.length() > 0) {
@@ -256,7 +266,7 @@ public class RssFormatParser implements FeedFormatParser {
 				break;
 			case 't':
 				if( elementName.equals("title") ) {
-					m_title = parser.getText().replace('\n', ' ');
+					m_title = parser.getText();
 					m_title = StringUtil.removeHtml( m_title );
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_title=" + m_title);}
