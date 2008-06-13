@@ -161,6 +161,7 @@ v1.11.1 Beta 1 (June 13th 2008)
 + Only remove new lines from title if there is a description.
 + If atom has summary, but no title or description, use the summary as the
   description
++ Support CLDC 1.1 versions all MIDP 2.0 versions.
 
 Known problems:
 
