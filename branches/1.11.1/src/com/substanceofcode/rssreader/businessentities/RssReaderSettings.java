@@ -50,6 +50,7 @@ public class RssReaderSettings {
     private static final String FEED_LIST_OPEN = "feed-list-open";
     private static final String ITUNES_ENABLED = "itunes-enabled";
     private static final String USE_TEXT_BOX = "use-text-box";
+    private static final String USE_STANDARD_EXIT = "use-standard-exit";
     private static final String LOG_LEVEL = "log-level";
     
     /** Creates a new instance of RssFeedReaderSettings */
@@ -163,9 +164,19 @@ public class RssReaderSettings {
         return m_settings.getBooleanProperty( USE_TEXT_BOX, false);
     }
     
-    /** Set import URL password */
+    /** Set use text box */
     public void setUseTextBox(boolean useTextBox) {
         m_settings.setBooleanProperty( USE_TEXT_BOX, useTextBox);
+    }
+    
+    /** Get use standard exit */
+    public boolean getUseStandardExit() {
+        return m_settings.getBooleanProperty( USE_STANDARD_EXIT, false);
+    }
+    
+    /** Set standard exit */
+    public void setUseStandardExit(boolean useStandardExit) {
+        m_settings.setBooleanProperty( USE_STANDARD_EXIT, useStandardExit);
     }
     
     /** Get settings version */
