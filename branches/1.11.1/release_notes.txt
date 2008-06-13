@@ -150,6 +150,17 @@ v1.11
 + Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
+v1.11.1 Beta 1 (June 13th 2008)
++ Fix bug when opening feeds on Sony Ericsson emulators and possiblely
+  affecting Sony Ericsson devices
++ Fix bug with storing Itunes attributes
++ Workaround VM problems with synchronized methods that prevent update of
+  settings
++ Allow choice to use standard exit or not in exit.  (Some phones the user may
+  not know which key is the exit key).
++ Only remove new lines from title if there is a description.
++ If atom has summary, but no title or description, use the summary as the
+  description
 
 Known problems:
 
