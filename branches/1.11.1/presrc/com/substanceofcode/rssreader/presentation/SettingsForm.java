@@ -85,6 +85,7 @@ public class SettingsForm extends Form implements CommandListener {
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
     private ChoiceGroup m_useTextBox;
+    private ChoiceGroup m_useStandardExit;
     private ChoiceGroup m_feedListOpen;
     private ChoiceGroup m_itunesEnabled;
     private TextField m_wordCountField;
@@ -143,6 +144,14 @@ public class SettingsForm extends Form implements CommandListener {
 		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_useTextBox );
+
+		String [] txtExit = {"Use standard exit key", "Use menu exit key"};
+        m_useStandardExit = new ChoiceGroup("Exit key type",
+				                            Choice.EXCLUSIVE, txtExit, null);
+		//#ifdef DMIDP20
+		m_useStandardExit.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_useStandardExit );
 		String [] itunesEnabledChoices = {"Don't show Itunes data",
 				"Show Itunes data"};
         m_itunesEnabled = new ChoiceGroup("Choose to use Itunes data",
@@ -268,6 +277,9 @@ public class SettingsForm extends Form implements CommandListener {
         boolean useTextBox = settings.getUseTextBox();
 		boolean [] boolSelectedItems = {useTextBox, !useTextBox};
 		m_useTextBox.setSelectedFlags( boolSelectedItems );
+        boolean useStdExit = settings.getUseStandardExit();
+		boolean [] boolExitItems = {useStdExit, !useStdExit};
+		m_useStandardExit.setSelectedFlags( boolExitItems );
         boolean itunesEnabled = settings.getItunesEnabled();
 		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
 		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
@@ -310,6 +322,8 @@ public class SettingsForm extends Form implements CommandListener {
                 settings.setMarkUnreadItems( markUnreadItems );
 				boolean useTextBox = m_useTextBox.isSelected(0);
 				settings.setUseTextBox(useTextBox);
+				boolean useStdExit = m_useStandardExit.isSelected(0);
+				settings.setUseStandardExit(useStdExit);
 				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
 				//#ifdef DITUNES
 				settings.setItunesEnabled( itunesEnabled );
