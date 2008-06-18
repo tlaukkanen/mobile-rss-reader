@@ -231,8 +231,11 @@ public class SettingsForm extends Form implements CommandListener {
 		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_jsr75 );
-        m_platformVers = new StringItem("Phone Microedition platform:",
-				System.getProperty("microedition.platform"));
+		String me = System.getProperty("microedition.platform");
+		if (me == null) {
+			me = "N/A";
+		}
+        m_platformVers = new StringItem("Phone Microedition platform:", me);
 		//#ifdef DMIDP20
 		m_platformVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
