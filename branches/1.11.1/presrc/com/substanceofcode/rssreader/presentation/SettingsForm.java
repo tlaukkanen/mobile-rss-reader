@@ -211,8 +211,11 @@ public class SettingsForm extends Form implements CommandListener {
 		m_pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_pgmJsr75 );
-        m_midpVers = new StringItem("Phone MIDP version:",
-				System.getProperty("microedition.profiles"));
+		String mep = System.getProperty("microedition.profiles");
+		if (mep == null) {
+			mep = "N/A";
+		}
+        m_midpVers = new StringItem("Phone MIDP version:", mep);
 		//#ifdef DMIDP20
 		m_midpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
