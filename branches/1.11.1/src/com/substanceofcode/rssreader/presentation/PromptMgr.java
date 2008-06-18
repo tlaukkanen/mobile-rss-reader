@@ -48,15 +48,18 @@ import javax.microedition.lcdui.Displayable;
 //#endif
 
 /* Form with optional commands added with addPromptCommand which if
-   used, will give prompt message with OK/Cancel.  */
-final public class PromptMgr implements CommandListener {
+   used, will give prompt message with OK/Cancel.
+
+   Due to peculiarities with setCurrent, we do setCurrent twice so that it will
+   work with most phones.  Otherwise, it may be ignored for some phones. */
+final public class PromptMgr implements CommandListener, Runnable {
 
 	private Hashtable promptCommands = new Hashtable();
 	private Displayable disp;
 	private Command origCmd = null;
 	private Command cmdOK;
 	private Command cmdCancel;
-	protected MIDlet midlet;
+	protected RssReaderMIDlet midlet;
 	private Alert promptAlert = null;
 	//#ifdef DLOGGING
 //@	private Logger logger = Logger.getLogger("PromptMgr");
@@ -66,7 +69,7 @@ final public class PromptMgr implements CommandListener {
 
 	private CommandListener cmdListener;
 
-	public PromptMgr (MIDlet midlet, Displayable disp) {
+	public PromptMgr (RssReaderMIDlet midlet, Displayable disp) {
 		this.midlet = midlet;
 		this.disp = disp;
 	}
@@ -83,6 +86,20 @@ final public class PromptMgr implements CommandListener {
 		promptCommands.remove(cmd);
 	}
 
+	/* Create prompt alert. */
+	public void run() {
+		promptAlert = new Alert(origCmd.getLabel(),
+				(String)promptCommands.get(origCmd), null,
+				AlertType.CONFIRMATION);
+		promptAlert.setTimeout(Alert.FOREVER);
+		cmdOK = new Command("OK", Command.OK, 0);
+		promptAlert.addCommand(cmdOK);
+		cmdCancel = new Command("Cancel", Command.CANCEL, 1);
+		promptAlert.addCommand(cmdCancel);
+		promptAlert.setCommandListener(this);
+		midlet.setCurrent(promptAlert);
+	}
+
 	/* Prompt if command is in prompt camands.  */
 	public void commandAction(Command cmd, Displayable cdisp) {
 		try {
@@ -90,16 +107,7 @@ final public class PromptMgr implements CommandListener {
 				if ((promptAlert == null) || !cdisp.equals(promptAlert)) {
 					origCmd = cmd;
 				}
-				promptAlert = new Alert(cmd.getLabel(),
-						(String)promptCommands.get(cmd), null,
-						AlertType.INFO);
-				promptAlert.setTimeout(Alert.FOREVER);
-				cmdOK = new Command("OK", Command.OK, 0);
-				promptAlert.addCommand(cmdOK);
-				cmdCancel = new Command("Cancel", Command.CANCEL, 0);
-				promptAlert.addCommand(cmdCancel);
-				promptAlert.setCommandListener(this);
-				Display.getDisplay(midlet).setCurrent(promptAlert);
+				new Thread(this).start();
 				return;
 			} else if (cmd.equals(cmdOK)
 				//#ifdef DMIDP20
@@ -111,14 +119,14 @@ final public class PromptMgr implements CommandListener {
 //@					logger.fine("origCmd,type=" + origCmd.getLabel() + "," + origCmd.getCommandType());
 //@				}
 				//#endif
-				Display.getDisplay(midlet).setCurrent(disp);
+				midlet.setCurrent(disp);
 				cmdListener.commandAction(origCmd, disp);
 			} else if (cmd.equals(cmdCancel)) {
-				Display.getDisplay(midlet).setCurrent(disp);
+				midlet.setCurrent(disp);
 				return;
 			} else {
-				Display.getDisplay(midlet).setCurrent(disp);
 				cmdListener.commandAction(cmd, disp);
+				midlet.setCurrent(disp);
 			}
 		} catch (Throwable e) {
 			//#ifdef DLOGGING
