@@ -92,7 +92,7 @@ final public class PromptMgr implements CommandListener {
 				}
 				promptAlert = new Alert(cmd.getLabel(),
 						(String)promptCommands.get(cmd), null,
-						AlertType.CONFIRMATION);
+						AlertType.INFO);
 				promptAlert.setTimeout(Alert.FOREVER);
 				cmdOK = new Command("OK", Command.OK, 0);
 				promptAlert.addCommand(cmdOK);
