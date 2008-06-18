@@ -24,19 +24,20 @@
 	<property name="dist" value="${target}/dist" />
 	<property name="dist.midp10" value="${target}/dist/midp10" />
 	<property name="dist.midp20" value="${target}/dist/midp20" />
-	<property name="dist.midp20.cldc1.1" value="${target}/dist/midp20_cldc11" />
+	<property name="dist.midp20.cldc11" value="${target}/dist/midp20_cldc11" />
 	<property name="dist.midp20.jsr75" value="${target}/dist/midp20_jsr75" />
-	<property name="dist.midp20.cldc1.1.jsr75" value="${target}/dist/midp20_cldc11_jsr75" />
+	<property name="dist.midp20.cldc11.jsr75" value="${target}/dist/midp20_cldc11_jsr75" />
 	<property name="dist.midp20.itunes.jsr75" value="${target}/dist/midp20_itunes_jsr75" />
-	<property name="dist.midp20.cldc1.1.itunes.jsr75" value="${target}/dist/midp20_cldc11_itunes_jsr75" />
+	<property name="dist.midp20.cldc11.itunes.jsr75" value="${target}/dist/midp20_cldc11_itunes_jsr75" />
 	<property name="dist.midp20.jsr75_jsr238" value="${target}/dist/midp20_jsr75_jsr238" />
 	<property name="build" value="${target}/build" />
 	<property name="build.midp10" value="${target}/build/midp10" />
 	<property name="build.midp20" value="${target}/build/midp20" />
+	<property name="build.midp20.cldc11" value="${target}/build/midp20_cldc11" />
 	<property name="build.midp20.itunes.jsr75" value="${target}/build/midp20_itunes_jsr75" />
 	<property name="build.midp20.jsr75" value="${target}/build/midp20_jsr75" />
 	<property name="build.midp20.itunes.jsr75" value="${target}/build/midp20_itunes_jsr75" />
-	<property name="build.midp20.cldc1.1.itunes.jsr75" value="${target}/build/midp20_cldc11_itunes_jsr75" />
+	<property name="build.midp20.cldc11.itunes.jsr75" value="${target}/build/midp20_cldc11_itunes_jsr75" />
 	<property name="build.midp20.jsr75.jsr238" value="${target}/build/midp20_jsr75.jsr238" />
 	<property name="classes" value="${target}/classes" />
 	<property name="tmppreprocess" value="${target}/tmppreprocess" />
@@ -491,6 +492,9 @@
 			</move>
 			<move todir="${op.dir}" >
 				<fileset file="${op.dir}/${svn.src}/release_notes.txt" />
+				<fileset file="${op.dir}/${svn.src}/gpl.txt" />
+				<fileset file="${op.dir}/${svn.src}/RSSReader.alx" />
+				<fileset file="${op.dir}/${svn.src}/build.xml" />
 			</move>
 			<delete dir="${op.dir}/${svn.src}" />
 			</then>
@@ -891,8 +895,8 @@
 	<target name="dist.midp.2.0.cldc.1.1.itunes.jsr75" unless="no.2.0.cldc.1.1.itunes.jsr75" >
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0cldc1.1.itunes.jsr75.properties${wtk.template}" />
-			<param name="dist.vers" value="${dist.midp20.cldc1.1.itunes.jsr75}" />
-			<param name="build.vers" value="${build.midp20.cldc1.1.itunes.jsr75}" />
+			<param name="dist.vers" value="${dist.midp20.cldc11.itunes.jsr75}" />
+			<param name="build.vers" value="${build.midp20.cldc11.itunes.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
