@@ -108,8 +108,7 @@ public class ExtParser {
 			language = m_language;
 		}
 
-		if ((m_author + m_subtitle + m_summary + language).equals("") &&
-				(m_explicit == (byte)-1)) {
+		if (!m_itunes) {
 			feed.setItunes(false);
 			return feed;
 		}
