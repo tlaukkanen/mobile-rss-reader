@@ -1149,6 +1149,7 @@ public class RssReaderMIDlet extends MIDlet
 
 	//#ifdef DMIDP20
 	final public void setCurrentItem(Item item) {
+		Display.getDisplay(this).setCurrentItem(item);
 		m_display.setCurrentItem(item);
 		wakeUp();
 	}
@@ -1166,6 +1167,7 @@ public class RssReaderMIDlet extends MIDlet
 //@		}
 //@		System.out.println("Test UI setCurrent " + disp.getClass().getName() + "," + title);
 		//#endif
+		Display.getDisplay(this).setCurrent( disp );
 		m_display.setCurrent( disp );
 		wakeUp();
 	}
@@ -1179,6 +1181,7 @@ public class RssReaderMIDlet extends MIDlet
 
 	/* Set current displayable and wake up the thread. */
 	final public void setCurrent(Alert alert, Displayable disp) {
+		Display.getDisplay(this).setCurrent( disp );
 		m_display.setCurrent( alert, disp );
 		wakeUp();
 	}
