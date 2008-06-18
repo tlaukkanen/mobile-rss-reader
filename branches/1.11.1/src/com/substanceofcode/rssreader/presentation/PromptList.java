@@ -33,7 +33,6 @@ package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
 
-import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Command;
@@ -65,12 +64,12 @@ public class PromptList extends List {
 //@	private boolean finestLoggable = false;
 	//#endif
 
-	public PromptList(MIDlet midlet, String title, int listType) {
+	public PromptList(RssReaderMIDlet midlet, String title, int listType) {
 		super(title, listType);
 		init(midlet);
 	}
 
-	private void init(MIDlet midlet) {
+	private void init(RssReaderMIDlet midlet) {
 		promptMgr = new PromptMgr(midlet, this);
 		//#ifdef DLOGGING
 //@		fineLoggable = logger.isLoggable(Level.FINE);
@@ -80,7 +79,7 @@ public class PromptList extends List {
 		//#endif
 	}
 
-	public PromptList(MIDlet midlet, String title, int listType,
+	public PromptList(RssReaderMIDlet midlet, String title, int listType,
 			          String [] stringElements,  Image[] imageElements) {
 		super(title, listType, stringElements, imageElements);
 		init(midlet);
