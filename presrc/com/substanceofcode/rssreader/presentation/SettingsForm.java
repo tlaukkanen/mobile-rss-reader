@@ -94,12 +94,14 @@ public class SettingsForm extends Form implements CommandListener {
     private StringItem m_pgmJsr75;
     private StringItem m_midpVers;
     private StringItem m_cldcVers;
+    private StringItem m_platformVers;
     private StringItem m_jsr75;
     private StringItem m_pgmMemUsedItem;
     private StringItem m_pgmMemAvailItem;
     private StringItem m_memUsedItem;
     private StringItem m_memAvailItem;
     private StringItem m_threadsUsed;
+    private boolean prevStdExit;
 	//#ifdef DLOGGING
     private TextField m_logLevelField;
     private Logger logger = Logger.getLogger("SettingsForm");
@@ -229,6 +231,12 @@ public class SettingsForm extends Form implements CommandListener {
 		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         this.append( m_jsr75 );
+        m_platformVers = new StringItem("Phone Microedition platform:",
+				System.getProperty("microedition.platform"));
+		//#ifdef DMIDP20
+		m_platformVers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( m_platformVers );
 		//#ifdef DLOGGING
         m_logLevelField = new TextField("Logging level",
                 logger.getParent().getLevel().getName(), 20, TextField.ANY);
@@ -278,6 +286,7 @@ public class SettingsForm extends Form implements CommandListener {
 		boolean [] boolSelectedItems = {useTextBox, !useTextBox};
 		m_useTextBox.setSelectedFlags( boolSelectedItems );
         boolean useStdExit = settings.getUseStandardExit();
+        prevStdExit = useStdExit;
 		boolean [] boolExitItems = {useStdExit, !useStdExit};
 		m_useStandardExit.setSelectedFlags( boolExitItems );
         boolean itunesEnabled = settings.getItunesEnabled();
@@ -324,6 +333,9 @@ public class SettingsForm extends Form implements CommandListener {
 				settings.setUseTextBox(useTextBox);
 				boolean useStdExit = m_useStandardExit.isSelected(0);
 				settings.setUseStandardExit(useStdExit);
+				if (useStdExit != prevStdExit) {
+					m_midlet.initExit();
+				}
 				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
 				//#ifdef DITUNES
 				settings.setItunesEnabled( itunesEnabled );
