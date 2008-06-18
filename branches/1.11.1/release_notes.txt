@@ -162,6 +162,18 @@ v1.11.1 Beta 1 (June 13th 2008)
 + If atom has summary, but no title or description, use the summary as the
   description
 + Support CLDC 1.1 versions all MIDP 2.0 versions.
++ Minor performance improvement for creating items, reading stored feeds.
++ Allow feeds with '^' in title, description, subtitle, summary,
+  and author.
+
+v1.11.1 Beta 2 (June 18th 2008)
++ Prepare for future store of items without encoding
++ Show microedition platform.
++ Workaround problem with some Sony Ericsson phones with dynamic retrieval
+  of display.  Need to use setCurrent using original display for alerts.  This
+  problem prevented exit/delete of feed, but is not fixed.
++ Update exit key of when change of standard exit enabling.
++ Allow feeds with '^' in title, description, subtitle, summary, and author.
 
 Known problems:
 
@@ -171,6 +183,4 @@ Known problems:
   back to the problem item.
 - Phone must support MP3 links, etc to play enclosures (many phones do not
   allow an MP3 to be read from a URL, but play them from the file system)
-- Does not handle feeds with '^' in title, description, subtitle, summary,
-  and author.
 
