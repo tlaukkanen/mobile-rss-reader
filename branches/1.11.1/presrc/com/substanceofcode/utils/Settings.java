@@ -64,10 +64,15 @@ public class Settings {
 	// "" by default
     public static final String FIRST_SETTINGS_VERS = "";
     public static final String ITUNES_CAPABLE_VERS = "3";
+    public static final String ENCODING_VERS = "4";
+    public static final String ITEMS_ENCODED = "items-encoded";
+    public static final String STORE_DATE = "store-date";
 	//#ifdef DCOMPATIBILITY2
     public static final String SETTINGS_VERS = "2";
-	//#else
+	//#elifdef DCOMPATIBILITY3
     public static final String SETTINGS_VERS = ITUNES_CAPABLE_VERS;
+	//#else
+    public static final String SETTINGS_VERS = ENCODING_VERS;
 	//#endif
     private static Settings m_store;
     private MIDlet          m_midlet;
@@ -150,6 +155,21 @@ public class Settings {
         return defaultValue;
     }
     
+    /** Get long property */
+    public long getLongProperty( String name, long defaultValue ) {
+        String value = getProperty( name );
+        if( value != null ) {
+            try {
+                return Long.parseLong( value );
+            } catch( NumberFormatException e ) {
+				//#ifdef DLOGGING
+				logger.warning("Warning parsing long name,value=" + name + "," + value, e);
+				//#endif
+            }
+        }
+        return defaultValue;
+    }
+    
     /** Get string property */
     public String getStringProperty(int region, String name,
 			                        String defaultValue ) {
@@ -176,10 +196,11 @@ public class Settings {
 			m_valuesChanged = false;
 			m_properties.clear();
 			boolean currentSettings = true;
+			int numRecs = 0;
 			
 			try {
 				rs = RecordStore.openRecordStore("Store", true );
-				int numRecs = rs.getNumRecords();
+				numRecs = rs.getNumRecords();
 				//#ifdef DLOGGING
 				if (fineLoggable) {logger.fine("region=" + region);}
 				if (finestLoggable) {logger.finest("numRecs=" + numRecs);}
@@ -254,13 +275,6 @@ public class Settings {
 					//#endif
 					rs.addRecord( null, 0, 0 );
 				}
-				if (!currentSettings && ( numRecs > 0 ) && (region == 0)) {
-					// If not current settings, save them to udate to
-					// current.
-					save(0, true);
-					// Update bookmark region too.
-					save(1, true);
-				}
 				m_region = region;
 			} catch (Exception e) {
 				//#ifdef DLOGGING
@@ -284,6 +298,13 @@ public class Settings {
 				if( rs != null ) {
 					try { rs.closeRecordStore(); } catch( Exception e ){}
 				}
+				if (!currentSettings && ( numRecs > 0 ) && (region == 0)) {
+					// If not current settings, save them to udate to
+					// current.
+					save(0, true);
+					// Update bookmark region too.
+					save(1, true);
+				}
 			}
 		}
     }
@@ -306,21 +327,38 @@ public class Settings {
 				if ( m_properties.containsKey(SETTINGS_NAME) ) {
 					vers = (String)m_properties.get(SETTINGS_NAME);
 				}
+
+				Hashtable cproperties = m_properties;
+				//#ifndef DCOMPATIBILITY1
+				//#ifndef DCOMPATIBILITY2
+				//#ifndef DCOMPATIBILITY3
+				if (region > 0) {
+					cproperties = new Hashtable();
+					cproperties.put("bookmarks", m_properties.get("bookmarks"));
+					cproperties.put(SETTINGS_NAME,
+							m_properties.get(SETTINGS_NAME));
+					cproperties.put(ITEMS_ENCODED, m_properties.get(ITEMS_ENCODED));
+					cproperties.put(STORE_DATE, m_properties.get(STORE_DATE));
+				}
+				//#endif
+				//#endif
+				//#endif
+
 				// Put version only if it is not DCOMPATIBILITY1 which is
 				// the settings based on the first few versions before
 				// the setting store was changed as the first few
 				// versions did not have settings version in properties.
 				//#ifndef DCOMPATIBILITY1
-				m_properties.put(SETTINGS_NAME, SETTINGS_VERS);
+				cproperties.put(SETTINGS_NAME, SETTINGS_VERS);
 				//#endif
 				//#ifdef DLOGGING
 				if (fineLoggable) {logger.fine("save region=" + region);}
 				//#endif
-				dout.writeInt( m_properties.size() );
-				Enumeration e = m_properties.keys();
+				dout.writeInt( cproperties.size() );
+				Enumeration e = cproperties.keys();
 				while( e.hasMoreElements() ) {
 					String name = (String) e.nextElement();
-					String value = m_properties.get( name ).toString();
+					String value = cproperties.get( name ).toString();
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("name=" + name);}
 					//#endif
@@ -364,7 +402,7 @@ public class Settings {
 				//#endif
 				//#ifndef DCOMPATIBILITY1
 				if ( vers != null) {
-					m_properties.put(SETTINGS_NAME, vers);
+					cproperties.put(SETTINGS_NAME, vers);
 				}
 				//#endif
 			} catch (Exception e) {
@@ -432,6 +470,11 @@ public class Settings {
     /** Set an integer property */
     public void setIntProperty( String name, int value ) {
         setStringProperty( name, Integer.toString( value ) );
+    }
+    
+    /** Set an long property */
+    public void setLongProperty( String name, long value ) {
+        setStringProperty( name, Long.toString( value ) );
     }
     
     /** Set a string property */
