@@ -36,6 +36,13 @@
 // Expand to define compatibility
 @DCOMPATDEF@
 
+//#ifdef DCOMPATIBILITY1
+//#define DCOMPATIBILITY
+//#elifdef DCOMPATIBILITY2
+//#define DCOMPATIBILITY
+//#elifdef DCOMPATIBILITY3
+//#define DCOMPATIBILITY
+//#endif
 
 package com.substanceofcode.rssreader.presentation;
 
@@ -132,6 +139,8 @@ public class RssReaderMIDlet extends MIDlet
         implements CommandListener,
         Runnable {
     
+    final static public char CFEED_SEPARATOR = (char)4;
+    final static public char OLD_FEED_SEPARATOR = '^';
     // Attributes
     private Display     m_display;          // The display for this MIDlet
     private Settings    m_settings;         // The settings
@@ -222,7 +231,7 @@ public class RssReaderMIDlet extends MIDlet
 	private Command     m_testBMCmd;        // Tet UI bookmarks list command
 	private Command     m_testRtnCmd;       // Tet UI return to prev command
 	//#endif
-    private Command     m_exitCommand;      // The exit command
+    private Command     m_exitCommand = null;// The exit command
     private Command     m_saveCommand;      // The save without exit command
     private Command     m_addNewBookmark;   // The add new bookmark command
     private Command     m_openBookmark;     // The open bookmark command
@@ -321,9 +330,7 @@ public class RssReaderMIDlet extends MIDlet
 			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 10);
 			//#endif
 			m_backCommand       = new Command("Back", Command.BACK, 1);
-			m_exitCommand       = new Command("Exit",
-					(m_appSettings.getUseStandardExit() ? Command.EXIT
-					 : Command.SCREEN), 14);
+			initExit();
 			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 10);
 			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
 			m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
@@ -434,6 +441,21 @@ public class RssReaderMIDlet extends MIDlet
 		}
     }
     
+	/* Create exit command based on if it's a standard exit. */
+	final public void initExit() {
+		boolean prevExit = (m_exitCommand != null);
+		if (prevExit) {
+			m_bookmarkList.removeCommand(m_exitCommand);
+		}
+		m_exitCommand       = new Command("Exit",
+				(m_appSettings.getUseStandardExit() ? Command.EXIT
+				 : Command.SCREEN), 14);
+		if (prevExit) {
+			m_bookmarkList.addPromptCommand(m_exitCommand,
+					"Are you sure you want to exit?");
+		}
+	}
+
 	/* Initialize the forms that are not dynamic. */
 	final private void initForms() {
 		try {
@@ -463,7 +485,7 @@ public class RssReaderMIDlet extends MIDlet
 					// Set Max item count to default so that it is initialized.
 					m_appSettings.setMaximumItemCountInFeed(
 							m_appSettings.getMaximumItemCountInFeed());
-					saveBkMrkSettings(false);
+					saveBkMrkSettings(System.currentTimeMillis(), false);
 					Alert m_about = getAbout();
 					setCurrent( m_about, m_bookmarkList );
 				} catch(Exception e) {
@@ -557,13 +579,22 @@ public class RssReaderMIDlet extends MIDlet
 						m_settings.SETTINGS_NAME, "");
 				final boolean firstSettings =
 					 vers.equals(m_settings.FIRST_SETTINGS_VERS);
-				final boolean itunesCapable =
-					 vers.equals(m_settings.ITUNES_CAPABLE_VERS);
+				final boolean itunesCapable = ((vers.length() > 0) &&
+					 (vers.compareTo(m_settings.ITUNES_CAPABLE_VERS) >= 0));
+				final boolean latestSettings = vers.equals(
+						m_settings.ENCODING_VERS);
+				final boolean itemsEncoded =
+					m_settings.getBooleanProperty(m_settings.ITEMS_ENCODED,
+							true);
+				final long storeDate = m_settings.getLongProperty(
+						m_settings.STORE_DATE, 0L);
+				final char feedSeparator =
+					latestSettings ? CFEED_SEPARATOR : OLD_FEED_SEPARATOR;
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("Settings region,vers,firstSettings,itunescapable=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable);}
+				if (fineLoggable) {logger.fine("Settings region,vers,firstSettings,itunescapable,latestSettings,itemsEncoded,storeDate=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + latestSettings + "," + itemsEncoded + "," + storeDate);}
 				//#endif
 				//#ifdef DTEST
-				if (m_debugOutput) System.out.println("Settings region,vers,firstSettings,itunescapable=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable);
+				if (m_debugOutput) System.out.println("Settings region,vers,firstSettings,itunescapable,latestSettings,itemsEncoded,storeDate=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + latestSettings + "," + itemsEncoded + "," + storeDate);
 				//#endif
 				String bms = m_settings.getStringProperty(ic, "bookmarks", "");
 				//#ifdef DLOGGING
@@ -577,10 +608,11 @@ public class RssReaderMIDlet extends MIDlet
 					do{
 						
 						String part = "";
-						if(bms.indexOf('^')>0) {
-							part = bms.substring(0, bms.indexOf('^'));
+						int pos = bms.indexOf(feedSeparator);
+						if(pos > 0) {
+							part = bms.substring(0, pos);
 						}
-						bms = bms.substring(bms.indexOf('^')+1);
+						bms = bms.substring(pos+1);
 						if(part.length()>0) {
 							//#ifdef DCOMPATIBILITY1
 							RssFeed bm1 = new CompatibilityRssFeed1( part );
@@ -1034,7 +1066,7 @@ public class RssReaderMIDlet extends MIDlet
 						//#ifdef DLOGGING
 						if (fineLoggable) {logger.fine("m_exit,m_saveBookmarks=" + m_exit + "," + m_saveBookmarks);}
 						//#endif
-						saveBkMrkSettings(m_exit);
+						saveBkMrkSettings(System.currentTimeMillis(), m_exit);
 						if (m_exit) {
 							try {
 								destroyApp(true);
@@ -1364,7 +1396,8 @@ public class RssReaderMIDlet extends MIDlet
         releaseMemory use true if exiting as we do not need
 		the rss feeds anymore, so we can save memory and avoid
 		having extra memory around.  */
-    final public void saveBookmarks(int region, boolean releaseMemory) {
+    final public void saveBookmarks(final long storeDate,
+			int region, boolean releaseMemory) {
 		System.gc();
 		StringBuffer bookmarks = new StringBuffer();
 		m_settings.setStringProperty("bookmarks", bookmarks.toString());
@@ -1433,7 +1466,17 @@ public class RssReaderMIDlet extends MIDlet
 						//#ifdef DTEST
 						storeTime += System.currentTimeMillis() - beginStore;
 						//#endif
-						bookmarks.append("^");
+						//#ifdef DCOMPATIBILITY1
+						bookmarks.append(OLD_FEED_SEPARATOR);
+						//#elifdef DCOMPATIBILITY2
+						bookmarks.append(OLD_FEED_SEPARATOR);
+						//#elifdef DCOMPATIBILITY2
+						bookmarks.append(OLD_FEED_SEPARATOR);
+						//#elifdef DCOMPATIBILITY3
+						bookmarks.append(OLD_FEED_SEPARATOR);
+						//#else
+						bookmarks.append(CFEED_SEPARATOR);
+						//#endif
 						if (releaseMemory) {
 							vstored.addElement( name );
 						}
@@ -1462,7 +1505,7 @@ public class RssReaderMIDlet extends MIDlet
 					}
 					final RssItunesFeed rss = (RssItunesFeed)m_rssFeeds.get( name );
 					bookmarks.append(rss.getStoreString(false, true));
-					bookmarks.append("^");
+					bookmarks.append(CFEED_SEPARATOR);
 					if (releaseMemory) {
 						vstored.addElement( name );
 					}
@@ -1479,6 +1522,8 @@ public class RssReaderMIDlet extends MIDlet
 			System.out.println("storeTime=" + storeTime);
 			//#endif
             m_settings.setStringProperty("bookmarks",bookmarks.toString());
+			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
+			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
 		} catch (Throwable t) {
             m_settings.setStringProperty("bookmarks", bookmarks.toString());
 			//#ifdef DTEST
@@ -1632,15 +1677,19 @@ public class RssReaderMIDlet extends MIDlet
 	   releaseMemory - true if memory used is to be released as the
 	   				   bookmarks are saved.  Used when exitiing as true.
 	*/
-	final private synchronized void saveBkMrkSettings(final boolean releaseMemory) {
+	final private synchronized void saveBkMrkSettings(final long storeDate,
+			final boolean releaseMemory) {
 		try {
+			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
+			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
 			m_settings.save(0, false);
 			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
-				saveBookmarks(ic, releaseMemory);
+				saveBookmarks(storeDate, ic, releaseMemory);
 				m_settings.save(ic, false);
 			}
 			// Set internal region back to 0.
 			m_settings.setStringProperty("bookmarks","");
+			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
 			m_settings.save(0, false);
 		} catch(Exception e) {
 			//#ifdef DLOGGING
