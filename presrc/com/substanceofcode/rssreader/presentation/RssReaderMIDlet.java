@@ -1181,7 +1181,7 @@ public class RssReaderMIDlet extends MIDlet
 
 	/* Set current displayable and wake up the thread. */
 	final public void setCurrent(Alert alert, Displayable disp) {
-		Display.getDisplay(this).setCurrent( disp );
+		Display.getDisplay(this).setCurrent( alert, disp );
 		m_display.setCurrent( alert, disp );
 		wakeUp();
 	}
@@ -1525,8 +1525,10 @@ public class RssReaderMIDlet extends MIDlet
 			System.out.println("storeTime=" + storeTime);
 			//#endif
             m_settings.setStringProperty("bookmarks",bookmarks.toString());
+			//#ifndef DCOMPATIBILITY
 			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
 			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
+			//#endif
 		} catch (Throwable t) {
             m_settings.setStringProperty("bookmarks", bookmarks.toString());
 			//#ifdef DTEST
@@ -1683,8 +1685,10 @@ public class RssReaderMIDlet extends MIDlet
 	final private synchronized void saveBkMrkSettings(final long storeDate,
 			final boolean releaseMemory) {
 		try {
+			//#ifndef DCOMPATIBILITY
 			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
 			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
+			//#endif
 			m_settings.save(0, false);
 			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
 				saveBookmarks(storeDate, ic, releaseMemory);
@@ -1692,7 +1696,10 @@ public class RssReaderMIDlet extends MIDlet
 			}
 			// Set internal region back to 0.
 			m_settings.setStringProperty("bookmarks","");
+			//#ifndef DCOMPATIBILITY
+			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
 			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
+			//#endif
 			m_settings.save(0, false);
 		} catch(Exception e) {
 			//#ifdef DLOGGING
