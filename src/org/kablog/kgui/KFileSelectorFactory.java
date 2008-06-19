@@ -19,6 +19,7 @@
  * IN THE SOFTWARE. 
  * 
  * 
+ * This software was originally modified no later than Sept 25, 2007.
  */
 
 /* From kablog-j2me. */
