@@ -18,7 +18,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. 
  * 
- * 
+ * This software was originally modified no later than Sept 25, 2007.
  */
 
 // Expand to define DJSR75 define
