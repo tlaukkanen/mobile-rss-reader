@@ -43,6 +43,8 @@
  * Site #2: http://student.vub.ac.be/~opinalid/
  * Source found at
  * http://www.koders.com/java/fid123AC940B58E5ED6E60BAC5685D7FFC0E3484875.aspx?s=mailto%40osvaldo.visionnaire.com.br
+ *
+ * This software was originally modified no later than Sept 10, 2007.
  */
 
 // Expand to define logging define
