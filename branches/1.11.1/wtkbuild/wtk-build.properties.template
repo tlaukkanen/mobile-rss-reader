@@ -59,7 +59,8 @@ wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReader/src
 zipdir = ../zipedsrc
 need.svn.preprocessed = true
 svn.home = C:\\PROGRA~1\\COLLAB~1
-svn.url =  https://mobile-rss-reader.googlecode.com/svn/trunk/
+#svn.url =  https://mobile-rss-reader.googlecode.com/svn/trunk/
+svn.url =  https://mobile-rss-reader.googlecode.com/svn/branches/1.11.1
 svn.src =  mobile-rss-reader
 svn.user =  ibuntonjr
 #Need ti distribute the SVN dirs
