@@ -176,6 +176,7 @@ v1.11.1 Beta 2 (June 19th 2008)
   problem prevented exit/delete of feed, but is not fixed.
 + Update exit key of when change of standard exit enabling.
 + Allow feeds with '^' in title, description, subtitle, summary, and author.
++ Use gauge to show progress of saving/loading.
 
 Known problems:
 
