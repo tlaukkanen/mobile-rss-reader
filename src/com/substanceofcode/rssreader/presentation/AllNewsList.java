@@ -480,6 +480,8 @@ implements CommandListener, Runnable  {
             try {
 				/* Sort the read or unread items. */
 				if ( m_sort ) {
+					m_midlet.initializeLoadingForm("Sorting items...", this);
+					m_midlet.showLoadingForm();
 					m_sort = false;
 					if (m_showAll) {
 						sortAllItems( m_dateSort, m_bookmarkList, m_rssFeeds );
@@ -580,7 +582,6 @@ implements CommandListener, Runnable  {
 //@		super.outputCmdAct(c, s, javax.microedition.lcdui.List.SELECT_COMMAND);
 		//#endif
         if( c == m_sortUnreadItemsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = true;
 			m_dateSort = true;
 			m_showAll = false;
@@ -590,7 +591,6 @@ implements CommandListener, Runnable  {
         
         /** Read read items date sorted */
         if( c == m_sortReadItemsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = false;
 			m_dateSort = true;
 			m_showAll = false;
@@ -600,7 +600,6 @@ implements CommandListener, Runnable  {
         
         /** Read unread items feed sorted */
         if( c == m_sortUnreadFeedsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = true;
 			m_dateSort = false;
 			m_showAll = false;
@@ -610,7 +609,6 @@ implements CommandListener, Runnable  {
         
         /** Read read items feed sorted */
         if( c == m_sortReadFeedsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = false;
 			m_dateSort = false;
 			m_showAll = false;
@@ -628,14 +626,12 @@ implements CommandListener, Runnable  {
 				//#endif
             }
 		} else if( c == m_sortAllDateCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = false;
 			m_dateSort = true;
 			m_showAll = true;
 			m_sort = true;
 			wakeUp();
 		} else if( c == m_sortAllFeedsCmd ) {
-			m_midlet.showLoadingForm("Sorting items...", this);
 			m_sortUnread = false;
 			m_dateSort = false;
 			m_showAll = true;
