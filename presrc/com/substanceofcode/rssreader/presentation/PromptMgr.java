@@ -48,10 +48,8 @@ import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 /* Form with optional commands added with addPromptCommand which if
-   used, will give prompt message with OK/Cancel.
+   used, will give prompt message with OK/Cancel. */
 
-   Due to peculiarities with setCurrent, we do setCurrent twice so that it will
-   work with most phones.  Otherwise, it may be ignored for some phones. */
 final public class PromptMgr implements CommandListener, Runnable {
 
 	private Hashtable promptCommands = new Hashtable();
