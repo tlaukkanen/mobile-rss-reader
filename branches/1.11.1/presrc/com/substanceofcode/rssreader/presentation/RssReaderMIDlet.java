@@ -90,6 +90,7 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Gauge;
 import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.Item;
 // If not using the test UI define the J2ME UI's
@@ -494,7 +495,8 @@ public class RssReaderMIDlet extends MIDlet
 					// Set Max item count to default so that it is initialized.
 					m_appSettings.setMaximumItemCountInFeed(
 							m_appSettings.getMaximumItemCountInFeed());
-					saveBkMrkSettings(System.currentTimeMillis(), false);
+					saveBkMrkSettings("Initializing database...",
+							System.currentTimeMillis(), false);
 					Alert m_about = getAbout();
 					setCurrent( m_about, m_bookmarkList );
 				} catch(Exception e) {
@@ -542,6 +544,9 @@ public class RssReaderMIDlet extends MIDlet
 		System.gc();
 		long beginMem = Runtime.getRuntime().freeMemory();
 		//#endif
+		Gauge gauge = new Gauge("Initializing bookmarks...",
+				false, m_settings.MAX_REGIONS, 0);
+		int pl = m_loadForm.append(gauge);
         try {
             m_bookmarkList = new PromptList(this, "Bookmarks", List.IMPLICIT);
             m_bookmarkList.addCommand( m_addNewBookmark );
@@ -648,7 +653,10 @@ public class RssReaderMIDlet extends MIDlet
 							stop = true;
 					}while(!stop);
 				}
+				gauge.setValue(ic);
             }
+			pl = -1;
+			gauge.setValue(m_settings.MAX_REGIONS);
 			// Reset internal region to 0.
 			m_settings.getStringProperty(0, "bookmarks", "");
 			//#ifdef DTEST
@@ -678,6 +686,10 @@ public class RssReaderMIDlet extends MIDlet
 			//#endif
 			/** Error while parsing RSS feed */
 			System.out.println("Error while initializing bookmark list: " + t.getMessage());
+		} finally {
+			if (pl >= 0) {
+				m_loadForm.delete(pl);
+			}
 		}
     }
     
@@ -1197,7 +1209,8 @@ public class RssReaderMIDlet extends MIDlet
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("m_exit,m_saveBookmarks=" + m_exit + "," + m_saveBookmarks);}
 			//#endif
-			saveBkMrkSettings(System.currentTimeMillis(), m_exit);
+			saveBkMrkSettings("Saving items to database...",
+					System.currentTimeMillis(), m_exit);
 			if (m_exit) {
 				try {
 					destroyApp(true);
@@ -1209,6 +1222,8 @@ public class RssReaderMIDlet extends MIDlet
 				super.notifyDestroyed();
 				m_exit = false;
 			} else {
+				m_loadForm.appendMsg(
+						"Finished saving.  Use back to return.");
 				setCurrent( m_bookmarkList );
 			}
 		} finally {
@@ -1762,17 +1777,24 @@ public class RssReaderMIDlet extends MIDlet
 	   releaseMemory - true if memory used is to be released as the
 	   				   bookmarks are saved.  Used when exitiing as true.
 	*/
-	final private synchronized void saveBkMrkSettings(final long storeDate,
+	final private synchronized void saveBkMrkSettings(String guageTxt,
+			final long storeDate,
 			final boolean releaseMemory) {
+		Gauge gauge = new Gauge(guageTxt, false,
+				m_settings.MAX_REGIONS + 1, 0);
+		int pl = m_loadForm.append(gauge);
+		showLoadingForm();
 		try {
 			//#ifndef DCOMPATIBILITY
 			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
 			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
 			//#endif
 			m_settings.save(0, false);
+			gauge.setValue(1);
 			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
 				saveBookmarks(storeDate, ic, releaseMemory);
 				m_settings.save(ic, false);
+				gauge.setValue(ic + 1);
 			}
 			// Set internal region back to 0.
 			m_settings.setStringProperty("bookmarks","");
@@ -1781,6 +1803,8 @@ public class RssReaderMIDlet extends MIDlet
 			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
 			//#endif
 			m_settings.save(0, false);
+			gauge.setValue(m_settings.MAX_REGIONS + 1);
+			pl = -1;
 		} catch(Exception e) {
 			//#ifdef DLOGGING
 			logger.severe("Saving feeds.", e);
@@ -1793,6 +1817,10 @@ public class RssReaderMIDlet extends MIDlet
 			//#endif
 			/** Error while parsing RSS feed */
 			System.out.println("Error saving: " + t + t.getMessage());
+		} finally {
+			if (pl >= 0) {
+				m_loadForm.delete(pl);
+			}
 		}
 	}
 
