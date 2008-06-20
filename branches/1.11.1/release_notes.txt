@@ -166,7 +166,9 @@ v1.11.1 Beta 1 (June 13th 2008)
 + Allow feeds with '^' in title, description, subtitle, summary,
   and author.
 
-v1.11.1 Beta 2 (June 18th 2008)
+v1.11.1 Beta 2 (June 19th 2008)
++ Workaround loading form not being shown on N95.  With the workaround the
+  problem is fixed.
 + Prepare for future store of items without encoding
 + Show microedition platform.
 + Workaround problem with some Sony Ericsson phones with dynamic retrieval
