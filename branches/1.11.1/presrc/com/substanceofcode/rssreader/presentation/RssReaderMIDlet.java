@@ -145,11 +145,16 @@ public class RssReaderMIDlet extends MIDlet
     private Display     m_display;          // The display for this MIDlet
     private Settings    m_settings;         // The settings
     private RssReaderSettings m_appSettings;// The application settings
+	// Some phones will now show the loading form if called from commandAction.
+	// So we need to use m_showReq to signal the thread the content we want
+	// to use for showLoadingForm.
+    private ShowLoadingReq m_showReq;       // The request to do showLoadingForm
     private Hashtable   m_rssFeeds;         // The bookmark URLs
     private Thread      m_netThread;        // The thread for networking
     final static private boolean     JSR75_ENABLED =
 	          (System.getProperty(
 			"microedition.io.file.FileConnection.version") != null);
+	private boolean     m_loadShown;           // Flag for loading form shown
     private boolean     m_debugOutput = false; // Flag to write to output for test
     private boolean     m_process = true;   // Flag to continue looping
     private boolean     m_needWakeup = false;   // Flag to show need to wakeup
@@ -285,7 +290,8 @@ public class RssReaderMIDlet extends MIDlet
 		//#endif
 
 		//#ifdef DLOGGING
-		showLoadingForm("Loading items...", null);
+		initializeLoadingForm("Loading items...", null);
+		setCurrent( m_loadForm );
 		try {
 			LogManager.getLogManager().readConfiguration(this);
 			logger = Logger.getLogger("RssReaderMIDlet");
@@ -364,6 +370,8 @@ public class RssReaderMIDlet extends MIDlet
 			m_backFrDebugCmd    = new Command("Back", Command.BACK, 2);
 		//#endif
 			
+			m_showReq = null;
+			m_loadShown = false;
 			m_getPage = false;
 			m_openPage = false;
 			m_getModPage = false;
@@ -418,7 +426,8 @@ public class RssReaderMIDlet extends MIDlet
 				System.err.println("Error while getting mark image: " + e.toString());
 			}
 			
-			showLoadingForm("Loading items...", null);
+			initializeLoadingForm("Loading items...", null);
+			setCurrent( m_loadForm );
 
 			/** Initialize thread for http connection operations */
 			m_process = true;
@@ -683,12 +692,48 @@ public class RssReaderMIDlet extends MIDlet
 		m_loadForm = new LoadingForm("Loading", disp);
 		m_loadForm.appendMsg( desc + "\n" );
     }
-    
+
+	/** Save request to show loading form to be executed by run thread. */
+	final private class ShowLoadingReq {
+		String desc;
+		Displayable disp;
+
+		public ShowLoadingReq(String desc, Displayable disp) {
+			this.desc = desc;
+			this.disp = disp;
+		}
+
+		public String getDesc() {
+			return (desc);
+		}
+
+		public Displayable getDisp() {
+			return (disp);
+		}
+
+	}
+
     /** Show loading form */
     final public void showLoadingForm(final String desc,
 									   Displayable disp) {
-		initializeLoadingForm(desc, disp);
-		setCurrent( m_loadForm );
+		if ((m_netThread != null) &&
+				Thread.currentThread().equals(m_netThread)) {
+			/* If same thread as midlet thread, do show loading form right
+			   away */
+			//#ifdef DTEST
+			System.out.println("showLoadingForm called from midlet thread.");
+			//#endif
+			initializeLoadingForm(desc, disp);
+			setCurrent( m_loadForm );
+		} else {
+			/* Request show loading as doing it in commandAction may hang
+			   or in N95's case it is not shown. */
+			//#ifdef DTEST
+			System.out.println("showLoadingForm called make request.");
+			//#endif
+			m_showReq = new ShowLoadingReq(desc, disp);
+			wakeUp();
+		}
 	}
 
     /** Set title and addmessage for loading form */
@@ -737,6 +782,24 @@ public class RssReaderMIDlet extends MIDlet
 					}
 				}
 
+				if (m_showReq != null) {
+					//#ifdef DTEST
+					System.out.println("showLoadingForm request processing.");
+					//#endif
+					initializeLoadingForm(m_showReq.getDesc(),
+							m_showReq.getDisp());
+					setCurrent( m_loadForm );
+					m_showReq = null;
+					m_needWakeup = true;
+					/* To avoid synchronization problem.  We set flag to let
+					   code which depends on the show loading form being shown
+					   to know that it has been shown.  Otherwise, we could
+					   do the other code and then show the loading form over
+					   what was shown. */
+
+					m_loadShown = true;
+				}
+
 				//#ifdef DTESTUI
 				// If there are headers, and the header index is >= 0,
 				// open the header so that it's items can be listed
@@ -772,14 +835,17 @@ public class RssReaderMIDlet extends MIDlet
 				//#endif
 
 				// Open existing bookmark and show headers (items).
-                if( m_openPage || m_getPage || m_getModPage ) {
+                if( m_loadShown && ( m_openPage || m_getPage || m_getModPage )) {
+					m_loadShown = false;
                     try {
-						if (m_openPage) {
-							final RssItunesFeed feed =
-								(RssItunesFeed)m_rssFeeds.get(
-									m_bookmarkList.getString(m_curBookmark));
-							m_curRssParser = new RssFeedParser( feed );
-						} else {
+						final RssItunesFeed feed = m_curRssParser.getRssFeed();
+						if(feed.getUrl().length() == 0) {
+							recordExcForm("Unable to open feed.  No URL.",
+									new Exception(
+								    "Feed has no URL cannot load."));
+							continue;
+						}
+						if (!m_openPage) {
 							/** Get RSS feed */
 							final int maxItemCount =
 								m_appSettings.getMaximumItemCountInFeed();
@@ -824,7 +890,8 @@ public class RssReaderMIDlet extends MIDlet
                 }
 
 				/* Handle going to settings form. */
-                if( m_getSettingsForm ) {
+                if( m_loadShown && m_getSettingsForm ) {
+					m_loadShown = false;
 					m_getSettingsForm = false;
                     try{
 						//#ifdef DTEST
@@ -849,7 +916,8 @@ public class RssReaderMIDlet extends MIDlet
 				}
 
 				/* Handle going to bookmark form. */
-                if( m_getAddBMForm || m_getEditBMForm ) {
+                if( m_loadShown && ( m_getAddBMForm || m_getEditBMForm )) {
+					m_loadShown = false;
                     try{
 						//#ifdef DTEST
 						System.gc();
@@ -879,7 +947,8 @@ public class RssReaderMIDlet extends MIDlet
 					}
 				}
 
-                if( m_refreshAllFeeds || m_refreshUpdFeeds ) {
+                if( m_loadShown && ( m_refreshAllFeeds || m_refreshUpdFeeds )) {
+					m_loadShown = false;
                     try{
 						boolean errFound = false;
                         final int maxItemCount = m_appSettings.getMaximumItemCountInFeed();
@@ -934,7 +1003,8 @@ public class RssReaderMIDlet extends MIDlet
                 }
 
 				// Go to import feed form
-				if( m_getImportForm ) {
+				if( m_loadShown && m_getImportForm ) {
+					m_loadShown = false;
 					try {
 						//#ifdef DTEST
 						System.gc();
@@ -993,53 +1063,58 @@ public class RssReaderMIDlet extends MIDlet
 				//#ifdef DJSR75
 				/* Find files in the file system to get for bookmark or
 				   import from. */
-                if( m_getFile ) {
-					if( m_getFile ) {
-						try {
-							final KFileSelectorMgr fileSelectorMgr =
-								new KFileSelectorMgr();
-							fileSelectorMgr.doLaunchSelector(this,
-										m_fileRtnForm, m_fileURL);
-						} catch(OutOfMemoryError ex) {
-							recordExcForm("Out Of Memory Error getting " +
-									"file form.", ex);
-						} catch (Throwable t) {
-							recordExcForm("Internal error getting file " +
-									"form.", t);
-						} finally {
-							m_getFile = false;
-						}
+                if( m_loadShown && m_getFile ) {
+					m_loadShown = false;
+					try {
+						final KFileSelectorMgr fileSelectorMgr =
+							new KFileSelectorMgr();
+						fileSelectorMgr.doLaunchSelector(this,
+									m_fileRtnForm, m_fileURL);
+					} catch(OutOfMemoryError ex) {
+						recordExcForm("Out Of Memory Error getting " +
+								"file form.", ex);
+					} catch (Throwable t) {
+						recordExcForm("Internal error getting file " +
+								"form.", t);
+					} finally {
+						m_getFile = false;
 					}
 				}
 				//#endif
 
 				/* Handle going to link (platform request.). */
 				//#ifdef DMIDP20
-				if (m_platformReq) {
+				if ( m_loadShown && m_platformReq ) {
+					m_loadShown = false;
 					try {
 
-					if( super.platformRequest(m_platformURL) ) {
-						m_exit = true;
-					} else {
-						setCurrent( m_itemRrnForm );
+						if( super.platformRequest(m_platformURL) ) {
+							initializeLoadingForm("Exiting saving data...",
+									m_itemRrnForm);
+							setCurrent( m_loadForm );
+							m_exit = true;
+							exitApp();
+						} else {
+							setCurrent( m_itemRrnForm );
+						}
+					} catch (ConnectionNotFoundException e) {
+						//#ifdef DLOGGING
+						logger.severe("Error opening link " + m_platformURL, e);
+						//#endif
+						final Alert badLink = new Alert("Could not connect to link",
+								"Bad link:  " + m_platformURL,
+								null, AlertType.ERROR);
+						badLink.setTimeout(Alert.FOREVER);
+						setCurrent( badLink, m_itemRrnForm );
+					} finally {
+						m_platformReq = false;
 					}
-				} catch (ConnectionNotFoundException e) {
-					//#ifdef DLOGGING
-					logger.severe("Error opening link " + m_platformURL, e);
-					//#endif
-					final Alert badLink = new Alert("Could not connect to link",
-							"Bad link:  " + m_platformURL,
-							null, AlertType.ERROR);
-					badLink.setTimeout(Alert.FOREVER);
-					setCurrent( badLink, m_itemRrnForm );
-				} finally {
-					m_platformReq = false;
 				}
-			}
 			//#endif
 
 				/* Sort the read or unread items. */
-				if ( m_runNews ) {
+				if ( m_loadShown && m_runNews ) {
+					m_loadShown = false;
 					try {
 						AllNewsList unreadHeaderList = new AllNewsList(this,
 							m_bookmarkList, m_rssFeeds,
@@ -1061,29 +1136,9 @@ public class RssReaderMIDlet extends MIDlet
 					}
 				}
 
-				if ( m_exit || m_saveBookmarks ) {
-					try {
-						//#ifdef DLOGGING
-						if (fineLoggable) {logger.fine("m_exit,m_saveBookmarks=" + m_exit + "," + m_saveBookmarks);}
-						//#endif
-						saveBkMrkSettings(System.currentTimeMillis(), m_exit);
-						if (m_exit) {
-							try {
-								destroyApp(true);
-							} catch (MIDletStateChangeException e) {
-								//#ifdef DLOGGING
-								if (fineLoggable) {logger.fine("MIDletStateChangeException=" + e.getMessage());}
-								//#endif
-							}
-							super.notifyDestroyed();
-							m_exit = false;
-						} else {
-							setCurrent( m_bookmarkList );
-						}
-					} finally {
-						m_exit = false;
-						m_saveBookmarks = false;
-					}
+				if ( m_loadShown && ( m_exit || m_saveBookmarks )) {
+					m_loadShown = false;
+					exitApp();
 				}
 
                 lngStart = System.currentTimeMillis();
@@ -1103,7 +1158,9 @@ public class RssReaderMIDlet extends MIDlet
 					if (m_loadForm == null) {
 						synchronized(this) {
 							if (m_loadForm == null) {
-								showLoadingForm("Processing...", m_bookmarkList);
+								initializeLoadingForm("Processing...",
+										m_bookmarkList);
+								setCurrent( m_loadForm );
 							}
 						}
 					}
@@ -1132,6 +1189,34 @@ public class RssReaderMIDlet extends MIDlet
         }
     }
 	
+	/** Save data and exit the application. This accesses the database,
+	    so it must not be called by commandAction as it may hang.  It must
+	    be called by a separate thread.  */
+	final private void exitApp() {
+		try {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine("m_exit,m_saveBookmarks=" + m_exit + "," + m_saveBookmarks);}
+			//#endif
+			saveBkMrkSettings(System.currentTimeMillis(), m_exit);
+			if (m_exit) {
+				try {
+					destroyApp(true);
+				} catch (MIDletStateChangeException e) {
+					//#ifdef DLOGGING
+					if (fineLoggable) {logger.fine("MIDletStateChangeException=" + e.getMessage());}
+					//#endif
+				}
+				super.notifyDestroyed();
+				m_exit = false;
+			} else {
+				setCurrent( m_bookmarkList );
+			}
+		} finally {
+			m_exit = false;
+			m_saveBookmarks = false;
+		}
+	}
+
 	/* Record the exception in the loading form, log it and give std error. */
 	final public void recordExcForm(final String causeMsg, final Throwable e) {
 		final CauseException ce = new CauseException(causeMsg, e);
@@ -1149,8 +1234,8 @@ public class RssReaderMIDlet extends MIDlet
 
 	//#ifdef DMIDP20
 	final public void setCurrentItem(Item item) {
-		Display.getDisplay(this).setCurrentItem(item);
 		m_display.setCurrentItem(item);
+		// Prevents loading screen Display.getDisplay(this).setCurrentItem(item);
 		wakeUp();
 	}
 	//#endif
@@ -1167,8 +1252,8 @@ public class RssReaderMIDlet extends MIDlet
 		}
 		System.out.println("Test UI setCurrent " + disp.getClass().getName() + "," + title);
 		//#endif
-		Display.getDisplay(this).setCurrent( disp );
 		m_display.setCurrent( disp );
+		// Prevents loading screen Display.getDisplay(this).setCurrent( disp );
 		wakeUp();
 	}
 
@@ -1181,8 +1266,8 @@ public class RssReaderMIDlet extends MIDlet
 
 	/* Set current displayable and wake up the thread. */
 	final public void setCurrent(Alert alert, Displayable disp) {
-		Display.getDisplay(this).setCurrent( alert, disp );
 		m_display.setCurrent( alert, disp );
+		// Prevents loading screen Display.getDisplay(this).setCurrent( alert, disp );
 		wakeUp();
 	}
 
@@ -1547,15 +1632,10 @@ public class RssReaderMIDlet extends MIDlet
     final private void updateHeaders(final boolean updMod, Displayable dispBack) {
 		try {
 			showLoadingForm("updating feed...", dispBack);
-			if(m_curRssParser.getRssFeed().getUrl().length()>0) {
-				if (updMod) {
-					m_getModPage = true;
-				} else {
-					m_getPage = true;
-				}
+			if (updMod) {
+				m_getModPage = true;
 			} else {
-				m_loadForm.addExc(new Exception(
-							"Feed has no URL cannot load."));
+				m_getPage = true;
 			}
 		} catch (Throwable t) {
 //#ifdef DLOGGING
@@ -1740,16 +1820,25 @@ public class RssReaderMIDlet extends MIDlet
         /** Exit from MIDlet and save bookmarks */
         if( c == m_exitCommand ){
 			showLoadingForm("Exiting saving data...", m_bookmarkList);
-			synchronized (this) {
-				if ( !m_netThread.isAlive() ) {
-					m_netThread.start();
-					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest("Thread started.");}
+			if ( !m_netThread.isAlive() ) {
+				m_process = true;
+				try {
+					//#ifdef DCLDCV11
+					m_netThread = new Thread(this, "RssReaderMIDlet");
+					//#else
+					m_netThread = new Thread(this);
 					//#endif
-					try {
-						m_netThread.sleep(1000L);
-					} catch (InterruptedException e) {}
+					m_netThread.start();
+				} catch (Exception e) {
+					System.err.println("Could not restart thread.");
+					e.printStackTrace();
+					//#ifdef DLOGGING
+					logger.severe("Could not restart thread.", e);
+					//#endif
 				}
+				//#ifdef DLOGGING
+				logger.info("RssReaderMIDlet thread not started.  Started now.");
+				//#endif
 			}
 			m_exit = true;
         }
@@ -1794,6 +1883,9 @@ public class RssReaderMIDlet extends MIDlet
                 m_display.getCurrent()==m_bookmarkList)){
             if( m_bookmarkList.size()>0 ){
                 m_curBookmark = m_bookmarkList.getSelectedIndex();
+                if (m_curBookmark < 0) {
+					m_curBookmark = 0;
+				}
                 
                 RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
                         m_bookmarkList.getString(m_curBookmark));
@@ -1803,17 +1895,11 @@ public class RssReaderMIDlet extends MIDlet
                     updateHeaders(false, m_bookmarkList);
                 } else {
 					showLoadingForm("Loading feed...", m_bookmarkList);
-					if(feed.getUrl().length() == 0) {
-						m_loadForm.addExc(new Exception(
-									"Feed has no URL cannot load."));
-					} else {
-						/**
-						 * Show currently selected RSS feed
-						 * headers without updating them
-						 */
-						m_openPage = true;
-						m_curBookmark = m_bookmarkList.getSelectedIndex();
-					}
+					/**
+					 * Show currently selected RSS feed
+					 * headers without updating them
+					 */
+					m_openPage = true;
                 }
             }
         }
@@ -1866,6 +1952,7 @@ public class RssReaderMIDlet extends MIDlet
 		//#ifdef DMIDP20
         /** Go to link and get back to RSS feed headers */
         if( c == m_openLinkCmd ){
+			showLoadingForm("Loading web page...", m_itemForm);
 			final String link = citem.getLink();
 			m_platformReq = true;
 			m_platformURL = link;
@@ -1876,6 +1963,7 @@ public class RssReaderMIDlet extends MIDlet
 		//#ifdef DMIDP20
         /** Go to link and get back to RSS feed headers */
         if( c == m_openEnclosureCmd ){
+			showLoadingForm("Loading web page...", m_itemForm);
 			m_platformReq = true;
 			m_platformURL = citem.getEnclosure();
 			wakeUp();
@@ -2009,6 +2097,7 @@ public class RssReaderMIDlet extends MIDlet
 			super("Import feeds");
 			m_getFeedList = false;
 			m_getFeedTitleList = false;
+			m_listParser = null;
 			if(url.length()==0) {
 				url = "http://";
 			}
@@ -2173,41 +2262,107 @@ public class RssReaderMIDlet extends MIDlet
 				try {
 					// Add feeds from import.
 					if( m_getFeedList ) {
-						if( m_getFeedList ) {
-							try {
-								if(m_listParser == null) {
-									/* If we get here, it's beause the user
-									   pressed the menu twice.  */
-									setCurrent( m_bookmarkList );
-									m_loadForm.removeRef(this);
-									m_getFeedList      = false;
-									m_getFeedTitleList = false;
-									m_process = false;
-								} else if(m_listParser.isReady()) {
-									addFeedLists();
-
-								} else {
-									//#ifndef DTESTUI
-									if (m_debugOutput) System.out.println("Feed list parsing isn't ready");
-									//#endif
-								}
-							} catch(Exception ex) {
-								recordExcForm(
-										"Error importing feeds from " +
-										m_listParser.getUrl() + " " +
-										ex.getMessage(), ex);
-								m_getFeedList      = false;
-								m_getFeedTitleList = false;
-								// TODO empty list parser m_listParser = null;
-							} catch(Throwable t) {
-								recordExcForm(
-										"Error importing feeds from " +
-										m_listParser.getUrl() + " " +
-										t.getMessage(), t);
-								m_getFeedList      = false;
-								m_getFeedTitleList = false;
-								// TODO empty list parser m_listParser = null;
+						m_getFeedList = false;
+						initializeLoadingForm("Loading feeds from import...",
+								this);
+						setCurrent( m_loadForm );
+						final String url = m_feedListURL.getString().trim();
+						try {
+							
+							// 2. Import feeds
+							int selectedImportType = m_importFormatGroup.getSelectedIndex();
+							RssItunesFeed[] feeds = null;
+							String feedNameFilter = m_feedNameFilter.getString();
+							String feedURLFilter = m_feedURLFilter.getString();
+							String username = m_feedListUsername.getString();
+							String password = m_feedListPassword.getString();
+							m_getFeedTitleList = m_importTitleGroup.isSelected(1);
+							//#ifdef DLOGGING
+							if (finestLoggable) {logger.finest("m_getFeedTitleList=" + m_getFeedTitleList);}
+							if (finestLoggable) {logger.finest("selectedImportType=" + selectedImportType);}
+							//#endif
+							
+							// Save settings
+							m_appSettings.setImportUrl(url);
+							m_appSettings.setImportUrlUsername(username);
+							m_appSettings.setImportUrlPassword(password);
+							switch (selectedImportType) {
+								case 0:
+									// Use OPML parser
+									m_listParser = new OpmlParser(url, username, password);
+									break;
+								case 1:
+									// Use line by line parser
+									m_listParser = new LineByLineParser(url, username, password);
+									break;
+								case 2:
+									// Use line by HMTL OPML auto link parser
+									m_listParser = new HTMLAutoLinkParser(url, username, password);
+									((HTMLAutoLinkParser)m_listParser).setNeedRss(false);
+									break;
+								case 3:
+									// Use line by HMTL RSS auto link parser
+									m_listParser = new HTMLAutoLinkParser(url, username, password);
+									((HTMLAutoLinkParser)m_listParser).setNeedRss(true);
+									break;
+								case 4:
+									// Use line by HMTL link parser
+									m_listParser = new HTMLLinkParser(url, username, password);
+									break;
 							}
+							m_listParser.setFeedNameFilter(feedNameFilter);
+							m_listParser.setFeedURLFilter(feedURLFilter);
+							m_listParser.setRedirectHtml(m_importHTMLGroup.isSelected(0)
+								&& !(m_listParser instanceof HTMLAutoLinkParser)
+								&& !(m_listParser instanceof HTMLLinkParser));
+							//#ifdef DLOGGING
+							if (fineLoggable) {logger.fine("redirect html=" + m_listParser.isRedirectHtml());}
+							//#endif
+							
+							// Start parsing
+							m_listParser.startParsing();
+							
+							// 3. Show result screen
+							// 4. Show list of feeds
+							
+						} catch(Exception ex) {
+							m_listParser = null;
+							recordExcForm("Error importing feeds from " + url, ex);
+						} catch(OutOfMemoryError ex) {
+							m_listParser = null;
+							recordExcForm("Out Of Memory Error importing feeds from " +
+									url, ex);
+						} catch(Throwable t) {
+							m_listParser = null;
+							recordExcForm("Out Of Memory Error importing feeds from " +
+									url, t);
+						}
+					}
+					if(m_listParser != null) {
+						try {
+							if(m_listParser.isReady()) {
+								addFeedLists();
+								m_listParser = null;
+
+							} else {
+								//#ifndef DTESTUI
+								if (m_debugOutput) System.out.println("Feed list parsing isn't ready");
+								//#endif
+							}
+						} catch(Exception ex) {
+							recordExcForm(
+									"Error importing feeds from " +
+									m_listParser.getUrl() + " " +
+									ex.getMessage(), ex);
+							m_getFeedTitleList = false;
+							// TODO empty list parser m_listParser = null;
+						} catch(Throwable t) {
+							recordExcForm(
+									"Error importing feeds from " +
+									m_listParser.getUrl() + " " +
+									t.getMessage(), t);
+							m_getFeedTitleList = false;
+							// TODO empty list parser m_listParser = null;
 						}
 					}
 					lngStart = System.currentTimeMillis();
@@ -2248,77 +2403,9 @@ public class RssReaderMIDlet extends MIDlet
 				if ((m_addBkmrk < 0) || (m_addBkmrk > blen)) {
 					m_addBkmrk = blen;
 				}
+				/* Set flag after other variables are set. */
+				m_getFeedList = true;
 
-				final String url = m_feedListURL.getString().trim();
-				try {
-					showLoadingForm("Loading feeds from import...", this);
-					
-					// 2. Import feeds
-					int selectedImportType = m_importFormatGroup.getSelectedIndex();
-					RssItunesFeed[] feeds = null;
-					String feedNameFilter = m_feedNameFilter.getString();
-					String feedURLFilter = m_feedURLFilter.getString();
-					String username = m_feedListUsername.getString();
-					String password = m_feedListPassword.getString();
-					m_getFeedTitleList = m_importTitleGroup.isSelected(1);
-					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest("m_getFeedTitleList=" + m_getFeedTitleList);}
-					if (finestLoggable) {logger.finest("selectedImportType=" + selectedImportType);}
-					//#endif
-					
-					// Save settings
-					m_appSettings.setImportUrl(url);
-					m_appSettings.setImportUrlUsername(username);
-					m_appSettings.setImportUrlPassword(password);
-					switch (selectedImportType) {
-						case 0:
-							// Use OPML parser
-							m_listParser = new OpmlParser(url, username, password);
-							break;
-						case 1:
-							// Use line by line parser
-							m_listParser = new LineByLineParser(url, username, password);
-							break;
-						case 2:
-							// Use line by HMTL OPML auto link parser
-							m_listParser = new HTMLAutoLinkParser(url, username, password);
-							((HTMLAutoLinkParser)m_listParser).setNeedRss(false);
-							break;
-						case 3:
-							// Use line by HMTL RSS auto link parser
-							m_listParser = new HTMLAutoLinkParser(url, username, password);
-							((HTMLAutoLinkParser)m_listParser).setNeedRss(true);
-							break;
-						case 4:
-							// Use line by HMTL link parser
-							m_listParser = new HTMLLinkParser(url, username, password);
-							break;
-					}
-					m_listParser.setFeedNameFilter(feedNameFilter);
-					m_listParser.setFeedURLFilter(feedURLFilter);
-					m_listParser.setRedirectHtml(m_importHTMLGroup.isSelected(0)
-						&& !(m_listParser instanceof HTMLAutoLinkParser)
-						&& !(m_listParser instanceof HTMLLinkParser));
-					//#ifdef DLOGGING
-					if (fineLoggable) {logger.fine("redirect html=" + m_listParser.isRedirectHtml());}
-					//#endif
-					
-					// Start parsing
-					m_listParser.startParsing();
-					m_getFeedList = true;
-					
-					// 3. Show result screen
-					// 4. Show list of feeds
-					
-				} catch(Exception ex) {
-					recordExcForm("Error importing feeds from " + url, ex);
-				} catch(OutOfMemoryError ex) {
-					recordExcForm("Out Of Memory Error importing feeds from " +
-							url, ex);
-				} catch(Throwable t) {
-					recordExcForm("Out Of Memory Error importing feeds from " +
-							url, t);
-				}
 			}
 			
 			//#ifdef DJSR75
@@ -2574,9 +2661,12 @@ public class RssReaderMIDlet extends MIDlet
 					m_display.getCurrent()==this)) {
 				if( super.size()>0 ) {
 					RssItunesFeed feed = m_curRssParser.getRssFeed();
-					int selIdx;
+					int selIdx = super.getSelectedIndex();
+					if (selIdx < 0) {
+						selIdx = 0;
+					}
 					RssItunesItem item = (RssItunesItem)feed.getItems(
-							).elementAt((selIdx = super.getSelectedIndex()) );
+							).elementAt(selIdx);
 					super.set(selIdx, super.getString(selIdx),
 							null );
 					item.setUnreadItem(false);
