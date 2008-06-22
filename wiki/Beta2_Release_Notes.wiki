@@ -169,7 +169,7 @@ v1.11.1 Beta 2 (June 19th 2008)
   * Show microedition platform.
   * Workaround problem with some Sony Ericsson phones with dynamic retrieval
    of display.  Need to use setCurrent using original display for alerts.  This
-   problem prevented exit/delete of feed, but is not fixed.
+   problem prevented exit/delete of feed, but is now fixed.
   * Update exit key of when change of standard exit enabling.
   * Allow feeds with '^' in title, description, subtitle, summary, and author.
   * Use gauge to show progress of saving/loading.
