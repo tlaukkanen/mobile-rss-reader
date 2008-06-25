@@ -381,6 +381,12 @@ public class RssFormatParser implements FeedFormatParser {
             int timeIndex = 4;
             int gmtIndex = 5;
             
+			int kc = 0;
+            while ((dateString.indexOf("  ") >= 0) &&
+					(kc++ < dateString.length())) {
+				dateString = StringUtil.replace(dateString, "  ", " ");
+			}
+
             String[] values = StringUtil.split(dateString, " ");
             int columnCount = values.length;
             if( columnCount==5 ) {
@@ -493,9 +499,6 @@ public class RssFormatParser implements FeedFormatParser {
             // Month
             int month = Integer.parseInt( values[ monthIndex ] );
             
-            int dayOfMonthIndex = 0;
-            // Time
-            String[] dayTimeValues = StringUtil.split(values[ dayOfMonthTimeIndex ],":");
             // Day of month
             String sdayOfMonth = values[ dayOfMonthTimeIndex ].substring(0, 2);
 
@@ -509,7 +512,8 @@ public class RssFormatParser implements FeedFormatParser {
             timeValues[2] = timeValues[2].substring( 0, 2 );
             int seconds = Integer.parseInt( timeValues[2] );
             
-            pubDate = getCal(dayOfMonth, month, year, hours, minutes, seconds);
+            pubDate = getCal(dayOfMonth, month - 1 + Calendar.JANUARY, year,
+					hours, minutes, seconds);
             
         } catch(Exception ex) {
 			//#ifdef DLOGGING
