@@ -481,7 +481,6 @@ implements CommandListener, Runnable  {
 				/* Sort the read or unread items. */
 				if ( m_sort ) {
 					m_midlet.initializeLoadingForm("Sorting items...", this);
-					m_midlet.showLoadingForm();
 					m_sort = false;
 					if (m_showAll) {
 						sortAllItems( m_dateSort, m_bookmarkList, m_rssFeeds );
