@@ -63,17 +63,17 @@ Alternatively, you can use your phone browser to download
 RSSReader directly from this web.
 
 Just enter this url for MIDP-2.0 (see below): 
-http://mobile-rss-reader.googlecode.com/files/midp20_RSSReader-10.7.jar
+http://mobile-rss-reader.googlecode.com/files/midp20_RSSReader-1.11.jar
 
 
 
 Just enter this url for MIDP-2.0 and JSR-75 (see below): 
-http://mobile-rss-reader.googlecode.com/files/midp20_jsr75_RSSReader-10.7.jar
+http://mobile-rss-reader.googlecode.com/files/midp20_jsr75_RSSReader-1.11.jar
 
  
 
 If your phone is old, use this url: 
-http://mobile-rss-reader.googlecode.com/files/midp10_RSSReader-10.7.jar
+http://mobile-rss-reader.googlecode.com/files/midp10_RSSReader-1.11.jar
 
 
  == Reading from phone memory == 
