@@ -2470,7 +2470,7 @@ public class RssReaderMIDlet extends MIDlet
 				commandAction(m_importAppndCmd, this);
 			}
 			//#endif
-			wakeUp();
+			importWakeUp();
 
 		}
 
