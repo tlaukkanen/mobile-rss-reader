@@ -1,6 +1,4 @@
 /*
-   TODO don't remove carriage return
-   TODO remove extra spaces between date elements: Thu, 19 Jul  2007 00:00:00 N
    TODO remove extra spaces between description item 7 of imbed
 
  * RssFormatParser.java
