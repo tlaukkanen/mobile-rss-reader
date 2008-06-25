@@ -2055,6 +2055,7 @@ public class RssReaderMIDlet extends MIDlet
 //@		}
 //@
 		//#endif
+		wakeUp();
 
     }
     
@@ -2411,6 +2412,7 @@ public class RssReaderMIDlet extends MIDlet
 //@							AlertType.WARNING);
 //@					invalidAlert.setTimeout(Alert.FOREVER);
 //@					setCurrent( invalidAlert, this );
+//@					wakeUp();
 //@					return;
 //@				}
 //@				try {
@@ -2468,7 +2470,7 @@ public class RssReaderMIDlet extends MIDlet
 //@				commandAction(m_importAppndCmd, this);
 //@			}
 			//#endif
-			wakeUp();
+			importWakeUp();
 
 		}
 
