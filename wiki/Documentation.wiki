@@ -38,6 +38,8 @@ midp20_RSSReader... or midp20_jsr75_RSSReader...)  for MIDP 2.0 (see above)
 phone memory
    #   OPML
    #   HTML hyperlinks 
+   #   HTML Auto links
+   #   HTML OPML Auto links
    #   Line by line
 using formats and filter feeds based on name and URL (except v1.10.5)
 
