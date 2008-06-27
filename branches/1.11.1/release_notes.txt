@@ -150,7 +150,7 @@ v1.11
 + Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
-v1.11.1 Beta 1 (June 13th 2008)
+v1.11.1 Release Candidate 1 (RC1) (June 27th 2008)
 + Fix bug when opening feeds on Sony Ericsson emulators and possiblely
   affecting Sony Ericsson devices
 + Fix bug with storing Itunes attributes
@@ -165,8 +165,6 @@ v1.11.1 Beta 1 (June 13th 2008)
 + Minor performance improvement for creating items, reading stored feeds.
 + Allow feeds with '^' in title, description, subtitle, summary,
   and author.
-
-v1.11.1 Beta 2 (June 19th 2008)
 + Workaround loading form not being shown on N95.  With the workaround the
   problem is fixed.
 + Prepare for future store of items without encoding
@@ -177,6 +175,8 @@ v1.11.1 Beta 2 (June 19th 2008)
 + Update exit key of when change of standard exit enabling.
 + Allow feeds with '^' in title, description, subtitle, summary, and author.
 + Use gauge to show progress of saving/loading.
++ Fix dates in yyyy-mm-dd format
++ Fix standard dates with 2 or more consecutive spaces
 
 Known problems:
 
