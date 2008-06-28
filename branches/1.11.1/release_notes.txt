@@ -179,6 +179,8 @@ v1.11.1 Release Candidate 1 (RC1) (June 27th 2008)
 + Fix standard dates with 2 or more consecutive spaces
 
 v1.11.1 Release Candidate 2 (RC2) (June 28th 2008)
++ Workaround Sony Ericsson T637 problem with Exit and Delete (Alerts on MIDP
+  1.0 device)
 + Handle Content module
 
 Known problems:
