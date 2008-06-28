@@ -260,6 +260,7 @@ public class ExtParser {
 		int elen = elementName.length();
 		boolean isItunes = false;
 		boolean isDc = false;
+		boolean isContent = false;
 		if (m_hasItunes && (elemChar == m_itunesNamespaceChar) &&
 				(m_itunesNamespaceLen < elen) &&
 			 elementName.startsWith(m_itunesNamespace)) {
@@ -274,7 +275,7 @@ public class ExtParser {
 			(m_contentNamespaceLen < elen) &&
 			elementName.startsWith(m_contentNamespace)) {
 			subElem = elementName.substring(m_contentNamespaceLen);
-			isDc = true;
+			isContent = true;
 		} else {
 			return;
 		}
