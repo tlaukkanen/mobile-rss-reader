@@ -135,6 +135,9 @@ public class XmlParser {
 									m_currentElementName.toString())) ||
 								((m_namespaces.length >= 2) &&
 								m_namespaces[1].equals(
+									m_currentElementName.toString())) ||
+								((m_namespaces.length >= 3) &&
+								m_namespaces[2].equals(
 									m_currentElementName.toString())))) {
 								m_currentElementName.append(c);
 								break;
