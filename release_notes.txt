@@ -178,6 +178,9 @@ v1.11.1 Release Candidate 1 (RC1) (June 27th 2008)
 + Fix dates in yyyy-mm-dd format
 + Fix standard dates with 2 or more consecutive spaces
 
+v1.11.1 Release Candidate 2 (RC2) (June 28th 2008)
++ Handle Content module
+
 Known problems:
 
 - Sometimes when using River of News, the sort does not complete leaving the
