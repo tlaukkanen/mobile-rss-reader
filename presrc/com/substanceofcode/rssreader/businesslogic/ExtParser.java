@@ -28,6 +28,7 @@ package com.substanceofcode.rssreader.businesslogic;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Vector;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -55,15 +56,19 @@ public class ExtParser {
 	// Dublin core metadata element set
 	// Explained at http://web.resource.org/rss/1.0/modules/dc/
 	public final static String DC_NAMESPACE = "http://purl.org/dc/elements/1.1/";
+	public final static String CONTENT_NAMESPACE = "http://purl.org/rss/1.0/modules/content/";
 	private boolean m_itunes = false;
 	private boolean m_hasItunes = false;
 	private boolean m_hasExt = false;
 	private boolean m_hasDc = false;
+	private boolean m_hasContent = false;
 	private byte m_explicit = (byte)-1;   // The RSS item explicit
 	private char m_itunesNamespaceChar;
 	private char m_dcNamespaceChar;
+	private char m_contentNamespaceChar;
 	private String m_itunesNamespace = "";
 	private String m_dcNamespace = "";
+	private String m_contentNamespace = "";
 	private String m_date = "";   // The RSS item date
 	private String m_author = "";   // The RSS item Itunes author
 	private String m_creator = "";   // The RSS item DC creator
@@ -72,10 +77,12 @@ public class ExtParser {
 	private String m_subtitle = "";   // The RSS item subtitle
     private String m_language = "";   // The RSS item language
 	private String m_description = "";   // The RSS item DC description
+	private String m_encoded = "";   // The RSS item Content encoded
 	private String m_summary = "";   // The RSS item summary
 	private String m_duration = "";   // The RSS item duration
 	private int m_itunesNamespaceLen = 0;
 	private int m_dcNamespaceLen = 0;
+	private int m_contentNamespaceLen = 0;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("ExtParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
@@ -92,6 +99,7 @@ public class ExtParser {
 		m_author = "";
 		m_creator = "";
 		m_description = "";
+		m_encoded = "";
 		m_language = "";
 		m_subtitle = "";
 		m_summary = "";
@@ -134,6 +142,9 @@ public class ExtParser {
 					boolean unreadItem, String author) {
 		if (desc.length() == 0) {
 			desc = m_description;
+			if (desc.length() == 0) {
+				desc = m_encoded;
+			}
 		}
 		if (desc.equals(m_summary)) {
 			m_summary = "";
@@ -177,6 +188,7 @@ public class ExtParser {
 		m_hasItunes = false;
 		m_hasExt = false;
 		m_hasDc = false;
+		m_hasContent = false;
 		for (int ic = 0; ic < rnameSpaces.length; ic++) {
 			if ((nameSpaces[1][ic].indexOf("itunes") >= 0) ||
 			   (nameSpaces[1][ic].indexOf("apple") >= 0)) {
@@ -201,34 +213,44 @@ public class ExtParser {
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest("m_dcNamespace,m_dcNamespace=" + m_dcNamespace + "," + m_dcNamespace);}
 				//#endif
+			} else if (nameSpaces[1][ic].indexOf(CONTENT_NAMESPACE) >= 0) {
+				m_hasContent = true;
+				m_hasExt = true;
+				m_contentNamespace = nameSpaces[0][ic] + ":";
+				m_contentNamespaceChar = m_contentNamespace.charAt(0);
+				m_contentNamespaceLen = m_contentNamespace.length();
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest("m_contentNamespace,m_contentNamespace=" + m_contentNamespace + "," + m_contentNamespace);}
+				//#endif
 			}
 		}
 		String [] checkNameSpaces;
-		if (m_hasItunes && m_hasDc) {
-			checkNameSpaces = new String[2] ;
-			checkNameSpaces[0] = m_itunesNamespace.substring(0,
-					(m_itunesNamespaceLen - 1));
-			checkNameSpaces[1] = m_dcNamespace.substring(0,
-					(m_dcNamespaceLen - 1));
-		} else if (m_hasItunes) {
-			checkNameSpaces = new String[1] ;
-			checkNameSpaces[0] = m_itunesNamespace.substring(0,
-					(m_itunesNamespace.length() - 1));
-		} else if (m_hasDc) {
-			checkNameSpaces = new String[1] ;
-			checkNameSpaces[0] = m_dcNamespace.substring(0,
-					(m_dcNamespace.length() - 1));
+		if (m_hasItunes || m_hasDc || m_hasContent) {
+			Vector vspaces = new Vector();
+			if (m_hasItunes) {
+				vspaces.addElement(m_itunesNamespace.substring(0,
+						(m_itunesNamespace.length() - 1)));
+			}
+			if (m_hasDc) {
+				vspaces.addElement(m_dcNamespace.substring(0,
+					(m_dcNamespace.length() - 1)));
+			}
+			if (m_hasContent) {
+				vspaces.addElement(m_contentNamespace.substring(0,
+					(m_contentNamespace.length() - 1)));
+			}
+			checkNameSpaces = new String[vspaces.size()];
+			vspaces.copyInto(checkNameSpaces);
+			parser.setNamespaces(checkNameSpaces);
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("checkNameSpaces[0]=" + checkNameSpaces[0]);}
+			if (finestLoggable) {if (checkNameSpaces.length > 1) {logger.finest("checkNameSpaces[1]=" + checkNameSpaces[1]);}}
+			if (finestLoggable) {if (checkNameSpaces.length > 2) {logger.finest("checkNameSpaces[2]=" + checkNameSpaces[2]);}}
+			//#endif
+			
 		} else {
 			return;
 		}
-		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("checkNameSpaces[0]=" + checkNameSpaces[0]);}
-		if (finestLoggable) {if (checkNameSpaces.length > 1) {logger.finest("checkNameSpaces[1]=" + checkNameSpaces[1]);}}
-		//#endif
-		if (m_hasDc || m_hasItunes) {
-			parser.setNamespaces(checkNameSpaces);
-		}
-        
     }
     
 	/* Parse the item to get it's fields */
@@ -238,6 +260,7 @@ public class ExtParser {
 		int elen = elementName.length();
 		boolean isItunes = false;
 		boolean isDc = false;
+		boolean isContent = false;
 		if (m_hasItunes && (elemChar == m_itunesNamespaceChar) &&
 				(m_itunesNamespaceLen < elen) &&
 			 elementName.startsWith(m_itunesNamespace)) {
@@ -248,6 +271,11 @@ public class ExtParser {
 			elementName.startsWith(m_dcNamespace)) {
 			subElem = elementName.substring(m_dcNamespaceLen);
 			isDc = true;
+		} else if (m_hasContent && (elemChar == m_contentNamespaceChar) &&
+			(m_contentNamespaceLen < elen) &&
+			elementName.startsWith(m_contentNamespace)) {
+			subElem = elementName.substring(m_contentNamespaceLen);
+			isContent = true;
 		} else {
 			return;
 		}
@@ -278,7 +306,6 @@ public class ExtParser {
 			case 'd':
 				if( subElem.equals("description") ) {
 					m_description = parser.getText();
-					m_description = StringUtil.removeHtml(m_description);
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_description=" + m_description);}
 					//#endif
@@ -346,6 +373,11 @@ public class ExtParser {
 					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_explicit=" + m_explicit);}
+					//#endif
+				} else if( subElem.equals("encoded") ) {
+					m_encoded = parser.getText();
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest("m_encoded=" + m_encoded);}
 					//#endif
 				}
 				break;
