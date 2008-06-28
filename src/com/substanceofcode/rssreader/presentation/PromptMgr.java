@@ -40,6 +40,12 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.StringItem;
+//#ifndef DTESTUI
+import javax.microedition.lcdui.Form;
+//#else
+//@import com.substanceofcode.testlcdui.Form;
+//#endif
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -55,10 +61,7 @@ final public class PromptMgr implements CommandListener, Runnable {
 	private Hashtable promptCommands = new Hashtable();
 	private Displayable disp;
 	private Command origCmd = null;
-	private Command cmdOK;
-	private Command cmdCancel;
 	protected RssReaderMIDlet midlet;
-	private Alert promptAlert = null;
 	//#ifdef DLOGGING
 //@	private Logger logger = Logger.getLogger("PromptMgr");
 //@	private boolean fineLoggable = false;
@@ -86,28 +89,35 @@ final public class PromptMgr implements CommandListener, Runnable {
 
 	/* Create prompt alert. */
 	public void run() {
-		promptAlert = new Alert(origCmd.getLabel(),
-				(String)promptCommands.get(origCmd), null,
+		// Due to a quirk on T637 (MIDP 1.0), we need to create a form
+		// before the alert or the alert will not be seen.
+		Form formAlert = new Form(origCmd.getLabel());
+		formAlert.append((String)promptCommands.get(origCmd));
+		formAlert.addCommand(new Command("OK", Command.OK, 0));
+		formAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
+		formAlert.setCommandListener(this);
+		midlet.setCurrent(formAlert);
+		Alert promptAlert = new Alert(origCmd.getLabel(),
+				((StringItem)formAlert.get(0)).getText(), null,
 				AlertType.CONFIRMATION);
 		promptAlert.setTimeout(Alert.FOREVER);
-		cmdOK = new Command("OK", Command.OK, 0);
-		promptAlert.addCommand(cmdOK);
-		cmdCancel = new Command("Cancel", Command.CANCEL, 1);
-		promptAlert.addCommand(cmdCancel);
+		promptAlert.addCommand(new Command("OK", Command.OK, 0));
+		promptAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
 		promptAlert.setCommandListener(this);
-		midlet.setCurrent(promptAlert);
+		midlet.setCurrent(promptAlert, formAlert);
 	}
 
 	/* Prompt if command is in prompt camands.  */
 	public void commandAction(Command cmd, Displayable cdisp) {
 		try {
 			if (promptCommands.containsKey(cmd)) {
-				if ((promptAlert == null) || !cdisp.equals(promptAlert)) {
-					origCmd = cmd;
-				}
+				origCmd = cmd;
 				new Thread(this).start();
 				return;
-			} else if (cmd.equals(cmdOK)
+			} else if (cdisp.equals(disp)) {
+				cmdListener.commandAction(cmd, disp);
+				midlet.setCurrent(disp);
+			} else if ((cmd.getCommandType() == Command.OK)
 				//#ifdef DMIDP20
 					   || cmd.equals(Alert.DISMISS_COMMAND)
 				//#endif
@@ -119,12 +129,9 @@ final public class PromptMgr implements CommandListener, Runnable {
 				//#endif
 				midlet.setCurrent(disp);
 				cmdListener.commandAction(origCmd, disp);
-			} else if (cmd.equals(cmdCancel)) {
+			} else if (cmd.getCommandType() == Command.CANCEL) {
 				midlet.setCurrent(disp);
 				return;
-			} else {
-				cmdListener.commandAction(cmd, disp);
-				midlet.setCurrent(disp);
 			}
 		} catch (Throwable e) {
 			//#ifdef DLOGGING
