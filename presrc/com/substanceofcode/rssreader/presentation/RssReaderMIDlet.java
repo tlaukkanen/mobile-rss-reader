@@ -159,6 +159,7 @@ public class RssReaderMIDlet extends MIDlet
     private boolean     m_openPage;         // Open the headers
     private boolean     m_saveBookmarks;    // The save bookmarks flag
     private boolean     m_exit;             // The exit application flag
+    private boolean     m_about;            // The about flag
     private boolean     m_getModPage;       // The noticy flag for modified HTTP
     private boolean     m_getSettingsForm;  // Flag to get settings form
     private boolean     m_getAddBMForm;     // Flag to get add bookmark form
@@ -367,6 +368,9 @@ public class RssReaderMIDlet extends MIDlet
 		//#endif
 			
 			m_getPage = false;
+			m_exit = false;
+			m_about = false;
+			m_saveBookmarks = false;
 			m_openPage = false;
 			m_getModPage = false;
 			m_getSettingsForm = false;
@@ -1124,6 +1128,17 @@ public class RssReaderMIDlet extends MIDlet
 					}
 				}
 
+				if ( m_about ) {
+					m_about = false;
+					final Alert aboutAlert = getAbout();
+					// Because of problems with alerts on T637, need to
+					// show a form before we show the alert, or it never
+					// appears.
+					initializeLoadingForm(aboutAlert.getString(),
+							m_bookmarkList);
+					setCurrent( aboutAlert, m_bookmarkList );
+				}
+
 				if ( m_exit || m_saveBookmarks ) {
 					if ( m_exit ) {
 						initializeLoadingForm("Exiting saving data...",
@@ -1443,9 +1458,14 @@ public class RssReaderMIDlet extends MIDlet
  super.getAppProperty("Program-Version") +
  " Copyright (C) 2005-2006 Tommi Laukkanen, " +
  "http://code.google.com/p/mobile-rss-reader/.  " +
- "This program is distributed in the hope that it will be useful, " +
- "but WITHOUT ANY WARRANTY; without even the implied warranty of " +
- "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the " +
+ "Disclaimer.  This program is distributed in the hope that it will be useful, " +
+ "but WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY OF " +
+ "MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  " +
+ "THE ENTIRE RISK AS " +
+ "TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE " +
+ "PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, " +
+ "REPAIR OR CORRECTION.  It is licensed under the GNU General Public " +
+ "License.  See the " +
  "GNU General Public License for more details at www.gnu.org. " +
  "This program is free software; you can redistribute it and/or modify " +
  "it under the terms of the GNU General Public License as published by " +
@@ -2021,8 +2041,7 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Show about */
 		if( c == m_aboutCmd ) {
-			final Alert m_about = getAbout();
-			setCurrent( m_about, m_bookmarkList );
+			m_about = true;
 		}
 
 		//#ifdef DTESTUI
