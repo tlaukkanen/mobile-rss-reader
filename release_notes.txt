@@ -150,7 +150,7 @@ v1.11
 + Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
-v1.11.1 Release Candidate 1 (RC1) (June 27th 2008)
+v1.11.1 (July 7th 2008)
 + Fix bug when opening feeds on Sony Ericsson emulators and possiblely
   affecting Sony Ericsson devices
 + Fix bug with storing Itunes attributes
@@ -177,8 +177,6 @@ v1.11.1 Release Candidate 1 (RC1) (June 27th 2008)
 + Use gauge to show progress of saving/loading.
 + Fix dates in yyyy-mm-dd format
 + Fix standard dates with 2 or more consecutive spaces
-
-v1.11.1 Release Candidate 2 (RC2) (June 28th 2008)
 + Workaround Sony Ericsson T637 problem with Exit and Delete (Alerts on MIDP
   1.0 device)
 + Handle Content module
