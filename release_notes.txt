@@ -181,6 +181,11 @@ v1.11.1 (July 7th 2008)
   1.0 device)
 + Handle Content module
 + Add to disclamer
++ Include jadsrc and manifestsrc directories in source zip
++ Fix '|' in feed name
++ Fix bugs in wtk-build.xml when properties suffixes not used.
++ Allow creation of jar using Free software:  Phone ME, ECJ (Eclipse compiler),
+  and Kaffe
 
 Known problems:
 
