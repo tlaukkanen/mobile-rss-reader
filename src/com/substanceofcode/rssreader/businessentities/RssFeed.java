@@ -176,7 +176,6 @@ public class RssFeed{
 			int PASSWORD = 3;
 			m_password = nodes[ startIndex + PASSWORD ];
 			if (iTunesCapable) {
-				m_password = m_password.replace(CONE, '|');
 				// Dencode so that password is not in regular lettters.
 				Base64 b64 = new Base64();
 				byte[] decodedPassword = b64.decode(m_password);
@@ -354,7 +353,7 @@ public class RssFeed{
 			// space for toString.
             updString = Long.toString( m_upddate.getTime(), 16 );
         }
-        String storeString = m_name + "|" +
+        String storeString = name + "|" +
                               m_url + "|" + username + "|" +
                 encodedPassword + "|" + updString + "|" +
 				m_link + "|" + dateString + "|" +
