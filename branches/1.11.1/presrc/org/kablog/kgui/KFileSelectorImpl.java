@@ -32,11 +32,21 @@
 //#ifdef DJSR75
 package org.kablog.kgui;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.*;
-import java.util.*;
+import java.util.Vector;
+import java.util.Enumeration;
 import javax.microedition.io.*;
 import javax.microedition.io.file.*;
-import javax.microedition.lcdui.*;
+import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.List;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Display;
+import javax.microedition.lcdui.Image;
 import javax.microedition.midlet.*;
 
 //#ifdef DLOGGING
