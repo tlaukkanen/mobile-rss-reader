@@ -1,6 +1,9 @@
 antenna.home = C:/mostdownloads/j2me/sourceforge/antenna
 #antenna.jar = antenna-bin-0.9.15-beta.jar
-antenna.jar = antenna-bin-1.0.0.jar
+#antenna.jar = antenna-bin-1.0.0.jar
+#This version (1.0.2) has //#elif bug, don't use!!
+#antenna.jar = antenna-bin-1.0.2.jar
+antenna.jar = antenna-bin-1.1.0-beta.jar
 antcontrib.home = C:/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
 wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
@@ -13,8 +16,21 @@ rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
 svn.pgm = svn.exe
 #wtk.home = C:/opt/WTK2.5.1
 wtk.home = C:/opt/WTK2.5.2
+#For phoneMe Windows
+#wtk.home = C:/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
+#For phoneMe Linux x86
+#wtk.home = /media/SEA_DISK/linux/src/RSSReader-1_11_1rc2/bin/linux_x86_fb_chameleon_mvm
+#For phoneMe
+#wtk.midpapi = ${wtk.home}/classes
+#For phoneMe, if not using ecj.jar
+#build.compiler = org.eclipse.jdt.core.JDTCompilerAdapter
+#For phoneMe, if using ecj.jar
+#ecj.jar = C:/mostdownloads/gnu/eclipse/ecj-3.4.jar
+#For phoneMe Windows, if using ecj.jar and Sun JDK
+#rt.jar = C:/opt/bea91/jdk150_04/jre/lib/rt.jar
+#For phoneMe Windows, if using ecj.jar and Kaffe
+#rt.jar = /usr/lib/kaffe/jre/lib/rt.jar
 wtk.encoding = UTF-8
-#wtk.optionalpda.enabled = false
 midlet.name = RssReaderMIDlet
 midlet.class = com.substanceofcode.rssreader.presentation.${midlet.name}
 logging.package = net.sf.jlogmicro.util.logging
