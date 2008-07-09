@@ -41,6 +41,7 @@
 	<property name="build.midp20.jsr75.jsr238" value="${target}/build/midp20_jsr75.jsr238" />
 	<property name="classes" value="${target}/classes" />
 	<property name="tmppreprocess" value="${target}/tmppreprocess" />
+	<property name="build.template" value="" />
 	<property file="${basedir}/wtk-build${device.props}.properties${build.template}" />
 	<!-- DCOMPATDEF is used to test compatibility store/restore of date -->
 	<property name="DCOMPATDEF" value="DNOCOMPAT" />
@@ -53,6 +54,7 @@
 	<target name="clean" >
 		<delete dir="${target}" />
 		<antcall target="clean.version" inheritAll="true" >
+			<param name="wtk.template" value="" />
 			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
 		</antcall>
 	</target>
@@ -70,6 +72,7 @@
 	<target name="test.prepare" unless="no.test" >
 	    <echo message="Using test properties" />
 	    <echo message="no.release=${no.release}" />
+		<property name="test.template" value="" />
 		<property file="${basedir}/test.properties${test.template}" />
 		<antcall target="test.buildno" />
 		<property file="${basedir}/test_buildinfo.properties${test.template}" />
@@ -86,6 +89,7 @@
 
 	<target name="release.prepare" unless="no.release" >
 	    <echo message="Using release properties" />
+		<property name="release.template" value="" />
 		<property file="${basedir}/release.properties${release.template}" />
 	    <echo message="RELEASE=${RELEASE}" />
 	    <echo message="build.number=${build.number}" />
@@ -109,6 +113,7 @@
 	<target name="prepare" depends="test.prepare,release.prepare" >
 		<!-- Define the Wireless Toolkit home directory. Needed by the tasks. -->
 		<!-- Define some additional properties for this project. Not required. -->
+		<property name="optional.template" value="" />
 		<property file="${basedir}/optional.properties${optional.template}" />
 		<property name="propdir" value="${basedir}" />
 		<property file="${basedir}/${wtk.properties}" />
@@ -220,7 +225,7 @@
 		<antcall target="copy.unproc.comp" />
 		<delete dir="${tmppreprocess}" />
 		<mkdir dir="${tmppreprocess}" />
-		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
+		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" printsymbols="yes" />
 		<echo message="Preprocess test UI if set ${testui.presrc}." />
 		<wtkpreprocess srcdir="${testui.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" printsymbols="true" if="testui.presrc" />
 		<echo message="Preprocess compatiblity code if set ${compat.presrc}." />
@@ -301,8 +306,28 @@
 		<antcall target="copy.jar.src" />
 		<antcall target="wtk.src.copy" />
 		<antcall target="display.props" />
-		<wtkbuild srcdir="${comp.src}" destdir="${classes}" preverify="false" />
+		<wtkbuild srcdir="${comp.src}" destdir="${classes}" preverify="false" unless="ecj.jar" />
+		<antcall target="ecj.compile" />
 
+	</target>
+
+	<target name="ecj.compile" if="ecj.jar" >
+		<echo message="-bootclasspath" />
+		<echo message="${wtk.midpapi}" />
+		<echo message="-classpath" />
+		<echo message="${rt.jar}" />
+		<echo message="-d" />
+		<echo message="${classes}" />
+		<echo message="${comp.src}" />
+		<java jar="${ecj.jar}" fork="true" >
+			<arg value="-bootclasspath" />
+			<arg value="${wtk.midpapi}" />
+			<arg value="-classpath" />
+			<arg value="${rt.jar}" />
+			<arg value="-d" />
+			<arg value="${classes}" />
+			<arg value="${comp.src}" />
+		</java>
 	</target>
 
 	<target name="build.testdata" depends="prepare" >
@@ -415,7 +440,6 @@
 		<wtkobfuscate jarfile="${bin}/${project.name}.jar" obfuscator="proguard" if="keep.obfuscate" >
 			<argument value="-keep public class ${obfuscate.classes}" />
 		</wtkobfuscate>
-		<wtkmakeprc jarfile="${bin}/${project.name}.jar" name="${project.name}"  highres="true" creator="${prc.creater}" longname="${prc.longname}" />
 		<!-- Include version in the file so that they can be uploaded to -->
 		<!-- download sites where the name must be unique.  -->
 
@@ -423,9 +447,8 @@
 		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" />
 		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" todir="${dist}" />
 		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" todir="${dist}" />
-		<mkdir dir="${dist}/${build.prefix}prc" />
-		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
 		<copy file="${bin}/${project.name}.jar" tofile="${build}/${build.prefix}${build.jar}" />
+		<antcall target="create.prc" inheritAll="true" />
 		<!-- Manifest changes based on MIDP/JSR's so use prefixes to -->
 		<!-- identify which is which -->
 		<copy file="${bin}/manifest.mf" todir="${build}/${build.prefix}manifest-${FMIDLETVERSROOT}.mf" overwrite="true" />
@@ -436,6 +459,12 @@
 				<filter token="STAGE" value="${stage}" />
 			</filterset>
 		</copy>
+	</target>
+
+	<target name="create.prc" depends="prepare" if="wtk.wme.home" >
+		<wtkmakeprc jarfile="${bin}/${project.name}.jar" name="${project.name}"  highres="true" creator="${prc.creater}" longname="${prc.longname}" />
+		<mkdir dir="${dist}/${build.prefix}prc" />
+		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
 	</target>
 
 	<target name="create.rim.files" depends="prepare" >
@@ -483,6 +512,12 @@
 			</move>
 			<move todir="${op.dir}/testdata" >
 				<fileset dir="${op.dir}/${svn.src}/testdata" />
+			</move>
+			<move todir="${op.dir}/jadsrc" >
+				<fileset dir="${op.dir}/${svn.src}/jadsrc" />
+			</move>
+			<move todir="${op.dir}/manifestsrc" >
+				<fileset dir="${op.dir}/${svn.src}/manifestsrc" />
 			</move>
 			<move todir="${op.dir}/zipedsrc" >
 				<fileset dir="${op.dir}/${svn.src}/zipedsrc" />
