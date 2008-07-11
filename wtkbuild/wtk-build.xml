@@ -1079,4 +1079,25 @@
 
 	</target>
 
+	<target name="run.dist.version"  depends="prepare" >
+		<echo message="emulator.jar=${emulator.jar}" />
+		<property name="run.jar" value="${dist}/${build.file.root}.jar" />
+		<echo message="jar=${run.jar}" />
+		<java classname="${emulator.class}" fork="true" >
+			<classpath>
+				<pathelement location="${emulator.jar}" />
+				<pathelement location="${run.jar}" />
+			</classpath>
+			<arg value="${midlet.class}" />
+		</java>
+	</target>
+
+	<target name="run.dist.midp.2.0.itunes.jsr75" unless="run.no.2.0.itunes.jsr75" >
+		<antcall target="run.dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
 </project>
