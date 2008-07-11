@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -292,7 +293,8 @@ public class Settings {
 				e.printStackTrace();
 			} finally {
 				if( din != null ) {
-					try { din.close(); } catch( Exception e ){}
+					/* Workaround for MicroEmulator. */
+					try { ((InputStream)din).close(); } catch( Exception e ){}
 				}
 				
 				if( rs != null ) {
