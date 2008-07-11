@@ -119,6 +119,7 @@
 		<property file="${basedir}/${wtk.properties}" />
 		<property name="stage" value="" />
 		<property name="build.prefix" value="${file.prefix}${stage}" />
+		<property name="build.file.root" value="${build.prefix}${project.name}-${FMIDLETVERSROOT}" />
 		<property name="buildinfo" value="${SUFFIXVERS}-${stage}b${build.number}" />
 		<!-- changed -->
 		<mkdir dir="${target}" />
@@ -149,6 +150,7 @@
 			<filter token="PROGVERS" value="${buildinfo}" />
 			<filter token="JMIDPVERS" value="${JMIDPVERS}" />
 			<filter token="JCLDCVERS" value="${JCLDCVERS}" />
+			<filter token="PERMISSIONS" value="${PERMISSIONS}" />
 			<filter token="EMULATOR" value="${EMULATOR}" />
 		</filterset>
 
@@ -210,6 +212,8 @@
 	    <echo message="no.release=${no.release}" />
 	    <echo message="need.test.res=${need.test.res}" />
 	    <echo message="manifestsrc=${manifestsrc}" />
+	    <echo message="MIDLETURL_ROOT=${MIDLETURL_ROOT}" />
+	    <echo message="separator=${separator}" />
 	</target>
 
 	<!-- Preprocess source using antenna preprocessor.  If preproccess -->
@@ -411,6 +415,9 @@
 
 		<copy file="${jadsrc}/${project.name}.jad" todir="${bin}" overwrite="true" >
 			<filterset refid="midlet.info" />
+			<filterset>
+				<filter token="MIDLETURL" value="${MIDLETURL_ROOT}${separator}${build.file.root}.jar" />
+			</filterset>
 		</copy>
 
 		<copy file="${manifestsrc}/manifest.mf" todir="${bin}" overwrite="true" >
@@ -443,15 +450,15 @@
 		<!-- Include version in the file so that they can be uploaded to -->
 		<!-- download sites where the name must be unique.  -->
 
-		<copy file="${bin}/${project.name}.jad" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" />
-		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" />
-		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" todir="${dist}" />
-		<copy file="${bin}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" todir="${dist}" />
+		<copy file="${bin}/${project.name}.jad" tofile="${bin}/${build.file.root}.jad" />
+		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.file.root}.jar" />
+		<copy file="${bin}/${build.file.root}.jar" todir="${dist}" />
+		<copy file="${bin}/${build.file.root}.jad" todir="${dist}" />
 		<copy file="${bin}/${project.name}.jar" tofile="${build}/${build.prefix}${build.jar}" />
 		<antcall target="create.prc" inheritAll="true" />
 		<!-- Manifest changes based on MIDP/JSR's so use prefixes to -->
 		<!-- identify which is which -->
-		<copy file="${bin}/manifest.mf" todir="${build}/${build.prefix}manifest-${FMIDLETVERSROOT}.mf" overwrite="true" />
+		<copy file="${bin}/manifest.mf" todir="${build}/${build.prefix}manifest-${FMIDLETVERSROOT}" overwrite="true" />
 
 		<copy todir="${dist}" >
 			<fileset file="${docs}/README.txt" />
@@ -467,13 +474,13 @@
 		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
 	</target>
 
-	<target name="create.rim.files" depends="prepare" >
+	<target name="create.rim.files" depends="prepare" if="rim.home" >
 		<exec executable="${rim.home}\\bin\\rapc" >
 			<arg value="import=&quot;${rim.home}\\lib\\net_rim_api.jar&quot;" />
 			<arg value="codename=${project.name}" />
 			<arg value="-midlet" />
-			<arg value="jad=${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" />
-			<arg value="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jar" />
+			<arg value="jad=${dist}/${build.file.root}.jad" />
+			<arg value="${dist}/${build.file.root}.jar" />
 		</exec>
 		<move file="${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cso" />
 		<move file="${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cod" />
@@ -515,6 +522,10 @@
 			</move>
 			<move todir="${op.dir}/jadsrc" >
 				<fileset dir="${op.dir}/${svn.src}/jadsrc" />
+			</move>
+			<mkdir dir="${op.dir}/docs" />
+			<move todir="${op.dir}/docs" >
+				<fileset file="${op.dir}/${svn.src}/docs/README.txt" />
 			</move>
 			<move todir="${op.dir}/manifestsrc" >
 				<fileset dir="${op.dir}/${svn.src}/manifestsrc" />
@@ -1064,7 +1075,7 @@
 
 	<!-- Start the MIDlet suite -->
 	<target name="run" depends="prepare" >
-		<wtkrun jadfile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.jad" device="DefaultColorPhone" wait="false" />
+		<wtkrun jadfile="${dist}/${build.file.root}.jad" device="DefaultColorPhone" wait="false" />
 
 	</target>
 
