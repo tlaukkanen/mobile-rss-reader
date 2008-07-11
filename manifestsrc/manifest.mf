@@ -5,6 +5,8 @@ MIDlet-Name: RSSReader
 MIDlet-Icon: /icons/rss.png
 MIDlet-Description: RSS Reader
 MIDlet-Version: @MIDLETVERS@
+MIDlet-Permissions-Opt: javax.microedition.io.HttpConnection@PERMISSIONS@
+MIDlet-Data-Size: 3000
 MicroEdition-Configuration: @JCLDCVERS@
 MicroEdition-Profile: @JMIDPVERS@
 Program-Version: @PROGVERS@
