@@ -12,6 +12,7 @@ DJSR238 = DNOJSR238
 DCLDCVERS = DCLDCV10
 JMIDPVERS = MIDP-2.0 
 JCLDCVERS = CLDC-1.0
+PERMISSIONS = ,javax.microedition.io.HttpsConnection,javax.microedition.io.Connector.file.read
 file.prefix = midp20_jsr75_
 bin = ../bin20jsr75
 MIDLETVERS = ${MIDLETVERSROOT}
