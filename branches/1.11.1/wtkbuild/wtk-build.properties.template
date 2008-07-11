@@ -5,6 +5,7 @@ antenna.home = C:/mostdownloads/j2me/sourceforge/antenna
 #antenna.jar = antenna-bin-1.0.2.jar
 antenna.jar = antenna-bin-1.1.0-beta.jar
 antcontrib.home = C:/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
+#Comment out for linux
 wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
@@ -12,6 +13,7 @@ wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
 svn.home = C:\\PROGRA~1\\COLLAB~1
 #svn.home = C:\\PROGRA~1\\TORTOI~1
 #rim.home = C:\\Program Files\\Research In Motion\\BlackBerry JDE 4.2.1
+#Comment out for linux
 rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
 svn.pgm = svn.exe
 #wtk.home = C:/opt/WTK2.5.1
@@ -20,8 +22,10 @@ wtk.home = C:/opt/WTK2.5.2
 #wtk.home = C:/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
 #For phoneMe Linux x86
 #wtk.home = /media/SEA_DISK/linux/src/RSSReader-1_11_1rc2/bin/linux_x86_fb_chameleon_mvm
-#For phoneMe
+#For phoneMe Windows and Linux
 #wtk.midpapi = ${wtk.home}/classes
+#For phoneMe Windows and Linux proguard.jar, if cannot put into bin
+#wtk.proguard.home = C:/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #For phoneMe, if not using ecj.jar
 #build.compiler = org.eclipse.jdt.core.JDTCompilerAdapter
 #For phoneMe, if using ecj.jar
@@ -41,6 +45,8 @@ project.name = RSSReader
 midlet.home = ${wtk.home}/apps/${project.name}
 prc.creater = MRSS
 prc.longname = RSS/News/Blog Reader
+MIDLETURL_ROOT = http://mobile-rss-reader.googlecode.com/files
+separator = /
 MIDLETVERSROOT = 1.11.1
 #Need vers with '_' to allow uploading to sites that get confused by to
 #many '.'
