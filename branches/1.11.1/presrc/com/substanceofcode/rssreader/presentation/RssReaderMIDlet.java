@@ -1716,7 +1716,8 @@ public class RssReaderMIDlet extends MIDlet
 			}
 		}
 		if (dis != null) {
-			try { dis.close(); } catch (IOException e) {}
+			/* Workaround for MicroEmulator. */
+			try { ((InputStream)dis).close(); } catch (IOException e) {}
 		}
 	}
 
@@ -2367,6 +2368,7 @@ public class RssReaderMIDlet extends MIDlet
 									m_listParser.getUrl() + " " +
 									ex.getMessage(), ex);
 							m_getFeedTitleList = false;
+							m_listParser = null;
 							// TODO empty list parser m_listParser = null;
 						} catch(Throwable t) {
 							recordExcForm(
@@ -2374,6 +2376,7 @@ public class RssReaderMIDlet extends MIDlet
 									m_listParser.getUrl() + " " +
 									t.getMessage(), t);
 							m_getFeedTitleList = false;
+							m_listParser = null;
 							// TODO empty list parser m_listParser = null;
 						}
 					}
