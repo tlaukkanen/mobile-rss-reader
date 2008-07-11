@@ -34,6 +34,12 @@ wtk.home = C:/opt/WTK2.5.2
 #rt.jar = C:/opt/bea91/jdk150_04/jre/lib/rt.jar
 #For phoneMe Windows, if using ecj.jar and Kaffe
 #rt.jar = /usr/lib/kaffe/jre/lib/rt.jar
+emulator.home=C:/mostdownloads/j2me/sourceforge/kobjects
+#emulator.home=C:/mostdownloads/j2me/sourceforge/MicroEmulator/microemulator-2.0.2
+emulator.jar=${emulator.home}/me4se-2.2.0.zip
+#emulator.jar=${emulator.home}/microemulator.jar
+emulator.class=org.me4se.MIDletRunner
+#emulator.class=org.microemu.app.Main
 wtk.encoding = UTF-8
 midlet.name = RssReaderMIDlet
 midlet.class = com.substanceofcode.rssreader.presentation.${midlet.name}
