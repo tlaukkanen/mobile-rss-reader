@@ -1,7 +1,7 @@
 #summary One-sentence summary of this page.
 
 = Introduction =
-Aticle
+Article
 Add your content here.
 
 
