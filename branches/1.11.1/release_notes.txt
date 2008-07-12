@@ -182,7 +182,8 @@ v1.11.1 Release Candidate 3 (rc3) (July 11th 2008)
 + Handle Content module
 + Add to disclamer
 + Include jadsrc and manifestsrc directories in source zip
-+ Allow '|' in feed name
++ Allow '|' in feed name, password, and podcast attributes author, subtitle,
+  summary.
 + Fix bugs in wtk-build.xml when properties suffixes not used.
 + Allow creation of jar using Free software:  Phone ME, ECJ (Eclipse compiler),
   GNU Classpath, and JamVM or GNU JavaVM (gcj)
