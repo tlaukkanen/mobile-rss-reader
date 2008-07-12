@@ -169,7 +169,7 @@ public class RssFeed{
 			
 			int USERNAME = 2;
 			m_username = nodes[ startIndex + USERNAME ];
-			if (iTunesCapable) {
+			if (iTunesCapable && hasPipe) {
 				m_username = m_username.replace(CONE, '|');
 			}
 			
@@ -187,6 +187,9 @@ public class RssFeed{
 				if (hasPipe) {
 					m_password = m_password.replace(CONE, '|');
 				}
+				//#ifdef DLOGGING
+//@				if (finestLoggable) {logger.finest("m_password=" + m_password);}
+				//#endif
 			}
 			
 			m_items = new Vector();
@@ -208,9 +211,7 @@ public class RssFeed{
 				}
 			}
 			if (iTunesCapable && hasPipe) {
-				if (hasPipe) {
-					m_name = m_name.replace(CONE, '|');
-				}
+				m_name = m_name.replace(CONE, '|');
 			} else {
 				if (!iTunesCapable) {
 					// Dencode for better UTF-8 and to allow '|' in the name.
