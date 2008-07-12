@@ -2,7 +2,7 @@
 
 = Introduction =
 
-#laBel
+laBel
 Add your content here.
 
 
