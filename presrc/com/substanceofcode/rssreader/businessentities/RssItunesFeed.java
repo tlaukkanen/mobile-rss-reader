@@ -165,7 +165,7 @@ public class RssItunesFeed extends RssFeed{
 
 		try {
         
-			boolean hasPipe = (storeString.indexOf('\n') >= 0);
+			boolean hasPipe = (storeString.indexOf(CONE) >= 0);
 			String[] nodes = StringUtil.split( storeString, "|" );
 			RssItunesFeed feed = new RssItunesFeed();
 			feed.init(hasPipe, encoded, nodes);
