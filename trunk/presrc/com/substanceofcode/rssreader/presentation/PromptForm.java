@@ -57,28 +57,21 @@ import net.sf.jlogmicro.util.logging.Level;
 /* Form with optional commands added with addPromptCommand which if
    used, will give prompt message with OK/Cancel.  */
 public class PromptForm extends Form {
+	protected PromptMgr promptMgr;
 
-	private Hashtable promptCommands = new Hashtable();
-	private Command origCmd = null;
-	private Command cmdOK;
-	private Command cmdCancel;
-	protected MIDlet midlet;
-	private PromptForm pform;
-	private Alert promptAlert = null;
 	//#ifdef DLOGGING
 	private Logger logger = Logger.getLogger("PromptForm");
 	private boolean fineLoggable = false;
 	private boolean finestLoggable = false;
 	//#endif
 
-	public PromptForm(MIDlet midlet, String title) {
+	public PromptForm(RssReaderMIDlet midlet, String title) {
 		super(title);
-		this.midlet = midlet;
-		init();
+		init(midlet);
 	}
 
-	private void init() {
-		pform = this;
+	private void init(RssReaderMIDlet midlet) {
+		promptMgr = new PromptMgr(midlet, this);
 		//#ifdef DLOGGING
 		fineLoggable = logger.isLoggable(Level.FINE);
 		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
@@ -87,80 +80,24 @@ public class PromptForm extends Form {
 		//#endif
 	}
 
-	public PromptForm(MIDlet midlet, String title, Item[] items) {
+	public PromptForm(RssReaderMIDlet midlet, String title, Item[] items) {
 		super(title, items);
-		this.midlet = midlet;
-		init();
+		init(midlet);
 	}
 
 	public void addPromptCommand(Command cmd, String prompt) {
 		super.addCommand(cmd);
-		promptCommands.put(cmd, prompt);
+		promptMgr.addPromptCommand(cmd, prompt);
 	}
 
 	public void removeCommand(Command cmd) {
 		super.removeCommand(cmd);
-		promptCommands.remove(cmd);
+		promptMgr.removeCommand(cmd);
 	}
 
     public void setCommandListener(CommandListener cmdListener) {
-		super.setCommandListener(new PromptHandler(cmdListener));
+		super.setCommandListener(promptMgr);
+		promptMgr.setCommandListener(cmdListener);
     }
-
-	private class PromptHandler implements CommandListener {
-		private CommandListener cmdListener;
-
-		private PromptHandler (CommandListener cmdListener) {
-			this.cmdListener = cmdListener;
-		}
-
-		/* Prompt if command is in prompt camands.  */
-		public void commandAction(Command cmd, Displayable disp) {
-			//#ifdef DTESTUI
-			pform.outputCmdAct(cmd, disp);
-			//#endif
-			try {
-				if (promptCommands.containsKey(cmd)) {
-					if ((promptAlert == null) || !disp.equals(promptAlert)) {
-						origCmd = cmd; System.out.println("here cact 7");
-					}
-					promptAlert = new Alert(cmd.getLabel(),
-							(String)promptCommands.get(cmd), null,
-							AlertType.CONFIRMATION); System.out.println("here cact 11");
-					promptAlert.setTimeout(Alert.FOREVER); System.out.println("here cact 12");
-					cmdOK = UiUtil.getCmdRsc("cmd.ok", Command.OK, 0); System.out.println("here cact 13");
-					promptAlert.addCommand(cmdOK); System.out.println("here cact 14");
-					cmdCancel = UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 0); System.out.println("here cact 15");
-					promptAlert.addCommand(cmdCancel); System.out.println("here cact 16");
-					promptAlert.setCommandListener(this); System.out.println("here cact 17");
-					Display.getDisplay(midlet).setCurrent(promptAlert); System.out.println("here cact 18");
-					return;
-				} else if (cmd.equals(cmdOK)
-					//#ifdef DMIDP20
-						   || cmd.equals(Alert.DISMISS_COMMAND)
-					//#endif
-							) {
-					//#ifdef DLOGGING
-					if (fineLoggable) {
-						logger.fine("origCmd,type=" + origCmd.getLabel() + "," + origCmd.getCommandType()); System.out.println("here cact 26");
-					}
-					//#endif
-					Display.getDisplay(midlet).setCurrent(pform);
-					cmdListener.commandAction(origCmd, pform);
-				} else if (cmd.equals(cmdCancel)) {
-					Display.getDisplay(midlet).setCurrent(pform);
-					return;
-				} else {
-					Display.getDisplay(midlet).setCurrent(pform);
-					cmdListener.commandAction(cmd, disp); System.out.println("here cact 31");
-				}
-			} catch (Throwable e) {
-				//#ifdef DLOGGING
-				logger.severe("commandAction caught ", e); System.out.println("here cact 35");
-				//#endif
-				System.out.println("commandAction caught " + e + " " + e.getMessage()); System.out.println("here cact 37");
-			}
-		}
-	}
 
 }
