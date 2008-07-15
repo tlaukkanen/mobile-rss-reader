@@ -21,9 +21,14 @@
  *
  */
 
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define logging define
 @DLOGDEF@
 
+/* This functionality adds to jar size, so don't do it for small memory */
+/* devices. */
+//#ifndef DSMALLMEM
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -186,7 +191,8 @@ public class HTMLAutoLinkParser extends FeedListParser {
 						// Allow null title so that the caller can
 						// check if it needs to get the title another way.
 						if (title != null) {
-							title = EncodingUtil.replaceAlphaEntities(title);
+							title = EncodingUtil.replaceAlphaEntities(true,
+									title);
 							title = EncodingUtil.replaceNumEntity(title);
 							// Replace special chars like left quote, etc.
 							// Since we have already converted to unicode, we want
@@ -278,3 +284,4 @@ public class HTMLAutoLinkParser extends FeedListParser {
     }
 
 }
+//#endif
