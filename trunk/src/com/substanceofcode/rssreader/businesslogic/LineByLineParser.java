@@ -69,21 +69,10 @@ public class LineByLineParser extends FeedListParser {
 		EncodingUtil encUtl = new EncodingUtil(is);
 		EncodingStreamReader esr = encUtl.getEncodingStreamReader();
 
-        // Read all data to buffer
-        int inputCharacter;
         try {
-			// Read the first character to account for BOM.
-            inputCharacter = esr.read();
-            if (inputCharacter != -1) {
-				inputBuffer.append((char)inputCharacter);
-				// If it's UTF and is UTF-16, we need EncodingStreamReader to
-				// read it so that it can put the bytes together.
-				InputStreamReader isr = ((esr.isUtfDoc() && esr.isUtf16Doc()) ?
-						esr : esr.getInputStream());
-				while ((inputCharacter = isr.read()) != -1) {
-					inputBuffer.append((char)inputCharacter);
-				}
-			}
+			// Read all data to buffer.  Use 100 char increments to save on
+			// memory.
+			inputBuffer = esr.readFile(100);
         } catch (IOException ex) {
 			CauseException cex = new CauseException(
 					"Error while parsing line by feed " + m_url, ex);
@@ -128,13 +117,16 @@ public class LineByLineParser extends FeedListParser {
 		} else {
 			text = inputBuffer.toString();
 		}
+		inputBuffer = null;
         
         // Split buffer string by each new line
         text = StringUtil.replace(text, "\r", "");
         String[] lines = StringUtil.split(text, '\n');
+		text = null;
         
         RssItunesFeed[] feeds = new RssItunesFeed[ lines.length ];
-        for(int lineIndex=0; lineIndex<lines.length; lineIndex++) {
+        for(int lineIndex=0; lineIndex<lines.length;
+				lines[lineIndex] = null, lineIndex++) {
             String line = lines[lineIndex];
             String name;
             String url;
