@@ -57,9 +57,9 @@ public class EncodingStreamReader extends InputStreamReader {
     private boolean m_firstChar = true; // 1st of a possible 2 byte character
     private boolean m_secondChar = false; // 2nd of a possible 2 byte character
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("EncodingStreamReader");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private Logger m_logger = Logger.getLogger("EncodingStreamReader");
+    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
+    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of EncodingStreamReader */
@@ -74,7 +74,7 @@ public class EncodingStreamReader extends InputStreamReader {
 			m_fileEncoding = EncodingUtil.getIsoEncoding();
 		} catch (UnsupportedEncodingException e) {
 //#ifdef DLOGGING
-			logger.severe("init read Could not open stream with encoding " +
+			m_logger.severe("init read Could not open stream with encoding " +
 						  m_fileEncoding);
 //#endif
 			System.out.println("init read Could not open stream with " +
@@ -85,7 +85,7 @@ public class EncodingStreamReader extends InputStreamReader {
 				m_inputStream = new InputStreamReader(inputStream, "UTF-8");
 			} catch (UnsupportedEncodingException e2) {
 //#ifdef DLOGGING
-				logger.severe("init read Could not open stream with " +
+				m_logger.severe("init read Could not open stream with " +
 							  "encoding " + m_fileEncoding);
 //#endif
 				System.out.println("init read Could not open stream with " +
@@ -137,7 +137,7 @@ public class EncodingStreamReader extends InputStreamReader {
 										}
 										if (inputCharacter != 0xbf) {
 											//#ifdef DLOGGING
-											logger.severe("Invalid BOM for UTf-8 " +
+											m_logger.severe("Invalid BOM for UTf-8 " +
 												"has last character " +
 												inputCharacter,
 												new Exception());
@@ -153,7 +153,7 @@ public class EncodingStreamReader extends InputStreamReader {
 										return inputCharacter;
 								}
 								//#ifdef DLOGGING
-								if (fineLoggable) {logger.fine("m_modUTF16,m_utf16Doc,m_utfDoc,m_modEncoding=" + m_modUTF16 + "," + m_utf16Doc + "," + m_utfDoc + "," + m_modEncoding);}
+								if (m_fineLoggable) {m_logger.fine("m_modUTF16,m_utf16Doc,m_utfDoc,m_modEncoding=" + m_modUTF16 + "," + m_utf16Doc + "," + m_utfDoc + "," + m_modEncoding);}
 								//#endif
 								/* Read 1st char after BOM. */
 								inputCharacter = m_inputStream.read();
@@ -209,7 +209,7 @@ public class EncodingStreamReader extends InputStreamReader {
 			return inputCharacter;
 		} catch (IOException e) {
 //#ifdef DLOGGING
-			logger.severe("read Could not read a char io error." + e + " " +
+			m_logger.severe("read Could not read a char io error." + e + " " +
 					           e.getMessage(), e);
 //#endif
 			System.out.println("read Could not read a char io error." + e + " " +
@@ -217,7 +217,7 @@ public class EncodingStreamReader extends InputStreamReader {
 			throw e;
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-			logger.severe("read Could not read a char run time." + t + " " +
+			m_logger.severe("read Could not read a char run time." + t + " " +
 					           t.getMessage(), t);
 //#endif
 			System.out.println("read Could not read a char run time." + t + " " +
@@ -226,8 +226,71 @@ public class EncodingStreamReader extends InputStreamReader {
 		}
 	}
 
-	public int read(char [] cbuf, int off, int len) throws IOException {
-		throw new IOException("Not implemented.");
+  /**
+   * Read the entire contents of the file.  Read in chunks of fileBuffer to
+   * speed reading time.
+   *
+   * @param fileBuffer
+   * @return    final
+   * @author Irv Bunton
+   */
+	final public StringBuffer readFile(int fileBuffer)
+	throws IOException {
+
+		// Read all data to buffer
+		int inputCharacter;
+		StringBuffer inputBuffer = new StringBuffer();
+		// Read the first character to account for BOM.
+		inputCharacter = read();
+		if (inputCharacter != -1) {
+			inputBuffer.append((char)inputCharacter);
+			// If it's UTF and is UTF-16, we need EncodingStreamReader to
+			// read it so that it can put the bytes together.
+			if (isUtfDoc() && isUtf16Doc()) {
+				//#ifdef DLOGGING
+				if (m_finestLoggable) {m_logger.finest("Reading UTF-16");}
+				//#endif
+				while ((inputCharacter = read()) != -1) {
+					inputBuffer.append((char)inputCharacter);
+				}
+			} else {
+				//#ifdef DLOGGING
+				if (m_finestLoggable) {m_logger.finest("UTF-8=" + isUtfDoc());}
+				//#endif
+				char[] cinput = new char[fileBuffer + 2];
+				int len;
+				while ((len = m_inputStream.read(cinput, 0, fileBuffer))
+						!= -1) {
+					inputBuffer.append(new String(cinput, 0, len));
+				}
+			}
+		}
+		return inputBuffer;
+	}
+
+  /**
+   * Read len characters into cbuf beginning at off ofset.
+   *
+   * @param cbuf
+   * @param off
+   * @param len
+   * @return    int
+   * @author Irv Bunton
+   */
+	public int read(char[] cbuf, int off, int len) throws IOException {
+		if (m_modEncoding) {
+			int ic = 0;
+			for (; ic < len; ic++) {
+				int inputCharacter = read();
+				if (inputCharacter == -1) {
+					return -1;
+				}
+				cbuf[off++] = (char)inputCharacter;
+			}
+			return ic;
+		} else {
+			return m_inputStream.read(cbuf, off, len);
+		}
 	}
 
     public void setModEncoding(boolean modEncoding) {
