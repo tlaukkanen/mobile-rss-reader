@@ -24,10 +24,14 @@
 //#define DNOLOGGING
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
-import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+
+import com.substanceofcode.utils.Base64;
+import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseMemoryException;
+
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.Level;
@@ -42,7 +46,11 @@ import java.util.Date;
  */
 public class RssItem {
     
-    protected static final char CONE = (char)1;
+    public static final int TITLE_OFFSET = 0;
+    public static final int DATE_OFFSET = 2;
+    public static final int UNREAD_ITEM = 4;
+    public static final int DESC_OFFSET = 5;
+    public static final char CONE = (char)1;
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssItem");
 	//#endif
@@ -152,13 +160,14 @@ public class RssItem {
 	  nodes - (elements in an array).
 	  **/
 	protected void init(int startIndex, boolean iTunesCapable,
-					    boolean hasPipe, String [ ] nodes) {
+					    boolean hasPipe, String [ ] nodes)
+	throws CauseMemoryException, CauseException {
 
 		try {
 			/* Node count should be 6:
 			 * title | link | date | enclosure | unreadItem | desc
 			 */
-			int TITLE = 0;
+			int TITLE = TITLE_OFFSET;
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + TITLE ]);}
 			//#endif
@@ -174,7 +183,7 @@ public class RssItem {
 			int LINK = 1;
 			m_link = nodes[startIndex + LINK];
 			
-			int DATE = 2;
+			int DATE = DATE_OFFSET;
 			String dateString = nodes[startIndex + DATE];
 			if(dateString.length()>0) {
 				if (iTunesCapable) {
@@ -189,12 +198,12 @@ public class RssItem {
 			int ENCLOSURE = 3;
 			m_enclosure = nodes[startIndex + ENCLOSURE];
 
-			int NEWITEM = 4;
-			String cunreadItem = nodes[startIndex + NEWITEM];
+			int UNREADITEM = UNREAD_ITEM;
+			String cunreadItem = nodes[startIndex + UNREADITEM];
 			m_unreadItem = (cunreadItem.equals("1"));
 					
 			// If description has '|', we need to join.
-			int DESC = 5;
+			int DESC = DESC_OFFSET;
 			if (DESC + startIndex < (nodes.length - 1)) {
 				m_desc = StringUtil.join(nodes, "|", startIndex + DESC);
 			} else {
@@ -202,13 +211,29 @@ public class RssItem {
 			}
 					
         } catch(Exception e) {
-            System.err.println("Error while rssitem init : " + e.toString());
+			CauseException ce = new CauseException(
+					"Internal error while RssItem init ", e);
+			//#ifdef DLOGGING
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
 			e.printStackTrace();
+			throw ce;
+        } catch(OutOfMemoryError e) {
+			CauseMemoryException ce = new CauseMemoryException(
+					"Out of memory error while RssItem init ", e);
+			//#ifdef DLOGGING
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
         }
     }
 
 	/** Deserialize the object **/
-	public static RssItem deserialize(String encodedData) {
+	public static RssItem deserialize(String encodedData)
+	throws CauseMemoryException, CauseException {
 		try {
 			// Base64 decode
 			Base64 b64 = new Base64();
@@ -220,10 +245,28 @@ public class RssItem {
 				data = new String( decodedData );
 			}
 			return unencodedDeserialize(data);
+        } catch(CauseException e) {
+			throw e;
         } catch(Exception e) {
-            System.err.println("Error while rssitem deserialize : " + e.toString());
+			CauseException ce = new CauseException(
+					"Internal error while RssItem deserialize ", e);
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssItem");
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
 			e.printStackTrace();
-			return new RssItem();
+			throw ce;
+        } catch(OutOfMemoryError e) {
+			CauseMemoryException ce = new CauseMemoryException(
+					"Out of memory error while RssItem deserialize ", e);
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssItem");
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
         }
 	}
 
@@ -231,7 +274,8 @@ public class RssItem {
 	  but not the initial version as that version has a bug in getting
 	  the items.
 	  */
-	public static RssItem unencodedDeserialize(String data) {
+	public static RssItem unencodedDeserialize(String data)
+	throws CauseMemoryException, CauseException {
 		RssItem item = new RssItem();
 		try {
 			boolean hasPipe = (data.indexOf('\n') >= 0);
@@ -240,10 +284,26 @@ public class RssItem {
 			return item;
 			
         } catch(Exception e) {
-            System.err.println("Error while rssitem deserialize : " + e.toString());
+			CauseException ce = new CauseException(
+					"Internal error while RssItem unencodedDeserialize ", e);
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssItem");
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
 			e.printStackTrace();
+			throw ce;
+        } catch(OutOfMemoryError e) {
+			CauseMemoryException ce = new CauseMemoryException(
+					"Out of memory error while RssItem unencodedDeserialize ", e);
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssItem");
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
         }
-        return item;
 	}
 
 	/* Copy to item. */
