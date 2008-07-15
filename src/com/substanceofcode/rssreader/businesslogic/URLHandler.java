@@ -26,6 +26,8 @@
 //#define DMIDP20
 // Expand to define DJSR75 define
 //#define DNOJSR75
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define test define
 //#define DNOTEST
 // Expand to define logging define
@@ -182,7 +184,8 @@ public abstract class URLHandler {
 
 				if ((((respCode == HttpConnection.HTTP_MOVED_TEMP) ||
 					 (respCode == HttpConnection.HTTP_MOVED_PERM) ||
-					 (respCode == HttpConnection.HTTP_TEMP_REDIRECT)) ||
+					 (respCode == HttpConnection.HTTP_TEMP_REDIRECT) ||
+					 (respCode == HttpConnection.HTTP_SEE_OTHER)) ||
 					 ((respCode == HttpConnection.HTTP_OK) &&
 					  respMsg.equals("Moved Temporarily"))) && 
 					 (m_location != null)) {
@@ -258,6 +261,9 @@ public abstract class URLHandler {
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	protected String parseHTMLRedirect(String url, InputStream is)
     throws IOException, Exception {
+		//#ifdef DSMALLMEM
+//@		throw new IOException("Error HTML not supported with this version.");
+		//#else
 		if (m_redirect) {
 			//#ifdef DLOGGING
 //@			logger.severe("Error 2nd redirect url:  " + url);
@@ -289,6 +295,7 @@ public abstract class URLHandler {
 		}
 		// Use last link as the site may have adds in the beginning.
 		return feeds[feeds.length - 1].getUrl();
+		//#endif
 	}
 
 	public void handleClose() {
