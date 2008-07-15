@@ -32,6 +32,10 @@ import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Hashtable;
+
+import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseMemoryException;
+
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.Level;
@@ -51,6 +55,10 @@ public class RssItunesItem extends RssItem {
 	// Beginning of data that has 0 itunes info.
 	// Number of Itunes info
     final private static int NBR_ITUNES_INFO = 6;
+    public static int ITITLE_OFFSET= NBR_ITUNES_INFO + TITLE_OFFSET;
+    public static int IUNREAD_ITEM = NBR_ITUNES_INFO + UNREAD_ITEM;
+    public static int IDATE_OFFSET = NBR_ITUNES_INFO + DATE_OFFSET;
+    public static int IDESC_OFFSET = NBR_ITUNES_INFO + DESC_OFFSET;
     final protected static byte BNO_EXPLICIT = (byte)-1;
     final public static String UNSPECIFIED = "unspecified";
     // Value that shows that the first item (and those following may
@@ -160,7 +168,8 @@ public class RssItunesItem extends RssItem {
 	}
 		
 	/** Deserialize the unencoded object */
-	public static RssItem unencodedDeserialize(String data) {
+	public static RssItem unencodedDeserialize(String data)
+	throws CauseMemoryException, CauseException {
 			
 		try {
 			boolean hasPipe = (data.indexOf((char)1) >= 0);
@@ -168,15 +177,34 @@ public class RssItunesItem extends RssItem {
 			RssItunesItem item = new RssItunesItem();
 			item.init(hasPipe, nodes);
 			return item;
+        } catch(CauseException e) {
+			throw e;
         } catch(Exception e) {
-            System.err.println("Error while RssItunesItem deserialize : " + e.toString());
+			CauseException ce = new CauseException(
+					"Internal error while RssItunesItem unencodedDeserialize ", e);
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssItem");
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
 			e.printStackTrace();
-			return null;
+			throw ce;
+        } catch(OutOfMemoryError e) {
+			CauseMemoryException ce = new CauseMemoryException(
+					"Out of memory error while RssItunesItem unencodedDeserialize ", e);
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssItunesItem");
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
         }
 	}
 			
 	/** Deserialize the object */
-	public static RssItem deserialize(String data) {
+	public static RssItem deserialize(String data)
+	throws CauseMemoryException, CauseException {
 		try {
 			// Base64 decode
 			Base64 b64 = new Base64();
@@ -187,10 +215,28 @@ public class RssItunesItem extends RssItem {
 				data = new String( decodedData );
 			}
 			return unencodedDeserialize(data);
+        } catch(CauseException e) {
+			throw e;
         } catch(Exception e) {
-            System.err.println("Error while RssItunesItem deserialize : " + e.toString());
+			CauseException ce = new CauseException(
+					"Internal error while RssItunesItem deserialize ", e);
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssItunesItem");
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
 			e.printStackTrace();
-			return null;
+			throw ce;
+        } catch(OutOfMemoryError e) {
+			CauseMemoryException ce = new CauseMemoryException(
+					"Out of memory error while RssItunesItem deserialize ", e);
+			//#ifdef DLOGGING
+//@			Logger logger = Logger.getLogger("RssItunesItem");
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
 		}
 			
 	}
@@ -200,7 +246,8 @@ public class RssItunesItem extends RssItem {
 	  hasPipe - True if the data has a pipe in at least one item
 	  nodes - (elements in an array).
 	  **/
-	protected void init(boolean hasPipe, String [] nodes) {
+	protected void init(boolean hasPipe, String [] nodes)
+	throws CauseMemoryException, CauseException {
 		try {
 			/* Node count should be 12:
 			 * author | subtitle | category | enclosure | summary | explicit
@@ -246,6 +293,8 @@ public class RssItunesItem extends RssItem {
 
 			super.init(NBR_ITUNES_INFO, true, hasPipe, nodes);
 
+        } catch(CauseException e) {
+			throw e;
         } catch(Exception e) {
             System.err.println("Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
