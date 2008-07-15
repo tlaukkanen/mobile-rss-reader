@@ -36,6 +36,7 @@ import net.sf.jlogmicro.util.logging.Level;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.XmlParser;
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.utils.CauseMemoryException;
@@ -59,6 +60,7 @@ public class AtomFormatParser implements FeedFormatParser {
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 	/** Atom item properties */
+	private boolean m_convXmlEnts;
 	private String m_title = "";
 	private String m_language = "";
 	private String m_description = "";
@@ -78,12 +80,14 @@ public class AtomFormatParser implements FeedFormatParser {
     
     /** Parse Atom feed */
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
-			            int maxItemCount, boolean getTitleOnly)
+			            final boolean convXmlEnts, final int maxItemCount,
+						boolean getTitleOnly)
 	throws IOException, CauseMemoryException, CauseException {
         
         Vector items = new Vector();
 		m_extParser.parseNamespaces(parser);
 		m_language = parser.getAttributeValue("xml:lang");
+		m_convXmlEnts = convXmlEnts;
 		if (m_language == null) {
 			m_language = "";
 		}
@@ -117,9 +121,11 @@ public class AtomFormatParser implements FeedFormatParser {
 					}
 					if ((elemChar == 's') &&
 						elementName.equals("subtitle") ) {
-						m_description = parser.getText();
-						m_description = StringUtil.removeHtml(
-								m_description );
+						m_description = parser.getText(m_convXmlEnts);
+						if (m_convXmlEnts) {
+							m_description = StringUtil.removeHtml(
+									m_description );
+						}
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest("m_description=" + m_description);}
 						//#endif
@@ -156,42 +162,13 @@ public class AtomFormatParser implements FeedFormatParser {
             if( (elemChar == 'e') &&
 				 elementName.equals("entry") ) {
                 /** Save previous entry */
-				if((m_title.length()>0) || (m_description.length()>0)) {
-					if (m_description.length() == 0) {
-						m_description = m_summary;
-					}
-					if (m_link.length() == 0) {
-						if (m_selfLink.length() != 0) {
-							m_link = m_selfLink;
-						} else if (m_relLink.length() != 0) {
-							m_link = m_relLink;
-						} else if (m_altLink.length() != 0) {
-							m_link = m_altLink;
-						}
-					}
-                    Date pubDate = null;
-					// Check date in case we cannot find it.
-					if (m_date.equals("") && m_extParser.isHasExt()) {
-						m_date = m_extParser.getDate();
-					}
-					if (m_date.length() > 0) {
-						pubDate = RssFormatParser.parseRssDate(m_date);
-					}
-                    RssItunesItem item;
-					if (m_hasExt) {
-						item = m_extParser.createItem(m_title, m_link,
-								m_description, pubDate, m_enclosure, true,
-								m_author);
-					} else {
-						item = new RssItunesItem(m_title, m_link,
-								m_description, pubDate,
-										   m_enclosure, true);
-					}
+				RssItunesItem item = createItem();
+				if ( item != null) {
                     items.addElement( item );
                     if(items.size()==maxItemCount) {
                         return feed;
                     }
-                }                
+				}
                 
                 /** New entry */
 				/** reset */
@@ -205,9 +182,30 @@ public class AtomFormatParser implements FeedFormatParser {
 		}
 				
         /** Save previous entry */
-		if((m_title.length()>0) || (m_description.length()>0)) {
-			if (m_description.length() == 0) {
+		RssItunesItem item = createItem();
+		if ( item != null) {
+            items.addElement( item );
+        }
+                        
+        return feed;
+    }
+    
+	/** Save previous entry */
+	final private RssItunesItem createItem() {
+		boolean hasTitle = (m_title.length()>0);
+		boolean hasDesc = (m_description.length()>0);
+		if(hasTitle || hasDesc || (m_summary.length()>0)) {
+			if (!hasDesc) {
 				m_description = m_summary;
+				hasDesc = true;
+			}
+			if (hasTitle && hasDesc) {
+				m_title = m_title.replace('\n', ' ');
+				if (!m_convXmlEnts) {
+					m_title = EncodingUtil.replaceAlphaEntities(
+							true, m_title );
+					m_title = StringUtil.removeHtml( m_title );
+				}
 			}
 			if (m_link.length() == 0) {
 				if (m_selfLink.length() != 0) {
@@ -218,25 +216,29 @@ public class AtomFormatParser implements FeedFormatParser {
 					m_link = m_altLink;
 				}
 			}
-		    Date pubDate = null;
-			// Check m_date in case we cannot find it.
-			if (m_date.length() != 0) {
+			Date pubDate = null;
+			// Check date in case we cannot find it.
+			if (m_date.equals("") && m_extParser.isHasExt()) {
+				m_date = m_extParser.getDate();
+			}
+			if (m_date.length() > 0) {
 				pubDate = RssFormatParser.parseRssDate(m_date);
 			}
 			RssItunesItem item;
 			if (m_hasExt) {
 				item = m_extParser.createItem(m_title, m_link,
-						m_description, pubDate, m_enclosure, true, m_author);
+						m_description, pubDate, m_enclosure, true,
+						m_author);
 			} else {
-				item = new RssItunesItem(m_title, m_link, m_description, pubDate,
+				item = new RssItunesItem(m_title, m_link,
+						m_description, pubDate,
 								   m_enclosure, true);
 			}
-            items.addElement( item );
-        }
-                        
-        return feed;
-    }
-    
+			return item;
+		}
+		return null;
+	}
+
 	private void reset() {
 		m_title = "";
 		m_language = "";
@@ -261,8 +263,10 @@ public class AtomFormatParser implements FeedFormatParser {
 		switch (elemChar) {
 			case 't':
 				if( elementName.equals("title") ) {
-					m_title = parser.getText();
-					m_title = StringUtil.removeHtml( m_title );
+					m_title = parser.getText(m_convXmlEnts);
+					if (m_convXmlEnts) {
+						m_title = StringUtil.removeHtml( m_title );
+					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_title=" + m_title);}
 					//#endif
@@ -328,8 +332,10 @@ public class AtomFormatParser implements FeedFormatParser {
 		switch (elemChar) {
 			case 'a':
 				if( m_hasExt && elementName.equals("author") ) {
-					m_author = parser.getText();
-					m_author = StringUtil.removeHtml( m_author );
+					m_author = parser.getText(m_convXmlEnts);
+					if (m_convXmlEnts) {
+						m_author = StringUtil.removeHtml( m_author );
+					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_author=" + m_author);}
 					//#endif
@@ -338,8 +344,10 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'c':
 				if( elementName.equals("content")) {
-					m_description = parser.getText();
-					m_description = StringUtil.removeHtml( m_description );
+					m_description = parser.getText(m_convXmlEnts);
+					if (m_convXmlEnts) {
+						m_description = StringUtil.removeHtml( m_description );
+					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("content=m_description=" + m_description);}
 					//#endif
@@ -348,8 +356,10 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 's':
 				if( elementName.equals("summary")) {
-					m_summary = parser.getText();
-					m_summary = StringUtil.removeHtml( m_summary );
+					m_summary = parser.getText(m_convXmlEnts);
+					if (m_convXmlEnts) {
+						m_summary = StringUtil.removeHtml( m_summary );
+					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_summary=" + m_summary);}
 					//#endif
