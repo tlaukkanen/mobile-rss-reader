@@ -37,7 +37,7 @@ import com.substanceofcode.utils.CauseException;
 public interface FeedFormatParser {
 
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed feed,
-			int maxItemCount, boolean getTitleOnly)
+			boolean convXmlEnts, int maxItemCount, boolean getTitleOnly)
 	throws IOException, CauseException;
     
 }
