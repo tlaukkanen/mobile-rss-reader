@@ -74,15 +74,17 @@ public class RssFeedParser extends URLHandler {
      * Send a GET request to web server and parse feeds from response.
      *
      * @input updFeed Do updated feeds only.
+     * @input convXmlEnts Convert XML entities
      * @input maxItemCount Maximum item count for the feed.
      *
      */
-    public void parseRssFeed(boolean updFeed, int maxItemCount)
+    public void parseRssFeed(final boolean updFeed,
+			final boolean convXmlEnts, final int maxItemCount)
 	throws IOException, CauseException, Exception {
 		// Set this here as the instance of this class is reused
 		// for update of the current feed.
 		m_redirect = false;
-		parseRssFeedUrl(m_rssFeed.getUrl(), updFeed, maxItemCount);
+		parseRssFeedUrl(m_rssFeed.getUrl(), updFeed, convXmlEnts, maxItemCount);
 	}
         
     /**
@@ -90,10 +92,12 @@ public class RssFeedParser extends URLHandler {
      *
      * @input url to parse
      * @input updFeed Do updated feeds only.
+     * @input convXmlEnts Convert XML entities
      * @input maxItemCount Maximum item count for the feed.
      *
      */
-    public void parseRssFeedUrl(String url, boolean updFeed, int maxItemCount)
+    public void parseRssFeedUrl(final String url, final boolean updFeed,
+			final boolean convXmlEnts, final int maxItemCount)
 	throws IOException, CauseException, Exception {
         
 		try {
@@ -101,13 +105,14 @@ public class RssFeedParser extends URLHandler {
 					  m_rssFeed.getPassword());
 			if (m_needRedirect) {
 				m_needRedirect = false;
-				parseHeaderRedirect(updFeed, m_location, maxItemCount);
+				parseHeaderRedirect(updFeed, m_location, convXmlEnts,
+						maxItemCount);
 				return;
 			}
 			// If we find HTML, usually it is redirection
 			if ((m_contentType != null) && (m_contentType.indexOf("html") >= 0)) {
 				parseHTMLRedirect(updFeed, url, m_inputStream,
-								  maxItemCount);
+								  convXmlEnts, maxItemCount);
 			} else {
 				if (m_lastMod == 0L) {
 					m_rssFeed.setUpddate(null);
@@ -123,7 +128,7 @@ public class RssFeedParser extends URLHandler {
 						}
 					}
  				}
-				parseRssFeedXml( m_inputStream, maxItemCount);
+				parseRssFeedXml( m_inputStream, convXmlEnts, maxItemCount);
 				m_rssFeed.setUpddate(new Date(m_lastMod));
 			}
 		} catch (CauseMemoryException e) {
@@ -180,8 +185,9 @@ public class RssFeedParser extends URLHandler {
     }
     
 	/** Read HTML and if it has links, redirect and parse the XML. */
-	private void parseHeaderRedirect(boolean updFeed, String url,
-								     int maxItemCount)
+	private void parseHeaderRedirect(final boolean updFeed, String url,
+								     final boolean convXmlEnts,
+									 final int maxItemCount)
 	throws IOException, CauseException, Exception {
 		if (m_redirect) {
 			//#ifdef DLOGGING
@@ -193,25 +199,27 @@ public class RssFeedParser extends URLHandler {
 		}
 		m_redirect = true;
 		m_redirectUrl = url;
-		parseRssFeedUrl(url, updFeed, maxItemCount);
+		parseRssFeedUrl(url, updFeed, convXmlEnts, maxItemCount);
 		return;
 
 	}
 
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private void parseHTMLRedirect(boolean updFeed, String url,
-								   InputStream is, int maxItemCount)
+								   InputStream is, final boolean convXmlEnts,
+								   final int maxItemCount)
 	throws IOException, CauseException, Exception {
 		String newUrl = super.parseHTMLRedirect(url, is);
 		RssItunesFeed svFeed = new RssItunesFeed(m_rssFeed);
-		parseRssFeedUrl(newUrl, updFeed, maxItemCount);
+		parseRssFeedUrl(newUrl, updFeed, convXmlEnts, maxItemCount);
 	}
 
     /**
      * Nasty RSS feed XML parser.
      * Seems to work with all RSS 0.91, 0.92 and 2.0.
      */
-    public void parseRssFeedXml(InputStream is, int maxItemCount)
+    public void parseRssFeedXml(InputStream is, final boolean convXmlEnts,
+			final int maxItemCount)
 	throws IOException, CauseException {
         /** Initialize item collection */
         m_rssFeed.getItems().removeAllElements();
@@ -233,13 +241,13 @@ public class RssFeedParser extends URLHandler {
             /** Feed is in RSS format */
             formatParser = new RssFormatParser();
             m_rssFeed = formatParser.parse( parser, m_rssFeed,
-					maxItemCount, m_getTitleOnly );
+					convXmlEnts, maxItemCount, m_getTitleOnly );
             
         } else if(entryElementName.equals("feed")) {
             /** Feed is in Atom format */
             formatParser = new AtomFormatParser();
             m_rssFeed = formatParser.parse( parser, m_rssFeed,
-					maxItemCount, m_getTitleOnly );
+					convXmlEnts, maxItemCount, m_getTitleOnly );
             
         } else {
 			//#ifdef DLOGGING
