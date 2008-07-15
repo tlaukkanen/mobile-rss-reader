@@ -30,6 +30,11 @@ import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+
+import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseMemoryException;
+
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.Level;
@@ -48,6 +53,8 @@ public class RssItunesFeed extends RssFeed{
 	// Beginning of data that has 0 itunes info.
 	// Number of Itunes info
     private static int NBR_ITUNES_FEED_INFO = 8;
+    public static int INAME_OFFSET= NBR_ITUNES_FEED_INFO + NAME_OFFSET;
+    public static int IDATE_OFFSET = NBR_ITUNES_FEED_INFO + DATE_OFFSET;
     private static String EMPTY_ITUNES_FEED_INFO = "|||||||";
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("RssItunesFeed");
@@ -162,23 +169,55 @@ public class RssItunesFeed extends RssFeed{
         Creates a new instance of RssItunesFeed from store string 
 		**/
 	public static RssItunesFeed deserialize(boolean encoded,
-			String storeString){
+			String storeString)
+	throws CauseMemoryException, CauseException {
 
 		try {
         
-			boolean hasPipe = (storeString.indexOf('\n') >= 0);
+			boolean hasPipe = (storeString.indexOf(CONE) >= 0);
 			String[] nodes = StringUtil.split( storeString, '|' );
 			RssItunesFeed feed = new RssItunesFeed();
 			feed.init(hasPipe, encoded, nodes);
 			return feed;
+		} catch (CauseMemoryException e) {
+			throw e;
+		} catch (CauseException e) {
+			throw e;
         } catch(Exception e) {
-            System.err.println("Error while RssItunesFeed deserialize : " + e.toString());
+			CauseException ce = new CauseException(
+					"Internal error during deserialize", e);
+			//#ifdef DLOGGING
+			Logger logger = Logger.getLogger("RssItunesFeed");
+			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
 			e.printStackTrace();
-			return null;
+			throw ce;
+        } catch(OutOfMemoryError e) {
+			CauseMemoryException ce = new CauseMemoryException(
+					"Out of memory error during deserialize", e);
+			//#ifdef DLOGGING
+			Logger logger = Logger.getLogger("RssItunesFeed");
+			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
+        } catch(Throwable e) {
+			CauseException ce = new CauseException(
+					"Internal error during deserialize", e);
+			//#ifdef DLOGGING
+			Logger logger = Logger.getLogger("RssItunesFeed");
+			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
         }
 	}
 			
-	public void init(boolean hasPipe, boolean encoded, String [] nodes) {
+	public void init(boolean hasPipe, boolean encoded, String [] nodes)
+	throws CauseMemoryException, CauseException {
 
 		try {
         
@@ -197,13 +236,13 @@ public class RssItunesFeed extends RssFeed{
 				int TITLE = 1;
 				m_title = nodes[TITLE];
 				if (hasPipe) {
-					m_title = m_title.replace('\n', '|');
+					m_title = m_title.replace(CONE, '|');
 				}
 				
 				int DESCRIPTION = 2;
 				m_description = nodes[DESCRIPTION];
 				if (hasPipe) {
-					m_description = m_description.replace('\n', '|');
+					m_description = m_description.replace(CONE, '|');
 				}
 				
 				int LANGUAGE = 3;
@@ -212,19 +251,19 @@ public class RssItunesFeed extends RssFeed{
 				int AUTHOR = 4;
 				m_author = nodes[AUTHOR];
 				if (hasPipe) {
-					m_author = m_author.replace('\n', '|');
+					m_author = m_author.replace(CONE, '|');
 				}
 				
 				int SUBTITLE = 5;
 				m_subtitle = nodes[SUBTITLE];
 				if (hasPipe) {
-					m_subtitle = m_subtitle.replace('\n', '|');
+					m_subtitle = m_subtitle.replace(CONE, '|');
 				}
 				
 				int SUMMARY = 6;
 				m_summary = nodes[SUMMARY];
 				if (hasPipe) {
-					m_summary = m_summary.replace('\n', '|');
+					m_summary = m_summary.replace(CONE, '|');
 				}
 
 				int EXPLICIT = 7;
@@ -240,9 +279,37 @@ public class RssItunesFeed extends RssFeed{
 			super.init(false, NBR_ITUNES_FEED_INFO, true,
 					   hasPipe, encoded, nodes);
 
+		} catch (CauseMemoryException e) {
+			throw e;
+		} catch (CauseException e) {
+			throw e;
         } catch(Exception e) {
-            System.err.println("Error while RssItunesFeed initialization : " + e.toString());
+			CauseException ce = new CauseException(
+					"Internal error during initialize of RssItunesFeed", e);
+			//#ifdef DLOGGING
+			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
 			e.printStackTrace();
+			throw ce;
+        } catch(OutOfMemoryError e) {
+			CauseMemoryException ce = new CauseMemoryException(
+					"Out of memory error during initialize of RssItunesFeed", e);
+			//#ifdef DLOGGING
+			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
+        } catch(Throwable e) {
+			CauseException ce = new CauseException(
+					"Internal error during initialize of RssItunesFeed", e);
+			//#ifdef DLOGGING
+			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
         }
     }
     
@@ -252,35 +319,192 @@ public class RssItunesFeed extends RssFeed{
 		//#ifdef DLOGGING
 		if (finestLoggable) {logger.finest("saveHdr,serializeItems,encoded=" + saveHdr + "," + serializeItems + "," + encoded);}
 		//#endif
+
 		String itunesInfo;
-		if (saveHdr) {
+		//#ifdef DITUNES
+		if (saveHdr && m_itunes) {
 			String title = "";
 			String description = "";
 			String author = "";
 			String subtitle = "";
 			String summary = "";
-			//#ifdef DITUNES
 			if (m_itunes) {
-				title = m_title.replace('|', '\n');
-				description = m_description.replace('|', '\n');
-				author = m_author.replace('|', '\n');
-				subtitle = m_subtitle.replace('|', '\n');
-				summary = m_summary.replace('|', '\n');
+				title = m_title.replace('|', CONE);
+				description = m_description.replace('|', CONE);
+				author = m_author.replace('|', CONE);
+				subtitle = m_subtitle.replace('|', CONE);
+				summary = m_summary.replace('|', CONE);
 			}
-			//#endif
 			itunesInfo = (m_itunes ? "1" : "") + "|" + title + "|" +
 			description + "|" + m_language + "|" +
                 author + "|" + subtitle + "|" + summary + "|" +
                  ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
 						 Integer.toString((int)m_explicit));
 		} else {
+		//#endif
 			itunesInfo = EMPTY_ITUNES_FEED_INFO;
+		//#ifdef DITUNES
 		}
+		//#endif
         String storeString = itunesInfo + "|" +
 			super.getStoreString(saveHdr, serializeItems, encoded);
         return storeString;
         
     }
+
+    /** Return record store string info */
+    final public static RssStoreInfo getStoreStringInfo(
+			final boolean serializeItems, final boolean encoded,
+			final String storeString,
+			boolean sencoded){
+		// TODO handle serialize items
+		//#ifdef DLOGGING
+		Logger logger = Logger.getLogger("RssItunesFeed");
+		logger.finest("serializeItems,encoded,sencoded=" + serializeItems + "," + encoded + "," + sencoded);
+		//#endif
+		//#ifdef DTEST
+		long encodeTime = 0L;
+		long splitTime = 0L;
+		long joinTime = 0L;
+		long lngStart = System.currentTimeMillis();
+		//#endif
+		String[] nodes = StringUtil.split( storeString, '|' );
+		//#ifdef DTEST
+		splitTime += System.currentTimeMillis() - lngStart;
+		//#endif
+		final String name = nodes[NBR_ITUNES_FEED_INFO];
+		if (encoded == sencoded) {
+			//#ifdef DTEST
+			return new RssStoreInfo(name, storeString, encodeTime, splitTime,
+					joinTime);
+			//#else
+			return new RssStoreInfo(name, storeString);
+			//#endif
+		}
+		final int itemsOff = NBR_ITUNES_FEED_INFO + RssFeed.ITUNES_ITEMS;
+		if (itemsOff >= nodes.length) {
+			//#ifdef DTEST
+			return new RssStoreInfo(name, storeString, encodeTime, splitTime,
+					joinTime);
+			//#else
+			return new RssStoreInfo(name, storeString);
+			//#endif
+		}
+		if (!sencoded) {
+			nodes[itemsOff] = nodes[itemsOff].replace(CTHREE, '|');
+		}
+		//#ifdef DTEST
+		lngStart = System.currentTimeMillis();
+		//#endif
+		final String[] itemArrayData = StringUtil.split(nodes[itemsOff],
+				(sencoded ? '.' : RssFeed.CTWO));
+		//#ifdef DTEST
+		splitTime += System.currentTimeMillis() - lngStart;
+		//#endif
+		final String[] nitemArrayData = new String[itemArrayData.length];
+		if (sencoded) {
+			for (int ic = 0; ic < itemArrayData.length; ic++) {
+				// Base64 decode
+				Base64 b64 = new Base64();
+				byte[] decodedData = b64.decode(itemArrayData[ic]);
+				try {
+					nitemArrayData[ic] = new String( decodedData, "UTF-8" );
+				} catch (UnsupportedEncodingException e) {
+					nitemArrayData[ic] = new String( decodedData );
+				}
+			}
+			nodes[itemsOff] = StringUtil.join(nitemArrayData, RssFeed.CTWO, 0);
+			nodes[itemsOff] = nodes[itemsOff].replace('|', RssFeed.CTHREE);
+		} else {
+			//#ifdef DTEST
+			lngStart = System.currentTimeMillis();
+			//#endif
+			for (int ic = 0; ic < itemArrayData.length; ic++) {
+				// Base64 decode
+				Base64 b64 = new Base64();
+				String data;
+				try {
+					nitemArrayData[ic] = b64.encode(
+							itemArrayData[ic].getBytes("UTF-8") );
+				} catch (UnsupportedEncodingException e) {
+					nitemArrayData[ic] = b64.encode(
+							itemArrayData[ic].getBytes() );
+				}
+			}
+			//#ifdef DTEST
+			encodeTime += System.currentTimeMillis() - lngStart;
+			lngStart = System.currentTimeMillis();
+			//#endif
+			nodes[itemsOff] = StringUtil.join(nitemArrayData, '.', 0);
+			//#ifdef DTEST
+			joinTime += System.currentTimeMillis() - lngStart;
+			//#endif
+		}
+		//#ifdef DTEST
+		RssStoreInfo rsi = new RssStoreInfo(name, StringUtil.join(
+					nodes, '|', 0), encodeTime, splitTime, joinTime);
+		//#else
+		RssStoreInfo rsi = new RssStoreInfo(name, StringUtil.join(
+					nodes, '|', 0));
+		//#endif
+		return rsi;
+	}
+
+    /** Return record store string info */
+    final public static RssShortItem[] getShortItems(
+			final RssReaderMIDlet midlet, final String storeString) {
+		//#ifdef DLOGGING
+		Logger logger = Logger.getLogger("RssItunesFeed");
+		logger.finest("storeString=" + storeString);
+		//#endif
+		String[] nodes = StringUtil.split( storeString, '|' );
+		final int itemsOff = NBR_ITUNES_FEED_INFO + RssFeed.ITUNES_ITEMS;
+		if ((itemsOff >= nodes.length) || (nodes[itemsOff].length() == 0)) {
+			return new RssShortItem[0];
+		}
+		final String[] itemArrayData = StringUtil.split(nodes[itemsOff],
+				RssFeed.CTWO);
+		final RssShortItem[] sitems = new RssShortItem[itemArrayData.length - 1];
+		//#ifdef DITUNES
+		String sfdate = null;
+		Date fdate = null;
+		//#endif
+		for (int ic = 0; ic < sitems.length; ic++) {
+			String[] sparts = StringUtil.split(itemArrayData[ic], CTHREE);
+			String title = sparts[RssItunesItem.ITITLE_OFFSET].replace(
+					RssItem.CONE, '|');
+			if (title.length() == 0) {
+				title = midlet.getItemDescription(
+						sparts[RssItunesItem.IDESC_OFFSET].replace(
+							RssItem.CONE, '|'));
+			}
+
+			final String sunreadItem = sparts[RssItunesItem.IUNREAD_ITEM];
+			boolean unreadItem = false;
+			if (sunreadItem.equals("1")) {
+				unreadItem = true;
+			}
+			String sdate = sparts[RssItunesItem.IDATE_OFFSET];
+			Date date = null;
+			if (sdate.length() > 0) {
+				date = new Date(Long.parseLong(sdate, 16));
+				//#ifdef DITUNES
+			} else {
+				if (sfdate == null) {
+					sfdate = nodes[IDATE_OFFSET];
+					if (sfdate.length() > 0) {
+						fdate = new Date(Long.parseLong(sfdate, 16));
+					}
+				}
+				if (fdate != null) {
+					date = fdate;
+				}
+				//#endif
+			}
+			sitems[ic] = new RssShortItem(title, date, unreadItem, ic);
+		}
+		return sitems;
+	}
 
 	/** Copy feed to an existing feed.  **/
 	public void copyTo(RssItunesFeed toFeed) {
