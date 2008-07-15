@@ -144,6 +144,9 @@ public class XmlParser {
 									m_currentElementName.toString())) ||
 								((m_namespaces.length >= 2) &&
 								m_namespaces[1].equals(
+									m_currentElementName.toString())) ||
+								((m_namespaces.length >= 3) &&
+								m_namespaces[2].equals(
 									m_currentElementName.toString())))) {
 								m_currentElementName.append(c);
 								break;
@@ -328,7 +331,8 @@ public class XmlParser {
     
     /** Get element text including inner xml
 	  * If no text, return empty string "" */
-    private String getTextStream(InputStreamReader is)
+    private String getTextStream(InputStreamReader is,
+								 final boolean convXmlEnts)
 	throws IOException, CauseMemoryException, CauseException {
         
 		if(!m_currentElementContainsText) {
@@ -406,13 +410,17 @@ public class XmlParser {
 					text = textBuffer.toString();
 				}
 			}
+			textBuffer = null;
 			text = StringUtil.replace(text, endCurrentElement, "");
 			
 			/** Handle some entities and encoded characters */
 			text = StringUtil.replace(text, "<![CDATA[", "");
 			text = StringUtil.replace(text, "]]>", "");
 			if (text.indexOf('&') >= 0) {
-				text = m_encodingUtil.replaceAlphaEntities(text);
+				text = EncodingUtil.replaceAlphaEntities(convXmlEnts, text);
+				if (convXmlEnts) {
+					text = EncodingUtil.replaceXmlEntities(text);
+				}
 				// No need to convert from UTF-8 to Unicode using replace
 				// umlauts now because it is done with new String...,encoding.
 
@@ -461,9 +469,21 @@ public class XmlParser {
     public String getText()
 	throws IOException, CauseMemoryException, CauseException {
 		if (m_encodingStreamReader.isModEncoding()) {
-			return getTextStream(m_encodingStreamReader);
+			return getTextStream(m_encodingStreamReader, true);
 		} else {
-			return getTextStream(m_inputStream);
+			return getTextStream(m_inputStream, true);
+		}
+	}
+
+    /** Get element text including inner xml
+	  * save some time by using the normal m_inputStream when we
+	  * know that we are not reading UTF-8/16. */
+    public String getText(final boolean convXmlEnts)
+	throws IOException, CauseMemoryException, CauseException {
+		if (m_encodingStreamReader.isModEncoding()) {
+			return getTextStream(m_encodingStreamReader, convXmlEnts);
+		} else {
+			return getTextStream(m_inputStream,  convXmlEnts);
 		}
 	}
 
