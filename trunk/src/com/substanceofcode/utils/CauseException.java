@@ -76,6 +76,13 @@ Exception
 				} else {
 					e = getCause();
 				}
+			} else if (e instanceof CauseRuntimeException) {
+				CauseRuntimeException ce = (CauseRuntimeException)e;
+				if (ce.getCause() == null) {
+					return ce;
+				} else {
+					e = getCause();
+				}
 			} else {
 				return e;
 			}
