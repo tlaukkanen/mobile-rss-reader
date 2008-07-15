@@ -20,9 +20,14 @@
  *
  */
 
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define logging define
 //#define DNOLOGGING
 
+/* This functionality adds to jar size, so don't do it for small memory */
+/* devices. */
+//#ifndef DSMALLMEM
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -272,3 +277,4 @@ public class HTMLLinkParser extends FeedListParser {
     }
     
 }
+//#endif
