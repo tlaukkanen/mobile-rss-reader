@@ -28,6 +28,7 @@ package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Settings;
 import java.io.IOException;
+import java.util.Hashtable;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStoreException;
 
@@ -42,6 +43,7 @@ public class RssReaderSettings {
     private static RssReaderSettings m_singleton;    
     
     private static final String MAX_ITEM_COUNT = "max-item-count";
+    private static final String SAVE_MEMORY_ENABLED = "save-memory-enabled";
     private static final String MAX_WORD_COUNT = "max-word-count";
     private static final String IMPORT_URL = "import-url";
     private static final String IMPORT_USERNAME = "import-username";
@@ -50,8 +52,10 @@ public class RssReaderSettings {
     private static final String FEED_LIST_OPEN = "feed-list-open";
     private static final String ITUNES_ENABLED = "itunes-enabled";
     private static final String PAGE_ENABLED = "page-enabled";
+    private static final String HTML_ENABLED = "html-enabled";
     private static final String FONT_SIZE = "font-size";
     private static final String USE_TEXT_BOX = "use-text-box";
+    private static final String USE_STANDARD_EXIT = "use-standard-exit";
     private static final String LOG_LEVEL = "log-level";
     private Exception m_loadExc = null;
     
@@ -172,6 +176,37 @@ public class RssReaderSettings {
         m_settings.setBooleanProperty( PAGE_ENABLED, pageEnabled);
     }
     
+    /** Get HTML enabled */
+    public boolean getHtmlEnabled() {
+        return m_settings.getBooleanProperty( HTML_ENABLED, false);
+    }
+    
+    /** Set HTML enabled */
+    public void setHtmlEnabled(boolean htmlEnabled) {
+        m_settings.setBooleanProperty( HTML_ENABLED, htmlEnabled);
+    }
+    
+    /** Get save memory enabled */
+    public boolean getSaveMemoryEnabled() {
+        return m_settings.getBooleanProperty( SAVE_MEMORY_ENABLED, true);
+    }
+    
+    /** Set save memory enabled */
+    public void setSaveMemoryEnabled(boolean saveMemoryEnabled) {
+        m_settings.setBooleanProperty( SAVE_MEMORY_ENABLED, saveMemoryEnabled);
+    }
+    
+    /** Get items encoded enabled */
+    public boolean getItemsEncodedEnabled() {
+        return m_settings.getBooleanProperty( m_settings.ITEMS_ENCODED, true);
+    }
+    
+    /** Set items encoded enabled */
+    public void setItemsEncodedEnabled(boolean itemsEncodedEnabled) {
+        m_settings.setBooleanProperty( m_settings.ITEMS_ENCODED,
+				itemsEncodedEnabled);
+    }
+    
     /** Get font size */
     public int getFontSize() {
         return m_settings.getIntProperty( FONT_SIZE, 0);
@@ -192,9 +227,25 @@ public class RssReaderSettings {
         m_settings.setBooleanProperty( USE_TEXT_BOX, useTextBox);
     }
     
+    /** Get use standard exit */
+    public boolean getUseStandardExit() {
+        return m_settings.getBooleanProperty( USE_STANDARD_EXIT, false);
+    }
+    
+    /** Set standard exit */
+    public void setUseStandardExit(boolean useStandardExit) {
+        m_settings.setBooleanProperty( USE_STANDARD_EXIT, useStandardExit);
+    }
+    
     /** Get settings version */
     public String getSettingsVers() {
         return m_settings.getStringProperty(Settings.SETTINGS_NAME, "");
+    }
+    
+    /** get settings db memory info. */
+    public Hashtable getSettingMemInfo()
+	throws IOException, RecordStoreException {
+        return m_settings.getSettingMemInfo();
     }
     
 	//#ifdef DTEST
