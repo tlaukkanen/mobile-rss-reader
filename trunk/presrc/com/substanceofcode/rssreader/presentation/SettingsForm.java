@@ -61,7 +61,9 @@ import com.substanceofcode.testlcdui.StringItem;
 //#endif
 import javax.microedition.lcdui.Item;
 
+//#ifndef DSMALLMEM
 import com.substanceofcode.rssreader.presentation.HelpForm;
+//#endif
 
 //#ifdef DJSR75
 import org.kablog.kgui.KFileSelectorMgr;
@@ -79,16 +81,23 @@ import net.sf.jlogmicro.util.logging.Level;
  *
  * @author Tommi Laukkanen
  */
-public class SettingsForm extends Form implements CommandListener {
+public class SettingsForm extends Form implements CommandListener, Runnable {
     
     private RssReaderMIDlet m_midlet;
+    private boolean m_getHelp = false;
+    private boolean m_upd = false;
     private Command m_okCommand;
     private Command m_cancelCommand;
+	//#ifndef DSMALLMEM
     private Command m_helpCommand;
+	//#endif
     
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
+	//#ifndef DSMALLMEM
     private ChoiceGroup m_useTextBox;
+	//#endif
+    private ChoiceGroup m_useStandardExit;
     private ChoiceGroup m_feedListOpen;
 	//#ifdef DITUNES
     private ChoiceGroup m_itunesEnabled;
@@ -98,17 +107,12 @@ public class SettingsForm extends Form implements CommandListener {
     private ChoiceGroup m_fontSize;
 	//#endif
     private TextField m_wordCountField;
-    private StringItem m_pgmMidpVers;
-    private StringItem m_pgCldVers;
-    private StringItem m_pgmJsr75;
-    private StringItem m_midpVers;
-    private StringItem m_cldcVers;
-    private StringItem m_jsr75;
     private StringItem m_pgmMemUsedItem;
     private StringItem m_pgmMemAvailItem;
     private StringItem m_memUsedItem;
     private StringItem m_memAvailItem;
     private StringItem m_threadsUsed;
+    private boolean prevStdExit;
 	//#ifdef DLOGGING
     private TextField m_logLevelField;
     private Logger logger = Logger.getLogger("SettingsForm");
@@ -128,8 +132,10 @@ public class SettingsForm extends Form implements CommandListener {
         m_cancelCommand = UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 2);
         this.addCommand( m_cancelCommand );
         
+		//#ifndef DSMALLMEM
         m_helpCommand = UiUtil.getCmdRsc("cmd.help", Command.HELP, 3);
         this.addCommand( m_helpCommand );
+		//#endif
 
         this.setCommandListener( this );
         
@@ -141,192 +147,201 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_itemCountField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_itemCountField );
-		String [] choices = {"Mark", "No mark"};
-        m_markUnreadItems = new ChoiceGroup("Mark unread items",
-				                            Choice.EXCLUSIVE, choices, null);
-		//#ifdef DMIDP20
-		m_markUnreadItems.setLayout(Item.LAYOUT_BOTTOM);
+        super.append( m_itemCountField );
+
+        m_markUnreadItems = UiUtil.getAddChoiceGroup(this,
+				"Mark unread items", new String [] {"Mark", "No mark"});
+
+		//#ifndef DSMALLMEM
+        m_useTextBox = UiUtil.getAddChoiceGroup(this,
+				"Text entry items", new String [] {"Text (large) box",
+				"Text (line) field"});
 		//#endif
-        this.append( m_markUnreadItems );
-		String [] txtChoices = {"Text (large) box", "Text (line) field"};
-        m_useTextBox = new ChoiceGroup("Text entry items",
-				                            Choice.EXCLUSIVE, txtChoices, null);
-		//#ifdef DMIDP20
-		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        this.append( m_useTextBox );
+
+        m_useStandardExit = UiUtil.getAddChoiceGroup(this,
+				"Exit key type", new String [] {"Use standard exit key",
+				"Use menu exit key"});
+
 		//#ifdef DITUNES
-		String [] itunesEnabledChoices = {"Don't show Itunes data",
-				"Show Itunes data"};
-        m_itunesEnabled = new ChoiceGroup("Choose to use Itunes data",
-				                            Choice.EXCLUSIVE,
-											itunesEnabledChoices,
-											null);
-		//#ifdef DMIDP20
-		m_itunesEnabled.setLayout(Item.LAYOUT_BOTTOM);
+        m_itunesEnabled = UiUtil.getAddChoiceGroup(this,
+				"Choose to use Itunes data", new String []
+				{"Don't show Itunes data", "Show Itunes data"});
 		//#endif
-        this.append( m_itunesEnabled );
-		//#endif
+
 		//#ifdef DMIDP20
-		String [] pageEnabledChoices = {
-			"Use commands to go back to previous screen",
-				"Also use keypad to go back to previous screen"};
-        m_pageEnabled = new ChoiceGroup("Choose to use keypad for item screen",
-				                            Choice.EXCLUSIVE,
-											pageEnabledChoices,
-											null);
-		m_pageEnabled.setLayout(Item.LAYOUT_BOTTOM);
-        this.append( m_pageEnabled );
+        m_pageEnabled = UiUtil.getAddChoiceGroup(this,
+				"Choose to use keypad and/get HTML emphasis for item screen",
+				new String []
+				{"Use commands to go back to previous screen",
+				"Also use keypad to go back to previous screen",
+				"Also use keypad (as previous) and emphasize HTML"});
+
 		String [] fontSizeChoices = {"Default font size", "Small", "Medium", "Large"};
         m_fontSize = new ChoiceGroup("Choose font size", Choice.EXCLUSIVE,
 				fontSizeChoices,
 											null);
 		m_fontSize.setLayout(Item.LAYOUT_BOTTOM);
-        this.append( m_fontSize );
+        super.append( m_fontSize );
 		//#endif
-		String [] feedBackChoices = {"Open item first", "Back first"};
-        m_feedListOpen = new ChoiceGroup("Choose feed list menu first item",
-				                            Choice.EXCLUSIVE, feedBackChoices,
-											null);
-		//#ifdef DMIDP20
-		m_feedListOpen.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        this.append( m_feedListOpen );
+        m_feedListOpen = UiUtil.getAddChoiceGroup(this,
+				"Choose feed list menu first item", new String []
+				{"Open item first", "Back first"});
+
         int maxWordCount = settings.getMaxWordCountInDesc();
         m_wordCountField = new TextField("Max word count desc abbrev",
                 String.valueOf(maxCount), 3, TextField.NUMERIC);
 		//#ifdef DMIDP20
 		m_wordCountField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_wordCountField );
-        m_pgmMidpVers = new StringItem("Program MIDP version:",
+        super.append( m_wordCountField );
+		StringItem itemInfo = new StringItem("Program MIDP version:",
 		//#ifdef DMIDP20
 				"MIDP-2.0");
 		//#else
 				"MIDP-1.0");
 		//#endif
 		//#ifdef DMIDP20
-		m_pgmMidpVers.setLayout(Item.LAYOUT_BOTTOM);
+		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgmMidpVers );
-        m_pgCldVers = new StringItem("Program CLDC version:",
+        super.append( itemInfo );
+        itemInfo = new StringItem("Program CLDC version:",
 				//#ifdef DCLDCV11
 				"CLDC-1.1");
 				//#else
 				"CLDC-1.0");
 				//#endif
 		//#ifdef DMIDP20
-		m_pgCldVers.setLayout(Item.LAYOUT_BOTTOM);
+		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgCldVers );
-        m_pgmJsr75 = new StringItem("Program JSR 75 available:",
+        super.append( itemInfo );
+        itemInfo = new StringItem("Program JSR 75 available:",
 		//#ifdef DJSR75
 				"true");
 		//#else
 				"false");
 		//#endif
 		//#ifdef DMIDP20
-		m_pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
+		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgmJsr75 );
-        m_midpVers = new StringItem("Phone MIDP version:",
-				System.getProperty("microedition.profiles"));
+        super.append( itemInfo );
+		String mep = System.getProperty("microedition.profiles");
+		if (mep == null) {
+			mep = "N/A";
+		}
+        itemInfo = new StringItem("Phone MIDP version:", mep);
 		//#ifdef DMIDP20
-		m_midpVers.setLayout(Item.LAYOUT_BOTTOM);
+		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_midpVers );
-        m_cldcVers = new StringItem("Phone CLDC version:",
+        super.append( itemInfo );
+        itemInfo = new StringItem("Phone CLDC version:",
 				System.getProperty("microedition.configuration"));
 		//#ifdef DMIDP20
-		m_cldcVers.setLayout(Item.LAYOUT_BOTTOM);
+		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_cldcVers );
-        m_jsr75 = new StringItem("Phone JSR 75 available:",
+        super.append( itemInfo );
+        itemInfo = new StringItem("Phone JSR 75 available:",
 				new Boolean(System.getProperty(
 				"microedition.io.file.FileConnection.version")
 				!= null).toString());
 		//#ifdef DMIDP20
-		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
+		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_jsr75 );
+        super.append( itemInfo );
+		String me = System.getProperty("microedition.platform");
+		if (me == null) {
+			me = "N/A";
+		}
+        itemInfo = new StringItem("Phone Microedition platform:", me);
+		//#ifdef DMIDP20
+		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        this.append( itemInfo );
 		//#ifdef DLOGGING
         m_logLevelField = new TextField("Logging level",
                 logger.getParent().getLevel().getName(), 20, TextField.ANY);
 		//#ifdef DMIDP20
 		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_logLevelField );
+        super.append( m_logLevelField );
 		//#endif
         m_pgmMemUsedItem = new StringItem("Application memory used:", "");
 		//#ifdef DMIDP20
 		m_pgmMemUsedItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgmMemUsedItem );
+        super.append( m_pgmMemUsedItem );
         m_pgmMemAvailItem = new StringItem("Application memory available:", "");
 		//#ifdef DMIDP20
 		m_pgmMemAvailItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgmMemAvailItem );
+        super.append( m_pgmMemAvailItem );
         m_memUsedItem = new StringItem("DB memory used:", "");
 		//#ifdef DMIDP20
 		m_memUsedItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_memUsedItem );
+        super.append( m_memUsedItem );
         m_memAvailItem = new StringItem("DB memory available:", "");
 		//#ifdef DMIDP20
 		m_memAvailItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_memAvailItem );
+        super.append( m_memAvailItem );
         m_threadsUsed = new StringItem("Active Threads:", "");
 		//#ifdef DMIDP20
 		m_threadsUsed.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_threadsUsed );
+        super.append( m_threadsUsed );
 		updateForm();
     }
     
 	/* Update form items that change per run. */
 	public void updateForm() {
-		Hashtable memInfo = null;
         RssReaderSettings settings = m_midlet.getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
         m_itemCountField.setString(String.valueOf(maxCount));
         boolean markUnreadItems = settings.getMarkUnreadItems();
-		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
-		m_markUnreadItems.setSelectedFlags( selectedItems );
+		m_markUnreadItems.setSelectedFlags( new boolean[] {markUnreadItems,
+				!markUnreadItems} );
+		//#ifndef DSMALLMEM
         boolean useTextBox = settings.getUseTextBox();
-		boolean [] boolSelectedItems = {useTextBox, !useTextBox};
-		m_useTextBox.setSelectedFlags( boolSelectedItems );
+		m_useTextBox.setSelectedFlags( new boolean[] {useTextBox, !useTextBox} );
+		//#endif
+        boolean useStdExit = settings.getUseStandardExit();
+        prevStdExit = useStdExit;
+		m_useStandardExit.setSelectedFlags( new boolean[] {useStdExit,
+				!useStdExit} );
 		//#ifdef DITUNES
         boolean itunesEnabled = settings.getItunesEnabled();
-		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
-		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
+		m_itunesEnabled.setSelectedFlags( new boolean[] {!itunesEnabled,
+				itunesEnabled} );
 		//#endif
 		//#ifdef DMIDP20
         boolean pageEnabled = settings.getPageEnabled();
-		boolean [] boolPageEnabled = {!pageEnabled, pageEnabled};
-		m_pageEnabled.setSelectedFlags( boolPageEnabled );
+        boolean htmlEnabled = settings.getHtmlEnabled();
+		m_pageEnabled.setSelectedFlags( new boolean[] {!pageEnabled &&
+				!htmlEnabled, pageEnabled, htmlEnabled} );
         int fontSize = settings.getFontSize();
 		boolean [] boolfontSize = {false, false, false, false};
-		m_fontSize.setSelectedFlags( boolfontSize );
+		m_fontSize.setSelectedFlags( new boolean[] {false, false, false,
+				false} );
 		m_fontSize.setSelectedIndex( fontSize, true );
 		//#endif
         boolean feedListOpen = settings.getFeedListOpen();
-		boolean [] boolFeedListOpen = {feedListOpen, !feedListOpen};
-		m_feedListOpen.setSelectedFlags( boolFeedListOpen );
-		try {
-			Settings m_settings = Settings.getInstance(m_midlet);
-			memInfo = m_settings.getSettingMemInfo();
-		} catch (Exception e) {
-			memInfo = new Hashtable(0);
-		}
+		m_feedListOpen.setSelectedFlags( new boolean[] {feedListOpen,
+				!feedListOpen} );
 
+		long totalMem;
+		long freeMem;
 		System.gc();
-		long totalMem = Runtime.getRuntime().totalMemory();
-		long freeMem = Runtime.getRuntime().freeMemory();
+		totalMem = Runtime.getRuntime().totalMemory();
+		freeMem = Runtime.getRuntime().freeMemory();
 		m_pgmMemUsedItem.setText(((totalMem - freeMem)/1024L) + "kb");
 		m_pgmMemAvailItem.setText((freeMem/1024L) + "kb");
+		Hashtable memInfo;
+		try {
+			memInfo = settings.getSettingMemInfo();
+		} catch (Throwable e) {
+			m_midlet.recordExcFormFinRsc("exc.int.err", e);
+			memInfo = new Hashtable();
+		}
         if (memInfo.size() == 0) {
 			m_memUsedItem.setText("0");
 			m_memAvailItem.setText("0");
@@ -342,15 +357,54 @@ public class SettingsForm extends Form implements CommandListener {
 		super.outputCmdAct(command, displayable);
 		//#endif
         if(command==m_okCommand) {
+			m_upd = true;
+			try {
+				new Thread(this).start();
+            } catch(Throwable e) {
+				/* Internal error.:\n */
+				m_midlet.recordExcFormFinRsc("exc.int.err", e);
+            }
+        }
+        
+        if(command==m_cancelCommand) {
+            m_midlet.showBookmarkList();
+        }
+
+		//#ifndef DSMALLMEM
+        if(command==m_helpCommand) {
+			m_getHelp = true;
+			try {
+				new Thread(this).start();
+            } catch(Throwable e) {
+				/* Internal error.:\n */
+				m_midlet.recordExcFormFinRsc("exc.int.err", e);
+            }
+		}
+		//#endif
+
+    }
+    
+	public void run() {
+        if(m_upd) {
+			m_upd = false;
+			/* Loading data... */
+			m_midlet.initializeLoadingFormRsc("text.u.data", this);
             // Save settings
-            RssReaderSettings settings = m_midlet.getSettings();
             try {
+				RssReaderSettings settings = m_midlet.getSettings();
                 int maxCount = Integer.parseInt( m_itemCountField.getString() );
                 settings.setMaximumItemCountInFeed( maxCount );
 				boolean markUnreadItems = m_markUnreadItems.isSelected(0);
                 settings.setMarkUnreadItems( markUnreadItems );
+				//#ifndef DSMALLMEM
 				boolean useTextBox = m_useTextBox.isSelected(0);
 				settings.setUseTextBox(useTextBox);
+				//#endif
+				boolean useStdExit = m_useStandardExit.isSelected(0);
+				settings.setUseStandardExit(useStdExit);
+				if (useStdExit != prevStdExit) {
+					m_midlet.initExit();
+				}
 				//#ifdef DITUNES
 				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
 				settings.setItunesEnabled( itunesEnabled );
@@ -358,8 +412,10 @@ public class SettingsForm extends Form implements CommandListener {
 				settings.setItunesEnabled( false );
 				//#endif
 				//#ifdef DMIDP20
-				boolean pageEnabled = !m_pageEnabled.isSelected(0);
+				boolean pageEnabled = m_pageEnabled.isSelected(1);
 				settings.setPageEnabled( pageEnabled );
+				boolean htmlEnabled = m_pageEnabled.isSelected(2);
+				settings.setHtmlEnabled( htmlEnabled );
 				int fontSize = m_fontSize.getSelectedIndex();
 				settings.setFontSize( fontSize );
 				//#endif
@@ -384,28 +440,37 @@ public class SettingsForm extends Form implements CommandListener {
 					return;
 				}
 				//#endif
+				m_midlet.showBookmarkList();
             } catch(Exception e) {
-                System.err.println("Error: " + e.toString());
+				/* Internal error.:\n */
+				m_midlet.recordExcFormFinRsc("exc.int.err", e);
+            } catch(Throwable e) {
+				/* Internal error.:\n */
+				m_midlet.recordExcFormFinRsc("exc.int.err", e);
             }
             
-            m_midlet.showBookmarkList();
-        }
-        
-        if(command==m_cancelCommand) {
-            m_midlet.showBookmarkList();
-        }
+		}
 
-        if(command==m_helpCommand) {
-			final HelpForm helpForm = new HelpForm(m_midlet, this);
-			helpForm.appendRsc("text.set.help");
-			helpForm.appendItemHelpRsc(m_useTextBox, "text.stxt.help");
-			//#ifdef DMIDP20
-			helpForm.appendItemHelpRsc(m_pageEnabled, "text.spg.help");
-			helpForm.appendItemHelpRsc(m_fontSize, "text.sfs.help");
-			//#endif
-            m_midlet.setCurrent(helpForm);
+		//#ifndef DSMALLMEM
+        if(m_getHelp) {
+			m_getHelp = false;
+			try {
+				/* Loading help... */
+				m_midlet.initializeLoadingFormRsc("text.l.h", this);
+				final HelpForm helpForm = new HelpForm(m_midlet, this);
+				helpForm.appendRsc("text.set.help");
+				helpForm.appendItemHelpRsc(m_useTextBox, "text.stxt.help");
+				//#ifdef DMIDP20
+				helpForm.appendItemHelpRsc(m_pageEnabled, "text.spg.help");
+				helpForm.appendItemHelpRsc(m_fontSize, "text.sfs.help");
+				//#endif
+				m_midlet.setCurrent(helpForm);
+            } catch(Throwable e) {
+				/* Internal error.:\n */
+				m_midlet.recordExcFormFinRsc("exc.int.err", e);
+            }
         }
+		//#endif
 
-    }
-    
+	}
 }
