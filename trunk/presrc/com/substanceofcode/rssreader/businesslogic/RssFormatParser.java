@@ -1,7 +1,5 @@
 /*
-   TODO don't remove carriage return
    TODO remove extra spaces between description item 7 of imbed
-
  * RssFormatParser.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
@@ -34,6 +32,7 @@ import net.sf.jlogmicro.util.logging.Level;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.XmlParser;
 import com.substanceofcode.utils.CauseException;
 import java.io.IOException;
@@ -57,6 +56,7 @@ public class RssFormatParser implements FeedFormatParser {
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
+	private boolean m_convXmlEnts;
 	private String m_title = "";
 	private String m_author = "";
 	private String m_description = "";
@@ -64,19 +64,23 @@ public class RssFormatParser implements FeedFormatParser {
 	private String m_language = "";
 	private String m_date = "";
 	private String m_enclosure = "";
-	private ExtParser m_extParser = new ExtParser();
+	private ExtParser m_extParser;
 
     /** Creates a new instance of RssFormatParser */
     public RssFormatParser() {
     }
     
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
-			            int maxItemCount, boolean getTitleOnly)
+			            
+							   final boolean convXmlEnts,
+							   final int maxItemCount, boolean getTitleOnly)
 	throws IOException, CauseException {
         
         Vector items = new Vector();
+		m_extParser = new ExtParser(convXmlEnts);
 		m_extParser.parseNamespaces(parser);
 		m_hasExt = m_extParser.isHasExt();
+		m_convXmlEnts = convXmlEnts;
 		RssItunesFeed feed = cfeed;
         feed.setItems(items);
         
@@ -101,6 +105,7 @@ public class RssFormatParser implements FeedFormatParser {
 						continue;
 					}
 					switch (elemChar) {
+						//#ifdef DITUNES
 						case 'l':
 							 if (elementName.equals("language")) {
 								 m_language = parser.getText();
@@ -110,13 +115,14 @@ public class RssFormatParser implements FeedFormatParser {
 								 continue;
 							 }
 							 break;
+						//#endif
 						case 'i':
 							 if (elementName.equals("image")) {
 								 // Skip image text as it includes link
 								 // and title.
-								 String itext = parser.getText();
+								 String itext = parser.getText(false);
 								 //#ifdef DLOGGING
-								 if (finestLoggable) {logger.finest("m_language=" + m_language);}
+								 if (finestLoggable) {logger.finest("image=" + itext);}
 								 //#endif
 								 continue;
 							 }
@@ -159,31 +165,13 @@ public class RssFormatParser implements FeedFormatParser {
 				case 'i':
 					if (elementName.equals("item") ) {
 						/** Save previous entry */
-						if((m_title.length()>0) || (m_description.length()>0)) {
-							RssItunesItem item;
-							Date pubDate = null;
-							// Check date in case we cannot find it.
-							if ((m_date.length() == 0) &&
-									m_extParser.isHasExt()) {
-								m_date = m_extParser.getDate();
-							}
-							if (m_date.length() > 0) {
-								pubDate = parseRssDate(m_date);
-							}
-							if (m_hasExt) {
-								item = m_extParser.createItem(m_title, m_link,
-										m_description, pubDate, m_enclosure, true,
-										m_author);
-							} else {
-								item = new RssItunesItem(m_title, m_link,
-										m_description, pubDate,
-										m_enclosure, true);
-							}
+						RssItunesItem item = createItem();
+						if ( item != null) {
 							items.addElement( item );
 							if(items.size()==maxItemCount) {
 								return feed;
 							}
-						}                
+						}
 
 						/** New entry */
 						/** reset */
@@ -195,7 +183,7 @@ public class RssFormatParser implements FeedFormatParser {
 					// Textinput has required sub element description.
 					// We don't want the overriding description.
 					if (elementName.equals("textinput") ) {
-						String textData = parser.getText();
+						String textData = parser.getText(false);
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest("skipping textinput data=" + textData);}
 						//#endif
@@ -209,25 +197,53 @@ public class RssFormatParser implements FeedFormatParser {
         }
 
         /** Save previous entry */
-        if((m_title.length()>0) || (m_description.length()>0)) {
-            RssItunesItem item;
-            Date pubDate = null;
-			if (m_date.length() > 0) {
-				pubDate = parseRssDate(m_date);
-			}
-			if (m_hasExt) {
-				item = m_extParser.createItem(m_title, m_link,
-						m_description, pubDate, m_enclosure, true, m_author);
-			} else {
-				item = new RssItunesItem(m_title, m_link, m_description, pubDate,
-								   m_enclosure, true);
-			}
+		RssItunesItem item = createItem();
+		if ( item != null) {
             items.addElement( item );
         }        
                         
 		return feed;
     }
     
+	/** Save previous entry */
+	final private RssItunesItem createItem() {
+		boolean hasTitle = (m_title.length()>0);
+		boolean hasDesc = (m_description.length()>0);
+		if(hasTitle || hasDesc) {
+			if (hasTitle && hasDesc) {
+				m_title = m_title.replace('\n', ' ');
+				// If we were not converting HTML, do so now since the
+				// title should not have HTML.
+				if (!m_convXmlEnts) {
+					m_title = EncodingUtil.replaceAlphaEntities(
+							true, m_title );
+					m_title = StringUtil.removeHtml( m_title );
+				}
+			}
+			Date pubDate = null;
+			// Check date in case we cannot find it.
+			if ((m_date.length() == 0) &&
+					m_extParser.isHasExt()) {
+				m_date = m_extParser.getDate();
+			}
+			if (m_date.length() > 0) {
+				pubDate = parseRssDate(m_date);
+			}
+			RssItunesItem item;
+			if (m_hasExt) {
+				item = m_extParser.createItem(m_title, m_link,
+						m_description, pubDate, m_enclosure, true,
+						m_author);
+			} else {
+				item = new RssItunesItem(m_title, m_link,
+						m_description, pubDate,
+						m_enclosure, true);
+			}
+			return item;
+		}
+		return null;
+	}
+
 	private void reset() {
 		m_title = "";
 		m_author = "";
@@ -257,8 +273,7 @@ public class RssFormatParser implements FeedFormatParser {
 				break;
 			case 't':
 				if( elementName.equals("title") ) {
-					m_title = parser.getText().replace('\n', ' ');
-					m_title = StringUtil.removeHtml( m_title );
+					m_title = parser.getText(m_convXmlEnts);
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_title=" + m_title);}
 					//#endif
@@ -267,8 +282,10 @@ public class RssFormatParser implements FeedFormatParser {
 				break;
 			case 'd':
 				if( elementName.equals("description")) {
-					m_description = parser.getText();
-					m_description = StringUtil.removeHtml( m_description );
+					m_description = parser.getText(m_convXmlEnts);
+					if (m_convXmlEnts) {
+						m_description = StringUtil.removeHtml( m_description );
+					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_description=" + m_description);}
 					//#endif
@@ -293,12 +310,14 @@ public class RssFormatParser implements FeedFormatParser {
 	void parseItem(XmlParser parser, char elemChar, String elementName)
 	throws IOException, CauseException {
 		switch (elemChar) {
+			//#ifdef DITUNES
 			case 'a':
 				if( elementName.equals("author")) {
-					m_author = parser.getText();
+					m_author = parser.getText(m_convXmlEnts);
 					return;
 				}
 				break;
+			//#endif
 			case 'e':
 				if( elementName.equals("enclosure") ) {
 					String cenclosure = parser.getAttributeValue("url");
@@ -427,7 +446,7 @@ public class RssFormatParser implements FeedFormatParser {
             }
             
             // Time
-            String[] timeValues = StringUtil.split(values[ timeIndex ],':');
+            String[] timeValues = StringUtil.split(values[ timeIndex ], ':');
             int hours = Integer.parseInt( timeValues[0] );
             int minutes = Integer.parseInt( timeValues[1] );
             int seconds = Integer.parseInt( timeValues[2] );
