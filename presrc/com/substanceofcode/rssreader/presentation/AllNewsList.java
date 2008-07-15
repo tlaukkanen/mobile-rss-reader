@@ -32,7 +32,6 @@
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.microedition.lcdui.Command;
@@ -49,8 +48,12 @@ import com.substanceofcode.testlcdui.List;
 
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 
+import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseMemoryException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+import com.substanceofcode.rssreader.businessentities.RssShortItem;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.SortUtil;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -66,7 +69,11 @@ final public class AllNewsList extends List
 implements CommandListener, Runnable  {
     
     private RssReaderMIDlet m_midlet;
-	private boolean     m_process = true;   // Flag to continue looping
+	private boolean     m_saveMemoryEnabled;  // Flag to show memory save enbabled
+	private boolean     m_process = true;     // Flag to continue looping
+    private boolean     m_select  = false;    // Select item from list.
+    private boolean     m_markUnread = false;    // Mark unread item flag
+    private boolean     m_updItem = false;    // Update item
     private boolean     m_sort      = false; // Process sort
     private boolean     m_sortByDate = false; // Sort by date
     private boolean     m_showAll = false;  // Show both read and unread.
@@ -86,8 +93,9 @@ implements CommandListener, Runnable  {
 	private int         m_newsLen = -1; // Length of headers
 	//#endif
     private Image       m_unreadImage;
+    private Image       m_readImage;
     private List m_bookmarkList;
-    private Hashtable m_rssFeeds;
+    private RssFeedStore m_rssFeeds;
     private final static String TITLE = "River of News";
     private Command     m_openUnreadHdrCmd;    // The open header command
     private Command     m_sortUnreadItemsCmd;  // The sort unread items by date command
@@ -102,11 +110,12 @@ implements CommandListener, Runnable  {
 	//#ifdef DTESTUI
 	private Command     m_testNewsCmd;       // Tet UI rss news command
 	//#endif
-    private Vector      m_itemFeeds = new Vector();
+    private Vector      m_itemFeedsNames = new Vector();
     private Vector      m_allItems = new Vector();
     private Vector      m_unreadItems = new Vector();
     private Vector      m_readItems = new Vector();
     private RssItunesItem m_item;
+    private RssShortItem m_shortItem;
     private RssItunesFeed m_feed;
 	//#ifdef DLOGGING
     private Logger m_logger = Logger.getLogger("AllNewsList");
@@ -118,15 +127,18 @@ implements CommandListener, Runnable  {
     /** Creates a new instance of AllNewsList
 	    unreadImage - if non-null, put image for unread items for all list. */
     public AllNewsList(final RssReaderMIDlet midlet,
-					   final List bookmarkList, final Hashtable rssFeeds,
-					   Image unreadImage) {
+					   final List bookmarkList, final RssFeedStore rssFeeds,
+					   Image unreadImage,
+					   Image readImage) {
 
         //super(TITLE, List.IMPLICIT);
         super("Unread Headers", List.IMPLICIT);
 		m_midlet = midlet;
 		m_bookmarkList = bookmarkList;
 		m_rssFeeds = rssFeeds;
+		m_saveMemoryEnabled = rssFeeds.isSaveMemoryEnabled();
 		m_unreadImage = unreadImage;
+		m_readImage = readImage;
 		//#ifdef DCLDCV11
 		new Thread(this, "AllNewsList").start();
 		//#else
@@ -187,36 +199,68 @@ implements CommandListener, Runnable  {
 						     final boolean showUnread,
 						     final boolean sortByDate,
 							 final List bookmarkList,
-							 final Hashtable rssFeeds) {
+							 final RssFeedStore rssFeeds)
+	throws CauseMemoryException, CauseException {
 
+		//#ifdef DLOGGING
+		if (m_finestLoggable) {m_logger.finest("initNewsList showAll,showUnread,sortByDate=" + showAll + "," + showUnread + "," + sortByDate);}
+		//#endif
 		this.m_showAll = showAll;
 		this.m_showUnread = showUnread;
 		this.m_sortByDate = sortByDate;
 		final int bsize = bookmarkList.size();
 		if( bsize > 0 ){
-			boolean firstItem = true;
+			initVectors();
 			for( int ic = 0; ic < bsize; ic++ ){
 			
-				final RssItunesFeed feed = (RssItunesFeed)rssFeeds.get(
-						bookmarkList.getString(ic));
-				if( feed.getItems().size()>0 ) {
-					/**
-					 * Show currently selected RSS feed
-					 * headers without updating them
-					 */
-					fillVectors( firstItem, feed );
-					if ( firstItem ) {
-						firstItem = false;
+				final String fname = bookmarkList.getString(ic);
+				if (m_saveMemoryEnabled) {
+					final String store = rssFeeds.getRoStoreStr(fname);
+					final RssShortItem[] sitems = RssItunesFeed.getShortItems(
+							m_midlet, store);
+					final int ilen = sitems.length;
+					if (ilen > 0) {
+						/**
+						 * Show currently selected RSS feed
+						 * headers without updating them
+						 */
+						fillVectors( ilen, fname,
+								//#ifdef DITUNES
+								null,
+								//#endif
+								sitems );
+					}
+				} else {
+					final RssItunesFeed feed =
+						(RssItunesFeed)rssFeeds.getRo(fname);
+					final Vector vitems = feed.getItems();
+					final int ilen = vitems.size();
+					if (ilen > 0) {
+						RssItunesItem[] ritems = new RssItunesItem[ilen];
+						vitems.copyInto(ritems);
+						/**
+						 * Show currently selected RSS feed
+						 * headers without updating them
+						 */
+						fillVectors( ilen, fname,
+								//#ifdef DITUNES
+								feed.getDate(),
+								//#endif
+								ritems );
 					}
 				}
 			}
+			//#ifdef DLOGGING
+			if (m_fineLoggable) {m_logger.fine("size of m_unreadItems,m_readItems,m_allItems,m_itemFeedsNames=" + m_unreadItems.size() + "," + m_readItems.size() + "," + m_allItems.size() + "," + m_itemFeedsNames.size());}
+			//#endif
 		}
 	}
 
 	/* Sort all items. */
 	final public void sortAllItems(final boolean sortByDate,
 							 final List bookmarkList,
-							 final Hashtable rssFeeds) {
+							 final RssFeedStore rssFeeds)
+	throws CauseMemoryException, CauseException {
 		initNewsList(true, false, sortByDate, bookmarkList, rssFeeds);
 		if (sortByDate) {
 			sortItems(false, m_allItems);
@@ -244,20 +288,21 @@ implements CommandListener, Runnable  {
 	/** Sort items unread. */
 	final public void sortUnreadItems(final boolean sortByDate,
 								final List bookmarkList,
-								final Hashtable rssFeeds) {
+								final RssFeedStore rssFeeds)
+	throws CauseMemoryException, CauseException {
 		initNewsList(false, true, sortByDate, bookmarkList, rssFeeds);
 		if (sortByDate) {
 			sortItems(true, m_unreadItems);
 		} else {
 			fillItems( m_unreadItems);
 		}
-		super.setTitle("Unread items " + (sortByDate ? "date" : "feed") +
-				" sorted:  " + super.size());
+		updTitle();
 	}
 
 	/* Sort items read. */
 	final public void sortReadItems(boolean sortByDate,
-							  List bookmarkList, Hashtable rssFeeds) {
+							  List bookmarkList, RssFeedStore rssFeeds)
+	throws CauseMemoryException, CauseException {
 		initNewsList(false, false, sortByDate, bookmarkList, rssFeeds);
 		if (sortByDate) {
 			sortItems(false, m_readItems);
@@ -275,27 +320,16 @@ implements CommandListener, Runnable  {
 		int [] indexes = new int[unsortedItems.size()];
 		long [] ldates = new long[unsortedItems.size()];
 		Vector vsorted = new Vector(unsortedItems.size());
-		Vector vfeedSorted = new Vector(m_itemFeeds.size());
+		Vector vfeedSorted = new Vector(m_itemFeedsNames.size());
 		Vector vunsorted = new Vector(unsortedItems.size());
-		Vector vfeedUnsorted = new Vector(m_itemFeeds.size());
-		RssItunesItem [] uitems = new RssItunesItem[unsortedItems.size()];
+		Vector vfeedUnsorted = new Vector(m_itemFeedsNames.size());
+		RssShortItem[] uitems = new RssShortItem[unsortedItems.size()];
 		unsortedItems.copyInto(uitems);
-		RssItunesFeed [] ufeeds = new RssItunesFeed[m_itemFeeds.size()];
-		m_itemFeeds.copyInto(ufeeds);
+		String[] ufeeds = new String[m_itemFeedsNames.size()];
+		m_itemFeedsNames.copyInto(ufeeds);
 		int kc = 0;
 		for (int ic = 0; ic < uitems.length; ic++) {
-			//#ifdef DITUNES
-			Date sortDate = uitems[ic].getDate();
-			if (sortDate == null)
-			{
-				sortDate = ufeeds[ic].getDate();
-				//#ifdef DLOGGING
-				if (m_finestLoggable) {m_logger.finest("Using feed date for item=" + ic + "," + ufeeds[ic].getName() + "," + sortDate + "," + uitems[ic].getTitle());}
-				//#endif
-			}
-			//#else
 			final Date sortDate = uitems[ic].getDate();
-			//#endif
 			if (sortDate == null)
 			{
 				vsorted.addElement(uitems[ic]);
@@ -313,10 +347,10 @@ implements CommandListener, Runnable  {
 		uitems = null;
 		ufeeds = null;
 		SortUtil.sortLongs( indexes, ldates, 0, kc - 1);
-		uitems = new RssItunesItem[kc];
+		uitems = new RssShortItem[kc];
 		vunsorted.copyInto(uitems);
 		vunsorted = null;
-		ufeeds = new RssItunesFeed[kc];
+		ufeeds = new String[kc];
 		vfeedUnsorted.copyInto(ufeeds);
 		vfeedUnsorted = null;
 		for (int ic = 0; ic < kc ; ic++) {
@@ -327,7 +361,7 @@ implements CommandListener, Runnable  {
 			vfeedSorted.insertElementAt(ufeeds[indexes[ic]], 0);
 		}
 		uitems = null;
-		RssItunesItem[] sitems = new RssItunesItem[vsorted.size()];
+		RssShortItem[] sitems = new RssShortItem[vsorted.size()];
 		vsorted.copyInto(sitems);
 		vsorted = null;
 		unsortedItems.removeAllElements();
@@ -335,103 +369,126 @@ implements CommandListener, Runnable  {
 			unsortedItems.addElement(sitems[ic]);
 		}
 		ufeeds = null;
-		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedSorted.size()];
+		String[] sfeeds = new String[vfeedSorted.size()];
 		vfeedSorted.copyInto(sfeeds);
 		vfeedSorted = null;
-		m_itemFeeds.removeAllElements();
+		m_itemFeedsNames.removeAllElements();
 		for( int ic = 0; ic < sitems.length; ic++){
-			m_itemFeeds.addElement(sfeeds[ic]);
+			m_itemFeedsNames.addElement(sfeeds[ic]);
 		}
 		fillItems( unsortedItems );
 	}
 
     /** Fill list from items */
     final private void fillItems(final Vector sortedItems) {
-		//#ifdef DMIDP20
-		super.deleteAll();
-		//#else
-		while(super.size()>0) {
-			super.delete(0);
-		}
-		//#endif
+		UiUtil.delItems(this);
 		final int slen = sortedItems.size();
-		RssItunesItem [] sitems = new RssItunesItem[slen];
+		RssShortItem [] sitems = new RssShortItem[slen];
 		sortedItems.copyInto(sitems);
 		for( int ic = 0; ic < slen; ic++){
-			String text = sitems[ic].getTitle();
-			if (text.length() == 0) {
-				text = m_midlet.getItemDescription(sitems[ic]);
-			}
-			if (m_showAll && (m_unreadImage != null) &&
-					sitems[ic].isUnreadItem()) {
-				super.append( text, m_unreadImage );
+			final String text = sitems[ic].getTitle();
+			if (m_showAll && (m_unreadImage != null)){
+				if (sitems[ic].isUnreadItem()) {
+					super.append( text, m_unreadImage );
+				} else {
+					super.append( text, m_readImage );
+				}
 			} else {
 				super.append( text, null );
 			}
 		}
 	}
 
+	/** Initialize item and feed name vectors. */
+	final private void initVectors() {
+		m_unreadItems.removeAllElements();
+		m_readItems.removeAllElements();
+		m_allItems.removeAllElements();
+		m_itemFeedsNames.removeAllElements();
+	}
+
     /** Fill RSS item vectors */
-    final private void fillVectors( final boolean firstItem,
-			final RssItunesFeed feed ) {
-        if(firstItem) {
-			m_unreadItems.removeAllElements();
-			m_readItems.removeAllElements();
-			m_allItems.removeAllElements();
-			m_itemFeeds.removeAllElements();
-        }
-        final Vector vitems = feed.getItems();
-        final int itemLen = vitems.size();
-        for(int i=0; i < itemLen; i++){
-            final RssItunesItem r = (RssItunesItem)vitems.elementAt(i);
-			if (m_showAll) {
-				m_allItems.addElement(r);
-				m_itemFeeds.addElement(feed);
+    final private void fillVectors( final int ilen,
+			final String fname,
+			//#ifdef DITUNES
+			final Date fdate,
+			//#endif
+			final Object[] oitems ) {
+		//#ifdef DLOGGING
+		if (m_finestLoggable) {m_logger.finest("fillVectors fname,ilen=" + fname + "," + ilen);}
+		//#endif
+        for(int i=0; i < ilen; i++){
+            final Object oi = oitems[i];
+            RssShortItem si;
+			if (oi instanceof RssItunesItem) {
+				si = new RssShortItem((RssItunesItem)oi, i);
+				if (si.getTitle().length() == 0) {
+					si.setTitle(
+							m_midlet.getItemDescription(
+								((RssItunesItem)oi).getDescription()));
+				}
+				//#ifdef DITUNES
+				if (si.getDate() == null) {
+					si.setDate(fdate);
+					//#ifdef DLOGGING
+					if (m_finestLoggable) {m_logger.finest("Using feed date for item=" + i + "," + fname + "," + si.getTitle());}
+					//#endif
+				}
+				//#endif
 			} else {
-				if (r.isUnreadItem()) {
+				si = (RssShortItem)oi;
+			}
+			if (m_showAll) {
+				m_allItems.addElement(si);
+				m_itemFeedsNames.addElement(fname);
+			} else {
+				if (si.isUnreadItem()) {
 					if (m_showUnread) {
-						m_unreadItems.addElement(r);
-						m_itemFeeds.addElement(feed);
+						m_unreadItems.addElement(si);
+						m_itemFeedsNames.addElement(fname);
 					}
 				} else {
 					if (!m_showUnread) {
-						m_readItems.addElement(r);
-						m_itemFeeds.addElement(feed);
+						m_readItems.addElement(si);
+						m_itemFeedsNames.addElement(fname);
 					}
 				}
 			}
         }
     }
     
+	final private void updFeedItem(Vector vitems, int selIdx)
+	throws CauseMemoryException, CauseException {
+		final String fname = (String)m_itemFeedsNames.elementAt(selIdx);
+		m_feed = m_rssFeeds.getRo(fname);
+		m_shortItem = (RssShortItem)vitems.elementAt(selIdx);
+		m_item = (RssItunesItem)(m_feed.getItems().elementAt(
+					m_shortItem.getIndex()));
+	}
+
 	/* Get the current selected index (or 0 index) and update the vectors. */
-	final private void getUpdSel(boolean updateIt) {
-		int selIdx = super.getSelectedIndex();
-		if (selIdx == -1) {
-			super.setSelectedIndex(0, true);
-			selIdx = 0;
-		}
+	final private void getUpdSel(boolean updateIt)
+	throws CauseMemoryException, CauseException {
+		int selIdx = UiUtil.getSelectedIndex(this);
 		if (m_showAll) {
-			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
-			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
-			final int unreadIdx = m_unreadItems.indexOf(m_item);
+			updFeedItem(m_allItems, selIdx);
+			final int unreadIdx = m_unreadItems.indexOf(m_shortItem);
 			if (updateIt && (m_unreadImage != null) && m_item.isUnreadItem()) {
-				super.set(selIdx, super.getString(selIdx), null);
+				super.set(selIdx, super.getString(selIdx), m_readImage);
 			}
 		} else if (m_showUnread) {
 			super.delete(selIdx);
 			if (selIdx > 0) {
 				super.setSelectedIndex(selIdx - 1, true);
 			}
-			m_item = (RssItunesItem)m_unreadItems.elementAt(selIdx);
-			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
+			updFeedItem(m_unreadItems, selIdx);
 			if (updateIt) {
 				m_unreadItems.removeElementAt(selIdx);
-				m_itemFeeds.removeElementAt(selIdx);
+				m_itemFeedsNames.removeElementAt(selIdx);
 			}
 			updTitle();
 		} else {
-			m_item = (RssItunesItem)m_readItems.elementAt(selIdx);
-			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
+			updFeedItem(m_readItems, selIdx);
 		}
 		/**
 		 * Show currently selected RSS item
@@ -439,26 +496,25 @@ implements CommandListener, Runnable  {
 		 */
 		if (updateIt) {
 			m_item.setUnreadItem(false);
+			m_rssFeeds.put(m_feed);
 		}
 	}
 
 	/* Update the lists for mark or unmark. */
-	final private void updMarkSel(boolean markUnread) {
-		int selIdx = super.getSelectedIndex();
-		if (selIdx == -1) {
-			super.setSelectedIndex(0, true);
-			selIdx = 0;
-		}
+	final private void updMarkSel(boolean markUnread)
+	throws CauseMemoryException, CauseException {
+		int selIdx = UiUtil.getSelectedIndex(this);
 		if (m_showAll) {
-			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+			updFeedItem(m_allItems, selIdx);
 			if (m_unreadImage != null) {
 				if (!markUnread && m_item.isUnreadItem()) {
-					super.set(selIdx, super.getString(selIdx), null);
+					super.set(selIdx, super.getString(selIdx), m_readImage);
 				} else if (markUnread && !m_item.isUnreadItem()) {
 					super.set(selIdx, super.getString(selIdx), m_unreadImage);
 				}
 			}
 			m_item.setUnreadItem(markUnread);
+			m_rssFeeds.put(m_feed);
 		} else {
 			if ((m_showUnread && !markUnread) ||
 					(!m_showUnread && markUnread)) {
@@ -467,14 +523,15 @@ implements CommandListener, Runnable  {
 					super.setSelectedIndex(selIdx - 1, true);
 				}
 				if (m_showUnread) {
-					m_item = (RssItunesItem)m_unreadItems.elementAt(selIdx);
+					updFeedItem(m_unreadItems, selIdx);
 					m_unreadItems.removeElementAt(selIdx);
 				} else {
-					m_item = (RssItunesItem)m_readItems.elementAt(selIdx);
+					updFeedItem(m_readItems, selIdx);
 					m_readItems.removeElementAt(selIdx);
 				}
 				m_item.setUnreadItem(markUnread);
-				m_itemFeeds.removeElementAt(selIdx);
+				m_rssFeeds.put(m_feed);
+				m_itemFeedsNames.removeElementAt(selIdx);
 			}
 			updTitle();
 		}
@@ -487,9 +544,54 @@ implements CommandListener, Runnable  {
         long lngStart;
         long lngTimeTaken;
         while(m_process) {
-            try {
+			if (m_select) {
+				m_select = false;
+				m_midlet.initializeLoadingFormRsc("text.l.it", this);
+				try {
+					try {
+						getUpdSel(true);
+						m_midlet.initializeItemForm( m_feed, m_item, this );
+						//#ifdef DTESTUI
+						m_itemNext = true;
+						//#endif
+					}catch(OutOfMemoryError t) {
+						m_midlet.recordExcForm(
+								"Out Of Memory Error selecting item", t);
+					}
+				} catch (CauseMemoryException e) {
+					m_midlet.recordExcForm(
+							"Out Of Memory Error selecting item", e);
+				} catch (CauseException e) {
+					m_midlet.recordExcForm(
+							"Internal error selecting item", e);
+				}
+			}
+
+			if (m_updItem) {
+				m_midlet.initializeLoadingFormRsc("text.u.it", this);
+				m_midlet.showLoadingForm();
+				m_updItem = false;
+				try {
+					try {
+						updMarkSel(m_markUnread);
+					}catch(OutOfMemoryError t) {
+						m_midlet.recordExcForm(
+								"Out Of Memory Error updating item", t);
+					}
+				} catch (CauseMemoryException e) {
+					m_midlet.recordExcForm(
+							"Out Of Memory Error updating item", e);
+				} catch (CauseException e) {
+					m_midlet.recordExcForm(
+							"Internal error updating item", e);
+				}
+			}
+
+			try {
 				/* Sort the read or unread items. */
 				if ( m_sort ) {
+					m_midlet.initializeLoadingFormRsc("text.s.item", this);
+					m_midlet.showLoadingForm();
 					m_sort = false;
 					if (m_showAll) {
 						sortAllItems( m_dateSort, m_bookmarkList, m_rssFeeds );
@@ -591,7 +693,6 @@ implements CommandListener, Runnable  {
 		//#endif
         if( c == m_sortUnreadItemsCmd ) {
 			/* Sorting items... */
-			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = true;
 			m_dateSort = true;
 			m_showAll = false;
@@ -602,7 +703,6 @@ implements CommandListener, Runnable  {
         /** Read read items date sorted */
         if( c == m_sortReadItemsCmd ) {
 			/* Sorting items... */
-			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = false;
 			m_dateSort = true;
 			m_showAll = false;
@@ -613,7 +713,6 @@ implements CommandListener, Runnable  {
         /** Read unread items feed sorted */
         if( c == m_sortUnreadFeedsCmd ) {
 			/* Sorting items... */
-			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = true;
 			m_dateSort = false;
 			m_showAll = false;
@@ -624,7 +723,6 @@ implements CommandListener, Runnable  {
         /** Read read items feed sorted */
         if( c == m_sortReadFeedsCmd ) {
 			/* Sorting items... */
-			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = false;
 			m_dateSort = false;
 			m_showAll = false;
@@ -634,16 +732,10 @@ implements CommandListener, Runnable  {
         
         if( (c == m_openUnreadHdrCmd) || (c == List.SELECT_COMMAND) ) {
             if( super.size()>0){
-				getUpdSel(true);
-				m_midlet.initializeItemForm( m_feed, m_item, this );
-				m_midlet.showItemForm();
-				//#ifdef DTESTUI
-				m_itemNext = true;
-				//#endif
+				m_select = true;
             }
 		} else if( c == m_sortAllDateCmd ) {
 			/* Sorting items... */
-			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = false;
 			m_dateSort = true;
 			m_showAll = true;
@@ -651,7 +743,6 @@ implements CommandListener, Runnable  {
 			wakeUp();
 		} else if( c == m_sortAllFeedsCmd ) {
 			/* Sorting items... */
-			m_midlet.showLoadingFormRsc("text.s.item", this);
 			m_sortUnread = false;
 			m_dateSort = false;
 			m_showAll = true;
@@ -659,12 +750,15 @@ implements CommandListener, Runnable  {
 			wakeUp();
 		} else if( c == m_markReadCmd ) {
             if( super.size()>0){
-				updMarkSel(false);
+				/* Updating item... */
+				m_markUnread = false;
+				m_updItem = true;
 
             }
 		} else if( c == m_markUnReadCmd ) {
             if( super.size()>0){
-				updMarkSel(true);
+				m_markUnread = true;
+				m_updItem = true;
             }
         /** Get back to RSS feed bookmarks */
 		} else if( c == m_backUnreadHdrCmd ){
