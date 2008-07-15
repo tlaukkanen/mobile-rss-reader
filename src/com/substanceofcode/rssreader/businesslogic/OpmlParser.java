@@ -96,7 +96,8 @@ public class OpmlParser extends FeedListParser {
 					
 					title = parser.getAttributeValue( "text" );
 					if (title != null) {
-						title = EncodingUtil.replaceAlphaEntities(title);
+						title = EncodingUtil.replaceAlphaEntities(true,
+								title);
 						// No need to convert from UTF-8 to Unicode using replace
 						// umlauts now because it is done with new String...,encoding.
 
