@@ -265,9 +265,6 @@ public class AtomFormatParser implements FeedFormatParser {
 			case 't':
 				if( elementName.equals("title") ) {
 					m_title = parser.getText(m_convXmlEnts);
-					if (m_convXmlEnts) {
-						m_title = StringUtil.removeHtml( m_title );
-					}
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_title=" + m_title);}
 					//#endif
