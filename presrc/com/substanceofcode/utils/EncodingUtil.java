@@ -123,6 +123,10 @@ public class EncodingUtil {
 	// See if ISO8859-1 is supported.
 	final public static boolean m_hasIso8859Encoding = hasIso8859Encoding();
 
+	final private static String m_xmlEntKeys =
+			"&lt;  &gt;  &nbsp;&amp; &apos;&quot;";
+	final private static String[] m_xmlEntValues =
+			{"<", ">", " ", "&", "'", "\""};
 
 	// Left single quote in cp-1252 (Windows) encoding.
     public static final char CWSGL_LOW9_QUOTE = 0x82; // #130;
@@ -152,8 +156,11 @@ public class EncodingUtil {
     public static final char CNON_BREAKING_SP = (char)160;
     
     private EncodingStreamReader m_encodingStreamReader;
-	final private static Hashtable m_convIso88591 = initAlphaIso88591();
-	final private static Hashtable m_convCp1252 = initAlphaCp1252();
+	final private static Hashtable m_convXmlEntities = initXmlEntities();
+	final private static Hashtable m_convIso88591 = initAlphaIso88591(false);
+	final private static Hashtable m_convXmlIso88591 = initAlphaIso88591(true);
+	final private static Hashtable m_convCp1252 = initAlphaCp1252(false);
+	final private static Hashtable m_convXmlCp1252 = initAlphaCp1252(true);
     private String m_docEncoding = "";  // Default for XML is UTF-8.
 	                                    // unexpected UTF-16.
     private boolean m_utf = false;  // Doc is utf.
@@ -606,9 +613,11 @@ public class EncodingUtil {
 	/**
 	  Replace alphabetic entities.
 	  */
-	public static String replaceAlphaEntities(String text) {
-		final Hashtable m_convEntities = (m_midpWin) ? m_convCp1252 :
-				m_convIso88591;
+	public static String replaceAlphaEntities(final boolean convXmlEnts,
+			String text) {
+		final Hashtable m_convEntities = (m_midpWin) ?
+			    (convXmlEnts ? m_convXmlCp1252 : m_convCp1252) :
+				(convXmlEnts ? m_convXmlIso88591 : m_convIso88591);
 		int beginPos = 0;
 		int pos = -1;
 		while ((pos = text.indexOf('&', beginPos)) >= 0) {
@@ -626,8 +635,9 @@ public class EncodingUtil {
 				continue;
 			}
 			String entity = text.substring(pos + 1, epos);
-			if (m_convEntities.containsKey(entity)) {
-				String ent = (String)m_convEntities.get(entity);
+			Object oent = m_convEntities.get(entity);
+			if (oent != null) {
+				String ent = (String)oent;
 				text = text.substring(0, pos) + ent + text.substring(epos + 1);
 				// If we made a substitution, keep the position the same
 				// as sometimes, we get a double substitution when
@@ -642,9 +652,62 @@ public class EncodingUtil {
 	}
 
 	/**
+	  Replace alphabetic entities.
+	  */
+	public static String replaceXmlEntities(String text) {
+		int beginPos = 0;
+		int pos = -1;
+		while ((pos = text.indexOf('&', beginPos)) >= 0) {
+			int epos = text.indexOf(';', pos);
+			if (epos < 0) {
+				break;
+			}
+			int nbpos = text.indexOf('&', pos + 1);
+			if ((nbpos >= 0) && (nbpos < epos)) {
+				beginPos = nbpos;
+				continue;
+			}
+			if ((pos + 1) == epos) {
+				beginPos = epos + 1;
+				continue;
+			}
+			String entity = text.substring(pos, epos + 1);
+			int spos = m_xmlEntKeys.indexOf(entity);
+			if (spos >= 0) {
+				String ent = m_xmlEntValues[spos / 6];
+				text = text.substring(0, pos) + ent + text.substring(epos + 1);
+				// If we made a substitution, keep the position the same
+				// as sometimes, we get a double substitution when
+				// we substitute &amp; for & this may create another
+				// entity (e.g. &amp;quot; becomes & &quot;)
+				beginPos = pos;
+			} else {
+				beginPos = epos + 1;
+			}
+		}
+		return text;
+	}
+
+	/**
+	  Create table of XML entities.
+	  */
+	public static Hashtable initXmlEntities() {
+		Hashtable convEntities = new Hashtable();
+		try {
+			initHtmlCommEnts(convEntities);
+		} catch (Throwable t) {
+			//#ifdef DLOGGING
+			Logger logger = Logger.getLogger("EncodingUtil");
+			logger.severe("initXmlEntities", t);
+			//#endif
+		}
+		return convEntities;
+	}
+
+	/**
 	  Create table of alpha entities for iso8859-1.
 	  */
-	public static Hashtable initAlphaIso88591() {
+	public static Hashtable initAlphaIso88591(final boolean convXmlEnts) {
 
 		//#ifdef DTEST
 		System.out.println( "m_midpIso=" + m_midpIso);
@@ -669,7 +732,9 @@ public class EncodingUtil {
 			initEntVals(convEntities, m_isoCommonEntities, m_isoCommValues);
 			initEntVals(convEntities, m_isoLatin1Entities, isoLatin1Values);
 			initEntVals(convEntities, m_isoSpecialEntities, m_isoSpecialValues);
-			initHtmlCommEnts(convEntities);
+			if (convXmlEnts) {
+				initHtmlCommEnts(convEntities);
+			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
 			Logger logger = Logger.getLogger("EncodingUtil");
@@ -682,7 +747,7 @@ public class EncodingUtil {
 	/**
 	  Create table of alpha entities for windows 1252.
 	  */
-	public static Hashtable initAlphaCp1252() {
+	public static Hashtable initAlphaCp1252(final boolean convXmlEnts) {
 
 		//#ifdef DTEST
 		System.out.println( "m_midpWin=" + m_midpWin);
@@ -717,7 +782,9 @@ public class EncodingUtil {
 				CWRIGHT_DBL_QUOTE, // right double quotation mark 
 				0x84}; // double low-9 quotation mark 
 			initEntVals(convEntities, m_isoSpecialEntities, wm_isoSpecialValues);
-			initHtmlCommEnts(convEntities);
+			if (convXmlEnts) {
+				initHtmlCommEnts(convEntities);
+			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
 			Logger logger = Logger.getLogger("EncodingUtil");
