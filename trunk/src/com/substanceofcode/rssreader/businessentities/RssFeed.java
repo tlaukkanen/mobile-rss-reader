@@ -31,6 +31,9 @@ import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseMemoryException;
+
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.Level;
@@ -44,10 +47,15 @@ import java.util.*;
  */
 public class RssFeed{
     
+    public static int NAME_OFFSET = 0;
+    public static final int DATE_OFFSET = 6;
     protected static final char CONE = (char)1;
     protected static final char [] CBONE = {CONE};
     public static String STR_ONE = new String(CBONE);
-    protected static final char [] CBTWO = {(char)2};
+    protected static final char CTWO = (char)2;
+    protected static final char [] CBTWO = {CTWO};
+    protected static final char CTHREE = (char)3;
+    protected static final char [] CBTHREE = {CTHREE};
     public static String STR_TWO = new String(CBTWO);
     public static int ITUNES_ITEMS = 8;
 	//#ifdef DLOGGING
@@ -149,7 +157,8 @@ public class RssFeed{
 	protected void init(boolean firstSettings,
 						int startIndex, boolean iTunesCapable,
 					    boolean hasPipe, boolean encoded,
-					    String [ ] nodes) {
+					    String [] nodes)
+	throws CauseMemoryException, CauseException {
 
 		try {
         
@@ -157,7 +166,7 @@ public class RssFeed{
 			 * name | url | username | password | upddate | link | date |
 			 * category | items 
 			 */
-			int NAME = 0;
+			int NAME = NAME_OFFSET;
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + NAME ]);}
 			//#endif
@@ -168,14 +177,13 @@ public class RssFeed{
 			
 			int USERNAME = 2;
 			m_username = nodes[ startIndex + USERNAME ];
-			if (iTunesCapable) {
+			if (iTunesCapable && hasPipe) {
 				m_username = m_username.replace(CONE, '|');
 			}
 			
 			int PASSWORD = 3;
 			m_password = nodes[ startIndex + PASSWORD ];
 			if (iTunesCapable) {
-				m_password = m_password.replace(CONE, '|');
 				// Dencode so that password is not in regular lettters.
 				Base64 b64 = new Base64();
 				byte[] decodedPassword = b64.decode(m_password);
@@ -208,9 +216,7 @@ public class RssFeed{
 				}
 			}
 			if (iTunesCapable && hasPipe) {
-				if (hasPipe) {
-					m_name = m_name.replace(CONE, '|');
-				}
+				m_name = m_name.replace(CONE, '|');
 			} else {
 				if (!iTunesCapable) {
 					// Dencode for better UTF-8 and to allow '|' in the name.
@@ -230,7 +236,7 @@ public class RssFeed{
 //@				if (nodes[startIndex + LINK].length() > 0) {
 //@					m_link = nodes[startIndex + LINK];
 //@				}
-//@				int DATE = 6;
+//@				int DATE = DATE_OFFSET;
 //@				String fdateString = nodes[startIndex + DATE];
 //@				if (fdateString.length() > 0) {
 //@					m_date = new Date(Long.parseLong(fdateString, 16));
@@ -250,7 +256,11 @@ public class RssFeed{
 			String itemArrayData = nodes[ startIndex + ITEMS ];
 			
 			// Deserialize itemss
-			String[] serializedItems = StringUtil.split(itemArrayData, '.');
+			if (!encoded) {
+				itemArrayData = itemArrayData.replace(CTHREE, '|');
+			}
+			String[] serializedItems = StringUtil.split(itemArrayData,
+						(encoded ? '.' : CTWO));
 			
 			for(int itemIndex=0; itemIndex<serializedItems.length; itemIndex++) {
 				String serializedItem = serializedItems[ itemIndex ];
@@ -272,11 +282,39 @@ public class RssFeed{
 					}
 				}
 			}
-       
+		} catch (CauseMemoryException e) {
+			throw e;
+		} catch (CauseException e) {
+			throw e;
         } catch(Exception e) {
-            System.err.println("Error while rssfeed initialization : " + e.toString());
+			CauseException ce = new CauseException(
+					"Internal error during initialize of RssFeed", e);
+			//#ifdef DLOGGING
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
 			e.printStackTrace();
+			throw ce;
+        } catch(OutOfMemoryError e) {
+			CauseMemoryException ce = new CauseMemoryException(
+					"Out of memory error during  initialize of RssFeed", e);
+			//#ifdef DLOGGING
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
+        } catch(Throwable e) {
+			CauseException ce = new CauseException(
+					"Internal error during initialize of RssFeed", e);
+			//#ifdef DLOGGING
+//@			logger.severe(ce.getMessage(), e);
+			//#endif
+            System.err.println(ce.getMessage() + " " + e.toString());
+			e.printStackTrace();
+			throw ce;
         }
+       
     }
     
     /** Return bookmark's name */
@@ -325,8 +363,9 @@ public class RssFeed{
 					serializedItems.append(rssItem.serialize());
 					serializedItems.append(".");
 				} else {
-					serializedItems.append(rssItem.unencodedSerialize());
-					serializedItems.append(CBTWO);
+					serializedItems.append(
+							rssItem.unencodedSerialize().replace('|', CTHREE));
+					serializedItems.append(CTWO);
 				}
             }
         }
@@ -365,7 +404,7 @@ public class RssFeed{
 			updString = "";
 			exInfoString = "|";
 		}
-        String storeString = m_name + "|" +
+        String storeString = name + "|" +
                               m_url + "|" + username + "|" +
                 encodedPassword + "|" + updString + "|" +
 				m_link + "|" + exInfoString + "|" + serializedItems;
