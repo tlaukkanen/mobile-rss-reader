@@ -330,10 +330,8 @@ public class AtomFormatParser implements FeedFormatParser {
 		switch (elemChar) {
 			case 'a':
 				if( m_hasExt && elementName.equals("author") ) {
+					// Remove HTML if needed in createItem.
 					m_author = parser.getText(m_convXmlEnts);
-					if (m_convXmlEnts) {
-						m_author = StringUtil.removeHtml( m_author );
-					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_author=" + m_author);}
 					//#endif
