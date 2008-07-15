@@ -72,7 +72,7 @@ public class AtomFormatParser implements FeedFormatParser {
 	private String m_altLink = "";
 	private String m_enclosure = "";
 	private String m_date = "";
-	private ExtParser m_extParser = new ExtParser();
+	private ExtParser m_extParser;
 
     /** Creates a new instance of AtomParser */
     public AtomFormatParser() {
@@ -85,6 +85,7 @@ public class AtomFormatParser implements FeedFormatParser {
 	throws IOException, CauseMemoryException, CauseException {
         
         Vector items = new Vector();
+		m_extParser = new ExtParser(convXmlEnts);
 		m_extParser.parseNamespaces(parser);
 		m_language = parser.getAttributeValue("xml:lang");
 		m_convXmlEnts = convXmlEnts;
