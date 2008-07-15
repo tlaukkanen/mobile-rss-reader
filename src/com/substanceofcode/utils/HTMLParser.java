@@ -21,8 +21,13 @@
  *
  */
 
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define logging define
 //#define DNOLOGGING
+/* This functionality adds to jar size, so don't do it for small memory */
+/* devices. */
+//#ifndef DSMALLMEM
 package com.substanceofcode.utils;
 
 import java.io.IOException;
@@ -266,12 +271,13 @@ public class HTMLParser extends XmlParser {
 					text = textBuffer.toString();
 				}
 			}
+			textBuffer = null;
 			text = StringUtil.replace(text, endCurrentElement, "");
 			
 			/** Handle some entities and encoded characters */
 			text = StringUtil.replace(text, "<![CDATA[", "");
 			text = StringUtil.replace(text, "]]>", "");
-			text = EncodingUtil.replaceAlphaEntities(text);
+			text = EncodingUtil.replaceAlphaEntities(true, text);
 			// No need to convert from UTF-8 to Unicode using replace
 			// umlauts now because it is done with new String...,encoding.
 
@@ -462,3 +468,4 @@ public class HTMLParser extends XmlParser {
     }
 
 }
+//#endif
