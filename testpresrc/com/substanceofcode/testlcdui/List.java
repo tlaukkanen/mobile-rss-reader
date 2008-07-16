@@ -45,26 +45,28 @@ import com.substanceofcode.testutil.TestOutput;
  * @author  Irving Bunton
  * @version 1.0
  */
-public class List extends javax.microedition.lcdui.List
-implements CommandListener {
+public class List extends javax.microedition.lcdui.List {
 
+	private List m_clist;
 	private String m_title;
-	private CommandListener m_cmdListener;
 
 	public List(String title, int listType) {
 		super(title, listType);
+		init(title, listType);
+	}
+
+	final private void init(String title, int listType) {
 		TestOutput.println("Test UI List Title: " + title);
 		this.m_title = title;
 		TestOutput.println("Test UI List listType: " + listType);
+		m_clist = this;
 	}
 
 	// TODO log stringElements
 	public List(String title, int listType, String[] stringElements,
 				    Image[] imageElements) {
 		super(title, listType, stringElements, imageElements);
-		TestOutput.println("Test UI List Title: " + title);
-		TestOutput.println("Test UI List listType: " + listType);
-		this.m_title = title;
+		init(title, listType);
 	}
 
 	public int append(String stringPart, Image imagePart) {
@@ -157,12 +159,6 @@ implements CommandListener {
 		TestOutput.println("Test UI List command,displayable,dispsame=[" + getTitle() + "]," + lblCmd + "," + dispTitle + "," + disp.equals(this));
 	}
 
-	public void commandAction(Command cmd, Displayable disp) {
-		outputCmdAct(cmd, disp,
-				javax.microedition.lcdui.List.SELECT_COMMAND);
-		m_cmdListener.commandAction(cmd, this);
-	}
-
 	public void setSelectedIndex(int elementNum, boolean selected) {
 		try {
 			super.setSelectedIndex(elementNum, selected);
@@ -175,10 +171,23 @@ implements CommandListener {
 	}
 
     public void setCommandListener(CommandListener cmdListener) {
-		TestOutput.println("Test UI List Setting command listner for listener,this,Title: " + cmdListener + "," + this + ",[" + m_title + "]");
-		super.setCommandListener(this);
-        this.m_cmdListener = cmdListener;
+		super.setCommandListener(new CmdHandler(cmdListener));
     }
+
+	private class CmdHandler implements CommandListener {
+		private CommandListener m_cmdListener;
+
+		private CmdHandler (CommandListener cmdListener) {
+			m_cmdListener = cmdListener;
+		}
+
+		/* Prompt if command is in prompt camands.  */
+		public void commandAction(Command cmd, Displayable disp) {
+			m_clist.outputCmdAct(cmd, disp,
+				javax.microedition.lcdui.List.SELECT_COMMAND);
+			m_cmdListener.commandAction(cmd, disp);
+		}
+	}
 
 }
 
