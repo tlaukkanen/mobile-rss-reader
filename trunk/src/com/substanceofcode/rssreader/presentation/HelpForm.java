@@ -22,6 +22,8 @@
 
 // Expand to define MIDP define
 //#define DMIDP20
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define logging define
 //#define DNOLOGGING
 // Expand to define test ui define
@@ -43,17 +45,11 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Item;
 //#ifndef DTESTUI
-import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Form;
-import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.StringItem;
 //#else
 //@// If using the test UI define the Test UI's
-//@import com.substanceofcode.testlcdui.ChoiceGroup;
 //@import com.substanceofcode.testlcdui.Form;
-//@import com.substanceofcode.testlcdui.List;
-//@import com.substanceofcode.testlcdui.TextBox;
-//@import com.substanceofcode.testlcdui.TextField;
 //@import com.substanceofcode.testlcdui.StringItem;
 //#endif
 import javax.microedition.lcdui.Item;
@@ -69,8 +65,14 @@ import cz.cacek.ebook.util.ResourceProviderME;
  *
  * @author Tommi Laukkanen
  */
-public class HelpForm extends Form implements CommandListener, Runnable {
+public class HelpForm
+//#ifndef DSMALLMEM
+extends Form
+implements CommandListener, Runnable
+//#endif
+{
     
+	//#ifndef DSMALLMEM
     private RssReaderMIDlet m_midlet;
     private Command     m_backCommand;      // The back to the previous screen
     private Command     m_aboutCommand;      // The about command
@@ -106,10 +108,12 @@ public class HelpForm extends Form implements CommandListener, Runnable {
 		this(midlet, dprev, null);
 	}
 
+	//#ifdef DMIDP20
     /** Creates a new instance of HelpForm */
     public HelpForm(RssReaderMIDlet midlet, Item iprev) {
 		this(midlet, null, iprev);
 	}
+	//#endif
 
     public void commandAction(Command command, Displayable displayable) {
 		//#ifdef DTESTUI
@@ -118,8 +122,10 @@ public class HelpForm extends Form implements CommandListener, Runnable {
         if(command==m_backCommand) {
 			if (m_dprev != null) {
 				m_midlet.setCurrent(m_dprev);
+				//#ifdef DMIDP20
 			} else if (m_iprev != null) {
 				m_midlet.setCurrentItem(m_iprev);
+				//#endif
 			}
         }
         
@@ -181,6 +187,7 @@ public class HelpForm extends Form implements CommandListener, Runnable {
 		m_midlet.setCurrent( about, this );
 	}
 
+	//#endif
     /**
 	 * Create about alert.
 	 * @author  Irving Bunton
