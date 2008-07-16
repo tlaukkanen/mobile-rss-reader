@@ -26,6 +26,13 @@
 //#define DNOLOGGING
 // Expand to define test define
 //#define DNOTEST
+// Expand to define compatibility
+//#define DNOCOMPAT
+//#ifdef DCOMPATIBILITY1
+//#define DCOMPATIBILITY12
+//#elifdef DCOMPATIBILITY2
+//#define DCOMPATIBILITY12
+//#endif
 package com.substanceofcode.utils;
 
 import java.io.ByteArrayInputStream;
@@ -409,9 +416,9 @@ public class Settings {
 				if ( m_properties.containsKey(SETTINGS_NAME) ) {
 					vers = (String)m_properties.get(SETTINGS_NAME);
 				}
-				//#ifndef DCOMPATIBILITY1
-				//#ifndef DCOMPATIBILITY2
-				//#ifndef DCOMPATIBILITY3
+				//#ifdef DCOMPATIBILITY12
+//@				Hashtable cproperties = m_properties;
+				//#else
 				Hashtable cproperties = m_properties;
 				if (region > 0) {
 					cproperties = new Hashtable();
@@ -421,8 +428,6 @@ public class Settings {
 					cproperties.put(ITEMS_ENCODED, m_properties.get(ITEMS_ENCODED));
 					cproperties.put(STORE_DATE, m_properties.get(STORE_DATE));
 				}
-				//#endif
-				//#endif
 				//#endif
 
 				// Put version only if it is not DCOMPATIBILITY1 which is
