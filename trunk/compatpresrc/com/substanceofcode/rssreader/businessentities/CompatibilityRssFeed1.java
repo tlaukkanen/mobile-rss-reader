@@ -22,7 +22,6 @@
 
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businessentities.RssItem;
