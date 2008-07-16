@@ -49,21 +49,21 @@ import com.substanceofcode.testutil.TestOutput;
  */
 public class Form extends javax.microedition.lcdui.Form {
 
-	private Form cform;
+	private Form m_form;
 	//#ifdef DMIDP10
 	private String m_title;
 	//#endif
 
 	public Form(String title) {
 		super(title);
-		cform = this;
+		m_form = this;
 		TestOutput.println("Test UI Form Title: " + title);
 	}
 
 	// TODO log items
 	public Form(String title, Item[] items) {
 		super(title, items);
-		cform = this;
+		m_form = this;
 		//#ifdef DMIDP10
 		this.m_title = title;
 		//#endif
@@ -181,7 +181,7 @@ public class Form extends javax.microedition.lcdui.Form {
 		/* Prompt if command is in prompt camands.  */
 		public void commandAction(Command cmd, Displayable disp) {
 			//#ifdef DTESTUI
-			cform.outputCmdAct(cmd, disp);
+			m_form.outputCmdAct(cmd, disp);
 			//#endif
 			m_cmdListener.commandAction(cmd, disp);
 		}
