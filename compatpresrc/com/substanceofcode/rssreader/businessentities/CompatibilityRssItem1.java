@@ -22,7 +22,7 @@
 
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
+import com.substanceofcode.utils.CompatibilityBase64;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.rssreader.businessentities.RssItem;
 import java.io.UnsupportedEncodingException;
@@ -78,7 +78,7 @@ public class CompatibilityRssItem1 extends RssItem {
             dateString = String.valueOf( m_date.getTime() );
         }
         String preData = m_title + "|" + m_link + "|" + dateString + "|" + m_desc;
-        Base64 b64 = new Base64();
+        CompatibilityBase64 b64 = new CompatibilityBase64();
         String encodedSerializedData = b64.encode( preData.getBytes() );
         return encodedSerializedData;
     }
@@ -91,8 +91,8 @@ public class CompatibilityRssItem1 extends RssItem {
         String desc = "";
         Date date = null;
 
-        // Base64 decode
-        Base64 b64 = new Base64();
+        // CompatibilityBase64 decode
+        CompatibilityBase64 b64 = new CompatibilityBase64();
         byte[] decodedData = b64.decode(data);
         data = new String( decodedData );
         
