@@ -176,11 +176,10 @@ public class SettingsForm extends Form implements CommandListener, Runnable {
 				"Also use keypad to go back to previous screen",
 				"Also use keypad (as previous) and emphasize HTML"});
 
-		String [] fontSizeChoices = {"Default font size", "Small", "Medium", "Large"};
-        m_fontSize = new ChoiceGroup("Choose font size", Choice.EXCLUSIVE,
-				fontSizeChoices,
-											null);
-		m_fontSize.setLayout(Item.LAYOUT_BOTTOM);
+        m_fontSize = UiUtil.getAddChoiceGroup(this,
+				"Choose font size",
+				new String[] {"Default font size", "Small",
+				"Medium", "Large"});
         super.append( m_fontSize );
 		//#endif
         m_feedListOpen = UiUtil.getAddChoiceGroup(this,
