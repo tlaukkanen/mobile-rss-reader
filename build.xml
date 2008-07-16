@@ -141,7 +141,7 @@
 		<echo message="Executing pre-jar" />
 		<mkdir dir="${buildsystem.baton}/data" />
 		<!-- This should be overrided by user's build.properties. -->
-		<property name="lang.file" value="messages_en_US.xml" />
-		<copy tofile="${buildsystem.baton}/data/lang.xml" file="translations/${language.file}" />
+		<property name="language.file" value="messages_en_US.xml" />
+		<xslt style="translations/props.xsl" in="translations/${language.file}" out="${buildsystem.baton}/data/lang.txt" />
     </target>
 </project>
