@@ -123,10 +123,12 @@ public class TestingForm extends Form implements CommandListener {
 				new Boolean(EncodingUtil.m_hasIso8859Encoding).toString()));
 		appendEntityAlphaTest("Test with no data.", "", "");
 		appendEntityAlphaTest("Test with one entity.", "&lt;", "<");
-		appendEntityAlphaTest("Test with one entity.", "&lt;&gt;&amp;&quot;&nbsp;&apos;",
+		appendEntityAlphaTest("Test with one entity.",
+						      "&lt;&gt;&amp;&quot;&nbsp;&apos;",
 						 "<>&\" '");
-		appendEntityAlphaTest("Test with one entity.", " &lt;&gt; &amp;&quot; &nbsp;",
-						 " <> &\"  ");
+		appendEntityAlphaTest("Test with one entity.",
+							  " &lt;&gt; &amp;&quot; &nbsp;",
+							 " <> &\"  ");
 		appendEntityAlphaTest("Test with one entity.", " &lt &gt; &amp;&quot; &nbsp;",
 						 " &lt > &\"  ");
 		appendEntityAlphaTest("Test with one amp replace.",
@@ -311,7 +313,7 @@ public class TestingForm extends Form implements CommandListener {
 	private void appendEntityAlphaTest(String tstName, String tst, String res) {
 		super.append(new StringItem(tstName, tst));
 		super.append(new StringItem("(" + tstName + ") Result:", "\n" + res));
-		String actres = EncodingUtil.replaceAlphaEntities(tst);
+		String actres = EncodingUtil.replaceAlphaEntities(true, tst);
 		super.append(new StringItem("(" + tstName + ") Act Result: ", "\n" + actres));
 		super.append("\n" + new Boolean(actres.equals(res)).toString());
 		super.append("-------");
