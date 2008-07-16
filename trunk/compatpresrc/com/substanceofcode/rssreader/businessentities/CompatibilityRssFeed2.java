@@ -22,7 +22,7 @@
 
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
+import com.substanceofcode.utils.CompatibilityBase64;
 import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import com.substanceofcode.rssreader.businessentities.RssFeed;
@@ -91,7 +91,7 @@ public class CompatibilityRssFeed2 extends RssFeed {
 					m_upddate = new Date(Long.parseLong(dateString));
 				}
 				// Encode for better UTF-8 and to allow '|' in the name.
-				Base64 b64 = new Base64();
+				CompatibilityBase64 b64 = new CompatibilityBase64();
 				byte[] decodedName = b64.decode(m_name);
 				try {
 					m_name = new String( decodedName , "UTF-8" );
@@ -135,7 +135,7 @@ public class CompatibilityRssFeed2 extends RssFeed {
             }
         }
 		String encodedName;
-        Base64 b64 = new Base64();
+        CompatibilityBase64 b64 = new CompatibilityBase64();
 		try {
 			encodedName = b64.encode( m_name.getBytes("UTF-8") );
 		} catch (UnsupportedEncodingException e) {
