@@ -107,6 +107,25 @@ public class StringUtil {
     /**
      * Join strings into one string
      * @param originals      Original strings
+     * @param joinChar       Join char
+     * @param index          Index to start at
+     * @return               Joined string
+     */
+    public static String join(String[] originals, char joinChar, int index) {
+        if (originals == null)  return null;
+        StringBuffer sb = new StringBuffer(originals[index]);
+        
+        // Parse nodes into vector
+        for (int ic = index + 1; ic < originals.length; ic++) {
+            sb.append( joinChar  );
+            sb.append( originals[ic] );
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Join strings into one string
+     * @param originals      Original strings
      * @param joinStr        Join string
      * @param index          Index to start at
      * @return               Joined string
