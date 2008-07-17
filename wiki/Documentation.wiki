@@ -116,8 +116,7 @@ bluetooth, or infrared), and copy the midp10_RSSReader.jar,
 midp20_RSSReader.jar, midp20_cldc11_RSSReader.jar,
 midp20_jsr75_RSSReader.jar, midp20_cldc11_jsr75_RSSReader.jar, file  
 (that is in the
-[http://code.google.com/p/mobile-rss-reader/downloads/list
-zip file (this link)] ) from the  
+[http://code.google.com/p/mobile-rss-reader/downloads/list (zip file)] ) from the  
 computer to the phone. If you have an old phone (that uses MIDP  
 1.0), copy midp10_RSSReader.jar. The detailed steps are different 
 from one phone to other, so please read the manual of your phone  
