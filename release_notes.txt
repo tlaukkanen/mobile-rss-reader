@@ -150,27 +150,29 @@ v1.11
 + Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
-v1.11.1
+v1.11.1 Release Candidate 3 (rc3) (July 11th 2008)
+
+v1.12
 + Have help for some forms/lists
 + Create .alx files for Blackberry
 + Minor performance improvement in startup
-+ Allow feeds with '^' in title, description, subtitle, summary,
-  and author.
 + Allow keypad to be used to go to previous screen for text fields on item form
 + Better workarounds for out of memory during exit
 + Save minimal data if force exit (e.g. kill using cancel on Symbian)
-+ Fix bug when opening feeds on Sony Ericsson emulators and possiblely
-  affecting Sony Ericsson devices
-+ Fix dates in yyyy-mm-dd format
-+ Fix standard dates with 2 or more consecutive
-+ Show progress of loading/saving bookmarks and updating all/modified feeds
++ Show progress of updating all/modified feeds
 + Have Open item command name on headers screen instead of open command name
-+ Give better error messages for problems (e.g. out of
-  memory)
-+ Have resources file for future localization
++ Give better error messages for problems (e.g. out of memory)
++ Have resources file for future localization.  Currently used for some text
 + Support BOM (Byte Order Mark) for UTF-8 and UTF-16 (includes line by line)
++ Optionally change emphasis and new line formatting for limited HTML
 + Fix problems with HTML hyperlinks which do not have quotes adding the '>' to
   the URL.
++ Save memory for feeds
++ Have small memory version for MIDP-1.0 to allow memory to be used for other
+  things
++ Minor performance improvements
++ Use open/closed envelopes to show read/unread items if mark items enabled
++ Optionally allow import to override existing feeds with the same name
 
 Known problems:
 
