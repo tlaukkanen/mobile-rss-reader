@@ -282,4 +282,7 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
         return (m_url);
     }
 
+    public void join() {
+		try { m_parsingThread.join(); } catch (Exception e) {}
+	}
 }
