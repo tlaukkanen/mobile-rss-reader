@@ -24,6 +24,7 @@
 	<property name="dist" value="${target}/dist" />
 	<property name="dist.midp10" value="${target}/dist/midp10" />
 	<property name="dist.midp20" value="${target}/dist/midp20" />
+	<property name="dist.midp20.novice" value="${target}/dist/midp20_novice" />
 	<property name="dist.midp20.cldc11" value="${target}/dist/midp20_cldc11" />
 	<property name="dist.midp20.jsr75" value="${target}/dist/midp20_jsr75" />
 	<property name="dist.midp20.cldc11.jsr75" value="${target}/dist/midp20_cldc11_jsr75" />
@@ -33,6 +34,7 @@
 	<property name="build" value="${target}/build" />
 	<property name="build.midp10" value="${target}/build/midp10" />
 	<property name="build.midp20" value="${target}/build/midp20" />
+	<property name="build.midp20.novice" value="${target}/build/midp20_novice" />
 	<property name="build.midp20.cldc11" value="${target}/build/midp20_cldc11" />
 	<property name="build.midp20.itunes.jsr75" value="${target}/build/midp20_itunes_jsr75" />
 	<property name="build.midp20.jsr75" value="${target}/build/midp20_jsr75" />
@@ -117,6 +119,11 @@
 		<property file="${basedir}/optional.properties${optional.template}" />
 		<property name="propdir" value="${basedir}" />
 		<property file="${basedir}/${wtk.properties}" />
+		<!-- Note:  this value will not be used if novice is set before -->
+		<!-- we get here (e.g. in target dist.midp.2.0.novice).  For the -->
+		<!-- other targets, NOVICE will be false and therefore disabled -->
+		<property name="NOVICE" value="false" />
+		<property name="novice.txt" value="${src}/data/novice.txt" />
 		<property name="stage" value="" />
 		<property name="build.prefix" value="${file.prefix}${stage}" />
 		<property name="build.file.root" value="${build.prefix}${project.name}-${FMIDLETVERSROOT}" />
@@ -152,6 +159,7 @@
 			<filter token="JCLDCVERS" value="${JCLDCVERS}" />
 			<filter token="PERMISSIONS" value="${PERMISSIONS}" />
 			<filter token="EMULATOR" value="${EMULATOR}" />
+			<filter token="NOVICE" value="${NOVICE}" />
 		</filterset>
 
 	</target>
@@ -197,6 +205,9 @@
 	    <echo message="compat.presrc=${compat.presrc}" />
 	    <echo message="testui.presrc=${testui.presrc}" />
 	    <echo message="build.number=${build.number}" />
+	    <echo message="novice=${novice}" />
+	    <echo message="novice.txt=${novice.txt}" />
+	    <echo message="NOVICE=${NOVICE}" />
 	    <echo message="DMIDPVERS=${DMIDPVERS}" />
 	    <echo message="DCLDCVERS=${DCLDCVERS}" />
 	    <echo message="DITUNESDEF=${DITUNESDEF}" />
@@ -395,6 +406,13 @@
 		</copy>
 	</target>
 
+	<target name="copy.novice" if="novice" >
+		<mkdir dir="${tmpres}/data" />
+		<copy tofile="${tmpres}/data/novice.txt" >
+			<fileset file="${novice.txt}" />
+		</copy>
+	</target>
+
 	<target name="copy.test.res" if="need.test.res" >
 		<copy todir="${tmpres}/${res.test.todir}" >
 			<fileset dir="${res.test.dir}" />
@@ -411,6 +429,7 @@
 		<mkdir dir="${tmpres}" />
 
 		<antcall target="copy.res" />
+		<antcall target="copy.novice" />
 		<antcall target="copy.test.res" />
 
 		<copy file="${jadsrc}/${project.name}.jad" todir="${bin}" overwrite="true" >
@@ -736,6 +755,8 @@
 
 	<!-- Preprocess for MIDP 2.0 as a release (no test) -->
 	<!-- This puts the code into src directory. -->
+	<!-- There is no novice preprocess given that novice has the same -->
+	<!-- compile options as MIDP-2.0. -->
 	<target name="dist.preprocess.2.0" >
 		<antcall target="preprocess" >
 			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
@@ -898,6 +919,17 @@
 			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20}" />
 			<param name="build.vers" value="${build.midp20}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Do MIDP 2.0 with novice version. -->
+	<target name="dist.midp.2.0.novice" unless="no.2.0.novice" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.novice.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.novice}" />
+			<param name="build.vers" value="${build.midp20.novice}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1067,7 +1099,7 @@
 		</antcall>
 	</target>
 
-	<target name="copy.device.bin" depends="prepare" >
+	<target name="copy.device.bin" depends="prepare" if="midlet.home" >
 		<mkdir dir="${midlet.home}/${bin}" />
 		<copy file="${bin}/${project.name}.jar" tofile="${midlet.home}/${bin}/${project.name}.jar" overwrite="true" />
 		<copy file="${bin}/${project.name}.jad" tofile="${midlet.home}/${bin}/${project.name}.jad" />
