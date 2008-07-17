@@ -7,7 +7,7 @@ http://www.substanceofcode.com
 Contributors:
 Irving Bunton Jr
 
-==Beta1 Release Notes==
+==Release Candidate 3 Notes==
 
 v1.5 (July 23th 2007)
   * Open links in device browser
