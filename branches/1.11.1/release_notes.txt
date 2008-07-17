@@ -150,7 +150,7 @@ v1.11
 + Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
-v1.11.1 Release Candidate 3 (rc3) (July 11th 2008)
+v1.11.1 Release Candidate 4 (rc4) (July 16th 2008)
 + Fix bug when opening feeds on Sony Ericsson emulators and possiblely
   affecting Sony Ericsson devices
 + Fix bug with storing Itunes attributes
@@ -195,6 +195,12 @@ v1.11.1 Release Candidate 3 (rc3) (July 11th 2008)
 + Put missing directories into released zip
 + Fix bug introduced in release candidate with bad error handling for a
   bad URL for import.
++ Allow build of novice version with dist.midp.2.0.novice.  Can take novice.txt
+  from a different file using ant -Dnovice.txt=(full path) dist.midp.2.0.novice
+  The novice version has novice property true in manifest disables add, edit,
+  delete, and import and reads from /data/novice.txt line by line file.  The
+  novice version is not the default, normally all functions are enabled.
++ Only copy to device bin if midlet.home exists during build.  
 
 Known problems:
 
