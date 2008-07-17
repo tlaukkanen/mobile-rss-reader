@@ -34,12 +34,9 @@ Modified GPL software from other projects are also used.
  * Update all/updated feeds with single command 
  * Open item link or enclosure in device browser
  * Update all/updated feeds with single command 
- * Open item link or enclosure in device browser 
-	(Only on phones which support it)
+ * Open item link or enclosure in device browser (Only on phones which support it)
  * Save on exit or request
- * Import and synchronize RSS feed lists from internet or
-phone memory
-using formats and filter feeds based on name and URL (except v1.10.5)
+ * Import and synchronize RSS feed lists from internet or phone memory using formats and filter feeds based on name and URL (except v1.10.5)
    # OPML
    # OPML autolinks 
    # HTML autolinks 
@@ -175,12 +172,8 @@ You need to install the software (needed for build only)
  * [http://sourceforge.net/projects/ant-contrib ant-contrib]
  * Java VM either Sun's, JamVM, or GNU GIJ
  * Either compiler below
-
     # Either [http://download.java.net/jdk6/binaries JDK 1.5 or later]   
-    # ECJ Eclipse compiler at [http://download.eclipse.org/eclipse/downloads Eclipse downloads]
-      then, go to a release >= 3.2.  Under JDT Core Batch an ecj.jar (usually
-      contains a version)
-
+    # ECJ Eclipse compiler at [http://download.eclipse.org/eclipse/downloads Eclipse downloads] then, go to a release >= 3.2.  Under JDT Core Batch an ecj.jar (usually contains a version)
  * Either Wireless Toolkit (WTK) below
  * [https://meapplicationdevelopers.dev.java.net/how_to_run.html phone ME]
  * [http://java.sun.com/products/sjwtoolkit/download-2_5.html Sun Wireless Toolkit]
