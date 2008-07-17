@@ -51,6 +51,7 @@ public class RssReaderSettings {
     private static final String ITUNES_ENABLED = "itunes-enabled";
     private static final String USE_TEXT_BOX = "use-text-box";
     private static final String USE_STANDARD_EXIT = "use-standard-exit";
+    private static final String NOVICE = "novice";
     private static final String LOG_LEVEL = "log-level";
     
     /** Creates a new instance of RssFeedReaderSettings */
@@ -177,6 +178,16 @@ public class RssReaderSettings {
     /** Set standard exit */
     public void setUseStandardExit(boolean useStandardExit) {
         m_settings.setBooleanProperty( USE_STANDARD_EXIT, useStandardExit);
+    }
+    
+    /** Get novice user */
+    public boolean getNovice() {
+        return m_settings.getBooleanProperty( NOVICE, false);
+    }
+    
+    /** Set novice user */
+    public void setNovice(boolean novice) {
+        m_settings.setBooleanProperty( NOVICE, novice);
     }
     
     /** Get settings version */
