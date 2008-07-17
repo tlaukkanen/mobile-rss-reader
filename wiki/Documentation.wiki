@@ -170,7 +170,7 @@ to use as the filter.
 
 You need to install the software (needed for build only) 
 
- * ant
+ * [http://ant.apache.org ant]
  * antenna
   version 1.1.0-beta.  Some of the previous versions don't run on Linux or
   have //#elif bug.
