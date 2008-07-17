@@ -17,7 +17,9 @@ svn.home = C:\\PROGRA~1\\COLLAB~1
 rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
 svn.pgm = svn.exe
 #wtk.home = C:/opt/WTK2.5.1
-wtk.home = C:/opt/WTK2.5.2
+#wtk.home = C:/opt/WTK2.5.2
+#For Netbeans
+wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
 #For phoneMe Windows
 #wtk.home = C:/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
 #For phoneMe Linux x86
@@ -25,7 +27,7 @@ wtk.home = C:/opt/WTK2.5.2
 #For phoneMe Windows and Linux
 #wtk.midpapi = ${wtk.home}/classes
 #For phoneMe Windows and Linux proguard.jar, if cannot put into bin
-#wtk.proguard.home = C:/mostdownloads/j2me/sourceforge/proguard/proguard4.2
+wtk.proguard.home = C:/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #For phoneMe, if not using ecj.jar
 #build.compiler = org.eclipse.jdt.core.JDTCompilerAdapter
 #For phoneMe, if using ecj.jar
