@@ -171,22 +171,20 @@ to use as the filter.
 You need to install the software (needed for build only) 
 
  * [http://ant.apache.org ant]
- * [http://antenna.sourceforge.net antenna]
-  version 1.1.0-beta.  Some of the previous versions don't run on Linux or
-  have //#elif bug.
+ * [http://antenna.sourceforge.net antenna]version 1.1.0-beta.  Some of the previous versions don't run on Linux of have //#elif bug.
  * [http://sourceforge.net/projects/ant-contrib ant-contrib]
  * Java VM either Sun's, JamVM, or GNU GIJ
  * Either compiler below
 
-   * Either [http://download.java.net/jdk6/binaries JDK 1.5 or later]
-   * ECJ Eclipse compiler at [http://download.eclipse.org/eclipse/downloads Eclipse downloads]
-    then, go to a release >= 3.2.  Under JDT Core Batch an ecj.jar (usually
-    contains a version)
+    # Either [http://download.java.net/jdk6/binaries JDK 1.5 or later]   
+    # ECJ Eclipse compiler at [http://download.eclipse.org/eclipse/downloads Eclipse downloads]
+      then, go to a release >= 3.2.  Under JDT Core Batch an ecj.jar (usually
+      contains a version)
 
  * Either Wireless Toolkit (WTK) below
-   * [https://meapplicationdevelopers.dev.java.net/how_to_run.html phone ME]
-   * [http://java.sun.com/products/sjwtoolkit/download-2_5.html Sun Wireless Toolkit]
-   * [http://www.netbeans.org/features/javame/index.html Netbeans Mobility]
+ * [https://meapplicationdevelopers.dev.java.net/how_to_run.html phone ME]
+ * [http://java.sun.com/products/sjwtoolkit/download-2_5.html Sun Wireless Toolkit]
+ * [http://www.netbeans.org/features/javame/index.html Netbeans Mobility]
  * [http://sourceforge.net/projects/proguard proguard]
 
 To build using antenna, go to wtkbuild directory, copy the files ending in
