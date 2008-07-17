@@ -216,8 +216,7 @@ export ANT_HOME=(location of ant)
 export JAVA_HOME=(one directory above location of java)
 export JAVACMD=(location of java)
 export PATH=$PATH:$ANT_HOME/bin
-ant dist
-
+ant -f wtk-build.xml dist
 
  }}} 
 
