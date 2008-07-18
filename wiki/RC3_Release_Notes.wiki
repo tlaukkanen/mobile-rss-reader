@@ -184,7 +184,7 @@ v1.11.1 Release Candidate 4 (rc4) (July 16th 2008)
   * Allow '|' in feed name, password, and podcast attributes author, subtitle,
     summary.
   * Fix bugs in wtk-build.xml when properties suffixes not used.
-  * Allow creation of jar using Free software:  Phone ME, ECJ (Eclipse compiler),
+  * Allow creation of jar using Free Open Source Software (FOSS):  Phone ME, ECJ (Eclipse compiler),
     GNU Classpath, and JamVM or GNU JavaVM (gcj)
   * Workaround for MicroEmulator
   * Optionally create PRC if present.
