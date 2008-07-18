@@ -14,7 +14,7 @@ service providers charge extra for, so you would best get an unlimited data
 from your service provider.  
 This is licensed under GPL.  The program can be built and run using either
 Free and
-Open Software (FOS) or proprietary compilers and J2ME.  
+Open Source Software (FOSS) or proprietary compilers and J2ME.  
 Source code originally authored by Tommi Laukkanen is at
  http://code.google.com/p/mobile-rss-reader/
 Modified GPL software from other projects are also used.
