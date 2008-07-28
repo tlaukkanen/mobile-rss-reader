@@ -2423,6 +2423,8 @@ public class RssReaderMIDlet extends MIDlet
 								if (m_debugOutput) System.out.println("Feed list parsing isn't ready");
 								//#endif
 							}
+							m_listParser = null;
+							m_getFeedTitleList = false;
 						} catch(Exception ex) {
 							recordExcForm(
 									"Error importing feeds from " +
@@ -2435,13 +2437,8 @@ public class RssReaderMIDlet extends MIDlet
 									"Error importing feeds from " +
 									m_listParser.getUrl() + " " +
 									t.getMessage(), t);
-						} finally {
-							if ((m_listParser != null) &&
-								m_listParser.isReady()) {
-								m_getFeedList      = false;
-								m_getFeedTitleList = false;
-								m_listParser = null;
-							}
+							m_getFeedTitleList = false;
+							m_listParser = null;
 						}
 					}
 					lngStart = System.currentTimeMillis();
