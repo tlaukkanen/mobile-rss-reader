@@ -56,7 +56,7 @@ abstract public class AbstractView {
 	protected int background;
 	protected int foreground;
 	protected static int borderSpace = 2;
-	protected int lineSpace;
+	protected static int lineSpace = 0;
 	protected boolean wrapSpaces;
 	protected int scrollWidth;
 	protected int scrollHeight;
@@ -73,7 +73,6 @@ abstract public class AbstractView {
 	 * @throws Exception
 	 */
 	protected void init() throws Exception {
-		lineSpace = 0;
 		wrapSpaces = true;
 		scrollWidth = 5;
 		scrollHeight = 5;
@@ -215,6 +214,16 @@ abstract public class AbstractView {
 		// Draw offscreen
 		aGraphic.drawImage(offscreen, aX, aY, Graphics.LEFT | Graphics.TOP);
 	}
+
+  /**
+   * Get the line space
+   *
+   * @return    int
+   * @author Irv Bunton
+   */
+    static public int getLineSpace() {
+        return (lineSpace);
+    }
 
 	final static int getTotalBorderSpace() {
 		return 2 * borderSpace;
