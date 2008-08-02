@@ -32,6 +32,7 @@ package net.eiroca.j2me.RSSReader.presentation;
 
 import java.util.Vector;
 import javax.microedition.lcdui.Font;
+import cz.cacek.ebook.AbstractView;
 import com.substanceofcode.utils.EncodingUtil;
 
 //#ifdef DLOGGING
@@ -79,7 +80,9 @@ public class RenderedWord {
       RenderedWord.font[i] = f;
       RenderedWord.fontWidth[i] = f.stringWidth(" ");
     }
-    RenderedWord.heightFont = Font.getFont(Font.FACE_PROPORTIONAL, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight() + 3;
+    RenderedWord.heightFont = Font.getFont(Font.FACE_PROPORTIONAL,
+			Font.STYLE_PLAIN, fontSize).getHeight() +
+			AbstractView.getLineSpace();
   }
 
   /**
