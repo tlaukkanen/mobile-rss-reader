@@ -40,6 +40,13 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+//#ifndef DTESTUI
+import javax.microedition.lcdui.Form;
+import javax.microedition.lcdui.StringItem;
+//#else
+//@import com.substanceofcode.testlcdui.Form;
+//@import com.substanceofcode.testlcdui.StringItem;
+//#endif
 
 import com.substanceofcode.utils.CauseException;
 
@@ -59,8 +66,6 @@ final public class PromptMgr implements CommandListener, Runnable {
 	private Hashtable promptCommands = new Hashtable();
 	private Displayable disp;
 	private Command origCmd = null;
-	private Command cmdOK;
-	private Command cmdCancel;
 	protected RssReaderMIDlet midlet;
 	private Alert promptAlert = null;
 	//#ifdef DLOGGING
@@ -96,14 +101,21 @@ final public class PromptMgr implements CommandListener, Runnable {
 
 	/* Create prompt alert. */
 	public void run() {
+		// Due to a quirk on T637 (MIDP 1.0), we need to create a form
+		// before the alert or the alert will not be seen.
+		Form formAlert = new Form(origCmd.getLabel());
+		int ix = formAlert.append(new StringItem(null,
+					(String)promptCommands.get(origCmd)));
+		Command okCmd = UiUtil.getCmdRsc("cmd.ok", Command.OK, 1);
+		formAlert.addCommand(okCmd);
+		Command cancelCmd = UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 2);
+		formAlert.addCommand(cancelCmd);
 		promptAlert = new Alert(origCmd.getLabel(),
-				(String)promptCommands.get(origCmd), null,
+				((StringItem)formAlert.get(ix)).getText(), null,
 				AlertType.CONFIRMATION);
 		promptAlert.setTimeout(Alert.FOREVER);
-		cmdOK = UiUtil.getCmdRsc("cmd.ok", Command.OK, 0);
-		promptAlert.addCommand(cmdOK);
-		cmdCancel = UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 0);
-		promptAlert.addCommand(cmdCancel);
+		promptAlert.addCommand(okCmd);
+		promptAlert.addCommand(cancelCmd);
 		promptAlert.setCommandListener(this);
 		midlet.setCurrent(promptAlert);
 	}
@@ -120,7 +132,10 @@ final public class PromptMgr implements CommandListener, Runnable {
 				}
 				new Thread(this).start();
 				return;
-			} else if (cmd.equals(cmdOK)
+			} else if (cdisp.equals(disp)) {
+				midlet.setCurrent(disp);
+				cmdListener.commandAction(cmd, disp);
+			} else if ((cmd.getCommandType() == Command.OK)
 				//#ifdef DMIDP20
 					   || cmd.equals(Alert.DISMISS_COMMAND)
 				//#endif
@@ -132,12 +147,9 @@ final public class PromptMgr implements CommandListener, Runnable {
 				//#endif
 				midlet.setCurrent(disp);
 				cmdListener.commandAction(origCmd, disp);
-			} else if (cmd.equals(cmdCancel)) {
+			} else if (cmd.getCommandType() == Command.CANCEL) {
 				midlet.setCurrent(disp);
 				return;
-			} else {
-				midlet.setCurrent(disp);
-				cmdListener.commandAction(cmd, disp);
 			}
 		} catch (Throwable e) {
 			final CauseException ce = new CauseException(
