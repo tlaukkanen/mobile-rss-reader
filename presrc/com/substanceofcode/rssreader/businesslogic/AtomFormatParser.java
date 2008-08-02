@@ -217,9 +217,10 @@ public class AtomFormatParser implements FeedFormatParser {
 					m_link = m_altLink;
 				}
 			}
+			m_link = StringUtil.removeHtml( m_link );
 			Date pubDate = null;
 			// Check date in case we cannot find it.
-			if (m_date.equals("") && m_extParser.isHasExt()) {
+			if ((m_date.length() == 0) && m_extParser.isHasExt()) {
 				m_date = m_extParser.getDate();
 			}
 			if (m_date.length() > 0) {
@@ -290,7 +291,8 @@ public class AtomFormatParser implements FeedFormatParser {
 							case 'e':
 								// Only get the first m_enclosure.  Atom's can have
 								// multiple enclosures for the same item.
-								if (rel.equals("enclosure") && m_enclosure.equals("")) {
+								if (rel.equals("enclosure") &&
+										(m_enclosure.length() == 0) ) {
 									 m_enclosure = clink;
 									 return true;
 								}
