@@ -180,7 +180,6 @@ public class SettingsForm extends Form implements CommandListener, Runnable {
 				"Choose font size",
 				new String[] {"Default font size", "Small",
 				"Medium", "Large"});
-        super.append( m_fontSize );
 		//#endif
         m_feedListOpen = UiUtil.getAddChoiceGroup(this,
 				"Choose feed list menu first item", new String []
