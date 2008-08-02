@@ -295,6 +295,7 @@ public class RssFormatParser implements FeedFormatParser {
 			case 'l':
 				if( elementName.equals("link") ) {
 					m_link = parser.getText();
+					m_link = StringUtil.removeHtml( m_link );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_link=" + m_link);}
 					//#endif
