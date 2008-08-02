@@ -1,5 +1,6 @@
 /*
    TODO Fix new View.  Get prev pos.
+   TODO Fix removing command if change
  * PageMgr.java
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,8 +73,13 @@ public class PageMgr implements ItemCommandListener {
 	private RssReaderMIDlet midlet;
 	protected PageImpl pageImpl;
 	protected AbstractView view;
+	protected AbstractView labelView = null;
+	protected String label = null;
 	protected String text = null;
+	protected int prefViewHeight;
+	protected boolean viewScrollBar;
 	protected Page page = null;
+	protected Page labelPage = null;
 	protected Displayable prev;
 	private String message = null;
 	private Font messageFont;
@@ -94,6 +100,7 @@ public class PageMgr implements ItemCommandListener {
 	private Display display;
 	int lastWidth;
 	int lastHeight;
+	int labelPageHeight = 0;
 	int pageHeight;
 
 	//#ifdef DLOGGING
@@ -146,7 +153,7 @@ public class PageMgr implements ItemCommandListener {
 			}
 		}
 
-		public void wakeup() {
+		public void wakeUp() {
 			synchronized(this) {
 				try {
 					super.notify();
@@ -216,34 +223,55 @@ public class PageMgr implements ItemCommandListener {
 			if (gameKeys == null) {
 				initGameKeys();
 			}
+			messageFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD,
+				aFontSize);
 			if (isHtml) {
-				text = aText;
-				updCustomData(aFrmWidth, aFrmHeight, aFontSize,
-						aUnderlinedStyle);
-				pageHeight = ((HtmlView)view).getPageHeight();
-				lastHeight = Math.min(pageHeight, aFrmHeight);
-			} else {
-				page = new Page(aText);
-				pageHeight = View.estimateHeight(aFontSize, aUnderlinedStyle,
-						aFrmWidth, aFrmHeight, page);
-				messageFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD,
-					aFontSize);
-				if (aFrmHeight == 0) {
-					lastHeight = pageHeight;
-					updCustomData(aFrmWidth, pageHeight, aFontSize,
-							aUnderlinedStyle);
+				label = aLabel;
+				if (aUnderlinedStyle) {
+					text = "<u>" + aText + "</u>";
 				} else {
-					lastHeight = Math.min(pageHeight, aFrmHeight);
-					updCustomData(aFrmWidth, lastHeight, aFontSize,
-							aUnderlinedStyle);
+					text = aText;
 				}
+				labelPageHeight = messageFont.getHeight();
+				updCustomData(aFrmWidth, 3 * labelPageHeight, aFontSize,
+						aUnderlinedStyle);
+				if (labelView != null) {
+					labelPageHeight = ((HtmlView)labelView).getPageHeight() +
+							AbstractView.getTotalBorderSpace();
+				}
+				pageHeight = ((HtmlView)view).getPageHeight() +
+							AbstractView.getTotalBorderSpace();
+			} else {
+				if (aLabel != null) {
+					labelPage = new Page(aLabel);
+					page = new Page(aText);
+					labelPageHeight = View.estimateHeight(aFontSize,
+							aUnderlinedStyle, aFrmWidth, aFrmHeight,
+							labelPage) + AbstractView.getTotalBorderSpace();
+				}
+				pageHeight = View.estimateHeight(aFontSize, aUnderlinedStyle,
+						aFrmWidth, aFrmHeight, page) +
+							AbstractView.getTotalBorderSpace();
 			}
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("aLabel,aFrmWidth,aFrmHeight,pageHeight=" + aLabel + "," + aFrmWidth + "," + aFrmHeight + "," + pageHeight);}
-			//#endif
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("lastHeight=" + lastHeight);}
-			//#endif
+			if (aFrmHeight == 0) {
+				lastHeight = labelPageHeight + pageHeight;
+			} else {
+				lastHeight = Math.min(labelPageHeight + pageHeight,
+						aFrmHeight);
+			}
+			if (!isHtml) {
+				updCustomData(aFrmWidth, lastHeight, aFontSize,
+						aUnderlinedStyle);
+				viewScrollBar = !((View)view).isLastPage();
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest("viewScrollBar=" + viewScrollBar);}
+				//#endif
+			}
+			if (!viewScrollBar &&
+					(lastHeight < (labelPageHeight + pageHeight))) {
+				viewScrollBar = true;
+			}
+			prefViewHeight = lastHeight;
 			if (cmdHelp == null) {
 				cmdHelp = UiUtil.getCmdRsc("cmd.i.help", Command.ITEM, 3);
 			}
@@ -261,6 +289,13 @@ public class PageMgr implements ItemCommandListener {
 		} catch (Throwable e) {
 			//#ifdef DLOGGING
 			logger.severe("Constructor failed with throwable", e);
+			//#endif
+		} finally {
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("aLabel,aFrmWidth,aFrmHeight,labelPageHeight,pageHeight,prefViewHeight,viewScrollBar=" + aLabel + "," + aFrmWidth + "," + aFrmHeight + "," + labelPageHeight + "," + pageHeight + "," + prefViewHeight + "," + viewScrollBar);}
+			//#endif
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("lastHeight=" + lastHeight);}
 			//#endif
 		}
 	}
@@ -384,8 +419,18 @@ public class PageMgr implements ItemCommandListener {
 			}
 			pageImpl.addCommand(cmdPosition);
 		}
+		int labelHeight = Math.min(labelPageHeight, aHeight);
+		aHeight-= labelHeight;
+		if (labelPage != null) {
+			labelView = new View(aWidth, labelHeight, aFontSize, false);
+			labelPage.setPosition(0);
+			((View)labelView).setPage(labelPage);
+		} else if (labelHeight > 0) {
+			labelView = new HtmlView(aWidth, labelHeight, aFontSize, label);
+		}
 		if (page != null) {
-			view = new View(aWidth, aHeight, aFontSize, aUnderlinedStyle);
+			view = new View(aWidth, aHeight, aFontSize,
+					aUnderlinedStyle);
 			page.setPosition(0);
 			((View)view).setPage(page);
 		} else {
@@ -420,7 +465,13 @@ public class PageMgr implements ItemCommandListener {
 				//#endif
 			}
 		}
-		view.draw(g, 0, 0);
+		if (labelPageHeight < pheight) {
+			if (labelView != null) {
+				labelView.draw(g, 0, 0, false, false);
+			}
+			view.draw(g, 0, labelPageHeight, true,
+					viewScrollBar || (prefViewHeight > pheight));
+		}
 		if (message != null) {
 			int mx = 2;
 			int my = 2;
@@ -470,16 +521,8 @@ public class PageMgr implements ItemCommandListener {
 		//#ifdef DLOGGING
 		if (finestLoggable) {logger.finest("getPrefContentWidth,width=" + width);}
 		//#endif
-		if ((width > 0) && (lastWidth != width)) {
+		if ((width > 0) && (lastWidth < width)) {
 			lastWidth = width;
-			try {
-				updCustomData(lastWidth, lastHeight, fontSize,
-					underlinedStyle);
-			} catch (Exception e) {
-				//#ifdef DTEST
-				Common.debugErr("PageMgr.getPrefContentWidth view failed");
-				//#endif
-			}
 		}
 		return lastWidth;
 	}
@@ -489,26 +532,15 @@ public class PageMgr implements ItemCommandListener {
 	 */
 	public int getPrefContentHeight(int height) {
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("getPrefContentHeight,height=" + height);}
+		if (finestLoggable) {logger.finest("getPrefContentHeight,height,labelPageHeight,pageHeight=" + height + "," + labelPageHeight + "," + pageHeight);}
 		//#endif
-		if ((height > -1) && (lastHeight > height)) {
-			lastHeight = height;
-			try {
-				updCustomData(lastWidth, lastHeight, fontSize,
-						underlinedStyle);
-			} catch (Exception e) {
-				//#ifdef DTEST
-				Common.debugErr("PageMgr.getPrefContentHeight view failed");
-				//#endif
-			}
-		}
-		return lastHeight;
+		return prefViewHeight;
 	}
 
 	/**
 	 * Size changed
 	 */
-	protected void sizeChanged(int width, int height) {
+	public void sizeChanged(int width, int height) {
 		//#ifdef DLOGGING
 		if (finestLoggable) {logger.finest("sizeChanged,width,height=" + width + "," + height);}
 		//#endif
@@ -550,7 +582,7 @@ public class PageMgr implements ItemCommandListener {
 	 * Key actions handler
 	 * @param aKey
 	 */
-	protected void key(final int aKey) {
+	public void key(final int aKey) {
 		synchronized(this) {
 			final int action = pageImpl.getGameAction(aKey);
 			//#ifdef DTEST
@@ -572,7 +604,7 @@ public class PageMgr implements ItemCommandListener {
 	 * Key actions handler
 	 * @param aKey
 	 */
-	protected void keyNormal(final int aKey, final int action) {
+	public void keyNormal(final int aKey, final int action) {
 		if (useActions) {
 			switch (action) {
 				case Canvas.UP:
@@ -628,7 +660,7 @@ public class PageMgr implements ItemCommandListener {
 	 * Key handlers for Autorun book reading.
 	 * @param aKey
 	 */
-	protected void keyAutoRun(final int aKey, final int action) {
+	public void keyAutoRun(final int aKey, final int action) {
 		Integer ikey = new Integer(aKey);
 		if ((useActions &&
 		    (((action == Canvas.UP) || (action == Canvas.LEFT) ||
@@ -770,9 +802,16 @@ public class PageMgr implements ItemCommandListener {
 		try {
 			pauseOn();
 			view.fwdLine();
-			messageOff();
+			if (view.emptyPage()) {
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest("Forward line too far.  Going back.");}
+				//#endif
+				view.bckLine();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			messageOff();
 		}
 	}
 
@@ -789,9 +828,10 @@ public class PageMgr implements ItemCommandListener {
 				//#endif
 				view.bckPage();
 			}
-			messageOff();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			messageOff();
 		}
 	}
 
@@ -802,9 +842,10 @@ public class PageMgr implements ItemCommandListener {
 		try {
 			pauseOn();
 			view.bckLine();
-			messageOff();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			messageOff();
 		}
 	}
 
@@ -815,9 +856,10 @@ public class PageMgr implements ItemCommandListener {
 		try {
 			pauseOn();
 			view.bckPage();
-			messageOff();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			messageOff();
 		}
 	}
 
@@ -854,7 +896,7 @@ public class PageMgr implements ItemCommandListener {
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.Displayable#hideNotify()
 	 */
-	protected void showNotify() {
+	public void showNotify() {
 		//#ifdef DTEST
 		Common.debug("PageCanvas.showNotify()");
 		//#endif
@@ -885,19 +927,14 @@ public class PageMgr implements ItemCommandListener {
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.Displayable#hideNotify()
 	 */
-	protected void hideNotify() {
+	public void hideNotify() {
 		//#ifdef DTEST
 		Common.debug("PageCanvas.hideNotify()");
 		//#endif
 		/* Don't change run so that help can know if it's on.  Also, it allows
 		   us to keep it's value. */
 		scrollThread.setProcessing(false);
-		synchronized(this) {
-			try {
-				scrollThread.notify();
-			} catch (Exception e) {
-			}
-		}
+		scrollThread.wakeUp();
 	}
 
 	/**
