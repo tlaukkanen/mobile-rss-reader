@@ -163,7 +163,7 @@ public class ExtParser {
 //@			m_subtitle = StringUtil.removeHtml(m_subtitle);
 //@			m_summary = StringUtil.removeHtml(m_summary);
 //@		}
-//@		if ((m_author + m_subtitle + m_summary + m_duration).equals("") &&
+//@		if (((m_author + m_subtitle + m_summary + m_duration).length() == 0)  &&
 //@				(m_explicit == (byte)-1)) {
 //@			RssItunesItem item = new RssItunesItem(title, link, desc, date,
 //@					enclosure, unreadItem);
