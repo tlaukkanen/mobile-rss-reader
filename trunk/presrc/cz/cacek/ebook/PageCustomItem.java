@@ -92,7 +92,7 @@ public class PageCustomItem extends CustomItem implements PageImpl {
 						  final Displayable aPrev,
 						  final RssReaderMIDlet aMidlet)
 	throws Exception {
-		super(aLabel);
+		super(null);
 		pageMgr = new PageMgr(aLabel, aFrmWidth, aFrmHeight,
 						  aFontSize, aUnderlinedStyle,
 						  isHtml,
