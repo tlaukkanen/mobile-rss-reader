@@ -33,6 +33,7 @@
 
 package com.substanceofcode.rssreader.presentation;
 
+import java.util.Vector;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -42,6 +43,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
@@ -85,14 +87,14 @@ import cz.cacek.ebook.util.ResourceProviderME;
  * @author  Irving Bunton
  * @version 1.0
  */
-final public class UiUtil {
+final public class UiUtil implements CommandListener {
  
-	private static Command m_backCmd;
-	private static Command m_cancelCmd;
-	private static Command m_exitCmd;
-	private static Command m_helpCmd;
-	private static Command m_okCmd;
-	private static Command m_stopCmd;
+    private RssReaderMIDlet   m_midlet;  // The RssReaderMIDlet midlet
+    private Form        m_urlRrnForm;    // The form to return to for URL box
+    private TextField   m_urlRrnItem;    // The item to return to for URL box
+
+	public UiUtil() { }
+
   /**
    * Create a new command using the resource key and standard parms
    *
@@ -429,102 +431,51 @@ final public class UiUtil {
 		return choiceGroup;
 	}
 
-	static public void addStdCommands(final Displayable disp,
-									  final int[] types, 
-									  final String[] prompts, 
-									  final int[] priorities) {
-		for (int ic = 0; ic < types.length; ic++) {
-			Command cmd;
-			switch (types[ic]) {
-				case Command.BACK:
-					if ((disp instanceof Alert) ||
-							((m_backCmd != null) &&
-							 (priorities[ic] != m_backCmd.getPriority()))) {
-						cmd = UiUtil.getCmdRsc("cmd.back", types[ic],
-								priorities[ic]);
-					} else if (m_backCmd == null) {
-						cmd =
-						m_backCmd = UiUtil.getCmdRsc("cmd.back", types[ic],
-								priorities[ic]);
-					} else {
-						cmd = m_backCmd;
-					}
-					break;
-				case Command.CANCEL:
-					if ((disp instanceof Alert) ||
-							((m_cancelCmd != null) &&
-							 (priorities[ic] != m_cancelCmd.getPriority()))) {
-						cmd = UiUtil.getCmdRsc("cmd.cancel", types[ic],
-								priorities[ic]);
-					} else if (m_cancelCmd == null) {
-						cmd =
-						m_cancelCmd = UiUtil.getCmdRsc("cmd.cancel", types[ic],
-								priorities[ic]);
-					} else {
-						cmd = m_cancelCmd;
-					}
-					break;
-				case Command.EXIT:
-					if ((disp instanceof Alert) ||
-							((m_exitCmd != null) &&
-							 (priorities[ic] != m_exitCmd.getPriority()))) {
-						cmd = UiUtil.getCmdRsc("cmd.exit", types[ic],
-								priorities[ic]);
-					} else if (m_exitCmd == null) {
-						cmd =
-						m_exitCmd = UiUtil.getCmdRsc("cmd.exit", types[ic],
-								priorities[ic]);
-					} else {
-						cmd = m_exitCmd;
-					}
-					break;
-				case Command.HELP:
-					if ((disp instanceof Alert) ||
-							((m_helpCmd != null) &&
-							 (priorities[ic] != m_helpCmd.getPriority()))) {
-						cmd = UiUtil.getCmdRsc("cmd.help", types[ic],
-								priorities[ic]);
-					} else if (m_helpCmd == null) {
-						cmd =
-						m_helpCmd = UiUtil.getCmdRsc("cmd.help", types[ic],
-								priorities[ic]);
-					} else {
-						cmd = m_helpCmd;
-					}
-					break;
-				case Command.OK:
-					if ((disp instanceof Alert) ||
-							((m_okCmd != null) &&
-							 (priorities[ic] != m_okCmd.getPriority()))) {
-						cmd = UiUtil.getCmdRsc("cmd.ok", types[ic],
-								priorities[ic]);
-					} else if (m_okCmd == null) {
-						cmd =
-						m_okCmd = UiUtil.getCmdRsc("cmd.ok", types[ic],
-								priorities[ic]);
-					} else {
-						cmd = m_okCmd;
-					}
-					break;
-				case Command.STOP:
-					if ((disp instanceof Alert) ||
-							((m_stopCmd != null) &&
-							 (priorities[ic] != m_stopCmd.getPriority()))) {
-						cmd = UiUtil.getCmdRsc("cmd.stop", types[ic],
-								priorities[ic]);
-					} else if (m_stopCmd == null) {
-						cmd =
-						m_stopCmd = UiUtil.getCmdRsc("cmd.stop", types[ic],
-								priorities[ic]);
-					} else {
-						cmd = m_stopCmd;
-					}
-					break;
-				default:
-					throw new IllegalArgumentException("Command type " +
-							types[ic] + " is not valid.");
-			}
-			disp.addCommand(cmd);
+	//#ifndef DSMALLMEM
+    /** Initialize URL text Box */
+    final public void initializeURLBox(RssReaderMIDlet midlet, final String url,
+			Form prevForm, TextField prevItem) {
+		m_midlet = midlet;
+		TextBox boxURL = new TextBox("URL", url, 256, TextField.URL);
+		m_urlRrnForm = prevForm;
+		m_urlRrnItem = prevItem;
+		boxURL.addCommand(UiUtil.getCmdRsc("cmd.ok", Command.OK, 2));
+		boxURL.addCommand(UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 1));
+        boxURL.setCommandListener(this);
+		midlet.setCurrent( boxURL );
+    }
+	//#endif
+    
+    /** Respond to commands */
+    public void commandAction(final Command c, final Displayable s) {
+		//#ifndef DSMALLMEM
+
+		/** Paste into URL field from previous form.  */
+		if( (m_urlRrnForm != null) &&
+			(s instanceof TextBox) && (c.getCommandType() == Command.OK) ){
+			m_urlRrnItem.setString( ((TextBox)s).getString() );
+			//#ifdef DMIDP20
+			m_midlet.setCurrentItem( m_urlRrnItem );
+			//#else
+//@			m_midlet.setCurrent( m_urlRrnForm );
+			//#endif
+			m_urlRrnForm = null;
+			m_urlRrnItem = null;
 		}
+		
+		/** Cancel the box go back to the return form.  */
+		if( (m_urlRrnForm != null) &&
+			(s instanceof TextBox) &&
+			(c.getCommandType() == Command.CANCEL) ){
+			//#ifdef DMIDP20
+			m_midlet.setCurrentItem( m_urlRrnItem );
+			//#else
+//@			setCurrent( m_urlRrnForm );
+			//#endif
+			m_urlRrnForm = null;
+			m_urlRrnItem = null;
+		}
+		//#endif
 	}
+	
 }
