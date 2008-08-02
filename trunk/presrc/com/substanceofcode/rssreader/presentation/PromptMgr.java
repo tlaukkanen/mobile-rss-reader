@@ -40,6 +40,7 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Image;
 //#ifndef DTESTUI
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.StringItem;
@@ -104,6 +105,8 @@ final public class PromptMgr implements CommandListener, Runnable {
 		// Due to a quirk on T637 (MIDP 1.0), we need to create a form
 		// before the alert or the alert will not be seen.
 		Form formAlert = new Form(origCmd.getLabel());
+		Image question = UiUtil.getImage("/icons/questionMk.png");
+		formAlert.append(question);
 		int ix = formAlert.append(new StringItem(null,
 					(String)promptCommands.get(origCmd)));
 		Command okCmd = UiUtil.getCmdRsc("cmd.ok", Command.OK, 1);
@@ -111,7 +114,7 @@ final public class PromptMgr implements CommandListener, Runnable {
 		Command cancelCmd = UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 2);
 		formAlert.addCommand(cancelCmd);
 		promptAlert = new Alert(origCmd.getLabel(),
-				((StringItem)formAlert.get(ix)).getText(), null,
+				((StringItem)formAlert.get(ix)).getText(), question,
 				AlertType.CONFIRMATION);
 		promptAlert.setTimeout(Alert.FOREVER);
 		promptAlert.addCommand(okCmd);
