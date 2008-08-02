@@ -142,9 +142,9 @@ public class RssItunesItem extends RssItem {
 		String summary = "";
 		//#ifdef DITUNES
 //@		if (m_itunes) {
-//@			author = m_author.replace('|', (char)1);
-//@			subtitle = m_subtitle.replace('|', (char)1);
-//@			summary = m_summary.replace('|', (char)1);
+//@			author = m_author.replace('|', CONE);
+//@			subtitle = m_subtitle.replace('|', CONE);
+//@			summary = m_summary.replace('|', CONE);
 //@		}
 		//#endif
         String preData = (m_itunes ? "1" : "") + "|" +
@@ -172,7 +172,7 @@ public class RssItunesItem extends RssItem {
 	throws CauseMemoryException, CauseException {
 			
 		try {
-			boolean hasPipe = (data.indexOf((char)1) >= 0);
+			boolean hasPipe = (data.indexOf(CONE) >= 0);
 			String[] nodes = StringUtil.split( data, '|');
 			RssItunesItem item = new RssItunesItem();
 			item.init(hasPipe, nodes);
@@ -265,19 +265,19 @@ public class RssItunesItem extends RssItem {
 //@				int AUTHOR = 1;
 //@				m_author = nodes[AUTHOR];
 //@				if (hasPipe) {
-//@					m_author = m_author.replace((char)1, '|');
+//@					m_author = m_author.replace(CONE, '|');
 //@				}
 //@				
 //@				int SUBTITLE = 2;
 //@				m_subtitle = nodes[SUBTITLE];
 //@				if (hasPipe) {
-//@					m_subtitle = m_subtitle.replace((char)1, '|');
+//@					m_subtitle = m_subtitle.replace(CONE, '|');
 //@				}
 //@				
 //@				int SUMMARY = 3;
 //@				m_summary = nodes[SUMMARY];
 //@				if (hasPipe) {
-//@					m_summary = m_summary.replace((char)1, '|');
+//@					m_summary = m_summary.replace(CONE, '|');
 //@				}
 //@
 //@				int EXPLICIT = 4;
