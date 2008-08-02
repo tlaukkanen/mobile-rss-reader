@@ -383,7 +383,7 @@ public class View extends AbstractView {
 		//#ifdef DTEST
 //@		Common.debug("emptyPage() started");
 		//#endif
-		if(page.getPosition() >= page.size - 1) {
+		if(page.getPosition() >= page.size) {
 			try {
 				for (int i = 0, n=screen.size(); i < n; i++) {
 					if (screen.getContent(i) != null) {
@@ -467,12 +467,14 @@ public class View extends AbstractView {
 	 * @throws Exception
 	 */
 	protected String nextLine() throws Exception {
-		if(page.getPosition() >= page.size - 1) {
+		if(page.getPosition() >= page.size) {
 			return null;
 		}
 		int len = 0;
+		// First place of white space
 		int ws = -1;
 		int index = 0;
+		int actWidth = width - (2 * borderSpace) - scrollWidth;
 		boolean eof = false;
 		buffer.setLength(0);
 		for(;;){
@@ -483,13 +485,30 @@ public class View extends AbstractView {
 				eof = true;
 				break;
 			}
+			// Change tabs to single space
 			if(c == '\t') c = ' ';
+			// If \r or line begins with spaces, go to next char without
+			// saving.
 			if(c == '\r' || (c == ' ' && index==0)) continue;
+			// If line feed, end the line.
 			if(c == '\n') break;
+			// Save white space index
 			if(c == ' ') ws = index;
 			len += charWidth(c);
-			if(len > width - (2 * borderSpace) - scrollWidth){
-				page.readPrev();
+			if(len > actWidth){
+				//#ifdef DLOGGING
+//@				if (finestLoggable) {logger.finest("c,len,ws,actWidth,index=" + c + "," + len + "," + ws + "," + actWidth + "," + index);}
+				//#endif
+				// Read prev will give EOFException if at the end of the page
+				// or the beginning.  In this case if we get it, we are at
+				// the end.
+				try {
+					page.readPrev();
+				} catch (EOFException e) {
+					eof = true;
+					page.setPosition(page.size - 1);
+					break;
+				}
 				if((ws != -1) && wrapSpaces){
 					int discard = index - ws - 1;
 					for(int i = 0; i < discard; i++) {
@@ -593,6 +612,13 @@ public class View extends AbstractView {
      */
     public int getPosition() {
         return screen==null?0:screen.getPosition(0);
+    }
+
+    /**
+     * @return Returns true if there is another page, false otherwise
+     */
+    public boolean isLastPage() {
+        return page.getPosition() >= page.size;
     }
 
     /**
