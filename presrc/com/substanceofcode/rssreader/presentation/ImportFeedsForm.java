@@ -449,34 +449,31 @@ final public class ImportFeedsForm extends Form
 								//#endif
 							}
 						} catch(OutOfMemoryError e) {
-							m_listParser = null;
 							throw new CauseMemoryException(
 									"Error importing feeds from " +
 									m_listParser.getUrl() + " " +
 									e.getMessage(), e);
 						}
 					} catch(CauseMemoryException ex) {
-						m_listParser = null;
 						m_midlet.recordExcFormFin(
 								"Out of memory error importing feeds " +
 								"from " + m_listParser.getUrl() + " " +
 								ex.getMessage(), ex);
 						m_getFeedTitleList = false;
+						m_listParser = null;
 						// TODO empty list parser m_listParser = null;
 					} catch(Exception ex) {
-						m_listParser = null;
 						m_midlet.recordExcFormFin(
 								"Error importing feeds from " +
 								m_listParser.getUrl(), ex);
 						m_getFeedTitleList = false;
-						// TODO empty list parser m_listParser = null;
-					} catch(Throwable t) {
 						m_listParser = null;
+					} catch(Throwable t) {
 						m_midlet.recordExcFormFin(
 								"Internal error importing feeds from " +
 								m_listParser.getUrl(), t);
 						m_getFeedTitleList = false;
-						// TODO empty list parser m_listParser = null;
+						m_listParser = null;
 					}
 				}
 				//#ifndef DSMALLMEM
@@ -568,7 +565,7 @@ final public class ImportFeedsForm extends Form
 		//#ifndef DSMALLMEM
 		/** Put current import URL into URL box.  */
 		if( c == m_pasteImportURLCmd ) {
-			m_midlet.initializeURLBox(m_feedListURL.getString(),
+			new UiUtil().initializeURLBox(m_midlet, m_feedListURL.getString(),
 					this, m_feedListURL);
 		}
 		//#endif
