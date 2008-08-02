@@ -55,7 +55,7 @@ abstract public class AbstractView {
 	protected int height;
 	protected int background;
 	protected int foreground;
-	protected int borderSpace;
+	protected static int borderSpace = 2;
 	protected int lineSpace;
 	protected boolean wrapSpaces;
 	protected int scrollWidth;
@@ -73,7 +73,6 @@ abstract public class AbstractView {
 	 * @throws Exception
 	 */
 	protected void init() throws Exception {
-		borderSpace = 2;
 		lineSpace = 0;
 		wrapSpaces = true;
 		scrollWidth = 5;
@@ -184,30 +183,41 @@ abstract public class AbstractView {
 	 * @param aX
 	 * @param aY
 	 */
-	public void draw(Graphics aGraphic, int aX, int aY) {
+	public void draw(Graphics aGraphic, int aX, int aY, boolean aBody,
+			boolean aScrollBar) {
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("draw aX,aY,width,height=" + aX + "," + aY + "," + width + "," + height);}
+		if (finestLoggable) {logger.finest("draw aX,aY,width,height,aBody,aScrollBar=" + aX + "," + aY + "," + width + "," + height + "," + aBody + "," + aScrollBar);}
 		//#endif
 		Graphics g = offscreen.getGraphics();
 		// Draw background
 		g.setColor(background);
-		g.fillRect(0, 0, width, height);
+		if (aBody) {
+			g.fillRect(0, 0, width, height);
+		}
 		// Draw text
 		g.setColor(foreground);
 		drawText(g);
-		// Draw border
-		g.setColor(foreground);
-		g.drawRect(0, 0, width - 1, height - 1);
-		// Draw scroll
-		g.setColor(background);
-		g.fillRect(width - scrollWidth, 0, scrollWidth - 1, height - 1);
-		g.setColor(foreground);
-		g.drawRect(width - scrollWidth, 0, scrollWidth - 1, height - 1);
-		int scroll = getScrollPosition(height, scrollHeight);
-		g.fillRect(width - scrollWidth, scroll,
-				scrollWidth - 1, scrollHeight - 1);
+		if (aBody) {
+			// Draw border
+			g.setColor(foreground);
+			g.drawRect(0, 0, width - 1, height - 1);
+			if (aScrollBar) {
+				// Draw scroll
+				g.setColor(background);
+				g.fillRect(width - scrollWidth, 0, scrollWidth - 1, height - 1);
+				g.setColor(foreground);
+				g.drawRect(width - scrollWidth, 0, scrollWidth - 1, height - 1);
+				int scroll = getScrollPosition(height, scrollHeight);
+				g.fillRect(width - scrollWidth, scroll,
+						scrollWidth - 1, scrollHeight - 1);
+			}
+		}
 		// Draw offscreen
 		aGraphic.drawImage(offscreen, aX, aY, Graphics.LEFT | Graphics.TOP);
+	}
+
+	final static int getTotalBorderSpace() {
+		return 2 * borderSpace;
 	}
 
 	abstract protected void drawText(Graphics g);
