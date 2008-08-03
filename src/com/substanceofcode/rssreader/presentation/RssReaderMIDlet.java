@@ -2417,14 +2417,12 @@ public class RssReaderMIDlet extends MIDlet
 									m_importSave = storeValues(items);
 									setCurrent( m_bookmarkList );
 								}
-
+								m_listParser = null;
 							} else {
 								//#ifndef DTESTUI
 								if (m_debugOutput) System.out.println("Feed list parsing isn't ready");
 								//#endif
 							}
-							m_listParser = null;
-							m_getFeedTitleList = false;
 						} catch(Exception ex) {
 							recordExcForm(
 									"Error importing feeds from " +
