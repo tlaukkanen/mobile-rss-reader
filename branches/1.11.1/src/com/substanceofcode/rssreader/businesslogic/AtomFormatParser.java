@@ -170,6 +170,7 @@ public class AtomFormatParser implements FeedFormatParser {
 							m_link = m_altLink;
 						}
 					}
+					m_link = StringUtil.removeHtml( m_link );
                     Date pubDate = null;
 					// Check date in case we cannot find it.
 					if (m_date.equals("") && m_extParser.isHasExt()) {
@@ -222,6 +223,7 @@ public class AtomFormatParser implements FeedFormatParser {
 					m_link = m_altLink;
 				}
 			}
+			m_link = StringUtil.removeHtml( m_link );
 		    Date pubDate = null;
 			// Check m_date in case we cannot find it.
 			if (m_date.length() != 0) {
