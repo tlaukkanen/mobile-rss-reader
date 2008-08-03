@@ -867,7 +867,7 @@
 	<!-- Compile for MIDP 2.0 as a release (no test) -->
 	<target name="dist.compile.2.0" >
 		<antcall target="compile" >
-			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
