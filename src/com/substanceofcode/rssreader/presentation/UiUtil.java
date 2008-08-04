@@ -169,7 +169,6 @@ final public class UiUtil implements CommandListener {
     
     /** Respond to commands */
     public void commandAction(final Command c, final Displayable s) {
-		//#ifndef DSMALLMEM
 
 		/** Paste into URL field from previous form.  */
 		if( (m_urlRrnForm != null) &&
@@ -196,7 +195,6 @@ final public class UiUtil implements CommandListener {
 			m_urlRrnForm = null;
 			m_urlRrnItem = null;
 		}
-		//#endif
 	}
 	
 }
