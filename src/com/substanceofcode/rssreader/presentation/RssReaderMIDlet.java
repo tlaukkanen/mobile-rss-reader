@@ -149,7 +149,7 @@ public class RssReaderMIDlet extends MIDlet
     private RssReaderSettings m_appSettings;// The application settings
     private Hashtable   m_rssFeeds;         // The bookmark URLs
     private Thread      m_netThread;        // The thread for networking
-    final static private boolean     JSR75_ENABLED =
+    final static public boolean JSR75_ENABLED =
 	          (System.getProperty(
 			"microedition.io.file.FileConnection.version") != null);
     private boolean     m_debugOutput = false; // Flag to write to output for test
@@ -758,18 +758,6 @@ public class RssReaderMIDlet extends MIDlet
 		}
     }
     
-    /** Initialize import form */
-    
-    /** Initialize URL text Box */
-    final private void initializeURLBox(final String url,
-			CommandListener cmdl) {
-		m_boxURL = new TextBox("URL", url,
-								256, TextField.URL);
-        m_boxURL.addCommand( m_boxOkCmd );
-        m_boxURL.addCommand( m_boxCancelCmd );
-        m_boxURL.setCommandListener(cmdl);
-    }
-    
 	//#ifdef DLOGGING
 //@    final public void initializeDebugForm() {
 //@        m_debug.addCommand( m_backFrDebugCmd );
@@ -793,7 +781,7 @@ public class RssReaderMIDlet extends MIDlet
 						}
 						if (m_novice) {
 							if (m_bookmarkList.size() == 0) {
-								LineByLineParser listParser =
+								FeedListParser listParser =
 									new LineByLineParser(
 										"jar:///data/novice.txt", "", "");
 								listParser.setFeedNameFilter(null);
@@ -801,7 +789,11 @@ public class RssReaderMIDlet extends MIDlet
 								listParser.setRedirectHtml(false);
 								listParser.startParsing();
 								listParser.join();
-								addFeedLists(listParser, false, 0);
+								ImportFeedsForm.addFeedLists(listParser,
+										false, 0,
+										m_appSettings.getMaximumItemCountInFeed(),
+										true, m_rssFeeds, m_bookmarkList,
+										m_loadForm);
 								if (m_loadForm.size() > 0) {
 									Item item = m_loadForm.get(
 											m_loadForm.size() - 1);
@@ -963,7 +955,7 @@ public class RssReaderMIDlet extends MIDlet
 //@						System.gc();
 //@						long beginMem = Runtime.getRuntime().freeMemory();
 						//#endif
-						BMForm bmForm = new BMForm(m_getAddBMForm);
+						BMForm bmForm = new BMForm(this, m_getAddBMForm);
 						//#ifdef DTEST
 //@						System.gc();
 //@						System.out.println("BMForm size=" +
@@ -1058,10 +1050,14 @@ public class RssReaderMIDlet extends MIDlet
 //@						if (m_getTestImportForm) {
 //@							RssItunesFeed bm = (RssItunesFeed)m_rssFeeds.get(
 //@									m_bookmarkList.getString(m_curBookmark));
-//@							importFeedsForm = new ImportFeedsForm(bm.getUrl());
+//@							importFeedsForm = new ImportFeedsForm(this,
+//@									m_bookmarkList, m_rssFeeds, m_appSettings,
+//@									m_loadForm, bm.getUrl());
 //@						} else
 						//#endif
-							importFeedsForm = new ImportFeedsForm(m_appSettings.getImportUrl());
+							importFeedsForm = new ImportFeedsForm(this,
+									m_bookmarkList, m_rssFeeds, m_appSettings,
+									m_loadForm, m_appSettings.getImportUrl());
 						//#ifdef DTEST
 //@						System.gc();
 //@						System.out.println("ImportForm size=" + (beginMem - Runtime.getRuntime().freeMemory()));
@@ -1731,7 +1727,7 @@ public class RssReaderMIDlet extends MIDlet
 	   fileURL - Text field that has URL to put file URL into as well
 	   			 as field to go back to if 2.0 is valid.
 	*/
-	final private void reqFindFiles( final Form fileRtnForm,
+	final public void reqFindFiles( final Form fileRtnForm,
 								     final TextField fileURL) {
 		m_fileRtnForm = fileRtnForm;
 		m_fileURL = fileURL;
@@ -1739,7 +1735,7 @@ public class RssReaderMIDlet extends MIDlet
 	}
 
 	/* Restore previous values. */
-	final private void restorePrevValues(Item[] items, byte[] bdata) {
+	final public void restorePrevValues(Item[] items, byte[] bdata) {
 		DataInputStream dis = new DataInputStream(
 				new ByteArrayInputStream(bdata));
 		for (int ic = 0; ic < items.length; ic++) {
@@ -1782,7 +1778,7 @@ public class RssReaderMIDlet extends MIDlet
 	}
 
 	/* Store current values. */
-	final private byte[] storeValues(Item[] items) {
+	final public byte[] storeValues(Item[] items) {
 		ByteArrayOutputStream bout = new
 				ByteArrayOutputStream();
 		DataOutputStream dout = new
@@ -2139,437 +2135,18 @@ public class RssReaderMIDlet extends MIDlet
 
     }
     
-	/** Add from feed list (from import). */
-	final private void addFeedLists(FeedListParser listParser,
-			boolean getFeedTitleList, int addBkmrk)
-	throws CauseException, Exception {
-		// Feed list parsing is ready
-		System.out.println("Feed list parsing is ready");
-		if(!listParser.isSuccessfull()) {
-			throw listParser.getEx();
-		}
-		RssItunesFeed[] feeds = listParser.getFeeds();
-		boolean notesShown = false;
-		for(int feedIndex=0; feedIndex<feeds.length; feedIndex++) {
-			String name = feeds[feedIndex].getName();
-			//#ifdef DTEST
-//@			System.out.println("Adding: " + name);
-			//#endif
-			// If no title (name) and we are getting the title from the
-			// feed being imported, parse the name(title) only.
-			if (((name == null) || (name.length() == 0)) && getFeedTitleList) {
-				RssItunesFeed feed = feeds[feedIndex];
-				RssFeedParser fparser = new RssFeedParser( feed );
-				m_loadForm.appendMsg("Loading title for " +
-						"feed " + feed.getUrl());
-				//#ifdef DLOGGING
-//@				if (finestLoggable) {logger.finest("Getting title for url=" + feed.getUrl());}
-				//#endif
-				fparser.setGetTitleOnly(true);
-				/** Get RSS feed */
-				int maxItemCount = m_appSettings.getMaximumItemCountInFeed();
-				try {
-					fparser.parseRssFeed( false, maxItemCount );
-					name = feed.getName();
-					m_loadForm.appendMsg("ok\n");
-				} catch(Exception ex) {
-					CauseException ce = new CauseException(
-							"Error loading title for feed " + feed.getUrl(),
-							ex);
-					//#ifdef DLOGGING
-//@					logger.severe(ce.getMessage(), ex);
-					//#endif
-					m_loadForm.appendMsg("Error\n");
-					m_loadForm.addExc(ce);
-				}
-			}
-			if((name != null) && (name.length()>0)) {
-				if(!m_rssFeeds.containsKey( name )) {
-					m_rssFeeds.put( name, feeds[feedIndex] );
-					m_bookmarkList.insert(addBkmrk++, name, null);
-				} else {
-					CauseException ce = new CauseException("Error:  Feed " +
-							"already exists with name " + name +
-							".  Existing feed not updated." );
-					m_loadForm.appendMsg(ce.getMessage());
-					m_loadForm.addExc(ce);
-				}
-			}
-		}
-	}
-
-	/* Form to import feeds. */
-	final private class ImportFeedsForm extends Form
-		implements CommandListener, Runnable {
-
-		private boolean     m_getFeedList = false;      // The noticy flag for list parsing
-		private boolean     m_getFeedTitleList = false; // The noticy flag for title/list parsing
-		private boolean     m_needWakeup = false;   // Flag to show need to wakeup
-		private boolean     m_process = true;   // Flag to continue looping
-		private FeedListParser m_listParser;    // The feed list parser
-		private TextField   m_feedListURL;      // The feed list URL field
-		private TextField   m_feedNameFilter;   // The feed name filter string
-		private TextField   m_feedURLFilter;    // The feed URL filter string
-		private TextField   m_feedListUsername; // The feed list username
-		private TextField   m_feedListPassword; // The feed list password
-		private ChoiceGroup m_importFormatGroup;// The import type choice group
-		private ChoiceGroup m_importTitleGroup; // The import title choice group
-		private ChoiceGroup m_importHTMLGroup;  // The import HTML redirect choice group
-		private Command     m_importInsCmd;   // The import before the current point?
-		private Command     m_importAddCmd;   // The import after the current point?
-		private Command     m_importAppndCmd; // The import append
-		private Command     m_importCancelCmd;  // The Cancel command for importing
-		private Command     m_importFileCmd;    // The find files command for importing
-		private Command     m_pasteImportURLCmd;// The paste command
-		//#ifdef DTESTUI
-//@		private Command     m_testImportCmd;      // Tet UI rss opml command
-		//#endif
-
-		/* Constructor */
-		ImportFeedsForm(String url) {
-			super("Import feeds");
-			m_getFeedList = false;
-			m_getFeedTitleList = false;
-			m_listParser = null;
-			if(url.length()==0) {
-				url = "http://";
-			}
-			m_feedListURL = new TextField("URL", url, 256, TextField.URL);
-			super.append(m_feedListURL);
-			
-			String[] formats = {"OPML", "line by line", "HTML OPML Auto link",
-								"HTML RSS Auto links", "HTML Links"};
-			m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
-			super.append(m_importFormatGroup);
-			
-			m_feedNameFilter = new TextField("Name filter string (optional)", "", 256, TextField.ANY);
-			super.append(m_feedNameFilter);
-			m_feedURLFilter = new TextField("URL filter string (optional)", "", 256, TextField.ANY);
-			super.append(m_feedURLFilter);
-			
-			final String username = m_appSettings.getImportUrlUsername();
-			m_feedListUsername  = new TextField("Username (optional)", username, 64, TextField.ANY);
-			super.append(m_feedListUsername);
-			
-			final String password = m_appSettings.getImportUrlPassword();
-			m_feedListPassword  = new TextField("Password (optional)", password, 64, TextField.PASSWORD);
-			super.append(m_feedListPassword);
-			String[] titleInfo =
-					{"Skip feed with missing title",
-					 "Get missing titles from feed"};
-			m_importTitleGroup  = new ChoiceGroup("Missing title (optionl)",
-					ChoiceGroup.EXCLUSIVE, titleInfo, null);
-			super.append(m_importTitleGroup);
-			String[] HTMLInfo =
-					{"Redirect if HTML (ignored for HTML link import)",
-					 "Treat HTML as import"};
-			m_importHTMLGroup  =
-				new ChoiceGroup("Treat HTML mime type as valid import (optional)",
-					ChoiceGroup.EXCLUSIVE, HTMLInfo, null);
-			if (m_importSave != null) { 
-				Item[] items = {m_importFormatGroup, m_feedNameFilter,
-					m_feedURLFilter, m_feedListUsername, m_feedListPassword,
-					m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup}; 
-				restorePrevValues(items, m_importSave);
-			}
-			super.append(m_importHTMLGroup);
-			//#ifdef DMIDP20
-			m_importInsCmd      = new Command("Insert import",
-					"Insert current import", Command.SCREEN, 1);
-			m_importAddCmd      = new Command("Add import",
-					"Add current import", Command.SCREEN, 2);
-			m_importAppndCmd    = new Command("Append import",
-					"Append end import", Command.SCREEN, 3);
-			//#else
-//@			m_importInsCmd      = new Command("Insert import", Command.SCREEN, 1);
-//@			m_importAddCmd      = new Command("Add import", Command.SCREEN, 2);
-//@			m_importAppndCmd    = new Command("Append import", Command.SCREEN, 3);
-			//#endif
-			m_importCancelCmd   = new Command("Cancel", Command.CANCEL, 4);
-			m_importFileCmd     = new Command("Find files", Command.SCREEN, 5);
-			m_pasteImportURLCmd = new Command("Allow paste", Command.SCREEN, 6);
-			
-			super.addCommand( m_importInsCmd );
-			super.addCommand( m_importAddCmd );
-			super.addCommand( m_importAppndCmd );
-			super.addCommand( m_importCancelCmd );
-			//#ifdef DJSR75
-//@			super.addCommand( m_importFileCmd );
-			//#endif
-			if (m_appSettings.getUseTextBox()) {
-				super.addCommand(m_pasteImportURLCmd);
-			}
-			//#ifdef DTESTUI
-//@			m_testImportCmd     = new Command("Test bookmarks imported", Command.SCREEN, 9);
-//@			super.addCommand( m_testImportCmd );
-			//#endif
-			super.setCommandListener(this);
-
-			m_process = true;
-			//#ifdef DCLDCV11
-//@			new Thread(this, "ImportFeedsForm").start();
-			//#else
-			new Thread(this).start();
-			//#endif
-		}
-
-		/** Run method is used to get RSS feed with HttpConnection */
-		public void run(){
-			/* Use networking if necessary */
-			long lngStart;
-			long lngTimeTaken;
-			while(m_process) {
-				try {
-					// Add feeds from import.
-					if( m_getFeedList ) {
-						m_getFeedList = false;
-						initializeLoadingForm("Loading feeds from import...",
-								this);
-						final String url = m_feedListURL.getString().trim();
-						try {
-							
-							// 2. Import feeds
-							int selectedImportType = m_importFormatGroup.getSelectedIndex();
-							RssItunesFeed[] feeds = null;
-							String feedNameFilter = m_feedNameFilter.getString();
-							String feedURLFilter = m_feedURLFilter.getString();
-							String username = m_feedListUsername.getString();
-							String password = m_feedListPassword.getString();
-							m_getFeedTitleList = m_importTitleGroup.isSelected(1);
-							//#ifdef DLOGGING
-//@							if (finestLoggable) {logger.finest("m_getFeedTitleList=" + m_getFeedTitleList);}
-//@							if (finestLoggable) {logger.finest("selectedImportType=" + selectedImportType);}
-							//#endif
-							
-							// Save settings
-							m_appSettings.setImportUrl(url);
-							m_appSettings.setImportUrlUsername(username);
-							m_appSettings.setImportUrlPassword(password);
-							switch (selectedImportType) {
-								case 0:
-									// Use OPML parser
-									m_listParser = new OpmlParser(url, username, password);
-									break;
-								case 1:
-									// Use line by line parser
-									m_listParser = new LineByLineParser(url, username, password);
-									break;
-								case 2:
-									// Use line by HMTL OPML auto link parser
-									m_listParser = new HTMLAutoLinkParser(url, username, password);
-									((HTMLAutoLinkParser)m_listParser).setNeedRss(false);
-									break;
-								case 3:
-									// Use line by HMTL RSS auto link parser
-									m_listParser = new HTMLAutoLinkParser(url, username, password);
-									((HTMLAutoLinkParser)m_listParser).setNeedRss(true);
-									break;
-								case 4:
-									// Use line by HMTL link parser
-									m_listParser = new HTMLLinkParser(url, username, password);
-									break;
-							}
-							m_listParser.setFeedNameFilter(feedNameFilter);
-							m_listParser.setFeedURLFilter(feedURLFilter);
-							m_listParser.setRedirectHtml(m_importHTMLGroup.isSelected(0)
-								&& !(m_listParser instanceof HTMLAutoLinkParser)
-								&& !(m_listParser instanceof HTMLLinkParser));
-							//#ifdef DLOGGING
-//@							if (fineLoggable) {logger.fine("redirect html=" + m_listParser.isRedirectHtml());}
-							//#endif
-							
-							// Start parsing
-							m_listParser.startParsing();
-							
-							// 3. Show result screen
-							// 4. Show list of feeds
-							
-						} catch(Exception ex) {
-							m_listParser = null;
-							recordExcForm("Error importing feeds from " + url, ex);
-						} catch(OutOfMemoryError ex) {
-							m_listParser = null;
-							recordExcForm("Out Of Memory Error importing feeds from " +
-									url, ex);
-						} catch(Throwable t) {
-							m_listParser = null;
-							recordExcForm("Out Of Memory Error importing feeds from " +
-									url, t);
-						}
-					}
-					if(m_listParser != null) {
-						try {
-							if(m_listParser.isReady()) {
-								addFeedLists(m_listParser, m_getFeedTitleList,
-										m_addBkmrk);
-								if (m_loadForm.hasExc()) {
-									m_loadForm.setTitle(
-											"One or more exceptions or errors.");
-									setCurrent( m_loadForm );
-								} else {
-									m_process = false;
-									m_loadForm.removeRef(this);
-									Item[] items = {m_importFormatGroup,
-										m_feedNameFilter,
-										m_feedURLFilter, m_feedListUsername,
-										m_feedListPassword,
-										m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup};
-									m_importSave = storeValues(items);
-									setCurrent( m_bookmarkList );
-								}
-								m_listParser = null;
-							} else {
-								//#ifndef DTESTUI
-								if (m_debugOutput) System.out.println("Feed list parsing isn't ready");
-								//#endif
-							}
-						} catch(Exception ex) {
-							recordExcForm(
-									"Error importing feeds from " +
-									m_listParser.getUrl() + " " +
-									ex.getMessage(), ex);
-							m_getFeedTitleList = false;
-							m_listParser = null;
-						} catch(Throwable t) {
-							recordExcForm(
-									"Error importing feeds from " +
-									m_listParser.getUrl() + " " +
-									t.getMessage(), t);
-							m_getFeedTitleList = false;
-							m_listParser = null;
-						}
-					}
-					lngStart = System.currentTimeMillis();
-					lngTimeTaken = System.currentTimeMillis()-lngStart;
-					if(lngTimeTaken<100L) {
-						synchronized(this) {
-							if (!m_needWakeup) {
-								super.wait(75L-lngTimeTaken);
-							}
-							m_needWakeup = false;
-						}
-					}
-				} catch (InterruptedException e) {
-					break;
-				}
-			}
-		}
-
-		/** Respond to commands */
-		public void commandAction(final Command c, final Displayable s) {
-			//#ifdef DTESTUI
-//@			super.outputCmdAct(c, s);
-			//#endif
-
-			/** Import list of feeds */
-			if( (c == m_importInsCmd ) || (c == m_importAddCmd ) ||
-					(c == m_importAppndCmd )) {
-				final int blen = m_bookmarkList.size();
-				m_addBkmrk = (m_curBookmark == -1) ? blen : m_curBookmark;
-				if( c == m_importAddCmd ){
-					if (m_addBkmrk < blen) {
-						m_addBkmrk++;
-					}
-				}
-				if (c == m_importAppndCmd ) {
-					m_addBkmrk = blen;
-				}
-				if ((m_addBkmrk < 0) || (m_addBkmrk > blen)) {
-					m_addBkmrk = blen;
-				}
-				/* Set flag after other variables are set. */
-				m_getFeedList = true;
-
-			}
-			
-			//#ifdef DJSR75
-//@			/** Find import file in file system */
-//@			if( c == m_importFileCmd ) {
-//@				if (!JSR75_ENABLED) {
-//@					Alert invalidAlert = new Alert(
-//@							"JSR-75 not enabled", 
-//@							"Find files (JSR-75) not enabled on the phone.",
-//@							null,
-//@							AlertType.WARNING);
-//@					invalidAlert.setTimeout(Alert.FOREVER);
-//@					setCurrent( invalidAlert, this );
-//@					wakeUp();
-//@					return;
-//@				}
-//@				try {
-//@					reqFindFiles( this, m_feedListURL );
-//@					wakeUp();
-//@				}catch(Throwable t) {
-					//#ifdef DLOGGING
-//@					logger.severe("RssReaderMIDlet find files ", t);
-					//#endif
-//@					/** Error while executing find files */
-//@					System.out.println("RssReaderMIDlet find files " + t.getMessage());
-//@					t.printStackTrace();
-//@				}
-//@			}
-			//#endif
-					
-			/** Cancel importing -> Show list of feeds */
-			if( c == m_importCancelCmd ) {
-				m_loadForm.removeRef(this);
-				m_process = false;
-				setCurrent( m_bookmarkList );
-			}
-			
-			/** Put current import URL into URL box.  */
-			if( c == m_pasteImportURLCmd ) {
-				initializeURLBox(m_feedListURL.getString(),
-						(CommandListener)this );
-				setCurrent( m_boxURL );
-			}
-
-			/** Paste into URL field from previous form.  */
-			if( c == m_boxOkCmd ) {
-				m_feedListURL.setString( m_boxURL.getString() );
-				//#ifdef DMIDP20
-				setCurrentItem( m_feedListURL );
-				//#else
-//@				setCurrent( this );
-				//#endif
-			}
-			
-			/** Cancel the box go back to the return form.  */
-			if( c == m_boxCancelCmd ) {
-				//#ifdef DMIDP20
-				setCurrentItem( m_feedListURL );
-				//#else
-//@				setCurrent( this );
-				//#endif
-			}
-			
-			//#ifdef DTESTUI
-//@			/** Import list of feeds and auto edit bookmarks/feeds */
-//@			if( c == m_testImportCmd ) {
-//@				m_bookmarkIndex = m_bookmarkList.size();
-//@				System.out.println("Test UI Test Rss feeds m_bookmarkIndex=" + m_bookmarkIndex);
-//@				commandAction(m_importAppndCmd, this);
-//@			}
-			//#endif
-			importWakeUp();
-
-		}
-
-		/* Notify us that we are finished. */
-		final public void importWakeUp() {
-		
-			synchronized(this) {
-				m_needWakeup = true;
-				super.notify();
-			}
-		}
-
-	}
+	//#ifdef DTESTUI
+//@    public void setBookmarkIndex(int bookmarkIndex) {
+//@        this.m_bookmarkIndex = bookmarkIndex;
+//@    }
+//@
+//@    public int getBookmarkIndex() {
+//@        return (m_bookmarkIndex);
+//@    }
+	//#endif
 
 	/* Form to add new/edit existing bookmark. */
 	final private class HeaderList extends List implements CommandListener {
-
-		private RssReaderMIDlet m_midlet;       // RssReaderMIDlet midlet
 		private Command     m_openHeaderCmd;    // The open header command
 		private Command     m_backHeaderCmd;    // The back to bookmark list command
 		private Command     m_updateCmd;        // The update headers command
@@ -2581,7 +2158,6 @@ public class RssReaderMIDlet extends MIDlet
 		/* Constructor */
 		private HeaderList(RssReaderMIDlet midlet, final RssItunesFeed feed) {
 			super("Headers", List.IMPLICIT);
-			this.m_midlet = midlet;
 			final boolean open1st = m_appSettings.getFeedListOpen();
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("initheader open1st=" + open1st);}
@@ -2801,6 +2377,7 @@ public class RssReaderMIDlet extends MIDlet
 
 	/* Form to add new/edit existing bookmark. */
 	final private class BMForm extends Form implements CommandListener {
+		private RssReaderMIDlet m_midlet;       // The RssReaderMIDlet midlet
 		private boolean     m_addForm;          // Flag to indicate is add form
 		private Command     m_addInsCmd;   // The add before the current point?
 		private Command     m_addAddCmd;        // The add after the current point?
@@ -2816,8 +2393,9 @@ public class RssReaderMIDlet extends MIDlet
 		private TextField   m_bmPassword;       // The RSS feed password field
 
 		/* Constructor */
-		private BMForm(final boolean addForm) {
+		private BMForm(final RssReaderMIDlet midlet, final boolean addForm) {
 			super(addForm ? "New Bookmark" : "Edit Bookmark");
+			this.m_midlet = midlet;
 			m_bmName = new TextField("Name", "", 64, TextField.ANY);
 			m_bmURL  = new TextField("URL", "http://", 256, TextField.URL);
 			m_bmUsername  = new TextField("Username (optional)", "", 64, TextField.ANY);
@@ -2901,21 +2479,9 @@ public class RssReaderMIDlet extends MIDlet
 		public void commandAction(final Command c, final Displayable s) {
 
 			/** Save currently added RSS feed's properties */
-			if( (c == m_addInsCmd ) || (c == m_addAddCmd ) ||
-					(c == m_addAppndCmd )) {
-				final int blen = m_bookmarkList.size();
-				m_addBkmrk = (m_curBookmark == -1) ? blen : m_curBookmark;
-				if( c == m_addAddCmd ){
-					if (m_addBkmrk < blen) {
-						m_addBkmrk++;
-					}
-				}
-				if (c == m_addAppndCmd ) {
-					m_addBkmrk = blen;
-				}
-				if ((m_addBkmrk < 0) || (m_addBkmrk > blen)) {
-					m_addBkmrk = blen;
-				}
+			m_addBkmrk = UiUtil.getPlaceIndex(c, m_addInsCmd,
+					m_addAddCmd, m_addAppndCmd, m_bookmarkList);
+			if( m_addBkmrk >= 0 ) {
 				saveBookmark();
 				m_loadForm.removeRef(this);
 				if (m_addForm) { 
@@ -2930,11 +2496,6 @@ public class RssReaderMIDlet extends MIDlet
 			if( c == m_editOkCmd ){
 				saveBookmark();
 				m_loadForm.removeRef(this);
-				if (m_addForm) { 
-					Item[] items = {m_bmName, m_bmURL,
-						m_bmUsername, m_bmPassword};
-					m_addBMSave = storeValues(items);
-				}
 				setCurrent( m_bookmarkList );
 			}
 
@@ -2954,8 +2515,8 @@ public class RssReaderMIDlet extends MIDlet
 			
 			/** Put current bookmark URL into URL box.  */
 			if( c == m_pasteURLCmd ) {
-				initializeURLBox( m_bmURL.getString(), (CommandListener)this );
-				setCurrent( m_boxURL );
+				new UiUtil().initializeURLBox( m_midlet, m_bmURL.getString(),
+						this, m_bmURL );
 			}
 
 			/** Paste into URL field from previous form.  */
@@ -3012,7 +2573,7 @@ public class RssReaderMIDlet extends MIDlet
 	/* Form to show data being loaded.  Save messages and exceptions to
 	   allow them to be viewed separately as well as diagnostics for
 	   reporting errors. */
-	final private class LoadingForm extends Form implements CommandListener {
+	final public class LoadingForm extends Form implements CommandListener {
 		//#ifdef DMIDP10
 //@		private String      m_title;         // Store title.
 		//#endif
