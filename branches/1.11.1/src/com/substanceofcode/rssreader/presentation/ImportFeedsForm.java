@@ -46,6 +46,7 @@ import javax.microedition.lcdui.Displayable;
 //#ifndef DTESTUI
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Form;
+import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.StringItem;
 //#else
@@ -86,6 +87,9 @@ final public class ImportFeedsForm extends Form
 	implements CommandListener, Runnable {
 
     static private byte[] m_importSave = null; // Import form save
+	//#ifndef DTESTUI
+    private boolean     m_debugOutput = false; // Flag to write to output for test
+	//#endif
 	private boolean     m_getFeedList = false;      // The noticy flag for list parsing
 	private boolean     m_getFeedTitleList = false; // The noticy flag for title/list parsing
 	// The noticy flag for override existing feeds
