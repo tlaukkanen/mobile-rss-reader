@@ -68,6 +68,8 @@ public class AtomFormatParser implements FeedFormatParser {
 	private String m_altLink = "";
 	private String m_enclosure = "";
 	private String m_date = "";
+	private String m_modified = "";
+	private String m_updated = "";
 	private ExtParser m_extParser = new ExtParser();
 
     /** Creates a new instance of AtomParser */
@@ -154,41 +156,8 @@ public class AtomFormatParser implements FeedFormatParser {
             if( (elemChar == 'e') &&
 				 elementName.equals("entry") ) {
                 /** Save previous entry */
-				boolean hasTitle = (m_title.length()>0);
-				boolean hasDesc = (m_description.length()>0);
-				if(hasTitle || hasDesc || (m_summary.length()>0)) {
-					if (!hasDesc) {
-						m_description = m_summary;
-						hasDesc = true;
-					}
-					if (m_link.length() == 0) {
-						if (m_selfLink.length() != 0) {
-							m_link = m_selfLink;
-						} else if (m_relLink.length() != 0) {
-							m_link = m_relLink;
-						} else if (m_altLink.length() != 0) {
-							m_link = m_altLink;
-						}
-					}
-					m_link = StringUtil.removeHtml( m_link );
-                    Date pubDate = null;
-					// Check date in case we cannot find it.
-					if (m_date.equals("") && m_extParser.isHasExt()) {
-						m_date = m_extParser.getDate();
-					}
-					if (m_date.length() > 0) {
-						pubDate = RssFormatParser.parseRssDate(m_date);
-					}
-                    RssItunesItem item;
-					if (m_hasExt) {
-						item = m_extParser.createItem(m_title, m_link,
-								m_description, pubDate, m_enclosure, true,
-								m_author);
-					} else {
-						item = new RssItunesItem(m_title, m_link,
-								m_description, pubDate,
-										   m_enclosure, true);
-					}
+				RssItunesItem item = createItem();
+				if ( item != null) {
                     items.addElement( item );
                     if(items.size()==maxItemCount) {
                         return feed;
@@ -207,6 +176,16 @@ public class AtomFormatParser implements FeedFormatParser {
 		}
 				
         /** Save previous entry */
+		RssItunesItem item = createItem();
+		if ( item != null) {
+            items.addElement( item );
+        }
+                        
+        return feed;
+    }
+    
+	/** Save previous entry */
+	final private RssItunesItem createItem() {
 		boolean hasTitle = (m_title.length()>0);
 		boolean hasDesc = (m_description.length()>0);
 		if(hasTitle || hasDesc || (m_summary.length()>0)) {
@@ -224,25 +203,36 @@ public class AtomFormatParser implements FeedFormatParser {
 				}
 			}
 			m_link = StringUtil.removeHtml( m_link );
-		    Date pubDate = null;
-			// Check m_date in case we cannot find it.
-			if (m_date.length() != 0) {
+			Date pubDate = null;
+			// Check date in case we cannot find it.
+			if (m_date.length() == 0) {
+				if (m_updated.length() > 0) {
+					m_date = m_updated;
+				} else {
+					m_date = m_modified;
+				}
+			}
+			if ((m_date.length() == 0) && m_extParser.isHasExt()) {
+				m_date = m_extParser.getDate();
+			}
+			if (m_date.length() > 0) {
 				pubDate = RssFormatParser.parseRssDate(m_date);
 			}
 			RssItunesItem item;
 			if (m_hasExt) {
 				item = m_extParser.createItem(m_title, m_link,
-						m_description, pubDate, m_enclosure, true, m_author);
+						m_description, pubDate, m_enclosure, true,
+						m_author);
 			} else {
-				item = new RssItunesItem(m_title, m_link, m_description, pubDate,
+				item = new RssItunesItem(m_title, m_link,
+						m_description, pubDate,
 								   m_enclosure, true);
 			}
-            items.addElement( item );
-        }
-                        
-        return feed;
-    }
-    
+			return item;
+		}
+		return null;
+	}
+
 	private void reset() {
 		m_title = "";
 		m_language = "";
@@ -250,6 +240,8 @@ public class AtomFormatParser implements FeedFormatParser {
 		m_author = "";
 		m_link = "";
 		m_date = "";
+		m_updated = "";
+		m_modified = "";
 		m_enclosure = "";
 		m_summary = "";
 		m_relLink = "";
@@ -362,7 +354,25 @@ public class AtomFormatParser implements FeedFormatParser {
 					return;
 				};
 				break;
-			case 'p':
+			case 'u': // Updated for Atom 1.0
+				if( elementName.equals("updated")) {
+					m_updated = parser.getText();
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("published=m_updated=" + m_updated);}
+					//#endif
+					return;
+				}
+				break;
+			case 'm': // Modified for Atom 0.3
+				if( elementName.equals("modified")) {
+					m_modified = parser.getText();
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("published=m_modified=" + m_modified);}
+					//#endif
+					return;
+				}
+				break;
+			case 'p': // Published
 				if( elementName.equals("published")) {
 					m_date = parser.getText();
 					//#ifdef DLOGGING
