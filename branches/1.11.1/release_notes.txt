@@ -150,7 +150,12 @@ v1.11
 + Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
-v1.11.1 Release Candidate 4 (rc4) (July 16th 2008)
+v1.11.1 Release Candidate 5 (rc5) (July 28th 2008)
++ Fix bug introduced in release candidate with bad error handling for a
+  bad URL for import.
++ Fixed introduced bug in a previous Release Candidate with import form
+
+v1.11.1 (August 2nd 2008)
 + Fix bug when opening feeds on Sony Ericsson emulators and possiblely
   affecting Sony Ericsson devices
 + Fix bug with storing Itunes attributes
@@ -193,14 +198,21 @@ v1.11.1 Release Candidate 4 (rc4) (July 16th 2008)
 + Put in optional midlet permissions
 + Make creation of RIM optional
 + Put missing directories into released zip
-+ Fix bug introduced in release candidate with bad error handling for a
-  bad URL for import.
 + Allow build of novice version with dist.midp.2.0.novice.  Can take novice.txt
   from a different file using ant -Dnovice.txt=(full path) dist.midp.2.0.novice
   The novice version has novice property true in manifest disables add, edit,
   delete, and import and reads from /data/novice.txt line by line file.  The
   novice version is not the default, normally all functions are enabled.
 + Only copy to device bin if midlet.home exists during build.  
++ Remove html from link for rss like from EBay.
++ Allow override in place of existing feeds that are also in the import file.
+  This means that the feed in the import file will be used instead of what
+  was loaded earlier.  Override in place means that the overrided feed will
+  be in the same place as it was before.  This is different from the
+  non-overrided feeds which will be added based on command used either insert,
+  add, or append.
++ Support RSS Atoms without published tag (version 0.3, 1,0 e.g. from google)
+  by using updated or modified for date if not published tag.
 
 Known problems:
 
