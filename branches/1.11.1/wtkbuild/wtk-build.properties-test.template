@@ -92,6 +92,7 @@ res.todir = icons
 #add.jars = true
 #copy.jar.src = true
 #jarsrc = ../../../JLogMicro/jlogmicro/src
+docs = ../docs
 jadsrc = ../jadsrc
 alxsrc = ../alxsrc
 debug = debug
