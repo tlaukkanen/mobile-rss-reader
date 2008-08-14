@@ -65,6 +65,7 @@ manifestsrc = ../manifestsrc
 #? lib = lib
 #Compile source dir generted by non-preprocessed source and generted source
 #(if needed)
+#comp.src = ${target}/mobile-rss-reader/1.11.1/src
 comp.src = ${target}/mobile-rss-reader/src
 #comp.src = released/src
 presrc = ../presrc
