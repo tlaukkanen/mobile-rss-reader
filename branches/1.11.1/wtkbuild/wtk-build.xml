@@ -615,28 +615,43 @@
 		<antcall target="dist.preprocessed" />
 
 		<delete dir="${compiled}" />
-		<copy todir="${compiled}" >
-			<fileset dir="${classes}" />
-		</copy>
-		<antcall target="build" inheritAll="true" >
-			<param name="build.jar" value="before-obfuscation.jar" />
-		</antcall>
+		<if>
+			<equals arg1="${make.build.files}" arg2="true" />
+			<then>
+			<copy todir="${compiled}" >
+				<fileset dir="${classes}" />
+			</copy>
+			</then>
+		</if>
+		<if>
+			<equals arg1="${make.build.files}" arg2="true" />
+			<then>
+			<antcall target="build" inheritAll="true" >
+				<param name="build.jar" value="before-obfuscation.jar" />
+			</antcall>
+			</then>
+		</if>
 		<delete dir="${preverified}" />
-		<mkdir dir="${preverified}" />
-		<unjar src="${build}/${build.prefix}before-obfuscation.jar" dest="${preverified}" />
+		<if>
+			<equals arg1="${make.build.files}" arg2="true" />
+			<then>
+			<mkdir dir="${preverified}" />
+			<unjar src="${build}/${build.prefix}before-obfuscation.jar" dest="${preverified}" />
+			</then>
+		</if>
 		<antcall target="build" >
 			<param name="build.jar" value="obfuscated.jar" />
 		</antcall>
+		<antcall target="create.rim.files" inheritAll="true" />
+		<delete dir="${obfuscated}" />
 		<if>
-			<equals arg1="${need.rim}" arg2="true" />
+			<equals arg1="${make.build.files}" arg2="true" />
 			<then>
-			<antcall target="create.rim.files" inheritAll="true" />
+			<mkdir dir="${obfuscated}" />
+			<unjar src="${build}/${build.prefix}obfuscated.jar" dest="${obfuscated}" />
+			<delete dir="${obfuscated}/MANIFEST.MF" />
 			</then>
 		</if>
-		<delete dir="${obfuscated}" />
-		<mkdir dir="${obfuscated}" />
-		<unjar src="${build}/${build.prefix}obfuscated.jar" dest="${obfuscated}" />
-		<delete dir="${obfuscated}/MANIFEST.MF" />
 		<delete file="${project.name}.jar" />
 	</target>
 
@@ -907,6 +922,7 @@
 	<target name="dist.midp.1.0" unless="no.1.0" >
 		<antcall target="dist.version" inheritAll="yes" >
 			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="make.build.files" value="true" />
 			<param name="dist.vers" value="${dist.midp10}" />
 			<param name="build.vers" value="${build.midp10}" />
 			<param name="no.test" value="true" />
@@ -918,6 +934,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20}" />
+			<param name="make.build.files" value="false" />
 			<param name="build.vers" value="${build.midp20}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -929,6 +946,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0.novice.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.novice}" />
+			<param name="make.build.files" value="true" />
 			<param name="build.vers" value="${build.midp20.novice}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -939,6 +957,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0cldc1.1.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.cldc11}" />
+			<param name="make.build.files" value="true" />
 			<param name="build.vers" value="${build.midp20.cldc11}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -949,6 +968,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.jsr75}" />
+			<param name="make.build.files" value="false" />
 			<param name="build.vers" value="${build.midp20.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -959,6 +979,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0cldc1.1.jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.cldc11.jsr75}" />
+			<param name="make.build.files" value="true" />
 			<param name="build.vers" value="${build.midp20.cldc11.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -969,6 +990,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
+			<param name="make.build.files" value="false" />
 			<param name="build.vers" value="${build.midp20.itunes.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -979,6 +1001,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0cldc1.1.itunes.jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.cldc11.itunes.jsr75}" />
+			<param name="make.build.files" value="false" />
 			<param name="build.vers" value="${build.midp20.cldc11.itunes.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -989,6 +1012,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0jsr238.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.jsr75}" />
+			<param name="make.build.files" value="false" />
 			<param name="build.vers" value="${build.midp20.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
