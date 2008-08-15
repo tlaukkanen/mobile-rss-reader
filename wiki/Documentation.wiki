@@ -126,13 +126,13 @@ Alternatively, you can use your phone browser to download
 RSSReader directly from this web.
 
 Just enter this url for MIDP-2.0 and CLDC-1.0 (see above): 
-http://mobile-rss-reader.googlecode.com/files/midp20_RSSReader-1.11.jar
+http://mobile-rss-reader.googlecode.com/files/midp20_RSSReader-1_11_1.jar
 
 Just enter this url for MIDP-2.0, CLDC-1.0 and JSR-75 (see above): 
-http://mobile-rss-reader.googlecode.com/files/midp20_jsr75_RSSReader-1.11.jar
+http://mobile-rss-reader.googlecode.com/files/midp20_jsr75_RSSReader-1_11_1.jar
 
 If your phone is old (has MIDP-1.0), use this url: 
-http://mobile-rss-reader.googlecode.com/files/midp10_RSSReader-1.11.jar
+http://mobile-rss-reader.googlecode.com/files/midp10_RSSReader-1_11_1.jar
 
  == Detailed Features ==   
 
@@ -167,7 +167,7 @@ to use as the filter.
 You need to install the software (needed for build only) 
 
  * [http://ant.apache.org ant]
- * [http://antenna.sourceforge.net antenna]version 1.1.0-beta.  Some of the previous versions don't run on Linux of have //#elif bug.
+ * [http://antenna.sourceforge.net antenna]version 1.1.0-beta.  Some of the previous versions don't run on Linux or have //#elif bug.
  * [http://sourceforge.net/projects/ant-contrib ant-contrib]
  * Java VM either Sun's, JamVM, or GNU GIJ
  * Either compiler below
