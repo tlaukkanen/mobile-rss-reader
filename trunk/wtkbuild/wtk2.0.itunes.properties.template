@@ -13,6 +13,7 @@ DMEMSIZEDEF = DREGULARMEM
 DCLDCVERS = DCLDCV10
 JMIDPVERS = MIDP-2.0 
 JCLDCVERS = CLDC-1.0
+PERMISSIONS = ,javax.microedition.io.HttpsConnection
 file.prefix = midp20_podcast_jsr75_
 bin = ../bin20podcastjsr75
 MIDLETVERS = ${MIDLETVERSROOT}
