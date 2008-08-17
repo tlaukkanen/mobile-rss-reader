@@ -186,7 +186,7 @@ v1.11.1 (August 13th 2008)
   * Fix bugs in wtk-build.xml when properties suffixes not used.
   * Allow creation of jar using Free software:  Phone ME, ECJ (Eclipse compiler),
     GNU Classpath, and JamVM or GNU JavaVM (gcj)
-  * Workaround for MicroEmulator
+  * Workaround for !MicroEmulator
   * Optionally create PRC if present.
   * Put in correct URL for jad for jar midlets.
   * Put in optional midlet permissions
