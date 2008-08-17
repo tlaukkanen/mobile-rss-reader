@@ -12,6 +12,7 @@ DMEMSIZEDEF = DREGULARMEM
 DCLDCVERS = DCLDCV11
 JMIDPVERS = MIDP-2.0 
 JCLDCVERS = CLDC-1.1
+PERMISSIONS = ,javax.microedition.io.HttpsConnection
 file.prefix = midp20_cldc11_
 bin = ../bin20cldc11
 MIDLETVERS = ${MIDLETVERSROOT}
