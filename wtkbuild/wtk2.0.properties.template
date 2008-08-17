@@ -13,6 +13,7 @@ DJSR238 = DNOJSR238
 DMEMSIZEDEF = DREGULARMEM
 JMIDPVERS = MIDP-2.0 
 JCLDCVERS = CLDC-1.0
+PERMISSIONS = ,javax.microedition.io.HttpsConnection
 file.prefix = midp20_
 bin = ../bin20
 MIDLETVERS = ${MIDLETVERSROOT}
