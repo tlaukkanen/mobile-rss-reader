@@ -87,7 +87,6 @@ public class XmlParser {
 
     /** Parse next element */
     protected int parseStream(InputStreamReader is) throws IOException {
-		StringBuffer inputBuffer = new StringBuffer();
 		
 		boolean parsingElementName = false;
 		boolean elementFound = false;
@@ -147,6 +146,8 @@ public class XmlParser {
 							// name.
 						case ' ':
 						case '/':
+						case '\n':
+						case '\r':
 							parsingElementName = false;
 							parsingElementData = true;
 							break;
@@ -186,33 +187,32 @@ public class XmlParser {
 									m_defEncoding);
 							m_docEncoding = m_encodingUtil.getDocEncoding();
 						}
-					} else if (m_getPrologue && prologueFound) {
+					} else if (m_getPrologue && prologueFound &&
 						// If we are looking for the prolog, now
 						// we have read the end of it, so we can
 						// get the encoding specified (or null which
 						// defaults to UTF-8).
 						// Only process actual prologes.  <?xmlstylesheet
 						// is not what we want.
-						if (m_currentElementData.toString().
+						m_currentElementData.toString().
 							startsWith("<?xml ")) {
 							m_getPrologue = false;
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("m_currentElementData.length()=" + m_currentElementData.length());}
+						//#endif
+						String cencoding = getAttributeValue("encoding");
+						if (cencoding == null) {
 							//#ifdef DLOGGING
-//@							if (finestLoggable) {logger.finest("m_currentElementData.length()=" + m_currentElementData.length());}
+//@							if (finestLoggable) {logger.finest("Prologue cencoding,m_defEncoding=" + cencoding + "," + m_defEncoding);}
 							//#endif
-							String cencoding = getAttributeValue("encoding");
-							if (cencoding == null) {
-								//#ifdef DLOGGING
-//@								if (finestLoggable) {logger.finest("Prologue cencoding,m_defEncoding=" + cencoding + "," + m_defEncoding);}
-								//#endif
-								cencoding = m_defEncoding;
-							}
-							m_encodingUtil.getEncoding(m_fileEncoding,
-									cencoding);
-							// Get doc encoding.  The encoding to translate
-							// the bytes into.
-							m_docEncoding = m_encodingUtil.getDocEncoding();
-							return PROLOGUE;
+							cencoding = m_defEncoding;
 						}
+						m_encodingUtil.getEncoding(m_fileEncoding,
+								cencoding);
+						// Get doc encoding.  The encoding to translate
+						// the bytes into.
+						m_docEncoding = m_encodingUtil.getDocEncoding();
+						return PROLOGUE;
 					}
 				}    
 
@@ -332,10 +332,9 @@ public class XmlParser {
 				textBuffer.append(c);
 				if( lastChars[0] == elementNameChars[0] &&
 					lastChars[1] == elementNameChars[1] &&
-					lastChars[2] == elementNameChars[2]) {
-					if( textBuffer.toString().endsWith(endCurrentElement)) {
-						endParsing = true;
-					}
+					lastChars[2] == elementNameChars[2] &&
+					textBuffer.toString().endsWith(endCurrentElement)) {
+					endParsing = true;
 				}
 			}
 
