@@ -52,7 +52,7 @@ import net.sf.jlogmicro.util.logging.Level;
  * @author  Tommi Laukkanen
  * @version 1.0
  */
-public class Settings {
+final public class Settings {
     
     public static final int OLD_MAX_REGIONS = 1;
 	//#ifdef DCOMPATIBILITY2
@@ -117,7 +117,7 @@ public class Settings {
     }
     
     /** Return true if value exists in record store */
-    private boolean exists( String name ) {
+    public boolean exists( String name ) {
         return getProperty( name ) != null;
     }
     
@@ -151,6 +151,7 @@ public class Settings {
             try {
                 return Integer.parseInt( value );
             } catch( NumberFormatException e ) {
+				e.printStackTrace();
             }
         }
         return defaultValue;
@@ -165,6 +166,8 @@ public class Settings {
             } catch( NumberFormatException e ) {
 				//#ifdef DLOGGING
 				logger.warning("Warning parsing long name,value=" + name + "," + value, e);
+				//#else
+				e.printStackTrace();
 				//#endif
             }
         }
@@ -238,11 +241,11 @@ public class Settings {
 							if (currentSettings) {
 								final int blen = din.readInt();
 								byte [] bvalue = new byte[blen];
-								din.read(bvalue);
+								final int bvlen = din.read(bvalue);
 								try {
-									value = new String(bvalue, "UTF-8");
+									value = new String(bvalue, 0, bvlen, "UTF-8");
 								} catch (UnsupportedEncodingException e) {
-									value = new String(bvalue);
+									value = new String(bvalue, 0, bvlen);
 									//#ifdef DLOGGING
 									logger.severe("cannot convert load name=" + name, e);
 									//#endif
@@ -251,7 +254,7 @@ public class Settings {
 											name + e.getMessage());
 									e.printStackTrace();
 								} catch (IOException e) {
-									value = new String(bvalue);
+									value = new String(bvalue, 0, bvlen);
 									//#ifdef DLOGGING
 									logger.severe("cannot convert load name=" + name, e);
 									//#endif
@@ -294,11 +297,17 @@ public class Settings {
 			} finally {
 				if( din != null ) {
 					/* Workaround for MicroEmulator. */
-					try { ((InputStream)din).close(); } catch( Exception e ){}
+					try { ((InputStream)din).close();
+					} catch( Exception e ){
+						e.printStackTrace();
+					}
 				}
 				
 				if( rs != null ) {
-					try { rs.closeRecordStore(); } catch( Exception e ){}
+					try { rs.closeRecordStore();
+					} catch( Exception e ){
+						e.printStackTrace();
+					}
 				}
 				if (!currentSettings && ( numRecs > 0 ) && (region == 0)) {
 					// If not current settings, save them to udate to
@@ -422,10 +431,16 @@ public class Settings {
 				System.out.println("catch throwable " + e.getMessage());
 				e.printStackTrace();
 			} finally {
-				try { dout.close(); } catch( Exception e ){}
+				try { dout.close();
+				} catch( Exception e ){
+					e.printStackTrace();
+				}
 				
 				if( rs != null ) {
-					try { rs.closeRecordStore(); } catch( Exception e ){}
+					try { rs.closeRecordStore();
+					} catch( Exception e ){
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -451,7 +466,10 @@ public class Settings {
 				} finally {
 					
 					if( rs != null ) {
-						try { rs.closeRecordStore(); } catch( Exception e ){}
+						try { rs.closeRecordStore();
+						} catch( Exception e ){
+							e.printStackTrace();
+						}
 					}
 				}
 			} catch (RecordStoreNotFoundException re) {
