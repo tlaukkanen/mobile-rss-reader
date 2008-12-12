@@ -104,54 +104,52 @@ public class EncodingStreamReader extends InputStreamReader {
     
 		try {
 			int inputCharacter = m_inputStream.read();
-			if (modEncoding) {
-				if (m_getPrologue || modUTF16) {
-					// If we get 0 character during prologue, it must be
-					// first or second byte of UTF-16.  Throw it out.
-					// If little endian, we need to read the next character.
-					if (firstChar) {
-						if (inputCharacter == -1) {
-							return inputCharacter;
-						}
-						if (modUTF16) {
-							// If we know that this is UTF-16 from
-							// encoding, put the bytes together correctly.
-							// In this case, we are not in prolog, so
-							// both bytes may be meaningful.
-							int secondCharacter = m_inputStream.read();
-							if (docBigEndian) {
-								inputCharacter <<= 8;
-								inputCharacter |= secondCharacter;
-							} else {
-								secondCharacter <<= 8;
-								secondCharacter |= inputCharacter;
-							}
-						} else {
-							if (inputCharacter == 0) {
-								// This is UTF-16, read second character
-								inputCharacter = m_inputStream.read();
-								docBigEndian = true;
-								m_utf16Doc = true;
-							} else {
-								firstChar = false;
-								secondChar = true;
-								if (m_utf16Doc) {
-									m_utf16Doc = false;
-								}
-							}
-						}
-					} else if (secondChar) {
-						// If 0 character, it is UTF-16 and little endian.
-						if (inputCharacter == 0) {
-							inputCharacter = m_inputStream.read();
-							docBigEndian = false;
-							m_utf16Doc = true;
-						} else if (inputCharacter == -1) {
-							return inputCharacter;
-						}
-						firstChar = true;
-						secondChar = false;
+			if (modEncoding && (m_getPrologue || modUTF16)) {
+				// If we get 0 character during prologue, it must be
+				// first or second byte of UTF-16.  Throw it out.
+				// If little endian, we need to read the next character.
+				if (firstChar) {
+					if (inputCharacter == -1) {
+						return inputCharacter;
 					}
+					if (modUTF16) {
+						// If we know that this is UTF-16 from
+						// encoding, put the bytes together correctly.
+						// In this case, we are not in prolog, so
+						// both bytes may be meaningful.
+						int secondCharacter = m_inputStream.read();
+						if (docBigEndian) {
+							inputCharacter <<= 8;
+							inputCharacter |= secondCharacter;
+						} else {
+							secondCharacter <<= 8;
+							secondCharacter |= inputCharacter;
+						}
+					} else {
+						if (inputCharacter == 0) {
+							// This is UTF-16, read second character
+							inputCharacter = m_inputStream.read();
+							docBigEndian = true;
+							m_utf16Doc = true;
+						} else {
+							firstChar = false;
+							secondChar = true;
+							if (m_utf16Doc) {
+								m_utf16Doc = false;
+							}
+						}
+					}
+				} else if (secondChar) {
+					// If 0 character, it is UTF-16 and little endian.
+					if (inputCharacter == 0) {
+						inputCharacter = m_inputStream.read();
+						docBigEndian = false;
+						m_utf16Doc = true;
+					} else if (inputCharacter == -1) {
+						return inputCharacter;
+					}
+					firstChar = true;
+					secondChar = false;
 				}
 			}
 			return inputCharacter;
