@@ -116,6 +116,7 @@ public class Base64 {
         byte[] decodedBytes = bos.toByteArray();
         try {
             bos.close();
+			// Save memory
             bos = null;
         } catch (IOException ex) {
             System.err.println("Error while decoding BASE64: " + ex.toString());
@@ -130,8 +131,9 @@ public class Base64 {
         int len = s.length();
 
         while (true) {
-            while (i < len && s.charAt(i) <= ' ')
+            while (i < len && s.charAt(i) <= ' ') {
                 i++;
+			}
 
             if (i == len)
                 break;
