@@ -36,15 +36,17 @@
 //@  extends KViewChild
 //@{
 //@
-//@public  String getFileName();
+//@String getFileName();
 //@
-//@public  String getFileMimeType();
+//#ifdef DTEST
+//@String getFileMimeType();
 //@
-//@public  Image getThumbnail(int width, int height);
+//@Image getThumbnail(int width, int height);
 //@
-//@public  byte[] getFileData();
+//@byte[] getFileData();
+//#endif
 //@
-//@public String getSelectedURL();
+//@String getSelectedURL();
 //@
 //@
 //@} //interface KFileFileSelector
