@@ -32,7 +32,7 @@
 //#ifdef DJSR75
 package org.kablog.kgui;
 
-import javax.microedition.midlet.MIDlet;
+import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -48,8 +48,8 @@ public class KFileSelectorFactory {
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
-	public static KFileSelector getInstance(MIDlet midlet, String title,
-											String defaultDir, String iconDir) {
+	public static KFileSelector getInstance(RssReaderMIDlet midlet,
+			String title, String defaultDir, String iconDir) {
 		try {
 			KFileSelector newInst = new KFileSelectorImpl();
 			((KFileSelectorImpl)newInst).init(midlet, title, defaultDir,
