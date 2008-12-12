@@ -49,14 +49,17 @@
 //@import javax.microedition.lcdui.Image;
 //@import javax.microedition.midlet.*;
 //@
+//@import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+//@import com.substanceofcode.rssreader.presentation.FeatureList;
+//@
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 //@
-//@public class KFileSelectorImpl 
-//@ extends List
+//@final public class KFileSelectorImpl 
+//@ extends FeatureList
 //@  implements KFileSelector, CommandListener
 //@  , FileSystemListener, Runnable
 //@{
@@ -95,7 +98,7 @@
 //@	protected boolean itemSelected = false;
 //@	protected boolean cancelCmd = false;
 //@	protected Thread kThread = null;
-//@	protected MIDlet midlet = null;
+//@	protected RssReaderMIDlet midlet = null;
 //@
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("KFileSelectorImpl");
@@ -107,7 +110,7 @@
 //@	/* Create the list and initialization. */
 //@	public KFileSelectorImpl()
 //@	{
-//@		super(null, List.IMPLICIT);
+//@		super(null, null, List.IMPLICIT);
 //@
 //@		try {
 //@
@@ -121,7 +124,7 @@
 //@			super.addCommand(openCommand);
 //@			super.addCommand(cancelCommand);
 //@			super.setSelectCommand(openCommand);
-//@			super.setCommandListener(this);
+//@			super.getFeatureMgr().setMidlet(midlet);
 //@
 			//#ifdef DTEST
 //@			if (bDebug) 
@@ -180,10 +183,11 @@
 			//#endif
 			//#ifdef DLOGGING
 //@			logger.severe("--- icons ex: ", imgOpenEx);
+			//#else
+//@			imgOpenEx.printStackTrace();
 			//#endif
-//@		} finally {
-//@			return rtnImage;
 //@		}
+//@		return rtnImage;
 //@	}
 //@
 //@	/* Initialize.  Get images. */
@@ -198,12 +202,13 @@
 //@	}
 //@
 //@	// Init fields.
-//@	public void init(MIDlet midlet, String title, String defaultDir,
+//@	public void init(RssReaderMIDlet midlet, String title, String defaultDir,
 //@					 String iconDir)
 //@	{
 //@
 //@		super.setTitle(title);
 //@		this.midlet = midlet;
+//@		super.getFeatureMgr().setMidlet(midlet);
 //@		this.title = title;
 //@		this.defaultDir = defaultDir;
 //@		this.iconDir = iconDir;
@@ -213,48 +218,44 @@
 //@	/* Thread run method used to execute actions.  */
 //@	public void run() {
 //@		try {
-//@			while (true) {
-//@				try {
-//@					if (itemSelected) {
-//@						try {
-//@							openSelected();
-//@						} catch (Throwable t) {
-//@							if (midlet != null) {
-//@								Alert internalAlert = new Alert(
-//@										"Internal problem", 
-//@										"Internal error.  Unable to open.",
-//@										null,
-//@										AlertType.ERROR);
-//@								internalAlert.setTimeout(Alert.FOREVER);
-//@								Display.getDisplay(midlet).setCurrent(
-//@										internalAlert, this );
-//@							}
-							//#ifdef DLOGGING
-//@							logger.severe("KFileSelectorImpl openSelected ", t);
-							//#endif
-//@							/** Error while executing constructor */
-//@							System.out.println("KFileSelectorFactory openSelected " + t.getMessage());
-//@							t.printStackTrace();
+//@			try {
+//@				if (itemSelected) {
+//@					try {
+//@						openSelected();
+//@					} catch (Throwable t) {
+//@						if (midlet != null) {
+//@							Alert internalAlert = new Alert(
+//@									"Internal problem", 
+//@									"Internal error.  Unable to open.",
+//@									null,
+//@									AlertType.ERROR);
+//@							internalAlert.setTimeout(Alert.FOREVER);
+//@							Display.getDisplay(midlet).setCurrent(
+//@									internalAlert, this );
 //@						}
-//@					} else if (cancelCmd) {
-//@						doCleanup();
-//@						parent.childFinished(this);
-//@						cancelCmd = false;
-//@						break;
+						//#ifdef DLOGGING
+//@						logger.severe("KFileSelectorImpl openSelected ", t);
+						//#endif
+//@						/** Error while executing constructor */
+//@						System.out.println("KFileSelectorFactory openSelected " + t.getMessage());
+//@						t.printStackTrace();
 //@					}
-//@				} catch (Exception e) {
-					//#ifdef DLOGGING
-//@					logger.severe("KFileSelectorImpl run ", e);
-					//#endif
-//@				} finally {
-//@					itemSelected = false;
+//@				} else if (cancelCmd) {
+//@					doCleanup();
+//@					parent.childFinished(this);
+//@					cancelCmd = false;
+//@					super.getFeatureMgr().setBackground(false);
 //@				}
-//@
-//@				try {
-//@					Thread.sleep(500L);
-//@				} catch (InterruptedException e) {
-//@				}
+//@			} catch (Exception e) {
+				//#ifdef DLOGGING
+//@				logger.severe("KFileSelectorImpl run ", e);
+				//#else
+//@				e.printStackTrace();
+				//#endif
+//@			} finally {
+//@				itemSelected = false;
 //@			}
+//@
 //@		} catch (Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("KFileSelectorImpl run ", t);
@@ -288,7 +289,12 @@
 //@
 //@		if (null != currentRoot) {
 //@			try {currentRoot.close();}
-//@			catch (IOException ioEx) {};
+//@			catch (IOException ioEx) {
+				//#ifdef DLOGGING
+//@				logger.severe("doCleanup ", ioEx);
+				//#endif
+//@				ioEx.printStackTrace();
+//@			}
 //@			currentRoot = null;
 //@		}
 //@
@@ -420,6 +426,8 @@
 //@		} catch (Throwable e) {
 			//#ifdef DTEST
 //@			if (bDebug) System.out.println("### load roots: " + e);
+			//#else
+//@			e.printStackTrace();
 			//#endif
 //@		}
 //@	}//loadRoots
@@ -521,6 +529,8 @@
 						//#endif
 						//#ifdef DLOGGING
 //@						logger.severe("openSelected exception selected:  " + selectedFile, e);
+						//#else
+//@						e.printStackTrace();
 						//#endif
 //@					}
 //@				}
@@ -556,6 +566,8 @@
 //@						{
 							//#ifdef DLOGGING
 //@							logger.severe("KFileSelectorImpl openSelected at dir " + currentRoot.getPath() + "," + currentRoot.getName(), e);
+							//#else
+//@							e.printStackTrace();
 							//#endif
 							//#ifdef DTEST
 //@							if (bDebug) System.out.println("### setfileConn: " + e);
@@ -579,18 +591,20 @@
 //@
 //@					//parent.childFinished(this);
 //@
+//@					// Stop thread of FeatureMgr
+//@					super.getFeatureMgr().setBackground(false);
+//@
 //@					// Clean up in separate thread.  This also saves
 //@					// the selectedURL and sends childFinished.
 //@					parent.addDeferredAction(new KFileSelectorKicker(this));
 //@
 //@				}
 //@			}
+			//#ifdef DTEST
 //@			else {
-				//#ifdef DTEST
 //@				if (bDebug) System.out.println("### no selected file???");
-				//#endif
-//@
 //@			}
+			//#endif
 //@		}
 //@	}//openSelected
 //@
@@ -606,7 +620,9 @@
 			//#endif
 //@
 //@			try {currentRoot.close();}
-//@			catch(IOException ioEx) {}
+//@			catch(IOException ioEx) {
+//@				ioEx.printStackTrace();
+//@			}
 //@		}
 //@
 //@		currentRoot = null; //reset it
@@ -681,6 +697,8 @@
 //@		{
 			//#ifdef DLOGGING
 //@			logger.severe("KFileSelectorImpl constructor", e);
+			//#else
+//@			e.printStackTrace();
 			//#endif
 			//#ifdef DTEST
 //@			if (bDebug) System.out.println("### displayRoot ex: " + e);
@@ -695,7 +713,8 @@
 //@		return selectedFile;
 //@	}//getFileName
 //@
-//@	public String getFileMimeType()
+	//#ifdef DTEST
+//@	final public String getFileMimeType()
 //@	{
 //@		String szMimeType = null;
 //@
@@ -713,8 +732,10 @@
 //@
 //@		return szMimeType;
 //@	}//getMimeType
+	//#endif
 //@
-//@	public Image getThumbnail(int width, int height)
+	//#ifdef DTEST
+//@	final public Image getThumbnail(int width, int height)
 //@	{
 //@		Image thumbImage = FILE_IMAGE;
 //@		String fileType = getFileMimeType();
@@ -751,11 +772,12 @@
 //@
 //@		return thumbImage;
 //@	}//getThumbnail
+	//#endif
 //@
+	//#ifdef DTEST
 //@	/* Get data from the selected file. */
-//@	public byte[] getFileData()
+//@	final public byte[] getFileData()
 //@	{
-//@
 //@		if (null == fileDataBlock)
 //@		{
 //@			if (null != selectedURL)
@@ -854,6 +876,7 @@
 //@		return fileDataBlock;
 //@
 //@	}//getFileData
+	//#endif
 //@
 //@
 //@	/* Method to listen for changes in root. */
@@ -888,13 +911,15 @@
 //@        return (filePatterns);
 //@    }
 //@
-//@    public void setMidlet(MIDlet midlet) {
+//@    public void setMidlet(RssReaderMIDlet midlet) {
 //@        this.midlet = midlet;
 //@    }
 //@
-//@    public MIDlet getMidlet() {
+	//#ifdef DTEST
+//@    final public MIDlet getMidlet() {
 //@        return (midlet);
 //@    }
+	//#endif
 //@
 //@} //class KFileSelectorImpl
 //@
