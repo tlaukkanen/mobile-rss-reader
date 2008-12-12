@@ -45,28 +45,28 @@
 //@    /**
 //@     * @param view -- the view that has completed operation.
 //@     */
-//@    public void childFinished(KViewChild child);
+//@    void childFinished(KViewChild child);
 //@    
 //@    /**
 //@     * We've updated the child's status.
 //@     */
-//@    public void childStatusChanged(KViewChild child, int statusType, int status);
+//@    void childStatusChanged(KViewChild child, int statusType, int status);
 //@
 //@    
 //@    /**
 //@     * @param newView object to make visible, if possible.
 //@     */
-//@    public void reqSetVisible(Displayable newView);
+//@    void reqSetVisible(Displayable newView);
 //@    
 //@    /**
 //@    * @param runny Object to run at a deferred time.
 //@	*/
-//@	public void addDeferredAction(Runnable runny);
+//@	void addDeferredAction(Runnable runny);
 //@    
 //@    /**
 //@     * Display a debug message somehow
 //@     */
-//@     public void displayDbgMsg(String msg, AlertType type);
+//@     void displayDbgMsg(String msg, AlertType type);
 //@
 //@}
 //#endif
