@@ -84,16 +84,15 @@ public class HTMLParser extends XmlParser {
 				case 'B':
 					m_bodyFound = elementName.toLowerCase().equals("body");
 					// Default HTML to iso-8859-1
-					if (m_bodyFound) {
-						if (!m_encoding_set) {
-							//#ifdef DLOGGING
-//@							if (finerLoggable) {logger.finer("Body found without encoding set.");}
-							//#endif
-							m_encodingUtil.getEncoding(m_fileEncoding,
-									"ISO-8859-1");
-							m_docEncoding = m_encodingUtil.getDocEncoding();
-							m_encoding_set = true;
-						}
+					if (m_bodyFound && !m_encoding_set) {
+						//#ifdef DLOGGING
+//@						if (finerLoggable) {logger.finer("Body found without encoding set.");}
+						//#endif
+						m_encodingUtil.getEncoding(m_fileEncoding,
+								"ISO-8859-1");
+						m_docEncoding = m_encodingUtil.getDocEncoding();
+						m_encoding_set = true;
+
 						//#ifdef DLOGGING
 //@						if (finerLoggable) {logger.finer("Body found m_docEncoding,m_fileEncoding=" + m_docEncoding + "," + m_fileEncoding);}
 						//#endif
@@ -228,10 +227,9 @@ public class HTMLParser extends XmlParser {
 								break;
 							}
 						default:
-							if (lastChars[2] == elementNameChars[2]) {
-								if( textBuffer.toString().endsWith(endCurrentElement)) {
-									endParsing = true;
-								}
+							if ((lastChars[2] == elementNameChars[2]) &&
+								( textBuffer.toString().endsWith(endCurrentElement))) {
+								endParsing = true;
 							}
 					}
 				}
@@ -366,6 +364,14 @@ public class HTMLParser extends XmlParser {
 				valueEndIndex = attribData.indexOf(' ');
 				if( valueEndIndex<0 ) {
 					valueEndIndex = attribData.length();
+				}
+				int lpos = attribData.indexOf('>');
+				if (lpos > 0) {
+					if (valueEndIndex > 0) {
+						valueEndIndex = Math.min(lpos, valueEndIndex);
+					} else {
+						valueEndIndex = lpos;
+					}
 				}
 			}
 
