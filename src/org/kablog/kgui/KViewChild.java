@@ -42,11 +42,11 @@
 //@     /**
 //@     * @param The callback client interested in receiving finished status.
 //@     */
-//@    public void setViewParent(KViewParent parent);
+//@    void setViewParent(KViewParent parent);
 //@    
 //@    /**
 //@    * Cleanup any allocated resources immediately.
 //@    */
-//@    public void doCleanup();
+//@    void doCleanup();
 //@}
 //#endif
