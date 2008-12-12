@@ -78,6 +78,7 @@ implements KViewParent
 				txtFld.setString(fileSelectorView.getSelectedURL());
 			}
 			fileSelectorView.doCleanup();
+			// Save memory
 			fileSelectorView = null;
 			//#ifdef DMIDP20
 			midlet.setCurrentItem( txtFld );
@@ -107,12 +108,18 @@ implements KViewParent
 		try {
 			fileSelectorView = KFileSelectorFactory.getInstance(
 					midlet, "Find import file", null, "/icons" );
+			((KFileSelectorImpl)fileSelectorView).setCommandListener(
+				(KFileSelectorImpl)fileSelectorView, true);
 			fileSelectorView.setViewParent(this);
 			Display.getDisplay(midlet).setCurrent((List)fileSelectorView);
 		}
 		catch (Exception ex)
 		{
-			if (bDebug) System.out.println("### selector fail: " + ex);
+			if (bDebug) System.out.println("Go to find files fail: " + ex);
+			//#ifdef DLOGGING
+			logger.severe("Go to find files fail: ", ex);
+			//#endif
+			ex.printStackTrace();
 		}
 
 	}//doLaunchSelector
