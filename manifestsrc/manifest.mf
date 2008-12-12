@@ -10,8 +10,7 @@ MIDlet-Data-Size: 3000
 MicroEdition-Configuration: @JCLDCVERS@
 MicroEdition-Profile: @JMIDPVERS@
 Program-Version: @PROGVERS@
-english-add-new-feed: Add new feed
-english-back: Back
+novice: @NOVICE@
 jlomicro-level: FINEST
 jlomicro-handlers: FormHandler
 jlomicro-ConsoleHandler-formatter: SimpleFormatter
