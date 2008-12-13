@@ -60,9 +60,8 @@
 //@
 //@final public class KFileSelectorImpl 
 //@ extends FeatureList
-//@  implements KFileSelector, CommandListener
-//@  , FileSystemListener, Runnable
-//@{
+//@  implements KFileSelector, CommandListener, FileSystemListener, Runnable {
+//@
 //@	protected   Image UPDIR_IMAGE;
 //@	protected   Image FOLDER_IMAGE;
 //@	protected   Image FILE_IMAGE;
@@ -110,7 +109,7 @@
 //@	/* Create the list and initialization. */
 //@	public KFileSelectorImpl()
 //@	{
-//@		super(null, null, List.IMPLICIT);
+//@		super(null, List.IMPLICIT);
 //@
 //@		try {
 //@
@@ -124,7 +123,6 @@
 //@			super.addCommand(openCommand);
 //@			super.addCommand(cancelCommand);
 //@			super.setSelectCommand(openCommand);
-//@			super.getFeatureMgr().setMidlet(midlet);
 //@
 			//#ifdef DTEST
 //@			if (bDebug) 
@@ -208,7 +206,7 @@
 //@
 //@		super.setTitle(title);
 //@		this.midlet = midlet;
-//@		super.getFeatureMgr().setMidlet(midlet);
+//@		super.init(midlet);
 //@		this.title = title;
 //@		this.defaultDir = defaultDir;
 //@		this.iconDir = iconDir;
