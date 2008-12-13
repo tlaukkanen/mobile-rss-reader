@@ -60,9 +60,8 @@ import net.sf.jlogmicro.util.logging.Level;
 
 final public class KFileSelectorImpl 
  extends FeatureList
-  implements KFileSelector, CommandListener
-  , FileSystemListener, Runnable
-{
+  implements KFileSelector, CommandListener, FileSystemListener, Runnable {
+
 	protected   Image UPDIR_IMAGE;
 	protected   Image FOLDER_IMAGE;
 	protected   Image FILE_IMAGE;
@@ -110,7 +109,7 @@ final public class KFileSelectorImpl
 	/* Create the list and initialization. */
 	public KFileSelectorImpl()
 	{
-		super(null, null, List.IMPLICIT);
+		super(null, List.IMPLICIT);
 
 		try {
 
@@ -124,7 +123,6 @@ final public class KFileSelectorImpl
 			super.addCommand(openCommand);
 			super.addCommand(cancelCommand);
 			super.setSelectCommand(openCommand);
-			super.getFeatureMgr().setMidlet(midlet);
 
 			//#ifdef DTEST
 			if (bDebug) 
@@ -208,7 +206,7 @@ final public class KFileSelectorImpl
 
 		super.setTitle(title);
 		this.midlet = midlet;
-		super.getFeatureMgr().setMidlet(midlet);
+		super.init(midlet);
 		this.title = title;
 		this.defaultDir = defaultDir;
 		this.iconDir = iconDir;
