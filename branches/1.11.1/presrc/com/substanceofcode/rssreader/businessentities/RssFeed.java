@@ -22,8 +22,8 @@
 
 // Expand to define logging define
 @DLOGDEF@
-// Expand to define itunes define
-@DITUNESDEF@
+// Expand to define test define
+@DTESTDEF@
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -44,12 +44,12 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class RssFeed{
     
-    protected static final char CONE = (char)1;
-    protected static final char [] CBONE = {CONE};
-    public static String STR_ONE = new String(CBONE);
-    protected static final char [] CBTWO = {(char)2};
-    public static String STR_TWO = new String(CBTWO);
-    public static int ITUNES_ITEMS = 8;
+    final protected static char CONE = (char)1;
+    final private static char [] CBONE = {CONE};
+    final public static String STR_ONE = new String(CBONE);
+    final private static char [] CBTWO = {(char)2};
+    final public static String STR_TWO = new String(CBTWO);
+    final public static int ITUNES_ITEMS = 8;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("RssFeed");
 	//#endif
@@ -333,9 +333,9 @@ public class RssFeed{
 		// Encode password to make reading password difficult
         Base64 b64 = new Base64();
 		try {
-			encodedPassword = b64.encode( m_password.getBytes("UTF-8") );
+			encodedPassword = b64.encode( password.getBytes("UTF-8") );
 		} catch (UnsupportedEncodingException e) {
-			encodedPassword = b64.encode( m_password.getBytes() );
+			encodedPassword = b64.encode( password.getBytes() );
 		}
 	    String dateString;
         if(m_date==null){
@@ -384,6 +384,7 @@ public class RssFeed{
 		}
 	}
     
+	//#ifdef DTEST
 	/** Compare feed to an existing feed.  **/
 	public boolean equals(RssFeed feed) {
 		if (!feed.m_url.equals(this.m_url)) {
@@ -474,6 +475,7 @@ public class RssFeed{
 		}
 		return true;
 	}
+	//#endif
     
     /** Return RSS feed items */
     public Vector getItems() {
