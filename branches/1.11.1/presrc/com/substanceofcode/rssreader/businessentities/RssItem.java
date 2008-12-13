@@ -22,6 +22,8 @@
 
 // Expand to define logging define
 @DLOGDEF@
+// Expand to define test define
+@DTESTDEF@
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -252,11 +254,12 @@ public class RssItem {
 		item.m_link  = m_link;
 		item.m_desc  = m_desc;
 		item.m_date = m_date;
-		item.m_enclosure  = m_enclosure;;
+		item.m_enclosure  = m_enclosure;
 		item.m_unreadItem = m_unreadItem;
 		return item;
 	}
 
+	//#ifdef DTEST
 	/* Compare item. */
 	public boolean equals(RssItem item) {
 		if (!item.m_title.equals(m_title)) {
@@ -306,6 +309,7 @@ public class RssItem {
 		}
 		return true;
 	}
+	//#endif
 
     public void setUnreadItem(boolean unreadItem) {
         this.m_unreadItem = unreadItem;
