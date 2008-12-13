@@ -22,6 +22,8 @@
 
 // Expand to define logging define
 //#define DNOLOGGING
+// Expand to define test define
+//#define DNOTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -252,60 +254,62 @@ public class RssItem {
 		item.m_link  = m_link;
 		item.m_desc  = m_desc;
 		item.m_date = m_date;
-		item.m_enclosure  = m_enclosure;;
+		item.m_enclosure  = m_enclosure;
 		item.m_unreadItem = m_unreadItem;
 		return item;
 	}
 
-	/* Compare item. */
-	public boolean equals(RssItem item) {
-		if (!item.m_title.equals(m_title)) {
+	//#ifdef DTEST
+//@	/* Compare item. */
+//@	public boolean equals(RssItem item) {
+//@		if (!item.m_title.equals(m_title)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_title,this=" + item.m_title + "," + m_title);}
 			//#endif
-			return false;
-		}
-		if (!item.m_link.equals(m_link)) {
+//@			return false;
+//@		}
+//@		if (!item.m_link.equals(m_link)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_link,this=" + item.m_link + "," + m_link);}
 			//#endif
-			return false;
-		}
-		if (!item.m_desc.equals(m_desc)) {
+//@			return false;
+//@		}
+//@		if (!item.m_desc.equals(m_desc)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_desc,this=" + item.m_desc + "," + m_desc);}
 			//#endif
-			return false;
-		}
-		if ((item.m_date == null) && (this.m_date == null)) {
-		} else if ((item.m_date != null) && (this.m_date != null)) {
-			if (item.m_date.equals(this.m_date)) {
-			} else {
+//@			return false;
+//@		}
+//@		if ((item.m_date == null) && (this.m_date == null)) {
+//@		} else if ((item.m_date != null) && (this.m_date != null)) {
+//@			if (item.m_date.equals(this.m_date)) {
+//@			} else {
 				//#ifdef DLOGGING
 //@				if (finestLoggable) {logger.finest("unequal dates=" + item.m_date + "," + m_date);}
 				//#endif
-				return false;
-			}
-		} else {
+//@				return false;
+//@			}
+//@		} else {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal dates=" + item.m_date + "," + m_date);}
 			//#endif
-			return false;
-		}
-		if (!item.m_enclosure.equals(m_enclosure)) {
+//@			return false;
+//@		}
+//@		if (!item.m_enclosure.equals(m_enclosure)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_enclosure,this=" + item.m_enclosure + "," + m_enclosure);}
 			//#endif
-			return false;
-		}
-		if (item.m_unreadItem != m_unreadItem) {
+//@			return false;
+//@		}
+//@		if (item.m_unreadItem != m_unreadItem) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_unreadItem,this=" + item.m_unreadItem + "," + m_unreadItem);}
 			//#endif
-			return false;
-		}
-		return true;
-	}
+//@			return false;
+//@		}
+//@		return true;
+//@	}
+	//#endif
 
     public void setUnreadItem(boolean unreadItem) {
         this.m_unreadItem = unreadItem;
