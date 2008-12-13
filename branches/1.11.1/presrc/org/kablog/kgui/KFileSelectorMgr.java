@@ -96,7 +96,8 @@ implements KViewParent
 	}
         
 	/* Start the file selector list. */
-	final public void doLaunchSelector(RssReaderMIDlet midlet, Form txtFrm, TextField txtFld) {
+	final public void doLaunchSelector(RssReaderMIDlet midlet, Form txtFrm, TextField txtFld)
+	throws Throwable {
 
 		System.out.println("doLaunchSelector...");
 		this.midlet = midlet;
@@ -113,13 +114,14 @@ implements KViewParent
 			fileSelectorView.setViewParent(this);
 			Display.getDisplay(midlet).setCurrent((List)fileSelectorView);
 		}
-		catch (Exception ex)
+		catch (Throwable e)
 		{
-			if (bDebug) System.out.println("Go to find files fail: " + ex);
+			if (bDebug) System.out.println("Go to find files fail: " + e);
 			//#ifdef DLOGGING
-			logger.severe("Go to find files fail: ", ex);
+			logger.severe("Go to find files fail: ", e);
 			//#endif
-			ex.printStackTrace();
+			e.printStackTrace();
+			throw e;
 		}
 
 	}//doLaunchSelector
