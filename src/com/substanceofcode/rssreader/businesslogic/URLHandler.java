@@ -82,11 +82,7 @@ public abstract class URLHandler {
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
-	public URLHandler() {
-	}
-
-    /** Open file or URL.  Give error if there is a problem with the URL/file.*/
-    public void handleOpen(String url, String username, String password)
+    final public void handleOpen(String url, String username, String password)
 	throws IOException, Exception {
         
         try {
@@ -108,9 +104,9 @@ public abstract class URLHandler {
 				//#endif
 			} else if (url.startsWith("jar://")) {
 				// If testing, allow opening of files in the jar.
-				m_inputStream = this.getClass().getResourceAsStream( url.substring(6));
+				m_inputStream = super.getClass().getResourceAsStream( url.substring(6));
 				if (m_inputStream == null) {
-					new IOException("No file found in jar:  " + url);
+					throw new IOException("No file found in jar:  " + url);
 				}
 				int dotPos = url.lastIndexOf('.');
 				if (dotPos >= 0) {
@@ -294,30 +290,36 @@ public abstract class URLHandler {
 		return feeds[feeds.length - 1].getUrl();
 	}
 
-	public void handleClose() {
+	final public void handleClose() {
 		try {
 			if (m_inputStream != null) m_inputStream.close();
-		} catch (IOException e) { }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		try {
 			if (m_hc != null) m_hc.close();
 		} catch (IOException e) {
 			//#ifdef DLOGGING
 //@			logger.warning("handleOpen possible bad open url error with " +
 //@					m_hc.getURL(), e);
+			//#else
+			e.printStackTrace();
 			//#endif
 		}
 		//#ifdef DJSR75
 //@		try {
 //@			if (m_fc != null) m_fc.close();
-//@		} catch (IOException e) { }
+//@		} catch (IOException e) {
+//@			e.printStackTrace();
+//@		}
 		//#endif
 	}
 
-    public void setLastMod(long m_lastMod) {
+    final public void setLastMod(long m_lastMod) {
         this.m_lastMod = m_lastMod;
     }
 
-    public long getLastMod() {
+    final public long getLastMod() {
         return (m_lastMod);
     }
 
