@@ -47,22 +47,24 @@ import com.substanceofcode.testutil.TestOutput;
  * @author  Irving Bunton
  * @version 1.0
  */
-public class Form extends javax.microedition.lcdui.Form
-implements CommandListener {
+public class Form extends javax.microedition.lcdui.Form 
+implements LogActIntr {
 
+	private Form m_form;
 	//#ifdef DMIDP10
 	private String m_title;
 	//#endif
-	private CommandListener m_cmdListener;
 
 	public Form(String title) {
 		super(title);
+		m_form = this;
 		TestOutput.println("Test UI Form Title: " + title);
 	}
 
 	// TODO log items
 	public Form(String title, Item[] items) {
 		super(title, items);
+		m_form = this;
 		//#ifdef DMIDP10
 		this.m_title = title;
 		//#endif
@@ -166,14 +168,8 @@ implements CommandListener {
 	}
 	//#endif
 
-	public void commandAction(Command cmd, Displayable disp) {
-		outputCmdAct(cmd, disp);
-		m_cmdListener.commandAction(cmd, disp);
-	}
-
     public void setCommandListener(CommandListener cmdListener) {
-		super.setCommandListener(this);
-        this.m_cmdListener = cmdListener;
+		super.setCommandListener(new CmdHandler(this, cmdListener));
     }
 
 }
