@@ -2,6 +2,7 @@
 
 <project name="RSSReader" default="build" basedir="." >
 
+	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
 
 	<property name="device.props" value="" />
@@ -21,6 +22,7 @@
 	<property name="tmpres" value="${target}/tmpres" />
 	<property name="webtestdata" value="${target}/webtestdata" />
 	<property name="filetestdata" value="${target}/filetestdata" />
+	<property name="analyze" value="${target}/analyze" />
 	<property name="dist" value="${target}/dist" />
 	<property name="dist.midp10" value="${target}/dist/midp10" />
 	<property name="dist.midp20" value="${target}/dist/midp20" />
@@ -43,6 +45,7 @@
 	<property name="build.midp20.jsr75.jsr238" value="${target}/build/midp20_jsr75.jsr238" />
 	<property name="classes" value="${target}/classes" />
 	<property name="tmppreprocess" value="${target}/tmppreprocess" />
+	<property name="ext.drive" value="${env.EXT_DRIVE}" />
 	<property name="build.template" value="" />
 	<property file="${basedir}/wtk-build${device.props}.properties${build.template}" />
 	<!-- DCOMPATDEF is used to test compatibility store/restore of date -->
@@ -200,6 +203,8 @@
 	-->
 
 	<target name="display.props" >
+	    <echo message="wtk.home=${wtk.home}" />
+	    <echo message="wtk.midp.jar=${wtk.midp.jar}" />
 	    <echo message="src=${src}" />
 	    <echo message="presrc=${presrc}" />
 	    <echo message="compat.presrc=${compat.presrc}" />
@@ -323,12 +328,13 @@
 		<antcall target="display.props" />
 		<wtkbuild srcdir="${comp.src}" destdir="${classes}" preverify="false" unless="ecj.jar" />
 		<antcall target="ecj.compile" />
-
+		<antcall target="findbugs" />
+		<antcall target="pmd" />
 	</target>
 
 	<target name="ecj.compile" if="ecj.jar" >
 		<echo message="-bootclasspath" />
-		<echo message="${wtk.midpapi}" />
+		<echo message="wtk.midpapi=${wtk.midpapi}" />
 		<echo message="-classpath" />
 		<echo message="${rt.jar}" />
 		<echo message="-d" />
@@ -337,6 +343,10 @@
 		<java jar="${ecj.jar}" fork="true" >
 			<arg value="-bootclasspath" />
 			<arg value="${wtk.midpapi}" />
+			<!--
+			<arg value="${ecj.bootclasspath}" />
+			<arg value="${wtk.home}/lib/${wtk.midp.jar}" />
+			-->
 			<arg value="-classpath" />
 			<arg value="${rt.jar}" />
 			<arg value="-d" />
@@ -344,6 +354,52 @@
 			<arg value="${comp.src}" />
 		</java>
 	</target>
+
+	<target name="findbugs" depends="prepare" if="findbugs.home" >
+    	<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"/>
+		<mkdir dir="${analyze}" />
+		<findbugs home="${findbugs.home}"
+			  jvmargs="-Xms512m -Xmx1024m"
+              output="html" reportLevel="medium"
+              outputFile="${analyze}/findbugs-${build.file.root}.html"
+              stylesheet="plain.xsl" >
+      <auxClasspath>
+		  <pathelement location="${findbug.classes}" />
+		  <fileset dir="${wtk.home}/lib" >
+			  <include name="*.jar" />
+		  </fileset>
+		  <fileset dir="${wtk.home}/bin" >
+			  <include name="*.jar" />
+		  </fileset>
+      </auxClasspath>
+      <sourcePath path="${comp.src}" />
+      <class location="${classes}" />
+    </findbugs>
+  </target>
+
+	<path id="pmd.classpath">
+		<fileset dir="${pmd.home}/lib/">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="pmd" depends="prepare" if="pmd.home" >
+		<mkdir dir="${analyze}" />
+		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.classpath" />
+		<pmd rulesetfiles="rulesets/favorites.xml" encoding="UTF-8" >
+			  <!-- undo
+			  <formatter type="net.sourceforge.pmd.renderers.HTMLRenderer" toFile="${analyze}/pmd-${build.file.root}.html"/>
+			  -->
+			  <formatter type="xml" toFile="${analyze}/pmd-${build.file.root}.xml"/>
+			  <fileset dir="${comp.src}">
+				  <include name="**/*.java"/>
+			  </fileset>
+		  </pmd>
+		  <xslt style="${pmd.xsl}" in="${analyze}/pmd-${build.file.root}.xml" out="${analyze}/pmd-${build.file.root}.txt" />
+		  <exec executable="${cat.cmd}" >
+			  <arg value="${analyze}/pmd-${build.file.root}.txt" />
+		  </exec>
+	  </target>
 
 	<target name="build.testdata" depends="prepare" >
 		<echo message="project.test.url=${project.test.url}" />
