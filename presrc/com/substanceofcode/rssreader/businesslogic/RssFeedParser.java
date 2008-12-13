@@ -162,8 +162,6 @@ public class RssFeedParser extends URLHandler {
 		m_redirect = true;
 		m_redirectUrl = url;
 		parseRssFeedUrl(url, updFeed, maxItemCount);
-		return;
-
 	}
 
 	/** Read HTML and if it has links, redirect and parse the XML. */
@@ -171,7 +169,6 @@ public class RssFeedParser extends URLHandler {
 								   InputStream is, int maxItemCount)
     throws IOException, Exception {
 		String newUrl = super.parseHTMLRedirect(url, is);
-		RssItunesFeed svFeed = new RssItunesFeed(m_rssFeed);
 		parseRssFeedUrl(newUrl, updFeed, maxItemCount);
 	}
 
