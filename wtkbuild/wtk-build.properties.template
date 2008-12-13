@@ -1,12 +1,18 @@
-antenna.home = C:/mostdownloads/j2me/sourceforge/antenna
+antenna.home = ${ext.drive}/mostdownloads/j2me/sourceforge/antenna
 #antenna.jar = antenna-bin-0.9.15-beta.jar
 #antenna.jar = antenna-bin-1.0.0.jar
 #This version (1.0.2) has //#elif bug, don't use!!
 #antenna.jar = antenna-bin-1.0.2.jar
 antenna.jar = antenna-bin-1.1.0-beta.jar
-antcontrib.home = C:/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
+antcontrib.home = ${ext.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
 #Comment out for linux
 wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
+#Comment out if you do not want to run findbugs
+#findbugs.home = ${ext.drive}/opt/tools/findbugs-1.3.4
+#Comment out if you do not want to run PMD
+#pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
+pmd.xsl = pmd-compile-reduced.xsl
+cat.cmd = cat
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
 #
@@ -20,23 +26,26 @@ svn.pgm = svn.exe
 #wtk.home = C:/opt/WTK2.5.2
 #For Netbeans
 wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
+wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #For phoneMe Windows
-#wtk.home = C:/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
+phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
 #For phoneMe Linux x86
-#wtk.home = /media/SEA_DISK/linux/src/RSSReader-1_11_1rc2/bin/linux_x86_fb_chameleon_mvm
+#phoneme.home = /media/SEA_DISK/linux/src/RSSReader-1_11_1rc2/bin/linux_x86_fb_chameleon_mvm
 #For phoneMe Windows and Linux
-#wtk.midpapi = ${wtk.home}/classes
+#wtk.midpapi = ${phoneme.home}/classes
+#For findbugs
+findbug.classes = ${phoneme.home}/classes
 #For phoneMe Windows and Linux proguard.jar, if cannot put into bin
-wtk.proguard.home = C:/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #For phoneMe, if not using ecj.jar
 #build.compiler = org.eclipse.jdt.core.JDTCompilerAdapter
 #For phoneMe, if using ecj.jar
-#ecj.jar = C:/mostdownloads/gnu/eclipse/ecj-3.4.jar
+#ecj.jar = ${ext.drive}/mostdownloads/gnu/eclipse/ecj-3.4.jar
 #For phoneMe Windows, if using ecj.jar and Sun JDK
 #rt.jar = C:/opt/bea91/jdk150_04/jre/lib/rt.jar
 #For phoneMe Windows, if using ecj.jar and Kaffe
 #rt.jar = /usr/lib/kaffe/jre/lib/rt.jar
-emulator.home=C:/mostdownloads/j2me/sourceforge/kobjects
+rt.jar = ${java.home}/../jre/lib/rt.jar
+emulator.home = ${ext.drive}/mostdownloads/j2me/sourceforge/kobjects
 #emulator.home=C:/mostdownloads/j2me/sourceforge/MicroEmulator/microemulator-2.0.2
 emulator.jar=${emulator.home}/me4se-2.2.0.zip
 #emulator.jar=${emulator.home}/microemulator.jar
@@ -55,10 +64,10 @@ prc.creater = MRSS
 prc.longname = RSS/News/Blog Reader
 MIDLETURL_ROOT = http://mobile-rss-reader.googlecode.com/files
 separator = /
-MIDLETVERSROOT = 1.11.1
+MIDLETVERSROOT = 1.11.2
 #Need vers with '_' to allow uploading to sites that get confused by to
 #many '.'
-FMIDLETVERSROOT = 1_11_1
+FMIDLETVERSROOT = 1_11_2
 #Location of manifest source
 manifestsrc = ../manifestsrc
 #? src = src
