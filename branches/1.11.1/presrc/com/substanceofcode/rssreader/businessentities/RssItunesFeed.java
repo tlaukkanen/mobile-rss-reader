@@ -24,6 +24,8 @@
 @DITUNESDEF@
 // Expand to define logging define
 @DLOGDEF@
+// Expand to define test define
+@DTESTDEF@
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -288,6 +290,7 @@ public class RssItunesFeed extends RssFeed{
 		//#endif
 	}
     
+	//#ifdef DTEST
 	/** Compare feed to an existing feed.  **/
 	public boolean equals(RssItunesFeed feed) {
 		if (!super.equals(feed)) {
@@ -325,6 +328,7 @@ public class RssItunesFeed extends RssFeed{
 		}
 		return true;
 	}
+	//#endif
     
     public void setCategory(int category) {
         this.m_category = category;
