@@ -25,6 +25,8 @@
 //#define DNOLOGGING
 // Expand to define itunes define
 //#define DNOITUNES
+// Expand to define test define
+//#define DNOTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -309,45 +311,47 @@ public class RssItunesItem extends RssItem {
         return (m_duration);
     }
     
-	/* Compare item. */
-	public boolean equals(RssItunesItem item) {
-		if (!super.equals(item)) {
-			return false;
-		}
-		if (!item.m_author.equals(m_author)) {
+	//#ifdef DTEST
+//@	/* Compare item. */
+//@	public boolean equals(RssItunesItem item) {
+//@		if (!super.equals(item)) {
+//@			return false;
+//@		}
+//@		if (!item.m_author.equals(m_author)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_author,this=" + item.m_author + "," + m_author);}
 			//#endif
-			return false;
-		}
-		if (!item.m_subtitle.equals(m_subtitle)) {
+//@			return false;
+//@		}
+//@		if (!item.m_subtitle.equals(m_subtitle)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_subtitle,this=" + item.m_subtitle + "," + m_subtitle);}
 			//#endif
-			return false;
-		}
-		if (!item.m_summary.equals(m_summary)) {
+//@			return false;
+//@		}
+//@		if (!item.m_summary.equals(m_summary)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_summary,this=" + item.m_summary + "," + m_summary);}
 			//#endif
-			return false;
-		}
-
-		if (item.m_explicit != m_explicit) {
+//@			return false;
+//@		}
+//@
+//@		if (item.m_explicit != m_explicit) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_explicit,this=" + item.m_explicit + "," + m_explicit);}
 			//#endif
-			return false;
-		}
-
-		if (!item.m_duration.equals(m_duration)) {
+//@			return false;
+//@		}
+//@
+//@		if (!item.m_duration.equals(m_duration)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal item.m_duration,this=" + item.m_duration + "," + m_duration);}
 			//#endif
-			return false;
-		}
-		return true;
-	}
+//@			return false;
+//@		}
+//@		return true;
+//@	}
+	//#endif
 
     public void setItunes(boolean itunes) {
 		//#ifdef DITUNES
