@@ -22,8 +22,8 @@
 
 // Expand to define logging define
 //#define DNOLOGGING
-// Expand to define itunes define
-//#define DNOITUNES
+// Expand to define test define
+//#define DNOTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -44,12 +44,12 @@ import java.util.*;
  */
 public class RssFeed{
     
-    protected static final char CONE = (char)1;
-    protected static final char [] CBONE = {CONE};
-    public static String STR_ONE = new String(CBONE);
-    protected static final char [] CBTWO = {(char)2};
-    public static String STR_TWO = new String(CBTWO);
-    public static int ITUNES_ITEMS = 8;
+    final protected static char CONE = (char)1;
+    final private static char [] CBONE = {CONE};
+    final public static String STR_ONE = new String(CBONE);
+    final private static char [] CBTWO = {(char)2};
+    final public static String STR_TWO = new String(CBTWO);
+    final public static int ITUNES_ITEMS = 8;
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssFeed");
 	//#endif
@@ -334,9 +334,9 @@ public class RssFeed{
 		// Encode password to make reading password difficult
         Base64 b64 = new Base64();
 		try {
-			encodedPassword = b64.encode( m_password.getBytes("UTF-8") );
+			encodedPassword = b64.encode( password.getBytes("UTF-8") );
 		} catch (UnsupportedEncodingException e) {
-			encodedPassword = b64.encode( m_password.getBytes() );
+			encodedPassword = b64.encode( password.getBytes() );
 		}
 	    String dateString;
         if(m_date==null){
@@ -385,96 +385,98 @@ public class RssFeed{
 		}
 	}
     
-	/** Compare feed to an existing feed.  **/
-	public boolean equals(RssFeed feed) {
-		if (!feed.m_url.equals(this.m_url)) {
+	//#ifdef DTEST
+//@	/** Compare feed to an existing feed.  **/
+//@	public boolean equals(RssFeed feed) {
+//@		if (!feed.m_url.equals(this.m_url)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_url,this=" + feed.m_url + "," + m_url);}
 			//#endif
-			return false;
-		}
-		if (!feed.m_name.equals(this.m_name)) {
+//@			return false;
+//@		}
+//@		if (!feed.m_name.equals(this.m_name)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_name,this=" + feed.m_name + "," + m_name);}
 			//#endif
-			return false;
-		}
-		if (!feed.m_username.equals(this.m_username)) {
+//@			return false;
+//@		}
+//@		if (!feed.m_username.equals(this.m_username)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_password,this=" + feed.m_password + "," + m_password);}
 			//#endif
-			return false;
-		}
-		if (!feed.m_password.equals(this.m_password)) {
+//@			return false;
+//@		}
+//@		if (!feed.m_password.equals(this.m_password)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_password,this=" + feed.m_password + "," + m_password);}
 			//#endif
-			return false;
-		}
-		if ((feed.m_date == null) && (this.m_date == null)) {
-		} else if ((feed.m_date != null) && (this.m_date != null)) {
-			if (feed.m_date.equals(this.m_date)) {
-			} else {
+//@			return false;
+//@		}
+//@		if ((feed.m_date == null) && (this.m_date == null)) {
+//@		} else if ((feed.m_date != null) && (this.m_date != null)) {
+//@			if (feed.m_date.equals(this.m_date)) {
+//@			} else {
 				//#ifdef DLOGGING
 //@				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 				//#endif
-				return false;
-			}
-		} else {
+//@				return false;
+//@			}
+//@		} else {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 			//#endif
-			return false;
-		}
-		if (!feed.m_link.equals(m_link)) {
+//@			return false;
+//@		}
+//@		if (!feed.m_link.equals(m_link)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_link,this=" + feed.m_link + "," + m_link);}
 			//#endif
-			return false;
-		}
-		if ((feed.m_date == null) && (this.m_date == null)) {
-		} else if ((feed.m_date != null) && (this.m_date != null)) {
-			if (feed.m_date.equals(this.m_date)) {
-			} else {
+//@			return false;
+//@		}
+//@		if ((feed.m_date == null) && (this.m_date == null)) {
+//@		} else if ((feed.m_date != null) && (this.m_date != null)) {
+//@			if (feed.m_date.equals(this.m_date)) {
+//@			} else {
 				//#ifdef DLOGGING
 //@				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 				//#endif
-				return false;
-			}
-		} else {
+//@				return false;
+//@			}
+//@		} else {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 			//#endif
-			return false;
-		}
-		if (feed.m_category != this.m_category) {
+//@			return false;
+//@		}
+//@		if (feed.m_category != this.m_category) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_category,this=" + feed.m_category + "," + m_category);}
 			//#endif
-			return false;
-		}
-		int flen = feed.m_items.size();
-		int ilen = m_items.size();
-		if (flen != ilen) {
+//@			return false;
+//@		}
+//@		int flen = feed.m_items.size();
+//@		int ilen = m_items.size();
+//@		if (flen != ilen) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal size feed,this=" + flen + "," + ilen);}
 			//#endif
-			return false;
-		}
-		RssItem [] ritems = new RssItem[ilen];
-		m_items.copyInto(ritems);
-		RssItem [] fitems = new RssItem[flen];
-		feed.m_items.copyInto(fitems);
-		for (int ic = 0; ic < ilen; ic++) {
-			if (!fitems[ic].equals(ritems[ic])) {
+//@			return false;
+//@		}
+//@		RssItem [] ritems = new RssItem[ilen];
+//@		m_items.copyInto(ritems);
+//@		RssItem [] fitems = new RssItem[flen];
+//@		feed.m_items.copyInto(fitems);
+//@		for (int ic = 0; ic < ilen; ic++) {
+//@			if (!fitems[ic].equals(ritems[ic])) {
 				//#ifdef DLOGGING
 //@				if (finestLoggable) {logger.finest("unequal ic,fitems[ic],ritems[ic]" + ic + "," + fitems[ic] + "," + ritems[ic]);}
 				//#endif
-				return false;
-			}
-		}
-		return true;
-	}
+//@				return false;
+//@			}
+//@		}
+//@		return true;
+//@	}
+	//#endif
     
     /** Return RSS feed items */
     public Vector getItems() {
