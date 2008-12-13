@@ -59,6 +59,7 @@ public class RssReaderSettings {
 	//#ifdef DMIDP20
     private static final String FONT_CHOICE = "font-choice";
     private static final String FIT_POLICY = "fit-policy";
+    private static final String BOOKMARK_NAME_NEWS = "bookmark-name-news";
 	//#endif
     private static final String USE_TEXT_BOX = "use-text-box";
     private static final String USE_STANDARD_EXIT = "use-standard-exit";
@@ -213,6 +214,16 @@ public class RssReaderSettings {
     /** Set fit policy */
     final public void setFitPolicy(int fitPolicy) {
         m_settings.setIntProperty( FIT_POLICY, fitPolicy);
+    }
+    
+    /** Get put bookmark name in news item list.*/
+    final public boolean getBookmarkNameNews() {
+        return m_settings.getBooleanProperty( BOOKMARK_NAME_NEWS, false);
+    }
+    
+    /** Set put bookmark name in news item list. */
+    final public void setBookmarkNameNews(boolean bookmarkNameNews) {
+        m_settings.setBooleanProperty( BOOKMARK_NAME_NEWS, bookmarkNameNews);
     }
     
     /** Get use text box */
