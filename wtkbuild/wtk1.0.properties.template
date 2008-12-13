@@ -2,6 +2,7 @@ wtk.midp.version = 1.0
 wtk.cldc.version = 1.0
 java.target = 1.0
 wtk.optionalpda.enabled = false
+wtk.midp.jar = midapi10.jar
 debug = debug
 DMIDPVERS = DMIDP10
 DCLDCVERS = DCLDCV10
