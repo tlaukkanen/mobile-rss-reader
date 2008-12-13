@@ -94,6 +94,7 @@ implements CommandListener, Runnable {
 	//#ifdef DMIDP20
     private ChoiceGroup m_fontChoice;
     private ChoiceGroup m_fitPolicy;
+    private ChoiceGroup m_nameNews;
 	//#endif
     private TextField m_wordCountField;
     private StringItem m_pgmMidpVers;
@@ -180,6 +181,9 @@ implements CommandListener, Runnable {
 				"Choose list wraparound",
 				new String[] {"Default wrap around", "Wraparound on",
 				"Wrap around off"});
+        m_nameNews = UiUtil.getAddChoiceGroup(this,
+				"Put feed name in river of news", new String []
+				{"Don't show name", "Show name"});
 		//#endif
 		String [] feedBackChoices = {"Open item first", "Back first"};
         m_feedListOpen = new ChoiceGroup("Choose feed list menu first item",
@@ -322,7 +326,8 @@ implements CommandListener, Runnable {
 		m_fontChoice.setSelectedIndex( fontChoice, true );
         int fitPolicy = settings.getFitPolicy();
 		m_fitPolicy.setSelectedFlags( new boolean[] {false, false, false} );
-		m_fitPolicy.setSelectedIndex( fitPolicy, true );
+        boolean nameNews = settings.getBookmarkNameNews();
+		m_nameNews.setSelectedFlags( new boolean[] {!nameNews, nameNews});
 		//#endif
         boolean feedListOpen = settings.getFeedListOpen();
 		boolean [] boolFeedListOpen = {feedListOpen, !feedListOpen};
@@ -384,6 +389,8 @@ implements CommandListener, Runnable {
 				//#ifdef DLOGGING
 //@				if (fineLoggable) {logger.fine("fitPolicy=" + fitPolicy);}
 				//#endif
+				boolean nameNews = !m_nameNews.isSelected(0);
+				settings.setBookmarkNameNews( nameNews );
 				//#endif
 				boolean feedListOpen = m_feedListOpen.isSelected(0);
 				settings.setFeedListOpen( feedListOpen);
