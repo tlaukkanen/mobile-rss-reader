@@ -33,6 +33,7 @@ import java.util.Vector;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Image;
 
 import com.substanceofcode.testutil.TestOutput;
@@ -46,13 +47,16 @@ import com.substanceofcode.testutil.TestOutput;
  * @version 1.0
  */
 public class List extends javax.microedition.lcdui.List
-implements CommandListener {
+implements LogActIntr {
 
 	private String m_title;
-	private CommandListener m_cmdListener;
 
 	public List(String title, int listType) {
 		super(title, listType);
+		init(title, listType);
+	}
+
+	final private void init(String title, int listType) {
 		TestOutput.println("Test UI List Title: " + title);
 		this.m_title = title;
 		TestOutput.println("Test UI List listType: " + listType);
@@ -62,9 +66,7 @@ implements CommandListener {
 	public List(String title, int listType, String[] stringElements,
 				    Image[] imageElements) {
 		super(title, listType, stringElements, imageElements);
-		TestOutput.println("Test UI List Title: " + title);
-		TestOutput.println("Test UI List listType: " + listType);
-		this.m_title = title;
+		init(title, listType);
 	}
 
 	public int append(String stringPart, Image imagePart) {
@@ -90,6 +92,19 @@ implements CommandListener {
 		TestOutput.println("Test UI List set: [" + m_title + "]," + stringPart);
 		TestOutput.println("Test UI List set elementnum: [" + m_title + "]," + elementnum);
 	}
+
+	//#ifdef DMIDP20
+	public void setFont(int elementnum, Font font) {
+		try {
+			super.setFont(elementnum, font);
+		} catch (Throwable t) {
+			TestOutput.println("Test UI List setFont: [" + m_title + "]," + t.getMessage());
+			t.printStackTrace();
+		}
+		TestOutput.println("Test UI List setFont,size: [" + m_title + "]," + font.getSize());
+		TestOutput.println("Test UI List setFont elementnum: [" + m_title + "]," + elementnum);
+	}
+	//#endif
 
 	public int getSelectedIndex() {
 		try {
@@ -138,7 +153,7 @@ implements CommandListener {
 	}
 	//#endif
 
-	public void outputCmdAct(Command cmd, Displayable disp, Command selCmd) {
+	public void outputCmdAct(Command cmd, Displayable disp) {
 		String dispTitle = "";
 		if (disp instanceof Form) {
 			dispTitle = ((Form)disp).getTitle();
@@ -146,7 +161,7 @@ implements CommandListener {
 			dispTitle = ((List)disp).getTitle();
 		}
 		String lblCmd = cmd.getLabel();
-		if (cmd == selCmd) {
+		if (cmd.equals(javax.microedition.lcdui.List.SELECT_COMMAND)) {
 			lblCmd = "Implicit select";
 			final int sel = super.getSelectedIndex();
 			if (sel >= 0) {
@@ -155,12 +170,6 @@ implements CommandListener {
 		}
 
 		TestOutput.println("Test UI List command,displayable,dispsame=[" + getTitle() + "]," + lblCmd + "," + dispTitle + "," + disp.equals(this));
-	}
-
-	public void commandAction(Command cmd, Displayable disp) {
-		outputCmdAct(cmd, disp,
-				javax.microedition.lcdui.List.SELECT_COMMAND);
-		m_cmdListener.commandAction(cmd, this);
 	}
 
 	public void setSelectedIndex(int elementNum, boolean selected) {
@@ -175,9 +184,7 @@ implements CommandListener {
 	}
 
     public void setCommandListener(CommandListener cmdListener) {
-		TestOutput.println("Test UI List Setting command listner for listener,this,Title: " + cmdListener + "," + this + ",[" + m_title + "]");
-		super.setCommandListener(this);
-        this.m_cmdListener = cmdListener;
+		super.setCommandListener(new CmdHandler(this, cmdListener));
     }
 
 }
