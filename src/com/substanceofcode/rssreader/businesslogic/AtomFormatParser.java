@@ -72,10 +72,6 @@ public class AtomFormatParser implements FeedFormatParser {
 	private String m_updated = "";
 	private ExtParser m_extParser = new ExtParser();
 
-    /** Creates a new instance of AtomParser */
-    public AtomFormatParser() {
-    }
-    
     /** Parse Atom feed */
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
 			            int maxItemCount, boolean getTitleOnly)
@@ -108,12 +104,11 @@ public class AtomFormatParser implements FeedFormatParser {
 				case XmlParser.ELEMENT:
 					String elementName = parser.getName();
 					char elemChar = elementName.charAt(0);
-					if (parseCommon(parser, elemChar, elementName)) {
-						if ((elemChar == 't') && 
+					if (parseCommon(parser, elemChar, elementName) &&
+						(elemChar == 't') && 
 								getTitleOnly && elementName.equals("title") ) {
-							feed.setName(m_title);
-							return feed;
-						}
+						feed.setName(m_title);
+						return feed;
 					}
 					if ((elemChar == 's') &&
 						elementName.equals("subtitle") ) {
@@ -147,6 +142,9 @@ public class AtomFormatParser implements FeedFormatParser {
 
         int parsingResult;
         while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
+			if (parsingResult != XmlParser.ELEMENT) {
+				continue;
+			}
             String elementName = parser.getName();
             if (elementName.length() == 0) {
 				continue;
@@ -331,7 +329,6 @@ public class AtomFormatParser implements FeedFormatParser {
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_author=" + m_author);}
 					//#endif
-					return;
 				}
 				break;
 			case 'c':
@@ -341,7 +338,6 @@ public class AtomFormatParser implements FeedFormatParser {
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("content=m_description=" + m_description);}
 					//#endif
-					return;
 				}
 				break;
 			case 's':
@@ -351,8 +347,7 @@ public class AtomFormatParser implements FeedFormatParser {
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_summary=" + m_summary);}
 					//#endif
-					return;
-				};
+				}
 				break;
 			case 'u': // Updated for Atom 1.0
 				if( elementName.equals("updated")) {
@@ -360,7 +355,6 @@ public class AtomFormatParser implements FeedFormatParser {
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("published=m_updated=" + m_updated);}
 					//#endif
-					return;
 				}
 				break;
 			case 'm': // Modified for Atom 0.3
@@ -369,7 +363,6 @@ public class AtomFormatParser implements FeedFormatParser {
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("published=m_modified=" + m_modified);}
 					//#endif
-					return;
 				}
 				break;
 			case 'p': // Published
@@ -378,7 +371,6 @@ public class AtomFormatParser implements FeedFormatParser {
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("published=m_date=" + m_date);}
 					//#endif
-					return;
 				}
 				break;
 			default:
