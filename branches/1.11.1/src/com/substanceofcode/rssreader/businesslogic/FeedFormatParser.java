@@ -35,7 +35,7 @@ import java.util.Vector;
  */
 public interface FeedFormatParser {
 
-    public RssItunesFeed parse(XmlParser parser, RssItunesFeed feed,
+    RssItunesFeed parse(XmlParser parser, RssItunesFeed feed,
 			int maxItemCount, boolean getTitleOnly) throws IOException;
     
 }
