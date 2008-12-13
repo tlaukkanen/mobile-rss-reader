@@ -24,6 +24,8 @@
 //#define DNOITUNES
 // Expand to define logging define
 //#define DNOLOGGING
+// Expand to define test define
+//#define DNOTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -288,43 +290,45 @@ public class RssItunesFeed extends RssFeed{
 		//#endif
 	}
     
-	/** Compare feed to an existing feed.  **/
-	public boolean equals(RssItunesFeed feed) {
-		if (!super.equals(feed)) {
-			return false;
-		}
-		if (feed.m_itunes != m_itunes) {
+	//#ifdef DTEST
+//@	/** Compare feed to an existing feed.  **/
+//@	public boolean equals(RssItunesFeed feed) {
+//@		if (!super.equals(feed)) {
+//@			return false;
+//@		}
+//@		if (feed.m_itunes != m_itunes) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_itunes,this=" + feed.m_itunes + "," + m_itunes);}
 			//#endif
-			return false;
-		}
-		if (!feed.m_language.equals(this.m_language)) {
+//@			return false;
+//@		}
+//@		if (!feed.m_language.equals(this.m_language)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_language,this=" + feed.m_language + "," + m_language);}
 			//#endif
-			return false;
-		}
-		if (!feed.m_author.equals(this.m_author)) {
+//@			return false;
+//@		}
+//@		if (!feed.m_author.equals(this.m_author)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_author,this=" + feed.m_author + "," + m_author);}
 			//#endif
-			return false;
-		}
-		if (!feed.m_summary.equals(this.m_summary)) {
+//@			return false;
+//@		}
+//@		if (!feed.m_summary.equals(this.m_summary)) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_summary,this=" + feed.m_summary + "," + m_summary);}
 			//#endif
-			return false;
-		}
-		if (feed.m_explicit != m_explicit) {
+//@			return false;
+//@		}
+//@		if (feed.m_explicit != m_explicit) {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("unequal feed.m_explicit,this=" + feed.m_explicit + "," + m_explicit);}
 			//#endif
-			return false;
-		}
-		return true;
-	}
+//@			return false;
+//@		}
+//@		return true;
+//@	}
+	//#endif
     
     public void setCategory(int category) {
         this.m_category = category;
