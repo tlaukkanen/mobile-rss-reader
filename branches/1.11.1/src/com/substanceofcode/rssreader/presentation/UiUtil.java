@@ -91,8 +91,6 @@ final public class UiUtil implements CommandListener {
     private Form        m_urlRrnForm;    // The form to return to for URL box
     private TextField   m_urlRrnItem;    // The item to return to for URL box
 
-	public UiUtil() { }
-
   /**
    * Return the selected index of the choice.  If nothing selected (-1),
    * return 0 if size &gt; 0, or -1 if 0 size.
@@ -102,7 +100,7 @@ final public class UiUtil implements CommandListener {
    *
    * @author Irv Bunton
    */
-	final static public int getSelectedIndex(Choice choice) {
+	static public int getSelectedIndex(Choice choice) {
 		final int selIdx = choice.getSelectedIndex();
 		if (selIdx != -1) {
 			return selIdx;
@@ -129,18 +127,20 @@ final public class UiUtil implements CommandListener {
    * @return    final
    * @author Irv Bunton
    */
-	final static int getPlaceIndex(Command c, Command insCmd,
+	static int getPlaceIndex(Command c, Command insCmd,
 							Command addCmd,
 							Command appndCmd,
 							javax.microedition.lcdui.List plist) {
+		if( (insCmd == null ) || (addCmd == null ) || (appndCmd == null )) {
+			return -1;
+		}
+
 		if( (c == insCmd ) || (c == addCmd ) || (c == appndCmd )) {
 			final int blen = plist.size();
 			int cplace = getSelectedIndex(plist);
 			int addElem = (cplace == -1) ? blen : cplace;
-			if( c == addCmd ){
-				if (addElem < blen) {
-					addElem++;
-				}
+			if(( c == addCmd ) && (addElem < blen)) {
+				addElem++;
 			}
 			if (c == appndCmd ) {
 				addElem = blen;
@@ -154,8 +154,27 @@ final public class UiUtil implements CommandListener {
 		}
 	}
 
+  /**
+   * Create a ChoiceGroup, set the layout and add it to the form.
+   *
+   * @param label
+   * @param choices
+   * @return    ChoiceGroup
+   * @author Irv Bunton
+   */
+	static public ChoiceGroup getAddChoiceGroup(Form form, String label,
+												String[] choices) {
+        ChoiceGroup choiceGroup = new ChoiceGroup(label,
+				                            Choice.EXCLUSIVE, choices, null);
+		//#ifdef DMIDP20
+		choiceGroup.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        form.append( choiceGroup );
+		return choiceGroup;
+	}
+
     /** Initialize URL text Box */
-    final public void initializeURLBox(RssReaderMIDlet midlet, final String url,
+    public void initializeURLBox(RssReaderMIDlet midlet, final String url,
 			Form prevForm, TextField prevItem) {
 		m_midlet = midlet;
 		TextBox boxURL = new TextBox("URL", url, 256, TextField.URL);
@@ -168,7 +187,7 @@ final public class UiUtil implements CommandListener {
     }
     
     /** Respond to commands */
-    public void commandAction(final Command c, final Displayable s) {
+    public void commandAction(Command c, Displayable s) {
 
 		/** Paste into URL field from previous form.  */
 		if( (m_urlRrnForm != null) &&
