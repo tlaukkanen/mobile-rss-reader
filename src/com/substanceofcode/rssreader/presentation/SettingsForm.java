@@ -76,7 +76,8 @@ import com.substanceofcode.utils.Settings;
  *
  * @author Tommi Laukkanen
  */
-public class SettingsForm extends Form implements CommandListener {
+public class SettingsForm extends FeatureForm
+implements CommandListener, Runnable {
     
     private RssReaderMIDlet m_midlet;
     private Command m_okCommand;
@@ -84,10 +85,16 @@ public class SettingsForm extends Form implements CommandListener {
     
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
+	//#ifdef DMIDP20
     private ChoiceGroup m_useTextBox;
+	//#endif
     private ChoiceGroup m_useStandardExit;
     private ChoiceGroup m_feedListOpen;
     private ChoiceGroup m_itunesEnabled;
+	//#ifdef DMIDP20
+    private ChoiceGroup m_fontChoice;
+    private ChoiceGroup m_fitPolicy;
+	//#endif
     private TextField m_wordCountField;
     private StringItem m_pgmMidpVers;
     private StringItem m_pgCldVers;
@@ -112,16 +119,14 @@ public class SettingsForm extends Form implements CommandListener {
     
     /** Creates a new instance of SettingsForm */
     public SettingsForm(RssReaderMIDlet midlet) {
-        super("Settings");
+        super(midlet, "Settings");
         m_midlet = midlet;
         
         m_okCommand = new Command("OK", Command.OK, 1);
-        this.addCommand( m_okCommand );
+        super.addCommand( m_okCommand );
         
         m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
-        this.addCommand( m_cancelCommand );
-        
-        this.setCommandListener( this );
+        super.addCommand( m_cancelCommand );
         
         RssReaderSettings settings = m_midlet.getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
@@ -131,21 +136,21 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_itemCountField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_itemCountField );
+        super.append( m_itemCountField );
 		String [] choices = {"Mark", "No mark"};
         m_markUnreadItems = new ChoiceGroup("Mark unread items",
 				                            Choice.EXCLUSIVE, choices, null);
 		//#ifdef DMIDP20
 		m_markUnreadItems.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_markUnreadItems );
+        super.append( m_markUnreadItems );
+		//#ifdef DMIDP20
 		String [] txtChoices = {"Text (large) box", "Text (line) field"};
         m_useTextBox = new ChoiceGroup("Text entry items",
 				                            Choice.EXCLUSIVE, txtChoices, null);
-		//#ifdef DMIDP20
 		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
+        super.append( m_useTextBox );
 		//#endif
-        this.append( m_useTextBox );
 
 		String [] txtExit = {"Use standard exit key", "Use menu exit key"};
         m_useStandardExit = new ChoiceGroup("Exit key type",
@@ -153,7 +158,7 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_useStandardExit.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_useStandardExit );
+        super.append( m_useStandardExit );
 		String [] itunesEnabledChoices = {"Don't show Itunes data",
 				"Show Itunes data"};
         m_itunesEnabled = new ChoiceGroup("Choose to use Itunes data",
@@ -164,7 +169,17 @@ public class SettingsForm extends Form implements CommandListener {
 		m_itunesEnabled.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
 		//#ifdef DITUNES
-//@        this.append( m_itunesEnabled );
+//@        super.append( m_itunesEnabled );
+		//#endif
+		//#ifdef DMIDP20
+        m_fontChoice = UiUtil.getAddChoiceGroup(this,
+				"Choose list font size",
+				new String[] {"Default font size", "Small",
+				"Medium", "Large"});
+        m_fitPolicy = UiUtil.getAddChoiceGroup(this,
+				"Choose list wraparound",
+				new String[] {"Default wrap around", "Wraparound on",
+				"Wrap around off"});
 		//#endif
 		String [] feedBackChoices = {"Open item first", "Back first"};
         m_feedListOpen = new ChoiceGroup("Choose feed list menu first item",
@@ -173,14 +188,14 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_feedListOpen.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_feedListOpen );
+        super.append( m_feedListOpen );
         int maxWordCount = settings.getMaxWordCountInDesc();
         m_wordCountField = new TextField("Max word count desc abbrev",
-                String.valueOf(maxCount), 3, TextField.NUMERIC);
+                String.valueOf(maxWordCount), 3, TextField.NUMERIC);
 		//#ifdef DMIDP20
 		m_wordCountField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_wordCountField );
+        super.append( m_wordCountField );
         m_pgmMidpVers = new StringItem("Program MIDP version:",
 		//#ifdef DMIDP20
 				"MIDP-2.0");
@@ -190,7 +205,7 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_pgmMidpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgmMidpVers );
+        super.append( m_pgmMidpVers );
         m_pgCldVers = new StringItem("Program CLDC version:",
 				//#ifdef DCLDCV11
 //@				"CLDC-1.1");
@@ -200,7 +215,7 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_pgCldVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgCldVers );
+        super.append( m_pgCldVers );
         m_pgmJsr75 = new StringItem("Program JSR 75 available:",
 		//#ifdef DJSR75
 //@				"true");
@@ -210,7 +225,7 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgmJsr75 );
+        super.append( m_pgmJsr75 );
 		String mep = System.getProperty("microedition.profiles");
 		if (mep == null) {
 			mep = "N/A";
@@ -219,13 +234,13 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_midpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_midpVers );
+        super.append( m_midpVers );
         m_cldcVers = new StringItem("Phone CLDC version:",
 				System.getProperty("microedition.configuration"));
 		//#ifdef DMIDP20
 		m_cldcVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_cldcVers );
+        super.append( m_cldcVers );
         m_jsr75 = new StringItem("Phone JSR 75 available:",
 				new Boolean(System.getProperty(
 				"microedition.io.file.FileConnection.version")
@@ -233,7 +248,7 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_jsr75 );
+        super.append( m_jsr75 );
 		String me = System.getProperty("microedition.platform");
 		if (me == null) {
 			me = "N/A";
@@ -242,40 +257,40 @@ public class SettingsForm extends Form implements CommandListener {
 		//#ifdef DMIDP20
 		m_platformVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_platformVers );
+        super.append( m_platformVers );
 		//#ifdef DLOGGING
 //@        m_logLevelField = new TextField("Logging level",
 //@                logger.getParent().getLevel().getName(), 20, TextField.ANY);
 		//#ifdef DMIDP20
 //@		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-//@        this.append( m_logLevelField );
+//@        super.append( m_logLevelField );
 		//#endif
         m_pgmMemUsedItem = new StringItem("Application memory used:", "");
 		//#ifdef DMIDP20
 		m_pgmMemUsedItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgmMemUsedItem );
+        super.append( m_pgmMemUsedItem );
         m_pgmMemAvailItem = new StringItem("Application memory available:", "");
 		//#ifdef DMIDP20
 		m_pgmMemAvailItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_pgmMemAvailItem );
+        super.append( m_pgmMemAvailItem );
         m_memUsedItem = new StringItem("DB memory used:", "");
 		//#ifdef DMIDP20
 		m_memUsedItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_memUsedItem );
+        super.append( m_memUsedItem );
         m_memAvailItem = new StringItem("DB memory available:", "");
 		//#ifdef DMIDP20
 		m_memAvailItem.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_memAvailItem );
+        super.append( m_memAvailItem );
         m_threadsUsed = new StringItem("Active Threads:", "");
 		//#ifdef DMIDP20
 		m_threadsUsed.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( m_threadsUsed );
+        super.append( m_threadsUsed );
 		updateForm();
     }
     
@@ -288,9 +303,11 @@ public class SettingsForm extends Form implements CommandListener {
         boolean markUnreadItems = settings.getMarkUnreadItems();
 		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
 		m_markUnreadItems.setSelectedFlags( selectedItems );
+		//#ifdef DMIDP20
         boolean useTextBox = settings.getUseTextBox();
 		boolean [] boolSelectedItems = {useTextBox, !useTextBox};
 		m_useTextBox.setSelectedFlags( boolSelectedItems );
+		//#endif
         boolean useStdExit = settings.getUseStandardExit();
         prevStdExit = useStdExit;
 		boolean [] boolExitItems = {useStdExit, !useStdExit};
@@ -298,6 +315,15 @@ public class SettingsForm extends Form implements CommandListener {
         boolean itunesEnabled = settings.getItunesEnabled();
 		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
 		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
+		//#ifdef DMIDP20
+        int fontChoice = settings.getFontChoice();
+		m_fontChoice.setSelectedFlags( new boolean[] {false, false, false,
+				false} );
+		m_fontChoice.setSelectedIndex( fontChoice, true );
+        int fitPolicy = settings.getFitPolicy();
+		m_fitPolicy.setSelectedFlags( new boolean[] {false, false, false} );
+		m_fitPolicy.setSelectedIndex( fitPolicy, true );
+		//#endif
         boolean feedListOpen = settings.getFeedListOpen();
 		boolean [] boolFeedListOpen = {feedListOpen, !feedListOpen};
 		m_feedListOpen.setSelectedFlags( boolFeedListOpen );
@@ -324,9 +350,6 @@ public class SettingsForm extends Form implements CommandListener {
 	}
 
     public void commandAction(Command command, Displayable displayable) {
-		//#ifdef DTESTUI
-//@		super.outputCmdAct(command, displayable);
-		//#endif
         if(command==m_okCommand) {
             // Save settings
             RssReaderSettings settings = m_midlet.getSettings();
@@ -335,8 +358,10 @@ public class SettingsForm extends Form implements CommandListener {
                 settings.setMaximumItemCountInFeed( maxCount );
 				boolean markUnreadItems = m_markUnreadItems.isSelected(0);
                 settings.setMarkUnreadItems( markUnreadItems );
+				//#ifdef DMIDP20
 				boolean useTextBox = m_useTextBox.isSelected(0);
 				settings.setUseTextBox(useTextBox);
+				//#endif
 				boolean useStdExit = m_useStandardExit.isSelected(0);
 				settings.setUseStandardExit(useStdExit);
 				if (useStdExit != prevStdExit) {
@@ -347,6 +372,18 @@ public class SettingsForm extends Form implements CommandListener {
 //@				settings.setItunesEnabled( itunesEnabled );
 				//#else
 				settings.setItunesEnabled( false );
+				//#endif
+				//#ifdef DMIDP20
+				int fontChoice = m_fontChoice.getSelectedIndex();
+				settings.setFontChoice( fontChoice );
+				//#ifdef DLOGGING
+//@				if (fineLoggable) {logger.fine("fontChoice=" + fontChoice);}
+				//#endif
+				int fitPolicy = m_fitPolicy.getSelectedIndex();
+				settings.setFitPolicy( fitPolicy );
+				//#ifdef DLOGGING
+//@				if (fineLoggable) {logger.fine("fitPolicy=" + fitPolicy);}
+				//#endif
 				//#endif
 				boolean feedListOpen = m_feedListOpen.isSelected(0);
 				settings.setFeedListOpen( feedListOpen);
@@ -380,5 +417,7 @@ public class SettingsForm extends Form implements CommandListener {
             m_midlet.showBookmarkList();
         }
     }
+
+	public void run() {}
     
 }
