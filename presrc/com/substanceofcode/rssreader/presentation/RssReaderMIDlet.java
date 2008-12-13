@@ -1459,33 +1459,21 @@ public class RssReaderMIDlet extends MIDlet
  "RssReader v" + super.getAppProperty("MIDlet-Version") + "-" +
  super.getAppProperty("Program-Version") +
  " Copyright (C) 2005-2006 Tommi Laukkanen, " +
+ " Copyright (c) 2001-2005 Todd C. Stellanova, rawthought, " +
+ " (C)1999 Romain Guy, Osvaldo Pinali Doederlein, " +
  "http://code.google.com/p/mobile-rss-reader/.  " +
- "Disclaimer.   " +
- "BECAUSE THIS PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY " +
- "FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN " +
- "OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES " +
- "PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED " +
- "OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF " +
- "MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS " +
- "TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE " +
- "PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, " +
- "REPAIR OR CORRECTION. " +
- "IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING " +
- "WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR " +
- "REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, " +
- "INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING " +
- "OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED " +
- "TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY " +
- "YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER " +
- "PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE " +
- "POSSIBILITY OF SUCH DAMAGES.   " +
- "This is licensed under the GNU General Public " +
- "License.  See the " +
- "GNU General Public License for more details at www.gnu.org. " +
- "This program is free software; you can redistribute it and/or modify " +
- "it under the terms of the GNU General Public License as published by " +
- "the Free Software Foundation; either version 2 of the License, or " +
- "(at your option) any later version.  ", null, AlertType.INFO);
+ "This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version." +
+ "" +
+ "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details." +
+ "" +
+ "You should have received a copy of the GNU General Public License along with this program; if not, write to the:" +
+ "Free Software Foundation, Inc." +
+ "51 Franklin Street, Fifth Floor" +
+ "Boston, MA" +
+ "02110-1301 USA" +
+ "Using this software means that you accept this license and agree to" +
+ "not use this program to break any laws.",
+  null, AlertType.INFO);
 		about.setTimeout(Alert.FOREVER);
  
 		return about;
