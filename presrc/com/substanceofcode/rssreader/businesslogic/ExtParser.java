@@ -89,12 +89,8 @@ public class ExtParser {
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
-    /** Creates a new instance of RssFormatParser */
-    public ExtParser() {
-    }
-    
 	/** Reset fields to uninitialized values. */
-    public void reset() {
+    final public void reset() {
 		m_itunes = false;
 		m_author = "";
 		m_creator = "";
@@ -110,7 +106,7 @@ public class ExtParser {
 	/** Create an Itunes feed if at least one of these fields are not
 	  their uninitialized values, else return an RssItunesFeed to save on
 	  memory. */
-    public RssItunesFeed getFeedInstance(RssItunesFeed feed, String language,
+    final public RssItunesFeed getFeedInstance(RssItunesFeed feed, String language,
 			String title, String desc) {
 		if (language.length() == 0) {
 			language = m_language;
@@ -128,7 +124,7 @@ public class ExtParser {
 		} else {
 			m_subtitle = StringUtil.removeHtml(m_subtitle);
 		}
-		feed.modifyItunes(true, title, desc, m_language, m_author, m_subtitle,
+		feed.modifyItunes(true, title, desc, language, m_author, m_subtitle,
 						  m_summary, m_explicit);
 		return feed;
 	}
@@ -136,7 +132,7 @@ public class ExtParser {
 	/** Create an Itunes item if at least one of these fields are not
 	  their uninitialized values, else return an RssItunesItem to save on
 	  memory. */
-    public RssItunesItem createItem(String title, String link, String desc,
+    final public RssItunesItem createItem(String title, String link, String desc,
 					Date date,
 					String enclosure,
 					boolean unreadItem, String author) {
@@ -177,7 +173,7 @@ public class ExtParser {
 	}
 
 	/** Parse the namespaces for Itunes namespaces and date namespace. */
-    public void parseNamespaces(XmlParser parser)
+    final public void parseNamespaces(XmlParser parser)
 	throws IOException {
         
 		String [][] nameSpaces = parser.parseNamespaces();
@@ -385,7 +381,7 @@ public class ExtParser {
 		}
 	}
 
-    public void setItunes(boolean itunes) {
+    final public void setItunes(boolean itunes) {
 		//#ifdef DITUNES
         this.m_itunes = itunes;
 		//#else
@@ -393,7 +389,7 @@ public class ExtParser {
 		//#endif
     }
 
-    public boolean isItunes() {
+    final public boolean isItunes() {
 		//#ifdef DITUNES
         return (m_itunes);
 		//#else
@@ -401,19 +397,19 @@ public class ExtParser {
 		//#endif
     }
 
-    public void setHasExt(boolean hasExt) {
+    final public void setHasExt(boolean hasExt) {
         this.m_hasExt = hasExt;
     }
 
-    public boolean isHasExt() {
+    final public boolean isHasExt() {
         return (m_hasExt);
     }
 
-    public void setDate(String date) {
+    final public void setDate(String date) {
         this.m_date = date;
     }
 
-    public String getDate() {
+    final public String getDate() {
         return (m_date);
     }
 
