@@ -64,10 +64,6 @@ public class RssFormatParser implements FeedFormatParser {
 	private String m_enclosure = "";
 	private ExtParser m_extParser = new ExtParser();
 
-    /** Creates a new instance of RssFormatParser */
-    public RssFormatParser() {
-    }
-    
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
 			            int maxItemCount, boolean getTitleOnly)
 	throws IOException {
@@ -112,9 +108,9 @@ public class RssFormatParser implements FeedFormatParser {
 							 if (elementName.equals("image")) {
 								 // Skip image text as it includes link
 								 // and title.
-								 String itext = parser.getText();
+								 parser.getText();
 								 //#ifdef DLOGGING
-								 if (finestLoggable) {logger.finest("m_language=" + m_language);}
+								 if (finestLoggable) {logger.finest("skipping image");}
 								 //#endif
 								 continue;
 							 }
@@ -147,6 +143,9 @@ public class RssFormatParser implements FeedFormatParser {
 		/** Parse next element */            
         int parsingResult;
         while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
+			if (parsingResult != XmlParser.ELEMENT) {
+				continue;
+			}
             String elementName = parser.getName();
             if (elementName.length() == 0) {
 				continue;
@@ -197,9 +196,9 @@ public class RssFormatParser implements FeedFormatParser {
 					// Textinput has required sub element description.
 					// We don't want the overriding description.
 					if (elementName.equals("textinput") ) {
-						String textData = parser.getText();
+						parser.getText();
 						//#ifdef DLOGGING
-						if (finestLoggable) {logger.finest("skipping textinput data=" + textData);}
+						if (finestLoggable) {logger.finest("skipping textinput data");}
 						//#endif
 						continue;
 					}
@@ -373,7 +372,6 @@ public class RssFormatParser implements FeedFormatParser {
             // 3 = year (could be with either 4 or 2 digits)
             // 4 = time
             // 5 = GMT
-            int weekDayIndex = 0;
             int dayOfMonthIndex = 1;
             int monthIndex = 2;
             int yearIndex = 3;
