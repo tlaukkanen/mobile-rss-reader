@@ -350,10 +350,19 @@ implements CommandListener, Runnable  {
 		final int slen = sortedItems.size();
 		RssItunesItem [] sitems = new RssItunesItem[slen];
 		sortedItems.copyInto(sitems);
+		final boolean addName = m_midlet.getSettings().getBookmarkNameNews();
+		RssItunesFeed [] sfeeds = null;
+		if (addName) {
+			sfeeds = new RssItunesFeed[slen];
+			m_itemFeeds.copyInto(sfeeds);
+		}
 		for( int ic = 0; ic < slen; ic++){
 			String text = sitems[ic].getTitle();
 			if (text.length() == 0) {
 				text = m_midlet.getItemDescription(sitems[ic]);
+			}
+			if (addName) {
+				text = sfeeds[ic].getName() + " " + text;
 			}
 			if (m_showAll && (m_unreadImage != null) &&
 					sitems[ic].isUnreadItem()) {
