@@ -69,7 +69,7 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
         m_parsingThread = new Thread(this);
 		m_url = url;
 		m_username = username;
-		m_password = m_password;
+		m_password = password;
     }
     
     /** Start parsing the feed list */
@@ -117,6 +117,7 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
         } catch( OutOfMemoryError t ) {
 			System.gc();
+			// Save memory by releasing it.
 			m_feeds = null;
 			//#ifdef DLOGGING
 			logger.severe("FeedListParser.run(): Out Of Memory Error while " +
@@ -173,6 +174,7 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
             throw new CauseException("Error while parsing import data: " 
                     + e.toString(), e);
         } catch(OutOfMemoryError t) {
+			// Save memory by releasing it.
 			m_feeds = null;
 			System.gc();
 			//#ifdef DLOGGING
@@ -211,7 +213,6 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 		}
 		m_redirect = true;
 		m_redirectUrl = m_url;
-		String svUrl = m_url;
 		m_url = newUrl;
 		try {
 			return parseFeeds();
@@ -234,13 +235,13 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 
     abstract RssItunesFeed[] parseFeeds(InputStream is);
 
-    public void setFeedNameFilter(String m_feedNameFilter) {
-        if (m_feedNameFilter == null) {
+    public void setFeedNameFilter(String feedNameFilter) {
+        if (feedNameFilter == null) {
 			this.m_feedNameFilter = null;
-		} else if (m_feedNameFilter.length() == 0) {
+		} else if (feedNameFilter.length() == 0) {
 			this.m_feedNameFilter = null;
 		} else {
-			this.m_feedNameFilter = m_feedNameFilter.toLowerCase();
+			this.m_feedNameFilter = feedNameFilter.toLowerCase();
 		}
     }
 
@@ -282,7 +283,7 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
         return (m_url);
     }
 
-    public void join() {
-		try { m_parsingThread.join(); } catch (Exception e) {}
+    public void join() throws InterruptedException {
+		m_parsingThread.join();
 	}
 }
