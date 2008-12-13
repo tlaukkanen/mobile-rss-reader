@@ -214,6 +214,30 @@ v1.11.1 (August 2nd 2008)
 + Support RSS Atoms without published tag (version 0.3, 1,0 e.g. from google)
   by using updated or modified for date if not published tag.
 
+v1.11.2 Development 2 (dev2) (Dec 12th 2008)
++ Check in the rest of novice enhancement
++ Fix OPML with line feed/carriage return immediately after 'outline' tag.
++ Combine if statements
++ Changes from code analysis:  Remove unnecessary modifiers. Put stack trace into empty catch statements.  
+  Combine if statements.
+  Remove unused equals.
++ Fix problems with hangs (not present on most devices).  Some methods are
+  required to not spend much time.  As features are added to these methods, they
+  become too long and cause a hang as J2ME has limited resources.  This change
+  worksaround this by doing operations in a separate thread.
++ Allow options to change font size for lists.
++ Turn on/off wraparound for lists
++ Need serial version id for serializable classes.
++ Fix river of news sort problem.
++ Allow ascending and descending for river of news.
++ Encode passwords
++ Fix handling passwords for feeds
++ Allow findbugs and PMD analyzers
++ Give error if having problem doing find files
++ Fix development 1 introduced problem with find files aborting (this problem
+  is not in stable versions)
++ Allow bookmark/feed name at the beginning of river of news items.
+  
 Known problems:
 
 - Sometimes when using River of News, the sort does not complete leaving the
