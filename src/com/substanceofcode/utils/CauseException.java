@@ -26,6 +26,7 @@ package com.substanceofcode.utils;
  */
 public class CauseException extends Exception {
     
+    private static final long serialVersionUID = 50L;
     private Throwable cause = null;
     private boolean causeSet = false;
 
