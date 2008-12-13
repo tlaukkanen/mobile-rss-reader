@@ -75,7 +75,11 @@ public class FeatureList extends List {
 		init(midlet);
 	}
 
-	private void init(RssReaderMIDlet midlet) {
+	public FeatureList(String title, int listType) {
+		super(title, listType);
+	}
+
+	public void init(RssReaderMIDlet midlet) {
 		featureMgr = new FeatureMgr(midlet, this);
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("Starting FeatureList "
