@@ -99,10 +99,9 @@ public class OpmlParser extends FeedListParser {
 					 * instead of link attribute.
 					 */
 
-					if ((link = parser.getAttributeValue( "xmlUrl" )) == null) {
-						if (opmlDirectory) {
-							link = parser.getAttributeValue( "url" );
-						}
+					if (((link = parser.getAttributeValue( "xmlUrl" )) == null) &&
+						opmlDirectory) {
+						link = parser.getAttributeValue( "url" );
 					}
 					
 					/** Debugging information */
