@@ -118,9 +118,9 @@ public class TestingForm extends Form implements CommandListener {
 		super.append(new StringItem("m_midpUni=",
 				new Boolean(EncodingUtil.m_midpUni).toString()));
 		super.append(new StringItem("m_hasWinEncoding=",
-				new Boolean(EncodingUtil.m_hasWinEncoding).toString()));
+				new Boolean(EncodingUtil.hasWinEncoding()).toString()));
 		super.append(new StringItem("m_hasIso8859Encoding=",
-				new Boolean(EncodingUtil.m_hasIso8859Encoding).toString()));
+				new Boolean(EncodingUtil.hasIso8859Encoding()).toString()));
 		appendEntityAlphaTest("Test with no data.", "", "");
 		appendEntityAlphaTest("Test with one entity.", "&lt;", "<");
 		appendEntityAlphaTest("Test with one entity.", "&lt;&gt;&amp;&quot;&nbsp;&apos;",
