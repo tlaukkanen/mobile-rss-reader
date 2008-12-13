@@ -25,6 +25,8 @@
 @DLOGDEF@
 // Expand to define itunes define
 @DITUNESDEF@
+// Expand to define test define
+@DTESTDEF@
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -309,6 +311,7 @@ public class RssItunesItem extends RssItem {
         return (m_duration);
     }
     
+	//#ifdef DTEST
 	/* Compare item. */
 	public boolean equals(RssItunesItem item) {
 		if (!super.equals(item)) {
@@ -348,6 +351,7 @@ public class RssItunesItem extends RssItem {
 		}
 		return true;
 	}
+	//#endif
 
     public void setItunes(boolean itunes) {
 		//#ifdef DITUNES
