@@ -260,13 +260,13 @@ public class RssReaderSettings {
 	//#ifdef DTEST
     /** Get log level */
     final public String getLogLevel() {
-        String log_level = m_settings.getStringProperty(0, LOG_LEVEL, "");
-        return log_level;
+        String logLevel = m_settings.getStringProperty(0, LOG_LEVEL, "");
+        return logLevel;
     }
     
     /** Set import URL password */
-    final public void setLogLevel(String log_level) {
-        m_settings.setStringProperty( LOG_LEVEL, log_level);
+    final public void setLogLevel(String logLevel) {
+        m_settings.setStringProperty( LOG_LEVEL, logLevel);
     }
 	//#endif
     
