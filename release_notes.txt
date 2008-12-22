@@ -238,6 +238,21 @@ v1.11.2 Development 2 (dev2) (Dec 12th 2008)
   is not in stable versions)
 + Allow bookmark/feed name at the beginning of river of news items.
   
+v1.11.2 Development 3 (dev2) (Dec 22th 2008)
++ Allow export of files on devices with JSR-75.  This is not usable on most
+  devices as they require that the user accept the write of each BYTE.  Yes,
+  each byte so this takes forever to the point that I gave up.
++ Attempts to fix problem on some devices where River of News leaves cursor is
+  put in the middle of the screen
++ Progress bars for large memory version (future)
++ Braces around optional feed names in River of News
++ Better handling of forms/lists wakeup for command and other events.
++ Show device locale in settings
++ Fix problem of loss of data when going to link.  This fixes a possibly
+  introduced defect into dev-2.
++ Changes for next release of JLogMicro
++ Fix turning on/off wraparound for lists
+
 Known problems:
 
 - Sometimes when using River of News, the sort does not complete leaving the
