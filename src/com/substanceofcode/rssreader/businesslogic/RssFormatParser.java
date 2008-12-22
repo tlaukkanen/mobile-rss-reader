@@ -376,7 +376,6 @@ public class RssFormatParser implements FeedFormatParser {
             int monthIndex = 2;
             int yearIndex = 3;
             int timeIndex = 4;
-            int gmtIndex = 5;
             
 			int kc = 0;
             while ((dateString.indexOf("  ") >= 0) &&
@@ -393,13 +392,11 @@ public class RssFormatParser implements FeedFormatParser {
                 monthIndex = 1;
                 yearIndex = 2;
                 timeIndex = 3;
-                gmtIndex = 4;
 			} else if( columnCount==7 ) {
                 // Expected format:
                 // Thu, 19 Jul  2007 00:00:00 N
                 yearIndex = 4;
                 timeIndex = 5;
-                gmtIndex = 6;
             } else if( columnCount<5 || columnCount>6 ) {
 				//#ifdef DLOGGING
 //@				Logger logger = Logger.getLogger("RssFormatParser");
