@@ -77,7 +77,7 @@ import net.sf.jlogmicro.util.logging.Level;
  * @author Tommi Laukkanen
  */
 public class SettingsForm extends FeatureForm
-implements CommandListener, Runnable {
+implements CommandListener {
     
     private RssReaderMIDlet m_midlet;
     private Command m_okCommand;
@@ -246,22 +246,31 @@ implements CommandListener, Runnable {
 		//#endif
         super.append( m_cldcVers );
         m_jsr75 = new StringItem("Phone JSR 75 available:",
-				new Boolean(System.getProperty(
+				String.valueOf(System.getProperty(
 				"microedition.io.file.FileConnection.version")
-				!= null).toString());
+				!= null));
 		//#ifdef DMIDP20
 		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         super.append( m_jsr75 );
-		String me = System.getProperty("microedition.platform");
-		if (me == null) {
-			me = "N/A";
+		String sprop = System.getProperty("microedition.platform");
+		if (sprop == null) {
+			sprop = "N/A";
 		}
-        m_platformVers = new StringItem("Phone Microedition platform:", me);
+        m_platformVers = new StringItem("Phone Microedition platform:", sprop);
 		//#ifdef DMIDP20
 		m_platformVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         super.append( m_platformVers );
+		sprop = System.getProperty("microedition.locale");
+		if (sprop == null) {
+			sprop = "N/A";
+		}
+        StringItem silocale = new StringItem("Phone Microedition locale:", sprop);
+		//#ifdef DMIDP20
+		silocale.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        super.append( silocale );
 		//#ifdef DLOGGING
         m_logLevelField = new TextField("Logging level",
                 logger.getParent().getLevel().getName(), 20, TextField.ANY);
@@ -326,6 +335,7 @@ implements CommandListener, Runnable {
 		m_fontChoice.setSelectedIndex( fontChoice, true );
         int fitPolicy = settings.getFitPolicy();
 		m_fitPolicy.setSelectedFlags( new boolean[] {false, false, false} );
+		m_fitPolicy.setSelectedIndex( fitPolicy, true );
         boolean nameNews = settings.getBookmarkNameNews();
 		m_nameNews.setSelectedFlags( new boolean[] {!nameNews, nameNews});
 		//#endif
@@ -425,6 +435,4 @@ implements CommandListener, Runnable {
         }
     }
 
-	public void run() {}
-    
 }
