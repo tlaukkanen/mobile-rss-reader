@@ -35,6 +35,7 @@ package com.substanceofcode.rssreader.businesslogic;
 import java.io.IOException;
 import javax.microedition.io.ConnectionNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 //#ifdef DMIDP20
@@ -60,14 +61,15 @@ import com.substanceofcode.utils.CauseException;
  *
  * @author Irving Bunton
  */
-public abstract class URLHandler {
+public class URLHandler {
     
     protected boolean m_redirect = false;  // The URL is redirected
     protected String m_redirectUrl = "";  // The URL is redirected URL
     protected boolean m_needRedirect = false;  // The URL needs to be redirected
     protected String m_location; // The URL location
     protected long m_lastMod = 0L;  // Last modification
-    protected InputStream m_inputStream;  // Last modification
+    protected InputStream m_inputStream;  // Input stream
+    protected OutputStream m_outputStream;  // Output stream
     protected HttpConnection m_hc = null;
     protected InputConnection m_ic = null;
 	//#ifdef DJSR75
@@ -82,7 +84,8 @@ public abstract class URLHandler {
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
-    final public void handleOpen(String url, String username, String password)
+    final public void handleOpen(String url, String username, String password,
+			boolean writePost)
 	throws IOException, Exception {
         
         try {
@@ -91,9 +94,17 @@ public abstract class URLHandler {
 //@				/*
 //@				 * Open an FileConnection with the file system 
 //@				 */
-//@				m_fc = (FileConnection) Connector.open( url, Connector.READ );
+//@				m_fc = (FileConnection) Connector.open( url,
+//@						Connector.READ | (writePost ? Connector.WRITE : 0) );
 //@				m_lastMod = m_fc.lastModified();
-//@				m_inputStream = m_fc.openInputStream();
+//@				if (writePost) {
+//@					if (!m_fc.exists()) {
+//@						m_fc.create();
+//@					}
+//@					m_outputStream = m_fc.openOutputStream();
+//@				} else {
+//@					m_inputStream = m_fc.openInputStream();
+//@				}
 				//#else
 				/*
 				 * Open an InputConnection with the file system.
@@ -197,9 +208,12 @@ public abstract class URLHandler {
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-
-            throw new CauseException("Error while parsing RSS data:  " +
-									  url, e);
+			if (writePost) {
+				throw e;
+			} else {
+				throw new CauseException("Error while parsing RSS data:  " +
+										  url, e);
+			}
         } catch(ConnectionNotFoundException e) {
 			//#ifdef DLOGGING
 //@			logger.severe("handleOpen connection error with " + url, e);
@@ -207,8 +221,12 @@ public abstract class URLHandler {
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Bad URL/File or protocol error while " +
-									 "opening: " + url, e);
+			if (writePost) {
+				throw e;
+			} else {
+				throw new CauseException("Bad URL/File or protocol error while " +
+										 "opening: " + url, e);
+			}
 		//#ifdef DMIDP20
         } catch(CertificateException e) {
 			//#ifdef DLOGGING
@@ -229,8 +247,12 @@ public abstract class URLHandler {
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Security error while oening " +
-									 ": " + url, e);
+			if (writePost) {
+				throw e;
+			} else {
+				throw new CauseException("Security error while oening " +
+										 ": " + url, e);
+			}
         } catch(Exception e) {
 			//#ifdef DLOGGING
 //@			logger.severe("handleOpen internal error with " + url, e);
@@ -322,5 +344,16 @@ public abstract class URLHandler {
     final public long getLastMod() {
         return (m_lastMod);
     }
+
+	//#ifdef DJSR75
+//@    public FileConnection getFc() {
+//@        return (m_fc);
+//@    }
+//@
+//@    public OutputStream getOutputStream() {
+//@        return (m_outputStream);
+//@    }
+//@
+	//#endif
 
 }
