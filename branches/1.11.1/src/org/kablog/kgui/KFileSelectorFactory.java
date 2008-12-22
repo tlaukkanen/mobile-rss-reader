@@ -42,22 +42,23 @@
 //@
 //@public class KFileSelectorFactory {
 	//#ifdef DLOGGING
-//@    private Logger logger = Logger.getLogger("KFileSelectorImpl");
+//@    private Logger logger = Logger.getLogger("KFileSelectorFactory");
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 //@
 //@	public static KFileSelector getInstance(RssReaderMIDlet midlet,
-//@			String title, String defaultDir, String iconDir) {
+//@			String title, boolean selectDir, String defaultDir,
+//@			String iconDir) {
 //@		try {
 //@			KFileSelector newInst = new KFileSelectorImpl();
-//@			((KFileSelectorImpl)newInst).init(midlet, title, defaultDir,
-//@					iconDir);
+//@			((KFileSelectorImpl)newInst).init(midlet, selectDir, title,
+//@				defaultDir, iconDir);
 //@			return (newInst);
 //@		} catch (Throwable t) {
 			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("KFileSelectorImpl");
+//@			Logger logger = Logger.getLogger("KFileSelectorFactory");
 //@			logger.severe("KFileSelectorFactory getInstance ", t);
 			//#endif
 //@			/** Error while executing constructor */
@@ -76,7 +77,7 @@
 //@			return (newInst);
 //@		} catch (Throwable t) {
 			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("KFileSelectorImpl");
+//@			Logger logger = Logger.getLogger("KFileSelectorFactory");
 //@			logger.severe("KFileSelectorFactory getInstance ", t);
 			//#endif
 //@			/** Error while executing constructor */
