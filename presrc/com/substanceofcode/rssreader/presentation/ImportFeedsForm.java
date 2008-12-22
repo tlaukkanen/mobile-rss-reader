@@ -211,80 +211,80 @@ final public class ImportFeedsForm extends URLForm
 
 		//#ifdef DJSR75
 		if (m_ok) {
-			m_ok = false; System.out.println("here exp 1");
-			final String url = m_url.getString().trim(); System.out.println("here exp 2");
+			m_ok = false;
+			final String url = m_url.getString().trim();
 			//#ifdef DLOGGING
 			if (m_finestLoggable) {m_logger.finest("Writing to url=" + url);}
 			//#endif
-			URLHandler uhandler = new URLHandler(); System.out.println("here exp 6");
-			OutputStreamWriter osw = null; System.out.println("here exp 7");
+			URLHandler uhandler = new URLHandler();
+			OutputStreamWriter osw = null;
 			try {
-				uhandler.handleOpen(url, null, null, true); System.out.println("here exp 9");
-				OutputStream os = uhandler.getOutputStream(); System.out.println("here exp 10");
+				uhandler.handleOpen(url, null, null, true);
+				OutputStream os = uhandler.getOutputStream();
 				// On many devices, writing to a file gives a propmt for
 				// each write to the file which is very annoying, so
 				// we put data into a StringBuffer and then to the file
 				// all at once.
-				StringBuffer sb = new StringBuffer(); System.out.println("here exp 14");
+				StringBuffer sb = new StringBuffer();
 				try {
-					osw = new OutputStreamWriter(os, "UTF-8"); System.out.println("here exp 16");
+					osw = new OutputStreamWriter(os, "UTF-8");
 				} catch (UnsupportedEncodingException e) {
-					osw = new OutputStreamWriter(os); System.out.println("here exp 18");
+					osw = new OutputStreamWriter(os);
 					//#ifdef DLOGGING
 					m_logger.severe("run Unable to use UTF-8 for export", e);
 					//#endif
 				}
-				int selectedImportType = m_importFormatGroup.getSelectedIndex(); System.out.println("here exp 22");
+				int selectedImportType = m_importFormatGroup.getSelectedIndex();
 				if (selectedImportType == 0) {
 					sb.append("<opml version=\"1.0\">\n<head>\n" +
 							"<title>Rss Reader subscriptions</title>\n" +
-							"</head>\n<body>\n"); System.out.println("here exp 26");
+							"</head>\n<body>\n");
 				}
 				// Line by line is URL followed by name
-				final int blen = m_bookmarkList.size(); System.out.println("here exp 29");
+				final int blen = m_bookmarkList.size();
 				for (int i = 0; i < blen; i++) {
 					final RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
-							m_bookmarkList.getString(i)); System.out.println("here exp 31");
+							m_bookmarkList.getString(i));
 					if (selectedImportType == 0) {
 						sb.append("<outline title=" + feed.getName() +
 							" text=" + feed.getName() + ">\n" +
 						"    <outline text=\"" + feed.getName() +
 							"\" title=" + feed.getName() + "\" type=\"rss\"\n" +
 						"xmlUrl=\"" + feed.getUrl() + "\" htmlUrl='\"" + feed.getUrl() +
-						"\"/>\n</outline>\n"); System.out.println("here exp 38");
+						"\"/>\n</outline>\n");
 					} else {
-						sb.append(feed.getUrl() + " " + feed.getName()); System.out.println("here exp 40");
+						sb.append(feed.getUrl() + " " + feed.getName());
 					}
 				}
 				if (selectedImportType == 0) {
-					sb.append("<body>\n</opml>\n"); System.out.println("here exp 44");
+					sb.append("<body>\n</opml>\n");
 				}
 				//#ifdef DLOGGING
 				if (m_finestLoggable) {m_logger.finest("Export sb.length()=" + sb.length());}
 				//#endif
-				osw.write(sb.toString()); System.out.println("here exp 46");
-				m_midlet.setCurrent( m_bookmarkList ); System.out.println("here exp 47");
+				osw.write(sb.toString());
+				m_midlet.setCurrent( m_bookmarkList );
 			} catch(IllegalArgumentException ex) {
-				m_midlet.recordExcForm("Invalid url:  " + url, ex); System.out.println("here exp 49");
+				m_midlet.recordExcForm("Invalid url:  " + url, ex);
 			} catch(ConnectionNotFoundException ex) {
-				m_midlet.recordExcForm("Invalid connection or url:  " + url, ex); System.out.println("here exp 51");
+				m_midlet.recordExcForm("Invalid connection or url:  " + url, ex);
 			} catch(IOException ex) {
-				m_midlet.recordExcForm("Error exporting feeds to " + url, ex); System.out.println("here exp 53");
+				m_midlet.recordExcForm("Error exporting feeds to " + url, ex);
 			} catch(SecurityException ex) {
-				m_midlet.recordExcForm("Security error exporting feeds to " + url, ex); System.out.println("here exp 55");
+				m_midlet.recordExcForm("Security error exporting feeds to " + url, ex);
 			} catch(Throwable t) {
 				m_midlet.recordExcForm("Internal error exporting feeds to " +
-						url, t); System.out.println("here exp 58");
+						url, t);
 			} finally {
-				uhandler.handleClose(); System.out.println("here exp 60");
+				uhandler.handleClose();
 				if (osw != null) {
 					try {
-						osw.close(); System.out.println("here exp 63");
+						osw.close();
 					} catch (IOException e) {
 						//#ifdef DLOGGING
-						m_logger.severe("Can't close output file.", e); System.out.println("here exp 66");
+						m_logger.severe("Can't close output file.", e);
 						//#endif
-						e.printStackTrace(); System.out.println("here exp 68");
+						e.printStackTrace();
 					}
 				}
 			}
