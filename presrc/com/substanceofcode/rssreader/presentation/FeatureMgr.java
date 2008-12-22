@@ -22,6 +22,8 @@
 
 // Expand to define MIDP define
 @DMIDPVERS@
+// Expand to define CLDC define
+@DCLDCVERS@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define test ui define
@@ -65,7 +67,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 	private Displayable exDisp = null;
 	protected RssReaderMIDlet midlet;
     private boolean     background = false;   // Flag to continue looping
-    private boolean     needWakeup = false;   // Flag to show need to wakeup
+    private int         loop = 0;   // Number of times to loop
     private Thread      netThread = null;  // The thread for networking, etc
 
 	//#ifdef DLOGGING
@@ -74,7 +76,8 @@ public class FeatureMgr implements CommandListener, Runnable {
 	private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
-	private Runnable featureUser;
+	private CommandListener cmdFeatureUser = null;
+	private Runnable runFeatureUser = null;
 
 	public FeatureMgr (RssReaderMIDlet midlet, Displayable disp) {
 		this.midlet = midlet;
@@ -84,20 +87,34 @@ public class FeatureMgr implements CommandListener, Runnable {
 		//#endif
 	}
 
-    public void setCommandListener(CommandListener featureUser,
+    public void setCommandListener(CommandListener cmdFeatureUser,
 			boolean background) {
 		synchronized(this) {
-			this.featureUser = (Runnable)featureUser;
+			this.cmdFeatureUser = cmdFeatureUser;
+			if (background) {
+				if (cmdFeatureUser != null) {
+					if (!(cmdFeatureUser instanceof Runnable)) {
+						throw new IllegalArgumentException(
+								"Listener must implement Runnable");
+					}
+					this.runFeatureUser = (Runnable)cmdFeatureUser;
+					//#ifdef DLOGGING
+					if (fineLoggable) {logger.fine("setCommandListener cmdFeatureUser" + cmdFeatureUser.getClass().getName() + "," + cmdFeatureUser);}
+					//#endif
+				} else {
+					this.runFeatureUser = (Runnable)cmdFeatureUser;
+					//#ifdef DLOGGING
+					if (fineLoggable) {logger.fine("setCommandListener cmdFeatureUser=null");}
+					//#endif
+				}
+			}
 			this.background = background;
 		}
 		if (background) {
-			if (featureUser == null) {
-				throw new NullPointerException("featureUser is null.  Must have command listener");
-			}
 			startWakeup(false);
 		}
 		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("featureUser,background,calling thread,new thread=" + featureUser + "," + background + "," + Thread.currentThread() + "," + netThread);}
+		if (fineLoggable) {logger.fine("cmdFeatureUser,background,calling thread,new thread=" + cmdFeatureUser + "," + background + "," + Thread.currentThread() + "," + netThread);}
 		//#endif
     }
 
@@ -167,8 +184,13 @@ public class FeatureMgr implements CommandListener, Runnable {
 							promptAlert.setCommandListener(this);
 							midlet.setCurrent(promptAlert, formAlert);
 						} else if (cdisp.equals(disp)) {
-							((CommandListener)featureUser).commandAction(ccmd, disp);
-							featureUser.run();
+							//#ifdef DLOGGING
+							if (fineLoggable) {logger.fine("Equal cdisp,disp,cmdFeatureUser=" + ccmd.getLabel() + "," + cdisp + "," + disp + "," + cmdFeatureUser);}
+							//#endif
+							cmdFeatureUser.commandAction(ccmd, cdisp);
+							if (background && (runFeatureUser != null)) {
+								runFeatureUser.run();
+							}
 						}
 						if (!cdisp.equals(disp)) {
 							//#ifdef DLOGGING
@@ -187,8 +209,10 @@ public class FeatureMgr implements CommandListener, Runnable {
 									}
 									//#endif
 									midlet.setCurrent(disp);
-									((CommandListener)featureUser).commandAction(corigCmd, disp);
-									featureUser.run();
+									cmdFeatureUser.commandAction(corigCmd, disp);
+									if (background && (runFeatureUser != null)) {
+										runFeatureUser.run();
+									}
 								} else if (ccmd.getCommandType() == Command.CANCEL) {
 									midlet.setCurrent(disp);
 								}
@@ -210,16 +234,17 @@ public class FeatureMgr implements CommandListener, Runnable {
 						}
 					}
 				} else {
-					featureUser.run();
+					if (background && (runFeatureUser != null)) {
+						runFeatureUser.run();
+					}
 				}
 				lngStart = System.currentTimeMillis();
 				lngTimeTaken = System.currentTimeMillis()-lngStart;
 				if(lngTimeTaken<100L) {
 					synchronized(this) {
-						if (!needWakeup) {
+						if (loop-- <= 0) {
 							super.wait(75L-lngTimeTaken);
 						}
-						needWakeup = false;
 					}
 				}
 			} catch (InterruptedException e) {
@@ -237,10 +262,14 @@ public class FeatureMgr implements CommandListener, Runnable {
 		startWakeup(true);
 	}
 
-	public void startWakeup(boolean wakeup) {
+	public void startWakeup(boolean wakeupThread) {
 		if ( (netThread == null) || !netThread.isAlive() ) {
 			try {
+				//#ifdef DCLDCV11
+				netThread = new Thread(this, disp.getClass().getName());
+				//#else
 				netThread = new Thread(this);
+				//#endif
 				netThread.start();
 			} catch (Exception e) {
 				System.err.println("Could not restart thread.");
@@ -253,16 +282,16 @@ public class FeatureMgr implements CommandListener, Runnable {
 			logger.info(this.getClass().getName() +
 					" thread not started.  Started now.");
 			//#endif
-		} else if (wakeup) {
-			wakeUp();
+		} else if (wakeupThread) {
+			wakeup(3);
 		}
 	}
 
 	/* Notify us that we are finished. */
-	public void wakeUp() {
+	public void wakeup(int loop) {
     
 		synchronized(this) {
-			needWakeup = true;
+			this.loop += loop;
 			super.notify();
 		}
 	}
