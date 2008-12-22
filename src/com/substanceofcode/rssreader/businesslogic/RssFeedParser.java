@@ -96,7 +96,7 @@ public class RssFeedParser extends URLHandler {
         
 		try {
 			super.handleOpen(url, m_rssFeed.getUsername(),
-					  m_rssFeed.getPassword());
+					  m_rssFeed.getPassword(), false);
 			if (m_needRedirect) {
 				m_needRedirect = false;
 				parseHeaderRedirect(updFeed, m_location, maxItemCount);
