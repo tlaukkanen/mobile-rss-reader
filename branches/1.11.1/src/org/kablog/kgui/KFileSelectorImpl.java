@@ -76,7 +76,10 @@
 //@		new Command("Open", Command.ITEM, 1);    
 //@
 //@	private final Command cancelCommand =
-//@		new Command("Cancel", Command.CANCEL, 2);    
+//@		new Command("Cancel", Command.CANCEL, 3);    
+//@
+//@	private final Command selectCommand =
+//@		new Command("Select", Command.ITEM, 2);    
 //@
 //@	private Vector rootsList = new Vector();
 //@
@@ -94,7 +97,9 @@
 //@	private static final boolean bDebug = false;
 	//#endif
 //@	protected boolean bCurFolderIsARoot = true;
+//@	protected boolean selectDir = false;
 //@	protected boolean itemSelected = false;
+//@	protected boolean dirSelected = false;
 //@	protected boolean cancelCmd = false;
 //@	protected Thread kThread = null;
 //@	protected RssReaderMIDlet midlet = null;
@@ -112,17 +117,6 @@
 //@		super(null, List.IMPLICIT);
 //@
 //@		try {
-//@
-			//#ifdef DTEST
-//@			if (bDebug) System.out.println("MFS building cmds....");
-			//#endif
-			//#ifdef DLOGGING
-//@			if (fineLoggable) {logger.fine("MFS building cmds....");}
-			//#endif
-//@
-//@			super.addCommand(openCommand);
-//@			super.addCommand(cancelCommand);
-//@			super.setSelectCommand(openCommand);
 //@
 			//#ifdef DTEST
 //@			if (bDebug) 
@@ -197,19 +191,37 @@
 //@		FOLDER_IMAGE = getImage(iconDir + "/folder_icon.png");
 //@		FILE_IMAGE = getImage(iconDir + "/file_icon.png");
 //@		UPDIR_IMAGE =  getImage(iconDir + "/up_dir_icon.png");
+		//#ifdef DTEST
+//@		if (bDebug) System.out.println("MFS building cmds....");
+		//#endif
+		//#ifdef DLOGGING
+//@		if (fineLoggable) {logger.fine("MFS building cmds....");}
+		//#endif
+//@
+//@		super.addCommand(openCommand);
+//@		if (selectDir) {
+//@			super.addCommand(selectCommand);
+//@		}
+//@		super.addCommand(cancelCommand);
+//@		super.setSelectCommand(openCommand);
+//@
 //@	}
 //@
 //@	// Init fields.
-//@	public void init(RssReaderMIDlet midlet, String title, String defaultDir,
-//@					 String iconDir)
+//@	public void init(RssReaderMIDlet midlet, boolean selectDir, String title,
+//@			String defaultDir, String iconDir)
 //@	{
 //@
 //@		super.setTitle(title);
 //@		this.midlet = midlet;
+//@		this.selectDir = selectDir;
 //@		super.init(midlet);
 //@		this.title = title;
 //@		this.defaultDir = defaultDir;
 //@		this.iconDir = iconDir;
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("init selectDir,title,defaultDir,iconDir=" + selectDir + "," + title + "," + defaultDir + "," + iconDir);}
+		//#endif
 //@		init();
 //@	}
 //@
@@ -219,7 +231,7 @@
 //@			try {
 //@				if (itemSelected) {
 //@					try {
-//@						openSelected();
+//@						openSelected(dirSelected);
 //@					} catch (Throwable t) {
 //@						if (midlet != null) {
 //@							Alert internalAlert = new Alert(
@@ -252,6 +264,7 @@
 				//#endif
 //@			} finally {
 //@				itemSelected = false;
+//@				dirSelected = false;
 //@			}
 //@
 //@		} catch (Throwable t) {
@@ -314,6 +327,11 @@
 //@			if (c == openCommand)
 //@			{
 //@				itemSelected = true;
+//@			}
+//@			else if (c == selectCommand)
+//@			{
+//@				itemSelected = true;
+//@				dirSelected = true;
 //@			}
 //@			else if (c == cancelCommand)
 //@			{
@@ -432,7 +450,7 @@
 //@
 //@
 //@	/* Open the selected directory or file. */
-//@	protected void openSelected()
+//@	protected void openSelected(boolean cdirSelected)
 //@	{
 //@
 //@		int selectedIndex = super.getSelectedIndex();
@@ -456,7 +474,7 @@
 //@
 //@			if (null != selectedFile)
 //@			{
-//@				if ( selectedFile.endsWith(FILE_SEPARATOR) || selectedFile.endsWith(FILE_SEPARATOR_ALT))
+//@				if (!cdirSelected && (selectedFile.endsWith(FILE_SEPARATOR) || selectedFile.endsWith(FILE_SEPARATOR_ALT)))
 //@				{
 //@					try
 //@					{
