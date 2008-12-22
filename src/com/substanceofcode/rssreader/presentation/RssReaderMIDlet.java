@@ -164,6 +164,8 @@ public class RssReaderMIDlet extends MIDlet
     private boolean     m_openPage;         // Open the headers
     private boolean     m_saveBookmarks;    // The save bookmarks flag
     private boolean     m_exit;             // The exit application flag
+    private boolean     m_saving;           // The saving settings flag
+    private boolean     m_stored;           // The data stored flag
     private boolean     m_about;            // The about flag
     private boolean     m_getModPage;       // The noticy flag for modified HTTP
     private boolean     m_getSettingsForm;  // Flag to get settings form
@@ -172,7 +174,9 @@ public class RssReaderMIDlet extends MIDlet
     private boolean     m_refreshAllFeeds;  // The notify flag for all feeds
     private boolean     m_refreshUpdFeeds;  // The notify flag for updated feeds
     private boolean     m_getImportForm;    // The noticy flag for going to Import Feed list
+    private boolean     m_getExportForm;    // The noticy flag for going to Export Feed list
     private boolean     m_getFile;          // The noticy flag for getting find files form
+    private boolean     m_selectDir;          // The noticy flag for selecting directories
     private boolean     m_runNews = false;  // Run AllNewsList form.
 	//#ifdef DTEST
 //@    // Get import form using URL from current bookmark
@@ -182,7 +186,6 @@ public class RssReaderMIDlet extends MIDlet
 //@	boolean m_headerNext = false; // Flag to control opening the next header
 //@	boolean m_itemNext = false; // Flag to control opening the next item
 	//#endif
-    private byte[]      m_addBMSave = null; // Add bookmark form save
 	//#ifdef DTESTUI
 //@	private int         m_headerIndex = -1; // Index in headers to auto test
 //@    // Index in bookmarks to auto test by opening in edit
@@ -205,7 +208,6 @@ public class RssReaderMIDlet extends MIDlet
 	// we don't want to reduce space for text.
     private Image           m_unreadImage;
     
-	private int             m_addBkmrk; // Place to add (insert) imported bookmarks
     // Currently selected bookmark
     private int             m_curBookmark;  // The currently selected item
     private RssFeedParser   m_curRssParser; // The currently selected RSS
@@ -244,6 +246,7 @@ public class RssReaderMIDlet extends MIDlet
     private Command     m_delBookmark;      // The delete bookmark command
     private Command     m_backCommand;      // The back to header list command
     private Command     m_importFeedListCmd;// The import feed list command
+    private Command     m_exportFeedListCmd;// The export feed list command
 	//#ifdef DTEST
 //@    private Command     m_importCurrFeedListCmd;// The import feed list command and default current seleected feed
 	//#endif
@@ -289,7 +292,7 @@ public class RssReaderMIDlet extends MIDlet
 //@					eHandlers.hasMoreElements();) {
 //@				Object ohandler = eHandlers.nextElement();
 //@				if (ohandler instanceof FormHandler) {
-//@					m_debug = ((FormHandler)ohandler).getForm();
+//@					m_debug = (Form)((FormHandler)ohandler).getView();
 //@					logger.finest("form=" + m_debug);
 //@				}
 //@			}
@@ -333,14 +336,15 @@ public class RssReaderMIDlet extends MIDlet
 			m_editBookmark      = new Command("Edit feed", Command.SCREEN, 4);
 			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 5);
 			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 6);
+			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, 7);
 			//#ifdef DTEST
-//@			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 6);
+//@			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 8);
 			//#endif
 			m_settingsCmd       = new Command("Settings", Command.SCREEN, 11);
 			m_aboutCmd          = new Command("About", Command.SCREEN, 12);
-			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 8);
+			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 9);
 			m_updateAllModCmd   = new Command("Update modified all",
-											  Command.SCREEN, 9);
+											  Command.SCREEN, 10);
 			//#ifdef DTESTUI
 //@			m_testEncCmd        = new Command("Testing Form", Command.SCREEN, 4);
 			//#endif
@@ -353,6 +357,8 @@ public class RssReaderMIDlet extends MIDlet
 			
 			m_getPage = false;
 			m_exit = false;
+			m_stored = false;
+			m_saving = false;
 			m_about = false;
 			m_saveBookmarks = false;
 			m_openPage = false;
@@ -363,7 +369,9 @@ public class RssReaderMIDlet extends MIDlet
 			m_refreshAllFeeds = false;
 			m_refreshUpdFeeds = false;
 			m_getImportForm = false;
+			m_getExportForm = false;
 			m_getFile = false;
+			m_selectDir = false;
 			m_curBookmark = -1;
 			CauseException ce = null;
 			
@@ -569,6 +577,7 @@ public class RssReaderMIDlet extends MIDlet
 			}
 			if (!m_novice) {
 				m_bookmarkList.addCommand( m_importFeedListCmd );
+				m_bookmarkList.addCommand( m_exportFeedListCmd );
 				//#ifdef DTEST
 //@				m_bookmarkList.addCommand( m_importCurrFeedListCmd );
 				//#endif
@@ -611,8 +620,10 @@ public class RssReaderMIDlet extends MIDlet
 						m_settings.ENCODING_VERS);
 				m_settings.getBooleanProperty(m_settings.ITEMS_ENCODED,
 							true);
+				/* FUTURE
 				final long storeDate = m_settings.getLongProperty(
 						m_settings.STORE_DATE, 0L);
+					*/
 				final char feedSeparator =
 					latestSettings ? CFEED_SEPARATOR : OLD_FEED_SEPARATOR;
 				//#ifdef DLOGGING
@@ -924,10 +935,11 @@ public class RssReaderMIDlet extends MIDlet
 			}
 
 			// Go to import feed form
-			if( m_getImportForm ) {
-				m_getImportForm = false;
+			if( m_getImportForm || m_getExportForm ) {
 				try {
-					initializeLoadingForm("Loading import form...",
+					initializeLoadingForm("Loading " +
+							(m_getImportForm ? "import" : "export") +
+							" form...",
 							m_bookmarkList);
 					//#ifdef DTEST
 //@					System.gc();
@@ -939,13 +951,14 @@ public class RssReaderMIDlet extends MIDlet
 //@						RssItunesFeed bm = (RssItunesFeed)m_rssFeeds.get(
 //@								m_bookmarkList.getString(m_curBookmark));
 //@						importFeedsForm = new ImportFeedsForm(this,
-//@								m_bookmarkList, m_rssFeeds, m_appSettings,
-//@								m_loadForm, bm.getUrl());
+//@								m_bookmarkList, m_getImportForm, m_rssFeeds,
+//@								m_appSettings, m_loadForm, bm.getUrl());
 //@					} else
 					//#endif
 					{
 						importFeedsForm = new ImportFeedsForm(this,
-								m_bookmarkList, m_rssFeeds, m_appSettings,
+								m_bookmarkList, m_getImportForm, m_rssFeeds,
+								m_appSettings,
 								m_loadForm, m_appSettings.getImportUrl());
 					}
 					importFeedsForm.setCommandListener(importFeedsForm, true);
@@ -964,8 +977,10 @@ public class RssReaderMIDlet extends MIDlet
 				} catch(Throwable t) {
 					recordExcForm("Internal error parsing feeds from:\n" +
 							m_curRssParser.getRssFeed().getUrl(), t);
+				} finally {
+					m_getImportForm = false;
+					m_getExportForm = false;
 					//#ifdef DTEST
-//@				} finally {
 //@					m_getTestImportForm = false;
 					//#endif
 				}
@@ -1028,15 +1043,10 @@ public class RssReaderMIDlet extends MIDlet
 				setCurrent( aboutAlert, m_bookmarkList );
 			}
 
-			if ( m_exit || m_saveBookmarks ) {
-				if ( m_exit ) {
-					initializeLoadingForm("Exiting saving data...",
-							m_bookmarkList);
-				} else {
-					initializeLoadingForm("Saving data...",
-							m_bookmarkList);
+			synchronized(this) {
+				if ( m_exit || m_saveBookmarks ) {
+					exitApp();
 				}
-				exitApp();
 			}
 
 		} catch (Throwable t) {
@@ -1164,17 +1174,22 @@ public class RssReaderMIDlet extends MIDlet
 		//#ifdef DJSR75
 //@		/* Find files in the file system to get for bookmark or
 //@		   import from. */
-//@		boolean cgetFile;
+//@		boolean cgetFile = false;
+//@		boolean cselectDir = false;
+//@		Form cfileRtnForm = null;
 //@		TextField   cfileURL;
 //@		synchronized(this) {
-//@			cgetFile = m_getFile;
+//@			cselectDir = m_selectDir;
+//@			cfileRtnForm = m_fileRtnForm;
 //@			cfileURL = m_fileURL;
+//@			cgetFile = m_getFile;
 //@		}
 //@		if( cgetFile ) {
 //@			try {
 //@				if (m_fileRtnForm instanceof ImportFeedsForm) {
 //@					initializeLoadingForm(
-//@							"Loading files to import from...",
+//@							"Loading files to " + (cselectDir ? "import" :
+//@								"export") + " from...",
 //@							m_fileRtnForm);
 //@				} else {
 //@					initializeLoadingForm(
@@ -1183,8 +1198,11 @@ public class RssReaderMIDlet extends MIDlet
 //@				}
 //@				final KFileSelectorMgr fileSelectorMgr =
 //@					new KFileSelectorMgr();
+				//#ifdef DLOGGING
+//@				if (finestLoggable) {logger.finest("cselectDir,cfileRtnForm,cfileURL=" + cselectDir + "," + cfileRtnForm + "," + cfileURL);}
+				//#endif
 //@				fileSelectorMgr.doLaunchSelector(this,
-//@							m_fileRtnForm, cfileURL);
+//@							cselectDir, cfileRtnForm, cfileURL);
 //@			} catch(OutOfMemoryError ex) {
 //@				recordExcForm("Out Of Memory Error getting " +
 //@						"file form.", ex);
@@ -1204,32 +1222,51 @@ public class RssReaderMIDlet extends MIDlet
 	    so it must not be called by commandAction as it may hang.  It must
 	    be called by a separate thread.  */
 	final private void exitApp() {
-		try {
-			//#ifdef DLOGGING
-//@			if (fineLoggable) {logger.fine("m_exit,m_saveBookmarks=" + m_exit + "," + m_saveBookmarks);}
-			//#endif
-			saveBkMrkSettings("Saving items to database...",
-					System.currentTimeMillis(), m_exit);
-			if (m_exit) {
-				try {
-					destroyApp(true);
-				} catch (MIDletStateChangeException e) {
-					//#ifdef DLOGGING
-//@					if (fineLoggable) {logger.fine("MIDletStateChangeException=" + e.getMessage());}
-					//#else
-					e.printStackTrace();
-					//#endif
+		synchronized(this) {
+			if ( (m_exit || m_saveBookmarks) && !m_saving ) {
+				if (m_exit && m_stored) {
+					return;
 				}
-				super.notifyDestroyed();
-				m_exit = false;
-			} else {
-				m_loadForm.appendMsg(
-						"Finished saving.  Use back to return.");
-				setCurrent( m_bookmarkList );
+				try {
+					m_saving = true;
+					//#ifdef DLOGGING
+//@					if (fineLoggable) {logger.fine("m_exit,m_saveBookmarks=" + m_exit + "," + m_saveBookmarks);}
+					//#endif
+					if ( m_exit ) {
+						initializeLoadingForm("Exiting saving data...",
+								m_bookmarkList);
+					} else if ( m_saveBookmarks ) {
+						initializeLoadingForm("Saving data...",
+								m_bookmarkList);
+					} else {
+						return;
+					}
+					saveBkMrkSettings("Saving items to database...",
+							System.currentTimeMillis(), m_exit);
+					if (m_exit) {
+						try {
+							destroyApp(true);
+						} catch (MIDletStateChangeException e) {
+							//#ifdef DLOGGING
+//@							if (fineLoggable) {logger.fine("MIDletStateChangeException=" + e.getMessage());}
+							//#else
+							e.printStackTrace();
+							//#endif
+						}
+						super.notifyDestroyed();
+						m_exit = false;
+					} else {
+						m_loadForm.appendMsg(
+								"Finished saving.  Use back to return.");
+						setCurrent( m_bookmarkList );
+					}
+				} finally {
+					m_stored = m_exit;
+					m_exit = false;
+					m_saveBookmarks = false;
+					m_saving = false;
+				}
 			}
-		} finally {
-			m_exit = false;
-			m_saveBookmarks = false;
 		}
 	}
 
@@ -1248,10 +1285,10 @@ public class RssReaderMIDlet extends MIDlet
 	}
 
 	/* Notify us that we are finished. */
-	final public void wakeUp() {
+	final public void wakeup(int loop) {
     
 		if (m_bookmarkList != null) {
-			m_bookmarkList.getFeatureMgr().wakeUp();
+			m_bookmarkList.getFeatureMgr().wakeup(loop);
 		}
 	}
 
@@ -1259,7 +1296,7 @@ public class RssReaderMIDlet extends MIDlet
 	final public void setCurrentItem(Item item) {
 		m_display.setCurrentItem(item);
 		// Prevents loading screen Display.getDisplay(this).setCurrentItem(item);
-		wakeUp();
+		wakeup(2);
 	}
 	//#endif
 
@@ -1277,7 +1314,7 @@ public class RssReaderMIDlet extends MIDlet
 		//#endif
 		m_display.setCurrent( disp );
 		// Prevents loading screen Display.getDisplay(this).setCurrent( disp );
-		wakeUp();
+		wakeup(2);
 	}
 
 	/* Set current displayable and wake up the thread. */
@@ -1331,7 +1368,7 @@ public class RssReaderMIDlet extends MIDlet
 	final public void setCurrent(Alert alert, Displayable disp) {
 		m_display.setCurrent( alert, disp );
 		// Prevents loading screen Display.getDisplay(this).setCurrent( alert, disp );
-		wakeUp();
+		wakeup(2);
 	}
 
     /** Show item form */
@@ -1671,19 +1708,22 @@ public class RssReaderMIDlet extends MIDlet
 		}
     }
     
-	/* Set flag to show find files list.
-	   fileRtnForm - Form to return to after file finished.
-	   fileURL - Text field that has URL to put file URL into as well
-	   			 as field to go back to if 2.0 is valid.
-	*/
-	final public void reqFindFiles( final Form fileRtnForm,
-								     final TextField fileURL) {
-		synchronized(this) {
-			m_fileRtnForm = fileRtnForm;
-			m_fileURL = fileURL;
-			m_getFile = true;
-		}
-	}
+	//#ifdef DJSR75
+//@	/* Set flag to show find files list.
+//@	   fileRtnForm - Form to return to after file finished.
+//@	   fileURL - Text field that has URL to put file URL into as well
+//@	   			 as field to go back to if 2.0 is valid.
+//@	*/
+//@	final public void reqFindFiles( final boolean selectDir,
+//@			final Form fileRtnForm, final TextField fileURL) {
+//@		synchronized(this) {
+//@			m_fileRtnForm = fileRtnForm;
+//@			m_fileURL = fileURL;
+//@			m_getFile = true;
+//@			m_selectDir = selectDir;
+//@		}
+//@	}
+	//#endif
 
 	/* Restore previous values. */
 	final public void restorePrevValues(Item[] items, byte[] bdata) {
@@ -1862,7 +1902,9 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Exit from MIDlet and save bookmarks */
         if( c == m_exitCommand ){
-			m_exit = true;
+			synchronized(this) {
+				m_exit = true;
+			}
         }
         
         /** Save bookmarks without exit (don't free up bookmarks)  */
@@ -1959,6 +2001,14 @@ public class RssReaderMIDlet extends MIDlet
 			m_getImportForm = true;
         }
         
+        /** Show export feed list form */
+        if( c == m_exportFeedListCmd ) {
+			// Set current bookmark so that the added feeds go after
+			// the current boolmark.
+			m_curBookmark = m_bookmarkList.getSelectedIndex();
+			m_getExportForm = true;
+        }
+        
 		//#ifdef DTEST
 //@		/** Show import feed list form and default file */
 //@		if( c == m_importCurrFeedListCmd ) {
@@ -2050,7 +2100,7 @@ public class RssReaderMIDlet extends MIDlet
 	//#ifdef DITUNES
 //@	/* Form to look at item. */
 //@	final private class DetailForm extends FeatureForm
-//@		implements CommandListener, Runnable {
+//@		implements CommandListener {
 //@		private Displayable        m_rtn;
 //@
 //@		private DetailForm (final RssItunesFeed feed, Displayable rtn ) {
@@ -2108,14 +2158,12 @@ public class RssReaderMIDlet extends MIDlet
 //@			}
 //@		}
 //@			
-//@		public void run() {}
-//@
 //@	}
 	//#endif
 
 	/* Form to look at item. */
 	final private class ItemForm extends FeatureForm
-		implements CommandListener, Runnable {
+		implements CommandListener {
 		private boolean     m_platformReq;    // Flag to get platform req open link
 		private String m_platformURL;         // Platform request URL
 		//#ifdef DMIDP20
@@ -2271,9 +2319,11 @@ public class RssReaderMIDlet extends MIDlet
 			//#ifdef DMIDP20
 			/** Go to link and get back to RSS feed headers */
 			if( c == m_openLinkCmd ){
-				final String link = citem.getLink();
-				m_platformURL = link;
-				m_platformReq = true;
+				synchronized(this) {
+					final String link = citem.getLink();
+					m_platformURL = link;
+					m_platformReq = true;
+				}
 			}
 			//#endif
 
@@ -2285,9 +2335,11 @@ public class RssReaderMIDlet extends MIDlet
 			}
 			//#endif
 			
+			execute();
+
 		}
 
-		public void run() {
+		public void execute() {
 
 			/* Handle going to link (platform request.). */
 			//#ifdef DMIDP20
@@ -2299,8 +2351,10 @@ public class RssReaderMIDlet extends MIDlet
 					if( m_midlet.platformRequest(m_platformURL) ) {
 						initializeLoadingForm("Exiting saving data...",
 								m_itemRrnForm);
-						m_exit = true;
-						exitApp();
+						synchronized(this) {
+							m_exit = true;
+							exitApp();
+						}
 					} else {
 						setCurrent( m_itemRrnForm );
 					}
@@ -2325,7 +2379,7 @@ public class RssReaderMIDlet extends MIDlet
 
 	/* Form to add new/edit existing bookmark. */
 	final private class HeaderList extends FeatureList
-		implements CommandListener, Runnable {
+		implements CommandListener {
 		private Command     m_openHeaderCmd;    // The open header command
 		private Command     m_backHeaderCmd;    // The back to bookmark list command
 		private Command     m_updateCmd;        // The update headers command
@@ -2485,10 +2539,11 @@ public class RssReaderMIDlet extends MIDlet
 //@				}
 //@			}
 			//#endif
+			execute();
 
 		}
 
-		public void run() {
+		public void execute() {
 			// Open existing bookmark and show headers (items).
 			procPage();
 		}
@@ -2499,7 +2554,7 @@ public class RssReaderMIDlet extends MIDlet
 	   allow them to be viewed separately as well as diagnostics for
 	   reporting errors. */
 	final public class LoadingForm extends FeatureForm
-		implements CommandListener, Runnable {
+		implements CommandListener {
 		//#ifdef DMIDP10
 //@		private String      m_title;         // Store title.
 		//#endif
@@ -2559,8 +2614,6 @@ public class RssReaderMIDlet extends MIDlet
 			}
 
 		}
-
-		public void run() {}
 
 		/* Show errors and diagnostics. */
 		private void showMsgs() {
