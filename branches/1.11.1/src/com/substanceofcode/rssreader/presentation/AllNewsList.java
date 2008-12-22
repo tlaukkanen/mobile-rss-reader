@@ -38,7 +38,11 @@ import java.util.Vector;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
+//#ifdef DLARGEMEM
+//@import javax.microedition.lcdui.Gauge;
+//#endif
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.StringItem;
 // If not using the test UI define the J2ME UI's
 //#ifndef DTESTUI
 import javax.microedition.lcdui.List;
@@ -65,6 +69,10 @@ import com.substanceofcode.utils.SortUtil;
 final public class AllNewsList extends FeatureList
 implements CommandListener, Runnable  {
     
+	//#ifdef DLARGEMEM
+//@    private final static int AND_VAL = 15;
+//@    private final static int DIV_VAL = 16;
+	//#endif
     private RssReaderMIDlet m_midlet;
     private boolean     m_sort      = false; // Process sort
     private boolean     m_sortDesc  = true; // Sort descending
@@ -252,6 +260,13 @@ implements CommandListener, Runnable  {
 	private void sortItems(final boolean showUnread,
 			final Vector unsortedItems) {
 
+		//#ifdef DLARGEMEM
+//@		final int diffDelta = unsortedItems.size() / DIV_VAL;
+//@		Gauge gauge = new Gauge("Preparing to sort...", false, diffDelta + 1, 0);
+//@		int gcnt = 0;
+//@		RssReaderMIDlet.LoadingForm loadingForm = m_midlet.getLoadForm();
+//@		loadingForm.append(gauge);
+		//#endif
 		this.m_showUnread = showUnread;
 		int [] indexes = new int[unsortedItems.size()];
 		long [] ldates = new long[unsortedItems.size()];
@@ -295,11 +310,34 @@ implements CommandListener, Runnable  {
 //@				}
 				//#endif
 			}
+			//#ifdef DLARGEMEM
+//@			if ((ic & AND_VAL) == 0) {
+//@				gauge.setValue(gcnt++);
+//@			}
+			//#endif
 		}
 		// Save memory by making null
 		uitems = null;
 		ufeeds = null;
-		SortUtil.sortLongs( indexes, ldates, 0, kc - 1);
+		//#ifdef DLARGEMEM
+		//#ifdef DMIDP20
+//@		gauge.setValue(diffDelta + 1);
+//@		gauge = new Gauge("Sorting...", false, Gauge.INDEFINITE,
+//@				Gauge.CONTINUOUS_RUNNING);
+//@		int gitem = loadingForm.append(gauge);
+		//#else
+//@		loadingForm.append("Sorting...\n");
+		//#endif
+		//#endif
+		SortUtil.sortLongs(indexes, ldates, 0, kc - 1);
+		//#ifdef DLARGEMEM
+		//#ifdef DMIDP20
+//@		loadingForm.set(gitem, new StringItem(null, "Sorting finished."));
+		//#endif
+//@		gauge = new Gauge("After sorting 1...", false, diffDelta + 1, 0);
+//@		loadingForm.append(gauge);
+//@		gcnt = 0;
+		//#endif
 		uitems = new RssItunesItem[kc];
 		vunsorted.copyInto(uitems);
 		// Save memory by making null
@@ -314,9 +352,20 @@ implements CommandListener, Runnable  {
 			//#endif
 			vsorted.insertElementAt(uitems[indexes[ic]], 0);
 			vfeedSorted.insertElementAt(ufeeds[indexes[ic]], 0);
+			//#ifdef DLARGEMEM
+//@			if ((ic & AND_VAL) == 0) {
+//@				gauge.setValue(gcnt++);
+//@			}
+			//#endif
 		}
 		// Save memory by making null
 		uitems = null;
+		//#ifdef DLARGEMEM
+//@		gauge.setValue(diffDelta + 1);
+//@		gauge = new Gauge("After sorting 2...", false, diffDelta + 1, 0);
+//@		loadingForm.append(gauge);
+//@		gcnt = 0;
+		//#endif
 		RssItunesItem[] sitems = new RssItunesItem[vsorted.size()];
 		vsorted.copyInto(sitems);
 		// Save memory by making null
@@ -324,9 +373,20 @@ implements CommandListener, Runnable  {
 		unsortedItems.removeAllElements();
 		for( int ic = 0; ic < sitems.length; ic++){
 			unsortedItems.addElement(sitems[ic]);
+			//#ifdef DLARGEMEM
+//@			if ((ic & AND_VAL) == 0) {
+//@				gauge.setValue(gcnt++);
+//@			}
+			//#endif
 		}
 		// Save memory by making null
 		ufeeds = null;
+		//#ifdef DLARGEMEM
+//@		gauge.setValue(diffDelta + 1);
+//@		gauge = new Gauge("After sorting 3...", false, diffDelta + 1, 0);
+//@		loadingForm.append(gauge);
+//@		gcnt = 0;
+		//#endif
 		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedSorted.size()];
 		vfeedSorted.copyInto(sfeeds);
 		// Save memory by making null
@@ -334,8 +394,16 @@ implements CommandListener, Runnable  {
 		m_itemFeeds.removeAllElements();
 		for( int ic = 0; ic < sitems.length; ic++){
 			m_itemFeeds.addElement(sfeeds[ic]);
+			//#ifdef DLARGEMEM
+//@			if ((ic & AND_VAL) == 0) {
+//@				gauge.setValue(gcnt++);
+//@			}
+			//#endif
 		}
 		fillItems( unsortedItems );
+		//#ifdef DLARGEMEM
+//@		gauge.setValue(diffDelta + 1);
+		//#endif
 	}
 
     /** Fill list from items */
@@ -343,8 +411,9 @@ implements CommandListener, Runnable  {
 		//#ifdef DMIDP20
 		super.deleteAll();
 		//#else
-//@		while(super.size()>0) {
-//@			super.delete(0);
+//@		int lc = super.size() - 1;
+//@		while(lc-- >= 0) {
+//@			super.delete(lc);
 //@		}
 		//#endif
 		final int slen = sortedItems.size();
@@ -365,7 +434,7 @@ implements CommandListener, Runnable  {
 			}
 			//#ifdef DMIDP20
 			if (addName) {
-				text = sfeeds[ic].getName() + " " + text;
+				text = "[" + sfeeds[ic].getName() + "] " + text;
 			}
 			//#endif
 			if (m_showAll && (m_unreadImage != null) &&
@@ -374,6 +443,11 @@ implements CommandListener, Runnable  {
 			} else {
 				super.append( text, null );
 			}
+		}
+		if (slen > 0) {
+			// Workaround for some phones leaving the cursor in the middle
+			// of the screen.
+			super.setSelectedIndex(0, true);
 		}
 	}
 
