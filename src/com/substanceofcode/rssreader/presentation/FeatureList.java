@@ -62,8 +62,6 @@ public class FeatureList extends List {
 
 	private Font font = null;
 
-
-
 	//#ifdef DLOGGING
 //@	private Logger logger = Logger.getLogger("FeatureList");
 //@	private boolean fineLoggable = logger.isLoggable(Level.FINE);
