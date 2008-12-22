@@ -42,7 +42,7 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class HTMLParser extends XmlParser {
     
-	private boolean m_encoding_set = false;
+	private boolean m_encodingSet = false;
 	private boolean m_headerFound = false;
 	private boolean m_metaFound = false;
 	private boolean m_bodyFound = false;
@@ -84,14 +84,14 @@ public class HTMLParser extends XmlParser {
 				case 'B':
 					m_bodyFound = elementName.toLowerCase().equals("body");
 					// Default HTML to iso-8859-1
-					if (m_bodyFound && !m_encoding_set) {
+					if (m_bodyFound && !m_encodingSet) {
 						//#ifdef DLOGGING
 						if (finerLoggable) {logger.finer("Body found without encoding set.");}
 						//#endif
 						m_encodingUtil.getEncoding(m_fileEncoding,
 								"ISO-8859-1");
 						m_docEncoding = m_encodingUtil.getDocEncoding();
-						m_encoding_set = true;
+						m_encodingSet = true;
 
 						//#ifdef DLOGGING
 						if (finerLoggable) {logger.finer("Body found m_docEncoding,m_fileEncoding=" + m_docEncoding + "," + m_fileEncoding);}
@@ -125,7 +125,7 @@ public class HTMLParser extends XmlParser {
 							m_encodingUtil.getEncoding(m_fileEncoding,
 									encoding);
 							m_docEncoding = m_encodingUtil.getDocEncoding();
-							m_encoding_set = true;
+							m_encodingSet = true;
 						} else {
 							int purl = content.toLowerCase().indexOf("url=");
 							if (purl < 0) {
