@@ -37,6 +37,7 @@
 //@import javax.microedition.midlet.MIDlet;
 //@
 //@import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+//@import com.substanceofcode.rssreader.presentation.ImportFeedsForm;
 //@
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -96,7 +97,8 @@
 //@	}
 //@        
 //@	/* Start the file selector list. */
-//@	final public void doLaunchSelector(RssReaderMIDlet midlet, Form txtFrm, TextField txtFld)
+//@	final public void doLaunchSelector(RssReaderMIDlet midlet,
+//@			boolean selectDir, Form txtFrm, TextField txtFld)
 //@	throws Throwable {
 //@
 //@		System.out.println("doLaunchSelector...");
@@ -108,7 +110,9 @@
 //@
 //@		try {
 //@			fileSelectorView = KFileSelectorFactory.getInstance(
-//@					midlet, "Find import file", null, "/icons" );
+//@					midlet,
+//@					((txtFrm instanceof ImportFeedsForm) ? "Find import file" :
+//@					 "Find feed file"), selectDir, null, "/icons" );
 //@			((KFileSelectorImpl)fileSelectorView).setCommandListener(
 //@				(KFileSelectorImpl)fileSelectorView, true);
 //@			fileSelectorView.setViewParent(this);
