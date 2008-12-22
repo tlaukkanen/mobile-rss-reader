@@ -76,10 +76,9 @@ import net.sf.jlogmicro.util.logging.Level;
 
 /* Form to add new/edit existing bookmark. */
 final public class BMForm extends URLForm
-	implements CommandListener, Runnable {
+	implements CommandListener {
     static byte[]      m_addBMSave = null; // Add bookmark form save
 	private boolean     m_addForm;          // Flag to indicate is add form
-	private Command     m_editOkCmd;        // The edit is OK
 	private TextField   m_bmName;           // The RSS feed name field
 	private FeatureList m_bookmarkList;
 
@@ -90,12 +89,12 @@ final public class BMForm extends URLForm
 			RssReaderSettings appSettings,
 			FeatureList bookmarkList,
 			RssReaderMIDlet.LoadingForm loadForm) {
-		super(midlet, "New Bookmark", rssFeeds, appSettings, loadForm);
+		super(midlet, "New Bookmark", false, rssFeeds, appSettings, loadForm);
 		this.m_addForm = true;
 		this.m_bookmarkList = bookmarkList;
 		m_bmName = new TextField("Name", "", 64, TextField.ANY);
 		super.append( m_bmName );
-		super.initAddUI("", "", "", 1, "Insert bookmark",
+		super.initAddUI("", "", "", false, null, 1, "Insert bookmark",
 						"Insert current bookmark",
 						"Add bookmark", "Add current bookmark",
 						"Append bookmark", "Append end bookmark");
@@ -112,16 +111,15 @@ final public class BMForm extends URLForm
 			FeatureList bookmarkList,
 			RssReaderMIDlet.LoadingForm loadForm,
 			final RssItunesFeed bm) {
-		super(midlet, "Edit Bookmark", rssFeeds, appSettings, loadForm);
+		super(midlet, "Edit Bookmark", false, rssFeeds, appSettings,
+				loadForm);
 		this.m_addForm = false;
 		this.m_bookmarkList = bookmarkList;
 		m_bmName = new TextField("Name", bm.getName(), 64, TextField.ANY);
 		super.append( m_bmName );
 		int initPriority = 1;
-		m_editOkCmd     = new Command("OK", Command.OK, initPriority++);
-		super.addCommand( m_editOkCmd );
-		super.initCommonUI(bm.getUrl(), bm.getUsername(), bm.getPassword(),
-				initPriority);
+		super.initCommonInputUI(bm.getUrl(), bm.getUsername(),
+				bm.getPassword(), true, null, initPriority);
 
 	}
 
@@ -169,7 +167,8 @@ final public class BMForm extends URLForm
 		}
 
 		/** Save currently edited (or added) RSS feed's properties */
-		if( c == m_editOkCmd ){
+		if( m_ok ){
+			m_ok = false;
 			saveBookmark();
 			m_loadForm.replaceRef(this, null);
 			m_midlet.showBookmarkList();
@@ -181,10 +180,7 @@ final public class BMForm extends URLForm
 			super.commandAction(c, s);
 		}
 		
-	}
-
-	public void run() {
-		super.run();
+		super.execute();
 	}
 
 }
