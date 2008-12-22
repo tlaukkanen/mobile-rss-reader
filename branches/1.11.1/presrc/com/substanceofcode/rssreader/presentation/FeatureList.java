@@ -60,7 +60,7 @@ import net.sf.jlogmicro.util.logging.Level;
 public class FeatureList extends List {
 	protected FeatureMgr featureMgr;
 
-	private Font font = null;
+	private Font font = null;
 
 	//#ifdef DLOGGING
 	private Logger logger = Logger.getLogger("FeatureList");
