@@ -1,4 +1,5 @@
 /*
+   FIX check for blank url
  * ImportFeedsForm.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
@@ -33,9 +34,17 @@
 
 package com.substanceofcode.rssreader.presentation;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
+import javax.microedition.io.ConnectionNotFoundException;
+//#ifdef DJSR75
+//@import javax.microedition.io.file.FileConnection;
+//#endif
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
@@ -62,6 +71,9 @@ import javax.microedition.lcdui.Item;
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
+//#ifdef DJSR75
+//@import com.substanceofcode.rssreader.businesslogic.URLHandler;
+//#endif
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
@@ -105,6 +117,7 @@ final public class ImportFeedsForm extends URLForm
 	//#endif
     private Hashtable m_rssFeeds;         // The bookmark URLs
     private FeatureList  m_bookmarkList;     // The bookmark list
+    final private boolean m_importFeeds;
     private RssReaderMIDlet.LoadingForm m_loadForm; // The application settings
 	//#ifdef DLOGGING
 //@    private Logger m_logger = Logger.getLogger("ImportFeedsForm");
@@ -116,74 +129,168 @@ final public class ImportFeedsForm extends URLForm
 	/* Constructor */
     /** Initialize import form */
 	public ImportFeedsForm(RssReaderMIDlet midlet,
-			FeatureList bookmarkList,
+			FeatureList bookmarkList, boolean importFeeds,
 			Hashtable rssFeeds,
 			RssReaderSettings appSettings,
 			RssReaderMIDlet.LoadingForm loadForm, String url) {
-		super(midlet, "Import feeds", rssFeeds, appSettings, loadForm);
+		super(midlet, (importFeeds ? "Import" : "Export") + " feeds",
+				!importFeeds, rssFeeds, appSettings, loadForm);
 		m_bookmarkList = bookmarkList;
+		m_importFeeds = importFeeds;
 		m_rssFeeds = rssFeeds;
 		m_appSettings = appSettings;
 		m_loadForm = loadForm;
 		if(url.length()==0) {
 			url = "http://";
 		}
-		super.initAddUI(url, m_appSettings.getImportUrlUsername(),
-				m_appSettings.getImportUrlPassword(), 1,
-					"Insert import", "Insert current import",
-					"Add import", "Add current import",
-					"Append import", "Append end import");
+		String[] formats = null;
 
-		String[] formats = {"OPML", "line by line", "HTML OPML Auto link",
-							"HTML RSS Auto links", "HTML Links"};
-		m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
-		super.append(m_importFormatGroup);
-		
-		m_feedNameFilter = new TextField("Name filter string (optional)", "", 256, TextField.ANY);
-		super.append(m_feedNameFilter);
-		m_feedURLFilter = new TextField("URL filter string (optional)", "", 256, TextField.ANY);
-		super.append(m_feedURLFilter);
-		
-		String[] titleInfo =
-				{"Skip feed with missing title",
-				 "Get missing titles from feed"};
-		m_importTitleGroup  = new ChoiceGroup("Missing title (optionl)",
-				ChoiceGroup.EXCLUSIVE, titleInfo, null);
-		super.append(m_importTitleGroup);
-		String[] HTMLInfo =
-				{"Redirect if HTML (ignored for HTML link import)",
-				 "Treat HTML as import"};
-		m_importHTMLGroup  =
-			new ChoiceGroup("Treat HTML mime type as valid import (optional)",
-				ChoiceGroup.EXCLUSIVE, HTMLInfo, null);
-		super.append(m_importHTMLGroup);
-		m_importOvrGroup  = new ChoiceGroup(
-				"Override existing feeds in place (optionl)",
-				ChoiceGroup.EXCLUSIVE,
-				new String[] {"Don't override existing feeds.",
-				 "Override (replace) existing feeds."},
-				null);
-		super.append(m_importOvrGroup);
-		if (ImportFeedsForm.m_importSave != null) { 
-			Item[] items = {m_importFormatGroup, m_feedNameFilter,
-				m_feedURLFilter, m_UrlUsername, m_UrlPassword,
-				m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup}; 
-			m_midlet.restorePrevValues(items, ImportFeedsForm.m_importSave);
+		if (m_importFeeds) {
+			super.initAddUI(url, m_appSettings.getImportUrlUsername(),
+					m_appSettings.getImportUrlPassword(), false, null, 1,
+						"Insert import", "Insert current import",
+						"Add import", "Add current import",
+						"Append import", "Append end import");
+			formats = new String[] {"OPML", "line by line", "HTML OPML Auto link",
+								"HTML RSS Auto links", "HTML Links"};
+		} else {
+			super.initUrlUI(url, true,
+					"Are you sure you want to export?  \r\n" +
+					"This can cause endless prompts on some phones.", 1);
+			formats = new String[] {"OPML", "line by line"};
 		}
+		m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
+
+		super.append(m_importFormatGroup);
+		if (m_importFeeds) {
 		
-		//#ifdef DTESTUI
-//@		m_testImportCmd     = new Command("Test bookmarks imported", Command.SCREEN, 9);
-//@		super.addCommand( m_testImportCmd );
-		//#endif
+			m_feedNameFilter = new TextField("Name filter string (optional)", "", 256, TextField.ANY);
+			super.append(m_feedNameFilter);
+			m_feedURLFilter = new TextField("URL filter string (optional)", "", 256, TextField.ANY);
+			super.append(m_feedURLFilter);
+			
+			String[] titleInfo =
+					{"Skip feed with missing title",
+					 "Get missing titles from feed"};
+			m_importTitleGroup  = new ChoiceGroup("Missing title (optionl)",
+					ChoiceGroup.EXCLUSIVE, titleInfo, null);
+			super.append(m_importTitleGroup);
+			String[] HTMLInfo =
+					{"Redirect if HTML (ignored for HTML link import)",
+					 "Treat HTML as import"};
+			m_importHTMLGroup  =
+				new ChoiceGroup("Treat HTML mime type as valid import (optional)",
+					ChoiceGroup.EXCLUSIVE, HTMLInfo, null);
+			super.append(m_importHTMLGroup);
+			m_importOvrGroup  = new ChoiceGroup(
+					"Override existing feeds in place (optionl)",
+					ChoiceGroup.EXCLUSIVE,
+					new String[] {"Don't override existing feeds.",
+					 "Override (replace) existing feeds."},
+					null);
+			super.append(m_importOvrGroup);
+			if (ImportFeedsForm.m_importSave != null) { 
+				Item[] items = {m_importFormatGroup, m_feedNameFilter,
+					m_feedURLFilter, m_UrlUsername, m_UrlPassword,
+					m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup}; 
+				m_midlet.restorePrevValues(items, ImportFeedsForm.m_importSave);
+			}
+		
+			//#ifdef DTESTUI
+//@			m_testImportCmd     = new Command("Test bookmarks imported", Command.SCREEN, 9);
+//@			super.addCommand( m_testImportCmd );
+			//#endif
+		}
 
 	}
 
 	/** Run method is used to get RSS feed with HttpConnection */
 	public void run() {
 
-		super.run();
+		super.execute();
 
-		/* Use networking if necessary */
+		//#ifdef DJSR75
+//@		if (m_ok) {
+//@			m_ok = false; System.out.println("here exp 1");
+//@			final String url = m_url.getString().trim(); System.out.println("here exp 2");
+			//#ifdef DLOGGING
+//@			if (m_finestLoggable) {m_logger.finest("Writing to url=" + url);}
+			//#endif
+//@			URLHandler uhandler = new URLHandler(); System.out.println("here exp 6");
+//@			OutputStreamWriter osw = null; System.out.println("here exp 7");
+//@			try {
+//@				uhandler.handleOpen(url, null, null, true); System.out.println("here exp 9");
+//@				OutputStream os = uhandler.getOutputStream(); System.out.println("here exp 10");
+//@				// On many devices, writing to a file gives a propmt for
+//@				// each write to the file which is very annoying, so
+//@				// we put data into a StringBuffer and then to the file
+//@				// all at once.
+//@				StringBuffer sb = new StringBuffer(); System.out.println("here exp 14");
+//@				try {
+//@					osw = new OutputStreamWriter(os, "UTF-8"); System.out.println("here exp 16");
+//@				} catch (UnsupportedEncodingException e) {
+//@					osw = new OutputStreamWriter(os); System.out.println("here exp 18");
+					//#ifdef DLOGGING
+//@					m_logger.severe("run Unable to use UTF-8 for export", e);
+					//#endif
+//@				}
+//@				int selectedImportType = m_importFormatGroup.getSelectedIndex(); System.out.println("here exp 22");
+//@				if (selectedImportType == 0) {
+//@					sb.append("<opml version=\"1.0\">\n<head>\n" +
+//@							"<title>Rss Reader subscriptions</title>\n" +
+//@							"</head>\n<body>\n"); System.out.println("here exp 26");
+//@				}
+//@				// Line by line is URL followed by name
+//@				final int blen = m_bookmarkList.size(); System.out.println("here exp 29");
+//@				for (int i = 0; i < blen; i++) {
+//@					final RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
+//@							m_bookmarkList.getString(i)); System.out.println("here exp 31");
+//@					if (selectedImportType == 0) {
+//@						sb.append("<outline title=" + feed.getName() +
+//@							" text=" + feed.getName() + ">\n" +
+//@						"    <outline text=\"" + feed.getName() +
+//@							"\" title=" + feed.getName() + "\" type=\"rss\"\n" +
+//@						"xmlUrl=\"" + feed.getUrl() + "\" htmlUrl='\"" + feed.getUrl() +
+//@						"\"/>\n</outline>\n"); System.out.println("here exp 38");
+//@					} else {
+//@						sb.append(feed.getUrl() + " " + feed.getName()); System.out.println("here exp 40");
+//@					}
+//@				}
+//@				if (selectedImportType == 0) {
+//@					sb.append("<body>\n</opml>\n"); System.out.println("here exp 44");
+//@				}
+				//#ifdef DLOGGING
+//@				if (m_finestLoggable) {m_logger.finest("Export sb.length()=" + sb.length());}
+				//#endif
+//@				osw.write(sb.toString()); System.out.println("here exp 46");
+//@				m_midlet.setCurrent( m_bookmarkList ); System.out.println("here exp 47");
+//@			} catch(IllegalArgumentException ex) {
+//@				m_midlet.recordExcForm("Invalid url:  " + url, ex); System.out.println("here exp 49");
+//@			} catch(ConnectionNotFoundException ex) {
+//@				m_midlet.recordExcForm("Invalid connection or url:  " + url, ex); System.out.println("here exp 51");
+//@			} catch(IOException ex) {
+//@				m_midlet.recordExcForm("Error exporting feeds to " + url, ex); System.out.println("here exp 53");
+//@			} catch(SecurityException ex) {
+//@				m_midlet.recordExcForm("Security error exporting feeds to " + url, ex); System.out.println("here exp 55");
+//@			} catch(Throwable t) {
+//@				m_midlet.recordExcForm("Internal error exporting feeds to " +
+//@						url, t); System.out.println("here exp 58");
+//@			} finally {
+//@				uhandler.handleClose(); System.out.println("here exp 60");
+//@				if (osw != null) {
+//@					try {
+//@						osw.close(); System.out.println("here exp 63");
+//@					} catch (IOException e) {
+						//#ifdef DLOGGING
+//@						m_logger.severe("Can't close output file.", e); System.out.println("here exp 66");
+						//#endif
+//@						e.printStackTrace(); System.out.println("here exp 68");
+//@					}
+//@				}
+//@			}
+//@		}
+		//#endif
+
 		// Add feeds from import.
 
 		if( m_getFeedList ) {
@@ -261,7 +368,7 @@ final public class ImportFeedsForm extends URLForm
 						url, ex);
 			} catch(Throwable t) {
 				m_listParser = null;
-				m_midlet.recordExcForm("Out Of Memory Error importing feeds from " +
+				m_midlet.recordExcForm("Internal error importing feeds from " +
 						url, t);
 			}
 		}
