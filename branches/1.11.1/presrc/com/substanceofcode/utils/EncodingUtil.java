@@ -116,7 +116,9 @@ final public class EncodingUtil {
 
 	// Convert uni chars to equivalent windows characters in the 0x80 - 0x9f
 	// range.
+	/* FUTURE?
 	private static char[] m_uniWinConvx80 = initUniWinConvx80();
+	*/
 
 	// See if windows cp-1252 is supported.
 	private static boolean m_hasWinEncoding = hasWinEncoding();
@@ -148,7 +150,9 @@ final public class EncodingUtil {
     private static final char CRIGHT_DBL_QUOTE = 0x201D;
     public static final char CDBL_LOW9_QUOTE = 0x201E;
     public static final char CA_UMLAUTE = (char)228;
+	/* FUTURE?
     private static final char CO_UMLAUTE = (char)246;
+	*/
     public static final char CNON_BREAKING_SP = (char)160;
     
     private EncodingStreamReader m_encodingStreamReader;
