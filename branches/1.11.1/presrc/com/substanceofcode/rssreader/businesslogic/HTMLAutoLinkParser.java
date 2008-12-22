@@ -122,8 +122,10 @@ public class HTMLAutoLinkParser extends FeedListParser {
 				return null;
 			}
             
+			/* FUTURE?
 			boolean windows = parser.isWindows();
 			boolean utf = parser.isUtf();
+			*/
 			boolean process = true;
 			boolean bodyFound = false;
             do {
@@ -142,10 +144,12 @@ public class HTMLAutoLinkParser extends FeedListParser {
 							continue;
 						}
 						bodyFound = parser.isBodyFound();
+						/* FUTURE?
 						if (bodyFound) {
-							windows = parser.isWindows();
-							utf = parser.isUtf();
+							   windows = parser.isWindows();
+							   utf = parser.isUtf();
 						}
+						 */
 						// If looking for OPML link, it is in header.
 						if ((!needRss || needFirstRss) && bodyFound) {
 							process = false;
