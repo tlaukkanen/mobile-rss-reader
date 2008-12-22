@@ -198,7 +198,9 @@ final public class UiUtil implements CommandListener {
 			//#else
 			m_midlet.setCurrent( m_urlRrnForm );
 			//#endif
+			// Free memory
 			m_urlRrnForm = null;
+			// Free memory
 			m_urlRrnItem = null;
 		}
 		
@@ -211,6 +213,7 @@ final public class UiUtil implements CommandListener {
 			//#else
 			m_midlet.setCurrent( m_urlRrnForm );
 			//#endif
+			// Free memory
 			m_urlRrnForm = null;
 			m_urlRrnItem = null;
 		}
