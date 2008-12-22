@@ -58,7 +58,6 @@ public class RssItunesItem extends RssItem {
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
 	// can later be modified to contain them).
-    final private static int INT_ITUNES_INDICATOR = NBR_ITUNES_INFO;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("RssItunesItem");
 	//#endif
