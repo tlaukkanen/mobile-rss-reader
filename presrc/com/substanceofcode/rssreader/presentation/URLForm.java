@@ -82,11 +82,13 @@ import net.sf.jlogmicro.util.logging.Level;
  * @author Tommi Laukkanen
  */
 public class URLForm extends FeatureForm
-	implements CommandListener, Runnable {
+	implements CommandListener {
 
+	protected boolean     m_ok = false;      // The ok flag
 	protected boolean     m_cancel = false;      // The cancel flag
 	protected boolean     m_clear = false;      // The clear flag
 	//#ifdef DJSR75
+	protected boolean     m_selectDir = false;  // The select directory flag
 	protected boolean     m_fileReq = false;      // The get file flag
 	//#endif
 	protected int         m_addBkmrk = 0;// Place to add (insert) imported bookmarks
@@ -118,11 +120,15 @@ public class URLForm extends FeatureForm
 
 	/** Initialize import form */
 	public URLForm(RssReaderMIDlet midlet, String formName,
+			boolean selectDir,
 			Hashtable rssFeeds,
 			RssReaderSettings appSettings,
 			RssReaderMIDlet.LoadingForm loadForm) {
 		super(midlet, formName);
 		m_midlet = midlet;
+		//#ifdef DJSR75
+		m_selectDir = selectDir;
+		//#endif
 		m_rssFeeds = rssFeeds;
 		m_appSettings = appSettings;
 		m_loadForm = loadForm;
@@ -134,7 +140,7 @@ public class URLForm extends FeatureForm
    *
    * @author Irv Bunton
    */
-	public void initCommonUI(String url, String username, String password,
+	public void initUrlUI(String url, boolean hasOK, String okPrompt,
 			int initPriority) {
 		if(url.length()==0) {
 			url = "http://";
@@ -142,14 +148,17 @@ public class URLForm extends FeatureForm
 		m_url = new TextField("URL", url, 256, TextField.URL);
 		super.append(m_url);
 		
-		m_UrlUsername  = new TextField("Username (optional)", username, 64, TextField.ANY);
-		super.append(m_UrlUsername);
-		
-		m_UrlPassword  = new TextField("Password (optional)", password, 64, TextField.PASSWORD);
-		super.append(m_UrlPassword);
-		/* Cancel */
 		Command cancelCmd = new Command("Cancel", Command.CANCEL,
 				initPriority++);
+		if (hasOK) {
+			if (okPrompt != null) {
+				super.addPromptCommand(new Command("OK", Command.OK, initPriority++),
+						okPrompt);
+			} else {
+				super.addCommand(new Command("OK", Command.OK, initPriority++));
+			}
+		}
+
 		//#ifdef DJSR75
 		/* Find files */
 		m_fileCmd     = new Command("Find files", Command.SCREEN,
@@ -172,8 +181,26 @@ public class URLForm extends FeatureForm
 		//#endif
 	}
 
+  /**
+   *
+   * Initialize UI elements
+   *
+   * @author Irv Bunton
+   */
+	public void initCommonInputUI(String url, String username, String password,
+			boolean hasOK, String okPrompt, int initPriority) {
+		initUrlUI(url, hasOK, okPrompt, initPriority);
+		
+		m_UrlUsername  = new TextField("Username (optional)", username, 64, TextField.ANY);
+		super.append(m_UrlUsername);
+		
+		m_UrlPassword  = new TextField("Password (optional)", password, 64, TextField.PASSWORD);
+		super.append(m_UrlPassword);
+		
+	}
+
 	public void initAddUI(String url, String username, String password,
-			int initPriority,
+			boolean hasOK, String okPrompt, int initPriority,
 			String insLabel, String insLongLabel,
 			String addLabel, String addLongLabel,
 			String appendLabel, String appendLongLabel) {
@@ -202,11 +229,11 @@ public class URLForm extends FeatureForm
 		super.addCommand( m_appndCmd );
 		super.addCommand( m_clearCmd );
 
-		initCommonUI(url, username, password, initPriority);
+		initCommonInputUI(url, username, password, hasOK, okPrompt, initPriority);
 	}
 
 	/** Respond to commands */
-	public void run() {
+	public void execute() {
 
 		if (m_clear) {
 			m_clear = false;
@@ -234,14 +261,14 @@ public class URLForm extends FeatureForm
 				return;
 			}
 			try {
-				m_midlet.reqFindFiles( this, m_url);
+				m_midlet.reqFindFiles( m_selectDir, this, m_url);
 				m_midlet.getFile();
 			}catch(Throwable t) {
 				//#ifdef DLOGGING
-				m_logger.severe("RssReaderMIDlet find files ", t);
+				m_logger.severe("URLForm find files ", t);
 				//#endif
 				/** Error while executing find files */
-				System.out.println("RssReaderMIDlet find files " + t.getMessage());
+				System.out.println("URLForm find files " + t.getMessage());
 				t.printStackTrace();
 			}
 		}
@@ -258,6 +285,11 @@ public class URLForm extends FeatureForm
 			m_clear = true;
 		}
 
+		/** OK accept input */
+		if ( commandType == Command.OK ) {
+			m_ok = true;
+		}
+		
 		/** Cancel currently edited (or added) RSS feed's properties */
 		if ( commandType == Command.CANCEL ) {
 			m_cancel = true;
