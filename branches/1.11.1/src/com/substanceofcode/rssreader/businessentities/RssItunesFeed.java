@@ -60,7 +60,6 @@ public class RssItunesFeed extends RssFeed{
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
 	// can later be modified to contain them).
-    private static int INT_ITUNES_INDICATOR = NBR_ITUNES_FEED_INFO;
     private boolean m_itunes = false;
     protected String m_title = "";
     protected String m_description = "";
