@@ -10,6 +10,8 @@ testui.presrc = ../testpresrc
 #Copy from src copy.jar.src = true
 #Copy from src jarsrc = ../../../JLogMicro/src
 jar.presrc = ../../../JLogMicro/jlogmicro/presrc
+#undo
+jar.presrc = ../../../../JLogMicro/jlogmicro/presrc
 need.test.res = true
 res.test.dir = ../testdata
 res.test.todir = 
