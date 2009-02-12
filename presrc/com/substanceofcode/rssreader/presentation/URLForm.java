@@ -108,7 +108,8 @@ public class URLForm extends FeatureForm
 	protected RssReaderMIDlet m_midlet;       // The application midlet
 	protected Hashtable m_rssFeeds;         // The bookmark URLs
 	protected RssReaderSettings m_appSettings;// The application settings
-	protected RssReaderMIDlet.LoadingForm m_loadForm; // The application settings
+	// The loading form
+	protected RssReaderMIDlet.LoadingForm m_loadForm;
 	protected Thread m_thread = null; // The thread
 
 	//#ifdef DLOGGING
@@ -298,7 +299,7 @@ public class URLForm extends FeatureForm
 		//#ifdef DMIDP20
 		/** Put current bookmark URL into URL box.  */
 		if( c == m_pasteURLCmd ) {
-			new UiUtil().initializeURLBox( m_midlet, m_url.getString(),
+			FeatureMgr.initializeURLBox( m_midlet, m_url.getString(),
 					this, m_url );
 		}
 		//#endif
