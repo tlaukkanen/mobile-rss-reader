@@ -37,8 +37,10 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class StringUtil {
     
+    private final static String breakTags = "<p><br><td><p/><br/><td/>";
+
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("HTMLParser");
+    private Logger logger = Logger.getLogger("StringUtil");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finerLoggable = logger.isLoggable(Level.FINER);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
@@ -126,15 +128,11 @@ public class StringUtil {
 		boolean finerLoggable = logger.isLoggable(Level.FINER);
 		//#endif
         try{
-            int idx = text.indexOf('<');
-            if (idx == -1) return text;
-            
+			if (text == null) { return null; }
             StringBuffer plainText = new StringBuffer();
-            String htmlText = text;
+            String htmlText = text.trim();
             int htmlStartIndex = htmlText.indexOf('<');
-            if(htmlStartIndex == -1) {
-                return text;
-            }
+			if (htmlStartIndex == -1) { return text; }
             while (htmlStartIndex>=0) {
                 plainText.append(htmlText.substring(0,htmlStartIndex));
                 int htmlEndIndex = htmlText.indexOf('>', htmlStartIndex);
@@ -145,15 +143,56 @@ public class StringUtil {
 					if (finerLoggable) {logger.finer("No end > for htmlStartIndex,htmlText=" + htmlStartIndex + "," + htmlText);}
 					if (finerLoggable) {logger.finer("plainText=" + plainText);}
 					//#endif
-					break;
+					return plainText.toString().trim();
+				}
+                final int html1stSpaceIndex = htmlText.indexOf(' ',
+						htmlStartIndex);
+                int htmlTagEndIndex;
+                int startTagLen;
+                int tagLen;
+				if ((html1stSpaceIndex > 0) &&
+						(htmlEndIndex > html1stSpaceIndex)) {
+					startTagLen = html1stSpaceIndex - htmlStartIndex;
+					htmlTagEndIndex = htmlText.lastIndexOf(' ',
+						htmlEndIndex) + 1;
+					tagLen = startTagLen + htmlEndIndex - htmlTagEndIndex + 1;
+				} else {
+					startTagLen = htmlEndIndex - htmlStartIndex;
+					htmlTagEndIndex = htmlEndIndex;
+					tagLen = startTagLen + 1;
+				}
+				try {
+					if ((3 <= tagLen) && (tagLen <= 5)) {
+						final String tag = htmlText.substring(htmlStartIndex,
+								htmlStartIndex + startTagLen) +
+							htmlText.substring(htmlTagEndIndex,
+									htmlEndIndex + 1);
+						if (breakTags.indexOf(tag) >= 0) {
+							plainText.append(" ");
+						}
+					}
+				} catch(Exception e) {
+					CauseException ce = new CauseException("Error while removing HTML and break: " +
+									   e.getClass().getName() + " " + e.toString());
+					//#ifdef DLOGGING
+					logger.severe(e.getMessage(), ce);
+					//#endif
+					System.err.println(ce.getMessage());
+					e.printStackTrace();
 				}
                 htmlText = htmlText.substring(htmlEndIndex+1);
                 htmlStartIndex = htmlText.indexOf('<');
             }
+			plainText.append(htmlText);
             return plainText.toString().trim();
         } catch(Exception e) {
-            System.err.println("Error while removing HTML: " +
-					           e.getClass().getName() + " " + e.toString());
+			CauseException ce = new CauseException("Error while removing HTML: " +
+							   e.getClass().getName() + " " + e.toString());
+			//#ifdef DLOGGING
+			logger.severe(e.getMessage(), ce);
+			//#endif
+			System.err.println(ce.getMessage());
+			e.printStackTrace();
             return text;
         }
     }
