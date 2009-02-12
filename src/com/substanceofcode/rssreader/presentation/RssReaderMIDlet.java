@@ -1273,6 +1273,13 @@ public class RssReaderMIDlet extends MIDlet
 
 	//#ifdef DMIDP20
 	final public void setCurrentItem(Item item) {
+		// To prevent loading form from being displayed instead of the
+		// next form when that form has no items, show the load form
+		// again as a workaround.
+		if ((m_loadForm != null) &&
+				(m_display.getCurrent() == m_loadForm)) {
+			m_display.setCurrent(m_loadForm);
+		}
 		m_display.setCurrentItem(item);
 		// Prevents loading screen Display.getDisplay(this).setCurrentItem(item);
 		wakeup(2);
