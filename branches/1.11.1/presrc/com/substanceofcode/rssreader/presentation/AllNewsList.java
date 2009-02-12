@@ -48,6 +48,7 @@ import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.List;
 //#else
 import com.substanceofcode.testlcdui.List;
+import com.substanceofcode.testlcdui.LogActIntr;
 //#endif
 // If using the test UI define the Test UI's
 
@@ -62,56 +63,56 @@ import net.sf.jlogmicro.util.logging.LogManager;
 import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
-/**
- *
- * @author Tommi Laukkanen
- */
-final public class AllNewsList extends FeatureList
-implements CommandListener, Runnable  {
-    
+/* Form to add new/edit existing bookmark. */
+public class AllNewsList extends FeatureList
+	implements CommandListener, Runnable {
+
+    protected Image       m_unreadImage;
+	protected Command     m_openHeaderCmd;    // The open header command
+	protected Command     m_backHeaderCmd;    // The back to bookmark list command
+    protected int       m_offset;             // Offset into bookmarkList
+    protected int       m_len;                // length from offset above
 	//#ifdef DLARGEMEM
-    private final static int AND_VAL = 15;
-    private final static int DIV_VAL = 16;
+    protected final static int AND_VAL = 15;
+    protected final static int DIV_VAL = 16;
 	//#endif
-    private RssReaderMIDlet m_midlet;
-    private boolean     m_sort      = false; // Process sort
-    private boolean     m_sortDesc  = true; // Sort descending
-    private boolean     m_sortByDate = true; // Sort by date
-    private boolean     m_showAll = false;  // Show both read and unread.
-    private boolean     m_showUnread = false;  // Show unread.
+    protected RssReaderMIDlet m_midlet;
+	// The loading form
+	protected RssReaderMIDlet.LoadingForm m_loadForm;
+    protected boolean     m_sort      = false; // Process sort
+    protected boolean     m_sortDesc  = true; // Sort descending
+    protected boolean     m_sortByDate = true; // Sort by date
+    protected boolean     m_showAll = false;  // Show both read and unread.
+    protected boolean     m_showUnread = false;  // Show unread.
 	//#ifdef DTESTUI
-    private boolean     m_testNews = false;     // True if auto testing news.
+    protected boolean     m_testNews = false;     // True if auto testing news.
 	boolean m_newsNext = false; // Flag to control opening the next header
 	boolean m_itemNext = false; // Flag to control opening the next item
 	//#endif
 	//#ifdef DTESTUI
-	private int         m_newsIndex = -1; // Index in headers to auto test
-	private int         m_newsLen = -1; // Length of headers
+	protected int         m_newsIndex = -1; // Index in headers to auto test
 	//#endif
-    private Image       m_unreadImage;
-    private List m_bookmarkList;
-    private Hashtable m_rssFeeds;
-    private final static String TITLE = "River of News";
-    private Command     m_openUnreadHdrCmd;    // The open header command
-    private Command     m_sortUnreadItemsCmd;  // The sort unread items by date command
-    private Command     m_sortReadItemsCmd;  // The sort read items by date command
-    private Command     m_sortUnreadFeedsCmd;  // The sort unread items by feed command
-    private Command     m_sortReadFeedsCmd;  // The sort read items by feed command
-    private Command     m_sortAllDateCmd;  // The sort all items by date command
-    private Command     m_sortAllFeedsCmd;  // The sort read items by feed command
-    private Command     m_markReadCmd;      // Mark the item as read
-    private Command     m_markUnReadCmd;    // Mark the item as unread
-    private Command     m_directionCmd;    // Direction of sort asc/desc
-    private Command     m_backUnreadHdrCmd;    // The back to bookmark list command
+    protected FeatureList m_bookmarkList;
+    protected Hashtable m_rssFeeds;
+    public final static String TITLE = "River of News";
+    protected Command     m_sortUnreadItemsCmd;  // The sort unread items by date command
+    protected Command     m_sortReadItemsCmd;  // The sort read items by date command
+    protected Command     m_sortUnreadFeedsCmd;  // The sort unread items by feed command
+    protected Command     m_sortReadFeedsCmd;  // The sort read items by feed command
+    protected Command     m_sortAllDateCmd;  // The sort all items by date command
+    protected Command     m_sortAllFeedsCmd;  // The sort read items by feed command
+    protected Command     m_markReadCmd;      // Mark the item as read
+    protected Command     m_markUnReadCmd;    // Mark the item as unread
+    protected Command     m_directionCmd;    // Direction of sort asc/desc
 	//#ifdef DTESTUI
-	private Command     m_testNewsCmd;       // Tet UI rss news command
+	protected Command     m_testNewsCmd;       // Tet UI rss news command
 	//#endif
-    private Vector      m_itemFeeds = new Vector();
-    private Vector      m_allItems = new Vector();
-    private Vector      m_unreadItems = new Vector();
-    private Vector      m_readItems = new Vector();
-    private RssItunesItem m_item;
-    private RssItunesFeed m_feed;
+    protected Vector      m_itemFeeds = new Vector();
+    protected Vector      m_allItems = new Vector();
+    protected Vector      m_unreadItems = new Vector();
+    protected Vector      m_readItems = new Vector();
+    protected RssItunesItem m_item;
+    protected RssItunesFeed m_feed;
 
 	//#ifdef DLOGGING
     private Logger m_logger = Logger.getLogger("AllNewsList");
@@ -122,39 +123,50 @@ implements CommandListener, Runnable  {
     
     /** Creates a new instance of AllNewsList
 	    unreadImage - if non-null, put image for unread items for all list. */
-    public AllNewsList(final RssReaderMIDlet midlet,
-					   final List bookmarkList, final Hashtable rssFeeds,
-					   Image unreadImage) {
-
-        super(midlet, TITLE, List.IMPLICIT);
-		m_midlet = midlet;
-		m_bookmarkList = bookmarkList;
-		m_rssFeeds = rssFeeds;
-		m_unreadImage = unreadImage;
+	public AllNewsList(final RssReaderMIDlet midlet, String title,
+			int listType, int offset, int len,
+					   final FeatureList bookmarkList,
+					   final Hashtable rssFeeds,
+					   Image unreadImage,
+			RssReaderMIDlet.LoadingForm loadForm, int priority) {
+		super(midlet, title, listType);
 		//#ifdef DLOGGING
 		if (m_fineLoggable) {m_logger.fine("Starting AllNewsList");}
 		//#endif
-		m_openUnreadHdrCmd  = new Command("Open item", Command.SCREEN, 1);
-		m_sortUnreadItemsCmd = new Command("Unread date sorted",
-										   Command.SCREEN, 1);
-		m_sortReadItemsCmd = new Command("Read date sorted",
-										   Command.SCREEN, 2);
-		m_sortUnreadFeedsCmd = new Command("Unread feed sorted",
-										   Command.SCREEN, 3);
-		m_sortReadFeedsCmd = new Command("Read feed sorted",
-										   Command.SCREEN, 4);
-		m_sortAllDateCmd = new Command("All date sorted",
-										   Command.SCREEN, 5);
-		m_sortAllFeedsCmd = new Command("All feed sorted",
-										   Command.SCREEN, 6);
-		m_markReadCmd = new Command("Mark read", Command.SCREEN, 7);
-		m_markUnReadCmd = new Command("Mark unread", Command.SCREEN, 8);
-		m_directionCmd = new Command("Sort ascending", Command.SCREEN, 9);
-		m_backUnreadHdrCmd  = new Command("Back", Command.BACK, 10);
-		//#ifdef DTESTUI
-		m_testNewsCmd        = new Command("Test news/items", Command.SCREEN, 11);
+
+		m_midlet = midlet;
+		m_offset = offset;
+		m_len = len;
+		m_loadForm = loadForm;
+		m_bookmarkList = bookmarkList;
+		m_rssFeeds = rssFeeds;
+		m_unreadImage = unreadImage;
+		final boolean open1st = midlet.getSettings().getFeedListOpen();
+		//#ifdef DLOGGING
+		if (m_fineLoggable) {m_logger.fine("initheader open1st=" + open1st);}
 		//#endif
-        super.addCommand(m_openUnreadHdrCmd);
+		m_openHeaderCmd     = new Command("Open", Command.SCREEN,
+				(open1st ? 1 : 2));
+		m_backHeaderCmd     = new Command("Back", Command.BACK,
+				(open1st ? 2 : 1));
+		priority++;
+		super.addCommand(m_openHeaderCmd);
+		super.addCommand(m_backHeaderCmd);
+		m_sortUnreadItemsCmd = new Command("Unread date sorted",
+										   Command.SCREEN, priority++);
+		m_sortReadItemsCmd = new Command("Read date sorted",
+										   Command.SCREEN, priority++);
+		m_sortUnreadFeedsCmd = new Command("Unread feed sorted",
+										   Command.SCREEN, priority++);
+		m_sortReadFeedsCmd = new Command("Read feed sorted",
+										   Command.SCREEN, priority++);
+		m_sortAllDateCmd = new Command("All date sorted",
+										   Command.SCREEN, priority++);
+		m_sortAllFeedsCmd = new Command("All feed sorted",
+										   Command.SCREEN, priority++);
+		m_markReadCmd = new Command("Mark read", Command.SCREEN, priority++);
+		m_markUnReadCmd = new Command("Mark unread", Command.SCREEN, priority++);
+		m_directionCmd = new Command("Sort ascending", Command.SCREEN, priority++);
         super.addCommand(m_sortUnreadItemsCmd);
         super.addCommand(m_sortReadItemsCmd);
         super.addCommand(m_sortUnreadFeedsCmd);
@@ -164,15 +176,19 @@ implements CommandListener, Runnable  {
         super.addCommand(m_markReadCmd);
         super.addCommand(m_markUnReadCmd);
         super.addCommand(m_directionCmd);
-        super.addCommand(m_backUnreadHdrCmd);
+		//#ifdef DTESTUI
+		m_testNewsCmd        = new Command("Test news/items", Command.SCREEN, 11);
+		//#endif
 		//#ifdef DTESTUI
         super.addCommand(m_testNewsCmd);
 		//#endif
-    }
-
+	}
+	
 	/* Initialize the read an unread news lists.  This is done when we
 	   switch to the list. */
-	public void initNewsList(final boolean showAll,
+	public void initNewsList(final int offset,
+	                         final int len,
+	                         final boolean showAll,
 						     final boolean showUnread,
 						     final boolean sortByDate,
 							 final List bookmarkList,
@@ -184,7 +200,11 @@ implements CommandListener, Runnable  {
 		final int bsize = bookmarkList.size();
 		if( bsize > 0 ){
 			boolean firstItem = true;
-			for( int ic = 0; ic < bsize; ic++ ){
+			int last = offset + len;
+			if (last > bsize) {
+				last = bsize;
+			}
+			for( int ic = offset; ic < last; ic++ ){
 			
 				final RssItunesFeed feed = (RssItunesFeed)rssFeeds.get(
 						bookmarkList.getString(ic));
@@ -202,208 +222,49 @@ implements CommandListener, Runnable  {
 		}
 	}
 
-	/* Sort all items. */
-	public void sortAllItems(final boolean sortByDate,
-							 final List bookmarkList,
-							 final Hashtable rssFeeds) {
-		initNewsList(true, false, sortByDate, bookmarkList, rssFeeds);
-		if (sortByDate) {
-			sortItems(false, m_allItems);
-		} else {
-			fillItems( m_allItems);
-		}
-
-		updTitle();
-	}
-
-	/** Update the title. */
-	public void updTitle() {
-		if (m_showAll) {
-			super.setTitle("All items " + (m_sortByDate ? "date" : "feed") +
-					" sorted:  " + super.size());
-		} else if (m_showUnread) {
-			super.setTitle("Unread items " + (m_sortByDate ? "date" : "feed") +
-					" sorted:  " + super.size());
-		} else {
-			super.setTitle("Read items " + (m_sortByDate ? "date" : "feed") +
-					" sorted:  " + super.size());
-		}
-	}
-
-	/** Sort items unread. */
-	public void sortUnreadItems(final boolean sortByDate,
-								final List bookmarkList,
-								final Hashtable rssFeeds) {
-		initNewsList(false, true, sortByDate, bookmarkList, rssFeeds);
-		if (sortByDate) {
-			sortItems(true, m_unreadItems);
-		} else {
-			fillItems( m_unreadItems);
-		}
-		super.setTitle("Unread items " + (sortByDate ? "date" : "feed") +
-				" sorted:  " + super.size());
-	}
-
-	/* Sort items read. */
-	public void sortReadItems(boolean sortByDate,
-							  List bookmarkList, Hashtable rssFeeds) {
-		initNewsList(false, false, sortByDate, bookmarkList, rssFeeds);
-		if (sortByDate) {
-			sortItems(false, m_readItems);
-		} else {
-			fillItems( m_readItems);
-		}
-		updTitle();
-	}
-
-	/* Sort items read or unread vector and put into GUI list. */
-	private void sortItems(final boolean showUnread,
-			final Vector unsortedItems) {
-
-		//#ifdef DLARGEMEM
-		final int diffDelta = unsortedItems.size() / DIV_VAL;
-		Gauge gauge = new Gauge("Preparing to sort...", false, diffDelta + 1, 0);
-		int gcnt = 0;
-		RssReaderMIDlet.LoadingForm loadingForm = m_midlet.getLoadForm();
-		loadingForm.append(gauge);
-		//#endif
-		this.m_showUnread = showUnread;
-		int [] indexes = new int[unsortedItems.size()];
-		long [] ldates = new long[unsortedItems.size()];
-		Vector vsorted = new Vector(unsortedItems.size());
-		Vector vfeedSorted = new Vector(m_itemFeeds.size());
-		Vector vunsorted = new Vector(unsortedItems.size());
-		Vector vfeedUnsorted = new Vector(m_itemFeeds.size());
-		RssItunesItem [] uitems = new RssItunesItem[unsortedItems.size()];
-		unsortedItems.copyInto(uitems);
-		RssItunesFeed [] ufeeds = new RssItunesFeed[m_itemFeeds.size()];
-		m_itemFeeds.copyInto(ufeeds);
-		int kc = 0;
-		for (int ic = 0; ic < uitems.length; ic++) {
-			Date sortDate = uitems[ic].getDate();
-			//#ifdef DITUNES
-			if (sortDate == null)
-			{
-				sortDate = ufeeds[ic].getDate();
-				//#ifdef DLOGGING
-				if (m_finestLoggable) {m_logger.finest("Using feed date for item=" + ic + "," + ufeeds[ic].getName() + "," + sortDate + "," + uitems[ic].getTitle());}
-				//#endif
-			}
-			//#endif
-			if (sortDate == null)
-			{
-				vsorted.addElement(uitems[ic]);
-				vfeedSorted.addElement(ufeeds[ic]);
+    /** Fill RSS item vectors */
+    private void fillVectors( final boolean firstItem,
+			final RssItunesFeed feed ) {
+        if(firstItem) {
+			m_unreadItems.removeAllElements();
+			m_readItems.removeAllElements();
+			m_allItems.removeAllElements();
+			m_itemFeeds.removeAllElements();
+        }
+        final Vector vitems = feed.getItems();
+        final int itemLen = vitems.size();
+        for(int i=0; i < itemLen; i++){
+            final RssItunesItem r = (RssItunesItem)vitems.elementAt(i);
+			if (m_showAll) {
+				m_allItems.addElement(r);
+				m_itemFeeds.addElement(feed);
 			} else {
-				indexes[kc] = kc;
-				ldates[kc++] = m_sortDesc ?
-					sortDate.getTime() : -sortDate.getTime();
-				vunsorted.addElement(uitems[ic]);
-				vfeedUnsorted.addElement(ufeeds[ic]);
-				//#ifdef DLOGGING
-				if (m_finestLoggable) {
-					if (m_sortDesc) {
-						m_logger.finest("kc,date=" + ic + "," + new Date(ldates[kc - 1]));
-					} else {
-						m_logger.finest("kc,date=" + ic + "," + new Date(-ldates[kc - 1]));
+				if (r.isUnreadItem()) {
+					if (m_showUnread) {
+						m_unreadItems.addElement(r);
+						m_itemFeeds.addElement(feed);
+					}
+				} else {
+					if (!m_showUnread) {
+						m_readItems.addElement(r);
+						m_itemFeeds.addElement(feed);
 					}
 				}
-				//#endif
 			}
-			//#ifdef DLARGEMEM
-			if ((ic & AND_VAL) == 0) {
-				gauge.setValue(gcnt++);
-			}
-			//#endif
+        }
+    }
+    
+	/* Sort all items. */
+	public void sortAllItems(final boolean sortByDate,
+							 final FeatureList bookmarkList,
+							 final Hashtable rssFeeds) {
+		initNewsList(m_offset, m_len, true, false, sortByDate, bookmarkList,
+				rssFeeds);
+		if (sortByDate) {
+			sortItems(false, m_allItems);
 		}
-		// Save memory by making null
-		uitems = null;
-		ufeeds = null;
-		//#ifdef DLARGEMEM
-		//#ifdef DMIDP20
-		gauge.setValue(diffDelta + 1);
-		gauge = new Gauge("Sorting...", false, Gauge.INDEFINITE,
-				Gauge.CONTINUOUS_RUNNING);
-		int gitem = loadingForm.append(gauge);
-		//#else
-		loadingForm.append("Sorting...\n");
-		//#endif
-		//#endif
-		SortUtil.sortLongs(indexes, ldates, 0, kc - 1);
-		//#ifdef DLARGEMEM
-		//#ifdef DMIDP20
-		loadingForm.set(gitem, new StringItem(null, "Sorting finished."));
-		//#endif
-		gauge = new Gauge("After sorting 1...", false, diffDelta + 1, 0);
-		loadingForm.append(gauge);
-		gcnt = 0;
-		//#endif
-		uitems = new RssItunesItem[kc];
-		vunsorted.copyInto(uitems);
-		// Save memory by making null
-		vunsorted = null;
-		ufeeds = new RssItunesFeed[kc];
-		vfeedUnsorted.copyInto(ufeeds);
-		// Save memory by making null
-		vfeedUnsorted = null;
-		for (int ic = 0; ic < kc ; ic++) {
-			//#ifdef DLOGGING
-			if (m_finestLoggable) {m_logger.finest("ic,index,date=" + ic + "," + indexes[ic] + "," + new Date(ldates[indexes[ic]]) + "," + uitems[indexes[ic]].getDate());}
-			//#endif
-			vsorted.insertElementAt(uitems[indexes[ic]], 0);
-			vfeedSorted.insertElementAt(ufeeds[indexes[ic]], 0);
-			//#ifdef DLARGEMEM
-			if ((ic & AND_VAL) == 0) {
-				gauge.setValue(gcnt++);
-			}
-			//#endif
-		}
-		// Save memory by making null
-		uitems = null;
-		//#ifdef DLARGEMEM
-		gauge.setValue(diffDelta + 1);
-		gauge = new Gauge("After sorting 2...", false, diffDelta + 1, 0);
-		loadingForm.append(gauge);
-		gcnt = 0;
-		//#endif
-		RssItunesItem[] sitems = new RssItunesItem[vsorted.size()];
-		vsorted.copyInto(sitems);
-		// Save memory by making null
-		vsorted = null;
-		unsortedItems.removeAllElements();
-		for( int ic = 0; ic < sitems.length; ic++){
-			unsortedItems.addElement(sitems[ic]);
-			//#ifdef DLARGEMEM
-			if ((ic & AND_VAL) == 0) {
-				gauge.setValue(gcnt++);
-			}
-			//#endif
-		}
-		// Save memory by making null
-		ufeeds = null;
-		//#ifdef DLARGEMEM
-		gauge.setValue(diffDelta + 1);
-		gauge = new Gauge("After sorting 3...", false, diffDelta + 1, 0);
-		loadingForm.append(gauge);
-		gcnt = 0;
-		//#endif
-		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedSorted.size()];
-		vfeedSorted.copyInto(sfeeds);
-		// Save memory by making null
-		vfeedSorted = null;
-		m_itemFeeds.removeAllElements();
-		for( int ic = 0; ic < sitems.length; ic++){
-			m_itemFeeds.addElement(sfeeds[ic]);
-			//#ifdef DLARGEMEM
-			if ((ic & AND_VAL) == 0) {
-				gauge.setValue(gcnt++);
-			}
-			//#endif
-		}
-		fillItems( unsortedItems );
-		//#ifdef DLARGEMEM
-		gauge.setValue(diffDelta + 1);
-		//#endif
+		fillItems( m_allItems);
+
 	}
 
     /** Fill list from items */
@@ -449,40 +310,9 @@ implements CommandListener, Runnable  {
 			// of the screen.
 			super.setSelectedIndex(0, true);
 		}
+		updTitle();
 	}
 
-    /** Fill RSS item vectors */
-    private void fillVectors( final boolean firstItem,
-			final RssItunesFeed feed ) {
-        if(firstItem) {
-			m_unreadItems.removeAllElements();
-			m_readItems.removeAllElements();
-			m_allItems.removeAllElements();
-			m_itemFeeds.removeAllElements();
-        }
-        final Vector vitems = feed.getItems();
-        final int itemLen = vitems.size();
-        for(int i=0; i < itemLen; i++){
-            final RssItunesItem r = (RssItunesItem)vitems.elementAt(i);
-			if (m_showAll) {
-				m_allItems.addElement(r);
-				m_itemFeeds.addElement(feed);
-			} else {
-				if (r.isUnreadItem()) {
-					if (m_showUnread) {
-						m_unreadItems.addElement(r);
-						m_itemFeeds.addElement(feed);
-					}
-				} else {
-					if (!m_showUnread) {
-						m_readItems.addElement(r);
-						m_itemFeeds.addElement(feed);
-					}
-				}
-			}
-        }
-    }
-    
 	/* Get the current selected index (or 0 index) and update the vectors. */
 	private void getUpdSel(boolean updateIt) {
 		int selIdx = super.getSelectedIndex();
@@ -560,21 +390,28 @@ implements CommandListener, Runnable  {
 
 	}
 
-    /** Run method is used to get RSS feed with HttpConnection */
+    /** Run method is used to sort RSS feed */
     public void run() {
 
 		//#ifdef DLOGGING
 		boolean newSort = false;
 		//#endif
+		boolean csort = false;
 		try {
+			csort = false;
+			synchronized(this) {
+				if ( m_sort ) {
+					csort = true;
+					m_sort = false;
+				}
+			}
 			/* Sort the read or unread items. */
-			if ( m_sort ) {
-				m_sort = false;
+			if ( csort ) {
+				csort = false;
 
 				//#ifdef DLOGGING
 				newSort = true;
 				//#endif
-				m_sort = false;
 				m_midlet.initializeLoadingForm("Sorting items...", this);
 				if (m_showAll) {
 					sortAllItems( m_sortByDate, m_bookmarkList, m_rssFeeds );
@@ -583,65 +420,69 @@ implements CommandListener, Runnable  {
 				} else {
 					sortReadItems( m_sortByDate, m_bookmarkList, m_rssFeeds );
 				}
-				m_midlet.setLoadingFinished("Sorting finished",
+				m_loadForm.setLoadingFinished("Sorting finished",
 						"Sorting finished use back to return.");
 				m_midlet.setCurrent(this);
 			}
-		}catch(OutOfMemoryError t) {
-			m_midlet.recordExcForm("\nOut Of Memory Error sorting items", t);
-		}catch(Throwable t) {
-			m_midlet.recordExcForm("\nInternal error sorting items", t);
-		}
 
-		//#ifdef DTESTUI
-		// If there are headers, and the header index is >= 0,
-		// open the header so that it's items can be listed
-		// with test UI classes.
-		// Need to change the selection to match the m_newsIndex.
-		if (m_newsNext && (m_newsIndex >= 0) && m_testNews &&
-			(m_newsIndex < super.size()) &&
-			(m_midlet.getCurrent() == this)) {
-			m_newsNext = false;
-			if (super.getSelectedIndex() >= 0) {
-				super.setSelectedIndex(
-						super.getSelectedIndex(), false);
+			//#ifdef DTESTUI
+			// If there are headers, and the header index is >= 0,
+			// open the header so that it's items can be listed
+			// with test UI classes.
+			// Need to change the selection to match the m_newsIndex.
+			synchronized(this) {
+				if (m_newsNext && (m_newsIndex >= 0) && m_testNews &&
+					(m_newsIndex < super.size()) &&
+					(m_midlet.getCurrent() == this)) {
+					m_newsNext = false;
+					if (super.getSelectedIndex() >= 0) {
+						super.setSelectedIndex(
+								super.getSelectedIndex(), false);
+					}
+					super.setSelectedIndex(m_newsIndex, true);
+					commandAction(List.SELECT_COMMAND, this);
+				}
+				// After intializing the form (which was already logged by
+				// testui classes), simulate the back command
+				if (m_itemNext && (m_newsIndex >= 0) && m_testNews &&
+					(m_newsIndex < super.size()) && m_midlet.isItemForm()) {
+					m_itemNext = false;
+					m_newsNext = true;
+					m_midlet.backFrItemForm();
+				}
 			}
-			super.setSelectedIndex(m_newsIndex, true);
-			commandAction(List.SELECT_COMMAND, this);
+			//#endif
+
+		}catch(OutOfMemoryError t) {
+			m_loadForm.recordExcForm("\nOut Of Memory Error sorting items", t);
+		}catch(Throwable t) {
+			m_loadForm.recordExcForm("\nInternal error sorting items", t);
 		}
-		// After intializing the form (which was already logged by
-		// testui classes), simulate the back command
-		if (m_itemNext && (m_newsIndex >= 0) && m_testNews &&
-			(m_newsIndex < super.size()) && m_midlet.isItemForm()) {
-			m_itemNext = false;
-			m_midlet.backFrItemForm();
-			// If size the same, we are not doing unread, so increase.
-			if (m_newsLen == super.size()) {
-				m_newsIndex++;
-			}
-			if (m_newsIndex >= super.size()) {
-				System.out.println("Test UI Test Rss items last");
-				m_newsIndex = -1;
-			}
-		}
-		//#endif
 
 		//#ifdef DLOGGING
 		if (newSort) {
 			newSort = false;
-			if (m_finestLoggable) {m_logger.finest("run m_sortDesc,m_sort,m_showUnread,m_sortByDate,m_showAll=" + m_sortDesc + "," + m_sort + "," + m_showUnread + "," + m_sortByDate + "," + m_showAll);}
+			if (m_finestLoggable) {m_logger.finest("run m_sortDesc,csort,m_showUnread,m_sortByDate,m_showAll=" + m_sortDesc + "," + csort + "," + m_showUnread + "," + m_sortByDate + "," + m_showAll);}
 		}
 		//#endif
 	}
 
 	//#ifdef DTESTUI
+	private void checkTest() {
+		if (m_newsIndex < 0) {
+			m_testNews = false;
+			m_newsNext = false;
+			m_itemNext = false;
+			System.out.println("Test UI Test Rss items last");
+		}
+	}
+
 	/** If auto testing news, set flag that says that we're going back to
 	    the news menu from item. */
 	final public void gotoNews() {
 		if (m_testNews) {
 			if (super.size() == 0) {
 				m_testNews = false;
-				m_newsLen = -1;
 				m_newsIndex = -1;
 				m_newsNext = false;
 				m_itemNext = false;
@@ -651,59 +492,289 @@ implements CommandListener, Runnable  {
 	}
 	//#endif
 
-    /** Respond to commands */
-    public void commandAction(Command c, Displayable s) {
-        if( c == m_sortUnreadItemsCmd ) {
-			m_showUnread = true;
-			m_sortByDate = true;
-			m_showAll = false;
-			m_sort = true;
-        }
-        
-        /** Read read items date sorted */
-        if( c == m_sortReadItemsCmd ) {
-			m_showUnread = false;
-			m_sortByDate = true;
-			m_showAll = false;
-			m_sort = true;
-        }
-        
-        /** Read unread items feed sorted */
-        if( c == m_sortUnreadFeedsCmd ) {
-			m_showUnread = true;
-			m_sortByDate = false;
-			m_showAll = false;
-			m_sort = true;
-        }
-        
-        /** Read read items feed sorted */
-        if( c == m_sortReadFeedsCmd ) {
-			m_showUnread = false;
-			m_sortByDate = false;
-			m_showAll = false;
-			m_sort = true;
-        }
+	/** Update the title.  Override to get another title.*/
+	public void updTitle() {
+		if (m_showAll) {
+			super.setTitle("All items " + (m_sortByDate ? "date" : "feed") +
+					" sorted:  " + super.size());
+		} else if (m_showUnread) {
+			super.setTitle("Unread items " + (m_sortByDate ? "date" : "feed") +
+					" sorted:  " + super.size());
+		} else {
+			super.setTitle("Read items " + (m_sortByDate ? "date" : "feed") +
+					" sorted:  " + super.size());
+		}
+	}
+
+
+	/** Sort items unread. */
+	public void sortUnreadItems(final boolean sortByDate,
+								final List bookmarkList,
+								final Hashtable rssFeeds) {
+		initNewsList(m_offset, m_len, false, true, sortByDate, bookmarkList, rssFeeds);
+		if (sortByDate) {
+			sortItems(true, m_unreadItems);
+		}
+		fillItems( m_unreadItems);
+	}
+
+	/* Sort items read. */
+	public void sortReadItems(boolean sortByDate,
+							  List bookmarkList, Hashtable rssFeeds) {
+		initNewsList(m_offset, m_len, false, false, sortByDate, bookmarkList, rssFeeds);
+		if (sortByDate) {
+			sortItems(false, m_readItems);
+		}
+		fillItems( m_readItems);
+	}
+
+	/* Sort items read or unread vector and put into GUI list. */
+	private void sortItems(final boolean showUnread,
+			final Vector unsortedItems) {
+
+		if (unsortedItems.size() == 0) {
+			return;
+		}
+		//#ifdef DLARGEMEM
+		final int diffDelta = unsortedItems.size() / DIV_VAL;
+		Gauge gauge = new Gauge("Preparing to sort...", false, diffDelta + 1, 0);
+		int gcnt = 0;
+		m_loadForm = m_midlet.getLoadForm();
+		m_loadForm.append(gauge);
+		//#endif
+		this.m_showUnread = showUnread;
+		int [] indexes = new int[unsortedItems.size()];
+		long [] ldates = new long[unsortedItems.size()];
+		Vector vsorted = new Vector(unsortedItems.size());
+		Vector vfeedSorted = new Vector(m_itemFeeds.size());
+		Vector vunsorted = new Vector(unsortedItems.size());
+		Vector vfeedUnsorted = new Vector(m_itemFeeds.size());
+		RssItunesItem [] uitems = new RssItunesItem[unsortedItems.size()];
+		unsortedItems.copyInto(uitems);
+		RssItunesFeed [] ufeeds = new RssItunesFeed[m_itemFeeds.size()];
+		m_itemFeeds.copyInto(ufeeds);
+		int kc = 0;
+		for (int ic = 0; ic < uitems.length; ic++) {
+			Date sortDate = uitems[ic].getDate();
+			//#ifdef DITUNES
+			if (sortDate == null)
+			{
+				sortDate = ufeeds[ic].getDate();
+				//#ifdef DLOGGING
+				if (m_finestLoggable) {m_logger.finest("Using feed date for item=" + ic + "," + ufeeds[ic].getName() + "," + sortDate + "," + uitems[ic].getTitle());}
+				//#endif
+			}
+			//#endif
+			if (sortDate == null)
+			{
+				vsorted.addElement(uitems[ic]);
+				vfeedSorted.addElement(ufeeds[ic]);
+			} else {
+				indexes[kc] = kc;
+				ldates[kc++] = m_sortDesc ?
+					sortDate.getTime() : -sortDate.getTime();
+				vunsorted.addElement(uitems[ic]);
+				vfeedUnsorted.addElement(ufeeds[ic]);
+				//#ifdef DLOGGING
+				if (m_finestLoggable) {
+					if (m_sortDesc) {
+						m_logger.finest("kc,date=" + ic + "," + new Date(ldates[kc - 1]));
+					} else {
+						m_logger.finest("kc,date=" + ic + "," + new Date(-ldates[kc - 1]));
+					}
+				}
+				//#endif
+			}
+			//#ifdef DLARGEMEM
+			if ((ic & AND_VAL) == 0) {
+				gauge.setValue(gcnt++);
+			}
+			//#endif
+		}
+		// Save memory by making null
+		uitems = null;
+		ufeeds = null;
+		//#ifdef DLARGEMEM
+		//#ifdef DMIDP20
+		gauge.setValue(diffDelta + 1);
+		gauge = new Gauge("Sorting...", false, Gauge.INDEFINITE,
+				Gauge.CONTINUOUS_RUNNING);
+		int gitem = m_loadForm.append(gauge);
+		//#else
+		m_loadForm.append("Sorting...\n");
+		//#endif
+		//#endif
+		SortUtil.sortLongs(indexes, ldates, 0, kc - 1);
+		//#ifdef DLARGEMEM
+		//#ifdef DMIDP20
+		m_loadForm.set(gitem, new StringItem(null, "Sorting finished."));
+		//#endif
+		gauge = new Gauge("After sorting 1...", false, diffDelta + 1, 0);
+		m_loadForm.append(gauge);
+		gcnt = 0;
+		//#endif
+		uitems = new RssItunesItem[kc];
+		vunsorted.copyInto(uitems);
+		// Save memory by making null
+		vunsorted = null;
+		ufeeds = new RssItunesFeed[kc];
+		vfeedUnsorted.copyInto(ufeeds);
+		// Save memory by making null
+		vfeedUnsorted = null;
+		for (int ic = 0; ic < kc ; ic++) {
+			//#ifdef DLOGGING
+			if (m_finestLoggable) {m_logger.finest("ic,index,date=" + ic + "," + indexes[ic] + "," + new Date(ldates[indexes[ic]]) + "," + uitems[indexes[ic]].getDate());}
+			//#endif
+			vsorted.insertElementAt(uitems[indexes[ic]], 0);
+			vfeedSorted.insertElementAt(ufeeds[indexes[ic]], 0);
+			//#ifdef DLARGEMEM
+			if ((ic & AND_VAL) == 0) {
+				gauge.setValue(gcnt++);
+			}
+			//#endif
+		}
+		// Save memory by making null
+		uitems = null;
+		//#ifdef DLARGEMEM
+		gauge.setValue(diffDelta + 1);
+		gauge = new Gauge("After sorting 2...", false, diffDelta + 1, 0);
+		m_loadForm.append(gauge);
+		gcnt = 0;
+		//#endif
+		RssItunesItem[] sitems = new RssItunesItem[vsorted.size()];
+		vsorted.copyInto(sitems);
+		// Save memory by making null
+		vsorted = null;
+		unsortedItems.removeAllElements();
+		for( int ic = 0; ic < sitems.length; ic++){
+			unsortedItems.addElement(sitems[ic]);
+			//#ifdef DLARGEMEM
+			if ((ic & AND_VAL) == 0) {
+				gauge.setValue(gcnt++);
+			}
+			//#endif
+		}
+		// Save memory by making null
+		ufeeds = null;
+		//#ifdef DLARGEMEM
+		gauge.setValue(diffDelta + 1);
+		gauge = new Gauge("After sorting 3...", false, diffDelta + 1, 0);
+		m_loadForm.append(gauge);
+		gcnt = 0;
+		//#endif
+		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedSorted.size()];
+		vfeedSorted.copyInto(sfeeds);
+		// Save memory by making null
+		vfeedSorted = null;
+		m_itemFeeds.removeAllElements();
+		for( int ic = 0; ic < sitems.length; ic++){
+			m_itemFeeds.addElement(sfeeds[ic]);
+			//#ifdef DLARGEMEM
+			if ((ic & AND_VAL) == 0) {
+				gauge.setValue(gcnt++);
+			}
+			//#endif
+		}
+		//#ifdef DLARGEMEM
+		gauge.setValue(diffDelta + 1);
+		//#endif
+	}
+
+	//#ifdef DTEST
+	/** Test that the feed is not ruined by being stored and restored. */
+	final private void testFeed() {
+		RssItunesFeed feed = m_feed;
+		if (feed == null) {
+			return;
+		}
+		String store = feed.getStoreString(true, true);
+		RssItunesFeed feed2 = RssItunesFeed.deserialize(
+				true, store );
+		boolean feedEq = feed.equals(feed2);
+		//#ifdef DLOGGING
+		if (m_finestLoggable) {m_logger.finest("feed1,2 eq=" + feedEq);}
+		//#endif
+		if (!feedEq) {
+			//#ifdef DLOGGING
+			m_logger.severe("Itunes feed does not match name=" + feed.getName());
+			//#endif
+			System.out.println("feed=" + feed + "," + feed.toString());
+			System.out.println("feed store=" + store);
+		}
+	}
+	//#endif
+
+	public void commandAction(Command c, Displayable s) {
+
+		//#ifdef DTESTUI
+		if (m_testNews && (m_newsIndex >= 0)) {
+			((LogActIntr)this).outputCmdAct(c, s);
+		}
+		//#endif
+		//#ifdef DLOGGING
+		if (m_finestLoggable) {m_logger.finest("commandAction c=" + c.getLabel());}
+		//#endif
+
+		synchronized(this) {
+			if( c == m_sortUnreadItemsCmd ) {
+				m_showUnread = true;
+				m_sortByDate = true;
+				m_showAll = false;
+				m_sort = true;
+			}
+			
+			/** Read read items date sorted */
+			if( c == m_sortReadItemsCmd ) {
+				m_showUnread = false;
+				m_sortByDate = true;
+				m_showAll = false;
+				m_sort = true;
+			}
+			
+			/** Read unread items feed sorted */
+			if( c == m_sortUnreadFeedsCmd ) {
+				m_showUnread = true;
+				m_sortByDate = false;
+				m_showAll = false;
+				m_sort = true;
+			}
+			
+			/** Read read items feed sorted */
+			if( c == m_sortReadFeedsCmd ) {
+				m_showUnread = false;
+				m_sortByDate = false;
+				m_showAll = false;
+				m_sort = true;
+			}
+		}
         
 		try {
-			if( (c == m_openUnreadHdrCmd) || (c == List.SELECT_COMMAND) ) {
+			if( (c == m_openHeaderCmd) || (c == List.SELECT_COMMAND) ) {
 				if( super.size()>0){
 					getUpdSel(true);
 					m_midlet.initializeItemForm( m_feed, m_item, this );
-					m_midlet.showItemForm();
 					//#ifdef DTESTUI
-					m_itemNext = true;
+					synchronized(this) {
+						m_itemNext = true;
+						m_newsIndex--;
+						checkTest();
+					}
 					//#endif
 				}
 			} else if( c == m_sortAllDateCmd ) {
-				m_showUnread = false;
-				m_sortByDate = true;
-				m_showAll = true;
-				m_sort = true;
+				synchronized(this) {
+					m_showUnread = false;
+					m_sortByDate = true;
+					m_showAll = true;
+					m_sort = true;
+				}
 			} else if( c == m_sortAllFeedsCmd ) {
-				m_showUnread = false;
-				m_sortByDate = false;
-				m_showAll = true;
-				m_sort = true;
+				synchronized(this) {
+					m_showUnread = false;
+					m_sortByDate = false;
+					m_showAll = true;
+					m_sort = true;
+				}
 			} else if( c == m_markReadCmd ) {
 				if( super.size()>0){
 					updMarkSel(false);
@@ -715,25 +786,28 @@ implements CommandListener, Runnable  {
 				}
 			} else if( c == m_directionCmd ) {
 				if( super.size()>0){
-					super.removeCommand(m_directionCmd);
-					if (m_sortDesc) {
-						m_sortDesc = false;
-						m_directionCmd = new Command("Sort descending", Command.SCREEN, 9);
-					} else {
-						m_sortDesc = true;
-						m_directionCmd = new Command("Sort ascending", Command.SCREEN, 9);
+					synchronized(this) {
+						super.removeCommand(m_directionCmd);
+						if (m_sortDesc) {
+							m_sortDesc = false;
+							m_directionCmd = new Command("Sort descending", Command.SCREEN, 9);
+						} else {
+							m_sortDesc = true;
+							m_directionCmd = new Command("Sort ascending", Command.SCREEN, 9);
+						}
+						m_sort = true;
+						super.addCommand(m_directionCmd);
 					}
-					m_sort = true;
-					super.addCommand(m_directionCmd);
 				}
 			/** Get back to RSS feed bookmarks */
-			} else if( c == m_backUnreadHdrCmd ){
+			} else if( c == m_backHeaderCmd ){
 				//#ifdef DTESTUI
-				m_testNews = false;
-				m_newsLen = -1;
-				m_newsIndex = -1;
-				m_newsNext = false;
-				m_itemNext = false;
+				synchronized(this) {
+					m_testNews = false;
+					m_newsIndex = -1;
+					m_newsNext = false;
+					m_itemNext = false;
+				}
 				//#endif
 				super.getFeatureMgr().setBackground(false);
 				m_midlet.replaceRef(this, null);
@@ -742,23 +816,25 @@ implements CommandListener, Runnable  {
 				//#ifdef DTESTUI
 				/** Indicate that we want to test the headers/items.  */
 			} else if( c == m_testNewsCmd) {
-				if( super.size()>0 ) {
-					m_itemNext = false;
-					m_newsIndex = 0;
-					m_newsLen = super.size();
-					System.out.println("Test UI Test News items start m_newsIndex=" + m_newsIndex);
-					m_newsNext = true;
-					m_testNews = true;
+				synchronized(this) {
+					if( super.size()>0 ) {
+						m_itemNext = false;
+						m_newsIndex = super.size() - 1;
+						System.out.println("Test UI Test News items start m_newsIndex=" + m_newsIndex);
+						m_newsNext = true;
+						m_testNews = true;
+					}
 				}
 				//#endif
 
 			}
+
 			//#ifdef DLOGGING
 			if (m_finestLoggable) {m_logger.finest("commandAction m_sortDesc,m_sort,m_showUnread,m_sortByDate,m_showAll=" + m_sortDesc + "," + m_sort + "," + m_showUnread + "," + m_sortByDate + "," + m_showAll);}
 			//#endif
 			
 		}catch(Throwable t) {
-			m_midlet.recordExcForm("Internal error", t);
+			m_loadForm.recordExcForm("Internal error", t);
 		}
 	}
 
