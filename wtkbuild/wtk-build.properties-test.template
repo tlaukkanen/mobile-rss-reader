@@ -1,8 +1,14 @@
 #This is used to compile testui and test
-antenna.home = C:/mostdownloads/j2me/sourceforge/antenna
+antenna.home = ${ext.drive}/mostdownloads/j2me/sourceforge/antenna
 antenna.jar = antenna-bin-1.0.0.jar
-antcontrib.home = C:/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
+antcontrib.home = ${ext.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
 wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
+#Comment out if you do not want to run findbugs
+#findbugs.home = ${ext.drive}/opt/tools/findbugs-1.3.4
+#Comment out if you do not want to run PMD
+#pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
+pmd.xsl = pmd-compile-reduced.xsl
+cat.cmd = cat
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
 #src = /cygwin/tmp/irvb/svn/mobile-rss-reader/src
@@ -13,15 +19,16 @@ src = /cygwin/tmp/irvb/old/mobile-rss-reader/src
 #unproc.src = /cygwin/tmp/irvb/svn/mobile-rss-reader/src
 #unproc.src = /cygwin/tmp/irvb/old/src
 #unproc.src = /opt/WTK2.5.1/apps/RSSReadero/mobile-rss-reader/1.11.1/src
-unproc.src = /cygwin/tmp/irvb/old/mobile-rss-reader/src
+unproc.src = /cygwin/tmp/irvb/old/mobile-rss-reader/RSSReader-1_11_1/src
 #presrc = /cygwin/tmp/irvb/svn/mobile-rss-reader/presrc
 #presrc = /mostdownloads/j2me/code.google.com/RSSReader/RSSReader/RSSReader-1_11/presrc
 #presrc = /cygwin/tmp/irvb/old/presrc
 #presrc = /opt/WTK2.5.1/apps/RSSReadero/mobile-rss-reader/1.11.1/presrc
-presrc = /cygwin/tmp/irvb/old/mobile-rss-reader/presrc
+presrc = /cygwin/tmp/irvb/old/mobile-rss-reader/RSSReader-1_11_1/presrc
 #Compile test ui
 #testui.presrc = ../testpresrc
-testui.presrc = /opt/WTK2.5.1/apps/RSSReadero/mobile-rss-reader/1.11.1/testpresrc
+#testui.presrc = /opt/WTK2.5.1/apps/RSSReadero/mobile-rss-reader/1.11.1/testpresrc
+testui.presrc = /cygwin/tmp/irvb/old/mobile-rss-reader/RSSReader-1_11_1/testpresrc
 DTESTDEF = DTEST
 DTESTUIDEF = DTESTUI
 DLOGDEF = DNOLOGGING
