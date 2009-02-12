@@ -118,7 +118,6 @@ final public class ImportFeedsForm extends URLForm
     private Hashtable m_rssFeeds;         // The bookmark URLs
     private FeatureList  m_bookmarkList;     // The bookmark list
     final private boolean m_importFeeds;
-    private RssReaderMIDlet.LoadingForm m_loadForm; // The application settings
 	//#ifdef DLOGGING
 //@    private Logger m_logger = Logger.getLogger("ImportFeedsForm");
 //@    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
@@ -139,7 +138,6 @@ final public class ImportFeedsForm extends URLForm
 		m_importFeeds = importFeeds;
 		m_rssFeeds = rssFeeds;
 		m_appSettings = appSettings;
-		m_loadForm = loadForm;
 		if(url.length()==0) {
 			url = "http://";
 		}
@@ -265,15 +263,15 @@ final public class ImportFeedsForm extends URLForm
 //@				osw.write(sb.toString());
 //@				m_midlet.setCurrent( m_bookmarkList );
 //@			} catch(IllegalArgumentException ex) {
-//@				m_midlet.recordExcForm("Invalid url:  " + url, ex);
+//@				m_loadForm.recordExcForm("Invalid url:  " + url, ex);
 //@			} catch(ConnectionNotFoundException ex) {
-//@				m_midlet.recordExcForm("Invalid connection or url:  " + url, ex);
+//@				m_loadForm.recordExcForm("Invalid connection or url:  " + url, ex);
 //@			} catch(IOException ex) {
-//@				m_midlet.recordExcForm("Error exporting feeds to " + url, ex);
+//@				m_loadForm.recordExcForm("Error exporting feeds to " + url, ex);
 //@			} catch(SecurityException ex) {
-//@				m_midlet.recordExcForm("Security error exporting feeds to " + url, ex);
+//@				m_loadForm.recordExcForm("Security error exporting feeds to " + url, ex);
 //@			} catch(Throwable t) {
-//@				m_midlet.recordExcForm("Internal error exporting feeds to " +
+//@				m_loadForm.recordExcForm("Internal error exporting feeds to " +
 //@						url, t);
 //@			} finally {
 //@				uhandler.handleClose();
@@ -361,14 +359,14 @@ final public class ImportFeedsForm extends URLForm
 				
 			} catch(Exception ex) {
 				m_listParser = null;
-				m_midlet.recordExcForm("Error importing feeds from " + url, ex);
+				m_loadForm.recordExcForm("Error importing feeds from " + url, ex);
 			} catch(OutOfMemoryError ex) {
 				m_listParser = null;
-				m_midlet.recordExcForm("Out Of Memory Error importing feeds from " +
+				m_loadForm.recordExcForm("Out Of Memory Error importing feeds from " +
 						url, ex);
 			} catch(Throwable t) {
 				m_listParser = null;
-				m_midlet.recordExcForm("Internal error importing feeds from " +
+				m_loadForm.recordExcForm("Internal error importing feeds from " +
 						url, t);
 			}
 		}
@@ -404,14 +402,14 @@ final public class ImportFeedsForm extends URLForm
 					//#endif
 				}
 			} catch(Exception ex) {
-				m_midlet.recordExcForm(
+				m_loadForm.recordExcForm(
 						"Error importing feeds from " +
 						m_listParser.getUrl() + " " +
 						ex.getMessage(), ex);
 				m_getFeedTitleList = false;
 				m_listParser = null;
 			} catch(Throwable t) {
-				m_midlet.recordExcForm(
+				m_loadForm.recordExcForm(
 						"Error importing feeds from " +
 						m_listParser.getUrl() + " " +
 						t.getMessage(), t);
@@ -429,7 +427,7 @@ final public class ImportFeedsForm extends URLForm
 
 		/** Import list of feeds if one of the insert, add, or append commands
 		    is used.  */
-		m_addBkmrk = UiUtil.getPlaceIndex(c, m_insCmd,
+		m_addBkmrk = FeatureMgr.getPlaceIndex(c, m_insCmd,
 				m_addCmd, m_appndCmd, m_bookmarkList);
 		if( m_addBkmrk >= 0 ) {
 			m_getFeedList = true;
