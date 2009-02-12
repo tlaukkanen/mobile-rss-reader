@@ -26,8 +26,8 @@ v1.10 (August 23rd 2007)
 + Optionally mark unread items in feed
 + Show memory usage
 + Prepare to allow saving of log level for test version.
-+ Replace HTML entities and numeric entitites from OPML title
-+ Replace more HTML entities and hex numeric entitites
++ Replace HTML entities and numeric entities from OPML title
++ Replace more HTML entities and hex numeric entities
 + Read all unread items in list
 + Update only modified feeds.
 + Use summary if no description in atoms.
@@ -44,8 +44,8 @@ v1.10.1 (August 24rd 2007)
 + Fixed intermittent exit problem
 
 v1.10.2 (August 24rd 2007)
-+ Fixed infinate loop in emulator on exit.
-+ Take version from mainifest file.
++ Fixed infinite loop in emulator on exit.
++ Take version from manifest file.
 
 v1.10.3 (August 28th 2007)
 + Fixed date formatting if it has '-' for RSS date.
@@ -59,7 +59,7 @@ v1.10.4 (September 4th 2007)
 + Fixed redirect problem with capitalized HTML tags.
 + Show used/available memory in addition to DB memory used/available.
 + Allow copy of enclosure.
-+ Give alert for out of memroy that is there until it is dismissed.
++ Give alert for out of memory that is there until it is dismissed.
 + Fixed initial run problem with bookmarks shown before about screen.
 + Fixed intermittent start hang with MIDP 1.0 version.
 + Added more logging for test version.
@@ -88,7 +88,7 @@ v1.10.7 (October 2nd 2007)
 + Allow optional prevention of redirect for bad HTML mime types
 + Allow files in memory for feed files and import files
 + Allow paste for MIDP-1.0 (dependent on device)
-+ Show program and device midp, cldc, jsr75 settings on settings form
++ Show program and device MIDP, CLDC, JSR75 settings on settings form
 
 v1.11
 + New river of news options to sort by date and feed for all items, only unread,
@@ -102,8 +102,8 @@ v1.11
 + Support metadata re-direct
 + Support HTML RSS/Atom autolinks
 + Minor performance enhancements
-+ Fix prologue handling to fix styleset handling
-+ Podcast version for phones with lots of memory (high end smartphones).
++ Fix prologue handling to fix style set handling
++ Podcast version for phones with lots of memory (high end smart phones).
   This gets subtitle, summary, author, explicit, language, and duration
 + Support description and for date (name space other than dc) from Dublin Core
 + Support two namespaces if present only itunes and Dublin core are supported
@@ -118,7 +118,7 @@ v1.11
   files in the jar file
 + Do not add feeds from HTML links which have 0 length
 + Allow passwords to contain '|'
-+ Fix problem where textinput description is used instead of item description
++ Fix problem where 'textinput' description is used instead of item description
 + Fix problem where update of redirected feed twice while on the bookmark/feed
   caused an error.  (The previous workaround was to go back to bookmarks and
   then open the book mark and update)
@@ -126,17 +126,17 @@ v1.11
 + Fix problem with some HTML imports not giving any values
 + Fix problem with some &nbsp; not being removed
 + Have error screen for errors during feed import.
-+ Give error when imporing and existing feed that it is not updated
++ Give error when importing and existing feed that it is not updated
   (workaround is to delete and then re-import)
 + Support HTML links without quotes for href
 + Better error when redirect is a second time
 + Allow logging of input/output with TESTUI define for test version.
-+ Allow testing of compatibilty of the record store from previous versions
++ Allow testing of compatibility of the record store from previous versions
 + Allow change in order of back and open for headers/items list
 + Testing form to show encoding
 + Convert more entities.  Also, convert hex numeric entities
 + Support dates with non-breaking space
-+ Prevent infinate loop when removing HTML which has unmatched '<'
++ Prevent infinite loop when removing HTML which has unmatched '<'
 + Fix handling of out of memory while storing bookmarks
 + Stop thread when exiting
 + Memory not updated after first time viewed on settings.
@@ -145,18 +145,18 @@ v1.11
 + Give correct error message if JSR75 not supported on the phone
 + Don't have open/copy link command if no link
 + Give out of memory errors when applicable
-+ Use standard J2ME menu items for ok, back and exit
++ Use standard J2ME menu items for OK, back and exit
 + Prompt for exit
 + Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
-v1.11.1 Release Candidate 5 (rc5) (July 28th 2008)
+v1.11.1 Release Candidate 5 (RC5) (July 28th 2008)
 + Fix bug introduced in release candidate with bad error handling for a
   bad URL for import.
 + Fixed introduced bug in a previous Release Candidate with import form
 
 v1.11.1 (August 2nd 2008)
-+ Fix bug when opening feeds on Sony Ericsson emulators and possiblely
++ Fix bug when opening feeds on Sony Ericsson emulators and possibly
   affecting Sony Ericsson devices
 + Fix bug with storing Itunes attributes
 + Workaround VM problems with synchronized methods that prevent update of
@@ -173,7 +173,7 @@ v1.11.1 (August 2nd 2008)
 + Workaround loading form not being shown on N95.  With the workaround the
   problem is fixed.
 + Prepare for future store of items without encoding
-+ Show microedition platform.
++ Show micro edition platform.
 + Workaround problem with some Sony Ericsson phones with dynamic retrieval
   of display.  Need to use setCurrent using original display for alerts.  This
   problem prevented exit/delete of feed, but is not fixed.
@@ -185,7 +185,7 @@ v1.11.1 (August 2nd 2008)
 + Workaround Sony Ericsson T637 problem with Exit and Delete (Alerts on MIDP
   1.0 device)
 + Handle Content module
-+ Add to disclamer
++ Add to disclaimer
 + Include jadsrc and manifestsrc directories in source zip
 + Allow '|' in feed name, password, and podcast attributes author, subtitle,
   summary.
@@ -207,7 +207,7 @@ v1.11.1 (August 2nd 2008)
 + Remove html from link for rss like from EBay.
 + Allow override in place of existing feeds that are also in the import file.
   This means that the feed in the import file will be used instead of what
-  was loaded earlier.  Override in place means that the overrided feed will
+  was loaded earlier.  Override in place means that the duplicate feed will
   be in the same place as it was before.  This is different from the
   non-overrided feeds which will be added based on command used either insert,
   add, or append.
@@ -224,10 +224,10 @@ v1.11.2 Development 2 (dev2) (Dec 12th 2008)
 + Fix problems with hangs (not present on most devices).  Some methods are
   required to not spend much time.  As features are added to these methods, they
   become too long and cause a hang as J2ME has limited resources.  This change
-  worksaround this by doing operations in a separate thread.
+  workaround this by doing operations in a separate thread.
 + Allow options to change font size for lists.
 + Turn on/off wraparound for lists
-+ Need serial version id for serializable classes.
++ Need serial version id for serialized classes.
 + Fix river of news sort problem.
 + Allow ascending and descending for river of news.
 + Encode passwords
@@ -253,12 +253,32 @@ v1.11.2 Development 3 (dev2) (Dec 22th 2008)
 + Changes for next release of JLogMicro
 + Fix turning on/off wraparound for lists
 
-Known problems:
+v1.11.2 Beta 1 (beta1) (Dec 22th 2008)
++ Show language for podcast version
++ Allow sorting, etc from River of News for showing headers/items screen
++ Have semi-automated tests go from the last item down to the first item
++ Fixed problem where if sort yielded 0 items, the loading form is displayed
+  without showing the list with 0 items.
++ Fix if CDATA and a tag is embedded in it, the text following the last tag is
+  now displayed
++ Fix problem where if using "River of News" or Header sort of the number of
+  items is 0, but a previous command displayed some results, there are items
+  shown instead of 0 items.
++ Synchronize sort variables to prevent unintended results
++ Enhance to replace p, td, and br tags with a space.
++ Fix test ui logging
++ Have separate RIM (cod) jad file to prevent conversion of jar from
+  corrupting the main jad file.
++ Make building in windows and linux easier to switch between the two choices
++ Change load for to have it's own logging methods to allow future putting
+  load of form in a separate thread
++ Combine classes for future enhancements.
++ Fix description problem introduced in previous Alpha release
++ Log command for testui for semi-automated tests
++ More logging
 
-- Sometimes when using River of News, the sort does not complete leaving the
-  "Sorting items..." screen displayed.  By using the back key and trying again
-  the same menu item usually resolves this.  Or picking another item and coming
-  back to the problem item.
+Device issues:
+
 - Phone must support MP3 links, etc to play enclosures (many phones do not
   allow an MP3 to be read from a URL, but play them from the file system)
 
