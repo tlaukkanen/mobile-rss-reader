@@ -38,15 +38,22 @@ import java.util.Hashtable;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.StringItem;
+import javax.microedition.lcdui.TextBox;
 //#ifndef DTESTUI
+import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Form;
+import javax.microedition.lcdui.TextField;
 //#else
+import com.substanceofcode.testlcdui.ChoiceGroup;
 import com.substanceofcode.testlcdui.Form;
+import com.substanceofcode.testlcdui.TextField;
 //#endif
 
 //#ifdef DLOGGING
@@ -66,7 +73,9 @@ public class FeatureMgr implements CommandListener, Runnable {
 	protected Command exCmd = null;
 	private Displayable exDisp = null;
 	protected RssReaderMIDlet midlet;
-    private boolean     background = false;   // Flag to continue looping
+    private Form        urlRrnForm = null; // The form to return to for URL box
+    private TextField   urlRrnItem = null; // The item to return to for URL box
+    private boolean     background = false;  // Flag to continue looping
     private int         loop = 0;   // Number of times to loop
     private Thread      netThread = null;  // The thread for networking, etc
 
@@ -183,6 +192,34 @@ public class FeatureMgr implements CommandListener, Runnable {
 							promptAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
 							promptAlert.setCommandListener(this);
 							midlet.setCurrent(promptAlert, formAlert);
+						} else if( (urlRrnForm != null) &&
+								   (cdisp instanceof TextBox)) {
+							/** Paste into URL field from previous form.  */
+							int cmdType = ccmd.getCommandType();
+							if (cmdType == Command.OK) {
+								urlRrnItem.setString( ((TextBox)cdisp).getString() );
+								//#ifdef DMIDP20
+								midlet.setCurrentItem( urlRrnItem );
+								//#else
+								midlet.setCurrent( urlRrnForm );
+								//#endif
+								// Free memory
+								urlRrnForm = null;
+								// Free memory
+								urlRrnItem = null;
+							}
+							
+							/** Cancel the box go back to the return form.  */
+							if (cmdType == Command.CANCEL) {
+								//#ifdef DMIDP20
+								midlet.setCurrentItem( urlRrnItem );
+								//#else
+								midlet.setCurrent( urlRrnForm );
+								//#endif
+								// Free memory
+								urlRrnForm = null;
+								urlRrnItem = null;
+							}
 						} else if (cdisp.equals(disp)) {
 							//#ifdef DLOGGING
 							if (fineLoggable) {logger.fine("Equal cdisp,disp,cmdFeatureUser=" + ccmd.getLabel() + "," + cdisp + "," + disp + "," + cmdFeatureUser);}
@@ -308,4 +345,99 @@ public class FeatureMgr implements CommandListener, Runnable {
         return (midlet);
     }
 
+  /**
+   * Return the selected index of the choice.  If nothing selected (-1),
+   * return 0 if size &gt; 0, or -1 if 0 size.
+   *
+   * Constructor
+   * @param choice - Choice interface
+   *
+   * @author Irv Bunton
+   */
+	static public int getSelectedIndex(Choice choice) {
+		final int selIdx = choice.getSelectedIndex();
+		if (selIdx != -1) {
+			return selIdx;
+		} else {
+			if (choice.size() > 0) {
+				choice.setSelectedIndex(0, true);
+				return 0;
+			} else {
+				return -1;
+			}
+		}
+	}
+
+  /**
+   * Get the place (index) in a list to insert/append an element if using
+   * an inert, add, or append command.
+   *
+   * @param c - command selected by user
+   * @param cplace - current place selected in list (-1 if no selection)
+   * @param insCmd
+   * @param addCmd
+   * @param appndCmd
+   * @param plist
+   * @return    final
+   * @author Irv Bunton
+   */
+	static int getPlaceIndex(Command c, Command insCmd,
+							Command addCmd,
+							Command appndCmd,
+							javax.microedition.lcdui.List plist) {
+		if( (insCmd == null ) || (addCmd == null ) || (appndCmd == null )) {
+			return -1;
+		}
+
+		if( (c == insCmd ) || (c == addCmd ) || (c == appndCmd )) {
+			final int blen = plist.size();
+			int cplace = getSelectedIndex(plist);
+			int addElem = (cplace == -1) ? blen : cplace;
+			if(( c == addCmd ) && (addElem < blen)) {
+				addElem++;
+			}
+			if (c == appndCmd ) {
+				addElem = blen;
+			}
+			if ((addElem < 0) || (addElem > blen)) {
+				addElem = blen;
+			}
+			return addElem;
+		} else {
+			return -1;
+		}
+	}
+
+  /**
+   * Create a ChoiceGroup, set the layout and add it to the form.
+   *
+   * @param label
+   * @param choices
+   * @return    ChoiceGroup
+   * @author Irv Bunton
+   */
+	static public ChoiceGroup getAddChoiceGroup(Form form, String label,
+												String[] choices) {
+        ChoiceGroup choiceGroup = new ChoiceGroup(label,
+				                            Choice.EXCLUSIVE, choices, null);
+		//#ifdef DMIDP20
+		choiceGroup.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        form.append( choiceGroup );
+		return choiceGroup;
+	}
+
+    /** Initialize URL text Box */
+    public static void initializeURLBox(RssReaderMIDlet midlet,
+			final String url, Form prevForm, TextField prevItem) {
+		TextBox boxURL = new TextBox("URL", url, 256, TextField.URL);
+		FeatureMgr featureMgr = new FeatureMgr(midlet, boxURL);
+		featureMgr.urlRrnForm = prevForm;
+		featureMgr.urlRrnItem = prevItem;
+		boxURL.addCommand(new Command("OK", Command.OK, 1));
+		boxURL.addCommand(new Command("Cancel", Command.CANCEL, 2));
+        boxURL.setCommandListener(featureMgr);
+		midlet.setCurrent( boxURL );
+    }
+    
 }
