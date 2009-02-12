@@ -42,6 +42,4 @@ public class Controller {
         m_midlet.showBookmarkList();
     }
     
-    
-    
 }
