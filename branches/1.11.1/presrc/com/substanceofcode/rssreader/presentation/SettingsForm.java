@@ -173,15 +173,15 @@ implements CommandListener {
         super.append( m_itunesEnabled );
 		//#endif
 		//#ifdef DMIDP20
-        m_fontChoice = UiUtil.getAddChoiceGroup(this,
+        m_fontChoice = FeatureMgr.getAddChoiceGroup(this,
 				"Choose list font size",
 				new String[] {"Default font size", "Small",
 				"Medium", "Large"});
-        m_fitPolicy = UiUtil.getAddChoiceGroup(this,
+        m_fitPolicy = FeatureMgr.getAddChoiceGroup(this,
 				"Choose list wraparound",
 				new String[] {"Default wrap around", "Wraparound on",
 				"Wrap around off"});
-        m_nameNews = UiUtil.getAddChoiceGroup(this,
+        m_nameNews = FeatureMgr.getAddChoiceGroup(this,
 				"Put feed name in river of news", new String []
 				{"Don't show name", "Show name"});
 		//#endif
