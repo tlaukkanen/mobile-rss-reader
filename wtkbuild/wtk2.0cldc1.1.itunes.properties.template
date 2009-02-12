@@ -15,6 +15,6 @@ JMIDPVERS = MIDP-2.0
 JCLDCVERS = CLDC-1.1
 PERMISSIONS = ,javax.microedition.io.HttpsConnection
 file.prefix = midp20_cldc11_podcast_jsr75_
-bin = ../bin20podcastjsr75
+bin = ${target}/bin20podcastjsr75
 MIDLETVERS = ${MIDLETVERSROOT}
 SUFFIXVERS = 2.0-cldc1.1-podcast
