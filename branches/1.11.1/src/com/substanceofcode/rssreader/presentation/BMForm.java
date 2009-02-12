@@ -153,7 +153,7 @@ final public class BMForm extends URLForm
 
 		if (m_addForm) {
 			/** If add commands used, do add. */
-			m_addBkmrk = UiUtil.getPlaceIndex(c, m_insCmd,
+			m_addBkmrk = FeatureMgr.getPlaceIndex(c, m_insCmd,
 					m_addCmd, m_appndCmd, m_bookmarkList);
 
 			if( m_addBkmrk >= 0 ) {
