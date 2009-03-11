@@ -98,6 +98,7 @@ final public class ImportFeedsForm extends URLForm
 	implements CommandListener, Runnable {
 
     static private byte[] m_importSave = null; // Import form save
+    static private byte[] m_exportSave = null; // Export form save
 	//#ifndef DTESTUI
     private boolean     m_debugOutput = false; // Flag to write to output for test
 	//#endif
@@ -187,11 +188,12 @@ final public class ImportFeedsForm extends URLForm
 					 "Override (replace) existing feeds."},
 					null);
 			super.append(m_importOvrGroup);
-			if (ImportFeedsForm.m_importSave != null) { 
-				Item[] items = {m_importFormatGroup, m_feedNameFilter,
-					m_feedURLFilter, m_UrlUsername, m_UrlPassword,
-					m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup}; 
-				m_midlet.restorePrevValues(items, ImportFeedsForm.m_importSave);
+			if ((ImportFeedsForm.m_importSave != null) ||
+				  (ImportFeedsForm.m_exportSave != null)) { 
+				Item[] items = getItemFields();
+				m_midlet.restorePrevValues(items,
+						m_importFeeds ? ImportFeedsForm.m_importSave :
+						 ImportFeedsForm.m_exportSave);
 			}
 		
 			//#ifdef DTESTUI
@@ -207,6 +209,7 @@ final public class ImportFeedsForm extends URLForm
 
 		super.execute();
 
+		//This (OK) happens only for export.  Import has insert/add/append
 		//#ifdef DJSR75
 		if (m_ok) {
 			m_ok = false;
@@ -261,6 +264,8 @@ final public class ImportFeedsForm extends URLForm
 				if (m_finestLoggable) {m_logger.finest("Export sb.length()=" + sb.length());}
 				//#endif
 				osw.write(sb.toString());
+				Item[] items = getItemFields();
+				ImportFeedsForm.m_exportSave = m_midlet.storeValues(items);
 				m_midlet.setCurrent( m_bookmarkList );
 			} catch(IllegalArgumentException ex) {
 				m_loadForm.recordExcForm("Invalid url:  " + url, ex);
@@ -386,11 +391,7 @@ final public class ImportFeedsForm extends URLForm
 						m_midlet.setCurrent( m_loadForm );
 					} else {
 						m_loadForm.replaceRef(this, null);
-						Item[] items = {m_importFormatGroup,
-							m_feedNameFilter,
-							m_feedURLFilter, m_UrlUsername,
-							m_UrlPassword,
-							m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup};
+						Item[] items = getItemFields();
 						ImportFeedsForm.m_importSave = m_midlet.storeValues(items);
 						m_midlet.setCurrent( m_bookmarkList );
 					}
@@ -420,6 +421,14 @@ final public class ImportFeedsForm extends URLForm
 		m_midlet.getFile();
 	}
 
+	private Item[] getItemFields() {
+		Item[] items = {m_importFormatGroup,
+			m_feedNameFilter,
+			m_feedURLFilter, m_UrlUsername,
+			m_UrlPassword,
+			m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup};
+		return items;
+	}
 	/** Respond to commands */
 	public void commandAction(Command c, Displayable s) {
 
