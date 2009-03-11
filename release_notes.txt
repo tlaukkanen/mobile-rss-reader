@@ -277,6 +277,13 @@ v1.11.2 Beta 1 (beta1) (Dec 22th 2008)
 + Log command for testui for semi-automated tests
 + More logging
 
+v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
++ Allow optional font size for forms.  This only works for display only items and ChoiceGroups.
++ Allow export only for podcast version.
++ Separate saved items for export form.
++ Use method for getting fields to save/restore.
++ Changes for next release of JLogMicro.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
