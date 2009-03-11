@@ -35,12 +35,15 @@ import java.util.Hashtable;
 
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.StringItem;
 //#ifndef DTESTUI
 import javax.microedition.lcdui.Form;
 //#else
@@ -59,11 +62,13 @@ import net.sf.jlogmicro.util.logging.Level;
    used, will give prompt message with OK/Cancel.  */
 public class FeatureForm extends Form {
 	protected FeatureMgr featureMgr;
+	private Font font = null;
 
 	//#ifdef DLOGGING
 	private Logger logger = Logger.getLogger("FeatureForm");
 	private boolean fineLoggable = logger.isLoggable(Level.FINE);
 	private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
 
 	public FeatureForm(RssReaderMIDlet midlet, String title) {
@@ -80,7 +85,84 @@ public class FeatureForm extends Form {
 			//#endif
 				);}
 		//#endif
+		//#ifdef DMIDP20
+		font = featureMgr.getCustomFont();
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine("init font=" + font);}
+		//#endif
+		//#endif
 	}
+
+	//#ifdef DMIDP20
+	final public void insert(int itemNum, Item item) {
+		try {
+			if (font != null) {
+				setItemFont(item);
+			}
+			super.insert(itemNum, item);
+		} catch (RuntimeException e) {
+			handleError("insert", e);
+			super.insert(itemNum, item);
+		}
+	}
+
+	final public void set(int itemNum, Item item) {
+		try {
+			if (font != null) {
+				setItemFont(item);
+			}
+			super.set(itemNum, item);
+		} catch (RuntimeException e) {
+			handleError("set", e);
+			super.set(itemNum, item);
+		}
+	}
+
+	final public int append(Item item) {
+		try {
+			if (font != null) {
+				setItemFont(item);
+			}
+			return super.append(item);
+		} catch (RuntimeException e) {
+			handleError("append", e);
+			return super.append(item);
+		}
+	}
+
+	final public int append(String stringPart) {
+		try {
+			int rtn = super.append(stringPart);
+			if (font != null) {
+				Item item = super.get(rtn);
+				setItemFont(item);
+			}
+			return rtn;
+		} catch (RuntimeException e) {
+			handleError("append", e);
+			return super.append(stringPart);
+		}
+	}
+
+	private void setItemFont(Item item) {
+		try {
+			if (item instanceof StringItem) {
+				((StringItem)item).setFont(font);
+			} else if (item instanceof ChoiceGroup) {
+				final int clen = ((ChoiceGroup)item).size();
+				for (int i = 0; i < clen; i++) {
+					((ChoiceGroup)item).setFont(i, font);
+				}
+			}
+		} catch (RuntimeException e) {
+			if (font != null) {
+				font = null;
+				setItemFont(item);
+			}
+		}
+	}
+
+	//#endif
 
 	public FeatureForm(RssReaderMIDlet midlet, String title, Item[] items) {
 		super(title, items);
@@ -111,5 +193,21 @@ public class FeatureForm extends Form {
     public FeatureMgr getFeatureMgr() {
         return (featureMgr);
     }
+
+	private void handleError(String msg, RuntimeException e) {
+		//#ifdef DLOGGING
+		logger.warning(msg + " possible error with setFont.", e);
+		//#endif
+		featureMgr.getMidlet().getLoadForm().appendNote(
+				"Font not supported by device.  Reset to default or pick another font.");
+		featureMgr.getMidlet().getSettings().setFontChoice(
+				RssReaderSettings.DEFAULT_FONT_CHOICE);
+		this.font = null;
+		final int flen = super.size();
+		for (int i = 0; i < flen; i++) {
+			Item item = super.get(i);
+			setItemFont(item);
+		}
+	}
 
 }
