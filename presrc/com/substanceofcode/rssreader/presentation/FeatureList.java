@@ -93,14 +93,7 @@ public class FeatureList extends List {
 
 	//#ifdef DMIDP20
 	public void initFont(RssReaderMIDlet midlet) {
-		if (midlet.getSettings().getFontChoice() ==
-				RssReaderSettings.DEFAULT_FONT_CHOICE) {
-			this.font = null;
-		} else {
-			Font defFont = Font.getDefaultFont();
-			this.font = Font.getFont(Font.FACE_SYSTEM, defFont.getStyle(),
-					midlet.getSettings().getFontSize());
-		}
+		font = featureMgr.getCustomFont();
         final int fitPolicy = midlet.getSettings().getFitPolicy();
         if (fitPolicy != List.TEXT_WRAP_DEFAULT) {
 			super.setFitPolicy(fitPolicy);
