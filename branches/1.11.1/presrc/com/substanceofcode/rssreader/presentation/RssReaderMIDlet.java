@@ -577,9 +577,9 @@ public class RssReaderMIDlet extends MIDlet
 			}
 			if (!m_novice) {
 				m_bookmarkList.addCommand( m_importFeedListCmd );
-				/* UNDO for next release
+				//#ifdef DITUNES
 				m_bookmarkList.addCommand( m_exportFeedListCmd );
-				*/
+				//#endif
 				//#ifdef DTEST
 				m_bookmarkList.addCommand( m_importCurrFeedListCmd );
 				//#endif
