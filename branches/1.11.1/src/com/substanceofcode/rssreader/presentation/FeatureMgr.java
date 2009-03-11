@@ -43,6 +43,7 @@ import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.TextBox;
@@ -55,6 +56,8 @@ import javax.microedition.lcdui.TextField;
 //@import com.substanceofcode.testlcdui.Form;
 //@import com.substanceofcode.testlcdui.TextField;
 //#endif
+
+import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -440,4 +443,18 @@ public class FeatureMgr implements CommandListener, Runnable {
 		midlet.setCurrent( boxURL );
     }
     
+		public Font getCustomFont() {
+			final RssReaderSettings appSettings = midlet.getSettings();
+			if (appSettings == null) {
+				return null;
+			}
+			if (appSettings.getFontChoice() ==
+					RssReaderSettings.DEFAULT_FONT_CHOICE) {
+				return null;
+			} else {
+				Font defFont = Font.getDefaultFont();
+				return Font.getFont(Font.FACE_SYSTEM, defFont.getStyle(),
+						appSettings.getFontSize());
+			}
+		}
 }
