@@ -285,6 +285,7 @@ v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
 + Changes for next release of JLogMicro.
 + Changed disclaimer to take from a standard one from modified BSD.
 + Include modified BSD license file with source/binary tar/zip.
++ Use export to get source instead of checkout.
 
 Device issues:
 
