@@ -628,6 +628,10 @@
 			<move todir="${op.dir}/nbproject" >
 				<fileset dir="${op.dir}/${svn.src}/nbproject" />
 			</move>
+			<delete dir="${op.dir}/nbproject/private" />
+			<move todir="${op.dir}/nbproject/private" >
+				<fileset dir="${op.dir}/${svn.src}/nbproject-private" />
+			</move>
 			<delete dir="${op.dir}/${svn.src}" />
 			</then>
 		</if>
@@ -656,7 +660,7 @@
 
 	<target name="dist.svn.dirs" depends="prepare" if="need.dist.svn.dirs" >
 		<antcall target="svn.op.dist" >
-			<param name="svn.op" value="checkout" />
+			<param name="svn.op" value="export" />
 			<param name="op.dir" value="${main}" />
 		</antcall>
 	</target>
