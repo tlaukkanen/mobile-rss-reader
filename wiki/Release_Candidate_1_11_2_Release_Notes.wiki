@@ -10,15 +10,15 @@ Irving Bunton Jr
 
 ==Release Notes==
 
-=v1.5 (July 23th 2007)
+= v1.5 (July 23th 2007) =
   * Open links in device browser
   * Allow long feed URLs
 
-=v1.9 (August 14rd 2007)
+= v1.9 (August 14rd 2007) =
   * Support ISO8859-1, windows-1252, UTF-8, UTF-16 (partial support 
   * Fixed import feeds replacing current feed and importing only 1 feed.
 
-=v1.10 (August 23rd 2007)
+= v1.10 (August 23rd 2007) =
   * Reduced memory overflows while saving
   * Fix '|' in header name and item 
   * Prompt to delete feed
@@ -41,11 +41,11 @@ Irving Bunton Jr
   * Show and open enclosure
   * Support more time formats
 
-=v1.10.1 (August 24rd 2007)
+= v1.10.1 (August 24rd 2007) =
   * Fixed about not being shown the first time of use
   * Fixed intermittent exit problem
 
-=v1.10.2 (August 24rd 2007)
+= v1.10.2 (August 24rd 2007) =
   * Fixed infinate loop in emulator on exit.
   * Take version from mainifest file.
 
@@ -68,7 +68,7 @@ Irving Bunton Jr
   * Set focus when setting copy link/enclosure (Focus does not work
 on all devices including the emulator.)
 
-=v1.10.5 (September 17th 2007)
+= v1.10.5 (September 17th 2007) =
   * Allow non utf-16 to be faster.
   * Allow windows single quote for attributes.
   * Fixed attributes not handling encoding.
@@ -92,7 +92,7 @@ on all devices including the emulator.)
   * Allow paste for MIDP-1.0 (dependent on device)
   * Show program and device midp, cldc, jsr75 settings on settings form
 
-=v1.11
+= v1.11 =
   * New river of news options to sort by date and feed for all items, only unread,
   or only read.
   * Mark item as read or unread on river of news
@@ -150,7 +150,7 @@ on all devices including the emulator.)
   * Support phones with encoding aliases not documented in J2SE list
   (e.g. ISO-8859-1 instead of ISO8859_1).
 
-=v1.11.1 (August 13th 2008)
+= v1.11.1 (August 13th 2008) =
   * Fix bug when opening feeds on Sony Ericsson emulators and possiblely
     affecting Sony Ericsson devices
   * Fix bug with storing Itunes attributes
@@ -209,7 +209,7 @@ on all devices including the emulator.)
   * Support RSS Atoms without published tag (version 0.3, 1,0 e.g. from google)
     by using updated or modified for date if not published tag.
 
-=v1.11.2 Development 2 (dev2) (Dec 12th 2008)
+= v1.11.2 Development 2 (dev2) (Dec 12th 2008) =
   * Check in the rest of novice enhancement
   * Fix OPML with line feed/carriage return immediately after 'outline' tag.
   * Combine if statements
@@ -247,7 +247,7 @@ on all devices including the emulator.)
   * Changes for next release of JLogMicro
   * Fix turning on/off wraparound for lists
 
-=v1.11.2 Beta 1 (beta1) (Feb 2nd 2008)
+= v1.11.2 Beta 1 (beta1) (Feb 2nd 2008) =
   * Show language for podcast version
   * Allow sorting, etc from River of News for showing headers/items screen
   * Have semi-automated tests go from the last item down to the first item
@@ -267,7 +267,7 @@ on all devices including the emulator.)
   * Log command for testui for semi-automated tests
   * More logging
 
-=v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)=
+= v1.11.2 Release Candidate 1 (rc1) (March 11th 2009) =
   * Allow optional font size for forms.  This only works for display only items and ChoiceGroups.
   * Allow export only for podcast version.
   * Separate saved items for export form.
