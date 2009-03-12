@@ -1,5 +1,6 @@
 #windows.drive = C:
 windows.drive = 
+wtk252 = _01
 #windows.ext = .exe
 windows.ext = .exe
 #opt.tools = ${windows.drive}/opt/tools
@@ -23,7 +24,7 @@ antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 #Comment out if you do not want to run PMD
 #pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
 pmd.xsl = pmd-compile-reduced.xsl
-cat.cmd = cat
+cat.cmd = cat${windows.ext}
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
 #
@@ -34,6 +35,8 @@ cat.cmd = cat
 #rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
 svn.pgm = svn${windows.ext}
 #wtk.home = C:/opt/WTK2.5.1
+#wtk.home = ${windows.drive}/WTK2.5.2_01
+#wtk.home = ${opt.tools}/WTK2.5.2${wtk252}
 wtk.home = ${windows.drive}/opt/WTK2.5.2
 #For Netbeans
 #wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
@@ -109,7 +112,7 @@ src.controlled.copy = true
 #Specify the WTK source directory to be replaced
 #wtk.src = ../../src
 #wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReader/src
-wtk.src = ${env.j2mewtk}/RSSReader/src
+wtk.src = ${env.j2mewtk}/${project.name}/src
 zipdir = ../zipedsrc
 need.svn.preprocessed = true
 #svn.home = C:\\PROGRA~1\\COLLAB~1
