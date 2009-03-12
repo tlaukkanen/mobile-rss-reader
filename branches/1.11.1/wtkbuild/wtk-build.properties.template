@@ -2,7 +2,7 @@
 windows.drive = 
 wtk252 = _01
 #windows.ext = .exe
-windows.ext = .exe
+windows.ext =
 #opt.tools = ${windows.drive}/opt/tools
 opt.tools = /home/irvbopt/opt/tools
 #antenna.home = ${ext.drive}/mostdownloads/j2me/sourceforge/antenna
