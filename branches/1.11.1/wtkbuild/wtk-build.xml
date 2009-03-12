@@ -48,6 +48,7 @@
 	<property name="ext.drive" value="${env.EXT_DRIVE}" />
 	<property name="build.template" value="" />
 	<property file="${basedir}/wtk-build${device.props}.properties${build.template}" />
+	<property name="DFEATUREFORMDEF" value="DFEATUREFORMDEF" />
 	<!-- DCOMPATDEF is used to test compatibility store/restore of date -->
 	<property name="DCOMPATDEF" value="DNOCOMPAT" />
 	<echo message="unproc.src=${unproc.src}" />
@@ -144,6 +145,8 @@
 		<filterset id="defile.filter" >
 			<filter token="DMIDPVERS" value="//#define ${DMIDPVERS}" />
 			<filter token="DCLDCVERS" value="//#define ${DCLDCVERS}" />
+			<filter token="DFEATUREFORMDEF" value="//#define ${DFEATUREFORMDEF}" />
+			<filter token="DFEATUREFORMIMPORTDEF" value="${DFEATUREFORMIMPORTDEF}" />
 			<filter token="DITUNESDEF" value="//#define ${DITUNESDEF}" />
 			<filter token="DJSR75" value="//#define ${DJSR75}" />
 			<filter token="DJSR238" value="//#define ${DJSR238}" />
