@@ -162,6 +162,22 @@ public class FeatureForm extends Form {
 		}
 	}
 
+	private void handleError(String msg, RuntimeException e) {
+		//#ifdef DLOGGING
+//@		logger.warning(msg + " possible error with setFont.", e);
+		//#endif
+		featureMgr.getMidlet().getLoadForm().appendNote(
+				"Font not supported by device.  Reset to default or pick another font.");
+		featureMgr.getMidlet().getSettings().setFontChoice(
+				RssReaderSettings.DEFAULT_FONT_CHOICE);
+		this.font = null;
+		final int flen = super.size();
+		for (int i = 0; i < flen; i++) {
+			Item item = super.get(i);
+			setItemFont(item);
+		}
+	}
+
 	//#endif
 
 	public FeatureForm(RssReaderMIDlet midlet, String title, Item[] items) {
@@ -193,21 +209,5 @@ public class FeatureForm extends Form {
     public FeatureMgr getFeatureMgr() {
         return (featureMgr);
     }
-
-	private void handleError(String msg, RuntimeException e) {
-		//#ifdef DLOGGING
-//@		logger.warning(msg + " possible error with setFont.", e);
-		//#endif
-		featureMgr.getMidlet().getLoadForm().appendNote(
-				"Font not supported by device.  Reset to default or pick another font.");
-		featureMgr.getMidlet().getSettings().setFontChoice(
-				RssReaderSettings.DEFAULT_FONT_CHOICE);
-		this.font = null;
-		final int flen = super.size();
-		for (int i = 0; i < flen; i++) {
-			Item item = super.get(i);
-			setItemFont(item);
-		}
-	}
 
 }
