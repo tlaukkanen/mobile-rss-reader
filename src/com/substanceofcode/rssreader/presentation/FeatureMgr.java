@@ -443,6 +443,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 		midlet.setCurrent( boxURL );
     }
     
+		//#ifdef DMIDP20
 		public Font getCustomFont() {
 			final RssReaderSettings appSettings = midlet.getSettings();
 			if (appSettings == null) {
@@ -457,4 +458,5 @@ public class FeatureMgr implements CommandListener, Runnable {
 						appSettings.getFontSize());
 			}
 		}
+		//#endif
 }
