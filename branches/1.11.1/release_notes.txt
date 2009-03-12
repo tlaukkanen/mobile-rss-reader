@@ -283,6 +283,8 @@ v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
 + Separate saved items for export form.
 + Use method for getting fields to save/restore.
 + Changes for next release of JLogMicro.
++ Changed disclaimer to take from a standard one from modified BSD.
++ Include modified BSD license file with source/binary tar/zip.
 
 Device issues:
 
