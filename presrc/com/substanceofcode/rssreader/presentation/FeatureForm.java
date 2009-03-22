@@ -67,8 +67,6 @@ public class FeatureForm extends Form {
 	//#ifdef DLOGGING
 	private Logger logger = Logger.getLogger("FeatureForm");
 	private boolean fineLoggable = logger.isLoggable(Level.FINE);
-	private boolean finestLoggable = logger.isLoggable(Level.FINEST);
-	private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
 
 	public FeatureForm(RssReaderMIDlet midlet, String title) {
@@ -162,12 +160,14 @@ public class FeatureForm extends Form {
 		}
 	}
 
-	private void handleError(String msg, RuntimeException e) {
+	private void handleError(String msg, Throwable e) {
 		//#ifdef DLOGGING
 		logger.warning(msg + " possible error with setFont.", e);
 		//#endif
+		e.printStackTrace();
 		featureMgr.getMidlet().getLoadForm().appendNote(
 				"Font not supported by device.  Reset to default or pick another font.");
+		featureMgr.getMidlet().getLoadForm().addExc("Error changing font.", e);
 		featureMgr.getMidlet().getSettings().setFontChoice(
 				RssReaderSettings.DEFAULT_FONT_CHOICE);
 		this.font = null;
@@ -188,6 +188,10 @@ public class FeatureForm extends Form {
 	final public void addPromptCommand(Command cmd, String prompt) {
 		super.addCommand(cmd);
 		featureMgr.addPromptCommand(cmd, prompt);
+	}
+
+	final public void removeCommandPrompt(Command cmd) {
+		featureMgr.removeCommand(cmd);
 	}
 
 	final public void removeCommand(Command cmd) {
