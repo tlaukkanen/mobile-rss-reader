@@ -49,6 +49,7 @@
 
 package com.substanceofcode.rssreader.presentation;
 
+import java.lang.SecurityException;
 //#ifdef DJSR75
 //@import org.kablog.kgui.KFileSelectorMgr;
 //#endif
@@ -66,23 +67,14 @@ import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.rssreader.businesslogic.Controller;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
-import com.substanceofcode.rssreader.businesslogic.HTMLAutoLinkParser;
-import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
-import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.presentation.AllNewsList;
 import com.substanceofcode.utils.Settings;
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.StringUtil;
-import com.substanceofcode.utils.SortUtil;
 import com.substanceofcode.utils.CauseException;
 import java.util.*;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import javax.microedition.midlet.*;
 import javax.microedition.io.ConnectionNotFoundException;
@@ -127,6 +119,7 @@ import javax.microedition.lcdui.StringItem;
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
+//@import net.sf.jlogmicro.util.presentation.LoggerRptForm;
 //@import net.sf.jlogmicro.util.logging.FormHandler;
 //@import net.sf.jlogmicro.util.logging.RecStoreHandler;
 //#endif
@@ -158,7 +151,7 @@ public class RssReaderMIDlet extends MIDlet
 	          (System.getProperty(
 			"microedition.io.file.FileConnection.version") != null);
 	//#ifdef DTEST
-//@    private boolean     m_debugOutput = false; // Flag to write to output for test
+//@    private boolean     m_debugOutput = true; // Flag to write to output for test
 	//#endif
     private boolean     m_getPage;          // The noticy flag for HTTP
     private boolean     m_openPage;         // Open the headers
@@ -199,6 +192,7 @@ public class RssReaderMIDlet extends MIDlet
     private boolean     m_firstTime = false;
     private boolean     m_novice = false;
     private boolean     m_itunesEnabled = false;
+    private boolean     m_parseBackground = false;
 	//#ifdef DLOGGING
 //@    private boolean fineLoggable;
 //@    private boolean finestLoggable;
@@ -210,10 +204,9 @@ public class RssReaderMIDlet extends MIDlet
     
     // Currently selected bookmark
     private int             m_curBookmark;  // The currently selected item
+    private int             m_backGrBookmark;  // The background selected item
     private RssFeedParser   m_curRssParser; // The currently selected RSS
-	//#ifdef DLOGGING
-//@	private RecordStore     m_recStore = null; // Rec store
-	//#endif
+    private RssFeedParser   m_backGrRssParser = null; // The currently selected RSS in background
     
     // GUI items
     private FeatureList  m_bookmarkList;     // The bookmark list
@@ -271,11 +264,12 @@ public class RssReaderMIDlet extends MIDlet
     private int citemEnclNbr = -1;
     private RssItunesItem citem = null;
 	//#ifdef DLOGGING
-//@    private javax.microedition.lcdui.Form m_debug;
+//@    private LoggerRptForm m_debug;
 //@    private Logger logger;
 	//#endif
     
-    public RssReaderMIDlet() {
+    public RssReaderMIDlet()
+	throws SecurityException {
         m_display = Display.getDisplay(this);
 		m_midlet = this;
         
@@ -286,19 +280,22 @@ public class RssReaderMIDlet extends MIDlet
 		//#ifdef DLOGGING
 //@		initializeLoadingForm("Loading items...", null);
 //@		try {
-//@			LogManager.getLogManager().readConfiguration(this);
+//@			LogManager logManager = LogManager.getLogManager();
+//@			logManager.readConfiguration(this);
 //@			logger = Logger.getLogger("RssReaderMIDlet");
 //@			for (Enumeration eHandlers = logger.getParent().getHandlers().elements();
 //@					eHandlers.hasMoreElements();) {
 //@				Object ohandler = eHandlers.nextElement();
 //@				if (ohandler instanceof FormHandler) {
-//@					m_debug = (Form)((FormHandler)ohandler).getView();
-//@					logger.finest("form=" + m_debug);
+//@					Form oform = (Form)((FormHandler)ohandler).getView();
+//@					logger.finest("form=" + oform);
 //@				}
 //@			}
 //@			logger = Logger.getLogger("RssReaderMIDlet");
 //@			logger.info("RssReaderMIDlet started.");
 //@			logger.info("RssReaderMIDlet has form handler=" + (m_debug != null));
+//@			m_debug = new LoggerRptForm(logManager, this,
+//@						this, "net.sf.jlogmicro.util.logging.FormHandler");
 //@		} catch (Throwable t) {
 //@			m_loadForm.appendMsg("Error initiating logging " +
 //@					t.getClass().getName() + "," + t.getMessage());
@@ -561,15 +558,15 @@ public class RssReaderMIDlet extends MIDlet
 		int pl = m_loadForm.append(gauge);
         try {
             m_bookmarkList = new FeatureList(this, "Bookmarks", List.IMPLICIT);
-			if (!m_novice) {
-				m_bookmarkList.addCommand( m_addNewBookmark );
-			}
 			//#ifdef DMIDP20
 			// If font is wrong, it can cause an exception for some
 			// devices.  This leaves some of the data not loaded.
 			// So, we'll update this later
             m_bookmarkList.setFont(null);
 			//#endif
+			if (!m_novice) {
+				m_bookmarkList.addCommand( m_addNewBookmark );
+			}
             m_bookmarkList.addCommand( m_openBookmark );
             m_bookmarkList.addCommand( m_readUnreadItems );
 			if (!m_novice) {
@@ -744,16 +741,6 @@ public class RssReaderMIDlet extends MIDlet
 		setCurrent( m_loadForm );
     }
 
-    /** Show loading form */
-    final public void showLoadingForm(final String desc,
-									   Displayable disp)
-	throws Exception {
-		//#ifdef DTEST
-//@		System.out.println("showLoadingForm called from midlet thread.");
-		//#endif
-		initializeLoadingForm(desc, disp);
-	}
-
 	//#ifdef DLOGGING
 //@    final public void initializeDebugForm() {
 //@        m_debug.addCommand( m_backFrDebugCmd );
@@ -909,7 +896,7 @@ public class RssReaderMIDlet extends MIDlet
 					} else {
 						m_loadForm.setLoadingFinished("Updating finished",
 								"Updating finished use back to return.");
-						setCurrent( m_bookmarkList );
+						showBookmarkList();
 					}
 				} catch(Exception ex) {
 					m_loadForm.recordExcForm("Error parsing feeds from:\n" +
@@ -977,6 +964,10 @@ public class RssReaderMIDlet extends MIDlet
 //@					m_getTestImportForm = false;
 					//#endif
 				}
+			}
+
+			if (m_parseBackground) {
+				procHeader(true, false);
 			}
 
 			//#ifdef DTESTUI
@@ -1076,19 +1067,24 @@ public class RssReaderMIDlet extends MIDlet
     }
 	
 	// Open existing bookmark and show headers (items).
-	final public void procPage() {
+	final public void procPage(boolean cbackground) {
 
 		Displayable cprevDisp = null;
 		boolean     copenPage = false;
 		boolean     cgetPage = false;
 		boolean     cgetModPage = false;
+		RssFeedParser ccurRssParser = null;
 		synchronized(this) {
 			cprevDisp = m_prevDisp;
 			copenPage = m_openPage;
 			cgetPage = m_getPage;
 			cgetModPage = m_getModPage;
+			ccurRssParser = m_curRssParser;
 		}
 
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("procPage copenPage,cgetPage,cgetModPage=" + copenPage + "," + cgetPage + "," + cgetModPage);}
+		//#endif
 		// Open existing bookmark and show headers (items).
 		if( copenPage || cgetPage || cgetModPage ) {
 			try {
@@ -1097,7 +1093,7 @@ public class RssReaderMIDlet extends MIDlet
 				} else {
 					initializeLoadingForm("updating feed...", cprevDisp);
 				}
-				final RssItunesFeed feed = m_curRssParser.getRssFeed();
+				final RssItunesFeed feed = ccurRssParser.getRssFeed();
 				if(feed.getUrl().length() == 0) {
 					m_loadForm.recordExcForm("Unable to open feed.  No URL.",
 							new Exception(
@@ -1108,24 +1104,99 @@ public class RssReaderMIDlet extends MIDlet
 					/** Get RSS feed */
 					final int maxItemCount =
 						m_appSettings.getMaximumItemCountInFeed();
-					m_curRssParser.parseRssFeed( cgetModPage,
-							maxItemCount );
+					if (cbackground) {
+						synchronized(this) {
+							m_backGrRssParser = new RssFeedParser(feed,
+									cgetModPage, maxItemCount);
+							m_parseBackground = true;
+							m_backGrBookmark = m_curBookmark;
+							m_loadForm.addPromptCommand(m_backCommand,
+									"Are you sure that you want to go back? " +
+									"Reading the feed has not finished.");
+							return;
+						}
+					} else {
+						ccurRssParser.parseRssFeed( cgetModPage,
+								maxItemCount );
+					}
+				}
+				procHeader(cbackground, copenPage);
+			}catch(Exception e) {
+				m_loadForm.recordExcForm(
+						"\nError " + (copenPage ? "loading" :
+							"parsing") + " feed on:\n" +
+						ccurRssParser.getRssFeed().getUrl(), e); 
+			}catch(OutOfMemoryError e) {
+				m_loadForm.recordExcForm(
+						"\nOut of memory " + (copenPage ? "loading" :
+							"parsing") + " feed on:\n" +
+						ccurRssParser.getRssFeed().getUrl(), e);
+			}catch(Throwable t) {
+				m_loadForm.recordExcForm(
+						"\nInternal error " + (copenPage ? "loading" :
+							"parsing") + " feed on:\n" +
+						ccurRssParser.getRssFeed().getUrl(), t);
+			} finally {
+				synchronized(this) {
+					m_getPage = false;
+					m_openPage = false;
+					m_getModPage = false;
+				}
+			}
+		}
+	}
+
+	// Open existing bookmark and show headers (items).
+	final public void procHeader(boolean cbackground, boolean copenPage) {
+
+		Displayable cprevDisp = null;
+		boolean cparseBackground = false;
+		RssFeedParser ccurRssParser = null;
+		RssFeedParser cbackGrRssParser = null;
+		int cbackGrBookmark = -1;
+		synchronized(this) {
+			cprevDisp = m_prevDisp;
+			cbackGrRssParser = m_backGrRssParser;
+			ccurRssParser = m_curRssParser;
+			cparseBackground = m_parseBackground;
+			cbackGrBookmark = m_backGrBookmark;
+		}
+
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("procHeader cbackground,copenPage,m_getPage,m_getModPage,cparseBackground,,ccurRssParser,cbackGrRssParser=" + cbackground + "," + copenPage + "," + m_getPage + "," + m_getModPage + "," + cparseBackground + "," + ccurRssParser + "," + cbackGrRssParser);}
+		//#endif
+		// Open existing bookmark and show headers (items).
+		boolean rssBackground = cbackground && cparseBackground &&
+				(cbackGrRssParser != null) &&
+				(cbackGrRssParser != ccurRssParser) && (cbackGrBookmark >= 0);
+		if( (cprevDisp != null) && (!cbackground || (rssBackground &&
+				cbackGrRssParser.isReady()) )) {
+			try {
+
+				if(rssBackground) {
+					if(cbackGrRssParser.isSuccessfull()) {
+						m_rssFeeds.put(m_backGrRssParser.getRssFeed().getName(),
+								m_backGrRssParser.getRssFeed());
+					} else {
+						throw cbackGrRssParser.getEx();
+					}
 				}
 				HeaderList hdrList = null;
-				if (cprevDisp instanceof HeaderList) {
-					hdrList = (HeaderList)cprevDisp;
-				} else {
+				if(rssBackground || !(cprevDisp instanceof HeaderList)) {
 					//#ifdef DTEST
 //@					System.gc();
 //@					long beginMem = Runtime.getRuntime().freeMemory();
 					//#endif
-					hdrList = new HeaderList(this, m_bookmarkList, m_rssFeeds,
+					hdrList = new HeaderList(this, m_bookmarkList,
+						cbackGrBookmark, m_rssFeeds,
 						m_unreadImage, m_itunesEnabled, m_loadForm,
-						m_curRssParser.getRssFeed());
+						cbackGrRssParser.getRssFeed());
 					hdrList.setCommandListener(hdrList, true);
 					//#ifdef DTEST
 //@					System.out.println("headerList size=" + (beginMem - Runtime.getRuntime().freeMemory()));
 					//#endif
+				} else {
+					hdrList = (HeaderList)cprevDisp;
 				}
 				hdrList.sortAllItems( false, m_bookmarkList, m_rssFeeds );
 				setCurrent( hdrList );
@@ -1136,23 +1207,28 @@ public class RssReaderMIDlet extends MIDlet
 				m_loadForm.recordExcForm(
 						"\nError " + (copenPage ? "loading" :
 							"parsing") + " feed on:\n" +
-						m_curRssParser.getRssFeed().getUrl(), e);
+						cbackGrRssParser.getRssFeed().getUrl(), e);
 
 			}catch(OutOfMemoryError e) {
 				m_loadForm.recordExcForm(
 						"\nOut of memory " + (copenPage ? "loading" :
 							"parsing") + " feed on:\n" +
-						m_curRssParser.getRssFeed().getUrl(), e);
+						cbackGrRssParser.getRssFeed().getUrl(), e);
 			}catch(Throwable t) {
 				m_loadForm.recordExcForm(
 						"\nInternal error " + (copenPage ? "loading" :
 							"parsing") + " feed on:\n" +
-						m_curRssParser.getRssFeed().getUrl(), t);
+						cbackGrRssParser.getRssFeed().getUrl(), t);
 			} finally {
 				synchronized(this) {
-					m_getPage = false;
-					m_openPage = false;
-					m_getModPage = false;
+					if (cbackGrRssParser == m_backGrRssParser) {
+						m_loadForm.removeCommandPrompt(m_backCommand);
+						m_backGrRssParser = m_curRssParser;
+						m_parseBackground = false;
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("procHeader m_parseBackground=" + m_parseBackground);}
+						//#endif
+					}
 				}
 			}
 		}
@@ -1179,15 +1255,15 @@ public class RssReaderMIDlet extends MIDlet
 //@		}
 //@		if( cgetFile ) {
 //@			try {
-//@				if (m_fileRtnForm instanceof ImportFeedsForm) {
+//@				if (cfileRtnForm instanceof ImportFeedsForm) {
 //@					initializeLoadingForm(
 //@							"Loading files to " + (cselectDir ? "import" :
 //@								"export") + " from...",
-//@							m_fileRtnForm);
+//@							cfileRtnForm);
 //@				} else {
 //@					initializeLoadingForm(
 //@							"Loading files to bookmark from...",
-//@							m_fileRtnForm);
+//@							cfileRtnForm);
 //@				}
 //@				final KFileSelectorMgr fileSelectorMgr =
 //@					new KFileSelectorMgr();
@@ -1251,7 +1327,7 @@ public class RssReaderMIDlet extends MIDlet
 					} else {
 						m_loadForm.appendMsg(
 								"Finished saving.  Use back to return.");
-						setCurrent( m_bookmarkList );
+						showBookmarkList();
 					}
 				} finally {
 					m_stored = m_exit;
@@ -1379,11 +1455,11 @@ public class RssReaderMIDlet extends MIDlet
 								   final RssItunesItem item,
 								   List prevList) {
         System.out.println("Create new item form");
-		final String title = item.getTitle();
 		//#ifdef DTEST
 //@		System.gc();
 //@		long beginMem = Runtime.getRuntime().freeMemory();
 		//#endif
+		final String title = item.getTitle();
 		m_itemRrnForm = prevList;
 		if (title.length() > 0) {
 			m_itemForm = new ItemForm( title, title, feed, item);
@@ -1434,7 +1510,8 @@ public class RssReaderMIDlet extends MIDlet
      * Start up the Hello MIDlet by creating the TextBox and associating
      * the exit command and listener.
      */
-    public void startApp() {
+    public void startApp()
+	throws MIDletStateChangeException {
 		// Initialize bookmarks here since it does some work.
 		if (m_bookmarkList == null) {
 			synchronized (this) {
@@ -1475,7 +1552,7 @@ public class RssReaderMIDlet extends MIDlet
 							}
 						}
 						if (!m_firstTime && !m_loadForm.hasExc()) {
-							setCurrent( m_bookmarkList );
+							showBookmarkList();
 						}
 					}
 					if (m_firstTime) {
@@ -1699,6 +1776,7 @@ public class RssReaderMIDlet extends MIDlet
 				} else {
 					m_getPage = true;
 				}
+				m_openPage = false;
 			}
 		} catch (Throwable t) {
 //#ifdef DLOGGING
@@ -1735,109 +1813,6 @@ public class RssReaderMIDlet extends MIDlet
 //@		}
 //@	}
 	//#endif
-
-	/* Restore previous values. */
-	final public void restorePrevValues(Item[] items, byte[] bdata) {
-		DataInputStream dis = new DataInputStream(
-				new ByteArrayInputStream(bdata));
-		for (int ic = 0; ic < items.length; ic++) {
-			try {
-				final Item item = items[ic];
-				if (item instanceof ChoiceGroup) {
-					((ChoiceGroup)item).setSelectedIndex(dis.readInt(),
-						true);
-					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("set selected " + ((ChoiceGroup)item).getSelectedIndex());}
-					//#endif
-				} else if (item instanceof TextField) {
-					final int len = dis.readInt();
-					if (len > 0) {
-						byte [] bvalue = new byte[len];
-						final int blen = dis.read(bvalue);
-						String value;
-						try {
-							value = new String(bvalue, 0, blen, "UTF-8");
-						} catch (UnsupportedEncodingException e) {
-							value = new String(bvalue, 0, blen);
-							//#ifdef DLOGGING
-//@							logger.severe("cannot convert value=" + value, e);
-							//#endif
-						}
-						((TextField)item).setString(value);
-						//#ifdef DLOGGING
-//@						if (finestLoggable) {logger.finest("set string " + ((TextField)item).getString());}
-						//#endif
-					}
-				}
-			} catch (IOException e) {
-				//#ifdef DLOGGING
-//@				logger.severe("IOException reading selected.", e);
-				//#else
-				e.printStackTrace();
-				//#endif
-			}
-		}
-		if (dis != null) {
-			/* Workaround for MicroEmulator. */
-			try { ((InputStream)dis).close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	/* Store current values. */
-	final public byte[] storeValues(Item[] items) {
-		ByteArrayOutputStream bout = new
-				ByteArrayOutputStream();
-		DataOutputStream dout = new
-				DataOutputStream( bout );
-		for (int ic = 0; ic < items.length; ic++) {
-			try {
-				final Item item = items[ic];
-				if (item instanceof ChoiceGroup) {
-					dout.writeInt(((ChoiceGroup)item).getSelectedIndex());
-					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("stored selected " + item.getLabel() + "," + ((ChoiceGroup)item).getSelectedIndex());}
-					//#endif
-				} else if (item instanceof TextField) {
-					final String value = ((TextField)item).getString();
-					byte [] bvalue;
-					try {
-						bvalue = value.getBytes("UTF-8");
-					} catch (UnsupportedEncodingException e) {
-						bvalue = value.getBytes();
-						//#ifdef DLOGGING
-//@						logger.severe("cannot store value=" + value, e);
-						//#endif
-					}
-					dout.writeInt(bvalue.length);
-					if (bvalue.length > 0) {
-						dout.write( bvalue, 0, bvalue.length );
-					}
-					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("set string " + item.getLabel() + "," + ((TextField)item).getString());}
-					//#endif
-				}
-			} catch (IOException e) {
-				//#ifdef DLOGGING
-//@				logger.severe("IOException storing selected.", e);
-				//#else
-				e.printStackTrace();
-				//#endif
-			}
-		}
-		//#ifdef DLOGGING
-//@		if (finestLoggable) {logger.finest("bout.toByteArray().length=" + bout.toByteArray().length);}
-		//#endif
-		if (dout != null) {
-			try { dout.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return bout.toByteArray();
-	}
 
 	/* Save the current bookmarks and other properties.
 	   releaseMemory - true if memory used is to be released as the
@@ -1955,31 +1930,30 @@ public class RssReaderMIDlet extends MIDlet
         
         /** Open RSS feed bookmark */
         if( ((c == m_openBookmark) || (c == List.SELECT_COMMAND &&
-                (s==m_bookmarkList))) && ( m_bookmarkList.size()>0 )){
-			m_curBookmark = m_bookmarkList.getSelectedIndex();
-			if (m_curBookmark < 0) {
-				m_curBookmark = 0;
-			}
-			
-			RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
-					m_bookmarkList.getString(m_curBookmark));
-			m_curRssParser = new RssFeedParser( feed );
-			if( feed.getItems().size()==0 ) {
-				/** Update RSS feed headers only if this is a first time */
-				updateHeaders(false, m_bookmarkList);
-			} else {
-				/**
-				 * Show currently selected RSS feed
-				 * headers without updating them
-				 */
-				synchronized(this) {
-					m_openPage = true;
+                (s==m_bookmarkList)))){
+			m_curBookmark = FeatureMgr.getSelectedIndex(m_bookmarkList);
+			if (m_curBookmark >= 0) {
+				RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
+						m_bookmarkList.getString(m_curBookmark));
+				m_curRssParser = new RssFeedParser( feed );
+				if( feed.getItems().size()==0 ) {
+					/** Update RSS feed headers only if this is a first time */
+					updateHeaders(false, m_bookmarkList);
+				} else {
+					/**
+					 * Show currently selected RSS feed
+					 * headers without updating them
+					 */
+					synchronized(this) {
+						m_openPage = true;
+						m_prevDisp = m_bookmarkList;
+					}
 				}
-			}
 
-			// Open existing bookmark and show headers (items).
-			procPage();
-        }
+				// Open existing bookmark and show headers (items).
+				procPage(!m_openPage);
+			}
+		}
         
         /** Read unread items date sorted */
         if(( c == m_readUnreadItems ) && (m_bookmarkList.size() > 0)) {
@@ -2023,8 +1997,8 @@ public class RssReaderMIDlet extends MIDlet
 		//#ifdef DTEST
 //@		/** Show import feed list form and default file */
 //@		if( c == m_importCurrFeedListCmd ) {
-//@			if( m_bookmarkList.size()>0 ) {
-//@                m_curBookmark = m_bookmarkList.getSelectedIndex();
+//@			m_curBookmark = FeatureMgr.getSelectedIndex(m_bookmarkList);
+//@			if( m_curBookmark >= 0 ) {
 				//#ifdef DTESTUI
 //@				m_bookmarkLastIndex = m_curBookmark;
 				//#endif
@@ -2069,9 +2043,10 @@ public class RssReaderMIDlet extends MIDlet
 //@        /** Show encodings list */
 //@		if( c == m_testEncCmd ) {
 //@			try {
-//@				showLoadingForm("Loading test form...", m_bookmarkList);
+//@				initializeLoadingForm("Loading test form...", m_bookmarkList);
 //@				setCurrent( m_testingForm );
 //@			} catch (Exception e) {
+//@				e.printStackTrace();
 //@			}
 //@		}
 		//#endif
@@ -2091,13 +2066,22 @@ public class RssReaderMIDlet extends MIDlet
 //@
 //@        /** Back to bookmarks */
 //@		if( c == m_backFrDebugCmd ) {
-//@			setCurrent( m_bookmarkList );
+//@			showBookmarkList();
 //@		}
 //@
 		//#endif
 
     }
     
+	public void stopRssBackground() {
+		synchronized(this) {
+			if (m_parseBackground) {
+				m_parseBackground = false;
+				m_curRssParser = m_backGrRssParser;
+			}
+		}
+	}
+
 	//#ifdef DTESTUI
 //@    public void setBookmarkIndex(int bookmarkIndex) {
 //@        this.m_bookmarkIndex = bookmarkIndex;
@@ -2394,7 +2378,6 @@ public class RssReaderMIDlet extends MIDlet
 		//#ifdef DMIDP10
 //@		private String      m_title;         // Store title.
 		//#endif
-		private Command     m_loadBackCmd;   // The load form back to prev displayable command
 		private Command     m_loadMsgsCmd;   // The load form messages command
 		private Command     m_loadDiagCmd;   // The load form diagnostic command
 		private Command     m_loadErrCmd;    // The load form error command
@@ -2410,27 +2393,30 @@ public class RssReaderMIDlet extends MIDlet
 			//#ifdef DMIDP10
 //@			this.m_title = title;
 			//#endif
-			m_loadMsgsCmd       = new Command("Messages", Command.SCREEN, 1);
-			m_loadErrCmd        = new Command("Errors", Command.SCREEN, 2);
-			m_loadDiagCmd       = new Command("Diagnostics", Command.SCREEN, 3);
-			m_loadBackCmd       = new Command("Back", Command.BACK, 4);
+			m_loadMsgsCmd       = new Command("Messages", Command.SCREEN, 2);
+			m_loadErrCmd        = new Command("Errors", Command.SCREEN, 3);
+			m_loadDiagCmd       = new Command("Diagnostics", Command.SCREEN, 4);
+			if (m_backCommand == null) {
+				m_backCommand   = new Command("Back", Command.BACK, 1);
+			}
 			super.addCommand( m_loadMsgsCmd );
 			super.addCommand( m_loadErrCmd );
 			super.addCommand( m_loadDiagCmd );
 			m_disp = disp;
 			if (disp != null) {
-				super.addCommand( m_loadBackCmd);
+				super.addCommand( m_backCommand );
 			}
 		}
 
 		/** Respond to commands */
 		public void commandAction(Command c, Displayable s) {
 
-			if( c == m_loadBackCmd ){
+			if( c == m_backCommand ){
 				Displayable cdisp = null;
 				synchronized(this) {
 					cdisp = m_disp;
 				}
+				stopRssBackground();
 				setCurrent( cdisp );
 			}
 
@@ -2452,7 +2438,7 @@ public class RssReaderMIDlet extends MIDlet
 		}
 
 		/** Set title and addmessage for loading form */
-		final public void setLoadingFinished(final String title, String msg) {
+		public void setLoadingFinished(final String title, String msg) {
 			if (title != null) {
 				super.setTitle(title);
 			}
@@ -2462,7 +2448,7 @@ public class RssReaderMIDlet extends MIDlet
 		}
 		
 		/* Record the exception in the loading form, log it and give std error. */
-		final public void recordExcForm(final String causeMsg, final Throwable e) {
+		public void recordExcForm(final String causeMsg, final Throwable e) {
 			final CauseException ce = new CauseException(causeMsg, e);
 			//#ifdef DLOGGING
 //@			logger.severe(ce.getMessage(), e);
@@ -2572,7 +2558,7 @@ public class RssReaderMIDlet extends MIDlet
 				}
 				m_disp = (newDisp == null) ? m_bookmarkList : newDisp;
 				if ((odisp == null) && (m_disp != null)) {
-					super.addCommand( m_loadBackCmd);
+					super.addCommand( m_backCommand);
 				}
 			}
 			//#ifdef DLOGGING
