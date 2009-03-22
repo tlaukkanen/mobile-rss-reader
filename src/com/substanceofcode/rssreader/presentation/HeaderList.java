@@ -66,36 +66,28 @@ import com.substanceofcode.utils.SortUtil;
 final public class HeaderList extends AllNewsList
 	implements CommandListener {
 	private boolean     m_itunesEnabled;    // True if Itunes is enabled
-	private Command     m_backHeaderCmd;    // The back to bookmark list command
 	private Command     m_updateCmd;        // The update headers command
 	private Command     m_updateModCmd;     // The update modified headers command
-
-	//#ifdef DLOGGING
-//@    private Logger m_logger = Logger.getLogger("HeaderList");
-//@    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
-//@    private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
-//@    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
-	//#endif
-    
 	//#ifdef DITUNES
 //@	private Command     m_bookmarkDetailsCmd;   // The show feed details
 	//#endif
 
+	//#ifdef DLOGGING
+//@    private Logger m_logger = Logger.getLogger("HeaderList");
+//@    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
+	//#endif
+    
 	/* Constructor */
 	public HeaderList(final RssReaderMIDlet midlet,
-			final FeatureList bookmarkList,
+			final FeatureList bookmarkList, final int selectedIx,
 			final Hashtable rssFeeds, Image unreadImage,
 			boolean itunesEnabled,
 			RssReaderMIDlet.LoadingForm loadForm, final RssItunesFeed feed) {
 		super(midlet, feed.getName(), List.IMPLICIT,
-				FeatureMgr.getSelectedIndex(bookmarkList), 1, bookmarkList,
+				selectedIx, 1, bookmarkList,
 				rssFeeds, unreadImage, loadForm, 6);
 		m_feed = feed;
 		this.m_itunesEnabled = itunesEnabled;
-		final boolean open1st = midlet.getSettings().getFeedListOpen();
-		//#ifdef DLOGGING
-//@		if (m_fineLoggable) {m_logger.fine("initheader open1st=" + open1st);}
-		//#endif
 		m_updateCmd         = new Command("Update feed", Command.SCREEN, 3);
 		m_updateModCmd      = new Command("Update modified feed",
 										  Command.SCREEN, 4);
@@ -112,21 +104,26 @@ final public class HeaderList extends AllNewsList
 	
 	//#ifdef DTEST
 //@	/** Test that the feed is not ruined by being stored and restored. */
-//@	final public void testFeed() {
-//@		RssItunesFeed feed = m_feed;
-//@		String store = feed.getStoreString(true, true);
-//@		RssItunesFeed feed2 = RssItunesFeed.deserialize(
-//@				true, store );
-//@		boolean feedEq = feed.equals(feed2);
-		//#ifdef DLOGGING
-//@		if (m_finestLoggable) {m_logger.finest("feed1,2 eq=" + feedEq);}
-		//#endif
-//@		if (!feedEq) {
+//@	public void testFeed() {
+//@		try {
+//@			RssItunesFeed feed = m_feed;
+//@			String store = feed.getStoreString(true, true);
+//@			RssItunesFeed feed2 = RssItunesFeed.deserialize(
+//@					true, store );
+//@			boolean feedEq = feed.equals(feed2);
 			//#ifdef DLOGGING
-//@			m_logger.severe("Itunes feed does not match name=" + feed.getName());
+//@			if (m_finestLoggable) {m_logger.finest("feed1,2 eq=" + feedEq);}
 			//#endif
-//@			System.out.println("feed=" + feed + "," + feed.toString());
-//@			System.out.println("feed store=" + store);
+//@			if (!feedEq) {
+				//#ifdef DLOGGING
+//@				m_logger.severe("Itunes feed does not match name=" + feed.getName());
+				//#endif
+//@				System.out.println("feed=" + feed + "," + feed.toString());
+//@				System.out.println("feed store=" + store);
+//@			}
+//@		} catch(Throwable t) {
+//@			m_loadForm.recordExcForm(
+//@					"\ntestFeed Internal error", t);
 //@		}
 //@	}
 	//#endif
@@ -143,7 +140,7 @@ final public class HeaderList extends AllNewsList
 		if( (c == m_updateCmd) ||  (c == m_updateModCmd) ) {
 			m_midlet.updateHeaders(c == m_updateModCmd, this);
 			// Update existing bookmark.
-			m_midlet.procPage();
+			m_midlet.procPage(false);
 		}
 		
 		//#ifdef DITUNES
