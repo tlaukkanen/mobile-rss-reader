@@ -87,6 +87,7 @@ public class URLForm extends FeatureForm
 	protected boolean     m_ok = false;      // The ok flag
 	protected boolean     m_cancel = false;      // The cancel flag
 	protected boolean     m_clear = false;      // The clear flag
+	protected boolean     m_last = false;      // The last flag
 	//#ifdef DJSR75
 //@	protected boolean     m_selectDir = false;  // The select directory flag
 //@	protected boolean     m_fileReq = false;      // The get file flag
@@ -98,6 +99,7 @@ public class URLForm extends FeatureForm
 	protected Command     m_addCmd = null; // The add command 
 	protected Command     m_insCmd = null;   // The import before the current point?
 	protected Command     m_appndCmd = null; // The import append
+	protected Command     m_lastCmd = null; // The last data used
 	protected Command     m_clearCmd; // The clear
 //#ifdef DJSR75
 //@	protected Command     m_fileCmd;    // The find files command for importing
@@ -114,9 +116,6 @@ public class URLForm extends FeatureForm
 
 	//#ifdef DLOGGING
 //@	private Logger m_logger = Logger.getLogger("URLForm");
-//@	private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
-//@	private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
-//@	private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
 	//#endif
 
 	/** Initialize import form */
@@ -170,6 +169,8 @@ public class URLForm extends FeatureForm
 		m_pasteURLCmd = new Command("Allow paste", Command.SCREEN,
 				initPriority++);
 		//#endif
+		// Show last data entered
+		m_lastCmd = new Command("Last", Command.SCREEN, initPriority++);
 		
 		super.addCommand( cancelCmd );
 		//#ifdef DJSR75
@@ -180,6 +181,7 @@ public class URLForm extends FeatureForm
 			super.addCommand(m_pasteURLCmd);
 		}
 		//#endif
+		super.addCommand( m_lastCmd );
 	}
 
   /**
@@ -311,6 +313,10 @@ public class URLForm extends FeatureForm
 //@		}
 		//#endif
 				
+		if( c == m_lastCmd ) {
+			m_last = true;
+		}
+
 	}
 
 }
