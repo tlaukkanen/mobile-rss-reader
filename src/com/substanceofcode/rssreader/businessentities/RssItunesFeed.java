@@ -54,7 +54,6 @@ public class RssItunesFeed extends RssFeed{
 //@    private Logger logger = Logger.getLogger("RssItunesFeed");
 	//#endif
 	//#ifdef DLOGGING
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     // Value that shows that the first item (and those following may
