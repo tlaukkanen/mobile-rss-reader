@@ -54,7 +54,6 @@ public class RssFeed{
     private Logger logger = Logger.getLogger("RssFeed");
 	//#endif
 	//#ifdef DLOGGING
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     protected String m_url  = "";
@@ -431,17 +430,14 @@ public class RssFeed{
 			if (finestLoggable) {logger.finest("unequal feed.m_link,this=" + feed.m_link + "," + m_link);}
 			//#endif
 			return false;
-		}
-		if ((feed.m_date == null) && (this.m_date == null)) {
-		} else if ((feed.m_date != null) && (this.m_date != null)) {
-			if (feed.m_date.equals(this.m_date)) {
-			} else {
+		if ((feed.m_date != null) && (this.m_date != null)) {
+			if (!feed.m_date.equals(this.m_date)) {
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 				//#endif
 				return false;
 			}
-		} else {
+		} else if ((feed.m_date != null) || (this.m_date != null)) {
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 			//#endif
