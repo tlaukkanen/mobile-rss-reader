@@ -53,7 +53,6 @@ public class AtomFormatParser implements FeedFormatParser {
 	//#endif
 	private boolean m_hasExt = false;
 	//#ifdef DLOGGING
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 	/** Atom item properties */
