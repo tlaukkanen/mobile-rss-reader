@@ -55,8 +55,6 @@ public class TestOutput extends OutputStreamWriter {
 	static boolean m_sglByte = true;
 	//#ifdef DLOGGING
     private Logger m_logger = Logger.getLogger("TestOutput");
-    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
-    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
 	//#endif
 
 	public TestOutput(OutputStream out) {
