@@ -1,5 +1,4 @@
 /*
-   FIX check for blank url
  * ImportFeedsForm.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
@@ -20,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+// FIX check for blank url
 
 // Expand to define MIDP define
 //#define DMIDP20
@@ -40,7 +40,6 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 
-import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import javax.microedition.io.ConnectionNotFoundException;
 //#ifdef DJSR75
 //@import javax.microedition.io.file.FileConnection;
@@ -55,7 +54,6 @@ import javax.microedition.lcdui.Displayable;
 //#ifndef DTESTUI
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Form;
-import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.lcdui.StringItem;
 //#else
@@ -68,6 +66,7 @@ import javax.microedition.lcdui.StringItem;
 //#endif
 import javax.microedition.lcdui.Item;
 
+import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
@@ -106,6 +105,7 @@ final public class ImportFeedsForm extends URLForm
 	private boolean     m_getFeedTitleList = false; // The noticy flag for title/list parsing
 	// The noticy flag for override existing feeds
 	private boolean     m_override = false;  // The noticy flag for override
+    final private boolean m_importFeeds;
 	private FeedListParser m_listParser = null;    // The feed list parser
 	private TextField   m_feedNameFilter;   // The feed name filter string
 	private TextField   m_feedURLFilter;    // The feed URL filter string
@@ -118,11 +118,9 @@ final public class ImportFeedsForm extends URLForm
 	//#endif
     private Hashtable m_rssFeeds;         // The bookmark URLs
     private FeatureList  m_bookmarkList;     // The bookmark list
-    final private boolean m_importFeeds;
 	//#ifdef DLOGGING
 //@    private Logger m_logger = Logger.getLogger("ImportFeedsForm");
 //@    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
-//@    private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
 //@    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
 	//#endif
 
@@ -137,8 +135,6 @@ final public class ImportFeedsForm extends URLForm
 				!importFeeds, rssFeeds, appSettings, loadForm);
 		m_bookmarkList = bookmarkList;
 		m_importFeeds = importFeeds;
-		m_rssFeeds = rssFeeds;
-		m_appSettings = appSettings;
 		if(url.length()==0) {
 			url = "http://";
 		}
@@ -188,13 +184,6 @@ final public class ImportFeedsForm extends URLForm
 					 "Override (replace) existing feeds."},
 					null);
 			super.append(m_importOvrGroup);
-			if ((ImportFeedsForm.m_importSave != null) ||
-				  (ImportFeedsForm.m_exportSave != null)) { 
-				Item[] items = getItemFields();
-				m_midlet.restorePrevValues(items,
-						m_importFeeds ? ImportFeedsForm.m_importSave :
-						 ImportFeedsForm.m_exportSave);
-			}
 		
 			//#ifdef DTESTUI
 //@			m_testImportCmd     = new Command("Test bookmarks imported", Command.SCREEN, 9);
@@ -265,8 +254,8 @@ final public class ImportFeedsForm extends URLForm
 				//#endif
 //@				osw.write(sb.toString());
 //@				Item[] items = getItemFields();
-//@				ImportFeedsForm.m_exportSave = m_midlet.storeValues(items);
-//@				m_midlet.setCurrent( m_bookmarkList );
+//@				ImportFeedsForm.m_exportSave = FeatureMgr.storeValues(items);
+//@				m_midlet.showBookmarkList();
 //@			} catch(IllegalArgumentException ex) {
 //@				m_loadForm.recordExcForm("Invalid url:  " + url, ex);
 //@			} catch(ConnectionNotFoundException ex) {
@@ -322,103 +311,99 @@ final public class ImportFeedsForm extends URLForm
 				m_appSettings.setImportUrl(url);
 				m_appSettings.setImportUrlUsername(username);
 				m_appSettings.setImportUrlPassword(password);
+				FeedListParser clistParser = null;
 				switch (selectedImportType) {
 					case 1:
 						// Use line by line parser
-						m_listParser = new LineByLineParser(url, username, password);
+						clistParser = new LineByLineParser(url, username, password);
 						break;
 					case 2:
 						// Use line by HMTL OPML auto link parser
-						m_listParser = new HTMLAutoLinkParser(url, username, password);
-						((HTMLAutoLinkParser)m_listParser).setNeedRss(false);
+						clistParser = new HTMLAutoLinkParser(url, username, password);
+						((HTMLAutoLinkParser)clistParser).setNeedRss(false);
 						break;
 					case 3:
 						// Use line by HMTL RSS auto link parser
-						m_listParser = new HTMLAutoLinkParser(url, username, password);
-						((HTMLAutoLinkParser)m_listParser).setNeedRss(true);
+						clistParser = new HTMLAutoLinkParser(url, username, password);
+						((HTMLAutoLinkParser)clistParser).setNeedRss(true);
 						break;
 					case 4:
 						// Use line by HMTL link parser
-						m_listParser = new HTMLLinkParser(url, username, password);
+						clistParser = new HTMLLinkParser(url, username, password);
 						break;
 					case 0:
 					default:
 						// Use OPML parser
-						m_listParser = new OpmlParser(url, username, password);
+						clistParser = new OpmlParser(url, username, password);
 						break;
 				}
-				m_listParser.setFeedNameFilter(feedNameFilter);
-				m_listParser.setFeedURLFilter(feedURLFilter);
-				m_listParser.setRedirectHtml(m_importHTMLGroup.isSelected(0)
-					&& !(m_listParser instanceof HTMLAutoLinkParser)
-					&& !(m_listParser instanceof HTMLLinkParser));
+				clistParser.setFeedNameFilter(feedNameFilter);
+				clistParser.setFeedURLFilter(feedURLFilter);
+				clistParser.setRedirectHtml(m_importHTMLGroup.isSelected(0)
+					&& !(clistParser instanceof HTMLAutoLinkParser)
+					&& !(clistParser instanceof HTMLLinkParser));
 				//#ifdef DLOGGING
-//@				if (m_fineLoggable) {m_logger.fine("redirect html=" + m_listParser.isRedirectHtml());}
+//@				if (m_fineLoggable) {m_logger.fine("redirect html=" + clistParser.isRedirectHtml());}
 				//#endif
 				
 				// Start parsing
-				m_listParser.startParsing();
+				clistParser.startParsing();
+				m_listParser = clistParser;
 				
 				// 3. Show result screen
 				// 4. Show list of feeds
 				
 			} catch(Exception ex) {
-				m_listParser = null;
 				m_loadForm.recordExcForm("Error importing feeds from " + url, ex);
 			} catch(OutOfMemoryError ex) {
-				m_listParser = null;
 				m_loadForm.recordExcForm("Out Of Memory Error importing feeds from " +
 						url, ex);
 			} catch(Throwable t) {
-				m_listParser = null;
 				m_loadForm.recordExcForm("Internal error importing feeds from " +
 						url, t);
 			}
 		}
 
-		if(m_listParser != null) {
+		if((m_listParser != null) && m_listParser.isReady()) {
 			try {
-				if(m_listParser.isReady()) {
-					addFeedLists(m_listParser, m_getFeedTitleList,
-							m_addBkmrk,
-							m_appSettings.getMaximumItemCountInFeed(),
-							 m_override, m_rssFeeds,
-							 m_bookmarkList, m_loadForm);
-					if (m_loadForm.hasNotes() || m_loadForm.hasExc()) {
-						m_loadForm.setTitle(
-								"One or more warnings, " +
-								"exceptions or errors.");
-						m_midlet.setCurrent( m_loadForm );
-					} else {
-						m_loadForm.replaceRef(this, null);
-						Item[] items = getItemFields();
-						ImportFeedsForm.m_importSave = m_midlet.storeValues(items);
-						m_midlet.setCurrent( m_bookmarkList );
-					}
-					super.getFeatureMgr().setBackground(false);
-					m_listParser = null;
+				addFeedLists(m_listParser, m_getFeedTitleList,
+						m_addBkmrk,
+						m_appSettings.getMaximumItemCountInFeed(),
+						 m_override, m_rssFeeds,
+						 m_bookmarkList, m_loadForm);
+				if (m_loadForm.hasNotes() || m_loadForm.hasExc()) {
+					m_loadForm.setTitle(
+							"One or more warnings, " +
+							"exceptions or errors.");
+					m_midlet.setCurrent( m_loadForm );
 				} else {
-					//#ifndef DTESTUI
-					if (m_debugOutput) System.out.println("Feed list parsing isn't ready");
-					//#endif
+					m_loadForm.replaceRef(this, null);
+					Item[] items = getItemFields();
+					ImportFeedsForm.m_importSave = FeatureMgr.storeValues(items);
+					m_midlet.showBookmarkList();
 				}
+				super.getFeatureMgr().setBackground(false);
 			} catch(Exception ex) {
 				m_loadForm.recordExcForm(
 						"Error importing feeds from " +
 						m_listParser.getUrl() + " " +
 						ex.getMessage(), ex);
 				m_getFeedTitleList = false;
-				m_listParser = null;
 			} catch(Throwable t) {
 				m_loadForm.recordExcForm(
 						"Error importing feeds from " +
 						m_listParser.getUrl() + " " +
 						t.getMessage(), t);
 				m_getFeedTitleList = false;
+			} finally {
+				// Free memory.
 				m_listParser = null;
 			}
+			//#ifndef DTESTUI
+		} else {
+			if (m_debugOutput) System.out.println("Feed list parsing isn't ready");
+			//#endif
 		}
-		m_midlet.getFile();
 	}
 
 	private Item[] getItemFields() {
@@ -429,6 +414,7 @@ final public class ImportFeedsForm extends URLForm
 			m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup};
 		return items;
 	}
+
 	/** Respond to commands */
 	public void commandAction(Command c, Displayable s) {
 
@@ -442,6 +428,22 @@ final public class ImportFeedsForm extends URLForm
 			m_getFeedList = true;
 		}
 		
+		if (m_clear) {
+			m_feedNameFilter.setString("");
+			m_feedURLFilter.setString("");
+		}
+
+		if (m_last) {
+			m_last = false;
+			if ((ImportFeedsForm.m_importSave != null) ||
+				  (ImportFeedsForm.m_exportSave != null)) {
+				Item[] items = getItemFields();
+				FeatureMgr.restorePrevValues(items,
+						m_importFeeds ? ImportFeedsForm.m_importSave :
+						 ImportFeedsForm.m_exportSave);
+			}
+		}
+
 		//#ifdef DTESTUI
 //@		/** Import list of feeds and auto edit bookmarks/feeds */
 //@		if( c == m_testImportCmd ) {
@@ -458,7 +460,7 @@ final public class ImportFeedsForm extends URLForm
 	public static void addFeedLists(FeedListParser listParser,
 			boolean getFeedTitleList, int addBkmrk,
 			int maxItemCount, boolean override, Hashtable rssFeeds,
-			List bookmarkList, RssReaderMIDlet.LoadingForm loadForm)
+			FeatureList bookmarkList, RssReaderMIDlet.LoadingForm loadForm)
 	throws CauseException, Exception {
 		// Feed list parsing is ready
 		System.out.println("Feed list parsing is ready");
