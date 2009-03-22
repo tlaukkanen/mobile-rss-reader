@@ -52,7 +52,6 @@ public class RssFormatParser implements FeedFormatParser {
 	/** RSS item properties */
 	private boolean m_hasExt = false;
 	//#ifdef DLOGGING
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 	private String m_title = "";
@@ -156,30 +155,8 @@ public class RssFormatParser implements FeedFormatParser {
 				case 'i':
 					if (elementName.equals("item") ) {
 						/** Save previous entry */
-						boolean hasTitle = (m_title.length()>0);
-						boolean hasDesc = (m_description.length()>0);
-						if(hasTitle || hasDesc) {
-							if (hasTitle && hasDesc) {
-								m_title = m_title.replace('\n', ' ');
-							}
-							RssItunesItem item;
-							Date pubDate = null;
-							// Check date in case we cannot find it.
-							if (m_date.equals("") && m_extParser.isHasExt()) {
-								m_date = m_extParser.getDate();
-							}
-							if (m_date.length() > 0) {
-								pubDate = parseRssDate(m_date);
-							}
-							if (m_hasExt) {
-								item = m_extParser.createItem(m_title, m_link,
-										m_description, pubDate, m_enclosure, true,
-										m_author);
-							} else {
-								item = new RssItunesItem(m_title, m_link,
-										m_description, pubDate,
-										m_enclosure, true);
-							}
+						RssItunesItem item = createItem();
+						if ( item != null) {
 							items.addElement( item );
 							if(items.size()==maxItemCount) {
 								return feed;
@@ -210,30 +187,45 @@ public class RssFormatParser implements FeedFormatParser {
         }
 
         /** Save previous entry */
-		boolean hasTitle = (m_title.length()>0);
-        boolean hasDesc = (m_description.length()>0);
-        if(hasTitle || hasDesc) {
-			if (hasTitle && hasDesc) {
-				m_title = m_title.replace('\n', ' ');
-			}
-            RssItunesItem item;
-            Date pubDate = null;
-			if (m_date.length() > 0) {
-				pubDate = parseRssDate(m_date);
-			}
-			if (m_hasExt) {
-				item = m_extParser.createItem(m_title, m_link,
-						m_description, pubDate, m_enclosure, true, m_author);
-			} else {
-				item = new RssItunesItem(m_title, m_link, m_description, pubDate,
-								   m_enclosure, true);
-			}
+		RssItunesItem item = createItem();
+		if ( item != null) {
             items.addElement( item );
         }        
                         
 		return feed;
     }
     
+	/** Save previous entry */
+	final private RssItunesItem createItem() {
+		boolean hasTitle = (m_title.length()>0);
+		boolean hasDesc = (m_description.length()>0);
+		if (hasTitle || hasDesc) {
+			if (hasTitle && hasDesc) {
+				m_title = m_title.replace('\n', ' ');
+			}
+			RssItunesItem item;
+			Date pubDate = null;
+			// Check date in case we cannot find it.
+			if (m_date.equals("") && m_extParser.isHasExt()) {
+				m_date = m_extParser.getDate();
+			}
+			if (m_date.length() > 0) {
+				pubDate = parseRssDate(m_date);
+			}
+			if (m_hasExt) {
+				item = m_extParser.createItem(m_title, m_link,
+						m_description, pubDate, m_enclosure, true,
+						m_author);
+			} else {
+				item = new RssItunesItem(m_title, m_link,
+						m_description, pubDate,
+						m_enclosure, true);
+			}
+			return item;
+		}
+		return null;
+	}
+
 	private void reset() {
 		m_title = "";
 		m_author = "";
