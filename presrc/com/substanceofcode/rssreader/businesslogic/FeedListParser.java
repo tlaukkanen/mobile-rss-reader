@@ -59,8 +59,6 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("FeedListParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
     /** Creates a new instance of FeedListParser */
@@ -286,4 +284,5 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
     public void join() throws InterruptedException {
 		m_parsingThread.join();
 	}
+
 }
