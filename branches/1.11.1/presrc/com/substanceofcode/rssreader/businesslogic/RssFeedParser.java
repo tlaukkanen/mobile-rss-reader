@@ -27,6 +27,7 @@
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
 import javax.microedition.io.*;
@@ -34,6 +35,7 @@ import java.util.*;
 import java.io.*;
 
 import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.CauseException;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
@@ -47,20 +49,41 @@ import net.sf.jlogmicro.util.logging.Level;
  * @author  Tommi Laukkanen
  * @version 1.0
  */
-public class RssFeedParser extends URLHandler {
+public class RssFeedParser extends URLHandler
+implements Runnable {
     
+    private Thread m_parsingThread = null;
     private RssItunesFeed m_rssFeed;  // The RSS feed
+    private int m_maxItemCount;  // Max count of itetms to get for a feed.
     private boolean m_getTitleOnly = false;  // The RSS feed
+    private boolean m_updFeed = false;  // Do updated feeds only.
+    private boolean m_ready = false;
+    private boolean m_successfull = false;
+    private CauseException m_ex = null;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("RssFeedParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Create new instance of RssFeedParser */
     public RssFeedParser(RssItunesFeed rssFeed) {
         m_rssFeed = rssFeed;
+		m_updFeed = true;
+		m_maxItemCount = RssReaderSettings.INIT_MAX_ITEM_COUNT;
+    }
+    
+    /** Create new instance of RssFeedParser */
+    public RssFeedParser(RssItunesFeed rssFeed, boolean updFeed,
+			int maxItemCount) {
+        m_rssFeed = new RssItunesFeed(rssFeed);
+		m_updFeed = updFeed;
+		m_maxItemCount = maxItemCount;
+        m_parsingThread = new Thread(this);
+        m_parsingThread.start();
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine("Thread started=" + m_parsingThread);}
+		//#endif
     }
     
     /** Return RSS feed */
@@ -217,6 +240,73 @@ public class RssFeedParser extends URLHandler {
         
     }
     
+    /** Check whatever parsing is ready or not */
+    public boolean isReady() {
+        return m_ready;
+    }
+    
+    /** Parsing thread */
+    public void run() {
+        try {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine("Thread running=" + this);}
+			//#endif
+			parseRssFeed(m_updFeed, m_maxItemCount);
+			m_successfull = true;
+        } catch( IOException ex ) {
+			//#ifdef DLOGGING
+			logger.severe("RssFeedParser.run(): Error while parsing " +
+					      "feeds: " + m_rssFeed.getUrl(), ex);
+			//#endif
+            // TODO: Add exception handling
+            System.err.println("RssFeedParser.run(): Error while parsing feeds: " + ex.toString());
+			m_ex = new CauseException("Error while parsing feed " + m_rssFeed.getUrl(), ex);
+        } catch( Exception ex ) {
+			//#ifdef DLOGGING
+			logger.severe("RssFeedParser.run(): Error while parsing " +
+					      "feeds: " + m_rssFeed.getUrl(), ex);
+			//#endif
+            // TODO: Add exception handling
+            System.err.println("RssFeedParser.run(): Error while parsing feeds: " + ex.toString());
+			m_ex = new CauseException("Error while parsing feed " + m_rssFeed.getUrl(), ex);
+        } catch( OutOfMemoryError t ) {
+			System.gc();
+			// Save memory by releasing it.
+			m_rssFeed = null;
+			//#ifdef DLOGGING
+			logger.severe("RssFeedParser.run(): Out Of Memory Error while " +
+					"parsing feeds: " + m_rssFeed.getUrl(), t);
+			//#endif
+            // TODO: Add exception handling
+            System.err.println("RssFeedParser.run(): " +
+					"Out Of Memory Error while parsing feeds: " + t.toString());
+			m_ex = new CauseException("Out Of Memory Error while parsing " +
+					"feed " + m_rssFeed.getUrl(), t);
+        } catch( Throwable t ) {
+			//#ifdef DLOGGING
+			logger.severe("RssFeedParser.run(): Error while parsing " +
+					      "feeds: " + m_rssFeed.getUrl(), t);
+			//#endif
+            // TODO: Add exception handling
+            System.err.println("RssFeedParser.run(): Error while parsing feeds: " + t.toString());
+			m_ex = new CauseException("Internal error while parsing feed " +
+									  m_rssFeed.getUrl(), t);
+        } finally {
+            m_ready = true;
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("run m_successfull,m_ready=" + m_successfull + "," + m_ready);}
+			//#endif
+        }        
+    }
+    
+    public CauseException getEx() {
+        return (m_ex);
+    }
+
+    public boolean isSuccessfull() {
+        return (m_successfull);
+    }
+
     public void setGetTitleOnly(boolean m_getTitleOnly) {
         this.m_getTitleOnly = m_getTitleOnly;
     }
