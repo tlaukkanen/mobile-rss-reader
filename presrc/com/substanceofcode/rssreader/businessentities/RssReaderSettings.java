@@ -1,5 +1,5 @@
 /*
- * RssFeedReaderSettings.java
+ * RssReaderSettings.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
  * http://www.substanceofcode.com
@@ -31,8 +31,8 @@ package com.substanceofcode.rssreader.businessentities;
 import com.substanceofcode.utils.Settings;
 import java.io.IOException;
 import javax.microedition.midlet.MIDlet;
-import javax.microedition.lcdui.Font;
 import javax.microedition.rms.RecordStoreException;
+import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.List;
 
 /**
@@ -40,7 +40,7 @@ import javax.microedition.lcdui.List;
  *
  * @author Tommi Laukkanen
  */
-public class RssReaderSettings {
+final public class RssReaderSettings {
     
     private Settings m_settings;
     private static RssReaderSettings m_singleton;    
@@ -64,11 +64,12 @@ public class RssReaderSettings {
     private static final String USE_TEXT_BOX = "use-text-box";
     private static final String USE_STANDARD_EXIT = "use-standard-exit";
     private static final String NOVICE = "novice";
-	//#ifdef DTEST
+    public static final int INIT_MAX_ITEM_COUNT = 10;
+	//#ifdef DLOGGING
     private static final String LOG_LEVEL = "log-level";
 	//#endif
     
-    /** Creates a new instance of RssFeedReaderSettings */
+    /** Creates a new instance of RssReaderSettings */
     private RssReaderSettings(MIDlet midlet) {
         try {
             m_settings = Settings.getInstance(midlet);
@@ -78,7 +79,7 @@ public class RssReaderSettings {
     }
     
     /** Get instance */
-    final public static RssReaderSettings getInstance(MIDlet midlet) {
+    public static RssReaderSettings getInstance(MIDlet midlet) {
         if(m_singleton==null) {
             m_singleton = new RssReaderSettings(midlet);
         }
@@ -86,82 +87,83 @@ public class RssReaderSettings {
     }
     
     /** Get maximum item count */
-    final public int getMaximumItemCountInFeed() {
-        int maxCount = m_settings.getIntProperty(MAX_ITEM_COUNT, 10);
+    public int getMaximumItemCountInFeed() {
+        int maxCount = m_settings.getIntProperty(MAX_ITEM_COUNT,
+				INIT_MAX_ITEM_COUNT);
         return maxCount;
     }
     
     /** Set maximum item count in feed */
-    final public void setMaximumItemCountInFeed(int maxCount) {
+    public void setMaximumItemCountInFeed(int maxCount) {
         m_settings.setIntProperty(MAX_ITEM_COUNT, maxCount);
     }
     
     /** Get maximum word count in description */
-    final public int getMaxWordCountInDesc() {
+    public int getMaxWordCountInDesc() {
         int maxCount = m_settings.getIntProperty(MAX_WORD_COUNT, 10);
         return maxCount;
     }
     
     /** Set maximum word count in description */
-    final public void setMaxWordCountInDesc(int maxCount) {
+    public void setMaxWordCountInDesc(int maxCount) {
         m_settings.setIntProperty(MAX_WORD_COUNT, maxCount);
     }
     
     /** Get import URL address */
-    final public String getImportUrl() {
+    public String getImportUrl() {
         String url = m_settings.getStringProperty(0, IMPORT_URL, "");
         return url;
     }
     
     /** Set import URL address */
-    final public void setImportUrl(String url) {
+    public void setImportUrl(String url) {
         m_settings.setStringProperty( IMPORT_URL, url);
     }
     
     /** Get import URL username */
-    final public String getImportUrlUsername() {
+    public String getImportUrlUsername() {
         String username = m_settings.getStringProperty(0, IMPORT_USERNAME, "");
         return username;
     }
     
     /** Set import URL username */
-    final public void setImportUrlUsername(String username) {
+    public void setImportUrlUsername(String username) {
         m_settings.setStringProperty( IMPORT_USERNAME, username);
     }
     
     /** Get import URL password */
-    final public String getImportUrlPassword() {
+    public String getImportUrlPassword() {
         String password = m_settings.getStringProperty(0, IMPORT_PASSWORD, "");
         return password;
     }
     
     /** Set import URL password */
-    final public void setImportUrlPassword(String password) {
+    public void setImportUrlPassword(String password) {
         m_settings.setStringProperty( IMPORT_PASSWORD, password);
     }
     
     /** Get mark unread items */
-    final public boolean getMarkUnreadItems() {
+    public boolean getMarkUnreadItems() {
         return m_settings.getBooleanProperty( MARK_UNREAD_ITEMS, false);
     }
     
     /** Set import URL password */
-    final public void setMarkUnreadItems(boolean markUnreadItems) {
+    public void setMarkUnreadItems(boolean markUnreadItems) {
         m_settings.setBooleanProperty( MARK_UNREAD_ITEMS, markUnreadItems);
     }
     
     /** Get feed list back is first command */
-    final public boolean getFeedListOpen() {
+    public boolean getFeedListOpen() {
         return m_settings.getBooleanProperty( FEED_LIST_OPEN, true);
     }
     
     /** Set feed list back is first command */
-    final public void setFeedListOpen(boolean feedListOpen) {
+    public void setFeedListOpen(boolean feedListOpen) {
         m_settings.setBooleanProperty( FEED_LIST_OPEN, feedListOpen);
     }
     
     /** Get itunes enabled */
-    final public boolean getItunesEnabled() {
+    public boolean getItunesEnabled() {
 		//#ifdef DITUNES
         return m_settings.getBooleanProperty( ITUNES_ENABLED, true);
 		//#else
@@ -170,18 +172,18 @@ public class RssReaderSettings {
     }
     
     /** Set feed list back is first command */
-    final public void setItunesEnabled(boolean itunesEnabled) {
+    public void setItunesEnabled(boolean itunesEnabled) {
         m_settings.setBooleanProperty( ITUNES_ENABLED, itunesEnabled);
     }
     
 	//#ifdef DMIDP20
     /** Get font choice */
-    final public int getFontChoice() {
+    public int getFontChoice() {
         return m_settings.getIntProperty( FONT_CHOICE, DEFAULT_FONT_CHOICE);
     }
     
 	/* Get the font size. This is the actual size of the font */
-	final public int getFontSize() {
+	public int getFontSize() {
 		int fontSize;
 		switch (getFontChoice()) {
 			case 1:
@@ -202,76 +204,76 @@ public class RssReaderSettings {
 	}
 
     /** Set font size */
-    final public void setFontChoice(int fontChoice) {
+    public void setFontChoice(int fontChoice) {
         m_settings.setIntProperty( FONT_CHOICE, fontChoice);
     }
     
     /** Get fit policy */
-    final public int getFitPolicy() {
+    public int getFitPolicy() {
         return m_settings.getIntProperty( FIT_POLICY, List.TEXT_WRAP_DEFAULT);
     }
     
     /** Set fit policy */
-    final public void setFitPolicy(int fitPolicy) {
+    public void setFitPolicy(int fitPolicy) {
         m_settings.setIntProperty( FIT_POLICY, fitPolicy);
     }
     
     /** Get put bookmark name in news item list.*/
-    final public boolean getBookmarkNameNews() {
+    public boolean getBookmarkNameNews() {
         return m_settings.getBooleanProperty( BOOKMARK_NAME_NEWS, false);
     }
     
     /** Set put bookmark name in news item list. */
-    final public void setBookmarkNameNews(boolean bookmarkNameNews) {
+    public void setBookmarkNameNews(boolean bookmarkNameNews) {
         m_settings.setBooleanProperty( BOOKMARK_NAME_NEWS, bookmarkNameNews);
     }
     
     /** Get use text box */
-    final public boolean getUseTextBox() {
+    public boolean getUseTextBox() {
         return m_settings.getBooleanProperty( USE_TEXT_BOX, false);
     }
     
     /** Set use text box */
-    final public void setUseTextBox(boolean useTextBox) {
+    public void setUseTextBox(boolean useTextBox) {
         m_settings.setBooleanProperty( USE_TEXT_BOX, useTextBox);
     }
 	//#endif
     
     /** Get use standard exit */
-    final public boolean getUseStandardExit() {
+    public boolean getUseStandardExit() {
         return m_settings.getBooleanProperty( USE_STANDARD_EXIT, false);
     }
     
     /** Set standard exit */
-    final public void setUseStandardExit(boolean useStandardExit) {
+    public void setUseStandardExit(boolean useStandardExit) {
         m_settings.setBooleanProperty( USE_STANDARD_EXIT, useStandardExit);
     }
     
     /** Get novice user */
-    final public boolean getNovice() {
+    public boolean getNovice() {
         return m_settings.getBooleanProperty( NOVICE, false);
     }
     
     /** Set novice user */
-    final public void setNovice(boolean novice) {
+    public void setNovice(boolean novice) {
         m_settings.setBooleanProperty( NOVICE, novice);
     }
     
-	//#ifdef DTEST
+	//#ifdef DLOGGING
     /** Get log level */
-    final public String getLogLevel() {
+    public String getLogLevel() {
         String logLevel = m_settings.getStringProperty(0, LOG_LEVEL, "");
         return logLevel;
     }
     
     /** Set import URL password */
-    final public void setLogLevel(String logLevel) {
+    public void setLogLevel(String logLevel) {
         m_settings.setStringProperty( LOG_LEVEL, logLevel);
     }
 	//#endif
     
     /** Get settings version */
-    final public String getSettingsVers() {
+    public String getSettingsVers() {
         return m_settings.getStringProperty( 0, Settings.SETTINGS_NAME, "");
     }
     
