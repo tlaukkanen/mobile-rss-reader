@@ -295,6 +295,7 @@ final public class KFileSelectorImpl
 	 */
 	public void doCleanup()
 	{
+		// Save memory.
 		this.selectedFile = null;
 		this.selectedURL = null;
 
@@ -306,9 +307,11 @@ final public class KFileSelectorImpl
 				//#endif
 				ioEx.printStackTrace();
 			}
+			// Save memory.
 			currentRoot = null;
 		}
 
+		// Save memory.
 		fileDataBlock = null;
 
 	}//doCleanup
@@ -411,6 +414,7 @@ final public class KFileSelectorImpl
 			//#endif
 			super.append(root.substring(1), FOLDER_IMAGE);
 		}
+		// Save memory.
 		currentRoot = null;
 	}//displayAllRoots
 
