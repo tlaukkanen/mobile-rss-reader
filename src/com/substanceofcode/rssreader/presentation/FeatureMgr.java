@@ -34,6 +34,13 @@
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Alert;
@@ -85,7 +92,6 @@ public class FeatureMgr implements CommandListener, Runnable {
 	//#ifdef DLOGGING
 //@	private Logger logger = Logger.getLogger("FeatureMgr");
 //@	private boolean fineLoggable = logger.isLoggable(Level.FINE);
-//@	private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
 	private CommandListener cmdFeatureUser = null;
@@ -443,20 +449,130 @@ public class FeatureMgr implements CommandListener, Runnable {
 		midlet.setCurrent( boxURL );
     }
     
-		//#ifdef DMIDP20
-		public Font getCustomFont() {
-			final RssReaderSettings appSettings = midlet.getSettings();
-			if (appSettings == null) {
-				return null;
-			}
-			if (appSettings.getFontChoice() ==
-					RssReaderSettings.DEFAULT_FONT_CHOICE) {
-				return null;
-			} else {
-				Font defFont = Font.getDefaultFont();
-				return Font.getFont(Font.FACE_SYSTEM, defFont.getStyle(),
-						appSettings.getFontSize());
+	//#ifdef DMIDP20
+	public Font getCustomFont() {
+		final RssReaderSettings appSettings = midlet.getSettings();
+		if (appSettings == null) {
+			return null;
+		}
+		if (appSettings.getFontChoice() ==
+				RssReaderSettings.DEFAULT_FONT_CHOICE) {
+			return null;
+		} else {
+			Font defFont = Font.getDefaultFont();
+			return Font.getFont(Font.FACE_SYSTEM, defFont.getStyle(),
+					appSettings.getFontSize());
+		}
+	}
+	//#endif
+
+	/* Restore previous values. */
+	final static public void restorePrevValues(Item[] items, byte[] bdata) {
+		DataInputStream dis = new DataInputStream(
+				new ByteArrayInputStream(bdata));
+		for (int ic = 0; ic < items.length; ic++) {
+			try {
+				final Item item = items[ic];
+				if (item == null) {
+					continue;
+				}
+				if (item instanceof ChoiceGroup) {
+					((ChoiceGroup)item).setSelectedIndex(dis.readInt(),
+						true);
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("set selected " + ((ChoiceGroup)item).getSelectedIndex());}
+					//#endif
+				} else if (item instanceof TextField) {
+					final int len = dis.readInt();
+					if (len > 0) {
+						byte [] bvalue = new byte[len];
+						final int blen = dis.read(bvalue);
+						String value;
+						try {
+							value = new String(bvalue, 0, blen, "UTF-8");
+						} catch (UnsupportedEncodingException e) {
+							value = new String(bvalue, 0, blen);
+							//#ifdef DLOGGING
+//@							logger.severe("cannot convert value=" + value, e);
+							//#endif
+						}
+						((TextField)item).setString(value);
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("set string " + ((TextField)item).getString());}
+						//#endif
+					}
+				}
+			} catch (IOException e) {
+				//#ifdef DLOGGING
+//@				logger.severe("IOException reading selected.", e);
+				//#else
+				e.printStackTrace();
+				//#endif
 			}
 		}
+		if (dis != null) {
+			/* Workaround for MicroEmulator. */
+			try { ((InputStream)dis).close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/* Store current values. */
+	final static public byte[] storeValues(Item[] items) {
+		ByteArrayOutputStream bout = new
+				ByteArrayOutputStream();
+		DataOutputStream dout = new
+				DataOutputStream( bout );
+		for (int ic = 0; ic < items.length; ic++) {
+			try {
+				final Item item = items[ic];
+				if (item == null) {
+					continue;
+				}
+				if (item instanceof ChoiceGroup) {
+					dout.writeInt(((ChoiceGroup)item).getSelectedIndex());
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("stored selected " + item.getLabel() + "," + ((ChoiceGroup)item).getSelectedIndex());}
+					//#endif
+				} else if (item instanceof TextField) {
+					final String value = ((TextField)item).getString();
+					byte [] bvalue;
+					try {
+						bvalue = value.getBytes("UTF-8");
+					} catch (UnsupportedEncodingException e) {
+						bvalue = value.getBytes();
+						//#ifdef DLOGGING
+//@						logger.severe("cannot store value=" + value, e);
+						//#endif
+					}
+					dout.writeInt(bvalue.length);
+					if (bvalue.length > 0) {
+						dout.write( bvalue, 0, bvalue.length );
+					}
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("set string " + item.getLabel() + "," + ((TextField)item).getString());}
+					//#endif
+				}
+			} catch (IOException e) {
+				//#ifdef DLOGGING
+//@				logger.severe("IOException storing selected.", e);
+				//#else
+				e.printStackTrace();
+				//#endif
+			}
+		}
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("bout.toByteArray().length=" + bout.toByteArray().length);}
 		//#endif
+		if (dout != null) {
+			try { dout.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return bout.toByteArray();
+	}
+
 }
