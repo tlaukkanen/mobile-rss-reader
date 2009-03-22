@@ -65,7 +65,6 @@ public class FeatureList extends List {
 	//#ifdef DLOGGING
 //@	private Logger logger = Logger.getLogger("FeatureList");
 //@	private boolean fineLoggable = logger.isLoggable(Level.FINE);
-//@	private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
 	public FeatureList(RssReaderMIDlet midlet, String title, int listType) {
@@ -114,6 +113,10 @@ public class FeatureList extends List {
 
 	final public void removeCommand(Command cmd) {
 		super.removeCommand(cmd);
+		featureMgr.removeCommand(cmd);
+	}
+
+	final public void removeCommandPrompt(Command cmd) {
 		featureMgr.removeCommand(cmd);
 	}
 
@@ -177,6 +180,7 @@ public class FeatureList extends List {
 			//#endif
 			featureMgr.getMidlet().getLoadForm().appendNote(
 					"Font not supported by device.  Reset to default or pick another font.");
+			featureMgr.getMidlet().getLoadForm().addExc("Error changing font.", e);
 			featureMgr.getMidlet().getSettings().setFontChoice(
 					RssReaderSettings.DEFAULT_FONT_CHOICE);
 			this.font = null;
