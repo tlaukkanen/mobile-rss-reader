@@ -69,7 +69,6 @@ implements CommandListener {
 	public void setString(String text) {
 		super.setString(text);
 		TestOutput.println("Test UI List setString: " + m_title + "," + text);
-		return;
 	}
 
 	public void commandAction(Command cmd, Displayable disp) {
