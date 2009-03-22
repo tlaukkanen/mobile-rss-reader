@@ -20,6 +20,8 @@
  *
  */
 
+// Expand to define logging define
+//#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -27,6 +29,11 @@ import com.substanceofcode.utils.StringUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
+
+//#ifdef DLOGGING
+//@import net.sf.jlogmicro.util.logging.Logger;
+//@import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * LineByLineParser class is used when we are parsing RSS feed list 
@@ -36,6 +43,10 @@ import java.util.Vector;
  */
 public class LineByLineParser extends FeedListParser {
     
+	//#ifdef DLOGGING
+//@    private Logger m_logger = Logger.getLogger("LineByLineParser");
+	//#endif
+
     /** Creates a new instance of LineByLineParser */
     public LineByLineParser(String url, String username, String password) {
         super(url, username, password);
@@ -52,6 +63,9 @@ public class LineByLineParser extends FeedListParser {
                 inputBuffer.append((char)inputCharacter);
             }
         } catch (IOException ex) {
+			//#ifdef DLOGGING
+//@			m_logger.severe("parseFeeds Could not read string.", ex);
+			//#endif
             ex.printStackTrace();
         }
         
