@@ -78,6 +78,7 @@ import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 final public class BMForm extends URLForm
 	implements CommandListener {
     static byte[]      m_addBMSave = null; // Add bookmark form save
+	private String      m_oldName;
 	private boolean     m_addForm;          // Flag to indicate is add form
 	private TextField   m_bmName;           // The RSS feed name field
 	private FeatureList m_bookmarkList;
@@ -98,11 +99,6 @@ final public class BMForm extends URLForm
 						"Insert current bookmark",
 						"Add bookmark", "Add current bookmark",
 						"Append bookmark", "Append end bookmark");
-		if (m_addBMSave != null) { 
-			Item[] items = {m_bmName, m_url,
-				m_UrlUsername, m_UrlPassword};
-			m_midlet.restorePrevValues(items, m_addBMSave);
-		}
 	}
 
 	public BMForm(RssReaderMIDlet midlet,
@@ -115,7 +111,8 @@ final public class BMForm extends URLForm
 				loadForm);
 		this.m_addForm = false;
 		this.m_bookmarkList = bookmarkList;
-		m_bmName = new TextField("Name", bm.getName(), 64, TextField.ANY);
+		this.m_oldName = bm.getName();
+		m_bmName = new TextField("Name", m_oldName, 64, TextField.ANY);
 		super.append( m_bmName );
 		int initPriority = 1;
 		super.initCommonInputUI(bm.getUrl(), bm.getUsername(),
@@ -134,6 +131,11 @@ final public class BMForm extends URLForm
 		final String password = m_UrlPassword.getString();
 		
 		final RssItunesFeed bm = new RssItunesFeed(name, url, username, password);
+		
+		/* If name changed, need to remove the previous name. */
+		if (!m_addForm && !name.equals(m_oldName)) {
+			m_rssFeeds.remove(m_oldName);
+		}
 		
 		if (m_addForm) {
 			m_bookmarkList.insert(m_addBkmrk, bm.getName(), null);
@@ -161,7 +163,7 @@ final public class BMForm extends URLForm
 				m_loadForm.replaceRef(this, null);
 				Item[] items = {m_bmName, m_url,
 					m_UrlUsername, m_UrlPassword};
-				m_addBMSave = m_midlet.storeValues(items);
+				BMForm.m_addBMSave = FeatureMgr.storeValues(items);
 				m_midlet.showBookmarkList();
 			}
 		}
@@ -180,6 +182,15 @@ final public class BMForm extends URLForm
 			super.commandAction(c, s);
 		}
 		
+		if (m_last) {
+			m_last = false;
+			if (BMForm.m_addBMSave != null) {
+				Item[] items = {m_bmName, m_url,
+					m_UrlUsername, m_UrlPassword};
+				FeatureMgr.restorePrevValues(items, BMForm.m_addBMSave);
+			}
+		}
+
 		super.execute();
 	}
 
