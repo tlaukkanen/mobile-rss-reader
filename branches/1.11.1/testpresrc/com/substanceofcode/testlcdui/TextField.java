@@ -75,7 +75,6 @@ implements ItemCommandListener
 	public void setString(String text) {
 		super.setString(text);
 		TestOutput.println("Test UI Text Field setString: " + super.getLabel() + "," + text);
-		return;
 	}
 
 	//#ifdef DMIDP20
