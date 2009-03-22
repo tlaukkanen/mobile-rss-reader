@@ -114,8 +114,6 @@ implements CommandListener {
     private TextField m_logLevelField;
     private Logger logger = Logger.getLogger("SettingsForm");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of SettingsForm */
