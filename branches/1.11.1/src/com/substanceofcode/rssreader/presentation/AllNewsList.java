@@ -68,8 +68,6 @@ public class AllNewsList extends FeatureList
 	implements CommandListener, Runnable {
 
     protected Image       m_unreadImage;
-	protected Command     m_openHeaderCmd;    // The open header command
-	protected Command     m_backHeaderCmd;    // The back to bookmark list command
     protected int       m_offset;             // Offset into bookmarkList
     protected int       m_len;                // length from offset above
 	//#ifdef DLARGEMEM
@@ -80,7 +78,7 @@ public class AllNewsList extends FeatureList
 	// The loading form
 	protected RssReaderMIDlet.LoadingForm m_loadForm;
     protected boolean     m_sort      = false; // Process sort
-    protected boolean     m_sortDesc  = true; // Sort descending
+    protected boolean     m_sortDesc;          // Sort descending
     protected boolean     m_sortByDate = true; // Sort by date
     protected boolean     m_showAll = false;  // Show both read and unread.
     protected boolean     m_showUnread = false;  // Show unread.
@@ -95,6 +93,8 @@ public class AllNewsList extends FeatureList
     protected FeatureList m_bookmarkList;
     protected Hashtable m_rssFeeds;
     public final static String TITLE = "River of News";
+	protected Command     m_openHeaderCmd;    // The open header command
+	protected Command     m_backHeaderCmd;    // The back to bookmark list command
     protected Command     m_sortUnreadItemsCmd;  // The sort unread items by date command
     protected Command     m_sortReadItemsCmd;  // The sort read items by date command
     protected Command     m_sortUnreadFeedsCmd;  // The sort unread items by feed command
@@ -117,7 +117,6 @@ public class AllNewsList extends FeatureList
 	//#ifdef DLOGGING
 //@    private Logger m_logger = Logger.getLogger("AllNewsList");
 //@    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
-//@    private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
 //@    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
 	//#endif
     
@@ -143,7 +142,7 @@ public class AllNewsList extends FeatureList
 		m_unreadImage = unreadImage;
 		final boolean open1st = midlet.getSettings().getFeedListOpen();
 		//#ifdef DLOGGING
-//@		if (m_fineLoggable) {m_logger.fine("initheader open1st=" + open1st);}
+//@		if (m_fineLoggable) {m_logger.fine("AllNewsList open1st=" + open1st);}
 		//#endif
 		m_openHeaderCmd     = new Command("Open", Command.SCREEN,
 				(open1st ? 1 : 2));
@@ -166,7 +165,9 @@ public class AllNewsList extends FeatureList
 										   Command.SCREEN, priority++);
 		m_markReadCmd = new Command("Mark read", Command.SCREEN, priority++);
 		m_markUnReadCmd = new Command("Mark unread", Command.SCREEN, priority++);
-		m_directionCmd = new Command("Sort ascending", Command.SCREEN, priority++);
+		m_sortDesc  = !(this instanceof HeaderList);
+		m_directionCmd = new Command(
+				m_sortDesc ? "Sort ascending" : "Sort descending", Command.SCREEN, priority++);
         super.addCommand(m_sortUnreadItemsCmd);
         super.addCommand(m_sortReadItemsCmd);
         super.addCommand(m_sortUnreadFeedsCmd);
@@ -186,7 +187,7 @@ public class AllNewsList extends FeatureList
 	
 	/* Initialize the read an unread news lists.  This is done when we
 	   switch to the list. */
-	public void initNewsList(final int offset,
+	final public void initNewsList(final int offset,
 	                         final int len,
 	                         final boolean showAll,
 						     final boolean showUnread,
@@ -194,12 +195,15 @@ public class AllNewsList extends FeatureList
 							 final List bookmarkList,
 							 final Hashtable rssFeeds) {
 
+		//#ifdef DLOGGING
+//@		if (m_finestLoggable) {m_logger.finest("initNewsList showAll,showUnread,sortByDate=" + showAll + "," + showUnread + "," + sortByDate);}
+		//#endif
 		this.m_showAll = showAll;
 		this.m_showUnread = showUnread;
 		this.m_sortByDate = sortByDate;
 		final int bsize = bookmarkList.size();
 		if( bsize > 0 ){
-			boolean firstItem = true;
+			initVectors();
 			int last = offset + len;
 			if (last > bsize) {
 				last = bsize;
@@ -208,33 +212,36 @@ public class AllNewsList extends FeatureList
 			
 				final RssItunesFeed feed = (RssItunesFeed)rssFeeds.get(
 						bookmarkList.getString(ic));
-				if( feed.getItems().size()>0 ) {
+				final Vector vitems = feed.getItems();
+				if( vitems.size()>0 ) {
 					/**
 					 * Show currently selected RSS feed
 					 * headers without updating them
 					 */
-					fillVectors( firstItem, feed );
-					if ( firstItem ) {
-						firstItem = false;
-					}
+					fillVectors( feed, vitems );
 				}
 			}
 		}
 	}
 
+	/** Initialize item and feed name vectors. */
+	private void initVectors() {
+		m_unreadItems.removeAllElements();
+		m_readItems.removeAllElements();
+		m_allItems.removeAllElements();
+		m_itemFeeds.removeAllElements();
+	}
+
     /** Fill RSS item vectors */
-    private void fillVectors( final boolean firstItem,
-			final RssItunesFeed feed ) {
-        if(firstItem) {
-			m_unreadItems.removeAllElements();
-			m_readItems.removeAllElements();
-			m_allItems.removeAllElements();
-			m_itemFeeds.removeAllElements();
-        }
-        final Vector vitems = feed.getItems();
+    private void fillVectors( final RssItunesFeed feed, final Vector vitems ) {
         final int itemLen = vitems.size();
+		//#ifdef DLOGGING
+//@		if (m_finestLoggable) {m_logger.finest("fillVectors itemLen=" + itemLen);}
+		//#endif
+		RssItunesItem[] aitems = new RssItunesItem[itemLen];
+		vitems.copyInto(aitems);
         for(int i=0; i < itemLen; i++){
-            final RssItunesItem r = (RssItunesItem)vitems.elementAt(i);
+            final RssItunesItem r = aitems[i];
 			if (m_showAll) {
 				m_allItems.addElement(r);
 				m_itemFeeds.addElement(feed);
@@ -255,13 +262,15 @@ public class AllNewsList extends FeatureList
     }
     
 	/* Sort all items. */
-	public void sortAllItems(final boolean sortByDate,
+	final public void sortAllItems(final boolean sortByDate,
 							 final FeatureList bookmarkList,
 							 final Hashtable rssFeeds) {
 		initNewsList(m_offset, m_len, true, false, sortByDate, bookmarkList,
 				rssFeeds);
 		if (sortByDate) {
 			sortItems(false, m_allItems);
+		} else if (m_sortDesc) {
+			reverseItems(m_allItems);
 		}
 		fillItems( m_allItems);
 
@@ -506,24 +515,27 @@ public class AllNewsList extends FeatureList
 		}
 	}
 
-
 	/** Sort items unread. */
-	public void sortUnreadItems(final boolean sortByDate,
+	final public void sortUnreadItems(final boolean sortByDate,
 								final List bookmarkList,
 								final Hashtable rssFeeds) {
 		initNewsList(m_offset, m_len, false, true, sortByDate, bookmarkList, rssFeeds);
 		if (sortByDate) {
 			sortItems(true, m_unreadItems);
+		} else if (m_sortDesc) {
+			reverseItems(m_unreadItems);
 		}
 		fillItems( m_unreadItems);
 	}
 
 	/* Sort items read. */
-	public void sortReadItems(boolean sortByDate,
+	final public void sortReadItems(boolean sortByDate,
 							  List bookmarkList, Hashtable rssFeeds) {
 		initNewsList(m_offset, m_len, false, false, sortByDate, bookmarkList, rssFeeds);
 		if (sortByDate) {
 			sortItems(false, m_readItems);
+		} else if (m_sortDesc) {
+			reverseItems(m_readItems);
 		}
 		fillItems( m_readItems);
 	}
@@ -680,29 +692,22 @@ public class AllNewsList extends FeatureList
 		//#endif
 	}
 
-	//#ifdef DTEST
-//@	/** Test that the feed is not ruined by being stored and restored. */
-//@	final private void testFeed() {
-//@		RssItunesFeed feed = m_feed;
-//@		if (feed == null) {
-//@			return;
-//@		}
-//@		String store = feed.getStoreString(true, true);
-//@		RssItunesFeed feed2 = RssItunesFeed.deserialize(
-//@				true, store );
-//@		boolean feedEq = feed.equals(feed2);
-		//#ifdef DLOGGING
-//@		if (m_finestLoggable) {m_logger.finest("feed1,2 eq=" + feedEq);}
-		//#endif
-//@		if (!feedEq) {
-			//#ifdef DLOGGING
-//@			m_logger.severe("Itunes feed does not match name=" + feed.getName());
-			//#endif
-//@			System.out.println("feed=" + feed + "," + feed.toString());
-//@			System.out.println("feed store=" + store);
-//@		}
-//@	}
-	//#endif
+	/* Reverse the order of the items to allow reverse (descending) feed sort. */
+	private void reverseItems(final Vector unsortedItems) {
+		final int ulen = unsortedItems.size();
+		final int flen = m_itemFeeds.size();
+		RssItunesItem[] items = new RssItunesItem[ulen];
+		unsortedItems.copyInto(items);
+		RssItunesFeed[] feeds = new RssItunesFeed[flen];
+		m_itemFeeds.copyInto(feeds);
+		int l = ulen - 1;
+		for (int i = 0; i < ulen; i++) {
+			unsortedItems.insertElementAt(items[l], i);
+			unsortedItems.removeElementAt(ulen);
+			m_itemFeeds.insertElementAt(feeds[l--], i);
+			m_itemFeeds.removeElementAt(ulen);
+		}
+	}
 
 	public void commandAction(Command c, Displayable s) {
 
@@ -751,6 +756,7 @@ public class AllNewsList extends FeatureList
 		try {
 			if( (c == m_openHeaderCmd) || (c == List.SELECT_COMMAND) ) {
 				if( super.size()>0){
+					m_midlet.initializeLoadingForm("Loading item...", this);
 					getUpdSel(true);
 					m_midlet.initializeItemForm( m_feed, m_item, this );
 					//#ifdef DTESTUI
