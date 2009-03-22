@@ -50,21 +50,18 @@ import com.substanceofcode.testutil.TestOutput;
 public class Form extends javax.microedition.lcdui.Form 
 implements LogActIntr {
 
-	private Form m_form;
 	//#ifdef DMIDP10
 	private String m_title;
 	//#endif
 
 	public Form(String title) {
 		super(title);
-		m_form = this;
 		TestOutput.println("Test UI Form Title: " + title);
 	}
 
 	// TODO log items
 	public Form(String title, Item[] items) {
 		super(title, items);
-		m_form = this;
 		//#ifdef DMIDP10
 		this.m_title = title;
 		//#endif
@@ -131,7 +128,6 @@ implements LogActIntr {
 					getTitle() + "]," + t.getMessage());
 			t.printStackTrace();
 		}
-		return;
 	}
 
 	public void delete(int elementnum) {
