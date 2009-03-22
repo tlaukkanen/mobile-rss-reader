@@ -23,6 +23,7 @@ antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 #findbugs.home = ${opt.tools}/findbugs-1.3.4
 #Comment out if you do not want to run PMD
 #pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
+pmd.home = ${opt.tools}/pmd/pmd-4.2.4
 pmd.xsl = pmd-compile-reduced.xsl
 cat.cmd = cat${windows.ext}
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
