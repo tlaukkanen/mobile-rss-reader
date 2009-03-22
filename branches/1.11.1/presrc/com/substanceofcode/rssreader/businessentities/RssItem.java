@@ -57,7 +57,6 @@ public class RssItem {
     protected String m_enclosure  = "";   // The RSS item enclosure
     protected boolean m_unreadItem = false;
 	//#ifdef DLOGGING
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
@@ -280,16 +279,14 @@ public class RssItem {
 			//#endif
 			return false;
 		}
-		if ((item.m_date == null) && (this.m_date == null)) {
-		} else if ((item.m_date != null) && (this.m_date != null)) {
-			if (item.m_date.equals(this.m_date)) {
-			} else {
+		if ((item.m_date != null) && (this.m_date != null)) {
+			if (!item.m_date.equals(this.m_date)) {
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest("unequal dates=" + item.m_date + "," + m_date);}
 				//#endif
 				return false;
 			}
-		} else {
+		} else if ((item.m_date != null) || (this.m_date != null)) {
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal dates=" + item.m_date + "," + m_date);}
 			//#endif
