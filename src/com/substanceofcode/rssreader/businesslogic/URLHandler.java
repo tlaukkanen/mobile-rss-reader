@@ -84,6 +84,7 @@ public class URLHandler {
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
+    /** Open file or URL.  Give error if there is a problem with the URL/file.*/
     final public void handleOpen(String url, String username, String password,
 			boolean writePost)
 	throws IOException, Exception {
@@ -188,7 +189,8 @@ public class URLHandler {
 
 				if ((((respCode == HttpConnection.HTTP_MOVED_TEMP) ||
 					 (respCode == HttpConnection.HTTP_MOVED_PERM) ||
-					 (respCode == HttpConnection.HTTP_TEMP_REDIRECT)) ||
+					 (respCode == HttpConnection.HTTP_TEMP_REDIRECT) ||
+					 (respCode == HttpConnection.HTTP_SEE_OTHER)) ||
 					 ((respCode == HttpConnection.HTTP_OK) &&
 					  respMsg.equals("Moved Temporarily"))) && 
 					 (m_location != null)) {
