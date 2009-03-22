@@ -287,6 +287,24 @@ v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
 + Include modified BSD license file with source/binary tar/zip.
 + Use export to get source instead of checkout.
 
+v1.11.2 Release Candidate 2 (rc2) (March 21st 2009)
++ Allow optional retrieval of previous (last) values used by the previous add bookmark and import feeds.
++ Do redirect for see other status from HTTP.
++ If the feed name is changed with edit feed, remove the previous one.
++ More logging.
++ Fix logging typeos.
++ Use less finals.
++ Use printStackTrace in catch.
++ Redirect for HTTP other status.
++ Combine nested if's.
++ Get file only in URLHandler.
++ Remove unused variables.
++ Allow descending feed sorted for headers/river of news.
++ Remove empty if statements.
++ Put parsing of feed from bookmarks in separate thread to prevent hang if the internet is not accessible (or someone selected the wrong access point).
++ Better logging form info.
++ Change final modifiers for methods/classes.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
