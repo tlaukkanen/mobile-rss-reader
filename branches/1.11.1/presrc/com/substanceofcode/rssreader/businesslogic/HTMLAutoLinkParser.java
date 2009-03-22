@@ -233,11 +233,11 @@ public class HTMLAutoLinkParser extends FeedListParser {
             while( process && (parser.parse() != XmlParser.END_DOCUMENT) );
             
         } catch (Exception ex) {
-            System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
+            System.err.println("HTMLAutoLinkParser.parseFeeds(): Exception " + ex.toString());
 			ex.printStackTrace();
             return null;
         } catch (Throwable t) {
-            System.err.println("OpmlParser.parseFeeds(): Exception " + t.toString());
+            System.err.println("HTMLAutoLinkParser.parseFeeds(): Exception " + t.toString());
 			t.printStackTrace();
             return null;
         }
