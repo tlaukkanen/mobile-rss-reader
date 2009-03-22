@@ -62,7 +62,6 @@ public class RssItunesItem extends RssItem {
 //@    private Logger logger = Logger.getLogger("RssItunesItem");
 	//#endif
 	//#ifdef DLOGGING
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     private boolean m_itunes = false;
