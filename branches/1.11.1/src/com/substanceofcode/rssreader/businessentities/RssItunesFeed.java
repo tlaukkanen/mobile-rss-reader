@@ -84,7 +84,7 @@ public class RssItunesFeed extends RssFeed{
 						Date upddate,
 						String link,
 						Date date,
-						int category,
+						String etag,
 						boolean itunes,
 						String title,
 						String description,
@@ -93,7 +93,7 @@ public class RssItunesFeed extends RssFeed{
 						String subtitle,
 						String summary,
 						byte explicit) {
-        super(name, url, username, password, upddate, link, date, category);
+        super(name, url, username, password, upddate, link, date, etag);
 		if (itunes) {
 			modifyItunes(itunes, title, description, language, author, subtitle,
 					summary, explicit);
@@ -160,15 +160,15 @@ public class RssItunesFeed extends RssFeed{
 	/** Deserialize the object
         Creates a new instance of RssItunesFeed from store string 
 		**/
-	public static RssItunesFeed deserialize(boolean encoded,
-			String storeString){
+	public static RssItunesFeed deserialize(boolean modifyCapable,
+			boolean encoded, String storeString){
 
 		try {
         
 			boolean hasPipe = (storeString.indexOf(CONE) >= 0);
 			String[] nodes = StringUtil.split( storeString, "|" );
 			RssItunesFeed feed = new RssItunesFeed();
-			feed.init(hasPipe, encoded, nodes);
+			feed.init(modifyCapable, hasPipe, encoded, nodes);
 			return feed;
         } catch(Exception e) {
             System.err.println("Error while RssItunesFeed deserialize : " + e.toString());
@@ -177,7 +177,8 @@ public class RssItunesFeed extends RssFeed{
         }
 	}
 			
-	public void init(boolean hasPipe, boolean encoded, String [] nodes) {
+	public void init(boolean modifyCapable, boolean hasPipe, boolean encoded,
+			String [] nodes) {
 
 		try {
         
@@ -238,7 +239,7 @@ public class RssItunesFeed extends RssFeed{
 //@			}
 			//#endif
 
-			super.init(false, NBR_ITUNES_FEED_INFO, true,
+			super.init(false, NBR_ITUNES_FEED_INFO, true, modifyCapable,
 					   hasPipe, encoded, nodes);
 
         } catch(Exception e) {
@@ -328,14 +329,6 @@ public class RssItunesFeed extends RssFeed{
 //@	}
 	//#endif
     
-    public void setCategory(int category) {
-        this.m_category = category;
-    }
-
-    public int getCategory() {
-        return (m_category);
-    }
-
     /** Write record as a string */
     public String toString(){
         String storeString = m_itunes + "|" + m_title + "|" +
