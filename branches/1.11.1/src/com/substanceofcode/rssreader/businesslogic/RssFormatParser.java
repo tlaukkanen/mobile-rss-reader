@@ -22,6 +22,8 @@
  *
  */
 
+// Expand to define test define
+//#define DNOTEST
 // Expand to define logging define
 //#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
@@ -38,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.Vector;
 
 /**
@@ -46,6 +49,17 @@ import java.util.Vector;
  */
 public class RssFormatParser implements FeedFormatParser {
     
+	final static public String stimeZones;
+	final static public byte GMT;
+	static {
+		String[] timeZones = TimeZone.getAvailableIDs();
+		StringBuffer sb = new StringBuffer();
+		sb.append(StringUtil.join(timeZones, ",", 0));
+		sb.insert(0, "UTC,");
+		stimeZones = sb.toString();
+		GMT = (byte)stimeZones.indexOf(",GMT,");
+	}
+
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssFormatParser");
 	//#endif
@@ -354,8 +368,11 @@ public class RssFormatParser implements FeedFormatParser {
      * Example of RSS date:
      * Sat, 23 Sep 2006 22:25:11 +0000
      */
-    public static Date parseStdDate(String dateString) {
-        Date pubDate = null;
+    public static Object[] parseStdDateTZ(String dateString) {
+        Object[] objs = null;
+		//#ifdef DLOGGING
+//@		Logger logger = Logger.getLogger("RssFormatParser");
+		//#endif
         try {
             // Split date string to values
             // 0 = week day
@@ -368,6 +385,7 @@ public class RssFormatParser implements FeedFormatParser {
             int monthIndex = 2;
             int yearIndex = 3;
             int timeIndex = 4;
+            int tzIndex = 5;
             
 			int kc = 0;
             while ((dateString.indexOf("  ") >= 0) &&
@@ -384,19 +402,22 @@ public class RssFormatParser implements FeedFormatParser {
                 monthIndex = 1;
                 yearIndex = 2;
                 timeIndex = 3;
+                tzIndex = 4;
 			} else if( columnCount==7 ) {
                 // Expected format:
                 // Thu, 19 Jul  2007 00:00:00 N
                 yearIndex = 4;
                 timeIndex = 5;
+                tzIndex = -1;
             } else if( columnCount<5 || columnCount>6 ) {
 				//#ifdef DLOGGING
-//@				Logger logger = Logger.getLogger("RssFormatParser");
 //@				logger.warning("Invalid date format: " + dateString);
 				//#endif
-				for (int ic = 0; ic < dateString.length(); ic++) {
-					System.out.println("date=" + ic + "," + dateString.charAt(ic) + "," + (int)dateString.charAt(ic));
-				}
+				//#ifdef DTEST
+//@				for (int ic = 0; ic < dateString.length(); ic++) {
+//@					System.out.println("date=" + ic + "," + dateString.charAt(ic) + "," + (int)dateString.charAt(ic));
+//@				}
+				//#endif
                 throw new Exception("Invalid date format: " + dateString);
             }
             
@@ -427,15 +448,27 @@ public class RssFormatParser implements FeedFormatParser {
             int minutes = Integer.parseInt( timeValues[1] );
             int seconds = Integer.parseInt( timeValues[2] );
             
-            pubDate = getCal(dayOfMonth, month, year, hours, minutes, seconds);
+			Date pubDate = getCal(
+					dayOfMonth, month, year, hours, minutes, seconds);
+			objs = new Object[2];
+			objs[0] = pubDate;
+			if ((tzIndex == -1) || (tzIndex >= values.length)) {
+				objs[1] = null;
+			} else {
+				final String stz = values[tzIndex];
+				//#ifdef DLOGGING
+//@				logger.finest("parseStdDateTZ values.length,tzIndex,stz=" + values.length + "," + tzIndex + "," + stz);
+				//#endif
+				objs[1] = new Byte(
+						(byte)RssFormatParser.stimeZones.indexOf("," + stz + ","));
+			}
             
         } catch(Exception ex) {
             // TODO: Add exception handling code
             System.err.println("parseStdDate error while converting date string to object: " + 
                     dateString + "," + ex.toString());
 			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("RssFormatParser");
-//@			logger.severe("parseStdDate  error while converting date " +
+//@			logger.severe("parseStdDateTZ   error while converting date " +
 //@						   "string to object: " +
 //@                    dateString, ex);
 			//#endif
@@ -444,15 +477,28 @@ public class RssFormatParser implements FeedFormatParser {
             System.err.println("parseStdDate error while converting date string to object: " + 
                     dateString + "," + t.toString());
 			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("RssFormatParser");
-//@			logger.severe("parseStdDate  error while converting date " +
+//@			logger.severe("parseStdDateTZ   error while converting date " +
 //@						   "string to object: " +
 //@                    dateString, t);
 			//#endif
         }
-        return pubDate;
+        return objs;
     }
     
+    /**
+     * Parse RSS date format to Date object.
+     * Example of RSS date:
+     * Sat, 23 Sep 2006 22:25:11 +0000
+     */
+    public static Date parseStdDate(String dateString) {
+		Object[] objs = parseStdDateTZ(dateString);
+		if (objs == null) {
+			return null;
+		} else {
+			return (Date)objs[0];
+		}
+	}
+
     /**
      * Parse RSS date dc:date or atom format to Date object.
      * Example of RSS dc:date:
@@ -514,7 +560,7 @@ public class RssFormatParser implements FeedFormatParser {
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 //@			Logger logger = Logger.getLogger("RssFormatParser");
-//@			logger.severe("parseDcDate error while converting date " +
+//@			logger.severe("parseStdDateTZ  error while converting date " +
 //@						   "string to object: " +
 //@                    dateString, t);
 			//#endif
@@ -525,4 +571,52 @@ public class RssFormatParser implements FeedFormatParser {
         return pubDate;
     }
     
+	public static String stdDate(Date cdate, String tz) {
+		Calendar cal = Calendar.getInstance(); 
+		cal.setTime(cdate); 
+		cal.setTimeZone(TimeZone.getTimeZone(tz)); 
+		StringBuffer sdate = new StringBuffer();
+		final int doff = cal.get(Calendar.DAY_OF_WEEK) * 3 - 3;
+		sdate.append("SunMonTueWedThuFriSat".substring(doff, doff + 3));
+		sdate.append(", ");
+		final int dm = cal.get(Calendar.DAY_OF_MONTH);
+		sdate.append(Integer.toString(dm));
+		sdate.append(" ");
+		final int moff = cal.get(Calendar.MONTH) * 3;
+		sdate.append("JanFebMarAprMayJunJulAugSepNovOctDec".substring(moff,
+					moff + 3));
+		sdate.append(" ");
+		final int syear = cal.get(Calendar.YEAR);
+		int year;
+		if (syear < 100) {
+			year = syear + 1900;
+		} else {
+			year = syear;
+		}
+		sdate.append(Integer.toString(year));
+		sdate.append(" ");
+		final int hour = cal.get(Calendar.HOUR_OF_DAY);
+		String shour = Integer.toString(hour);
+		sdate.append("00".substring(0, 2 - shour.length()));
+		sdate.append(shour);
+		sdate.append(":");
+		final int min = cal.get(Calendar.MINUTE);
+		final String smin = Integer.toString(min);
+		sdate.append("00".substring(0, 2 - smin.length()));
+		sdate.append(smin);
+		sdate.append(":");
+		final int sec = cal.get(Calendar.SECOND);
+		final String ssec = Integer.toString(sec);
+		sdate.append("00".substring(0, 2 - ssec.length()));
+		sdate.append(ssec);
+		sdate.append(" ");
+		sdate.append(tz);
+		//#ifdef DLOGGING
+//@		Logger logger = Logger.getLogger("RssFormatParser");
+//@		logger.finest("stdDate doff,dm,moff,syear,year,hour,min,sec,tz=" + doff + "," + dm + "," + moff + "," + syear + "," + year + "," + hour + "," + min + "," + sec + "," + tz);
+//@		logger.finest("stdDate sdate=" + sdate.toString());
+		//#endif
+		return sdate.toString();
+	}
+
 }
