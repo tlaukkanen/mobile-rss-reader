@@ -67,6 +67,7 @@ import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.rssreader.businesslogic.Controller;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
+import com.substanceofcode.rssreader.businesslogic.RssFormatParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.presentation.AllNewsList;
 import com.substanceofcode.utils.Settings;
@@ -615,8 +616,10 @@ public class RssReaderMIDlet extends MIDlet
 					 vers.equals(m_settings.FIRST_SETTINGS_VERS);
 				final boolean itunesCapable = ((vers.length() > 0) &&
 					 (vers.compareTo(m_settings.ITUNES_CAPABLE_VERS) >= 0));
-				final boolean latestSettings = vers.equals(
-						m_settings.ENCODING_VERS);
+				final boolean encodingSettings = ((vers.length() > 0) &&
+					 (vers.compareTo(m_settings.ENCODING_VERS) >= 0));
+				final boolean modifiedSettings = vers.equals(
+						m_settings.MODIFIED_VERS);
 				m_settings.getBooleanProperty(m_settings.ITEMS_ENCODED,
 							true);
 				/* FUTURE
@@ -624,12 +627,12 @@ public class RssReaderMIDlet extends MIDlet
 						m_settings.STORE_DATE, 0L);
 					*/
 				final char feedSeparator =
-					latestSettings ? CFEED_SEPARATOR : OLD_FEED_SEPARATOR;
+					encodingSettings ? CFEED_SEPARATOR : OLD_FEED_SEPARATOR;
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("Settings region,vers,firstSettings,itunescapable,latestSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + latestSettings);}
+				if (fineLoggable) {logger.fine("Settings region,vers,firstSettings,itunesCapable,encodingSettings,modifiedSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + encodingSettings + "," + modifiedSettings);}
 				//#endif
 				//#ifdef DTEST
-				if (m_debugOutput) System.out.println("Settings region,vers,firstSettings,itunescapable,latestSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + latestSettings);
+				if (m_debugOutput) System.out.println("Settings region,vers,firstSettings,itunesCapable,encodingSettings,modifiedSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + encodingSettings + "," + modifiedSettings);
 				//#endif
 				String bms = m_settings.getStringProperty(ic, "bookmarks", "");
 				//#ifdef DLOGGING
@@ -655,10 +658,14 @@ public class RssReaderMIDlet extends MIDlet
 							//#elifdef DCOMPATIBILITY2
 							RssFeed bm2 = new CompatibilityRssFeed2( part );
 							RssItunesFeed bm = new RssItunesFeed( bm2 );
+							//#elifdef DCOMPATIBILITY3
+							RssFeed bm3 = new CompatibilityRssFeed3( part );
+							RssItunesFeed bm = new RssItunesFeed( bm3 );
 							//#else
 							RssItunesFeed bm;
 							if (itunesCapable) {
-								bm = RssItunesFeed.deserialize( true, part );
+								bm = RssItunesFeed.deserialize(modifiedSettings,
+										true, part );
 							} else {
 								bm = new RssItunesFeed(new RssFeed(
 											firstSettings, true, part ));
@@ -897,15 +904,13 @@ public class RssReaderMIDlet extends MIDlet
 						showBookmarkList();
 					}
 				} catch(Exception ex) {
-					m_loadForm.recordExcForm("Error parsing feeds from:\n" +
-							m_curRssParser.getRssFeed().getUrl(), ex);
+					m_loadForm.recordExcForm("Error parsing feeds\n", ex);
 				} catch(OutOfMemoryError ex) {
-					m_loadForm.recordExcForm("Out Of Memory Error parsing feeds " +
-							"from:\n" +
-							m_curRssParser.getRssFeed().getUrl(), ex);
+					m_loadForm.recordExcForm("Out Of Memory Error parsing feeds \n",
+							ex);
 				} catch(Throwable t) {
-					m_loadForm.recordExcForm("Internal error parsing feeds from:\n" +
-							m_curRssParser.getRssFeed().getUrl(), t);
+					m_loadForm.recordExcForm("Internal error parsing feeds from:\n",
+							t);
 				} finally {
 					m_refreshAllFeeds = false;
 					m_refreshUpdFeeds = false;
@@ -946,15 +951,14 @@ public class RssReaderMIDlet extends MIDlet
 					//#endif
 					setCurrent( importFeedsForm );
 				} catch(Exception ex) {
-					m_loadForm.recordExcForm("Error parsing feeds from:\n" +
-							m_curRssParser.getRssFeed().getUrl(), ex);
+					m_loadForm.recordExcForm("Error parsing feeds from:\n",
+							ex);
 				} catch(OutOfMemoryError ex) {
-					m_loadForm.recordExcForm("Out Of Memory Error parsing feeds " +
-							"from:\n" +
-							m_curRssParser.getRssFeed().getUrl(), ex);
+					m_loadForm.recordExcForm("Out Of Memory Error parsing feeds \n",
+							ex);
 				} catch(Throwable t) {
-					m_loadForm.recordExcForm("Internal error parsing feeds from:\n" +
-							m_curRssParser.getRssFeed().getUrl(), t);
+					m_loadForm.recordExcForm("Internal error parsing feeds from:\n",
+							t);
 				} finally {
 					m_getImportForm = false;
 					m_getExportForm = false;
@@ -1081,7 +1085,7 @@ public class RssReaderMIDlet extends MIDlet
 		}
 
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("procPage copenPage,cgetPage,cgetModPage=" + copenPage + "," + cgetPage + "," + cgetModPage);}
+		if (finestLoggable) {logger.finest("procPage cbackground,copenPage,cgetPage,cgetModPage,cprevDisp,ccurRssParser=" + cbackground + "," + copenPage + "," + cgetPage + "," + cgetModPage + "," + cprevDisp + "," + ccurRssParser);}
 		//#endif
 		// Open existing bookmark and show headers (items).
 		if( copenPage || cgetPage || cgetModPage ) {
@@ -1104,7 +1108,7 @@ public class RssReaderMIDlet extends MIDlet
 						m_appSettings.getMaximumItemCountInFeed();
 					if (cbackground) {
 						synchronized(this) {
-							m_backGrRssParser = new RssFeedParser(feed,
+							m_backGrRssParser = new RssFeedParser(this, feed,
 									cgetModPage, maxItemCount);
 							m_parseBackground = true;
 							m_backGrBookmark = m_curBookmark;
@@ -1123,7 +1127,7 @@ public class RssReaderMIDlet extends MIDlet
 				m_loadForm.recordExcForm(
 						"\nError " + (copenPage ? "loading" :
 							"parsing") + " feed on:\n" +
-						ccurRssParser.getRssFeed().getUrl(), e); 
+						ccurRssParser.getRssFeed().getUrl(), e);
 			}catch(OutOfMemoryError e) {
 				m_loadForm.recordExcForm(
 						"\nOut of memory " + (copenPage ? "loading" :
@@ -1151,6 +1155,7 @@ public class RssReaderMIDlet extends MIDlet
 		boolean cparseBackground = false;
 		RssFeedParser ccurRssParser = null;
 		RssFeedParser cbackGrRssParser = null;
+		int ccurBookmark = -1;
 		int cbackGrBookmark = -1;
 		synchronized(this) {
 			cprevDisp = m_prevDisp;
@@ -1158,10 +1163,11 @@ public class RssReaderMIDlet extends MIDlet
 			ccurRssParser = m_curRssParser;
 			cparseBackground = m_parseBackground;
 			cbackGrBookmark = m_backGrBookmark;
+			ccurBookmark =    m_curBookmark;
 		}
 
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("procHeader cbackground,copenPage,m_getPage,m_getModPage,cparseBackground,,ccurRssParser,cbackGrRssParser=" + cbackground + "," + copenPage + "," + m_getPage + "," + m_getModPage + "," + cparseBackground + "," + ccurRssParser + "," + cbackGrRssParser);}
+		if (finestLoggable) {logger.finest("procHeader cbackground,copenPage,m_getPage,m_getModPage,cparseBackground,ccurRssParser,cbackGrRssParser=" + cbackground + "," + copenPage + "," + m_getPage + "," + m_getModPage + "," + cparseBackground + "," + ccurRssParser + "," + cbackGrRssParser);}
 		//#endif
 		// Open existing bookmark and show headers (items).
 		boolean rssBackground = cbackground && cparseBackground &&
@@ -1173,8 +1179,8 @@ public class RssReaderMIDlet extends MIDlet
 
 				if(rssBackground) {
 					if(cbackGrRssParser.isSuccessfull()) {
-						m_rssFeeds.put(m_backGrRssParser.getRssFeed().getName(),
-								m_backGrRssParser.getRssFeed());
+						m_rssFeeds.put(cbackGrRssParser.getRssFeed().getName(),
+								cbackGrRssParser.getRssFeed());
 					} else {
 						throw cbackGrRssParser.getEx();
 					}
@@ -1185,10 +1191,19 @@ public class RssReaderMIDlet extends MIDlet
 					System.gc();
 					long beginMem = Runtime.getRuntime().freeMemory();
 					//#endif
+					RssFeedParser cactRssParser;
+					int cactbookindex;
+					if (cbackground) {
+						cactRssParser = cbackGrRssParser;
+						cactbookindex = cbackGrBookmark;
+					} else {
+						cactRssParser = ccurRssParser;
+						cactbookindex = ccurBookmark;
+					}
 					hdrList = new HeaderList(this, m_bookmarkList,
-						cbackGrBookmark, m_rssFeeds,
+						cactbookindex, m_rssFeeds,
 						m_unreadImage, m_itunesEnabled, m_loadForm,
-						cbackGrRssParser.getRssFeed());
+						cactRssParser.getRssFeed());
 					hdrList.setCommandListener(hdrList, true);
 					//#ifdef DTEST
 					System.out.println("headerList size=" + (beginMem - Runtime.getRuntime().freeMemory()));
@@ -1219,9 +1234,10 @@ public class RssReaderMIDlet extends MIDlet
 						cbackGrRssParser.getRssFeed().getUrl(), t);
 			} finally {
 				synchronized(this) {
-					if (cbackGrRssParser == m_backGrRssParser) {
+					if ((cbackGrRssParser != null) &&
+						(cbackGrRssParser == m_backGrRssParser)) {
 						m_loadForm.removeCommandPrompt(m_backCommand);
-						m_backGrRssParser = m_curRssParser;
+						m_curRssParser = m_backGrRssParser;
 						m_parseBackground = false;
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest("procHeader m_parseBackground=" + m_parseBackground);}
@@ -1929,27 +1945,35 @@ public class RssReaderMIDlet extends MIDlet
         /** Open RSS feed bookmark */
         if( ((c == m_openBookmark) || (c == List.SELECT_COMMAND &&
                 (s==m_bookmarkList)))){
-			m_curBookmark = FeatureMgr.getSelectedIndex(m_bookmarkList);
-			if (m_curBookmark >= 0) {
-				RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
-						m_bookmarkList.getString(m_curBookmark));
-				m_curRssParser = new RssFeedParser( feed );
-				if( feed.getItems().size()==0 ) {
-					/** Update RSS feed headers only if this is a first time */
-					updateHeaders(false, m_bookmarkList);
-				} else {
-					/**
-					 * Show currently selected RSS feed
-					 * headers without updating them
-					 */
-					synchronized(this) {
-						m_openPage = true;
-						m_prevDisp = m_bookmarkList;
+			try {
+				m_curBookmark = FeatureMgr.getSelectedIndex(m_bookmarkList);
+				if (m_curBookmark >= 0) {
+					RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
+							m_bookmarkList.getString(m_curBookmark));
+					m_curRssParser = new RssFeedParser( feed );
+					if( feed.getItems().size()==0 ) {
+						/** Update RSS feed headers only if this is a first time */
+						updateHeaders(false, m_bookmarkList);
+					} else {
+						/**
+						 * Show currently selected RSS feed
+						 * headers without updating them
+						 */
+						synchronized(this) {
+							m_openPage = true;
+							m_prevDisp = m_bookmarkList;
+						}
 					}
-				}
 
-				// Open existing bookmark and show headers (items).
-				procPage(!m_openPage);
+					// Open existing bookmark and show headers (items).
+					procPage(!m_openPage);
+				}
+			}catch(Throwable t) {
+				//#ifdef DLOGGING
+				logger.severe("commandAction openPage.", t);
+				//#endif
+				/** Error while parsing RSS feed */
+				System.out.println("Error editing feeds: " + t.getMessage());
 			}
 		}
         
@@ -2075,8 +2099,12 @@ public class RssReaderMIDlet extends MIDlet
 		synchronized(this) {
 			if (m_parseBackground) {
 				m_parseBackground = false;
-				m_curRssParser = m_backGrRssParser;
+				m_curRssParser = new RssFeedParser(
+						m_backGrRssParser.getRssFeed());
 			}
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("m_parseBackground,m_curRssParser,m_backGrRssParser=" + m_parseBackground + "," + m_curRssParser + "," + m_backGrRssParser);}
+			//#endif
 		}
 	}
 
@@ -2253,7 +2281,14 @@ public class RssReaderMIDlet extends MIDlet
 			}
 			//#endif
 			if(itemDate!=null) {
-				super.append(new StringItem(dateLabel, itemDate.toString()));
+				//#ifdef DMIDP10
+				// MIDP 1.0 does not require toString to produce a date.
+				// It may give the hash of the string (e.g. Sony Ericsson T637).
+				final String sdate = RssFormatParser.stdDate(itemDate, "GMT");
+				//#else
+				final String sdate = itemDate.toString();
+				//#endif
+				super.append(new StringItem(dateLabel, sdate));
 			}
 
 			if (link.length() > 0) {
