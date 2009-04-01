@@ -108,7 +108,7 @@ final public class HeaderList extends AllNewsList
 		try {
 			RssItunesFeed feed = m_feed;
 			String store = feed.getStoreString(true, true);
-			RssItunesFeed feed2 = RssItunesFeed.deserialize(
+			RssItunesFeed feed2 = RssItunesFeed.deserialize( true,
 					true, store );
 			boolean feedEq = feed.equals(feed2);
 			//#ifdef DLOGGING
