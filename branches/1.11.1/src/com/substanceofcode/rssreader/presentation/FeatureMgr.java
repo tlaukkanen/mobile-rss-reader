@@ -92,6 +92,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 	//#ifdef DLOGGING
 //@	private Logger logger = Logger.getLogger("FeatureMgr");
 //@	private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@	private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
 	private CommandListener cmdFeatureUser = null;
@@ -468,6 +469,10 @@ public class FeatureMgr implements CommandListener, Runnable {
 
 	/* Restore previous values. */
 	final static public void restorePrevValues(Item[] items, byte[] bdata) {
+		//#ifdef DLOGGING
+//@		Logger logger = Logger.getLogger("FeatureMgr");
+//@		boolean cfinestLoggable = logger.isLoggable(Level.FINEST);
+		//#endif
 		DataInputStream dis = new DataInputStream(
 				new ByteArrayInputStream(bdata));
 		for (int ic = 0; ic < items.length; ic++) {
@@ -480,7 +485,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 					((ChoiceGroup)item).setSelectedIndex(dis.readInt(),
 						true);
 					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("set selected " + ((ChoiceGroup)item).getSelectedIndex());}
+//@					if (cfinestLoggable) {logger.finest("set selected " + ((ChoiceGroup)item).getSelectedIndex());}
 					//#endif
 				} else if (item instanceof TextField) {
 					final int len = dis.readInt();
@@ -498,7 +503,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 						}
 						((TextField)item).setString(value);
 						//#ifdef DLOGGING
-//@						if (finestLoggable) {logger.finest("set string " + ((TextField)item).getString());}
+//@						if (cfinestLoggable) {logger.finest("set string " + ((TextField)item).getString());}
 						//#endif
 					}
 				}
@@ -521,6 +526,10 @@ public class FeatureMgr implements CommandListener, Runnable {
 
 	/* Store current values. */
 	final static public byte[] storeValues(Item[] items) {
+		//#ifdef DLOGGING
+//@		Logger logger = Logger.getLogger("FeatureMgr");
+//@		boolean cfinestLoggable = logger.isLoggable(Level.FINEST);
+		//#endif
 		ByteArrayOutputStream bout = new
 				ByteArrayOutputStream();
 		DataOutputStream dout = new
@@ -534,7 +543,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 				if (item instanceof ChoiceGroup) {
 					dout.writeInt(((ChoiceGroup)item).getSelectedIndex());
 					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("stored selected " + item.getLabel() + "," + ((ChoiceGroup)item).getSelectedIndex());}
+//@					if (cfinestLoggable) {logger.finest("stored selected " + item.getLabel() + "," + ((ChoiceGroup)item).getSelectedIndex());}
 					//#endif
 				} else if (item instanceof TextField) {
 					final String value = ((TextField)item).getString();
@@ -552,7 +561,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 						dout.write( bvalue, 0, bvalue.length );
 					}
 					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("set string " + item.getLabel() + "," + ((TextField)item).getString());}
+//@					if (cfinestLoggable) {logger.finest("set string " + item.getLabel() + "," + ((TextField)item).getString());}
 					//#endif
 				}
 			} catch (IOException e) {
@@ -564,7 +573,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 			}
 		}
 		//#ifdef DLOGGING
-//@		if (finestLoggable) {logger.finest("bout.toByteArray().length=" + bout.toByteArray().length);}
+//@		if (cfinestLoggable) {logger.finest("bout.toByteArray().length=" + bout.toByteArray().length);}
 		//#endif
 		if (dout != null) {
 			try { dout.close();
