@@ -145,7 +145,8 @@ public abstract class FeedListParser extends URLHandler implements Runnable{
     public RssItunesFeed[] parseFeeds() throws IOException, Exception {
         
 		try {
-			super.handleOpen(m_url, m_username, m_password, false);
+			super.handleOpen(m_url, m_username, m_password, false, false, null,
+					"");
 			if (m_needRedirect) {
 				m_needRedirect = false;
 				m_feeds = parseHeaderRedirect(m_location);
