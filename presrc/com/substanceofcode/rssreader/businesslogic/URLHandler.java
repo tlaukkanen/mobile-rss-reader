@@ -32,6 +32,7 @@
 @DLOGDEF@
 package com.substanceofcode.rssreader.businesslogic;
 
+import java.util.Date;
 import java.io.IOException;
 import javax.microedition.io.ConnectionNotFoundException;
 import java.io.InputStream;
@@ -66,8 +67,10 @@ public class URLHandler {
     protected boolean m_redirect = false;  // The URL is redirected
     protected String m_redirectUrl = "";  // The URL is redirected URL
     protected boolean m_needRedirect = false;  // The URL needs to be redirected
+    protected boolean m_same = false;  // The conditional get got the same results
     protected String m_location; // The URL location
-    protected long m_lastMod = 0L;  // Last modification
+    protected String m_lastMod = "";  // Last modification
+    protected String m_etag = "";  // Etag
     protected InputStream m_inputStream;  // Input stream
     protected OutputStream m_outputStream;  // Output stream
     protected HttpConnection m_hc = null;
@@ -75,7 +78,7 @@ public class URLHandler {
 	//#ifdef DJSR75
     protected FileConnection m_fc = null;
 	//#endif
-    protected String m_contentType = null;  // Last modification
+    protected String m_contentType = null;  // Content type
     
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("URLHandler");
@@ -86,9 +89,13 @@ public class URLHandler {
 
     /** Open file or URL.  Give error if there is a problem with the URL/file.*/
     final public void handleOpen(String url, String username, String password,
-			boolean writePost)
+			boolean writePost, boolean saveBandwidth, String slastModified, String etag)
 	throws IOException, Exception {
         
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("handleOpen url,saveBandwidth,slastModified,etag=" + url + "," + saveBandwidth + "," + ((slastModified == null) ? "null" : slastModified) +
+				"," + etag);}
+		//#endif
         try {
 			if (url.startsWith("file://")) {
 				//#ifdef DJSR75
@@ -97,7 +104,7 @@ public class URLHandler {
 				 */
 				m_fc = (FileConnection) Connector.open( url,
 						Connector.READ | (writePost ? Connector.WRITE : 0) );
-				m_lastMod = m_fc.lastModified();
+				m_lastMod = RssFormatParser.stdDate(new Date(m_fc.lastModified()), "GMT");
 				if (writePost) {
 					if (!m_fc.exists()) {
 						m_fc.create();
@@ -146,6 +153,14 @@ public class URLHandler {
 						"Profile/MIDP-1.0 Configuration/CLDC-1.0");
 				m_hc.setRequestProperty("Content-Length", "0");
 				m_hc.setRequestProperty("Connection", "close");
+				if (saveBandwidth && (slastModified != null) &&
+					(slastModified.length() > 0)) {
+					m_hc.setRequestProperty("If-Modified-Since",
+							slastModified);
+				}
+				if (saveBandwidth && (etag.length() > 0)) {
+					m_hc.setRequestProperty("If-None-Match", etag);
+				}
 
 				/** Add credentials if they are defined */
 				if( username.length()>0) {
@@ -163,18 +178,33 @@ public class URLHandler {
 				int respCode = m_hc.getResponseCode();
 				m_inputStream = m_hc.openInputStream();
 				String respMsg = m_hc.getResponseMessage();
-				m_lastMod = m_hc.getLastModified();
+				m_lastMod = m_hc.getHeaderField("last-modified");
+				if ((m_lastMod == null) || (m_lastMod.length() == 0)) {
+					m_lastMod = m_hc.getHeaderField("Last-Modified");
+					if (m_lastMod == null) {
+						m_lastMod = "";
+					}
+				}
+				m_etag = m_hc.getHeaderField("ETag");
+				if ((m_etag == null) || (m_etag.length() == 0)) {
+					m_etag = m_hc.getHeaderField("etag");
+					if (m_etag == null) {
+						m_etag = "";
+					}
+				}
 				m_contentType = m_hc.getHeaderField("content-type");
 				m_location = m_hc.getHeaderField("location");
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("responce code=" + respCode);}
-				if (fineLoggable) {logger.fine("responce message=" + respMsg);}
-				if (fineLoggable) {logger.fine("responce location=" + m_hc.getHeaderField("location"));}
+				if (fineLoggable) {logger.fine("handleOpen response code=" + respCode);}
+				if (fineLoggable) {logger.fine("handleOpen response message=" + respMsg);}
+				if (fineLoggable) {logger.fine("handleOpen response m_lastMod=" + m_lastMod);}
+				if (fineLoggable) {logger.fine("handleOpen response m_etag=" + m_etag);}
+				if (fineLoggable) {logger.fine("handleOpen response m_location=" + m_location);}
 				if (finestLoggable) {
 					for (int ic = 0; ic < 20; ic++) {
-						logger.finest("hk=" + ic + "," +
+						logger.finest("handleOpen hk=" + ic + "," +
 								m_hc.getHeaderFieldKey(ic));
-						logger.finest("hf=" + ic + "," +
+						logger.finest("handleOpen hf=" + ic + "," +
 								m_hc.getHeaderField(ic));
 					}
 				}
@@ -197,9 +227,12 @@ public class URLHandler {
 					m_needRedirect = true;
 					return;
 				}
+				if (respCode == HttpConnection.HTTP_NOT_MODIFIED) {
+					m_same = true;
+				}
 			}
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("m_contentType=" + m_contentType);}
+			if (finestLoggable) {logger.finest("handleOpen m_contentType=" + m_contentType);}
 			//#endif
             
         } catch(IllegalArgumentException e) {
@@ -339,12 +372,20 @@ public class URLHandler {
 		//#endif
 	}
 
-    final public void setLastMod(long m_lastMod) {
+    final public void setLastMod(String m_lastMod) {
         this.m_lastMod = m_lastMod;
     }
 
-    final public long getLastMod() {
+    final public String getLastMod() {
         return (m_lastMod);
+    }
+
+    public void setEtag(String etag) {
+        this.m_etag = etag;
+    }
+
+    public String getEtag() {
+        return (m_etag);
     }
 
 	//#ifdef DJSR75
