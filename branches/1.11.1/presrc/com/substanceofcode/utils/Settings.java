@@ -66,14 +66,17 @@ final public class Settings {
     public static final String FIRST_SETTINGS_VERS = "";
     public static final String ITUNES_CAPABLE_VERS = "3";
     public static final String ENCODING_VERS = "4";
+    public static final String MODIFIED_VERS = "5";
     public static final String ITEMS_ENCODED = "items-encoded";
     public static final String STORE_DATE = "store-date";
 	//#ifdef DCOMPATIBILITY2
     public static final String SETTINGS_VERS = "2";
 	//#elifdef DCOMPATIBILITY3
     public static final String SETTINGS_VERS = ITUNES_CAPABLE_VERS;
-	//#else
+	//#elifdef DCOMPATIBILITY4
     public static final String SETTINGS_VERS = ENCODING_VERS;
+	//#else
+    public static final String SETTINGS_VERS = MODIFIED_VERS;
 	//#endif
     private static Settings m_store;
     private MIDlet          m_midlet;
