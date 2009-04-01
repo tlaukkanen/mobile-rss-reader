@@ -116,7 +116,6 @@ final public class ImportFeedsForm extends URLForm
 	//#ifdef DTESTUI
 //@	private Command     m_testImportCmd;      // Tet UI rss opml command
 	//#endif
-    private Hashtable m_rssFeeds;         // The bookmark URLs
     private FeatureList  m_bookmarkList;     // The bookmark list
 	//#ifdef DLOGGING
 //@    private Logger m_logger = Logger.getLogger("ImportFeedsForm");
@@ -209,7 +208,7 @@ final public class ImportFeedsForm extends URLForm
 //@			URLHandler uhandler = new URLHandler();
 //@			OutputStreamWriter osw = null;
 //@			try {
-//@				uhandler.handleOpen(url, null, null, true);
+//@				uhandler.handleOpen(url, null, null, true, false, null, "");
 //@				OutputStream os = uhandler.getOutputStream();
 //@				// On many devices, writing to a file gives a propmt for
 //@				// each write to the file which is very annoying, so
@@ -464,6 +463,10 @@ final public class ImportFeedsForm extends URLForm
 	throws CauseException, Exception {
 		// Feed list parsing is ready
 		System.out.println("Feed list parsing is ready");
+		//#ifdef DLOGGING
+//@		Logger logger = Logger.getLogger("ImportFeedsForm");
+//@		logger.finest("addFeedLists rssFeeds=" + rssFeeds);
+		//#endif
 		if(!listParser.isSuccessfull()) {
 			throw listParser.getEx();
 		}
@@ -482,7 +485,6 @@ final public class ImportFeedsForm extends URLForm
 				loadForm.appendMsg("Loading title for " +
 						"feed " + feed.getUrl());
 				//#ifdef DLOGGING
-//@				Logger logger = Logger.getLogger("ImportFeedsForm");
 //@				logger.finest("Getting title for url=" + feed.getUrl());
 				//#endif
 				fparser.setGetTitleOnly(true);
