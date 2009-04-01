@@ -741,7 +741,7 @@
 
 	<!-- Future as CLDC-1.1 features not used -->
 	<!-- Compile using WTK with MIDP-2.0 CLDC-1.1 and test -->
-	<target name="compile.2.0.cldc1.1">
+	<target name="compile.2.0.cldc.1.1">
 		<antcall target="compile" >
 			<param name="wtk.properties" value="wtk2.0cldc1.1.properties${wtk.template}" />
 			<param name="no.staging" value="true" />
@@ -759,7 +759,7 @@
 	</target>
 
 	<!-- Compile using WTK with MIDP-2.0 and JSR-75 and test -->
-	<target name="compile.2.0.cldc1.1.jsr75" >
+	<target name="compile.2.0.cldc.1.1.jsr75" >
 		<antcall target="compile" >
 			<param name="wtk.properties" value="wtk2.0cldc1.1.jsr75.properties${wtk.template}" />
 			<param name="no.staging" value="true" />
