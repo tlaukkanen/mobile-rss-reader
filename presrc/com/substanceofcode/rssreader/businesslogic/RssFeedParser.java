@@ -20,6 +20,8 @@
  *
  */
 
+// Expand to define CLDC define
+@DCLDCVERS@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -30,6 +32,7 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.utils.StringUtil;
 import com.substanceofcode.utils.XmlParser;
+import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
@@ -52,6 +55,7 @@ import net.sf.jlogmicro.util.logging.Level;
 public class RssFeedParser extends URLHandler
 implements Runnable {
     
+    private RssReaderMIDlet m_midlet = null;
     private Thread m_parsingThread = null;
     private RssItunesFeed m_rssFeed;  // The RSS feed
     private int m_maxItemCount;  // Max count of itetms to get for a feed.
@@ -74,12 +78,17 @@ implements Runnable {
     }
     
     /** Create new instance of RssFeedParser */
-    public RssFeedParser(RssItunesFeed rssFeed, boolean updFeed,
-			int maxItemCount) {
+    public RssFeedParser(RssReaderMIDlet midlet, RssItunesFeed rssFeed,
+			boolean updFeed, int maxItemCount) {
         m_rssFeed = new RssItunesFeed(rssFeed);
+		m_midlet = midlet;
 		m_updFeed = updFeed;
 		m_maxItemCount = maxItemCount;
+		//#ifdef DCLDCV11
+        m_parsingThread = new Thread(this, "RssFeedParser");
+		//#else
         m_parsingThread = new Thread(this);
+		//#endif
         m_parsingThread.start();
 		//#ifdef DLOGGING
 		if (fineLoggable) {logger.fine("Thread started=" + m_parsingThread);}
@@ -119,7 +128,8 @@ implements Runnable {
         
 		try {
 			super.handleOpen(url, m_rssFeed.getUsername(),
-					  m_rssFeed.getPassword(), false);
+					  m_rssFeed.getPassword(), false, updFeed,
+					  m_rssFeed.getUpddateTz(), m_rssFeed.getEtag());
 			if (m_needRedirect) {
 				m_needRedirect = false;
 				parseHeaderRedirect(updFeed, m_location, maxItemCount);
@@ -130,22 +140,22 @@ implements Runnable {
 				parseHTMLRedirect(updFeed, url, m_inputStream,
 								  maxItemCount);
 			} else {
-				if (m_lastMod == 0L) {
-					m_rssFeed.setUpddate(null);
-				} else {
-					// If we're only processing if the feed is updated,
-					// check if we previously had a update value.
-					// If so and it does equals the new one, return
-					if (updFeed) {
-						Date updDate = m_rssFeed.getUpddate();
-	  					if ((updDate != null) && updDate.equals(new
-							Date(m_lastMod))) {
-							return;
-						}
-					}
- 				}
+				String supdDate = m_rssFeed.getUpddateTz();
+				m_rssFeed.setUpddateTz(m_lastMod);
+				String etag = m_rssFeed.getEtag();
+				m_rssFeed.setEtag(m_etag);
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest("run supdDate,m_lastMod,etag,m_etag=" + supdDate + "," + m_lastMod + "," + etag + "," + m_etag);}
+				//#endif
+				// If we're only processing if the feed is updated,
+				// check if we previously had a update value.
+				// If so and it does equals the new one, return
+				if (updFeed && (m_same || ((m_lastMod != null) &&
+					(m_lastMod.length() > 0) &&
+					(supdDate != null) && (m_lastMod.equals(supdDate))))) {
+					return;
+				}
 				parseRssFeedXml( m_inputStream, maxItemCount);
-				m_rssFeed.setUpddate(new Date(m_lastMod));
 			}
         } catch(Exception e) {
 			//#ifdef DLOGGING
@@ -293,6 +303,7 @@ implements Runnable {
 									  m_rssFeed.getUrl(), t);
         } finally {
             m_ready = true;
+			m_midlet.wakeup(2);
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("run m_successfull,m_ready=" + m_successfull + "," + m_ready);}
 			//#endif
