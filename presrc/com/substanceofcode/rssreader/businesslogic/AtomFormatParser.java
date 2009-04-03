@@ -113,7 +113,7 @@ public class AtomFormatParser implements FeedFormatParser {
 						elementName.equals("subtitle") ) {
 						m_description = parser.getText();
 						m_description = StringUtil.removeHtml(
-								m_description );
+								m_description ).trim();
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest("m_description=" + m_description);}
 						//#endif
@@ -199,7 +199,7 @@ public class AtomFormatParser implements FeedFormatParser {
 					m_link = m_altLink;
 				}
 			}
-			m_link = StringUtil.removeHtml( m_link );
+			m_link = StringUtil.removeHtml( m_link ).trim();
 			Date pubDate = null;
 			// Check date in case we cannot find it.
 			if (m_date.length() == 0) {
@@ -266,7 +266,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'l':
 				if( elementName.equals("link") ) {
-					String clink = parser.getText();
+					String clink = parser.getText().trim();
 					// Some atoms have href= attribute.
 					if (clink.length() == 0) {
 						String hlink = parser.getAttributeValue("href");
