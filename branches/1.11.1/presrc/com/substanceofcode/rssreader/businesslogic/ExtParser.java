@@ -135,10 +135,11 @@ final public class ExtParser {
 					Date date,
 					String enclosure,
 					boolean unreadItem, String author) {
+		desc = desc.trim();
 		if (desc.length() == 0) {
-			desc = m_description;
+			desc = m_description.trim();
 			if (desc.length() == 0) {
-				desc = m_encoded;
+				desc = m_encoded.trim();
 			}
 		}
 		if (desc.equals(m_summary)) {
@@ -148,6 +149,7 @@ final public class ExtParser {
 			m_subtitle = "";
 		}
 		desc = StringUtil.removeHtml(desc);
+		desc = desc.trim();
 		m_subtitle = StringUtil.removeHtml(m_subtitle);
 		if ((m_author + m_subtitle + m_summary + m_duration).equals("") &&
 				(m_explicit == (byte)-1)) {
