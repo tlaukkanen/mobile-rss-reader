@@ -214,8 +214,12 @@ public class RssFormatParser implements FeedFormatParser {
 		boolean hasTitle = (m_title.length()>0);
 		boolean hasDesc = (m_description.length()>0);
 		if (hasTitle || hasDesc) {
+			if (hasDesc) {
+				m_description = m_description.trim();
+			}
 			if (hasTitle && hasDesc) {
 				m_title = m_title.replace('\n', ' ');
+				m_title = m_title.trim();
 			}
 			RssItunesItem item;
 			Date pubDate = null;
@@ -226,6 +230,7 @@ public class RssFormatParser implements FeedFormatParser {
 			if (m_date.length() > 0) {
 				pubDate = parseRssDate(m_date);
 			}
+			m_link = m_link.trim();
 			if (m_hasExt) {
 				item = m_extParser.createItem(m_title, m_link,
 						m_description, pubDate, m_enclosure, true,
