@@ -307,6 +307,7 @@ v1.11.2 Release Candidate 2 (rc2) (April 6th 2009)
 + Conditional get with last-modified or ETag.
 + For MIDP 1.0 create GMT date string as JVM does not have to make toString give the date.
 + Trim title, description, and link.
++ Allow 3 redirects for getting to a feed.
 
 Device issues:
 
