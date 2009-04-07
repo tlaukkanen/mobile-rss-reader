@@ -64,7 +64,8 @@ import com.substanceofcode.utils.CauseException;
  */
 public class URLHandler {
     
-    protected boolean m_redirect = false;  // The URL is redirected
+    protected int MAX_REDIRECTS = 3;  // Max times URL is redirected
+    protected int m_redirects = 0;  // The URL is redirected
     protected String m_redirectUrl = "";  // The URL is redirected URL
     protected boolean m_needRedirect = false;  // The URL needs to be redirected
     protected boolean m_same = false;  // The conditional get got the same results
@@ -310,15 +311,14 @@ public class URLHandler {
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	protected String parseHTMLRedirect(String url, InputStream is)
     throws IOException, Exception {
-		if (m_redirect) {
+		if (++m_redirects >= MAX_REDIRECTS) {
 			//#ifdef DLOGGING
-//@			logger.severe("Error 2nd redirect url:  " + url);
+//@			logger.severe("Error redirect url:  " + url);
 			//#endif
-			System.out.println("Error 2nd redirect url:  " + url);
+			System.out.println("Error redirect url:  " + url);
 			throw new IOException("Error url " + m_redirectUrl +
-					" to 2nd redirect url:  " + url);
+					" to redirect url:  " + url);
 		}
-		m_redirect = true;
 		m_redirectUrl = url;
 		com.substanceofcode.rssreader.businessentities.RssItunesFeed[] feeds =
 				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
