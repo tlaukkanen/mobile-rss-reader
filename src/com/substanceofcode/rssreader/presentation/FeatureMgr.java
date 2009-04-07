@@ -79,7 +79,11 @@ public class FeatureMgr implements CommandListener, Runnable {
 
 	private Hashtable promptCommands = null;
 	private Displayable disp;
+	private Displayable promptDisp1;
+	private Displayable promptDisp2;
 	private Command origCmd = null;
+	private boolean foundDisp = false;
+	private boolean foundPrompt = false;
 	protected Command exCmd = null;
 	private Displayable exDisp = null;
 	protected RssReaderMIDlet midlet;
@@ -164,12 +168,16 @@ public class FeatureMgr implements CommandListener, Runnable {
 				Command ccmd = null;
 				Displayable cdisp = null;
 				Command corigCmd = null;
+				boolean cfoundDisp = false;
+				boolean cfoundPrompt = false;
 				synchronized(this) {
-					if (exCmd != null) {
+					cfoundDisp = foundDisp;
+					cfoundPrompt = foundPrompt;
+					if ((cfoundDisp || cfoundPrompt) && (exCmd != null)) {
 						ccmd = exCmd;
 						cdisp = exDisp;
+						corigCmd = origCmd;
 					}
-					corigCmd = origCmd;
 				}
 				if ((ccmd != null) && (cdisp != null)) {
 					try {
@@ -180,7 +188,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 						//#ifdef DLOGGING
 //@						if (fineLoggable) {logger.fine("disp,ccmd,cpromptCommands,corigCmd,thread=" + disp + "," + ccmd.getLabel() + "," + cpromptCommands + "," + "," + corigCmd + "," + Thread.currentThread());}
 						//#endif
-						if ((cpromptCommands != null)
+						if (cfoundDisp && (cpromptCommands != null)
 								&& cpromptCommands.containsKey(ccmd)) {
 							synchronized(this) {
 								origCmd = ccmd;
@@ -202,6 +210,10 @@ public class FeatureMgr implements CommandListener, Runnable {
 							promptAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
 							promptAlert.setCommandListener(this);
 							midlet.setCurrent(promptAlert, formAlert);
+							synchronized(this) {
+								promptDisp1 = formAlert;
+								promptDisp2 = promptAlert;
+							}
 						} else if( (urlRrnForm != null) &&
 								   (cdisp instanceof TextBox)) {
 							/** Paste into URL field from previous form.  */
@@ -230,7 +242,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 								urlRrnForm = null;
 								urlRrnItem = null;
 							}
-						} else if (cdisp.equals(disp)) {
+						} else if (cfoundDisp && cdisp.equals(disp)) {
 							//#ifdef DLOGGING
 //@							if (fineLoggable) {logger.fine("Equal cdisp,disp,cmdFeatureUser=" + ccmd.getLabel() + "," + cdisp + "," + disp + "," + cmdFeatureUser);}
 							//#endif
@@ -239,7 +251,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 								runFeatureUser.run();
 							}
 						}
-						if (!cdisp.equals(disp)) {
+						if (cfoundPrompt && !cdisp.equals(disp)) {
 							//#ifdef DLOGGING
 //@							if (fineLoggable) {logger.fine("corigCmd,cdisp,disp=" + corigCmd.getLabel() + "," + cdisp + "," + disp);}
 							//#endif
@@ -266,6 +278,8 @@ public class FeatureMgr implements CommandListener, Runnable {
 							} finally {
 								synchronized(this) {
 									origCmd = null;
+									promptDisp1 = disp;
+									promptDisp2 = disp;
 								}
 							}
 						}
@@ -276,8 +290,9 @@ public class FeatureMgr implements CommandListener, Runnable {
 						System.out.println("commandAction caught " + e + " " + e.getMessage());
 					} finally {
 						synchronized(this) {
-							exCmd = null;
-							exDisp = null;
+							foundDisp = false;
+							foundPrompt = false;
+							exDisp = disp;
 						}
 					}
 				} else {
@@ -303,6 +318,9 @@ public class FeatureMgr implements CommandListener, Runnable {
 	/* Prompt if command is in prompt camands.  */
 	public void commandAction(Command cmd, Displayable cdisp) {
 		synchronized(this) {
+			foundDisp = (cdisp == disp);
+			foundPrompt = (cdisp != promptDisp1) &&
+				((cdisp == promptDisp1) || (cdisp == promptDisp2));
 			this.exCmd = cmd;
 			this.exDisp = cdisp;
 		}
