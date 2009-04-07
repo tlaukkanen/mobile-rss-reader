@@ -111,7 +111,7 @@ implements Runnable {
     throws IOException, Exception {
 		// Set this here as the instance of this class is reused
 		// for update of the current feed.
-		m_redirect = false;
+		m_redirects = 0;
 		parseRssFeedUrl(m_rssFeed.getUrl(), updFeed, maxItemCount);
 	}
         
@@ -184,15 +184,14 @@ implements Runnable {
 	private void parseHeaderRedirect(boolean updFeed, String url,
 								     int maxItemCount)
     throws IOException, Exception {
-		if (m_redirect) {
+		if (++m_redirects >= MAX_REDIRECTS) {
 			//#ifdef DLOGGING
-//@			logger.severe("Error 2nd redirect url:  " + url);
+//@			logger.severe("Error redirect url:  " + url);
 			//#endif
-			System.out.println("Error 2nd redirect url:  " + url);
+			System.out.println("Error redirect url:  " + url);
 			throw new IOException("Error url " + m_redirectUrl +
-					" to 2nd redirect url:  " + url);
+					" to redirect url:  " + url);
 		}
-		m_redirect = true;
 		m_redirectUrl = url;
 		parseRssFeedUrl(url, updFeed, maxItemCount);
 	}
