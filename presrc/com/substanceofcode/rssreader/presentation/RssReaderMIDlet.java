@@ -822,6 +822,7 @@ public class RssReaderMIDlet extends MIDlet
 
 			/* Handle going to bookmark form. */
 			if( m_getAddBMForm || m_getEditBMForm ) {
+				RssItunesFeed bm = null;
 				try{
 					if( m_getAddBMForm ) {
 						initializeLoadingForm("Loading add bookmark...",
@@ -836,7 +837,7 @@ public class RssReaderMIDlet extends MIDlet
 					//#endif
 					BMForm bmForm = null;
 					if (m_getEditBMForm) {
-						final RssItunesFeed bm = (RssItunesFeed)m_rssFeeds.get(
+						bm = (RssItunesFeed)m_rssFeeds.get(
 								m_bookmarkList.getString(m_curBookmark));
 						bmForm = new BMForm(this, m_rssFeeds, m_appSettings,
 								m_bookmarkList, m_loadForm, bm);
@@ -856,7 +857,7 @@ public class RssReaderMIDlet extends MIDlet
 							"bookmark form", t);
 				} catch(Throwable t) {
 					m_loadForm.recordExcForm("\nInternal error loading bookmark " +
-							"form", t);
+							"form" + ((m_getEditBMForm ? (" " + bm.getName()) : " ")), t);
 				} finally {
 					m_getAddBMForm = false;
 					m_getEditBMForm = false;
@@ -2023,6 +2024,7 @@ public class RssReaderMIDlet extends MIDlet
 			if( m_curBookmark >= 0 ) {
 				//#ifdef DTESTUI
 				m_bookmarkLastIndex = m_curBookmark;
+				System.out.println("TESTUI Import Current:  " + m_bookmarkList.getString(m_curBookmark));
 				//#endif
 				m_getTestImportForm = true;
 				m_getImportForm = true;
