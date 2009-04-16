@@ -60,6 +60,7 @@ import javax.microedition.lcdui.Item;
 
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
@@ -93,7 +94,7 @@ final public class BMForm extends URLForm
 		super(midlet, "New Bookmark", false, rssFeeds, appSettings, loadForm);
 		this.m_addForm = true;
 		this.m_bookmarkList = bookmarkList;
-		m_bmName = new TextField("Name", "", 64, TextField.ANY);
+		m_bmName = new TextField("Name", "", RssFeed.MAX_NAME_LEN, TextField.ANY);
 		super.append( m_bmName );
 		super.initAddUI("", "", "", false, null, 1, "Insert bookmark",
 						"Insert current bookmark",
@@ -112,7 +113,9 @@ final public class BMForm extends URLForm
 		this.m_addForm = false;
 		this.m_bookmarkList = bookmarkList;
 		this.m_oldName = bm.getName();
-		m_bmName = new TextField("Name", m_oldName, 64, TextField.ANY);
+		m_bmName = new TextField("Name", m_oldName,
+				Math.max(m_oldName.length() + 10, RssFeed.MAX_NAME_LEN),
+				TextField.ANY);
 		super.append( m_bmName );
 		int initPriority = 1;
 		super.initCommonInputUI(bm.getUrl(), bm.getUsername(),
