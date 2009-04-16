@@ -52,6 +52,7 @@ public class RssFeed{
     final public static String STR_TWO = new String(CBTWO);
     final public static int ITUNES_ITEMS = 8;
     final public static int MODIFY_ITEMS = 9;
+    final public static int MAX_NAME_LEN = 100;
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssFeed");
 	//#endif
