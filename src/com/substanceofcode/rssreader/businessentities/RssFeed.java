@@ -48,7 +48,7 @@ public class RssFeed{
     final protected static char CONE = (char)1;
     final private static char [] CBONE = {CONE};
     final public static String STR_ONE = new String(CBONE);
-    final private static char [] CBTWO = {(char)2};
+    final protected static char [] CBTWO = {(char)2};
     final public static String STR_TWO = new String(CBTWO);
     final public static int ITUNES_ITEMS = 8;
     final public static int MODIFY_ITEMS = 9;
@@ -225,10 +225,12 @@ public class RssFeed{
 				String stz = nodes[startIndex + UPDDATETZ];
 				m_upddateTz = (stz.length() == 0) ? (byte)-1 : (byte)Integer.parseInt(stz);
 			}
-			int ETAG = 7;
-			String etagString = nodes[startIndex + ETAG];
-			if (etagString.length() > 0) {
-				m_etag = etagString;
+			if(modifyCapable) {
+				int ETAG = 7;
+				String etagString = nodes[startIndex + ETAG];
+				if (etagString.length() > 0) {
+					m_etag = etagString;
+				}
 			}
 			if (iTunesCapable && hasPipe) {
 				m_name = m_name.replace(CONE, '|');
@@ -265,6 +267,9 @@ public class RssFeed{
 				return;
 			}
 			String itemArrayData = nodes[ startIndex + ITEMS ];
+			//#ifdef DLOGGING
+//@			if (traceLoggable) {logger.trace("init m_upddate,m_date,m_etag,first item=" + m_upddate + "," + m_date + "," + m_etag + "," + nodes[ startIndex + ITEMS ]);}
+			//#endif
 			
 			// Deserialize itemss
 			String[] serializedItems = StringUtil.split(itemArrayData, ".");
@@ -291,6 +296,9 @@ public class RssFeed{
 			}
        
         } catch(Exception e) {
+			//#ifdef DLOGGING
+//@			logger.severe("init error", e);
+			//#endif
             System.err.println("Error while rssfeed initialization : " + e.toString());
 			e.printStackTrace();
         }
@@ -420,7 +428,7 @@ public class RssFeed{
 //@		}
 //@		if (!feed.m_username.equals(this.m_username)) {
 			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal feed.m_password,this=" + feed.m_password + "," + m_password);}
+//@			if (finestLoggable) {logger.finest("unequal feed.m_username,this=" + feed.m_username + "," + m_username);}
 			//#endif
 //@			result = false;
 //@		}
