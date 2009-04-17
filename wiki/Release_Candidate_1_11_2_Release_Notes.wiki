@@ -277,6 +277,35 @@ on all devices including the emulator.)
   * Include modified BSD license file with source/binary tar/zip.
   * Use export to get source instead of checkout.
 
+= v1.11.2 Release Candidate 2 (rc2) (April 17th 2009) =
+  * Allow optional retrieval of previous (last) values used by the previous add bookmark and import feeds.
+  * Do redirect for see other status from HTTP.
+  * If the feed name is changed with edit feed, remove the previous one.
+  * More logging.
+  * Fix logging typeos.
+  * Use less finals.
+  * Use printStackTrace in catch.
+  * Redirect for HTTP other status.
+  * Combine nested if's.
+  * Get file only in URLHandler.
+  * Remove unused variables.
+  * Allow descending feed sorted for headers/river of news.
+  * Remove empty if statements.
+  * Put parsing of feed from bookmarks in separate thread to prevent hang if the internet is not accessible (or someone selected the wrong access point).
+  * Better logging form info.
+  * Change final modifiers for methods/classes.
+  * Conditional get with last-modified or ETag.
+  * For MIDP 1.0 create GMT date string as JVM does not have to make toString give the date.
+  * Trim title, description, and link.
+  * Allow 3 redirects for getting to a feed.
+  * Allow name/title for bookmark/feed to be up to 100 bytes long.
+  * Better error message if problem loading edit bookmark.
+  * Log imported feed for import current with test.
+  * Fix 1.11.2 not recognizing data from 1.11.1.
+  * Better tests for equals to show more differences.
+  * Allow compatibility testing for the previous rms version layout.
+  * Put ascending/descending as last command.
+
 == Device Notes ==
 
   * Phone must support MP3 links, etc to play enclosures (many phones do not
