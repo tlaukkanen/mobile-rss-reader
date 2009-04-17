@@ -311,6 +311,10 @@ v1.11.2 Release Candidate 2 (rc2) (April 16th 2009)
 + Allow name/title for bookmark/feed to be up to 100 bytes long.
 + Better error message if problem loading edit bookmark.
 + Log imported feed for import current with test.
++ Fix 1.11.2 not recognizing data from 1.11.1.
++ Better tests for equals to show more differences.
++ Allow compatibility testing for the previous rms version layout.
++ Put ascending/descending as last command.
 
 Device issues:
 
