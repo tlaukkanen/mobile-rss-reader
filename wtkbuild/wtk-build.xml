@@ -617,11 +617,9 @@
 			</move>
 			<copy todir="${dist}" file="${op.dir}/${svn.src}/RSSReader.alx" />
 			<copy todir="${dist}" file="${op.dir}/${svn.src}/gpl.txt" />
-			<copy todir="${dist}" file="${op.dir}/${svn.src}/bsdmod.txt" />
 			<move todir="${op.dir}" >
 				<fileset file="${op.dir}/${svn.src}/release_notes.txt" />
 				<fileset file="${op.dir}/${svn.src}/gpl.txt" />
-				<fileset file="${op.dir}/${svn.src}/bsdmod.txt" />
 				<fileset file="${op.dir}/${svn.src}/RSSReader.alx" />
 				<fileset file="${op.dir}/${svn.src}/build.xml" />
 			</move>
