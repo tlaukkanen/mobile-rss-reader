@@ -52,7 +52,7 @@ public class RssItunesItem extends RssItem {
     public static int MAX_SUMMARY = 500;
 	// Beginning of data that has 0 itunes info.
 	// Number of Itunes info
-    final private static int NBR_ITUNES_INFO = 6;
+    final protected static int NBR_ITUNES_INFO = 6;
     final protected static byte BNO_EXPLICIT = (byte)-1;
     final public static String UNSPECIFIED = "unspecified";
     // Value that shows that the first item (and those following may
@@ -64,14 +64,14 @@ public class RssItunesItem extends RssItem {
 	//#ifdef DLOGGING
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
-    private boolean m_itunes = false;
-    private String m_author = "";   // The RSS item description
-    private String m_subtitle = "";   // The RSS item description
-    private String m_summary = "";   // The RSS item description
+    protected boolean m_itunes = false;
+    protected String m_author = "";   // The RSS item description
+    protected String m_subtitle = "";   // The RSS item description
+    protected String m_summary = "";   // The RSS item description
 	//TODO 4 values for m_explicit.  Fix duration descriptions above.
 	//TODO duration use 60 radius.  Max summary of 4K
-    private byte m_explicit = BNO_EXPLICIT;   // The RSS item explicit
-    private String m_duration  = "";   // The RSS item duration
+    protected byte m_explicit = BNO_EXPLICIT;   // The RSS item explicit
+    protected String m_duration  = "";   // The RSS item duration
 
     /** Creates a new instance of RssItunesItem.  Used by this class.  */
     public RssItunesItem() {
