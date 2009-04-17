@@ -287,7 +287,7 @@ v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
 + Include modified BSD license file with source/binary tar/zip.
 + Use export to get source instead of checkout.
 
-v1.11.2 Release Candidate 2 (rc2) (April 16th 2009)
+v1.11.2 Release Candidate 2 (rc2) (April 17th 2009)
 + Allow optional retrieval of previous (last) values used by the previous add bookmark and import feeds.
 + Do redirect for see other status from HTTP.
 + If the feed name is changed with edit feed, remove the previous one.
