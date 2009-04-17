@@ -28,10 +28,7 @@ package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
-import com.substanceofcode.rssreader.businesslogic.RssFormatParser;
 import java.io.UnsupportedEncodingException;
-import com.substanceofcode.rssreader.businessentities.RssFeed;
-import com.substanceofcode.rssreader.businessentities.RssItem;
 import java.util.*;
 
 //#ifdef DLOGGING
@@ -47,30 +44,14 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class CompatibilityRssFeed3 extends RssFeed {
     
-    final protected static char CONE = (char)1;
-    final private static char [] CBONE = {CONE};
-    final public static String STR_ONE = new String(CBONE);
-    final private static char [] CBTWO = {(char)2};
-    final public static String STR_TWO = new String(CBTWO);
-    final public static int ITUNES_ITEMS = 8;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("CompatibilityRssFeed3");
 	//#endif
 	//#ifdef DLOGGING
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
-    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
-    protected String m_url  = "";
-    protected String m_name = "";
-    protected String m_username = "";
-    protected String m_password = "";
-    protected Date m_upddate = null;
-    protected byte m_upddateTz = (byte)-1;
-    protected Date m_date = null;
-    protected String m_link = "";   // The RSS feed link
-    protected String m_etag = ""; // The RSS feed etag
-    
-    protected Vector m_items = new Vector();  // The RSS item vector
+    protected int m_category = -1; // The RSS feed category
     
     /** Creates a new instance of RSSBookmark */
     public CompatibilityRssFeed3(){
@@ -89,23 +70,21 @@ public class CompatibilityRssFeed3 extends RssFeed {
 				   Date upddate,
 				   String link,
 				   Date date,
-				   String etag) {
+				   int category) {
         m_name = name;
         m_url = url;
         m_username = username;
         m_password = password;
         m_upddate = upddate;
-        m_upddateTz = RssFormatParser.GMT;
 		//#ifdef DITUNES
         m_link = link;
         m_date = date;
 		//#endif
-        m_etag = etag;
+        m_category = category;
     }
     
 	/** Create feed from an existing feed.  **/
-	public CompatibilityRssFeed3(RssFeed3 feed) {
-		super();
+	public CompatibilityRssFeed3(RssFeed feed) {
 		this.m_url = feed.m_url;
 		this.m_name = feed.m_name;
 		this.m_username = feed.m_username;
@@ -115,12 +94,26 @@ public class CompatibilityRssFeed3 extends RssFeed {
 		this.m_link = feed.m_link;
 		this.m_date = feed.m_date;
 		//#endif
+		/* not used now this.m_category = feed.m_category; */
 		this.m_items = new Vector();
 		int ilen = feed.m_items.size();
 		RssItem [] rItems = new RssItem[ilen];
 		feed.m_items.copyInto(rItems);
 		for (int ic = 0; ic < ilen; ic++) {
-			m_items.addElement(new CompatibilityRssItem3(rItems[ic]));
+			RssItem citem = rItems[ic];
+			if (citem instanceof RssItem) {
+				this.m_items.addElement(
+						new CompatibilityRssItunesItem3(citem));
+			} else if (citem instanceof RssItunesItem) {
+				this.m_items.addElement(
+						new CompatibilityRssItunesItem3(
+							(RssItunesItem)citem));
+			} else if (citem instanceof CompatibilityRssItem3) {
+				this.m_items.addElement(
+						new CompatibilityRssItem3(citem));
+			} else {
+				this.m_items.addElement(citem);
+			}
 		}
 	}
     
@@ -160,7 +153,7 @@ public class CompatibilityRssFeed3 extends RssFeed {
         
 			/* Node count should be 8
 			 * name | url | username | password | upddate | link | date |
-			 * etag | items 
+			 * category | items 
 			 */
 			int NAME = 0;
 			//#ifdef DLOGGING
@@ -241,9 +234,9 @@ public class CompatibilityRssFeed3 extends RssFeed {
 					m_date = new Date(Long.parseLong(fdateString, 16));
 				}
 				//#endif
-				int ETAG = 7;
-				if (nodes[startIndex + ETAG].length() > 0) {
-					m_etag = nodes[startIndex + ETAG];
+				int CATEGORY = 7;
+				if (nodes[startIndex + CATEGORY].length() > 0) {
+					m_category = Integer.parseInt(nodes[startIndex + CATEGORY]);
 				}
 			}
 			if (firstSettings) {
@@ -263,14 +256,14 @@ public class CompatibilityRssFeed3 extends RssFeed {
 					RssItem rssItem;
 					if (iTunesCapable) {
 						if (encoded) {
-							rssItem = RssItunesItem.deserialize( 
+							rssItem = CompatibilityRssItunesItem3.deserialize3( 
 									serializedItem );
 						} else {
-							rssItem = RssItunesItem.unencodedDeserialize(
+							rssItem = CompatibilityRssItunesItem3.unencodedDeserialize3(
 									serializedItem );
 						}
 					} else {
-						rssItem = RssItem.deserialize( serializedItem );
+						rssItem = CompatibilityRssItem3.deserialize3( serializedItem );
 					}
 					if (rssItem != null) {
 						m_items.addElement( rssItem );
@@ -318,16 +311,15 @@ public class CompatibilityRssFeed3 extends RssFeed {
         StringBuffer serializedItems = new StringBuffer();
         if( serializeItems ) {
 			int ilen = m_items.size();
-			RssItunesItem [] ritems = new RssItunesItem[ilen];
+			CompatibilityRssItunesItem3 [] ritems = new CompatibilityRssItunesItem3[ilen];
 			m_items.copyInto(ritems);
             for(int itemIndex=0; itemIndex<ilen;itemIndex++) {
-                CompatibilityRssItem3 rssItem =
-					new CompatibilityRssItem3((RssItunesItem)ritems[itemIndex]);
+                CompatibilityRssItunesItem3 rssItem = (CompatibilityRssItunesItem3)ritems[itemIndex];
 				if (encoded) {
-					serializedItems.append(rssItem.serialize());
+					serializedItems.append(rssItem.serialize3());
 					serializedItems.append(".");
 				} else {
-					serializedItems.append(rssItem.unencodedSerialize());
+					serializedItems.append(rssItem.unencodedSerialize3());
 					serializedItems.append(CBTWO);
 				}
             }
@@ -363,7 +355,7 @@ public class CompatibilityRssFeed3 extends RssFeed {
                               m_url + "|" + username + "|" +
                 encodedPassword + "|" + updString + "|" +
 				m_link + "|" + dateString + "|" +
-				m_etag +
+				((m_category == -1) ? "" : Integer.toString(m_category)) +
 				"|" + serializedItems;
         return storeString;
         
@@ -380,7 +372,7 @@ public class CompatibilityRssFeed3 extends RssFeed {
 		toFeed.m_link = this.m_link;
 		toFeed.m_date = this.m_date;
 		//#endif
-		toFeed.m_etag = this.m_etag;
+		toFeed.m_category = this.m_category;
 		toFeed.m_items = new Vector();
 		int ilen = m_items.size();
 		RssItem [] ritems = new RssItem[ilen];
@@ -392,7 +384,7 @@ public class CompatibilityRssFeed3 extends RssFeed {
     
 	//#ifdef DTEST
 	/** Compare feed to an existing feed.  **/
-	public boolean equals(RssFeed feed) {
+	public boolean equals(CompatibilityRssFeed3 feed) {
 		if (!feed.m_url.equals(this.m_url)) {
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal feed.m_url,this=" + feed.m_url + "," + m_url);}
@@ -417,14 +409,16 @@ public class CompatibilityRssFeed3 extends RssFeed {
 			//#endif
 			return false;
 		}
-		if ((feed.m_date != null) && (this.m_date != null)) {
-			if (!feed.m_date.equals(this.m_date)) {
+		if ((feed.m_date == null) && (this.m_date == null)) {
+		} else if ((feed.m_date != null) && (this.m_date != null)) {
+			if (feed.m_date.equals(this.m_date)) {
+			} else {
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 				//#endif
 				return false;
 			}
-		} else if ((feed.m_date != null) || (this.m_date != null)) {
+		} else {
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
 			//#endif
@@ -436,25 +430,29 @@ public class CompatibilityRssFeed3 extends RssFeed {
 			//#endif
 			return false;
 		}
-		if ((feed.m_date != null) && (this.m_date != null)) {
-			if (!feed.m_date.equals(this.m_date)) {
+		if ((feed.m_date == null) && (this.m_date == null)) {
+		} else if ((feed.m_date != null) && (this.m_date != null)) {
+			if (feed.m_date.equals(this.m_date)) {
+			} else {
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
+				if (finestLoggable) {logger.finest("unequal feed.m_date,this=" + feed.m_date + "," + m_date);}
 				//#endif
 				return false;
 			}
-		} else if ((feed.m_date != null) || (this.m_date != null)) {
+		} else {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal dates=" + feed.m_date + "," + m_date);}
+			if (finestLoggable) {logger.finest("unequal feed.m_date,this=" + feed.m_date + "," + m_date);}
 			//#endif
 			return false;
 		}
-		if (!feed.m_etag.equals(this.m_etag)) {
+		/* No category
+		if (feed.m_category != this.m_category) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_etag,this=" + feed.m_etag + "," + m_etag);}
+			if (finestLoggable) {logger.finest("unequal feed.m_category,this=" + feed.m_category + "," + m_category);}
 			//#endif
 			return false;
 		}
+		*/
 		int flen = feed.m_items.size();
 		int ilen = m_items.size();
 		if (flen != ilen) {
@@ -467,15 +465,16 @@ public class CompatibilityRssFeed3 extends RssFeed {
 		m_items.copyInto(ritems);
 		RssItem [] fitems = new RssItem[flen];
 		feed.m_items.copyInto(fitems);
+		boolean rtn = true;
 		for (int ic = 0; ic < ilen; ic++) {
 			if (!fitems[ic].equals(ritems[ic])) {
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest("unequal ic,fitems[ic],ritems[ic]" + ic + "," + fitems[ic] + "," + ritems[ic]);}
 				//#endif
-				return false;
+				rtn = false;
 			}
 		}
-		return true;
+		return rtn;
 	}
 	//#endif
     
@@ -490,61 +489,29 @@ public class CompatibilityRssFeed3 extends RssFeed {
     }
     
     public void setUpddate(Date upddate) {
-		//#ifdef DLOGGING
-		if (traceLoggable) {logger.trace("setUpddate upddate=" + ((upddate == null) ? "null" : upddate.toString()));}
-		//#endif
         this.m_upddate = upddate;
-    }
-
-    public void setUpddate(String supddate) {
-		//#ifdef DLOGGING
-		if (traceLoggable) {logger.trace("setUpddate supddate=" + supddate);}
-		//#endif
-		Object[] objs = null;
-		if ((supddate != null) && (supddate.length() >= 0)) {
-			objs = RssFormatParser.parseStdDateTZ(supddate);
-		}
-		if (objs == null) {
-			this.m_upddate = null;
-			this.m_upddateTz = (byte)-1;
-		} else {
-			this.m_upddate = (Date)objs[0];
-			this.m_upddateTz = ((Byte)objs[1]).byteValue();
-		}
     }
 
     public Date getUpddate() {
         return (m_upddate);
     }
 
-    public String getUpddateTz() {
-		if (m_upddate == null) {
-			return null;
-		}
-        final String stz = (m_upddateTz == (byte)-1) ? "GMT" : RssFormatParser.stimeZones.substring((int)m_upddateTz + 1, (int)m_upddateTz + 4);
-        return RssFormatParser.stdDate(m_upddate, stz);
+    public void setCategory(int category) {
+        this.m_category = category;
     }
 
-    public void setEtag(String etag) {
-		//#ifdef DLOGGING
-		if (traceLoggable) {logger.trace("setEtag etag=" + etag);}
-		//#endif
-        this.m_etag = etag;
-    }
-
-    public String getEtag() {
-        return (m_etag);
+    public int getCategory() {
+        return (m_category);
     }
 
     /** Write record as a string */
     public String toString(){
         StringBuffer serializedItems = new StringBuffer();
 		int ilen = m_items.size();
-		RssItunesItem [] ritems = new RssItunesItem[ilen];
+		Object[] ritems = new Object[ilen];
 		m_items.copyInto(ritems);
 		for(int itemIndex=0; itemIndex<ilen;itemIndex++) {
-			RssItunesItem rssItem = (RssItunesItem)ritems[itemIndex];
-			serializedItems.append(rssItem.toString());
+			serializedItems.append(ritems[itemIndex]);
 			serializedItems.append(".");
 		}
         String dateString;
@@ -565,7 +532,7 @@ public class CompatibilityRssFeed3 extends RssFeed {
         }
         String storeString = m_name + "|" + m_url + "|" + m_username + "|" +
                 m_password + "|" +
-                updString + "|" + m_link + "|" + m_etag + "|" +
+                updString + "|" + m_link + "|" + m_category + "|" +
                 dateString + "|" + serializedItems.toString();
         return storeString;
         
