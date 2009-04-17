@@ -43,7 +43,7 @@ wtk.home = ${windows.drive}/opt/WTK2.5.2
 #wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
 #wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #wtk.proguard.home = ${windows.drive}/opt/tools/proguard/proguard4.2
-wtk.proguard.home = ${opt.tools}/proguard/proguard4.2
+wtk.proguard.home = ${opt.tools}/proguard/proguard4.3
 #For phoneMe Windows
 phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
 #For phoneMe Linux x86
