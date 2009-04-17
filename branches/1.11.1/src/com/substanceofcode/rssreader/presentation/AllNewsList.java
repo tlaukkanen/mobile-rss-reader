@@ -167,7 +167,7 @@ public class AllNewsList extends FeatureList
 		m_markUnReadCmd = new Command("Mark unread", Command.SCREEN, priority++);
 		m_sortDesc  = !(this instanceof HeaderList);
 		m_directionCmd = new Command(
-				m_sortDesc ? "Sort ascending" : "Sort descending", Command.SCREEN, priority++);
+				m_sortDesc ? "Sort ascending" : "Sort descending", Command.SCREEN, 100);
         super.addCommand(m_sortUnreadItemsCmd);
         super.addCommand(m_sortReadItemsCmd);
         super.addCommand(m_sortUnreadFeedsCmd);
@@ -796,10 +796,10 @@ public class AllNewsList extends FeatureList
 						super.removeCommand(m_directionCmd);
 						if (m_sortDesc) {
 							m_sortDesc = false;
-							m_directionCmd = new Command("Sort descending", Command.SCREEN, 9);
+							m_directionCmd = new Command("Sort descending", Command.SCREEN, 100);
 						} else {
 							m_sortDesc = true;
-							m_directionCmd = new Command("Sort ascending", Command.SCREEN, 9);
+							m_directionCmd = new Command("Sort ascending", Command.SCREEN, 100);
 						}
 						m_sort = true;
 						super.addCommand(m_directionCmd);
