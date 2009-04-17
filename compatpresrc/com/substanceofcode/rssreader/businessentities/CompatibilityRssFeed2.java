@@ -29,6 +29,11 @@ import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businessentities.RssItem;
 import java.util.*;
 
+//#ifdef DLOGGING
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.Level;
+//#endif
+
 /**
  * CompatibilityRssFeed2 class contains one RSS feed's properties.
  * Properties include name and URL to RSS feed.
@@ -37,6 +42,14 @@ import java.util.*;
  */
 public class CompatibilityRssFeed2 extends RssFeed {
     
+	//#ifdef DLOGGING
+    private Logger logger = Logger.getLogger("CompatibilityRssFeed2");
+	//#endif
+	//#ifdef DLOGGING
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
+	//#endif
+
     /** Creates a new instance of RSSBookmark */
     public CompatibilityRssFeed2(String name, String url, String username, String password){
 		super();
@@ -153,37 +166,37 @@ public class CompatibilityRssFeed2 extends RssFeed {
 
 	/** Compare feed to an existing feed.  **/
 	public boolean equals(RssFeed feed) {
+		boolean rtn = true;
 		if (!feed.m_url.equals(this.m_url)) {
-			System.out.println("m_url != new m_url=" + m_url + "," + feed.m_url);
-			return false;
+			if (finestLoggable) {logger.finest("unequal feed.m_url,this=" + feed.m_url + "," + m_url);}
+			rtn = false;
 		}
 		if (!feed.m_name.equals(this.m_name)) {
-			System.out.println("m_name != new m_name=" + m_name + "," + feed.m_name);
-			return false;
+			if (finestLoggable) {logger.finest("unequal feed.m_name,this=" + feed.m_name + "," + m_name);}
+			rtn = false;
 		}
 		if (!feed.m_username.equals(this.m_username)) {
-			System.out.println("m_username != new m_username=" + m_username + "," + feed.m_username);
-			return false;
+			if (finestLoggable) {logger.finest("unequal feed.m_username,this=" + feed.m_username + "," + m_username);}
+			rtn = false;
 		}
 		if (!feed.m_password.equals(this.m_password)) {
-			System.out.println("m_password != new m_password=" + m_password + "," + feed.m_password);
-			return false;
+			if (finestLoggable) {logger.finest("unequal feed.m_password,this=" + feed.m_password + "," + m_password);}
+			rtn = false;
 		}
 		if ((feed.m_upddate == null) && (this.m_upddate == null)) {
-			System.out.println("m_upddate != new m_upddate=" + m_upddate + "," + feed.m_upddate);
 		} else if ((feed.m_upddate != null) && (this.m_upddate != null)) {
 			if (feed.m_upddate.equals(this.m_upddate)) {
 			} else {
-				System.out.println("m_upddate != new m_upddate=" + m_upddate + "," + feed.m_upddate);
-				return false;
+				if (finestLoggable) {logger.finest("unequal feed.m_upddate,this=" + feed.m_upddate + "," + m_upddate);}
+				rtn = false;
 			}
 		} else {
-			System.out.println("m_upddate != new m_upddate=" + m_upddate + "," + feed.m_upddate);
-			return false;
+			if (finestLoggable) {logger.finest("unequal feed.m_upddate,this=" + feed.m_upddate + "," + m_upddate);}
+			rtn = false;
 		}
 		if (feed.m_items.size() != m_items.size()) {
-			System.out.println("m_items.size() != new m_items.size()=" + m_items.size() + "," + feed.m_items.size());
-			return false;
+			if (finestLoggable) {logger.finest("unequal feed.m_items.size(),this=" + feed.m_items.size() + "," + m_items.size());}
+			rtn = false;
 		}
 		int ilen = m_items.size();
 		RssItem [] ritems = new RssItem[ilen];
@@ -193,11 +206,11 @@ public class CompatibilityRssFeed2 extends RssFeed {
 		feed.m_items.copyInto(fitems);
 		for (int ic = 0; ic < ilen; ic++) {
 			if (!ritems[ic].equals(fitems[ic])) {
-				System.out.println("m_items[ic] != new m_items[ic]=" + ic + "," + ritems[ic] + "," + fitems[ic]);
-				return false;
+				if (finestLoggable) {logger.finest("unequal feed.m_items[ic],this=" + ic + "," + fitems[ic] + "," + ritems[ic]);}
+				rtn = false;
 			}
 		}
-		return true;
+		return rtn;
 	}
     
 }
