@@ -49,24 +49,25 @@ public class RssItunesFeed extends RssFeed{
     public static int MAX_SUMMARY = 500;
 	// Beginning of data that has 0 itunes info.
 	// Number of Itunes info
-    private static int NBR_ITUNES_FEED_INFO = 8;
+    protected static int NBR_ITUNES_FEED_INFO = 8;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("RssItunesFeed");
 	//#endif
 	//#ifdef DLOGGING
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
 	// can later be modified to contain them).
-    private boolean m_itunes = false;
+    protected boolean m_itunes = false;
     protected String m_title = "";
     protected String m_description = "";
     protected String m_language = "";   // The RSS feed language
     protected String m_author = "";   // The RSS feed author
     protected String m_subtitle = "";   // The RSS feed subtitle
     protected String m_summary = "";   // The RSS feed summary
-    private byte m_explicit = RssItunesItem.BNO_EXPLICIT;   // The RSS feed explicit
+    protected byte m_explicit = RssItunesItem.BNO_EXPLICIT;   // The RSS feed explicit
     
     /** Creates a new instance of RSSBookmark */
     public RssItunesFeed(){
@@ -238,6 +239,11 @@ public class RssItunesFeed extends RssFeed{
 				}
 			}
 			//#endif
+			//#ifdef DLOGGING
+			if (traceLoggable) {logger.trace( "modifyCapable,encoded=" + modifyCapable + "," + encoded);}
+			if (traceLoggable) {logger.trace( "m_itunes, m_title, m_description, m_language, m_author," + "m_subtitle, m_summary, m_explicit=" + m_itunes + "," + m_title + "," + m_description + "," + m_language + "," + m_author + "," + m_subtitle + "," + m_summary + "," + m_explicit);}
+			if (finestLoggable) {logger.finest("nodes.length=" + nodes.length);}
+			//#endif
 
 			super.init(false, NBR_ITUNES_FEED_INFO, true, modifyCapable,
 					   hasPipe, encoded, nodes);
@@ -292,6 +298,7 @@ public class RssItunesFeed extends RssFeed{
 	//#ifdef DTEST
 	/** Compare feed to an existing feed.  **/
 	public boolean equals(RssItunesFeed feed) {
+		boolean rtn = true;
 		if (!super.equals(feed)) {
 			return false;
 		}
@@ -299,33 +306,33 @@ public class RssItunesFeed extends RssFeed{
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal feed.m_itunes,this=" + feed.m_itunes + "," + m_itunes);}
 			//#endif
-			return false;
+			rtn = false;
 		}
 		if (!feed.m_language.equals(this.m_language)) {
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal feed.m_language,this=" + feed.m_language + "," + m_language);}
 			//#endif
-			return false;
+			rtn = false;
 		}
 		if (!feed.m_author.equals(this.m_author)) {
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal feed.m_author,this=" + feed.m_author + "," + m_author);}
 			//#endif
-			return false;
+			rtn = false;
 		}
 		if (!feed.m_summary.equals(this.m_summary)) {
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal feed.m_summary,this=" + feed.m_summary + "," + m_summary);}
 			//#endif
-			return false;
+			rtn = false;
 		}
 		if (feed.m_explicit != m_explicit) {
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("unequal feed.m_explicit,this=" + feed.m_explicit + "," + m_explicit);}
 			//#endif
-			return false;
+			rtn = false;
 		}
-		return true;
+		return rtn;
 	}
 	//#endif
     
