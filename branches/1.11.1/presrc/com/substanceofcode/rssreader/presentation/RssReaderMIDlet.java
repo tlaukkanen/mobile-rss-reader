@@ -62,6 +62,10 @@ import com.substanceofcode.rssreader.businessentities.CompatibilityRssItem1;
 //#elifdef DCOMPATIBILITY2
 import com.substanceofcode.rssreader.businessentities.CompatibilityRssFeed2;
 import com.substanceofcode.rssreader.businessentities.CompatibilityRssItem2;
+//#elifdef DCOMPATIBILITY3
+import com.substanceofcode.rssreader.businessentities.CompatibilityRssItunesFeed3;
+import com.substanceofcode.rssreader.businessentities.CompatibilityRssFeed3;
+import com.substanceofcode.rssreader.businessentities.CompatibilityRssItunesItem3;
 //#endif
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.rssreader.businesslogic.Controller;
@@ -652,17 +656,27 @@ public class RssReaderMIDlet extends MIDlet
 						}
 						bms = bms.substring(pos+1);
 						if(part.length()>0) {
+							//#ifdef DCOMPATIBILITY
+							Object cbm = null;
+							RssFeed nbm = null;
+							//#endif
+							RssItunesFeed bm = null;
 							//#ifdef DCOMPATIBILITY1
-							RssFeed bm1 = new CompatibilityRssFeed1( part );
-							RssItunesFeed bm = new RssItunesFeed( bm1 );
+							cbm = new CompatibilityRssFeed1( part );
+							nbm = new RssItunesFeed( (RssFeed)cbm );
 							//#elifdef DCOMPATIBILITY2
-							RssFeed bm2 = new CompatibilityRssFeed2( part );
-							RssItunesFeed bm = new RssItunesFeed( bm2 );
+							cbm = new CompatibilityRssFeed2( part );
+							nbm = new RssItunesFeed( (RssFeed)cbm );
 							//#elifdef DCOMPATIBILITY3
-							RssFeed bm3 = new CompatibilityRssFeed3( part );
-							RssItunesFeed bm = new RssItunesFeed( bm3 );
-							//#else
-							RssItunesFeed bm;
+							if (itunesCapable) {
+								cbm = CompatibilityRssItunesFeed3.deserialize( true, part );
+							} else {
+								cbm = new CompatibilityRssItunesFeed3(
+										new CompatibilityRssFeed3(
+											firstSettings, true, part ));
+							}
+							nbm = new RssItunesFeed( (RssFeed)cbm );
+							//#endif
 							if (itunesCapable) {
 								bm = RssItunesFeed.deserialize(modifiedSettings,
 										true, part );
@@ -670,7 +684,16 @@ public class RssReaderMIDlet extends MIDlet
 								bm = new RssItunesFeed(new RssFeed(
 											firstSettings, true, part ));
 							}
-
+							//#ifdef DCOMPATIBILITY
+							if (!cbm.equals(bm)) {
+								//#ifdef DLOGGING
+								logger.severe("itunes store stings not backwards compatible cbm.getName(),bm.getName()=" + ((RssFeed)cbm).getName() + "," + bm.getName());
+								//#endif
+								System.out.println("cbm cbm.getClass().getName(),part=" + cbm.getClass().getName() + "," + part);
+								System.out.println("cbm feed store=" + cbm.toString());
+								System.out.println("bm bm.getClass().getName(),store part=" + cbm.getClass().getName() + "," + bm.getStoreString(true, true));
+								System.out.println("bm feed store=" + bm.toString());
+							}
 							//#endif
 							if(bm.getName().length()>0){
 								m_bookmarkList.append(bm.getName(),null);
@@ -1698,6 +1721,21 @@ public class RssReaderMIDlet extends MIDlet
 						RssItunesFeed nrss = new RssItunesFeed(new RssFeed(
 											false, true, prevStore ));
 						if (!rss2.equals(nrss)) {
+							//#ifdef DLOGGING
+							logger.severe("itunes store stings not backwards compatible i=" + i);
+							//#endif
+						}
+						long beginStore = System.currentTimeMillis();
+						//#endif
+						//#elifdef DCOMPATIBILITY3
+						CompatibilityRssItunesFeed3 rss3 =
+							new CompatibilityRssItunesFeed3(rss);
+						final String prevStore = rss3.getStoreString(true, true);
+						bookmarks.append(prevStore);
+						//#ifdef DTEST
+						RssItunesFeed nrss = RssItunesFeed.deserialize(
+											false, true, prevStore );
+						if (!rss3.equals(nrss)) {
 							//#ifdef DLOGGING
 							logger.severe("itunes store stings not backwards compatible i=" + i);
 							//#endif
