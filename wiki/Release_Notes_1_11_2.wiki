@@ -251,10 +251,8 @@ on all devices including the emulator.)
   * Show language for podcast version
   * Allow sorting, etc from River of News for showing headers/items screen
   * Have semi-automated tests go from the last item down to the first item
-  * Fixed problem where if sort yielded 0 items, the loading form is displayed
-    without showing the list with 0 items.
-  * Fix if CDATA and a tag is embedded in it, the text following the last tag is
-  now displayed
+  * Fixed problem where if sort yielded 0 items, the loading form is displayed without showing the list with 0 items.
+  * Fix if CDATA and a tag is embedded in it, the text following the last tag is now displayed
   * Fix problem where if using "River of News" or Header sort of the number of items is 0, but a previous command displayed some results, there are items shown instead of 0 items.
   * Synchronize sort variables to prevent unintended results
   * Enhance to replace p, td, and br tags with a space.
@@ -311,6 +309,5 @@ on all devices including the emulator.)
 
 == Device Notes ==
 
-  * Phone must support MP3 links, etc to play enclosures (many phones do not
-    allow an MP3 to be read from a URL, but play them from the file system)
+  * Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
   
