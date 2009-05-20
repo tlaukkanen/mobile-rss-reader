@@ -84,7 +84,7 @@
 			<Application_XML_File_URL>http://mobilerssreader.sourceforge.net/pad/RSS_Reader.xml</Application_XML_File_URL>
 		</Application_URLs>
 		<Download_URLs>
-			<Primary_Download_URL>google.downlad.root/rssreader_v1_11_2-bin.zip</Primary_Download_URL>
+			<Primary_Download_URL>http://mobile-rss-reader.googlecode.com/files/rssreader_v1_11_2-bin.zip</Primary_Download_URL>
 			<Secondary_Download_URL>http://superb-west.dl.sourceforge.net/sourceforge/mobilerssreader/rssreader_v1_11_2-bin.zip</Secondary_Download_URL>
 			<Additional_Download_URL_1 />
 			<Additional_Download_URL_2 />
