@@ -173,6 +173,12 @@ v1.12
 + Minor performance improvements
 + Use open/closed envelopes to show read/unread items if mark items enabled
 + Optionally allow import to override existing feeds with the same name
++ Use question mark for prompt alerts
+
+v1.11.1 Release Candidate 4 (rc4) (May 11th 2009)
++ Changes for 1.11.2. 
++ Move statements to common build file. 
++ Changes for find bugs and pmd tools.
 
 Known problems:
 
