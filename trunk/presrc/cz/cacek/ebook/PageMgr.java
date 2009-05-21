@@ -49,10 +49,10 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
-import cz.cacek.ebook.util.ResourceProviderME;
 import com.substanceofcode.rssreader.presentation.UiUtil;
 import com.substanceofcode.rssreader.presentation.HelpForm;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import net.eiroca.j2me.RSSReader.presentation.RenderedWord;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -68,8 +68,15 @@ import net.sf.jlogmicro.util.logging.Level;
  * @version $Revision$
  * @created $Date$
  */
-public class PageMgr implements ItemCommandListener {
+final public class PageMgr implements ItemCommandListener {
 
+	final public static int PAGE_FWD_ACTION = Canvas.RIGHT;
+	final public static int PAGE_BCK_ACTION = Canvas.LEFT;
+	final public static int LINE_FWD_ACTION = Canvas.DOWN;
+	final public static int LINE_BCK_ACTION = Canvas.UP;
+	final public static int BACK_ACTION = Canvas.GAME_A;
+	final public static int SELECT_ACTION = Canvas.GAME_C;
+	final public static int SCROLL_ACTION = Canvas.GAME_D;
 	private RssReaderMIDlet midlet;
 	protected PageImpl pageImpl;
 	protected AbstractView view;
@@ -77,13 +84,19 @@ public class PageMgr implements ItemCommandListener {
 	protected String label = null;
 	protected String text = null;
 	protected int prefViewHeight;
-	protected boolean viewScrollBar;
+	protected boolean resize = false;
+	protected boolean viewScrollBar = false;
+	private boolean initialized = false;
+	private boolean paintDone = false;
 	protected Page page = null;
 	protected Page labelPage = null;
 	protected Displayable prev;
 	private String message = null;
 	private Font messageFont;
 	private static Command cmdPosition = null;
+	//#ifdef DTEST
+	private static Command cmdInfo = null;
+	//#endif
 	private static Command cmdHelp = null;
 	private int fontSize;
 	private boolean underlinedStyle;
@@ -91,6 +104,9 @@ public class PageMgr implements ItemCommandListener {
 	private boolean hasPos = false;
 	private Hashtable gameKeys = null;
 	private Hashtable sgameKeys = null;
+	//#ifdef DTEST
+	private boolean debug = true;
+	//#endif
 
 	protected ScrollThread scrollThread  = new ScrollThread();
 
@@ -101,7 +117,7 @@ public class PageMgr implements ItemCommandListener {
 	int lastWidth;
 	int lastHeight;
 	int labelPageHeight = 0;
-	int pageHeight;
+	int mainPageHeight;
 
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("PageMgr");
@@ -113,7 +129,7 @@ public class PageMgr implements ItemCommandListener {
 	 * Thread which provides autoscroll functionality.
 	 * @author Josef Cacek
 	 */
-	class ScrollThread extends Thread {
+	final class ScrollThread extends Thread {
 		boolean processing = true;
 		boolean run = false;
 
@@ -144,11 +160,11 @@ public class PageMgr implements ItemCommandListener {
 					messageOff();
 				}
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("scrollThread finished.");}
+				if (finestLoggable) {logger.finest(this + " scrollThread finished.");}
 				//#endif
 			} catch (Exception e) {
 				//#ifdef DLOGGING
-				logger.severe("scrollThread run failed.", e);
+				logger.severe(this + " scrollThread run failed.", e);
 				//#endif
 			}
 		}
@@ -226,76 +242,74 @@ public class PageMgr implements ItemCommandListener {
 			messageFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD,
 				aFontSize);
 			if (isHtml) {
-				label = aLabel;
+				if (aLabel != null) {
+					label = "<b>" + aLabel + "</b>";
+				}
 				if (aUnderlinedStyle) {
 					text = "<u>" + aText + "</u>";
 				} else {
 					text = aText;
 				}
-				labelPageHeight = messageFont.getHeight();
-				updCustomData(aFrmWidth, 3 * labelPageHeight, aFontSize,
+				// Create label (if needed) and main view.  Need to use
+				// a temp height for it to work.  These are not used
+				// by html view.
+				setCustomData(aFrmWidth, (label != null) ? aFrmHeight : 0, aFrmHeight, aFontSize,
 						aUnderlinedStyle);
 				if (labelView != null) {
-					labelPageHeight = ((HtmlView)labelView).getPageHeight() +
-							AbstractView.getTotalBorderSpace();
+					labelPageHeight = ((HtmlView)labelView).getPageHeight();
 				}
-				pageHeight = ((HtmlView)view).getPageHeight() +
-							AbstractView.getTotalBorderSpace();
+				mainPageHeight = ((HtmlView)view).getPageHeight();
 			} else {
 				if (aLabel != null) {
 					labelPage = new Page(aLabel);
-					page = new Page(aText);
 					labelPageHeight = View.estimateHeight(aFontSize,
-							aUnderlinedStyle, aFrmWidth, aFrmHeight,
-							labelPage) + AbstractView.getTotalBorderSpace();
+							true, false, aFrmWidth, aFrmHeight,
+							labelPage);
 				}
-				pageHeight = View.estimateHeight(aFontSize, aUnderlinedStyle,
-						aFrmWidth, aFrmHeight, page) +
-							AbstractView.getTotalBorderSpace();
+				page = new Page(aText);
+				mainPageHeight = View.estimateHeight(aFontSize, false,
+						aUnderlinedStyle, aFrmWidth, aFrmHeight, page);
+				setCustomData(aFrmWidth, labelPageHeight, mainPageHeight,
+						aFontSize, aUnderlinedStyle);
 			}
-			if (aFrmHeight == 0) {
-				lastHeight = labelPageHeight + pageHeight;
-			} else {
-				lastHeight = Math.min(labelPageHeight + pageHeight,
-						aFrmHeight);
-			}
-			if (!isHtml) {
-				updCustomData(aFrmWidth, lastHeight, aFontSize,
+			lastHeight = labelPageHeight + mainPageHeight;
+			prefViewHeight = Math.min(lastHeight,
+					aFrmHeight - AbstractView.getTotalHeightBorderSpace());
+			if (isHtml) {
+				updCustomData(aFrmWidth, prefViewHeight, aFontSize,
 						aUnderlinedStyle);
-				viewScrollBar = !((View)view).isLastPage();
-				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("viewScrollBar=" + viewScrollBar);}
-				//#endif
 			}
-			if (!viewScrollBar &&
-					(lastHeight < (labelPageHeight + pageHeight))) {
-				viewScrollBar = true;
-			}
-			prefViewHeight = lastHeight;
 			if (cmdHelp == null) {
-				cmdHelp = UiUtil.getCmdRsc("cmd.i.help", Command.ITEM, 3);
+				cmdHelp = UiUtil.getCmdRsc(Common.CMD_I_HELP, Command.ITEM, 3);
 			}
 			pageImpl.addCommand(cmdHelp);
-			if (lastHeight < pageHeight) {
-				scrollThread.start();
-				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("scrollThread started.");}
-				//#endif
-			}
 		} catch (Exception e) {
 			//#ifdef DLOGGING
-			logger.severe("Constructor failed with exception", e);
+			logger.severe(this + " Constructor failed with exception", e);
 			//#endif
 		} catch (Throwable e) {
 			//#ifdef DLOGGING
-			logger.severe("Constructor failed with throwable", e);
+			logger.severe(this + " Constructor failed with throwable", e);
 			//#endif
 		} finally {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("aLabel,aFrmWidth,aFrmHeight,labelPageHeight,pageHeight,prefViewHeight,viewScrollBar=" + aLabel + "," + aFrmWidth + "," + aFrmHeight + "," + labelPageHeight + "," + pageHeight + "," + prefViewHeight + "," + viewScrollBar);}
+			if (finestLoggable) {logger.finest(this + " aLabel,aFrmWidth,aFrmHeight,labelPageHeight,mainPageHeight,prefViewHeight=" + aLabel + "," + aFrmWidth + "," + aFrmHeight + "," + labelPageHeight + "," + mainPageHeight + "," + prefViewHeight);}
 			//#endif
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("lastHeight=" + lastHeight);}
+			if (finestLoggable) {logger.finest(this + " lastHeight=" + lastHeight);}
+			//#endif
+			synchronized(this) {
+				initialized = true;
+				if (!paintDone) {
+					pageImpl.svcRepaint();
+				}
+			}
+			//#ifdef DTEST
+			if (cmdInfo == null) {
+				cmdInfo = UiUtil.getCmdRsc(Common.CMD_INFO,
+						Command.ITEM, 9);
+			}
+			pageImpl.addCommand(cmdInfo);
 			//#endif
 		}
 	}
@@ -333,15 +347,15 @@ public class PageMgr implements ItemCommandListener {
 					   "9",
 					   "pound",
 					   "star"};
-		int [] acts = {Canvas.UP,
-					   Canvas.DOWN,
-					   Canvas.LEFT,
-					   Canvas.RIGHT,
+		int [] acts = {LINE_BCK_ACTION,
+					   LINE_FWD_ACTION,
+		               PAGE_BCK_ACTION,
+					   PAGE_FWD_ACTION,
 					   Canvas.FIRE,
-					   Canvas.GAME_A,
+					   BACK_ACTION,
 					   Canvas.GAME_B,
-					   Canvas.GAME_C,
-					   Canvas.GAME_D};
+					   SELECT_ACTION,
+					   SCROLL_ACTION};
 		String [] sacts = {"UP",
 					   "DOWN",
 					   "LEFT",
@@ -376,12 +390,12 @@ public class PageMgr implements ItemCommandListener {
 		//#ifdef DLOGGING
 		if (finestLoggable) {logger.finest("useActions,hact.size()=" + useActions + "," + hsize);}
 		//#endif
-		if (hsize > 0) {
+		if (!useActions) {
 			int[] altKeys = {Canvas.KEY_NUM2, Canvas.KEY_NUM8,
 				Canvas.KEY_NUM4, Canvas.KEY_NUM6, Canvas.KEY_NUM5,
-				Canvas.KEY_NUM1, Canvas.KEY_NUM3, Canvas.KEY_NUM7,
+				Canvas.KEY_NUM1, Canvas.KEY_NUM7, Canvas.KEY_NUM3,
 				Canvas.KEY_NUM9};
-			String[] saltKeys = {"2", "8", "4", "6", "5", "1", "3", "7", "9"};
+			String[] saltKeys = {"2", "8", "4", "6", "5", "1", "7", "3", "9"};
 			gameKeys = new Hashtable();
 			sgameKeys = new Hashtable();
 			for (int ic = 0; ic < acts.length; ic++) {
@@ -408,33 +422,82 @@ public class PageMgr implements ItemCommandListener {
    * @return    final
    * @author Irv Bunton
    */
+	final private void setCustomData(int aWidth, int aLabelHeight,
+			int aMainHeight, int aFontSize,
+			boolean aUnderlinedStyle)
+	throws Exception {
+		//#ifdef DLOGGING
+		//#ifdef DTEST
+		if (debug) {
+			if (finestLoggable) {logger.finest(this + " setCustomData aWidth,aLabelHeight,aMainHeight,aFontSize,aUnderlinedStyle=" + aWidth + "," + aLabelHeight + "," + aMainHeight + "," + aFontSize + "," + aUnderlinedStyle);}
+		}
+		//#endif
+		//#endif
+		if (labelPage != null) {
+			labelView = new View(aWidth, aLabelHeight, aFontSize, true,
+					false);
+			labelPage.setPosition(0);
+			((View)labelView).setPage(labelPage);
+		} else if (aLabelHeight > 0) {
+			labelView = new HtmlView(aWidth, aLabelHeight, aFontSize, label);
+		}
+		if (page != null) {
+			view = new View(aWidth, aMainHeight, aFontSize,
+					false, aUnderlinedStyle);
+			page.setPosition(0);
+			((View)view).setPage(page);
+			viewScrollBar = !((View)view).isLastPage();
+		} else {
+			view = new HtmlView(aWidth, aMainHeight, aFontSize, text);
+		}
+	}
+
+
+  /**
+   * Create a new view with the width and height and font.  Also, set
+   * page position to 0.  Also, account for message if page height is <
+   * given height.
+   *
+   * @param aWidth
+   * @param aHeight
+   * @param aFontSize
+   * @param aUnderlinedStyle
+   * @return    final
+   * @author Irv Bunton
+   */
 	final private void updCustomData(int aWidth, int aHeight, int aFontSize,
 			boolean aUnderlinedStyle)
 	throws Exception {
-		if ((lastHeight < pageHeight) && !hasPos) {
+		//#ifdef DLOGGING
+		//#ifdef DTEST
+		if (debug) {
+			if (finestLoggable) {logger.finest(this + " updCustomData aWidth,aHeight,labelPageHeight,aFontSize,aUnderlinedStyle=" + aWidth + "," + aHeight + "," + labelPageHeight + "," + aFontSize + "," + aUnderlinedStyle);}
+		}
+		//#endif
+		//#endif
+		int labelHeight = Math.min(labelPageHeight, aHeight);
+		int mainHeight = aHeight - labelHeight;
+		if (mainHeight >= (messageFont.getHeight() +
+					AbstractView.getTotalHeightBorderSpace())) {
+			setCustomData(aWidth,
+					labelHeight, mainHeight, aFontSize, aUnderlinedStyle);
+		//#ifdef DLOGGING
+		//#ifdef DTEST
+		} else {
+			if (debug) {
+				if (finestLoggable) {logger.finest(this + " updCustomData labelHeight,mainHeight,messageFont.getHeight(),AbstractView.getTotalHeightBorderSpace()=" + labelHeight + "," + mainHeight + "," + messageFont.getHeight() + "," + AbstractView.getTotalHeightBorderSpace());}
+			}
+		//#endif
+		//#endif
+		}
+		viewScrollBar = (aHeight < (labelPageHeight + mainPageHeight));
+		if ((aHeight < prefViewHeight) && !hasPos) {
 			hasPos = true;
 			if (cmdPosition == null) {
-				cmdPosition = UiUtil.getCmdRsc("page.cmd.position",
+				cmdPosition = UiUtil.getCmdRsc(Common.PAGE_CMD_POSITION,
 						Command.ITEM, 2);
 			}
 			pageImpl.addCommand(cmdPosition);
-		}
-		int labelHeight = Math.min(labelPageHeight, aHeight);
-		aHeight-= labelHeight;
-		if (labelPage != null) {
-			labelView = new View(aWidth, labelHeight, aFontSize, false);
-			labelPage.setPosition(0);
-			((View)labelView).setPage(labelPage);
-		} else if (labelHeight > 0) {
-			labelView = new HtmlView(aWidth, labelHeight, aFontSize, label);
-		}
-		if (page != null) {
-			view = new View(aWidth, aHeight, aFontSize,
-					aUnderlinedStyle);
-			page.setPosition(0);
-			((View)view).setPage(page);
-		} else {
-			view = new HtmlView(aWidth, aHeight, aFontSize, text);
 		}
 	}
 
@@ -443,83 +506,110 @@ public class PageMgr implements ItemCommandListener {
 	 *
 	 * @see javax.microedition.lcdui.Displayable#paint(javax.microedition.lcdui.Graphics)
 	 */
-	public void paint(Graphics g, int pwidth, int pheight) {
+	final public void paint(Graphics g, int pwidth, int pheight) {
+		if (!initialized) {
+			synchronized(this) {
+				if (!initialized) {
+					paintDone = true;
+				}
+			}
+		}
 		//#ifdef DTEST
 		Common.debug("PageMgr.paint(Graphics g)");
 		//#endif
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("paint pwidth,pheight=" + pwidth + "," + pheight);}
+		if (finestLoggable) {logger.finest(this + " paint pwidth,pheight=" + pwidth + "," + pheight);}
 		//#endif
+		if ((pheight > prefViewHeight) && !resize &&
+				(pageImpl instanceof PageCustomItem)) {
+			midlet.callSerially((Runnable)pageImpl);
+			resize = true;
+		}
 		if ((lastWidth != pwidth) || (lastHeight != pheight)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("paint changed pwidth,lastWidth,pheight,lastHeight=" + pwidth + "," + lastWidth + "," + pheight + "," + lastHeight);}
+			if (finestLoggable) {logger.finest(this + " paint changed pwidth,lastWidth,pheight,lastHeight=" + pwidth + "," + lastWidth + "," + pheight + "," + lastHeight);}
 			//#endif
 			lastWidth = pwidth;
 			lastHeight = pheight;
 			try {
 				updCustomData(lastWidth, lastHeight, fontSize,
 						underlinedStyle);
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest(this + " viewScrollBar=" + viewScrollBar);}
+				//#endif
 			} catch (Exception e) {
 				//#ifdef DTEST
 				Common.debugErr("PageMgr.paint view failed");
 				//#endif
+				//#ifdef DLOGGING
+				logger.severe(this + " paint updCustomData " + e.getMessage(), e);
+				//#endif
 			}
 		}
-		if (labelPageHeight < pheight) {
+		// Write the item only if there is space for the label and at least
+		// one line.
+		//#ifdef DLOGGING
+		//#ifdef DTEST
+		if (debug) {
+			if (finestLoggable) {logger.finest(this + " labelPageHeight,pheight,viewScrollBar=" + labelPageHeight + "," + pheight + "," + viewScrollBar);}
+		}
+		//#endif
+		//#endif
+		if (((labelPageHeight + messageFont.getHeight()) < pheight) ||
+		    (prefViewHeight <= pheight)) {
 			if (labelView != null) {
 				labelView.draw(g, 0, 0, false, false);
 			}
-			view.draw(g, 0, labelPageHeight, true,
-					viewScrollBar || (prefViewHeight > pheight));
-		}
-		if (message != null) {
-			int mx = 2;
-			int my = 2;
-			g.setFont(messageFont);
-			int w = messageFont.stringWidth(message);
-			int h = messageFont.getHeight();
-			g.setColor(0xFFFFFF);
-			g.fillRect(mx, my, w + 3, h + 3);
-			g.setColor(0x000000);
-			g.drawString(message, mx + 2, my + 2, Graphics.LEFT | Graphics.TOP);
-			g.drawRect(mx, my, w + 3, h + 3);
+			view.draw(g, 0, labelPageHeight, true, viewScrollBar);
+			if (message != null) {
+				int mx = 2;
+				int my = 2;
+				g.setFont(messageFont);
+				int w = messageFont.stringWidth(message);
+				int h = messageFont.getHeight();
+				g.setColor(0xFFFFFF);
+				g.fillRect(mx, my, w + 3, h + 3);
+				g.setColor(0x000000);
+				g.drawString(message, mx + 2, my + 2, Graphics.LEFT | Graphics.TOP);
+				g.drawRect(mx, my, w + 3, h + 3);
+			}
 		}
 	}
 
 	/**
 	 * @return Returns width of last paint.
 	 */
-	public int getWidth() {
+	final public int getWidth() {
 		return lastWidth;
 	}
 
 	/**
 	 * @return Returns height of last paint.
 	 */
-	public int getHeight() {
+	final public int getHeight() {
 		return lastHeight;
 	}
 
 	/**
 	 * @return Returns min content width of last paint.
 	 */
-	public int getMinContentWidth() {
+	final public int getMinContentWidth() {
 		return lastWidth;
 	}
 
 	/**
 	 * @return Returns min content height of last paint.
 	 */
-	public int getMinContentHeight() {
+	final public int getMinContentHeight() {
 		return lastHeight;
 	}
 
 	/**
 	 * @return Returns preferred width of last paint.
 	 */
-	public int getPrefContentWidth(int width) {
+	final public int getPrefContentWidth(int width) {
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("getPrefContentWidth,width=" + width);}
+		if (finestLoggable) {logger.finest(this + " getPrefContentWidth,width=" + width);}
 		//#endif
 		if ((width > 0) && (lastWidth < width)) {
 			lastWidth = width;
@@ -530,9 +620,9 @@ public class PageMgr implements ItemCommandListener {
 	/**
 	 * @return Returns preferred height of last paint.
 	 */
-	public int getPrefContentHeight(int height) {
+	final public int getPrefContentHeight(int height) {
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("getPrefContentHeight,height,labelPageHeight,pageHeight=" + height + "," + labelPageHeight + "," + pageHeight);}
+		if (finestLoggable) {logger.finest(this + " getPrefContentHeight,height,labelPageHeight,mainPageHeight=" + height + "," + labelPageHeight + "," + mainPageHeight);}
 		//#endif
 		return prefViewHeight;
 	}
@@ -540,9 +630,9 @@ public class PageMgr implements ItemCommandListener {
 	/**
 	 * Size changed
 	 */
-	public void sizeChanged(int width, int height) {
+	final public void sizeChanged(int width, int height) {
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("sizeChanged,width,height=" + width + "," + height);}
+		if (finestLoggable) {logger.finest(this + " sizeChanged,width,height=" + width + "," + height);}
 		//#endif
 		if ((lastHeight != width) || (lastHeight != height)) {
 			lastWidth = width;
@@ -561,7 +651,7 @@ public class PageMgr implements ItemCommandListener {
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.Displayable#keyPressed(int)
 	 */
-	public void keyPressed(int aKey) {
+	final public void keyPressed(int aKey) {
 		//#ifdef DTEST
 		Common.debug("Key pressed " + aKey);
 		//#endif
@@ -571,7 +661,7 @@ public class PageMgr implements ItemCommandListener {
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.Displayable#keyRepeated(int)
 	 */
-	public void keyRepeated(int aKey) {
+	final public void keyRepeated(int aKey) {
 		//#ifdef DTEST
 		Common.debug("Key repeated " + aKey);
 		//#endif
@@ -582,7 +672,7 @@ public class PageMgr implements ItemCommandListener {
 	 * Key actions handler
 	 * @param aKey
 	 */
-	public void key(final int aKey) {
+	final public void key(final int aKey) {
 		synchronized(this) {
 			final int action = pageImpl.getGameAction(aKey);
 			//#ifdef DTEST
@@ -601,29 +691,40 @@ public class PageMgr implements ItemCommandListener {
 
 
 	/**
-	 * Key actions handler
+	 * Key actions handler.  If no scroll bar, don't do movement commands.
 	 * @param aKey
 	 */
-	public void keyNormal(final int aKey, final int action) {
+	final public void keyNormal(final int aKey, final int action) {
 		if (useActions) {
 			switch (action) {
-				case Canvas.UP:
-					prevPage();
+				case PAGE_BCK_ACTION:
+					if (viewScrollBar) {
+						prevPage();
+					}
 					break;
-				case Canvas.DOWN:
-					nextPage();
+				case PAGE_FWD_ACTION:
+					if (viewScrollBar) {
+						nextPage();
+					}
 					break;
-				case Canvas.RIGHT:
-					nextLine();
+				case LINE_FWD_ACTION:
+					if (viewScrollBar) {
+						nextLine();
+					}
 					break;
-				case Canvas.LEFT:
-					prevLine();
+				case LINE_BCK_ACTION:
+					if (viewScrollBar) {
+						prevLine();
+					}
 					break;
-				case Canvas.GAME_D:
+				case BACK_ACTION:
 					display.setCurrent(prev);
 					break;
-				case Canvas.GAME_A:
-					if (lastHeight < pageHeight) {
+				case SELECT_ACTION:
+					pageImpl.selectKey();
+					break;
+				case SCROLL_ACTION:
+					if (viewScrollBar && (lastHeight < mainPageHeight)) {
 						scrollThread.setRun(true);
 					}
 					break;
@@ -632,25 +733,38 @@ public class PageMgr implements ItemCommandListener {
 			}
 		} else {
 			Integer ikey = new Integer(aKey);
-			if (ikey.equals((Integer)gameKeys.get(new Integer(Canvas.UP)))) {
-				prevPage();
+			if (ikey.equals((Integer)gameKeys.get(new Integer(PAGE_BCK_ACTION)))) {
+				if (viewScrollBar) {
+					prevPage();
+				}
 			} else if (ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.DOWN)))) {
-				nextPage();
+					(Integer)gameKeys.get(new Integer(PAGE_FWD_ACTION)))) {
+				if (viewScrollBar) {
+					nextPage();
+				}
 			} else if (ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.RIGHT)))) {
-				nextLine();
+					(Integer)gameKeys.get(new Integer(LINE_FWD_ACTION)))) {
+				if (viewScrollBar) {
+					nextLine();
+				}
 			} else if (ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.LEFT)))) {
-				prevLine();
+					(Integer)gameKeys.get(new Integer(LINE_BCK_ACTION)))) {
+				if (viewScrollBar) {
+					prevLine();
+				}
 			} else if (ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.GAME_D)))) {
+					(Integer)gameKeys.get(new Integer(BACK_ACTION)))) {
 					display.setCurrent(prev);
 			} else if (ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.GAME_A)))) {
-					if (lastHeight < pageHeight) {
-						scrollThread.setRun(true);
-					}
+					(Integer)gameKeys.get(new Integer(SCROLL_ACTION)))) {
+				if (viewScrollBar && (lastHeight < mainPageHeight)) {
+					scrollThread.setRun(true);
+				}
+			} else if (ikey.equals(
+					(Integer)gameKeys.get(new Integer(SELECT_ACTION)))) {
+				if (viewScrollBar) {
+					pageImpl.selectKey();
+				}
 			}
 		}
 	}
@@ -660,46 +774,43 @@ public class PageMgr implements ItemCommandListener {
 	 * Key handlers for Autorun book reading.
 	 * @param aKey
 	 */
-	public void keyAutoRun(final int aKey, final int action) {
+	final public void keyAutoRun(final int aKey, final int action) {
 		Integer ikey = new Integer(aKey);
 		if ((useActions &&
-		    (((action == Canvas.UP) || (action == Canvas.LEFT) ||
+		    (((action == PAGE_BCK_ACTION) || (action == LINE_BCK_ACTION) ||
 				(action == Canvas.GAME_B)))) ||
 		   (!useActions &&
 			(ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.UP))) ||
+					(Integer)gameKeys.get(new Integer(PAGE_BCK_ACTION))) ||
 			 ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.LEFT))) ||
+					(Integer)gameKeys.get(new Integer(LINE_BCK_ACTION))) ||
 			 ikey.equals(
 					(Integer)gameKeys.get(new Integer(Canvas.GAME_B)))))) {
 			addScrollDelay(Common.AUTOSCROLL_STEP);
 		} else if ((useActions &&
-		    (((action == Canvas.DOWN) || (action == Canvas.RIGHT) ||
-				(action == Canvas.GAME_C)))) ||
+		    (((action == PAGE_FWD_ACTION) || (action == LINE_FWD_ACTION)))) ||
 		   (!useActions &&
 			(ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.DOWN))) ||
+					(Integer)gameKeys.get(new Integer(PAGE_FWD_ACTION))) ||
 			 ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.RIGHT))) ||
-			 ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.GAME_C)))))) {
+					(Integer)gameKeys.get(new Integer(LINE_FWD_ACTION)))))) {
 			addScrollDelay(- Common.AUTOSCROLL_STEP);
 		}
-		if ((useActions && (action == Canvas.GAME_A)) ||
+		if ((useActions && (action == SCROLL_ACTION)) ||
 		    (!useActions &&
 			 ikey.equals(
-					(Integer)gameKeys.get(new Integer(Canvas.GAME_A))))) {
-			messageOn(ResourceProviderME.get("i.stop"));
+					(Integer)gameKeys.get(new Integer(SCROLL_ACTION))))) {
+			messageOn(RssReaderMIDlet.get(Common.I_STOP));
 			scrollThread.setRun(false);
 		} else {
-			messageOn(ResourceProviderME.get("i.delay")+getScrollDelay());
+			messageOn(RssReaderMIDlet.get(Common.I_DELAY)+getScrollDelay());
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.Displayable#pointerPressed(int, int)
 	 */
-	public void pointerPressed(int aX, int aY) {
+	final public void pointerPressed(int aX, int aY) {
 		//#ifdef DTEST
 		Common.debug("Pointer pressed (" + aX + "," + aY + ")");
 		//#endif
@@ -728,39 +839,69 @@ public class PageMgr implements ItemCommandListener {
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.CommandListener#commandAction(javax.microedition.lcdui.Command, javax.microedition.lcdui.Item)
 	 */
-	public void commandAction(Command aCmd, Item aItem) {
+	final public void commandAction(Command aCmd, Item aItem) {
 		//#ifdef DTEST
 		Common.debug("commandAction() for page started");
 		//#endif
 		if (aCmd == cmdPosition) {
-			PositionForm pform = new PositionForm("page.pos.head", view,
+			PositionForm pform = new PositionForm(Common.PAGE_POS_HEAD, view,
 					(Item)pageImpl,
 					midlet);
-			pform.createGauge("page.pos.actual", view.getPercPosition());
+			pform.createGauge(Common.PAGE_POS_ACTUAL, view.getPercPosition());
+		//#ifdef DTEST
+		} else if (aCmd == cmdInfo) {
+			final HelpForm helpForm = new HelpForm(midlet, (Item)pageImpl);
+			helpForm.append("lastWidth=" + lastWidth + "\n");
+			helpForm.append("lastHeight=" + lastHeight + "\n");
+			helpForm.append("labelPageHeight=" + labelPageHeight + "\n");
+			helpForm.append("mainPageHeight=" + mainPageHeight + "\n");
+			helpForm.append("prefViewHeight=" + prefViewHeight + "\n");
+			helpForm.append("viewScrollBar=" + viewScrollBar + "\n");
+			helpForm.append("initialized=" + initialized + "\n");
+			helpForm.append("resize=" + resize + "\n");
+			helpForm.append("paintDone=" + paintDone + "\n");
+			helpForm.append("RenderedWord.heightFont=" + RenderedWord.heightFont + "\n");
+			helpForm.append("label=" + label + "\n");
+			helpForm.append("page=" + (page != null) + "\n");
+			helpForm.append("text=" + (text != null) + "\n");
+			helpForm.append("view=" + view.getClass().getName() + "\n");
+			if (view instanceof HtmlView) {
+				HtmlView hview = (HtmlView)view;
+				int hvlen = hview.getRenderedWordsLen();
+				helpForm.append("hview.getRenderedWordsLen()=" + hvlen + "\n");
+			} else if (view instanceof View) {
+				View vview = (View)view;
+				int vvlen = vview.getScreenSize();
+				helpForm.append("vview.getScreenSize()=" + vvlen + "\n");
+			}
+			helpForm.append("messageFont.getHeight()=" + messageFont.getHeight() + "\n");
+			display.setCurrent(helpForm);
+		//#endif
 		} else if (aCmd == cmdHelp) {
 			final HelpForm helpForm = new HelpForm(midlet, (Item)pageImpl);
-			appendKeyHelp(helpForm, Canvas.GAME_D, "text.b.key");
+			/*Press \1 to go back to the previous screen. */
+			appendKeyHelp(helpForm, BACK_ACTION, Common.TEXT_B_KEY);
+			/*Press \1 to go to open the link. */
+			appendKeyHelp(helpForm, SELECT_ACTION, Common.TEXT_SEL_KEY);
 			if (!scrollThread.canRun()) {
 				/* Page forward. */
-				appendKeyHelp(helpForm, Canvas.DOWN, "text.pf.key");
+				appendKeyHelp(helpForm, PAGE_FWD_ACTION, Common.TEXT_PF_KEY);
 				/* Page backward. */
-				appendKeyHelp(helpForm, Canvas.UP, "text.pb.key");
+				appendKeyHelp(helpForm, PAGE_BCK_ACTION, Common.TEXT_PB_KEY);
 				/* Line forward. */
-				appendKeyHelp(helpForm, Canvas.RIGHT, "text.lf.key");
+				appendKeyHelp(helpForm, LINE_FWD_ACTION, Common.TEXT_LF_KEY);
 				/* Line backward. */
-				appendKeyHelp(helpForm, Canvas.LEFT, "text.lb.key");
+				appendKeyHelp(helpForm, LINE_BCK_ACTION, Common.TEXT_LB_KEY);
 			} else {
 				/* Scroll faster. */
-				appendKeyHelp(helpForm, Canvas.DOWN, "text.auf.key");
+				appendKeyHelp(helpForm, PAGE_FWD_ACTION, Common.TEXT_AUF_KEY);
 				/* Scroll slower. */
-				appendKeyHelp(helpForm, Canvas.UP, "text.aus.key");
-				appendKeyHelp(helpForm, Canvas.RIGHT, "text.auf.key");
-				appendKeyHelp(helpForm, Canvas.LEFT, "text.aus.key");
-				appendKeyHelp(helpForm, Canvas.GAME_C, "text.auf.key");
-				appendKeyHelp(helpForm, Canvas.GAME_B, "text.aus.key");
+				appendKeyHelp(helpForm, PAGE_BCK_ACTION, Common.TEXT_AUS_KEY);
+				appendKeyHelp(helpForm, LINE_FWD_ACTION, Common.TEXT_AUF_KEY);
+				appendKeyHelp(helpForm, LINE_BCK_ACTION, Common.TEXT_AUS_KEY);
 			}
-			if (lastHeight < pageHeight) {
-				appendKeyHelp(helpForm, Canvas.GAME_A, "text.s.key");
+			if (lastHeight < mainPageHeight) {
+				appendKeyHelp(helpForm, SCROLL_ACTION, Common.TEXT_S_KEY);
 			}
 			display.setCurrent(helpForm);
 		}
@@ -776,16 +917,17 @@ public class PageMgr implements ItemCommandListener {
    * @author Irv Bunton
    */
 	final private int appendKeyHelp(final HelpForm helpForm, int aKey,
-			String aResKey) {
-		String pkey = ResourceProviderME.get("text.k." + sgameKeys.get(
-					new Integer(aKey)));
-		return helpForm.append(ResourceProviderME.get(aResKey, pkey));
+			int aResKey) {
+		String pkey = RssReaderMIDlet.get(Common.TEXT_K_0 +
+				((Integer)gameKeys.get(
+					new Integer(aKey))).intValue() - Canvas.KEY_NUM0);
+		return helpForm.append(RssReaderMIDlet.get(aResKey, pkey));
 	}
 
 	/**
 	 * Set the text to show
 	 */
-	public void setText(final String aText) {
+	final public void setText(final String aText) {
 		if (view instanceof View) {
 			page = new Page(aText);
 			((View)view).setPage(page);
@@ -798,13 +940,13 @@ public class PageMgr implements ItemCommandListener {
 	/**
 	 * Scrolls one line ahead in current book
 	 */
-	protected void nextLine() {
+	final protected void nextLine() {
 		try {
 			pauseOn();
 			view.fwdLine();
 			if (view.emptyPage()) {
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("Forward line too far.  Going back.");}
+				if (finestLoggable) {logger.finest(this + " Forward line too far.  Going back.");}
 				//#endif
 				view.bckLine();
 			}
@@ -818,13 +960,13 @@ public class PageMgr implements ItemCommandListener {
 	/**
 	 * Scrolls one page ahead in current book
 	 */
-	protected void nextPage() {
+	final protected void nextPage() {
 		try {
 			pauseOn();
 			view.fwdPage();
 			if (view.emptyPage()) {
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("Forward page too far.  Going back.");}
+				if (finestLoggable) {logger.finest(this + " Forward page too far.  Going back.");}
 				//#endif
 				view.bckPage();
 			}
@@ -838,7 +980,7 @@ public class PageMgr implements ItemCommandListener {
 	/**
 	 * Scrolls one line back in current book
 	 */
-	protected void prevLine() {
+	final protected void prevLine() {
 		try {
 			pauseOn();
 			view.bckLine();
@@ -852,7 +994,7 @@ public class PageMgr implements ItemCommandListener {
 	/**
 	 * Scrolls one page back in current book
 	 */
-	protected void prevPage() {
+	final protected void prevPage() {
 		try {
 			pauseOn();
 			view.bckPage();
@@ -866,18 +1008,18 @@ public class PageMgr implements ItemCommandListener {
 	/**
 	 * Displays "Wait" message
 	 */
-	protected void pauseOn() {
-		messageOn(ResourceProviderME.get("i.wait"));
+	final protected void pauseOn() {
+		messageOn(RssReaderMIDlet.get(Common.I_WAIT));
 	}
 
 	/**
 	 * Displays system message (e.g. Wait) display
 	 */
-	protected void messageOn(final String aMsg) {
+	final protected void messageOn(final String aMsg) {
 		synchronized(this) {
 			message = aMsg;
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("message=" + message);}
+			if (finestLoggable) {logger.finest(this + " message=" + message);}
 			//#endif
 			pageImpl.svcRepaint();
 		}
@@ -886,7 +1028,7 @@ public class PageMgr implements ItemCommandListener {
 	/**
 	 * Disable system message (e.g. Wait) display
 	 */
-	protected void messageOff() {
+	final protected void messageOff() {
 		synchronized(this) {
 			message = null;
 			pageImpl.svcRepaint();
@@ -896,7 +1038,7 @@ public class PageMgr implements ItemCommandListener {
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.Displayable#hideNotify()
 	 */
-	public void showNotify() {
+	final public void showNotify() {
 		//#ifdef DTEST
 		Common.debug("PageCanvas.showNotify()");
 		//#endif
@@ -912,11 +1054,11 @@ public class PageMgr implements ItemCommandListener {
 					scrollThread.setRun(run);
 					scrollThread.start();
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest("scrollThread re-started from showNotify after recreate.");}
+					if (finestLoggable) {logger.finest(this + " scrollThread re-started from showNotify after recreate.");}
 					//#endif
 				} catch (Exception e) {
 					//#ifdef DLOGGING
-					logger.severe("Unable to start thread.", e);
+					logger.severe(this + " Unable to start thread.", e);
 					//#endif
 					e.printStackTrace();
 				}
@@ -927,7 +1069,7 @@ public class PageMgr implements ItemCommandListener {
 	/* (non-Javadoc)
 	 * @see javax.microedition.lcdui.Displayable#hideNotify()
 	 */
-	public void hideNotify() {
+	final public void hideNotify() {
 		//#ifdef DTEST
 		Common.debug("PageCanvas.hideNotify()");
 		//#endif
@@ -941,21 +1083,21 @@ public class PageMgr implements ItemCommandListener {
 	 * Sets pause between scrolling.
 	 * @param aDelay
 	 */
-	public synchronized static void setScrollDelay(int aDelay) {
+	final public synchronized static void setScrollDelay(int aDelay) {
 		if (aDelay < Common.AUTOSCROLL_STEP) {
 			aDelay = Common.AUTOSCROLL_STEP;
 		}
 		scrollDelay = aDelay;
 	}
 
-	public synchronized static void addScrollDelay(int aDelay) {
+	final public synchronized static void addScrollDelay(int aDelay) {
 		setScrollDelay(getScrollDelay() + aDelay);
 	}
 
 	/**
 	 * @return Returns the scrollDelay.
 	 */
-	public synchronized static int getScrollDelay() {
+	final public synchronized static int getScrollDelay() {
 		return scrollDelay;
 	}
 
