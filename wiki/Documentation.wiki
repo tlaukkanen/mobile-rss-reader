@@ -51,6 +51,7 @@ Modified GPL software from other projects are also used.
    # Redirect if HTTP Other is received
 
  == Which program to choose ==   
+
 These instructions are for 1.11.1 Release Candidate 2 and later.
 If you want to start quickly, you can choose the program that should work
 for most phones, midp20_RSSReader.jar.  
@@ -74,24 +75,35 @@ feature, it may not come up and may not give an error message.  So, in this
 case one needs to pick the phone version that does not read from phone memory.
 
 
+The easiest and best way to install and get the program with all the features
+that your phone is capable of using is to go to
+http://www.getjar.com/products/11333/RSSReader.  On the left hand side under
+home (a few inches from the top), select your phone manufacture and model.
+This causes the download information to change to the appropriate program
+for your phone.  Follow the instructions there and you cannot go wrong.
+
+These instructions are for 95% of the phones (it's a little bit more work
+than the previous paragraph above which uses getjar.com.)  DO NOT USE
+the download with ...-expert... in it as it is too complicated for 95% of users.
+Instead use the one with -latest in it.
 So, it is important to see which features the phone has and install the
-program that uses those same features.  The features that
-are important to know are CLDC-1.0, CLDC-1.1, MIDP-1.0 or MIDP-2.0, and JSR-75.  To find
+program that uses those same features.  
+There are two sets of programs those that run on Blackberry and those that
+run on other operating systems.  All the Blackberry phones have programs ending
+in '.cod'.  The other phones have '.jar'.  The info below is for '.jar' however,
+it can also be used for Blackberry by changing the '.jar' to '.cod'.
+The features that
+are important to know are MIDP-1.0 or MIDP-2.0, and JSR-75.  To find
 the features go to 
 http://www.mobref.com/device.
 Find your phone and go to it's web page.  
-Or you can find this out by looking at technical specs for your phone,
-Look for CLDC version.  It may
-have 1 or 2 numbers 1.0 and/or 1.1.  Use the higher number this gives
-CLDC-1.1.  
-If this is the CLDC version, use a program which has cldc11
-(e.g. midp20_cldc11_RSSReader.jar)
-If CLDC version 1.0, use program without cldc11  (e.g. midp20_RSSReader.jar).
+Or you can find this out by looking at technical specs for your phone.
 Look for MIDP version.  It may
-have 1 or 2 numbers 1.0 and/or 2.0.  Use the the higher number this gives
-MIDP-2.0.
-If this is the MIDP version, use a program which has midp20
-(e.g. midp20_cldc11_RSSReader.jar)
+have 1, 2, or 3 numbers 1.0 and/or 2.0 and/or 2.1.  Use the the higher number this gives
+MIDP-2.0 or MIDP-2.1.
+If this is the MIDP version (e.g. MIDP-2.0 or MIDP-2.1),
+use a program which has midp20
+(e.g. midp20_RSSReader.jar)
 If version 1.0, use program without midp10  (e.g. midp10_RSSReader.jar).
 Look for the Specific JSR.  If it has JSR-75, choose the program with jsr75
 (e.g. midp20_jsr75_RSSReader).  If it does not have JSR-75, choose the program
@@ -103,9 +115,7 @@ Near the bottom it will say
 phone MIDP.  Take that number or numbers there and use it as above for 
 picking the MIDP
 version program to install.
-After phone MIDP, it has phone CLDC.  Take that number or numbers there and
-use it as above for picking the CLDC version program to install.  
-After phone CLDC, it has phone jsr75.  If that has true, the phone has JSR-75.
+The specifications also has phone jsr75.  If that has true, the phone has JSR-75.
 Use it as above for the JSR-75 version program to install.  
 
  == Install/copy Mobile RSS Reader to phone instructions == 
@@ -113,8 +123,8 @@ Use it as above for the JSR-75 version program to install.
 To install/copy RSSReader to the phone, you will need some communication  
 method between your computer and your phone to be working (e-mail, cable, 
 bluetooth, or infrared), and copy the midp10_RSSReader.jar,
-midp20_RSSReader.jar, midp20_cldc11_RSSReader.jar,
-midp20_jsr75_RSSReader.jar, midp20_cldc11_jsr75_RSSReader.jar, file  
+midp20_RSSReader.jar, midp20_jsr75_RSSReader.jar,
+file  
 (that is in the
 [http://code.google.com/p/mobile-rss-reader/downloads/list (zip file)] ) from the  
 computer to the phone. If you have an old phone (that uses MIDP  
