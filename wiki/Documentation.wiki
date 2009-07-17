@@ -135,10 +135,10 @@ and the help of your communication program.
 Alternatively, you can use your phone browser to download  
 RSSReader directly from this web.
 
-Just enter this url for MIDP-2.0 and CLDC-1.0 (see above): 
+Just enter this url for MIDP-2.0 (see above): 
 http://mobile-rss-reader.googlecode.com/files/midp20_RSSReader-1_11_1.jar
 
-Just enter this url for MIDP-2.0, CLDC-1.0 and JSR-75 (see above): 
+Just enter this url for MIDP-2.0, and JSR-74 (see above): 
 http://mobile-rss-reader.googlecode.com/files/midp20_jsr75_RSSReader-1_11_1.jar
 
 If your phone is old (has MIDP-1.0), use this url: 
