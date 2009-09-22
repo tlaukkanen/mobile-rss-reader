@@ -171,7 +171,6 @@ final public class EncodingUtil {
 	//#ifdef DLOGGING
     final private Logger logger = Logger.getLogger("EncodingUtil");
     final private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    final private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of EncodingUtil */
@@ -205,23 +204,146 @@ final public class EncodingUtil {
            cencoding = "UTF-8";
         }
         cencoding = cencoding.toUpperCase();
-		boolean modUTF16 = m_encodingStreamReader.isModUTF16();
+		boolean modBit16 = m_encodingStreamReader.isModBit16();
 		boolean modEncoding = m_encodingStreamReader.isModEncoding();
-		m_utf = false;
+		m_utf = m_encodingStreamReader.isUtfDoc();
 		m_windows = false;
 		String docEncoding = fileEncoding;
 		// Only need to convert from 2 byte to 1 byte and vsa versa.
-        if ((cencoding.equals("UTF-8") || cencoding.equals("UTF8"))) {
+        if (cencoding.equals("UTF-8") || cencoding.equals("UTF8") ||
+				(m_utf && !modBit16)) {
             docEncoding = "UTF-8";
             modEncoding = false;
+            modBit16 = false;
 			m_utf = true;
         } else if (cencoding.equals("UTF-16") || cencoding.equals("UTF16")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modUTF16 = true;
+            modBit16 = true;
+            modEncoding = true;
 			m_utf = true;
 			// Don't do doc encoding as the stream reader does it.
             docEncoding = "";
+        } else if (cencoding.equals("BIG5") || cencoding.equals("BIG-5")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = false;
+			m_utf = false;
+            docEncoding = "BIG5";
+
+        } else if (cencoding.equals("BIG-HSCS") ||
+			cencoding.equals("BIG_HSCS") || cencoding.equals("BIG-HSCS")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = false;
+			m_utf = false;
+            docEncoding = "BIG_HSCS";
+
+        } else if (cencoding.equals("windows-31j") ||
+			cencoding.equals("MS932")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = false;
+			m_utf = false;
+            docEncoding = "MS932";
+        } else if (cencoding.equals("x-mswin-936") ||
+			cencoding.equals("MS936")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = false;
+			m_utf = false;
+            docEncoding = "MS936";
+        } else if (cencoding.equals("EUC_CN") || cencoding.equals("x-EUC-CN")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "EUC_CN";
+        } else if (cencoding.equals("SJIS") || cencoding.equals("Shift-JIS")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = false;
+			m_utf = false;
+            docEncoding = "SJIS";
+        } else if (cencoding.equals("EUC_JP") || cencoding.equals("EUC-JP")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = false;
+			m_utf = false;
+            docEncoding = "EUC_JP";
+        } else if (cencoding.equals("EUC_JP_LINUX") || cencoding.equals("EUC-JP-LINUX")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "EUC_JP_LINUX";
+        } else if (cencoding.equals("ISO-2022-JP") || cencoding.equals("ISO2022JP")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "ISO2022JP";
+        } else if (cencoding.equals("x-windows-949") ||
+				cencoding.equals("MS949")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "MS949";
+        } else if (cencoding.equals("x-windows-950") ||
+				cencoding.equals("MS950")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "MS950";
+        } else if (cencoding.equals("x-MS950-HKSCS") ||
+				cencoding.equals("MS950_HKSCS")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "MS950_HKSCS";
+        } else if (cencoding.equals("ISCII91")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "ISCII91";
+        } else if (cencoding.equals("EUC_TW") || cencoding.equals("EUC-TW")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "EUC_TW";
+        } else if (cencoding.equals("TIS-620") || cencoding.equals("TIS620")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "TIS620";
+        } else if (cencoding.equals("GBK")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = false;
+			m_utf = false;
+            docEncoding = "GBK";
 		} else if (cencoding.startsWith("ISO-8859")) {
 			if (hasIso8859Encoding) {
 				if (isoEncoding.indexOf("-") == -1) {
@@ -235,7 +357,15 @@ final public class EncodingUtil {
 				docEncoding = "";
 			}
 			modEncoding = false;
+            modBit16 = false;
 
+        } else if (cencoding.equals("GB18030")) {
+			// If utf-16, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16 = false;
+            modEncoding = true;
+			m_utf = false;
+            docEncoding = "GB18030";
 		} else if (cencoding.startsWith("ISO8859")) {
 			if (hasIso8859Encoding) {
 				if (isoEncoding.indexOf("-") >= 0) {
@@ -249,6 +379,8 @@ final public class EncodingUtil {
 				docEncoding = "";
 			}
 			modEncoding = false;
+            modBit16 = false;
+
 		} else if (cencoding.startsWith("WINDOWS-12")) {
 			if (hasWinEncoding) {
 				if (winEncoding.indexOf("-") == -1) {
@@ -261,6 +393,7 @@ final public class EncodingUtil {
 				docEncoding = "";
 			}
 			modEncoding = false;
+            modBit16 = false;
 			m_windows = true;
 		} else if (cencoding.indexOf("CP-") == 0) {
 			if (hasWinEncoding) {
@@ -275,6 +408,7 @@ final public class EncodingUtil {
 				docEncoding = "";
 			}
 			modEncoding = false;
+            modBit16 = false;
 			m_windows = true;
 		} else if (cencoding.startsWith("CP")) {
 			if (hasWinEncoding) {
@@ -288,6 +422,7 @@ final public class EncodingUtil {
 				docEncoding = "";
 			}
 			modEncoding = false;
+            modBit16 = false;
 			m_windows = true;
 		}
 		if (docEncoding.equals(fileEncoding)) {
@@ -344,7 +479,7 @@ final public class EncodingUtil {
 			}
 		}
 		m_encodingStreamReader.setModEncoding(modEncoding);
-		m_encodingStreamReader.setModUTF16(modUTF16);
+		m_encodingStreamReader.setModBit16(modBit16);
 
 		//#ifdef DLOGGING
         if (fineLoggable) {logger.fine("hasIso8859Encoding=" + hasIso8859Encoding);}
@@ -359,7 +494,7 @@ final public class EncodingUtil {
         if (fineLoggable) {logger.fine("m_windows=" + m_windows);}
         if (fineLoggable) {logger.fine("m_utf=" + m_utf);}
         if (fineLoggable) {logger.fine("modEncoding=" + modEncoding);}
-        if (fineLoggable) {logger.fine("modUTF16=" + modUTF16);}
+        if (fineLoggable) {logger.fine("modBit16=" + modBit16);}
 		//#endif
     }
 
