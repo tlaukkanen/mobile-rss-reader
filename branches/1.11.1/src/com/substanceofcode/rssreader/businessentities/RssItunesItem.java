@@ -27,6 +27,16 @@
 //#define DNOITUNES
 // Expand to define test define
 //#define DNOTEST
+// Expand to define test ui define
+//#define DNOTESTUI
+// Expand to define JMUnit test define
+//#define ${DJMTESTDEF}
+//#ifdef DTESTUI
+//#define HAS_EQUALS
+//#endif
+//#ifdef DLOGGING
+//#define HAS_EQUALS
+//#endif
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -39,6 +49,12 @@ import java.util.Hashtable;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
+//#ifdef DLOGGING
+//@import com.substanceofcode.testutil.logging.TestLogUtil;
+//#elif DTESTUI
+//@import com.substanceofcode.testutil.console.TestLogUtil;
+//#endif
+
 /**
  * RssItunesItem class is a data store for a single item in RSS feed.
  * One item consist of title, link, description and optional date.
@@ -46,7 +62,13 @@ import java.util.Hashtable;
  * @author  Tommi Laukkanen
  * @version 1.1
  */
-public class RssItunesItem extends RssItem {
+public class RssItunesItem extends RssItem
+//#ifdef DTEST
+//#ifdef DJMTEST
+//@implements RssItunesItemInfo
+//#endif
+//#endif
+{
     
 	// Make max summary same as max description (actual max is 50K)
     public static int MAX_SUMMARY = 500;
@@ -60,9 +82,12 @@ public class RssItunesItem extends RssItem {
 	// can later be modified to contain them).
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssItunesItem");
-	//#endif
-	//#ifdef DLOGGING
+//@	private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#elif DTESTUI
+//@    private Object logger = null;
+//@    private boolean fineLoggable = true;
+//@    private boolean finestLoggable = true;
 	//#endif
     protected boolean m_itunes = false;
     protected String m_author = "";   // The RSS item description
@@ -288,17 +313,54 @@ public class RssItunesItem extends RssItem {
         this.m_explicit = (byte)explicit;
     }
 
-    public String getExplicit() {
-		switch (m_explicit) {
-			case (byte)0:
-				return "no";
-			case (byte)1:
-				return "clean";
-			case (byte)2:
-				return "yes";
+    static public String convExplicit(byte explicit) {
+		switch (explicit) {
+			case 0:
+				return "No";
+			case 1:
+				return "Clean";
+			case 2:
+				return "Yes";
 			default:
 				return UNSPECIFIED;
 		}
+    }
+
+    public String getExplicit() {
+		return convExplicit(m_explicit);
+	}
+
+    static public byte convExplicit(String pexplicit) {
+		if ((pexplicit == null) || (pexplicit.length() == 0)) {
+			return BNO_EXPLICIT;
+		}
+		String explicit = pexplicit.toLowerCase();
+		switch (explicit.charAt(0)) {
+			case 'n':
+				if (explicit.equals("no")) {
+					return (byte)0;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			case 'c':
+				if (explicit.equals("clean")) {
+					return (byte)1;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			case 'y':
+				if (explicit.equals("yes")) {
+					return (byte)2;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			default:
+				return BNO_EXPLICIT;
+		}
+    }
+
+    public void setExplicit(String explicit) {
+        this.m_explicit = convExplicit(explicit);
     }
 
     public void setDuration(String m_duration) {
@@ -309,45 +371,51 @@ public class RssItunesItem extends RssItem {
         return (m_duration);
     }
     
-	//#ifdef DTEST
-//@	/* Compare item. */
-//@	public boolean equals(RssItunesItem item) {
-//@		if (!super.equals(item)) {
-//@			return false;
+	/* Compare item. */
+	//#ifdef HAS_EQUALS
+	//#ifdef DJMTEST
+//@	public boolean equals(RssItunesItemInfo pitem)
+	//#else
+//@	public boolean equals(RssItunesItem pitem)
+	//#endif
+//@	{
+//@		boolean result = true;
+//@		if (!super.equals(pitem)) {
+//@			result = false;
 //@		}
-//@		if (!item.m_author.equals(m_author)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_author,this=" + item.m_author + "," + m_author);}
-			//#endif
-//@			return false;
+		//#ifdef DJMTEST
+//@		if (!(pitem instanceof RssItunesItemInfo)) {
+//@			return result;
 //@		}
-//@		if (!item.m_subtitle.equals(m_subtitle)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_subtitle,this=" + item.m_subtitle + "," + m_subtitle);}
-			//#endif
-//@			return false;
+//@		RssItunesItemInfo item = (RssItunesItemInfo)pitem;
+		//#else
+//@		if (!(pitem instanceof RssItunesItem)) {
+//@			return result;
 //@		}
-//@		if (!item.m_summary.equals(m_summary)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_summary,this=" + item.m_summary + "," + m_summary);}
-			//#endif
-//@			return false;
+//@		RssItunesItem item = (RssItunesItem)pitem;
+		//#endif
+//@		if (!TestLogUtil.fieldEquals(item.isItunes(), m_itunes,
+//@			"m_itunes", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@
-//@		if (item.m_explicit != m_explicit) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_explicit,this=" + item.m_explicit + "," + m_explicit);}
-			//#endif
-//@			return false;
+//@		if (!TestLogUtil.fieldEquals(item.getAuthor(), m_author,
+//@			"m_author", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@
-//@		if (!item.m_duration.equals(m_duration)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_duration,this=" + item.m_duration + "," + m_duration);}
-			//#endif
-//@			return false;
+//@		if (!TestLogUtil.fieldEquals(item.getSubtitle(), m_subtitle,
+//@			"m_subtitle", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@		return true;
+//@		if (!TestLogUtil.fieldEquals(item.getSummary(), m_summary,
+//@			"m_summary", logger, fineLoggable)) {
+//@			result = false;
+//@		}
+//@		if (!TestLogUtil.fieldEquals(item.getExplicit(),
+//@					RssItunesItem.convExplicit(m_explicit),
+//@			"m_explicit", logger, fineLoggable)) {
+//@			result = false;
+//@		}
+//@		return result;
 //@	}
 	//#endif
 
