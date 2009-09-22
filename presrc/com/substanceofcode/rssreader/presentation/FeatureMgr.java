@@ -96,7 +96,6 @@ public class FeatureMgr implements CommandListener, Runnable {
 	//#ifdef DLOGGING
 	private Logger logger = Logger.getLogger("FeatureMgr");
 	private boolean fineLoggable = logger.isLoggable(Level.FINE);
-	private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
 	private CommandListener cmdFeatureUser = null;
