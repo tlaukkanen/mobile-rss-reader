@@ -20,13 +20,24 @@
  *
  */
 
+// Expand to define logging define
+@DLOGDEF@
+// Expand to define test define
+@DTESTDEF@
+//#ifdef DTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
-import com.substanceofcode.rssreader.businessentities.RssItem;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+
+import com.substanceofcode.testutil.logging.TestLogUtil;
+
+//#ifdef DLOGGING
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * CompatibilityRssItem2 class is a data store for a single item in RSS feed.
@@ -35,17 +46,22 @@ import java.util.Date;
  * @author  Tommi Laukkanen
  * @version 1.1
  */
-public class CompatibilityRssItem2 extends RssItem {
+public class CompatibilityRssItem2 implements RssItemInfo {
     
-    /** Creates a new instance of CompatibilityRssItem2.  Used by this class and
-	    RssItem and later the fields are initalized. */
-    protected CompatibilityRssItem2() {
-		super();
-	}
+    private String m_title = "";   // The RSS item title
+    private String m_link  = "";   // The RSS item link
+    private String m_desc  = "";   // The RSS item description
+    private Date m_date = null;
+    private String m_enclosure  = "";   // The RSS item enclosure
+    private boolean m_unreadItem = false;
+    
+	//#ifdef DLOGGING
+    private Logger logger = Logger.getLogger("CompatibilityRssItem2");
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+	//#endif
 
-    /** Creates a new instance of RssItem */
+    /** Creates a new instance of CompatibilityRssItem2 */
     public CompatibilityRssItem2(String title, String link, String desc) {
-		super();
         m_title = title;
         m_link = link;
         m_desc = desc;
@@ -53,10 +69,9 @@ public class CompatibilityRssItem2 extends RssItem {
         m_enclosure = "";
     }
     
-    /** Creates a new instance of RssItem */
+    /** Creates a new instance of CompatibilityRssItem2 */
     public CompatibilityRssItem2(String title, String link, String desc, Date pubDate,
 			       String enclosure, boolean unreadItem) {
-		super();
         m_title = title;
         m_link = link;
         m_desc = desc;
@@ -65,15 +80,54 @@ public class CompatibilityRssItem2 extends RssItem {
         m_unreadItem = unreadItem;
     }
     
-    public CompatibilityRssItem2(RssItem item) {
-		super();
-        m_title = item.m_title;
-        m_link = item.m_link;
-        m_desc = item.m_desc;
-        m_date = item.m_date;
-        m_enclosure = item.m_enclosure;
-        m_unreadItem = item.m_unreadItem;
-	}
+    /** Creates a new instance of CompatibilityRssItem2 */
+    public CompatibilityRssItem2(RssItemInfo item) {
+        m_title = item.getTitle(); 
+        m_link = item.getLink();
+        m_desc = item.getDescription();
+        m_date = item.getDate();
+        m_enclosure = item.getEnclosure();
+        m_unreadItem = isUnreadItem();
+    }
+    
+    /** Get RSS item title */
+    public String getTitle(){
+        return m_title;
+    }
+    
+    /** Get RSS item title */
+    public void setTitle(String title){
+        m_title = title;
+    }
+    
+    /** Get RSS item link address */
+    public String getLink(){
+        return m_link;
+    }
+    
+    /** Get RSS item link address */
+    public void setLink(String link){
+        m_link = link;
+    }
+    
+    /** Get RSS item description */
+    public String getDescription(){
+        return m_desc;
+    }
+    
+    /** Get RSS item description */
+    public void setDescription(String description){
+        m_desc = description;
+    }
+    
+    /** Get RSS item publication date */
+    public Date getDate() {
+        return m_date;
+    }
+    
+    public void setDate(Date date) {
+        this.m_date = date;
+    }
 
     /** Serialize the object */
     public String serialize() {
@@ -84,7 +138,7 @@ public class CompatibilityRssItem2 extends RssItem {
             dateString = String.valueOf( m_date.getTime() );
         }
 
-		String title = m_title.replace('|', '\n');
+		String title = StringUtil.replace(m_title, "|", "\n");
         String preData = title + "|" + m_link + "|" + dateString + "|" +
 			    m_enclosure + "|" + (m_unreadItem ? "1" : "0") + "|" + m_desc;
         Base64 b64 = new Base64();
@@ -97,8 +151,12 @@ public class CompatibilityRssItem2 extends RssItem {
 		return encodedSerializedData;
 	}
 		
+    public String unencodedSerialize() {
+		throw new RuntimeException("unencodedSerialize not supported.");
+	}
+
 	/** Deserialize the object */
-	public static CompatibilityRssItem2 deserialize2(String data) {
+	public static CompatibilityRssItem2 deserialize(String data) {
 			
 		String title = "";
 		String link = "";
@@ -150,7 +208,7 @@ public class CompatibilityRssItem2 extends RssItem {
 					DESC = 3;
 				}
 				if (DESC != 3) {
-					title = title.replace('\n', '|');
+					title = StringUtil.replace(title, "\n", "|");
 				}
 			} else {
 				DESC = 3;
@@ -166,39 +224,59 @@ public class CompatibilityRssItem2 extends RssItem {
 			item = new CompatibilityRssItem2(title, link, desc, date, enclosure, unreadItem);
 
         } catch(Exception e) {
-            System.err.println("Error while rssitem deserialize : " + e.toString());
+            System.err.println("Error while CompatibilityRssItem2 deserialize : " + e.toString());
 			e.printStackTrace();
         }
         return item;
     }
 
+    public void setUnreadItem(boolean unreadItem) {
+        this.m_unreadItem = unreadItem;
+    }
+
+    public boolean isUnreadItem() {
+        return (m_unreadItem);
+    }
+
+    public void setEnclosure(String enclosure) {
+        this.m_enclosure = enclosure;
+    }
+
+    public String getEnclosure() {
+        return (m_enclosure);
+    }
+
+	//#ifdef DTEST
 	/* Compare item. */
-	public boolean equals(RssItem item) {
-		if (!item.m_title.equals(m_title)) {
-			return false;
+	public boolean equals(RssItemInfo item) {
+		boolean result = true;
+		if (!TestLogUtil.fieldEquals(item.getTitle(), m_title,
+			"m_title", logger, fineLoggable)) {
+			result = false;
 		}
-		if (!item.m_link.equals(m_link)) {
-			return false;
+		if (!TestLogUtil.fieldEquals(item.getLink(), m_link,
+			"m_link", logger, fineLoggable)) {
+			result = false;
 		}
-		if (!item.m_desc.equals(m_desc)) {
-			return false;
+		if (!TestLogUtil.fieldEquals(item.getDescription(), m_desc,
+			"m_desc", logger, fineLoggable)) {
+			result = false;
 		}
-		if ((item.m_date == null) && (this.m_date == null)) {
-		} else if ((item.m_date != null) && (this.m_date != null)) {
-			if (item.m_date.equals(this.m_date)) {
-			} else {
-				return false;
-			}
-		} else {
-			return false;
+		if (!TestLogUtil.fieldEquals(item.getDate(), m_date,
+			"m_date", logger, fineLoggable)) {
+			result = false;
 		}
-		if (!item.m_enclosure.equals(m_enclosure)) {
-			return false;
+		if (!TestLogUtil.fieldEquals(item.getEnclosure(), m_enclosure,
+			"m_enclosure", logger, fineLoggable)) {
+			result = false;
 		}
-		if (item.m_unreadItem != m_unreadItem) {
-			return false;
+		if (!TestLogUtil.fieldEquals(item.isUnreadItem(), m_unreadItem,
+			"m_unreadItem", logger, fineLoggable)) {
+			result = false;
 		}
-		return true;
+		return result;
 	}
+	//#endif
 
 }
+//#endif
