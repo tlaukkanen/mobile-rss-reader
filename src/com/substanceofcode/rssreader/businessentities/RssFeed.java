@@ -33,7 +33,7 @@
 // Expand to define logging define
 //#define DNOLOGGING
 // Expand to define JMUnit test define
-//#define ${DJMTESTDEF}
+//#define DNOJMTEST
 //#ifdef DTESTUI
 //#define HAS_EQUALS
 //#endif
