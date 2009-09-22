@@ -142,7 +142,9 @@ implements Runnable {
 			} else {
 				String supdDate = m_rssFeed.getUpddateTz();
 				m_rssFeed.setUpddateTz(m_lastMod);
+				//#ifdef DLOGGING
 				String etag = m_rssFeed.getEtag();
+				//#endif
 				m_rssFeed.setEtag(m_etag);
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest("run supdDate,m_lastMod,etag,m_etag=" + supdDate + "," + m_lastMod + "," + etag + "," + m_etag);}
@@ -302,7 +304,9 @@ implements Runnable {
 									  m_rssFeed.getUrl(), t);
         } finally {
             m_ready = true;
-			m_midlet.wakeup(2);
+			if (m_midlet != null) {
+				m_midlet.wakeup(2);
+			}
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("run m_successfull,m_ready=" + m_successfull + "," + m_ready);}
 			//#endif
