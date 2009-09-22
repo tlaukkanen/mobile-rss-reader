@@ -47,6 +47,7 @@ presrc = ../../../../RSSReaderold/mobile-rss-reader/presrc
 #testui.presrc = /cygwin/tmp/irvb/old/mobile-rss-reader/RSSReader-1_11_1/testpresrc
 DTESTDEF = DTEST
 DTESTUIDEF = DTESTUI
+DJMTESTDEF = DNOJMTEST
 DLOGDEF = DNOLOGGING
 svn.home = C:\\PROGRA~1\\COLLAB~1
 #svn.home = C:\\PROGRA~1\\TORTOI~1
