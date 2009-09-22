@@ -24,12 +24,29 @@
 //#define DNOLOGGING
 // Expand to define test define
 //#define DNOTEST
+// Expand to define test ui define
+//#define DNOTESTUI
+// Expand to define JMUnit test define
+//#define ${DJMTESTDEF}
+//#ifdef DTESTUI
+//#define HAS_EQUALS
+//#endif
+//#ifdef DLOGGING
+//#define HAS_EQUALS
+//#endif
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+
+//#ifdef DLOGGING
+//@import com.substanceofcode.testutil.logging.TestLogUtil;
+//#elif DTESTUI
+//@import com.substanceofcode.testutil.console.TestLogUtil;
+//#endif
+
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.Level;
@@ -42,12 +59,15 @@ import java.util.Date;
  * @author  Tommi Laukkanen
  * @version 1.1
  */
-public class RssItem {
+public class RssItem
+	//#ifdef DTEST
+	//#ifdef DJMTEST
+//@	implements RssItemInfo
+	//#endif
+	//#endif
+{
     
     protected static final char CONE = (char)1;
-	//#ifdef DLOGGING
-//@    private Logger logger = Logger.getLogger("RssItem");
-	//#endif
 	// Use protected so that sub classes can access these including the
 	// backward store compatibility classes.
     protected String m_title = "";   // The RSS item title
@@ -57,7 +77,13 @@ public class RssItem {
     protected String m_enclosure  = "";   // The RSS item enclosure
     protected boolean m_unreadItem = false;
 	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("RssItem");
+//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#elif DTESTUI
+//@    private Object logger = null;
+//@    private boolean fineLoggable = true;
+//@    private boolean finestLoggable = true;
 	//#endif
     
     /** Creates a new instance of RssItem.  Used by this class and
@@ -86,9 +112,19 @@ public class RssItem {
         return m_title;
     }
     
+    /** Get RSS item title */
+    public void setTitle(String title){
+        m_title = title;
+    }
+    
     /** Get RSS item link address */
     public String getLink(){
         return m_link;
+    }
+    
+    /** Get RSS item link address */
+    public void setLink(String link){
+        m_link = link;
     }
     
     /** Get RSS item description */
@@ -96,11 +132,20 @@ public class RssItem {
         return m_desc;
     }
     
+    /** Get RSS item description */
+    public void setDescription(String description){
+        m_desc = description;
+    }
+    
     /** Get RSS item publication date */
     public Date getDate() {
         return m_date;
     }
     
+    public void setDate(Date date) {
+        this.m_date = date;
+    }
+
     /** Serialize the object
 	  When we serialize we don't do anything special for itunes as the
 	  store to memory will be deserialized only by the iTunes capable
@@ -248,63 +293,52 @@ public class RssItem {
 	}
 
 	/* Copy to item. */
-	public RssItem copyTo(RssItem item) {
-		item.m_title = m_title;
-		item.m_link  = m_link;
-		item.m_desc  = m_desc;
-		item.m_date = m_date;
-		item.m_enclosure  = m_enclosure;
-		item.m_unreadItem = m_unreadItem;
+	/* UNDO?
+	public RssItemInfo copyTo(RssItemInfo item) {
+		item.setTitle(m_title);
+		item.setLink(m_link);
+		item.setDescription(m_desc);
+		item.setDate(m_date);
+		item.setEnclosure(m_enclosure);
+		item.setUnreadItem(m_unreadItem);
 		return item;
 	}
+	UNDO */
 
-	//#ifdef DTEST
-//@	/* Compare item. */
-//@	public boolean equals(RssItem item) {
-//@		if (!item.m_title.equals(m_title)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_title,this=" + item.m_title + "," + m_title);}
-			//#endif
-//@			return false;
+	/* Compare item. */
+	//#ifdef HAS_EQUALS
+	//#ifdef DJMTEST
+//@	public boolean equals(RssItemInfo item)
+	//#else
+//@	public boolean equals(RssItem item)
+	//#endif
+//@	{
+//@		boolean result = true;
+//@		if (!TestLogUtil.fieldEquals(item.getTitle(), m_title,
+//@			"m_title", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@		if (!item.m_link.equals(m_link)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_link,this=" + item.m_link + "," + m_link);}
-			//#endif
-//@			return false;
+//@		if (!TestLogUtil.fieldEquals(item.getLink(), m_link,
+//@			"m_link", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@		if (!item.m_desc.equals(m_desc)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_desc,this=" + item.m_desc + "," + m_desc);}
-			//#endif
-//@			return false;
+//@		if (!TestLogUtil.fieldEquals(item.getDescription(), m_desc,
+//@			"m_desc", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@		if ((item.m_date != null) && (this.m_date != null)) {
-//@			if (!item.m_date.equals(this.m_date)) {
-				//#ifdef DLOGGING
-//@				if (finestLoggable) {logger.finest("unequal dates=" + item.m_date + "," + m_date);}
-				//#endif
-//@				return false;
-//@			}
-//@		} else if ((item.m_date != null) || (this.m_date != null)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal dates=" + item.m_date + "," + m_date);}
-			//#endif
-//@			return false;
+//@		if (!TestLogUtil.fieldEquals(item.getDate(), m_date,
+//@			"m_date", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@		if (!item.m_enclosure.equals(m_enclosure)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_enclosure,this=" + item.m_enclosure + "," + m_enclosure);}
-			//#endif
-//@			return false;
+//@		if (!TestLogUtil.fieldEquals(item.getEnclosure(), m_enclosure,
+//@			"m_enclosure", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@		if (item.m_unreadItem != m_unreadItem) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_unreadItem,this=" + item.m_unreadItem + "," + m_unreadItem);}
-			//#endif
-//@			return false;
+//@		if (!TestLogUtil.fieldEquals(item.isUnreadItem(), m_unreadItem,
+//@			"m_unreadItem", logger, fineLoggable)) {
+//@			result = false;
 //@		}
-//@		return true;
+//@		return result;
 //@	}
 	//#endif
 
@@ -316,12 +350,12 @@ public class RssItem {
         return (m_unreadItem);
     }
 
-    public void setEnclosure(String enclosure) {
-        this.m_enclosure = enclosure;
-    }
-
     public String getEnclosure() {
         return (m_enclosure);
+    }
+
+    public void setEnclosure(String enclosure) {
+        m_enclosure = enclosure;
     }
 
     /** convert the object to string */
