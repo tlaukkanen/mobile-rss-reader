@@ -24,8 +24,6 @@
 @DITUNESDEF@
 // Expand to define logging define
 @DLOGDEF@
-// Expand to define test define
-@DTESTDEF@
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -43,8 +41,11 @@ import net.sf.jlogmicro.util.logging.Level;
  *
  * @author Irving Bunton
  */
-public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
-    
+public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3
+//#ifdef DTEST
+implements RssItunesFeedInfo
+//#endif
+{
     
 	// Make max summary same as max description (actual max is 50K)
     public static int MAX_SUMMARY = 500;
@@ -61,6 +62,7 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
 	// can later be modified to contain them).
+    private static int INT_ITUNES_INDICATOR = NBR_ITUNES_FEED_INFO;
     private boolean m_itunes = false;
     protected String m_title = "";
     protected String m_description = "";
@@ -68,10 +70,11 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
     protected String m_author = "";   // The RSS feed author
     protected String m_subtitle = "";   // The RSS feed subtitle
     protected String m_summary = "";   // The RSS feed summary
-    private byte m_explicit = RssItunesItem.BNO_EXPLICIT;   // The RSS feed explicit
-
+    private byte m_explicit = CompatibilityRssItunesItem3.BNO_EXPLICIT;   // The RSS feed explicit
+    
     /** Creates a new instance of RSSBookmark */
     public CompatibilityRssItunesFeed3(){
+		super();
 	}
 
     /** Creates a new instance of RSSBookmark */
@@ -121,35 +124,22 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
 	}
 
 	/** Create feed from an existing feed.  **/
-	public CompatibilityRssItunesFeed3(RssFeed feed) {
-		super(feed);
+	public CompatibilityRssItunesFeed3(RssFeedInfo pfeed) {
+		super(pfeed);
 		try {
         
-			if (feed instanceof CompatibilityRssItunesFeed3) {
-				CompatibilityRssItunesFeed3 itfeed = (CompatibilityRssItunesFeed3)feed;
-				modifyItunes(itfeed.m_itunes, itfeed.m_title, itfeed.m_description, itfeed.m_language, itfeed.m_author, itfeed.m_subtitle,
-					itfeed.m_summary, itfeed.m_explicit);
-			} else if (feed instanceof RssItunesFeed) {
-				RssItunesFeed itfeed = (RssItunesFeed)feed;
-				modifyItunes(itfeed.m_itunes, itfeed.m_title, itfeed.m_description, itfeed.m_language, itfeed.m_author, itfeed.m_subtitle,
-					itfeed.m_summary, itfeed.m_explicit);
-			} else {
-				final Vector cvitems = feed.getItems();
-				if (cvitems.size() > 0) {
-					RssItem[] citems = new RssItem[cvitems.size()];
-					cvitems.copyInto(citems);
-					Vector nvitems = new Vector();
-					for (int ic = 0; ic < citems.length; ic++) {
-						final RssItem item = citems[ic];
-						if (item instanceof RssItunesItem) {
-							nvitems.addElement(
-									new CompatibilityRssItunesItem3(item));
-						} else {
-							nvitems.addElement(
-									new CompatibilityRssItunesItem3(item));
-						}
-					}
-					m_items = nvitems;
+			if (pfeed instanceof RssItunesFeedInfo) {
+				RssItunesFeedInfo feed = (RssItunesFeedInfo)pfeed;
+				this.m_itunes = feed.isItunes();
+				if (this.m_itunes) {
+					this.m_title = feed.getTitle();
+					this.m_description = feed.getDescription();
+					this.m_language = feed.getLanguage();
+					this.m_author = feed.getAuthor();
+					this.m_subtitle = feed.getSubtitle();
+					this.m_summary = feed.getSummary();
+					this.m_explicit = CompatibilityRssItunesItem3.convExplicit(
+							feed.getExplicit());
 				}
 			}
         } catch(Throwable e) {
@@ -166,7 +156,7 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
 
 		try {
         
-			boolean hasPipe = (storeString.indexOf(CONE) >= 0);
+			boolean hasPipe = (storeString.indexOf('\n') >= 0);
 			String[] nodes = StringUtil.split( storeString, "|" );
 			CompatibilityRssItunesFeed3 feed = new CompatibilityRssItunesFeed3();
 			feed.init(hasPipe, encoded, nodes);
@@ -199,13 +189,13 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
 				int TITLE = 1;
 				m_title = nodes[TITLE];
 				if (hasPipe) {
-					m_title = m_title.replace(CONE, '|');
+					m_title = m_title.replace('\n', '|');
 				}
 				
 				int DESCRIPTION = 2;
 				m_description = nodes[DESCRIPTION];
 				if (hasPipe) {
-					m_description = m_description.replace(CONE, '|');
+					m_description = m_description.replace('\n', '|');
 				}
 				
 				int LANGUAGE = 3;
@@ -214,19 +204,19 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
 				int AUTHOR = 4;
 				m_author = nodes[AUTHOR];
 				if (hasPipe) {
-					m_author = m_author.replace(CONE, '|');
+					m_author = m_author.replace('\n', '|');
 				}
 				
 				int SUBTITLE = 5;
 				m_subtitle = nodes[SUBTITLE];
 				if (hasPipe) {
-					m_subtitle = m_subtitle.replace(CONE, '|');
+					m_subtitle = m_subtitle.replace('\n', '|');
 				}
 				
 				int SUMMARY = 6;
 				m_summary = nodes[SUMMARY];
 				if (hasPipe) {
-					m_summary = m_summary.replace(CONE, '|');
+					m_summary = m_summary.replace('\n', '|');
 				}
 
 				int EXPLICIT = 7;
@@ -234,7 +224,7 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
 				if (explicit.length() > 0) {
 					m_explicit = (byte)Integer.parseInt(explicit);
 				} else {
-					m_explicit = RssItunesItem.BNO_EXPLICIT;
+					m_explicit = CompatibilityRssItunesItem3.BNO_EXPLICIT;
 				}
 			}
 			//#endif
@@ -257,17 +247,17 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
 		String summary = "";
 		//#ifdef DITUNES
 		if (m_itunes) {
-			title = m_title.replace('|', CONE);
-			description = m_description.replace('|', CONE);
-			author = m_author.replace('|', CONE);
-			subtitle = m_subtitle.replace('|', CONE);
-			summary = m_summary.replace('|', CONE);
+			title = m_title.replace('|', '\n');
+			description = m_description.replace('|', '\n');
+			author = m_author.replace('|', '\n');
+			subtitle = m_subtitle.replace('|', '\n');
+			summary = m_summary.replace('|', '\n');
 		}
 		//#endif
         String storeString = (m_itunes ? "1" : "") + "|" + title + "|" +
 			description + "|" + m_language + "|" +
                 author + "|" + subtitle + "|" + summary + "|" +
-                 ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
+                 ((m_explicit == CompatibilityRssItunesItem3.BNO_EXPLICIT) ? "" :
 						 Integer.toString((int)m_explicit)) + "|" +
 			super.getStoreString(serializeItems, encoded);
         return storeString;
@@ -289,46 +279,61 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
 		//#endif
 	}
     
-	//#ifdef DTEST
 	/** Compare feed to an existing feed.  **/
-	public boolean equals(RssItunesFeed feed) {
+	public boolean equals(RssFeedInfo pfeed) {
 		boolean rtn = true;
-		if (!super.equals(feed)) {
+		if (!super.equals(pfeed)) {
 			rtn = false;
 		}
-		if (feed.m_itunes != m_itunes) {
+		if (!(pfeed instanceof RssItunesFeedInfo)) {
+			return rtn;
+		}
+		RssItunesFeedInfo feed = (RssItunesFeedInfo)pfeed;
+		if (feed.isItunes() != m_itunes) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_itunes,this=" + feed.m_itunes + "," + m_itunes);}
+			if (finestLoggable) {logger.finest("unequal feed.m_itunes,this=" + feed.isItunes() + "," + m_itunes);}
 			//#endif
 			rtn = false;
 		}
-		if (!feed.m_language.equals(this.m_language)) {
+		if (!feed.getTitle().equals(this.m_title)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_language,this=" + feed.m_language + "," + m_language);}
+			if (finestLoggable) {logger.finest("unequal feed.m_title,this=" + feed.getTitle() + "," + m_title);}
 			//#endif
 			rtn = false;
 		}
-		if (!feed.m_author.equals(this.m_author)) {
+		if (!feed.getDescription().equals(this.m_description)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_author,this=" + feed.m_author + "," + m_author);}
+			if (finestLoggable) {logger.finest("unequal feed.m_description,this=" + feed.getDescription() + "," + m_description);}
 			//#endif
 			rtn = false;
 		}
-		if (!feed.m_summary.equals(this.m_summary)) {
+		if (!feed.getLanguage().equals(this.m_language)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_summary,this=" + feed.m_summary + "," + m_summary);}
+			if (finestLoggable) {logger.finest("unequal feed.m_language,this=" + feed.getLanguage() + "," + m_language);}
 			//#endif
 			rtn = false;
 		}
-		if (feed.m_explicit != m_explicit) {
+		if (!feed.getAuthor().equals(this.m_author)) {
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal feed.m_explicit,this=" + feed.m_explicit + "," + m_explicit);}
+			if (finestLoggable) {logger.finest("unequal feed.m_author,this=" + feed.getAuthor() + "," + m_author);}
+			//#endif
+			rtn = false;
+		}
+		if (!feed.getSummary().equals(this.m_summary)) {
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("unequal feed.m_summary,this=" + feed.getSummary() + "," + m_summary);}
+			//#endif
+			rtn = false;
+		}
+		if (CompatibilityRssItunesItem3.convExplicit(feed.getExplicit()) !=
+				m_explicit) {
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("unequal feed.m_explicit,this=" + feed.getExplicit() + "," + m_explicit);}
 			//#endif
 			rtn = false;
 		}
 		return rtn;
 	}
-	//#endif
     
     public void setCategory(int category) {
         this.m_category = category;
@@ -343,7 +348,7 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
         String storeString = m_itunes + "|" + m_title + "|" +
 			m_description + "|" + m_language + "|" +
 			m_author + "|" + m_subtitle + "|" + m_summary + "|" +
-                 ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
+                 ((m_explicit == CompatibilityRssItunesItem3.BNO_EXPLICIT) ? "" :
 						 Integer.toString((int)m_explicit)) + "|" +
 				 super.toString();
         return storeString;
@@ -394,17 +399,12 @@ public class CompatibilityRssItunesFeed3 extends CompatibilityRssFeed3 {
         this.m_explicit = (byte)explicit;
     }
 
+    public void setExplicit(String explicit) {
+        this.m_explicit = CompatibilityRssItunesItem3.convExplicit(explicit);
+    }
+
     public String getExplicit() {
-		switch (m_explicit) {
-			case (byte)0:
-				return "no";
-			case (byte)1:
-				return "clean";
-			case (byte)2:
-				return "yes";
-			default:
-				return RssItunesItem.UNSPECIFIED;
-		}
+		return CompatibilityRssItunesItem3.convExplicit(m_explicit);
     }
 
     public void setItunes(boolean itunes) {
