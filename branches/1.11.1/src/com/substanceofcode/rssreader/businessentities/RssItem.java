@@ -27,7 +27,7 @@
 // Expand to define test ui define
 //#define DNOTESTUI
 // Expand to define JMUnit test define
-//#define ${DJMTESTDEF}
+//#define DNOJMTEST
 //#ifdef DTESTUI
 //#define HAS_EQUALS
 //#endif
