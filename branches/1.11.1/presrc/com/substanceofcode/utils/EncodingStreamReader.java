@@ -1,4 +1,4 @@
- /*
+/*
  * EncodingStreamReader.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
@@ -20,6 +20,8 @@
  *
  */
 
+// Expand to define testing define
+@DTESTDEF@
 // Expand to define logging define
 @DLOGDEF@
 package com.substanceofcode.utils;
@@ -46,18 +48,24 @@ public class EncodingStreamReader extends InputStreamReader {
     
     private InputStreamReader m_inputStream = null;
     private String m_fileEncoding = "ISO8859_1";  // See below
-    private boolean modEncoding = true;  // First mod encoding to account for
-	                                    // unexpected UTF-16.
-    private boolean modUTF16 = false;  // First mod encoding to account for
-    private boolean m_utf16Doc = false; // utf-16 doc
-    private static boolean docBigEndian = false;  // Doc big endian
+    private boolean m_modEncoding = true;  // First mod encoding to account for
+	                                    // unexpected big5 or UTF-16.
+    private boolean m_modBit16 = false;  // First mod encoding to account for
+    private boolean m_bit16Doc = false; // definately big5 or utf-16 doc
+    private boolean m_utfDoc = false; // definately utf-8 or utf-16 doc
+    private static boolean m_docBigEndian = false;  // Doc big endian
     private boolean m_getPrologue = true;
-    private boolean firstChar = true;
-    private boolean secondChar = false;
+    private boolean m_getBom = true;    // Get the Byte Order Mark
+    private boolean m_firstChar = true; // 1st of a possible 2 byte character
+    private boolean m_secondChar = false; // 2nd of a possible 2 byte character
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger("EncodingStreamReader");
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#ifdef DTEST
+    private boolean m_logChar    = false; // Log characters
+	//#endif
+    private Logger m_logger = Logger.getLogger("EncodingStreamReader");
+    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
+    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
+    private boolean m_traceLoggable = m_logger.isLoggable(Level.TRACE);
 	//#endif
     
     /** Creates a new instance of EncodingStreamReader */
@@ -72,7 +80,7 @@ public class EncodingStreamReader extends InputStreamReader {
 			m_fileEncoding = EncodingUtil.getIsoEncoding();
 		} catch (UnsupportedEncodingException e) {
 //#ifdef DLOGGING
-			logger.severe("init read Could not open stream with encoding " +
+			m_logger.severe("init read Could not open stream with encoding " +
 						  m_fileEncoding);
 //#endif
 			System.out.println("init read Could not open stream with " +
@@ -83,7 +91,7 @@ public class EncodingStreamReader extends InputStreamReader {
 				m_inputStream = new InputStreamReader(inputStream, "UTF-8");
 			} catch (UnsupportedEncodingException e2) {
 //#ifdef DLOGGING
-				logger.severe("init read Could not open stream with " +
+				m_logger.severe("init read Could not open stream with " +
 							  "encoding " + m_fileEncoding);
 //#endif
 				System.out.println("init read Could not open stream with " +
@@ -91,7 +99,7 @@ public class EncodingStreamReader extends InputStreamReader {
 						           e2.getMessage());
 				m_inputStream = new InputStreamReader(inputStream);
 				m_fileEncoding = "";
-				modEncoding = false;
+				m_modEncoding = false;
 			}
 		}
     }
@@ -104,21 +112,86 @@ public class EncodingStreamReader extends InputStreamReader {
     
 		try {
 			int inputCharacter = m_inputStream.read();
-			if (modEncoding && (m_getPrologue || modUTF16)) {
+			//#ifdef DLOGGING
+			//#ifdef DTEST
+			if (m_logChar && m_traceLoggable) {m_logger.trace("read inputCharacter,m_modEncoding,m_getPrologue,m_modBit16,m_firstChar,m_secondChar=" + inputCharacter  + "," + ((inputCharacter == -1) ? "-1" : new Character((char)inputCharacter).toString()) + "," + Integer.toString(inputCharacter, 16) + "," + m_modEncoding + "," + m_getPrologue + "," + m_modBit16 + "," + m_firstChar + "," + m_secondChar);}
+			//#endif
+			//#endif
+			if (m_modEncoding && (m_getPrologue || m_modBit16)) {
 				// If we get 0 character during prologue, it must be
 				// first or second byte of UTF-16.  Throw it out.
 				// If little endian, we need to read the next character.
-				if (firstChar) {
+				if (m_firstChar) {
+					if (m_getBom) {
+						//#ifdef DLOGGING
+						if (m_finestLoggable) {m_logger.finest("read m_getBom,inputCharacter=" + "," + m_getBom + "," + inputCharacter + "," + Integer.toString(inputCharacter, 16));}
+						//#endif
+						m_getBom = false;
+						if (inputCharacter == 0x0ef) {
+							//#ifdef DLOGGING
+							int prevInputChar = inputCharacter;
+							//#endif
+							inputCharacter = m_inputStream.read();
+							//#ifdef DLOGGING
+							if (m_finestLoggable) {m_logger.finest("read next byte of bom inputCharacter=" + "," + inputCharacter + "," + Integer.toString(inputCharacter, 16));}
+							//#endif
+							switch (inputCharacter) {
+								case -1:
+									return inputCharacter;
+								case 0xff:
+									m_modBit16 = true;
+									m_bit16Doc = true;
+									m_utfDoc = true;
+									m_docBigEndian = true;
+									break;
+								case 0xfe:
+									m_modBit16 = true;
+									m_bit16Doc = true;
+									m_utfDoc = true;
+									m_docBigEndian = false;
+									break;
+								case 0xbb:
+									if ((inputCharacter = m_inputStream.read())
+											== -1) {
+										return inputCharacter;
+									}
+									if (inputCharacter != 0xbf) {
+										//#ifdef DLOGGING
+										m_logger.severe("Invalid BOM for UTf-8 " +
+											"has last character " +
+											inputCharacter,
+											new Exception());
+										//#endif
+										return inputCharacter;
+									}
+									m_modBit16 = false;
+									m_bit16Doc = false;
+									m_utfDoc = true;
+									m_modEncoding = false;
+									break;
+								default:
+									return inputCharacter;
+							}
+							//#ifdef DLOGGING
+							if (m_fineLoggable) {m_logger.fine("read() read bom prevInputChar,inputCharacter,m_modBit16,m_bit16Doc,m_utfDoc,m_modEncoding=" + prevInputChar + "," + inputCharacter + "," + m_modBit16 + "," + m_bit16Doc + "," + m_utfDoc + "," + m_modEncoding);}
+							//#endif
+							/* Read 1st char after BOM. */
+							inputCharacter = m_inputStream.read();
+							if (m_modEncoding) {
+								return inputCharacter;
+							}
+						}
+					}
 					if (inputCharacter == -1) {
 						return inputCharacter;
 					}
-					if (modUTF16) {
+					if (m_modBit16) {
 						// If we know that this is UTF-16 from
 						// encoding, put the bytes together correctly.
 						// In this case, we are not in prolog, so
 						// both bytes may be meaningful.
 						int secondCharacter = m_inputStream.read();
-						if (docBigEndian) {
+						if (m_docBigEndian) {
 							inputCharacter <<= 8;
 							inputCharacter |= secondCharacter;
 						} else {
@@ -129,33 +202,33 @@ public class EncodingStreamReader extends InputStreamReader {
 						if (inputCharacter == 0) {
 							// This is UTF-16, read second character
 							inputCharacter = m_inputStream.read();
-							docBigEndian = true;
-							m_utf16Doc = true;
+							m_docBigEndian = true;
+							m_bit16Doc = true;
 						} else {
-							firstChar = false;
-							secondChar = true;
-							if (m_utf16Doc) {
-								m_utf16Doc = false;
+							m_firstChar = false;
+							m_secondChar = true;
+							if (m_bit16Doc) {
+								m_bit16Doc = false;
 							}
 						}
 					}
-				} else if (secondChar) {
+				} else if (m_secondChar) {
 					// If 0 character, it is UTF-16 and little endian.
 					if (inputCharacter == 0) {
 						inputCharacter = m_inputStream.read();
-						docBigEndian = false;
-						m_utf16Doc = true;
+						m_docBigEndian = false;
+						m_bit16Doc = true;
 					} else if (inputCharacter == -1) {
 						return inputCharacter;
 					}
-					firstChar = true;
-					secondChar = false;
+					m_firstChar = true;
+					m_secondChar = false;
 				}
 			}
 			return inputCharacter;
 		} catch (IOException e) {
 //#ifdef DLOGGING
-			logger.severe("read Could not read a char io error." + e + " " +
+			m_logger.severe("read Could not read a char io error." + e + " " +
 					           e.getMessage());
 //#endif
 			System.out.println("read Could not read a char io error." + e + " " +
@@ -163,7 +236,7 @@ public class EncodingStreamReader extends InputStreamReader {
 			throw e;
 		} catch (Throwable t) {
 //#ifdef DLOGGING
-			logger.severe("read Could not read a char run time." + t + " " +
+			m_logger.severe("read Could not read a char run time." + t + " " +
 					           t.getMessage());
 //#endif
 			System.out.println("read Could not read a char run time." + t + " " +
@@ -177,11 +250,14 @@ public class EncodingStreamReader extends InputStreamReader {
 	}
 
     public void setModEncoding(boolean modEncoding) {
-        this.modEncoding = modEncoding;
+		//#ifdef DLOGGING
+		if (m_finestLoggable) {m_logger.finest("setModEncoding modEncoding=" + modEncoding);}
+		//#endif
+        this.m_modEncoding = modEncoding;
     }
 
     public boolean isModEncoding() {
-        return (modEncoding);
+        return (m_modEncoding);
     }
 
     public void setFileEncoding(String fileEncoding) {
@@ -208,20 +284,43 @@ public class EncodingStreamReader extends InputStreamReader {
         return (m_inputStream);
     }
 
-    public void setModUTF16(boolean modUTF16) {
-        this.modUTF16 = modUTF16;
+    public void setModBit16(boolean modBit16) {
+		//#ifdef DLOGGING
+		if (m_finestLoggable) {m_logger.finest("setModBit16 modBit16=" + modBit16);}
+		//#endif
+        this.m_modBit16 = modBit16;
     }
 
-    public boolean isModUTF16() {
-        return (modUTF16);
+    public boolean isModBit16() {
+        return (m_modBit16);
     }
 
-    public void setUtf16Doc(boolean m_utf16Doc) {
-        this.m_utf16Doc = m_utf16Doc;
+    public void setBit16Doc(boolean bit16Doc) {
+        this.m_bit16Doc = bit16Doc;
     }
 
-    public boolean isUtf16Doc() {
-        return (m_utf16Doc);
+    public boolean isBit16Doc() {
+        return (m_bit16Doc);
     }
+
+    public void setUtfDoc(boolean utfDoc) {
+        this.m_utfDoc = utfDoc;
+    }
+
+    public boolean isUtfDoc() {
+        return (m_utfDoc);
+    }
+
+	//#ifdef DLOGGING
+	//#ifdef DTEST
+    public void setLogChar(boolean logChar) {
+        this.m_logChar = logChar;
+    }
+
+    public boolean isLogChar() {
+        return (m_logChar);
+    }
+	//#endif
+	//#endif
 
 }
