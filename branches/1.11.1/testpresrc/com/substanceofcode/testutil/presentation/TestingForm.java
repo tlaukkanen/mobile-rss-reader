@@ -79,9 +79,6 @@ public class TestingForm extends Form implements CommandListener {
     
 	//#ifdef DLOGGING
     private Logger m_logger = Logger.getLogger("TestingForm");
-    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
-    private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
-    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of TestingForm */
