@@ -241,8 +241,8 @@ final public class ExtParser {
 			parser.setNamespaces(checkNameSpaces);
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("checkNameSpaces[0]=" + checkNameSpaces[0]);}
-//@			if (finestLoggable) {if (checkNameSpaces.length > 1) {logger.finest("checkNameSpaces[1]=" + checkNameSpaces[1]);}}
-//@			if (finestLoggable) {if (checkNameSpaces.length > 2) {logger.finest("checkNameSpaces[2]=" + checkNameSpaces[2]);}}
+//@			if (finestLoggable && (checkNameSpaces.length > 1)) {logger.finest("checkNameSpaces[1]=" + checkNameSpaces[1]);}
+//@			if (finestLoggable && (checkNameSpaces.length > 2)) {logger.finest("checkNameSpaces[2]=" + checkNameSpaces[2]);}
 			//#endif
 			
 		} else {
@@ -352,18 +352,7 @@ final public class ExtParser {
 				if( subElem.equals("explicit") ) {
 					m_itunes = true;
 					String sexplicit = parser.getText();
-					if (sexplicit.toLowerCase().equals("yes")) {
-						m_explicit = (byte)2;
-					}
-					else if (sexplicit.toLowerCase().equals("clean")) {
-						m_explicit = (byte)1;
-					}
-					else if (sexplicit.toLowerCase().equals("no")) {
-						m_explicit = (byte)0;
-					}
-					else {
-						m_explicit = (byte)-1;
-					}
+					m_explicit = RssItunesItem.convExplicit(sexplicit);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_explicit=" + m_explicit);}
 					//#endif
