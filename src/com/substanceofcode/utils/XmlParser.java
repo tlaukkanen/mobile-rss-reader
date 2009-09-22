@@ -60,10 +60,14 @@ public class XmlParser {
     private String [] m_namespaces = null;
     private boolean m_getPrologue = true;
 	//#ifdef DLOGGING
+	//#ifdef DTEST
+//@    private boolean m_logChar    = false; // Log characters
+	//#endif
 //@    private Logger logger = Logger.getLogger("XmlParser");
 //@    final private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    final private boolean finerLoggable = logger.isLoggable(Level.FINER);
 //@    final private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    final private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
     
     /** Enumerations for parse function */
@@ -179,6 +183,15 @@ public class XmlParser {
 					if(m_currentElementName.length()>0) {
 						elementFound = true;
 						parsingElementName = false;
+						//#ifdef DLOGGING
+//@						if (m_logChar) {
+//@							m_logChar = false;
+							//#ifdef DLOGGING
+//@							if (traceLoggable) {logger.trace("parseStream m_currentElementName=" + m_currentElementName);}
+							//#endif
+//@							m_encodingStreamReader.setLogChar(false);
+//@						}
+						//#endif
 						// If we find XML without a prologue, need
 						// to treat as default UTF-8 encoding for XML.
 						if (m_getPrologue) {
@@ -198,12 +211,12 @@ public class XmlParser {
 							startsWith("<?xml ")) {
 							m_getPrologue = false;
 						//#ifdef DLOGGING
-//@						if (finestLoggable) {logger.finest("m_currentElementData.length()=" + m_currentElementData.length());}
+//@						if (finestLoggable) {logger.finest("parseStream m_currentElementData.length()=" + m_currentElementData.length());}
 						//#endif
 						String cencoding = getAttributeValue("encoding");
 						if (cencoding == null) {
 							//#ifdef DLOGGING
-//@							if (finestLoggable) {logger.finest("Prologue cencoding,m_defEncoding=" + cencoding + "," + m_defEncoding);}
+//@							if (finestLoggable) {logger.finest("parseStream Prologue cencoding,m_defEncoding=" + cencoding + "," + m_defEncoding);}
 							//#endif
 							cencoding = m_defEncoding;
 						}
@@ -224,17 +237,17 @@ public class XmlParser {
 				//#ifdef DTEST
 				//#ifdef DLOGGING
 //@				if (m_debugTrace) {
-//@					logger.finest("c=" + c);
-//@					logger.finest("m_currentElementName=" + m_currentElementName);
-//@					logger.finest("m_currentElementData=" + m_currentElementData);
-//@					logger.finest("m_currentElementContainsText=" + m_currentElementContainsText);
-//@					logger.finest("parsingElementName=" + parsingElementName);
-//@					logger.finest("parsingElementData=" + parsingElementData);
-//@					logger.finest("prologueFound=" + prologueFound);
-//@					logger.finest("parsingElementData=" + parsingElementData);
-//@					logger.finest("parsingElementData=" + parsingElementData);
-//@					logger.finest("elementFound=" + elementFound);
-//@					logger.finest("elementStart=" + elementStart);
+//@					logger.finest("parseStream c=" + c);
+//@					logger.finest("parseStream m_currentElementName=" + m_currentElementName);
+//@					logger.finest("parseStream m_currentElementData=" + m_currentElementData);
+//@					logger.finest("parseStream m_currentElementContainsText=" + m_currentElementContainsText);
+//@					logger.finest("parseStream parsingElementName=" + parsingElementName);
+//@					logger.finest("parseStream parsingElementData=" + parsingElementData);
+//@					logger.finest("parseStream prologueFound=" + prologueFound);
+//@					logger.finest("parseStream parsingElementData=" + parsingElementData);
+//@					logger.finest("parseStream parsingElementData=" + parsingElementData);
+//@					logger.finest("parseStream elementFound=" + elementFound);
+//@					logger.finest("parseStream elementStart=" + elementStart);
 //@				}
 				//#endif
 				//#endif
@@ -249,7 +262,7 @@ public class XmlParser {
 				m_currentElementContainsText = true;
 			}
 			//#ifdef DLOGGING
-//@			if (finerLoggable) {logger.finer("m_currentElementContainsText,m_currentElementData=" + m_currentElementContainsText + "," + m_currentElementData);}
+//@			if (finerLoggable) {logger.finer("parseStream m_currentElementContainsText,m_currentElementData=" + m_currentElementContainsText + "," + m_currentElementData);}
 			//#endif
 			
 		} catch (IOException e) {
