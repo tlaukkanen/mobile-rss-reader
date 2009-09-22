@@ -37,6 +37,7 @@
 //@import java.io.*;
 //@import java.util.Vector;
 //@import java.util.Enumeration;
+//@import javax.microedition.midlet.MIDlet;
 //@import javax.microedition.io.*;
 //@import javax.microedition.io.file.*;
 //@import javax.microedition.lcdui.Alert;
@@ -47,7 +48,6 @@
 //@import javax.microedition.lcdui.Displayable;
 //@import javax.microedition.lcdui.Display;
 //@import javax.microedition.lcdui.Image;
-//@import javax.microedition.midlet.*;
 //@
 //@import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 //@import com.substanceofcode.rssreader.presentation.FeatureList;
