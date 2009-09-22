@@ -48,9 +48,7 @@ public class HTMLParser extends XmlParser {
 	private boolean m_bodyFound = false;
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("HTMLParser");
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 	private String m_redirectUrl = "";
     
