@@ -58,6 +58,7 @@
 
 	<!-- clean up the project -->
 	<target name="clean" >
+		<echo message="deleting ${target}" />
 		<delete dir="${target}" />
 		<antcall target="clean.version" inheritAll="true" >
 			<param name="wtk.template" value="" />
@@ -151,6 +152,7 @@
 			<filter token="DJSR75" value="//#define ${DJSR75}" />
 			<filter token="DJSR238" value="//#define ${DJSR238}" />
 			<filter token="DTESTDEF" value="//#define ${DTESTDEF}" />
+			<filter token="DJMTESTDEF" value="//#define ${DJMTESTDEF}" />
 			<filter token="DCOMPATDEF" value="//#define ${DCOMPATDEF}" />
 			<filter token="DTESTUIDEF" value="//#define ${DTESTUIDEF}" />
 			<filter token="DLOGDEF" value="//#define ${DLOGDEF}" />
@@ -222,6 +224,7 @@
 	    <echo message="DJSR75=${DJSR75}" />
 	    <echo message="DJSR238=${DJSR238}" />
 	    <echo message="DTESTDEF=${DTESTDEF}" />
+	    <echo message="DJMTESTDEF=${DJMTESTDEF}" />
 	    <echo message="DTESTUIDEF=${DTESTUIDEF}" />
 	    <echo message="DCOMPATDEF=${DCOMPATDEF}" />
 	    <echo message="wtk.optionalpda.enabled=${wtk.optionalpda.enabled}" />
@@ -247,14 +250,17 @@
 		<!-- Copy unpreprocessed source to compiled src dir -->
 		<antcall target="copy.unproc.comp" />
 		<delete dir="${tmppreprocess}" />
+		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
 		<mkdir dir="${tmppreprocess}" />
-		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" printsymbols="yes" />
+		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="yes" />
+		<echo message="Preprocess JMUnit pre src if set ${jmunit.src}." />
+		<wtkpreprocess srcdir="${jmunit.src}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="true" if="jmunit.src" />
 		<echo message="Preprocess test UI if set ${testui.presrc}." />
-		<wtkpreprocess srcdir="${testui.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" printsymbols="true" if="testui.presrc" />
+		<wtkpreprocess srcdir="${testui.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="true" if="testui.presrc" />
 		<echo message="Preprocess compatiblity code if set ${compat.presrc}." />
-		<wtkpreprocess srcdir="${compat.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" if="compat.presrc" />
+		<wtkpreprocess srcdir="${compat.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" if="compat.presrc" />
 		<echo message="Preprocess jar src if set ${jar.presrc}." />
-		<wtkpreprocess srcdir="${jar.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" if="jar.presrc" />
+		<wtkpreprocess srcdir="${jar.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" if="jar.presrc" />
 		<copy todir="${comp.src}" overwrite="true" >
 			<fileset dir="${tmppreprocess}" includes="**/*.java" />
 			<filterset refid="defile.filter" />
