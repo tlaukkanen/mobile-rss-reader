@@ -1706,7 +1706,8 @@ public class RssReaderMIDlet extends MIDlet
 //@						CompatibilityRssFeed1 rss1 = new CompatibilityRssFeed1(rss);
 						//#ifdef DTEST
 //@						String prevStore = rss1.getStoreString(true);
-//@						RssItunesFeed nrss = new RssItunesFeed( false, true, true, prevStore );
+//@						RssItunesFeed nrss = RssItunesFeed.deserialize(
+//@								false, true, prevStore );
 //@						if (!rss1.equals(nrss)) {
 							//#ifdef DLOGGING
 //@							logger.severe("itunes store stings not backwards compatible i=" + i);
