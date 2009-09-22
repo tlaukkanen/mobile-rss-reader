@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
  * Copyright (C) 2007 Tommi Laukkanen
+ * Copyright (C) 2009 Irving Bunton Jr
  * http://www.substanceofcode.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,8 +26,7 @@
 @DLOGDEF@
 // Expand to define itunes define
 @DITUNESDEF@
-// Expand to define test define
-@DTESTDEF@
+//#ifdef DTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
@@ -34,6 +34,9 @@ import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Hashtable;
+
+import com.substanceofcode.testutil.logging.TestLogUtil;
+
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.Level;
@@ -46,7 +49,11 @@ import net.sf.jlogmicro.util.logging.Level;
  * @author  Tommi Laukkanen
  * @version 1.1
  */
-public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
+public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3
+//#ifdef DTEST
+implements RssItunesItemInfo
+//#endif
+{
     
 	// Make max summary same as max description (actual max is 50K)
     public static int MAX_SUMMARY = 500;
@@ -54,18 +61,17 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
 	// Number of Itunes info
     final private static int NBR_ITUNES_INFO = 6;
     final protected static byte BNO_EXPLICIT = (byte)-1;
+    final private static byte[] BANO_EXPLICIT = {BNO_EXPLICIT};
     final public static String UNSPECIFIED = "unspecified";
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
 	// can later be modified to contain them).
+    final private static int INT_ITUNES_INDICATOR = NBR_ITUNES_INFO;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("CompatibilityRssItunesItem3");
-	//#endif
-	//#ifdef DLOGGING
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
-
     private boolean m_itunes = false;
     private String m_author = "";   // The RSS item description
     private String m_subtitle = "";   // The RSS item description
@@ -115,43 +121,43 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
     }
     
     /** Creates a new instance of CompatibilityRssItunesItem3 */
-    public CompatibilityRssItunesItem3(RssItem item) {
-		super(item);
+    public CompatibilityRssItunesItem3(RssItemInfo pitem) {
+		super(pitem);
 		//#ifdef DITUNES
-		if (item instanceof RssItunesItem) {
-			RssItunesItem ititem = (RssItunesItem)item;
-			this.m_itunes = ititem.m_itunes;
-			this.m_author = ititem.m_author;
-			this.m_subtitle = ititem.m_subtitle;
-			this.m_summary = ititem.m_summary;
-			this.m_explicit = ititem.m_explicit;
-			this.m_duration = ititem.m_duration;
+		if (pitem instanceof RssItunesItemInfo) {
+			RssItunesItemInfo item = (RssItunesItemInfo)pitem;
+			this.m_itunes = item.isItunes();
+			this.m_author = item.getAuthor();
+			this.m_subtitle = item.getSubtitle();
+			this.m_summary = item.getSummary();
+			this.m_explicit = convExplicit(item.getExplicit());
+			this.m_duration = item.getDuration();
 		}
 		//#endif
     }
     
     /** Serialize the object */
-    public String unencodedSerialize3() {
+    public String unencodedSerialize() {
 		String author = "";
 		String subtitle = "";
 		String summary = "";
 		//#ifdef DITUNES
 		if (m_itunes) {
-			author = m_author.replace('|', CONE);
-			subtitle = m_subtitle.replace('|', CONE);
-			summary = m_summary.replace('|', CONE);
+			author = m_author.replace('|', (char)1);
+			subtitle = m_subtitle.replace('|', (char)1);
+			summary = m_summary.replace('|', (char)1);
 		}
 		//#endif
         String preData = (m_itunes ? "1" : "") + "|" +
 			author + "|" + subtitle + "|" + summary + "|" +
                  ((m_explicit == BNO_EXPLICIT) ? "" :
 						 Integer.toString((int)m_explicit)) + "|" +
-				m_duration + "|" + super.unencodedSerialize3();
+				m_duration + "|" + super.unencodedSerialize();
 		return preData;
 	}
 
-    public String serialize3() {
-        String preData = unencodedSerialize3();
+    public String serialize() {
+        String preData = unencodedSerialize();
         Base64 b64 = new Base64();
         String encodedSerializedData = null;
 		try {
@@ -163,7 +169,7 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
 	}
 		
 	/** Deserialize the unencoded object */
-	public static CompatibilityRssItem3 unencodedDeserialize3(String data) {
+	public static CompatibilityRssItem3 unencodedDeserialize(String data) {
 			
 		try {
 			boolean hasPipe = (data.indexOf((char)1) >= 0);
@@ -172,14 +178,14 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
 			item.init(hasPipe, nodes);
 			return item;
         } catch(Exception e) {
-            System.err.println("Error while CompatibilityRssItunesItem3 deserialize3 : " + e.toString());
+            System.err.println("Error while CompatibilityRssItunesItem3 deserialize : " + e.toString());
 			e.printStackTrace();
 			return null;
         }
 	}
 			
 	/** Deserialize the object */
-	public static CompatibilityRssItem3 deserialize3(String data) {
+	public static CompatibilityRssItem3 deserialize(String data) {
 		try {
 			// Base64 decode
 			Base64 b64 = new Base64();
@@ -189,9 +195,9 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
 			} catch (UnsupportedEncodingException e) {
 				data = new String( decodedData );
 			}
-			return unencodedDeserialize3(data);
+			return unencodedDeserialize(data);
         } catch(Exception e) {
-            System.err.println("Error while CompatibilityRssItunesItem3 deserialize3 : " + e.toString());
+            System.err.println("Error while CompatibilityRssItunesItem3 deserialize : " + e.toString());
 			e.printStackTrace();
 			return null;
 		}
@@ -221,19 +227,19 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
 				int AUTHOR = 1;
 				m_author = nodes[AUTHOR];
 				if (hasPipe) {
-					m_author = m_author.replace(CONE, '|');
+					m_author = m_author.replace((char)1, '|');
 				}
 				
 				int SUBTITLE = 2;
 				m_subtitle = nodes[SUBTITLE];
 				if (hasPipe) {
-					m_subtitle = m_subtitle.replace(CONE, '|');
+					m_subtitle = m_subtitle.replace((char)1, '|');
 				}
 				
 				int SUMMARY = 3;
 				m_summary = nodes[SUMMARY];
 				if (hasPipe) {
-					m_summary = m_summary.replace(CONE, '|');
+					m_summary = m_summary.replace((char)1, '|');
 				}
 
 				int EXPLICIT = 4;
@@ -250,7 +256,7 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
 			super.init(NBR_ITUNES_INFO, true, hasPipe, nodes);
 
         } catch(Exception e) {
-            System.err.println("Error while CompatibilityRssItunesItem3 deserialize3 : " + e.toString());
+            System.err.println("Error while CompatibilityRssItunesItem3 deserialize : " + e.toString());
 			e.printStackTrace();
         }
     }
@@ -262,24 +268,24 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
         return storeString;
     }
 
-    public void setAuthor(String m_author) {
-        this.m_author = m_author;
+    public void setAuthor(String author) {
+        this.m_author = author;
     }
 
     public String getAuthor() {
         return (m_author);
     }
 
-    public void setSubtitle(String m_subtitle) {
-        this.m_subtitle = m_subtitle;
+    public void setSubtitle(String subtitle) {
+        this.m_subtitle = subtitle;
     }
 
     public String getSubtitle() {
         return (m_subtitle);
     }
 
-    public void setSummary(String m_summary) {
-        this.m_summary = m_summary;
+    public void setSummary(String summary) {
+        this.m_summary = summary;
     }
 
     public String getSummary() {
@@ -290,8 +296,8 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
         this.m_explicit = (byte)explicit;
     }
 
-    public String getExplicit() {
-		switch (m_explicit) {
+    static public String convExplicit(int explicit) {
+		switch (explicit) {
 			case (byte)0:
 				return "no";
 			case (byte)1:
@@ -303,56 +309,83 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
 		}
     }
 
-    public void setDuration(String m_duration) {
-        this.m_duration = m_duration;
+    public String getExplicit() {
+		return convExplicit(m_explicit);
+	}
+
+    static public byte convExplicit(String explicit) {
+		if ((explicit == null) || (explicit.length() == 0)) {
+			return BNO_EXPLICIT;
+		}
+		switch (explicit.charAt(0)) {
+			case 'n':
+				if (explicit.equals("no")) {
+					return (byte)0;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			case 'c':
+				if (explicit.equals("clean")) {
+					return (byte)1;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			case 'y':
+				if (explicit.equals("yes")) {
+					return (byte)2;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			default:
+				return BNO_EXPLICIT;
+		}
+    }
+
+    public void setDuration(String duration) {
+        this.m_duration = duration;
     }
 
     public String getDuration() {
         return (m_duration);
     }
     
-	//#ifdef DTEST
 	/* Compare item. */
-	public boolean equals(RssItunesItem item) {
-		boolean rtn = true;
-		if (!super.equals(item)) {
-			rtn = false;
+	public boolean equals(RssItemInfo pitem) {
+		boolean result = true;
+		if (!super.equals(pitem)) {
+			result = false;
 		}
-		if (!item.m_author.equals(m_author)) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_author,this=" + item.m_author + "," + m_author);}
-			//#endif
-			rtn = false;
+		if (!(pitem instanceof RssItunesItemInfo)) {
+			return result;
 		}
-		if (!item.m_subtitle.equals(m_subtitle)) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_subtitle,this=" + item.m_subtitle + "," + m_subtitle);}
-			//#endif
-			rtn = false;
+		RssItunesItemInfo item = (RssItunesItemInfo)pitem;
+		if (!TestLogUtil.fieldEquals(item.isItunes(), m_itunes,
+			"m_itunes", logger, fineLoggable)) {
+			result = false;
 		}
-		if (!item.m_summary.equals(m_summary)) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_summary,this=" + item.m_summary + "," + m_summary);}
-			//#endif
-			rtn = false;
+		if (!TestLogUtil.fieldEquals(item.getAuthor(), m_author,
+			"m_author", logger, fineLoggable)) {
+			result = false;
 		}
-
-		if (item.m_explicit != m_explicit) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_explicit,this=" + item.m_explicit + "," + m_explicit);}
-			//#endif
-			rtn = false;
+		if (!TestLogUtil.fieldEquals(item.getSubtitle(), m_subtitle,
+			"m_subtitle", logger, fineLoggable)) {
+			result = false;
 		}
-
-		if (!item.m_duration.equals(m_duration)) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_duration,this=" + item.m_duration + "," + m_duration);}
-			//#endif
-			rtn = false;
+		if (!TestLogUtil.fieldEquals(item.getSummary(), m_summary,
+			"m_summary", logger, fineLoggable)) {
+			result = false;
 		}
-		return rtn;
+		if (!TestLogUtil.fieldEquals(item.getExplicit(),
+					convExplicit(m_explicit),
+			"convExplicit(m_explicit)", logger, fineLoggable)) {
+			result = false;
+		}
+		if (!TestLogUtil.fieldEquals(item.getDuration(), m_duration,
+			"m_duration", logger, fineLoggable)) {
+			result = false;
+		}
+		return result;
 	}
-	//#endif
 
     public void setItunes(boolean itunes) {
 		//#ifdef DITUNES
@@ -371,3 +404,4 @@ public class CompatibilityRssItunesItem3 extends CompatibilityRssItem3 {
     }
 
 }
+//#endif
