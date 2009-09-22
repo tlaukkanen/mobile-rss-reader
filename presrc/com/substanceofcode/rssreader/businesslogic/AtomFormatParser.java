@@ -190,6 +190,10 @@ public class AtomFormatParser implements FeedFormatParser {
 				m_description = m_summary;
 				hasDesc = true;
 			}
+			if (hasTitle && hasDesc) {
+				m_title = m_title.replace('\n', ' ');
+				m_title = m_title.trim();
+			}
 			if (m_link.length() == 0) {
 				if (m_selfLink.length() != 0) {
 					m_link = m_selfLink;
