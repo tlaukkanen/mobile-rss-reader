@@ -24,12 +24,16 @@
 @DLOGDEF@
 // Expand to define test define
 @DTESTDEF@
+//#ifdef DTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Base64;
 import com.substanceofcode.utils.StringUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+
+import com.substanceofcode.testutil.logging.TestLogUtil;
+
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.Level;
@@ -42,7 +46,7 @@ import net.sf.jlogmicro.util.logging.Level;
  * @author  Tommi Laukkanen
  * @version 1.1
  */
-public class CompatibilityRssItem3 extends RssItem {
+public class CompatibilityRssItem3 implements RssItemInfo {
     
     protected static final char CONE = (char)1;
 	//#ifdef DLOGGING
@@ -50,6 +54,12 @@ public class CompatibilityRssItem3 extends RssItem {
 	//#endif
 	// Use protected so that sub classes can access these including the
 	// backward store compatibility classes.
+    protected String m_title = "";   // The RSS item title
+    protected String m_link  = "";   // The RSS item link
+    protected String m_desc  = "";   // The RSS item description
+    protected Date m_date = null;
+    protected String m_enclosure  = "";   // The RSS item enclosure
+    protected boolean m_unreadItem = false;
 	//#ifdef DLOGGING
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
@@ -71,9 +81,9 @@ public class CompatibilityRssItem3 extends RssItem {
         m_unreadItem = unreadItem;
     }
     
-    public CompatibilityRssItem3(RssItem item) {
-		this(item.m_title, item.m_link, item.m_desc, item.m_date,
-			 item.m_enclosure, item.m_unreadItem);
+    public CompatibilityRssItem3(RssItemInfo item) {
+		this(item.getTitle(), item.getLink(), item.getDescription(),
+				item.getDate(), item.getEnclosure(), item.isUnreadItem());
 	}
 
     /** Get RSS item title */
@@ -81,9 +91,18 @@ public class CompatibilityRssItem3 extends RssItem {
         return m_title;
     }
     
+    /** Get RSS item title */
+    public void setTitle(String title){
+        m_title = title;
+    }
+    
     /** Get RSS item link address */
     public String getLink(){
         return m_link;
+    }
+    
+    public void setLink(String link){
+        m_link = link;
     }
     
     /** Get RSS item description */
@@ -91,17 +110,25 @@ public class CompatibilityRssItem3 extends RssItem {
         return m_desc;
     }
     
+    public void setDescription(String description){
+        m_desc = description;
+    }
+    
     /** Get RSS item publication date */
     public Date getDate() {
         return m_date;
     }
     
+    public void setDate(Date date) {
+        this.m_date = date;
+    }
+
     /** Serialize the object
 	  When we serialize we don't do anything special for itunes as the
 	  store to memory will be deserialized only by the iTunes capable
 	  version.
 	  */
-    public String unencodedSerialize3() {
+    public String unencodedSerialize() {
         String dateString;
         if(m_date==null){
             dateString = "";
@@ -121,8 +148,8 @@ public class CompatibilityRssItem3 extends RssItem {
 	  this serialize does not need to know if Itunes is capable/enabled given
 	  that no fields were added to make it capable/enabled
 	  */
-    public String serialize3() {
-        String preData = unencodedSerialize3();
+    public String serialize() {
+        String preData = unencodedSerialize();
         Base64 b64 = new Base64();
         String encodedSerializedData = null;
 		try {
@@ -204,7 +231,7 @@ public class CompatibilityRssItem3 extends RssItem {
     }
 
 	/** Deserialize the object **/
-	public static CompatibilityRssItem3 deserialize3(String encodedData) {
+	public static CompatibilityRssItem3 deserialize(String encodedData) {
 		try {
 			// Base64 decode
 			Base64 b64 = new Base64();
@@ -215,9 +242,9 @@ public class CompatibilityRssItem3 extends RssItem {
 			} catch (UnsupportedEncodingException e) {
 				data = new String( decodedData );
 			}
-			return unencodedDeserialize3(data);
+			return unencodedDeserialize(data);
         } catch(Exception e) {
-            System.err.println("Error while CompatibilityRssItem3 deserialize3 : " + e.toString());
+            System.err.println("Error while CompatibilityRssItem3 deserialize : " + e.toString());
 			e.printStackTrace();
 			return new CompatibilityRssItem3();
         }
@@ -227,7 +254,7 @@ public class CompatibilityRssItem3 extends RssItem {
 	  but not the initial version as that version has a bug in getting
 	  the items.
 	  */
-	public static CompatibilityRssItem3 unencodedDeserialize3(String data) {
+	public static CompatibilityRssItem3 unencodedDeserialize(String data) {
 		CompatibilityRssItem3 item = new CompatibilityRssItem3();
 		try {
 			boolean hasPipe = (data.indexOf('\n') >= 0);
@@ -236,75 +263,54 @@ public class CompatibilityRssItem3 extends RssItem {
 			return item;
 			
         } catch(Exception e) {
-            System.err.println("Error while CompatibilityRssItem3 deserialize3 : " + e.toString());
+            System.err.println("Error while CompatibilityRssItem3 deserialize : " + e.toString());
 			e.printStackTrace();
         }
         return item;
 	}
 
 	/* Copy to item. */
+	/* UNDO?
 	public CompatibilityRssItem3 copyTo(CompatibilityRssItem3 item) {
 		item.m_title = m_title;
 		item.m_link  = m_link;
 		item.m_desc  = m_desc;
 		item.m_date = m_date;
-		item.m_enclosure  = m_enclosure;
+		item.m_enclosure  = m_enclosure;;
 		item.m_unreadItem = m_unreadItem;
 		return item;
 	}
+	UNDO */
 
-	//#ifdef DTEST
 	/* Compare item. */
-	public boolean equals(RssItem item) {
-		boolean rtn = true;
-		if (!item.m_title.equals(m_title)) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_title,this=" + item.m_title + "," + m_title);}
-			//#endif
-			rtn = false;
+	public boolean equals(RssItemInfo item) {
+		boolean result = true;
+		if (!TestLogUtil.fieldEquals(item.getTitle(), m_title,
+			"m_title", logger, fineLoggable)) {
+			result = false;
 		}
-		if (!item.m_link.equals(m_link)) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_link,this=" + item.m_link + "," + m_link);}
-			//#endif
-			rtn = false;
+		if (!TestLogUtil.fieldEquals(item.getLink(), m_link,
+			"m_link", logger, fineLoggable)) {
+			result = false;
 		}
-		if (!item.m_desc.equals(m_desc)) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_desc,this=" + item.m_desc + "," + m_desc);}
-			//#endif
-			rtn = false;
+		if (!TestLogUtil.fieldEquals(item.getDescription(), m_desc,
+			"m_desc", logger, fineLoggable)) {
+			result = false;
 		}
-		if ((item.m_date == null) && (this.m_date == null)) {
-		} else if ((item.m_date != null) && (this.m_date != null)) {
-			if (item.m_date.equals(this.m_date)) {
-			} else {
-				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest("unequal dates=" + item.m_date + "," + m_date);}
-				//#endif
-				rtn = false;
-			}
-		} else {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal dates=" + item.m_date + "," + m_date);}
-			//#endif
-			rtn = false;
+		if (!TestLogUtil.fieldEquals(item.getDate(), m_date,
+			"m_date", logger, fineLoggable)) {
+			result = false;
 		}
-		if (!item.m_enclosure.equals(m_enclosure)) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_enclosure,this=" + item.m_enclosure + "," + m_enclosure);}
-			//#endif
-			rtn = false;
+		if (!TestLogUtil.fieldEquals(item.getEnclosure(), m_enclosure,
+			"m_enclosure", logger, fineLoggable)) {
+			result = false;
 		}
-		if (item.m_unreadItem != m_unreadItem) {
-			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("unequal item.m_unreadItem,this=" + item.m_unreadItem + "," + m_unreadItem);}
-			//#endif
-			rtn = false;
+		if (!TestLogUtil.fieldEquals(item.isUnreadItem(), m_unreadItem,
+			"m_unreadItem", logger, fineLoggable)) {
+			result = false;
 		}
-		return rtn;
+		return result;
 	}
-	//#endif
 
     public void setUnreadItem(boolean unreadItem) {
         this.m_unreadItem = unreadItem;
@@ -330,3 +336,4 @@ public class CompatibilityRssItem3 extends RssItem {
 	}
     
 }
+//#endif
