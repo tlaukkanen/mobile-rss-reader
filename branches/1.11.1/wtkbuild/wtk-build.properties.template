@@ -34,6 +34,8 @@ cat.cmd = cat${windows.ext}
 #rim.home = C:\\Program Files\\Research In Motion\\BlackBerry JDE 4.2.1
 #Comment out for linux
 #rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
+jde.home = ${opt.tools}/blackberry4.2.1
+#wine = /usr/bin/wine
 svn.pgm = svn${windows.ext}
 #wtk.home = C:/opt/WTK2.5.1
 #wtk.home = ${windows.drive}/WTK2.5.2_01
