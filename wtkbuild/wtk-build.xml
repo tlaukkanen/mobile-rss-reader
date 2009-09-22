@@ -251,6 +251,7 @@
 		<antcall target="copy.unproc.comp" />
 		<delete dir="${tmppreprocess}" />
 		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DITUNESDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
+		<echo message="preprocess.defines=${preprocess.defines}" />
 		<mkdir dir="${tmppreprocess}" />
 		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="yes" />
 		<echo message="Preprocess JMUnit pre src if set ${jmunit.src}." />
@@ -318,6 +319,10 @@
 
 	<path id="project.classpath">
 		<pathelement location="lib/JLogMicro.jar" />
+	</path>
+
+	<path id="jde.classpath">
+		<pathelement location="${jde.home}/bin/rapc.jar" />
 	</path>
 
 	<target name="compile" depends="prepare">
@@ -558,7 +563,7 @@
 		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
 	</target>
 
-	<target name="create.rim.files" depends="prepare" if="rim.home" >
+	<target name="exec.create.rim.files" depends="prepare" if="rim.home" >
 		<copy file="${dist}/${build.file.root}.jad" tofile="${dist}/${build.file.root}_cod.jad" />
 		<exec executable="${rim.home}\\bin\\rapc" >
 			<arg value="import=&quot;${rim.home}\\lib\\net_rim_api.jar&quot;" />
@@ -572,6 +577,22 @@
 		<move file="${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.debug" />
 	</target>
 
+	<target name="jar.create.rim.files" depends="prepare" if="jde.home" >
+	    <echo message="basedir=${basedir}" />
+	    <echo message="jde.home=${jde.home}" />
+		<copy file="${dist}/${build.file.root}.jad" tofile="${dist}/${build.file.root}_cod.jad" />
+		<java classpathref="jde.classpath" classname="net.rim.tools.compiler.Compiler" >
+			<arg value="import=${jde.home}/lib/net_rim_api.jar" />
+			<arg value="codename=${project.name}" />
+			<arg value="-midlet" />
+			<arg value="jad=${basedir}/${dist}/${build.file.root}_cod.jad" />
+			<arg value="${basedir}/${dist}/${build.file.root}.jar" />
+		</java>
+		<move file="../${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cso" />
+		<move file="../${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cod" />
+		<move file="../${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.debug" />
+	</target>
+
 	<target name="svn.op.dist" unless="skip.svn.op" >
 		<delete dir="${op.dir}" />
 		<mkdir dir="${op.dir}" />
@@ -580,6 +601,8 @@
 			<equals arg1="${need.svn.preprocessed}" arg2="true" />
 			<then>
 			<exec executable="${svn.pgm}" dir="${op.dir}" >
+				<arg value="--username ${env.USERNAME}" />
+				<arg value="--password ${env.ibuntonjr_pass}" />
 				<arg value="${svn.op}" />
 				<arg value="${svn.url}" />
 				<arg value="${svn.src}" />
@@ -712,7 +735,8 @@
 		<antcall target="build" >
 			<param name="build.jar" value="obfuscated.jar" />
 		</antcall>
-		<antcall target="create.rim.files" inheritAll="true" />
+		<antcall target="exec.create.rim.files" inheritAll="true" />
+		<antcall target="jar.create.rim.files" inheritAll="true" />
 		<delete dir="${obfuscated}" />
 		<if>
 			<equals arg1="${make.build.files}" arg2="true" />
