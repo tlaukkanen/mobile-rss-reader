@@ -276,6 +276,7 @@ v1.11.2 Release Candidate 2 (rc2) (April 17th 2009)
 + Put ascending/descending as last command.
 
 v1.11.3 Release Candidate 1 (rc1) (Sep 22st 2009)
++ Simplify distribution.
 + Remove unused fields.
 + Handle Big5, BIG-HSCS, MS932, MS936, EUC_CN, SJIS, EUC_JP, EUC_JP_LINUX, ISO-2202-JP, MS949, MS950, ISCII91, EUC_TW, TIS-620, GBK, GB18030, and other encodings (only Big5 tested).
 + Allow logging characters read for testing other encodings.
@@ -285,6 +286,8 @@ v1.11.3 Release Candidate 1 (rc1) (Sep 22st 2009)
 + Have dist-private to have a release with the private directory.
 + Simplify explicit.
 + Trim title for atoms if both title and description are present.
++ Allow using RIM building of cod file using jar files.
++ Export source without authorization as it is read only.
 
 Device issues:
 
