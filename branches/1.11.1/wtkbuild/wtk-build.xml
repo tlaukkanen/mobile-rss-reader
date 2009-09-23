@@ -24,6 +24,7 @@
 	<property name="filetestdata" value="${target}/filetestdata" />
 	<property name="analyze" value="${target}/analyze" />
 	<property name="dist" value="${target}/dist" />
+	<property name="distall" value="${target}/distall" />
 	<property name="dist.midp10" value="${target}/dist/midp10" />
 	<property name="dist.midp20" value="${target}/dist/midp20" />
 	<property name="dist.midp20.novice" value="${target}/dist/midp20_novice" />
@@ -555,6 +556,13 @@
 				<filter token="STAGE" value="${stage}" />
 			</filterset>
 		</copy>
+		<copy todir="${distall}" file="${dist}/README.txt" />
+		<copy todir="${distall}" >
+			<fileset file="${docs}/READMEAll.txt" />
+			<filterset>
+				<filter token="STAGE" value="${stage}" />
+			</filterset>
+		</copy>
 	</target>
 
 	<target name="create.prc" depends="prepare" if="wtk.wme.home" >
@@ -600,9 +608,8 @@
 		<if>
 			<equals arg1="${need.svn.preprocessed}" arg2="true" />
 			<then>
+			<echo message="${svn.pgm} ${svn.op} ${svn.url} ${svn.src}" />
 			<exec executable="${svn.pgm}" dir="${op.dir}" >
-				<arg value="--username ${env.USERNAME}" />
-				<arg value="--password ${env.ibuntonjr_pass}" />
 				<arg value="${svn.op}" />
 				<arg value="${svn.url}" />
 				<arg value="${svn.src}" />
@@ -1171,6 +1178,7 @@
 		<antcall target="clean" />
 		<delete dir="${dist}" />
 		<mkdir dir="${dist}" />
+		<mkdir dir="${distall}" />
 		<delete dir="${build}" />
 		<mkdir dir="${build}" />
 		<mkdir dir="${dist}" />
