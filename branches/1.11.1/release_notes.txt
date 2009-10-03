@@ -290,7 +290,8 @@ v1.11.3 Release Candidate 1 (rc1) (Sep 22st 2009)
 + Export source without authorization as it is read only.
 
 v1.11.3 (Oct 2nd 2009)
-+ Simplify distribution.
++ Cosmetic source change.
++ This contains all previous changes (see above).
 
 Device issues:
 
