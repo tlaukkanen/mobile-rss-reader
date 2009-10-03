@@ -289,6 +289,9 @@ v1.11.3 Release Candidate 1 (rc1) (Sep 22st 2009)
 + Allow using RIM building of cod file using jar files.
 + Export source without authorization as it is read only.
 
+v1.11.3 (Oct 2nd 2009)
++ Simplify distribution.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
@@ -302,11 +305,14 @@ Program issues:
 TODO:
 
 - Check if need to set to itunes feed if not in header, but in items.
+- Add some media fields.
+- Use decorator patteren for media fields.
 - Minimizer for open link or use to show link in RSS Reader.
 - Methods for booleans for EncodingUtil.
 - Fix new View.  Get prev pos. in PageMgr.
 - Fix removing command if change in PageMgr.
 - Remove extra spaces between description item 7 of imbed.  This happens from removing of HTML which is replaced by spaces.
 - Handle content element with attribute type=html for HTML formating.
-- Use multiple links in atom for twitter.
-- Use twim menu.
+- Add Twim to RSS.
+	- Use multiple links in atom for twitter.
+	- Use twim menu.
