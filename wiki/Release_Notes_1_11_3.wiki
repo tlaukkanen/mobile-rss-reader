@@ -50,13 +50,13 @@ Irving Bunton Jr
   * Fixed infinate loop in emulator on exit.
   * Take version from mainifest file.
 
-=v1.10.3 (August 28th 2007)
+= v1.10.3 (August 28th 2007) =
   * Fixed date formatting if it has '-' for RSS date.
   * Use alternate link for atoms of self and related are not present.
   * Rename New Items form to Unread Items form.
   * Remove unused test logging classes.
 
-=v1.10.4 (September 4th 2007)
+= v1.10.4 (September 4th 2007) =
   * Fixed allowing pasting for some devices.  (Other devices may not have had
   any problem.)
   * Fixed redirect problem with capitalized HTML tags.
@@ -83,10 +83,10 @@ on all devices including the emulator.)
   * Increased size of bookmarks that can be restored.
   * Logging changes (for test only).
 
-=v1.10.6 (September 20th 2007)
+= v1.10.6 (September 20th 2007) =
   * Fix serious problem with import not working
 
-=v1.10.7 (October 2nd 2007)
+= v1.10.7 (October 2nd 2007) =
   * Give error for forbidden and not found
   * Allow optional prevention of redirect for bad HTML mime types
   * Allow files in memory for feed files and import files
@@ -233,7 +233,7 @@ on all devices including the emulator.)
     is not in stable versions)
   * Allow bookmark/feed name at the beginning of river of news items.
   
-=v1.11.2 Development 3 (dev2) (Dec 22th 2008)
+= v1.11.2 Development 3 (dev2) (Dec 22th 2008) =
   * Allow export of files on devices with JSR-75.  This is not usable on most
     devices as they require that the user accept the write of each BYTE.  Yes,
     each byte so this takes forever to the point that I gave up.
