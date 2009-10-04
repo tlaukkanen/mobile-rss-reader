@@ -1,4 +1,4 @@
-#labels Featured
+#labels Deprecated
 #Release note history for 1.11.2
 = Mobile RSS Reader Release Notes =
 
