@@ -2,7 +2,7 @@ MIDlet-1: RSSReader,/icons/rss.png,com.substanceofcode.rssreader.presentation.Rs
 MIDlet-Vendor: Tommi Laukkanen
 MIDlet-Info-URL: http://www.substanceofcode.com
 MIDlet-Name: RSSReader
-MIDlet-Icon: /icons/rss.png
+MIDlet-Icon: /data/icons/rss.png
 MIDlet-Description: RSS Reader
 MIDlet-Version: @MIDLETVERS@
 MIDlet-Permissions-Opt: javax.microedition.io.HttpConnection@PERMISSIONS@
