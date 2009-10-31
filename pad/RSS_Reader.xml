@@ -34,9 +34,9 @@
 	</Company_Info>
 	<Program_Info>
 		<Program_Name>RSS Reader</Program_Name>
-		<Program_Version>1.11.2</Program_Version>
-		<Program_Release_Month>05</Program_Release_Month>
-		<Program_Release_Day>11</Program_Release_Day>
+		<Program_Version>1.11.3</Program_Version>
+		<Program_Release_Month>10</Program_Release_Month>
+		<Program_Release_Day>02</Program_Release_Day>
 		<Program_Release_Year>2009</Program_Release_Year>
 		<Program_Cost_Dollars>0</Program_Cost_Dollars>
 		<Program_Cost_Other_Code />
@@ -46,7 +46,7 @@
 		<Program_Install_Support>No Install Support</Program_Install_Support>
 		<Program_OS_Support>Linux,Linux Gnome,Linux GPL,Linux Open Source,Pocket PC,Windows Mobile 2003,Windows Mobile 2005,RIM,Symbian,Java</Program_OS_Support>
 		<Program_Language>English</Program_Language>
-		<Program_Change_Info>Fix password problem.  Conditional get for HTTP.   Having ascending and descinding for "River of News" and Headers.  Optional font size configure.  Fix OPML file with newline after outline tag. </Program_Change_Info>
+		<Program_Change_Info>Simplify install options.  Partial workaround for Big5.</Program_Change_Info>
 		<Program_Specific_Category>Internet</Program_Specific_Category>
 		<Program_Category_Class>Network &amp; Internet::Other</Program_Category_Class>
 		<Program_System_Requirements>Symbian, Windows Mobile, or Java enabled phone</Program_System_Requirements>
@@ -77,15 +77,15 @@
 	</Program_Descriptions>
 	<Web_Info>
 		<Application_URLs>
-			<Application_Info_URL>@code.home@</Application_Info_URL>
-			<Application_Order_URL>@code.home@</Application_Order_URL>
+			<Application_Info_URL>http://code.google.com/p/mobile-rss-reader</Application_Info_URL>
+			<Application_Order_URL>http://code.google.com/p/mobile-rss-reader</Application_Order_URL>
 			<Application_Screenshot_URL>http://mobilerssreader.sourceforge.net/screenshots/main01.jpg</Application_Screenshot_URL>
 			<Application_Icon_URL>http://mobilerssreader.sourceforge.net/screenshots/rss.png</Application_Icon_URL>
 			<Application_XML_File_URL>http://mobilerssreader.sourceforge.net/pad/RSS_Reader.xml</Application_XML_File_URL>
 		</Application_URLs>
 		<Download_URLs>
-			<Primary_Download_URL>http://mobile-rss-reader.googlecode.com/files/rssreader_v1_11_2-bin.zip</Primary_Download_URL>
-			<Secondary_Download_URL>http://superb-west.dl.sourceforge.net/sourceforge/mobilerssreader/rssreader_v1_11_2-bin.zip</Secondary_Download_URL>
+			<Primary_Download_URL>http://mobile-rss-reader.googlecode.com/files/rssreader_v1_11_3-bin.zip</Primary_Download_URL>
+			<Secondary_Download_URL>http://mobile-rss-reader.yinlight.net/downloads/rssreader_v1_11_3-bin.zip</Secondary_Download_URL>
 			<Additional_Download_URL_1 />
 			<Additional_Download_URL_2 />
 		</Download_URLs>
