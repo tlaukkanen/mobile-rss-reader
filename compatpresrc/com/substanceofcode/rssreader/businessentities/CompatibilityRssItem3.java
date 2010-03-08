@@ -269,19 +269,6 @@ public class CompatibilityRssItem3 implements RssItemInfo {
         return item;
 	}
 
-	/* Copy to item. */
-	/* UNDO?
-	public CompatibilityRssItem3 copyTo(CompatibilityRssItem3 item) {
-		item.m_title = m_title;
-		item.m_link  = m_link;
-		item.m_desc  = m_desc;
-		item.m_date = m_date;
-		item.m_enclosure  = m_enclosure;;
-		item.m_unreadItem = m_unreadItem;
-		return item;
-	}
-	UNDO */
-
 	/* Compare item. */
 	public boolean equals(RssItemInfo item) {
 		boolean result = true;
