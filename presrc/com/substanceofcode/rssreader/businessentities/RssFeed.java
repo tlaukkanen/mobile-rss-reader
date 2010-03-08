@@ -431,31 +431,6 @@ public class RssFeed
 
 	}
 
-	/** Copy feed to an existing feed.  **/
-	/* UNDO?
-	   public void copyTo(RssFeedInfo toFeed) {
-	   toFeed.setUrl(this.m_url);
-	   toFeed.setName(this.m_name);
-	   toFeed.setUsername(this.m_username);
-	   toFeed.setPassword(this.m_password);
-	   toFeed.setUpddate(this.m_upddate);
-	   toFeed.setUpddateTz(this.getUpddateTz());
-	//#ifdef DITUNES
-	toFeed.setLink(this.m_link);
-	toFeed.setDate(this.m_date);
-	//#endif
-	toFeed.setEtag(this.m_etag);
-	Vector toItems = new Vector();
-	int ilen = m_items.size();
-	RssItem [] ritems = new RssItem[ilen];
-	m_items.copyInto(ritems);
-	for (int ic = 0; ic < ilen; ic++) {
-	toItems.addElement(ritems[ic]);
-	}
-	toFeed.setItems(toItems);
-	}
-	UNDO */
-
 	//#ifdef HAS_EQUALS
 	//#ifdef DJMTEST
 	/** Compare feed to an existing feed.  **/
