@@ -1,5 +1,6 @@
 #-- IB 2010-03-08 1.11.4RC1 Use latest antenna 1.2.1 beta.
 #-- IB 2010-03-08 1.11.4RC1 Use latest proguard 4.5 beta3.
+#-- IB 2010-03-08 1.11.4RC1 Use project.file.prefix for project archives.
 
 #windows.drive = C:
 windows.drive = 
@@ -88,6 +89,7 @@ project.info.url = http://www.substanceofcode.com
 project.test.url = http://mobilerssreader.sourceforge.net/testdata
 file.test.url = file:///root1/testdata
 project.name = RSSReader
+project.file.prefix = rssreader
 midlet.home = ${wtk.home}/apps/${project.name}
 prc.creater = MRSS
 project.description = RSS/News/Blog Reader
