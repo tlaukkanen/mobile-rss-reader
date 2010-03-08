@@ -8,6 +8,9 @@
 	<!-- IB 2010-03-08 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs. -->
 	<!-- IB 2010-03-08 1.11.4RC1 Use googlecode_upload.pl to upload to Google Project Hosting. -->
 	<!-- IB 2010-03-08 1.11.4RC1 Create smartphone version with just MIDP 2.0.  -->
+	<!-- IB 2010-03-08 1.11.4RC1 Create archive files.  -->
+	<!-- IB 2010-03-08 1.11.4RC1 Don't create empty version directory.  -->
+	<!-- IB 2010-03-08 1.11.4RC1 Use zip for src as the file paths are too long for non-GNU tar.  -->
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
 
@@ -31,7 +34,10 @@
 	<property name="analyze" value="${target}/analyze" />
 	<property name="dist" value="${target}/dist" />
 	<property name="distgooglecode" value="${target}/distgooglecode" />
+	<property name="distproject" value="${target}/distproject" />
+	<property name="distjardir" value="${distproject}/distjardir" />
 	<property name="distall" value="${target}/distall" />
+	<property name="main" value="${target}/main" />
 	<property name="dist.midp10" value="${target}/dist/midp10" />
 	<property name="dist.midp20" value="${target}/dist/midp20" />
 	<property name="dist.midp20.novice" value="${target}/dist/midp20_novice" />
@@ -145,7 +151,6 @@
 		<mkdir dir="${target}" />
 		<mkdir dir="${classes}" />
 		<property name="EMULATOR" value="true" />
-		<property name="main" value="${target}/main" />
 		<property name="svnexport" value="${build}/svnexport" />
 		<property name="compiled" value="${build}/${build.prefix}pcompiled" />
 		<property name="preverified" value="${build}/${build.prefix}preverified" />
@@ -724,10 +729,10 @@
 	<target name="google.upload.append" depends="prepare" if="upload.to.google">
 		<property name="jsr" value="" />
 		<property name="google.labels" value="" />
-		<echo message="cd dist" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="cd */RSS*&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=${build.file.root}.cod --summary=&quot;stable Blackberry MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=${build.file.root}.jar --summary=&quot;stable (not Blackberry) MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="cd .." file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="cd ../..&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 	</target>
 
 	<!-- Distribute the version (e.g. MIDP-1.0, MIDP-2.0, etc) to -->
@@ -735,8 +740,6 @@
 		 
 	<target name="dist.version" depends="prepare" >
 		<property name="no.test" value="true" />
-		<delete dir="${dist.vers}" />
-		<mkdir dir="${dist.vers}" />
 		<mkdir dir="${distgooglecode}" />
 		<!-- delete TODO
 		<delete dir="${build.vers}" />
@@ -787,6 +790,7 @@
 			</then>
 		</if>
 		<delete file="${project.name}.jar" />
+		<delete file="../${project.name}.jar" />
 	</target>
 
 	<!-- Compile using WTK with MIDP-1.0 and test -->
@@ -1238,15 +1242,15 @@
 		<mkdir dir="${dist}" />
 	    <echo message="main build.number=${build.number}" />
 		<antcall target="dist.svn.dirs" />
-		<echo message="cd .." file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-bin.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-expert-bin.zip --summary=&quot;Expert (use rssreader_v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 4% of phones&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-src-tar.bz2 --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest source using tar and bzip2 on most Unix/Linux systems and in cygwin (cygwin.com) on Windows.  To unzip in linux and cygwin, tar -xjf.  For Unix, you may first have to bunzip2 (file).  Then, untar tar -xf.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="cd *${FMIDLETVERSROOT}" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-bin.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-expert-bin.zip --summary=&quot;Expert (use rssreader_v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 4% of phones&quot; --labels=--labels=Featured,Type-Archive,OpSys-All&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-src-zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest source zip.&quot; --labels=Type-Source&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<!-- UNDO
 		<antcall target="dist.midp.1.0" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		-->
 		<antcall target="dist.midp.2.0.jsr75" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
@@ -1255,6 +1259,7 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		<!-- UNDO
 		<antcall target="dist.midp.2.0.itunes.jsr75" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
@@ -1275,6 +1280,24 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		-->
+		<property name="distdir" value="${distjardir}/RSSReader-${FMIDLETVERSROOT}" />
+		<mkdir dir="${distdir}" />
+		<copy todir="${distdir}/dist" overwrite="true" >
+			<fileset dir="${dist}" excludes="**/RE*.txt" />
+		</copy>
+		<copy file="${distall}/READMEAll.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
+		<zip destfile="${distproject}/rssreader-v${FMIDLETVERSROOT}-expert-bin.zip" basedir="${distjardir}" />
+		<copy file="${distall}/README.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
+		<delete includeemptydirs="true">
+			<fileset dir="${distdir}" includes="**/**cldc**,**podcast**" />
+		</delete>
+		<zip destfile="${distproject}/rssreader-v${FMIDLETVERSROOT}-bin.zip" basedir="${distjardir}" />
+		<delete dir="${distdir}/dist" />
+		<copy todir="${distdir}" overwrite="true" >
+			<fileset dir="${main}" />
+		</copy>
+		<zip destfile="${distproject}/rssreader-v${FMIDLETVERSROOT}-src.zip" basedir="${distjardir}" />
 	</target>
 
 	<target name="dist" >
