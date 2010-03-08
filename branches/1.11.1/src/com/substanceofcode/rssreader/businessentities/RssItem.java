@@ -292,19 +292,6 @@ public class RssItem
         return item;
 	}
 
-	/* Copy to item. */
-	/* UNDO?
-	public RssItemInfo copyTo(RssItemInfo item) {
-		item.setTitle(m_title);
-		item.setLink(m_link);
-		item.setDescription(m_desc);
-		item.setDate(m_date);
-		item.setEnclosure(m_enclosure);
-		item.setUnreadItem(m_unreadItem);
-		return item;
-	}
-	UNDO */
-
 	/* Compare item. */
 	//#ifdef HAS_EQUALS
 	//#ifdef DJMTEST
