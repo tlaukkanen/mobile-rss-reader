@@ -19,7 +19,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
+*/
 
+// Expand to define MIDP define
+@DMIDPVERS@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -38,10 +43,20 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+//#ifdef DMIDP20
+import net.eiroca.j2me.observable.Observer;
+import net.eiroca.j2me.observable.Observable;
+//#endif
 
 import com.substanceofcode.jmunit.logging.LoggingTestCase;
 
-final public class RssFeedParserTest extends LoggingTestCase {
+final public class RssFeedParserTest extends LoggingTestCase
+//#ifdef DMIDP20
+implements Observer
+//#endif
+{
+
+	private boolean ready = false;
 
 	public RssFeedParserTest() {
 		super(2, "RssFeedParserTest");
@@ -61,6 +76,16 @@ final public class RssFeedParserTest extends LoggingTestCase {
 			default:
 				break;
 		}
+	}
+
+	//#ifdef DMIDP20
+	public void changed(Observable observable) {
+		ready = true;
+	}
+	//#endif
+
+	public boolean isReady() {
+		return ready;
 	}
 
 	/* Test parse Itunes. */
@@ -98,6 +123,14 @@ final public class RssFeedParserTest extends LoggingTestCase {
 		feedParserTestSub(mname, feed, true, 20);
 	}
 
+	private void waitReady() throws Throwable {
+		while (!isReady()) {
+			synchronized(this) {
+				wait(1000L);
+			}
+		}
+	}
+
     public void feedParserTestSub(final String mname, RssItunesFeed feed,
 			boolean updFeed, int maxItemCount)
 	throws Throwable {
@@ -107,8 +140,19 @@ final public class RssFeedParserTest extends LoggingTestCase {
 			if (finestLoggable) {logger.finest(mname + " feed=" + feed);}
 			//#endif
 			RssItunesFeed cmpfeed = new RssItunesFeed(feed);
-			RssFeedParser fparser = new RssFeedParser(null, feed, updFeed,
-					maxItemCount);
+			RssFeedParser fparser = new RssFeedParser(new RssItunesFeed(feed));
+			//#ifdef DMIDP20
+			fparser.makeObserable(null, updFeed, maxItemCount);
+			fparser.getObserverManager().addObserver(this);
+			//#else
+			fparser.parseRssFeed( false, 10);
+			//#endif
+			fparser.getParsingThread().start();
+			//#ifdef DMIDP20
+			waitReady();
+			//#else
+			fparser.getParsingThread().join();
+			//#endif
 			RssItunesFeed nfeed = fparser.getRssFeed();
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest(mname + " nfeed=" + nfeed);}
