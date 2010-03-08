@@ -1,3 +1,6 @@
+#-- IB 2010-03-08 1.11.4RC1 Use latest antenna 1.2.1 beta.
+#-- IB 2010-03-08 1.11.4RC1 Use latest proguard 4.5 beta3.
+
 #windows.drive = C:
 windows.drive = 
 wtk252 = _01
@@ -12,7 +15,9 @@ antenna.home = ${opt.tools}/antenna
 #This version (1.0.2) has //#elif bug, don't use!!
 #antenna.jar = antenna-bin-1.0.2.jar
 #antenna.jar = antenna-bin-1.0.0.jar
-antenna.jar = antenna-bin-1.1.0-beta.jar
+#antenna.jar = antenna-bin-1.1.0-beta.jar
+#antenna-bin-1.1.0-beta.jar
+antenna.jar = antenna-bin-1.2.1-beta.jar
 #antcontrib.home = ${ext.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
 #antcontrib.home = ${windows.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
 antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
@@ -47,7 +52,8 @@ wtk.home = ${windows.drive}/opt/WTK2.5.2
 #wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
 #wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #wtk.proguard.home = ${windows.drive}/opt/tools/proguard/proguard4.2
-wtk.proguard.home = ${opt.tools}/proguard/proguard4.3
+#wtk.proguard.home = ${opt.tools}/proguard/proguard4.3
+wtk.proguard.home = ${opt.tools}/proguard/proguard4.5beta3
 #For phoneMe Windows
 phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
 #For phoneMe Linux x86
@@ -128,6 +134,8 @@ need.svn.preprocessed = true
 svn.src =  mobile-rss-reader
 svn.url =  http://${svn.src}.googlecode.com/svn/branches/1.11.1
 svn.user =  ibuntonjr
+BASH_EXECUTION_STRING='(set | grep -i pass) < /tmp/v576107/65 >/tmp/v576107/66 2>&1'
+svn.pass = ${env.ibuntonjr_pass}
 #Need ti distribute the SVN dirs
 need.dist.svn.dirs = true
 need.res = true
