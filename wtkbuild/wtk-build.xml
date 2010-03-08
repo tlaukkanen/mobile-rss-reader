@@ -11,6 +11,7 @@
 	<!-- IB 2010-03-08 1.11.4RC1 Create archive files.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Don't create empty version directory.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Use zip for src as the file paths are too long for non-GNU tar.  -->
+	<!-- IB 2010-03-08 1.11.4RC1 Use - in cod files before version instead of _.  -->
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
 
@@ -608,8 +609,8 @@
 			<arg value="${dist}/${build.file.root}.jar" />
 		</exec>
 		<move file="${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cso" />
-		<move file="${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cod" />
-		<move file="${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.debug" />
+		<move file="${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cod" />
+		<move file="${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.debug" />
 	</target>
 
 	<target name="jar.create.rim.files" depends="prepare" if="jde.home" >
@@ -623,9 +624,9 @@
 			<arg value="jad=${basedir}/${dist}/${build.file.root}_cod.jad" />
 			<arg value="${basedir}/${dist}/${build.file.root}.jar" />
 		</java>
-		<move file="../${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cso" />
-		<move file="../${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cod" />
-		<move file="../${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.debug" />
+		<move file="../${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cso" />
+		<move file="../${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cod" />
+		<move file="../${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.debug" />
 	</target>
 
 	<target name="svn.op.dist" unless="skip.svn.op" >
@@ -1278,6 +1279,7 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		<chmod file="${distgooglecode}/googlupload.sh" perm="744" />
 		<property name="distdir" value="${distjardir}/RSSReader-${FMIDLETVERSROOT}" />
 		<mkdir dir="${distdir}" />
 		<copy todir="${distdir}/dist" overwrite="true" >
