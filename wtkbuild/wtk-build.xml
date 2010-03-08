@@ -729,10 +729,10 @@
 	<target name="google.upload.append" depends="prepare" if="upload.to.google">
 		<property name="jsr" value="" />
 		<property name="google.labels" value="" />
-		<echo message="cd */RSS*/dist&#13;&#10;#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${build.file.root}.cod --summary=&quot;stable Blackberry MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; ${google.labels}&#13;&#10;#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${build.file.root}.jar --summary=&quot;stable (not Blackberry) MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; ${google.labels}&#13;&#10;#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="cd ../../..&#13;&#10;#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="cd */RSS*/dist&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${build.file.root}.cod --summary=&quot;stable Blackberry MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; ${google.labels}&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${build.file.root}.jar --summary=&quot;stable (not Blackberry) MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; ${google.labels}&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="cd ../../..&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 	</target>
 
 	<!-- Distribute the version (e.g. MIDP-1.0, MIDP-2.0, etc) to -->
@@ -1242,10 +1242,10 @@
 		<mkdir dir="${dist}" />
 	    <echo message="main build.number=${build.number}" />
 		<antcall target="dist.svn.dirs" />
-		<echo message="#!/bin/bash" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader_v${FMIDLETVERSROOT}-bin.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#13;&#10;#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader_v${FMIDLETVERSROOT}-expert-bin.zip --summary=&quot;Expert (use rssreader_v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 4% of phones&quot; --labels=--labels=Featured,Type-Archive,OpSys-All&#13;&#10;#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader_v${FMIDLETVERSROOT}-src-zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest source zip.&quot; --labels=Type-Source&#13;&#10;#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="#!/bin/bash&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader-v${FMIDLETVERSROOT}-bin.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader-v${FMIDLETVERSROOT}-expert-bin.zip --summary=&quot;Expert (use rssreader-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 4% of phones&quot; --labels=--labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader-v${FMIDLETVERSROOT}-src-zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest source zip.&quot; --labels=Type-Source&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<antcall target="dist.midp.1.0" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
