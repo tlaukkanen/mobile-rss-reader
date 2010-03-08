@@ -19,7 +19,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
+*/
 
+// Expand to define logging define
+@DLOGDEF@
+// Expand to define test define
+@DTESTDEF@
+//#ifdef DTEST
 package com.substanceofcode.rssreader.businessentities;
 
 import java.util.Date;
@@ -72,11 +80,6 @@ public interface RssFeedInfo {
 	    are put into store string by RssItunesFeed.  */
     String getStoreString(boolean serializeItems, boolean encoded);
 
-	/** Copy feed to an existing feed.  **/
-	/* UNDO
-	void copyTo(RssFeedInfo toFeed);
-	*/
-    
 	//#ifdef DTEST
 	/** Compare feed to an existing feed.  **/
 	boolean equals(RssFeedInfo feed);
@@ -97,3 +100,4 @@ public interface RssFeedInfo {
     Date getDate();
 
 }
+//#endif
