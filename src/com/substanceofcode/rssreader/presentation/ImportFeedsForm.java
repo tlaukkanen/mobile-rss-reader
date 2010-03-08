@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Fix testing code of explicit.
+*/
 // FIX check for blank url
 
 // Expand to define MIDP define
@@ -81,6 +84,10 @@ import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
 //#ifdef DJSR75
 //@import org.kablog.kgui.KFileSelectorMgr;
 //#endif
+//#ifdef DMIDP20
+import net.eiroca.j2me.observable.Observer;
+import net.eiroca.j2me.observable.Observable;
+//#endif
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -94,7 +101,12 @@ import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
  */
 /* Form to import feeds. */
 final public class ImportFeedsForm extends URLForm
-	implements CommandListener, Runnable {
+implements 
+//#ifdef DMIDP20
+			Observer,
+//#endif
+	CommandListener,
+	Runnable {
 
     static private byte[] m_importSave = null; // Import form save
     static private byte[] m_exportSave = null; // Export form save
@@ -102,11 +114,13 @@ final public class ImportFeedsForm extends URLForm
     private boolean     m_debugOutput = false; // Flag to write to output for test
 	//#endif
 	private boolean     m_getFeedList = false;      // The noticy flag for list parsing
-	private boolean     m_getFeedTitleList = false; // The noticy flag for title/list parsing
 	// The noticy flag for override existing feeds
 	private boolean     m_override = false;  // The noticy flag for override
+	//#ifdef DMIDP20
+    private boolean     m_parseBackground = false;
+    private Observable  m_backGrListParser = null; // The currently selected RSS in background
+	//#endif
     final private boolean m_importFeeds;
-	private FeedListParser m_listParser = null;    // The feed list parser
 	private TextField   m_feedNameFilter;   // The feed name filter string
 	private TextField   m_feedURLFilter;    // The feed URL filter string
 	private ChoiceGroup m_importFormatGroup;// The import type choice group
@@ -190,6 +204,80 @@ final public class ImportFeedsForm extends URLForm
 			//#endif
 		}
 
+	}
+
+    //#ifdef DMIDP20
+  /**
+   * If the observer (list parser) has changed, add the feeds (or give error
+   * message).  If observable is null, remove the observer as this means that
+   * we are not going to wait for the feeds as it is probably hung.
+   *
+   * @param observable
+   * @author Irv Bunton
+   */
+	public void changed(Observable observable) {
+
+		boolean cparseBackground = false;
+		FeedListParser cbackGrListParser = null;
+		synchronized(this) {
+			cbackGrListParser = (FeedListParser)observable.getObserverManager(
+						).checkActive(m_parseBackground,
+						m_backGrListParser, observable);
+		}
+		if (cbackGrListParser == null) {
+			return;
+		}
+
+		if (!cbackGrListParser.getObserverManager().isCanceled()) {
+			addFeedLists(cbackGrListParser);
+		}
+	}
+	//#endif
+
+	public void addFeedLists(FeedListParser cfeedListParser) {
+
+		try {
+			addFeedLists(cfeedListParser,
+					m_addBkmrk,
+					m_appSettings.getMaximumItemCountInFeed(),
+					 m_override, m_rssFeeds,
+					 m_bookmarkList, m_loadForm);
+			if (m_loadForm.hasNotes() || m_loadForm.hasExc()) {
+				m_loadForm.recordFin();
+				m_midlet.setCurrent( m_loadForm );
+			} else {
+				m_loadForm.replaceRef(this, null);
+				Item[] items = getItemFields();
+				ImportFeedsForm.m_importSave = FeatureMgr.storeValues(items);
+				m_midlet.showBookmarkList();
+				super.getFeatureMgr().setBackground(false);
+			}
+		} catch(Exception ex) {
+			m_loadForm.recordExcFormFin(
+					"Error importing feeds from " +
+					cfeedListParser.getUrl(), ex);
+		} catch(OutOfMemoryError e) {
+			m_loadForm.recordExcForm(e.getMessage(), e);
+			m_loadForm.recordFin();
+		} catch(Throwable t) {
+			m_loadForm.recordExcFormFin(
+					"Internal error importing feeds from " +
+					cfeedListParser.getUrl(), t);
+		} finally {
+			//#ifdef DMIDP20
+			if (cfeedListParser.getObserverManager() != null) {
+				cfeedListParser.getObserverManager().removeObserver(this);
+			}
+			//#endif
+			m_loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
+			// Free memory.
+			//#ifdef DMIDP20
+			synchronized(this) {
+				m_backGrListParser = null;
+				m_parseBackground = false;
+			}
+			//#endif
+		}
 	}
 
 	/** Run method is used to get RSS feed with HttpConnection */
@@ -288,7 +376,7 @@ final public class ImportFeedsForm extends URLForm
 			m_getFeedList = false;
 			final String url = m_url.getString().trim();
 			try {
-				m_midlet.initializeLoadingForm(
+				m_loadForm = m_midlet.initializeLoadingForm(
 						"Loading feeds from import...",
 						this);
 					
@@ -299,10 +387,10 @@ final public class ImportFeedsForm extends URLForm
 				String feedURLFilter = m_feedURLFilter.getString();
 				String username = m_UrlUsername.getString();
 				String password = m_UrlPassword.getString();
-				m_getFeedTitleList = m_importTitleGroup.isSelected(1);
+				boolean getFeedTitleList = m_importTitleGroup.isSelected(1);
 				m_override = m_importOvrGroup.isSelected(1);
 				//#ifdef DLOGGING
-//@				if (m_finestLoggable) {m_logger.finest("m_getFeedTitleList=" + m_getFeedTitleList);}
+//@				if (m_finestLoggable) {m_logger.finest("getFeedTitleList=" + getFeedTitleList);}
 //@				if (m_finestLoggable) {m_logger.finest("selectedImportType=" + selectedImportType);}
 				//#endif
 				
@@ -336,6 +424,10 @@ final public class ImportFeedsForm extends URLForm
 						clistParser = new OpmlParser(url, username, password);
 						break;
 				}
+				clistParser.setGetFeedTitleList(getFeedTitleList);
+				clistParser.setLoadForm(m_loadForm);
+				clistParser.setMaxItemCount(
+						m_appSettings.getMaximumItemCountInFeed());
 				clistParser.setFeedNameFilter(feedNameFilter);
 				clistParser.setFeedURLFilter(feedURLFilter);
 				clistParser.setRedirectHtml(m_importHTMLGroup.isSelected(0)
@@ -346,8 +438,21 @@ final public class ImportFeedsForm extends URLForm
 				//#endif
 				
 				// Start parsing
+				//#ifdef DMIDP20
+				synchronized(this) {
+					m_backGrListParser = clistParser;
+					m_backGrListParser.getObserverManager().addObserver(this);
+					m_parseBackground = true;
+					m_loadForm.setObservable(m_backGrListParser);
+				}
+				m_loadForm.addPromptCommand(RssReaderMIDlet.m_backCommand,
+									"Are you sure that you want to go back? Reading the list has not finished.");
+				//#endif
 				clistParser.startParsing();
-				m_listParser = clistParser;
+				//#ifdef DMIDP10
+//@				clistParser.join();
+//@				addFeedLists(clistParser);
+				//#endif
 				
 				// 3. Show result screen
 				// 4. Show list of feeds
@@ -363,46 +468,6 @@ final public class ImportFeedsForm extends URLForm
 			}
 		}
 
-		if((m_listParser != null) && m_listParser.isReady()) {
-			try {
-				addFeedLists(m_listParser, m_getFeedTitleList,
-						m_addBkmrk,
-						m_appSettings.getMaximumItemCountInFeed(),
-						 m_override, m_rssFeeds,
-						 m_bookmarkList, m_loadForm);
-				if (m_loadForm.hasNotes() || m_loadForm.hasExc()) {
-					m_loadForm.setTitle(
-							"One or more warnings, " +
-							"exceptions or errors.");
-					m_midlet.setCurrent( m_loadForm );
-				} else {
-					m_loadForm.replaceRef(this, null);
-					Item[] items = getItemFields();
-					ImportFeedsForm.m_importSave = FeatureMgr.storeValues(items);
-					m_midlet.showBookmarkList();
-				}
-				super.getFeatureMgr().setBackground(false);
-			} catch(Exception ex) {
-				m_loadForm.recordExcForm(
-						"Error importing feeds from " +
-						m_listParser.getUrl() + " " +
-						ex.getMessage(), ex);
-				m_getFeedTitleList = false;
-			} catch(Throwable t) {
-				m_loadForm.recordExcForm(
-						"Error importing feeds from " +
-						m_listParser.getUrl() + " " +
-						t.getMessage(), t);
-				m_getFeedTitleList = false;
-			} finally {
-				// Free memory.
-				m_listParser = null;
-			}
-			//#ifndef DTESTUI
-		} else {
-			if (m_debugOutput) System.out.println("Feed list parsing isn't ready");
-			//#endif
-		}
 	}
 
 	private Item[] getItemFields() {
@@ -424,7 +489,20 @@ final public class ImportFeedsForm extends URLForm
 		m_addBkmrk = FeatureMgr.getPlaceIndex(c, m_insCmd,
 				m_addCmd, m_appndCmd, m_bookmarkList);
 		if( m_addBkmrk >= 0 ) {
-			m_getFeedList = true;
+			//#ifdef DMIDP20
+			boolean cparseBackground = false;
+			synchronized(this) {
+				cparseBackground = m_parseBackground;
+			}
+			if (cparseBackground) {
+				m_midlet.getLoadForm().appendNote(
+						"NOTE:  Import parsing has already started.  Please wait for it to finish.");
+			} else {
+				m_getFeedList = true;
+			}
+			//#else
+//@			m_getFeedList = true;
+			//#endif
 		}
 		
 		if (m_clear) {
@@ -457,7 +535,7 @@ final public class ImportFeedsForm extends URLForm
 
 	/** Add from feed list (from import). */
 	public static void addFeedLists(FeedListParser listParser,
-			boolean getFeedTitleList, int addBkmrk,
+			int addBkmrk,
 			int maxItemCount, boolean override, Hashtable rssFeeds,
 			FeatureList bookmarkList, RssReaderMIDlet.LoadingForm loadForm)
 	throws CauseException, Exception {
@@ -476,33 +554,6 @@ final public class ImportFeedsForm extends URLForm
 			//#ifdef DTEST
 //@			System.out.println("Adding: " + name);
 			//#endif
-			// If no title (name) and we are getting the title from the
-			// feed being imported, parse the name(title) only.
-			if (((name == null) || (name.length() == 0)) &&
-					getFeedTitleList) {
-				RssItunesFeed feed = feeds[feedIndex];
-				RssFeedParser fparser = new RssFeedParser( feed );
-				loadForm.appendMsg("Loading title for " +
-						"feed " + feed.getUrl());
-				//#ifdef DLOGGING
-//@				logger.finest("Getting title for url=" + feed.getUrl());
-				//#endif
-				fparser.setGetTitleOnly(true);
-				/** Get RSS feed */
-				try {
-					fparser.parseRssFeed( false, maxItemCount );
-					name = feed.getName();
-					loadForm.appendMsg("ok\n");
-				} catch(Exception ex) {
-					CauseException ce = new CauseException(
-							"Error loading title for feed " + feed.getUrl(),
-							ex);
-					//#ifdef DLOGGING
-//@					logger.severe(ce.getMessage(), ex);
-					//#endif
-					loadForm.addExc("Error\n", ce);
-				}
-			}
 			if((name != null) && (name.length()>0)) {
 				final boolean pres = rssFeeds.containsKey( name );
 				if(override || !pres) {
