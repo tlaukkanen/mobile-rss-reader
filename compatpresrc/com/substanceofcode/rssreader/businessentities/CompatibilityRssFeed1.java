@@ -232,25 +232,6 @@ public class CompatibilityRssFeed1 implements RssFeedInfo {
         return null;
     }
 
-	//#ifdef DTEST
-	/** Copy feed to an existing feed.  **/
-	/* UNDO ?
-	public void copyTo(RssFeedInfo toFeed) {
-		toFeed.setUrl(this.m_url);
-		toFeed.setName(this.m_name);
-		toFeed.setUsername(this.m_username);
-		toFeed.setPassword(this.m_password);
-		Vector toItems = new Vector();
-		int ilen = m_items.size();
-		CompatibilityRssItem1 [] ritems = new CompatibilityRssItem1[ilen];
-		m_items.copyInto(ritems);
-		for (int ic = 0; ic < ilen; ic++) {
-			toItems.addElement(ritems[ic]);
-		}
-		toFeed.setItems(toItems);
-	}
-	UNDO */
-    
 	/** Compare feed to an existing feed.  **/
 	public boolean equals(RssFeedInfo feed) {
 		boolean result = true;
