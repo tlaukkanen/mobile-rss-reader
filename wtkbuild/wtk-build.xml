@@ -209,8 +209,10 @@
 	-->
 
 	<target name="display.props" >
+	    <echo message="project.name=${project.name}" />
 	    <echo message="wtk.home=${wtk.home}" />
 	    <echo message="wtk.midp.jar=${wtk.midp.jar}" />
+	    <echo message="build.compiler=${build.compiler}" />
 	    <echo message="src=${src}" />
 	    <echo message="presrc=${presrc}" />
 	    <echo message="compat.presrc=${compat.presrc}" />
@@ -293,7 +295,7 @@
 		<delete includeemptydirs="true" failonerror="false" >
 			<!-- remove testui classes as these are kept in testui -->
 			<fileset dir="${dsrc}" includes="**/Compatibility*,**/testutil/**,**/testlcdui/*.java" />
-			<fileset dir="${dsrc}/net" />
+			<fileset dir="${dsrc}/net/sf" />
 		</delete>
 	</target>
 
@@ -341,7 +343,8 @@
 		<antcall target="copy.jar.src" />
 		<antcall target="wtk.src.copy" />
 		<antcall target="display.props" />
-		<wtkbuild srcdir="${comp.src}" destdir="${classes}" preverify="false" unless="ecj.jar" />
+		<echo message="comp.src=${comp.src}" />
+		<wtkbuild srcdir="${comp.src}" destdir="${classes}" preverify="false" depend="yes" unless="ecj.jar" />
 		<antcall target="ecj.compile" />
 		<antcall target="findbugs" />
 		<antcall target="pmd" />
@@ -503,16 +506,28 @@
 		<antcall target="copy.novice" />
 		<antcall target="copy.test.res" />
 
-		<copy file="${jadsrc}/${project.name}.jad" todir="${bin}" overwrite="true" >
-			<filterset refid="midlet.info" />
-			<filterset>
-				<filter token="MIDLETURL" value="${MIDLETURL_ROOT}${separator}${build.file.root}.jar" />
-			</filterset>
-		</copy>
-
-		<copy file="${manifestsrc}/manifest.mf" todir="${bin}" overwrite="true" >
-			<filterset refid="midlet.info" />
-		</copy>
+		<wtkjad jadfile="${bin}/${project.name}.jad" manifest="${bin}/manifest.mf" name="${project.name}" vendor="${vendor}" version="${MIDLETVERS}" encoding="UTF-8" >
+			<midlet name="${project.name}" icon="/icons/rss.png" class="${midlet.class}" />
+			<midlet name="RssSuite" class="com.substanceofcode.jmunit.businessentities.RssSuite" unless="no.test" />
+			<midlet name="UtilitySuite" class="com.substanceofcode.jmunit.utils.UtilitySuite" unless="no.test" />
+			<midlet name="RssFeedSuite" class="com.substanceofcode.jmunit.businessentities.RssFeedSuite" unless="no.test" />
+			<midlet name="RssItemPerfCompatability4Test" class="com.substanceofcode.jmunit.businessentities.RssItemPerfCompatability4Test" unless="no.test" />
+			<attribute name="MIDlet-Description" value="${project.description}" />
+			<attribute name="MIDlet-Info-URL" value="${project.info.url}" />
+			<attribute name="MIDlet-Permissions-Opt" value="${PERMISSIONS}" />
+			<attribute name="MIDlet-Data-Size" value="3000" />
+			<attribute name="MIDlet-Jar-URL" value="${build.file.root}.jar" />
+			<attribute name="novice" value="${NOVICE}" />
+			<attribute name="Program-Version" value="${buildinfo}" />
+			<attribute name="jlomicro-level" value="${jlomicro-level}" unless="no.test" />
+			<attribute name="jlomicro-handlers" value="${jlomicro-handlers}" unless="no.test" />
+			<attribute name="jlomicro-ConsoleHandler-formatter" value="${jlomicro-ConsoleHandler-formatter}" unless="no.test" />
+			<attribute name="jlomicro-FormHandler-limit" value="${jlomicro-FormHandler-limit}" unless="no.test" />
+			<attribute name="jlomicro-FormHandler-formatter" value="${jlomicro-FormHandler-formatter}" unless="no.test" />
+			<attribute name="jlomicro-RecStoreHandler-limit" value="${jlomicro-RecStoreHandler-limit}" unless="no.test" />
+			<attribute name="jlomicro-RecStoreHandler-formatter" value="${jlomicro-RecStoreHandler-formatter}" unless="no.test" />
+			<attribute name="jlomicro-com-substanceofcode-utils-SortUtil-level" value="${jlomicro-com-substanceofcode-utils-SortUtil-level}" unless="no.test" />
+		</wtkjad>
 
 		<echo message="MIDLETVERS=${MIDLETVERS}" />
 
