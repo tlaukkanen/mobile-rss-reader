@@ -1294,6 +1294,9 @@
 			<fileset dir="${main}" />
 		</copy>
 		<zip destfile="${distproject}/rssreader-v${FMIDLETVERSROOT}-src.zip" basedir="${distjardir}" />
+		<copy todir="${distdir}/dist" overwrite="true" >
+			<fileset dir="${dist}" excludes="**/RE*.txt" />
+		</copy>
 	</target>
 
 	<target name="dist" >
