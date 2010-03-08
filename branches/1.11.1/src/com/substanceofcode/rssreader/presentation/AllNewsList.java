@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Have next item command on item display.
+*/
 
 // Expand to define MIDP define
 //#define DMIDP20
@@ -70,6 +73,8 @@ public class AllNewsList extends FeatureList
     protected Image       m_unreadImage;
     protected int       m_offset;             // Offset into bookmarkList
     protected int       m_len;                // length from offset above
+    private boolean m_openItem = false;
+    private boolean m_nextItem = false;
 	//#ifdef DLARGEMEM
 //@    protected final static int AND_VAL = 15;
 //@    protected final static int DIV_VAL = 16;
@@ -339,6 +344,8 @@ public class AllNewsList extends FeatureList
 			super.delete(selIdx);
 			if (selIdx > 0) {
 				super.setSelectedIndex(selIdx - 1, true);
+			} else {
+				super.setSelectedIndex(0, true);
 			}
 			m_item = (RssItunesItem)m_unreadItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
@@ -358,6 +365,9 @@ public class AllNewsList extends FeatureList
 		if (updateIt) {
 			m_item.setUnreadItem(false);
 		}
+		//#ifdef DLOGGING
+//@		if (m_finestLoggable) {m_logger.finest("getUpdSel updateIt,selIdx=" + updateIt + "," + selIdx);}
+		//#endif
 	}
 
 	/* Update the lists for mark or unmark. */
@@ -417,11 +427,12 @@ public class AllNewsList extends FeatureList
 			/* Sort the read or unread items. */
 			if ( csort ) {
 				csort = false;
+				nextItem(false);
 
 				//#ifdef DLOGGING
 //@				newSort = true;
 				//#endif
-				m_midlet.initializeLoadingForm("Sorting items...", this);
+				m_loadForm = m_midlet.initializeLoadingForm("Sorting items...", this);
 				if (m_showAll) {
 					sortAllItems( m_sortByDate, m_bookmarkList, m_rssFeeds );
 				} else if (m_showUnread) {
@@ -432,6 +443,30 @@ public class AllNewsList extends FeatureList
 				m_loadForm.setLoadingFinished("Sorting finished",
 						"Sorting finished use back to return.");
 				m_midlet.setCurrent(this);
+			}
+
+			if ( m_openItem || m_nextItem ) {
+				int selIdx = FeatureMgr.getSelectedIndex(this);
+				//#ifdef DLOGGING
+//@				if (m_finestLoggable) {m_logger.finest("run selIdx,m_openItem,m_nextItem=" + selIdx + "," + m_openItem + "," + m_nextItem);}
+				//#endif
+				synchronized(this) {
+					m_nextItem = false;
+					m_openItem = false;
+				}
+				if( selIdx >= 0){
+					m_loadForm = m_midlet.initializeLoadingForm("Loading item...", this);
+					try {
+						getUpdSel(true);
+						m_midlet.initializeItemForm( m_feed, m_item, this );
+						//#ifdef DTESTUI
+//@							checkTest();
+						//#endif
+					}catch(OutOfMemoryError t) {
+						m_loadForm.recordExcForm(
+								"Out Of Memory Error selecting item", t);
+					}
+				}
 			}
 
 			//#ifdef DTESTUI
@@ -478,6 +513,8 @@ public class AllNewsList extends FeatureList
 
 	//#ifdef DTESTUI
 //@	private void checkTest() {
+//@		m_itemNext = true;
+//@		m_newsIndex--;
 //@		if (m_newsIndex < 0) {
 //@			m_testNews = false;
 //@			m_newsNext = false;
@@ -755,18 +792,7 @@ public class AllNewsList extends FeatureList
         
 		try {
 			if( (c == m_openHeaderCmd) || (c == List.SELECT_COMMAND) ) {
-				if( super.size()>0){
-					m_midlet.initializeLoadingForm("Loading item...", this);
-					getUpdSel(true);
-					m_midlet.initializeItemForm( m_feed, m_item, this );
-					//#ifdef DTESTUI
-//@					synchronized(this) {
-//@						m_itemNext = true;
-//@						m_newsIndex--;
-//@						checkTest();
-//@					}
-					//#endif
-				}
+				m_openItem = true;
 			} else if( c == m_sortAllDateCmd ) {
 				synchronized(this) {
 					m_showUnread = false;
@@ -829,6 +855,7 @@ public class AllNewsList extends FeatureList
 //@						System.out.println("Test UI Test News items start m_newsIndex=" + m_newsIndex);
 //@						m_newsNext = true;
 //@						m_testNews = true;
+//@						super.removeCommand(m_testNewsCmd);
 //@					}
 //@				}
 				//#endif
@@ -842,6 +869,36 @@ public class AllNewsList extends FeatureList
 		}catch(Throwable t) {
 			m_loadForm.recordExcForm("Internal error", t);
 		}
+	}
+
+	public void nextItem(boolean next) {
+		if (!next) {
+			return;
+		}
+		int selIdx = FeatureMgr.getSelectedIndex(this);
+		if (selIdx < 0) {
+			return;
+		}
+		int asize = super.size();
+		int nselected;
+		if (m_showUnread) {
+			nselected = selIdx;
+		} else {
+			nselected = selIdx + 1;
+		}
+		synchronized(this) {
+			if (nselected < asize) {
+				super.setSelectedIndex(nselected, true);
+				synchronized(this) {
+					m_nextItem = true;
+				}
+				super.getFeatureMgr().wakeup(2);
+			}
+		}
+		//#ifdef DLOGGING
+//@		if (m_finestLoggable) {m_logger.finest("nextItem nselected,asize,m_nextItem=" + nselected + "," + asize + "," + m_nextItem);}
+		//#endif
+		super.getFeatureMgr().wakeup(2);
 	}
 
 }
