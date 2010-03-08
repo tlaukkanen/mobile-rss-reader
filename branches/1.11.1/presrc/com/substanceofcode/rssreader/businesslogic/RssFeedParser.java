@@ -19,7 +19,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+*/
 
+// Expand to define MIDP define
+@DMIDPVERS@
 // Expand to define CLDC define
 @DCLDCVERS@
 // Expand to define test define
@@ -39,6 +44,11 @@ import java.io.*;
 
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.CauseException;
+//#ifdef DMIDP20
+import net.eiroca.j2me.observable.Observable;
+import net.eiroca.j2me.observable.ObserverManager;
+//#endif
+
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
@@ -53,7 +63,11 @@ import net.sf.jlogmicro.util.logging.Level;
  * @version 1.0
  */
 public class RssFeedParser extends URLHandler
-implements Runnable {
+implements 
+//#ifdef DMIDP20
+			Observable,
+//#endif
+	Runnable {
     
     private RssReaderMIDlet m_midlet = null;
     private Thread m_parsingThread = null;
@@ -61,9 +75,11 @@ implements Runnable {
     private int m_maxItemCount;  // Max count of itetms to get for a feed.
     private boolean m_getTitleOnly = false;  // The RSS feed
     private boolean m_updFeed = false;  // Do updated feeds only.
-    private boolean m_ready = false;
     private boolean m_successfull = false;
     private CauseException m_ex = null;
+	//#ifdef DMIDP20
+    private ObserverManager observerMgr = null;
+	//#endif
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("RssFeedParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
@@ -77,23 +93,24 @@ implements Runnable {
 		m_maxItemCount = RssReaderSettings.INIT_MAX_ITEM_COUNT;
     }
     
-    /** Create new instance of RssFeedParser */
-    public RssFeedParser(RssReaderMIDlet midlet, RssItunesFeed rssFeed,
+	//#ifdef DMIDP20
+    /** Make this observable. */
+    public void makeObserable(RssReaderMIDlet midlet,
 			boolean updFeed, int maxItemCount) {
-        m_rssFeed = new RssItunesFeed(rssFeed);
 		m_midlet = midlet;
 		m_updFeed = updFeed;
 		m_maxItemCount = maxItemCount;
+		observerMgr = new ObserverManager(this);
 		//#ifdef DCLDCV11
         m_parsingThread = new Thread(this, "RssFeedParser");
 		//#else
         m_parsingThread = new Thread(this);
 		//#endif
-        m_parsingThread.start();
 		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("Thread started=" + m_parsingThread);}
+		if (fineLoggable) {logger.fine("Thread created=" + m_parsingThread);}
 		//#endif
     }
+	//#endif
     
     /** Return RSS feed */
     public RssItunesFeed getRssFeed() {
@@ -113,6 +130,7 @@ implements Runnable {
 		// for update of the current feed.
 		m_redirects = 0;
 		parseRssFeedUrl(m_rssFeed.getUrl(), updFeed, maxItemCount);
+		m_successfull = true;
 	}
         
     /**
@@ -251,11 +269,12 @@ implements Runnable {
         
     }
     
-    /** Check whatever parsing is ready or not */
-    public boolean isReady() {
-        return m_ready;
-    }
-    
+	//#ifdef DMIDP20
+	public ObserverManager getObserverManager() {
+		return observerMgr;
+	}
+	//#endif
+
     /** Parsing thread */
     public void run() {
         try {
@@ -263,7 +282,6 @@ implements Runnable {
 			if (fineLoggable) {logger.fine("Thread running=" + this);}
 			//#endif
 			parseRssFeed(m_updFeed, m_maxItemCount);
-			m_successfull = true;
         } catch( IOException ex ) {
 			//#ifdef DLOGGING
 			logger.severe("RssFeedParser.run(): Error while parsing " +
@@ -303,12 +321,16 @@ implements Runnable {
 			m_ex = new CauseException("Internal error while parsing feed " +
 									  m_rssFeed.getUrl(), t);
         } finally {
-            m_ready = true;
 			if (m_midlet != null) {
 				m_midlet.wakeup(2);
 			}
+			//#ifdef DMIDP20
+			if (observerMgr != null) {
+				observerMgr.notifyObservers(this);
+			}
+			//#endif
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("run m_successfull,m_ready=" + m_successfull + "," + m_ready);}
+			if (finestLoggable) {logger.finest("run m_successfull=" + m_successfull);}
 			//#endif
         }        
     }
@@ -327,6 +349,10 @@ implements Runnable {
 
     public boolean isGetTitleOnly() {
         return (m_getTitleOnly);
+    }
+
+    public Thread getParsingThread() {
+        return (m_parsingThread);
     }
 
 }
