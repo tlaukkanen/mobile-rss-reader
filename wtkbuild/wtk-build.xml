@@ -729,10 +729,10 @@
 	<target name="google.upload.append" depends="prepare" if="upload.to.google">
 		<property name="jsr" value="" />
 		<property name="google.labels" value="" />
-		<echo message="cd */RSS*&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="cd */RSS*/dist&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=${build.file.root}.cod --summary=&quot;stable Blackberry MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=${build.file.root}.jar --summary=&quot;stable (not Blackberry) MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="cd ../..&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="cd ../../..&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 	</target>
 
 	<!-- Distribute the version (e.g. MIDP-1.0, MIDP-2.0, etc) to -->
