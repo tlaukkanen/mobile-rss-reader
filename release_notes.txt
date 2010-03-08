@@ -293,6 +293,20 @@ v1.11.3 (Oct 2nd 2009)
 + Cosmetic source change.
 + This contains all previous changes (see above).
 
+v1.11.4 Release Candidate 1 (Mar 7th 2010)
++ Use wtkjad to create non-Blackberry JAD/manifest file.
++ Prevent override message from causing hang on import feeds.
++ Use NULL pattern.
++ Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
++ Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.
++ Don't use observer pattern for MIDP 1.0 as it increases size.
++ Get feed titles for blank names in OPML in FeedListParser.
++ Have next item command on item display.
++ Use antenna to create manifest and jad.
++ Remove unused methods.
++ Fixed loop.
++ Fix testing code of explicit.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
