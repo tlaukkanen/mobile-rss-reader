@@ -20,7 +20,7 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Fix testing code of explicit.
+   IB 2010-03-07 1.11.4RC1 Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.  Prevent override message from causing hang on import feeds.
 */
 // FIX check for blank url
 
