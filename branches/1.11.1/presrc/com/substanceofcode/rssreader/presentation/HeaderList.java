@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+*/
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -55,7 +58,12 @@ import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
-import com.substanceofcode.utils.SortUtil;
+import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
+//#ifdef DMIDP20
+import net.eiroca.j2me.observable.Observer;
+import net.eiroca.j2me.observable.Observable;
+//#endif
+
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
@@ -64,7 +72,12 @@ import net.sf.jlogmicro.util.logging.Level;
 
 /* Form to add new/edit existing bookmark. */
 final public class HeaderList extends AllNewsList
-	implements CommandListener {
+implements 
+//#ifdef DMIDP20
+			Observer,
+//#endif
+	CommandListener
+{
 	private boolean     m_itunesEnabled;    // True if Itunes is enabled
 	private Command     m_updateCmd;        // The update headers command
 	private Command     m_updateModCmd;     // The update modified headers command
@@ -128,6 +141,19 @@ final public class HeaderList extends AllNewsList
 	}
 	//#endif
 
+	//#ifdef DMIDP20
+	public void changed(Observable observable) {
+
+		RssFeedParser cbackGrRssParser = m_midlet.checkActive(observable);
+		if (cbackGrRssParser == null) {
+			return;
+		}
+		if (!cbackGrRssParser.getObserverManager().isCanceled()) {
+			m_feed = cbackGrRssParser.getRssFeed();
+		}
+	}
+	//#endif
+
 	public void commandAction(Command c, Displayable s) {
 
 		super.commandAction(c, s);
@@ -138,9 +164,23 @@ final public class HeaderList extends AllNewsList
 
 		/** Update currently selected RSS feed's headers */
 		if( (c == m_updateCmd) ||  (c == m_updateModCmd) ) {
-			m_midlet.updateHeaders(c == m_updateModCmd, this);
+			m_midlet.setPageInfo(false, (c == m_updateCmd),
+					(c == m_updateModCmd), this);
 			// Update existing bookmark.
-			m_midlet.procPage(false);
+			//#ifdef DMIDP20
+			synchronized(this) {
+				m_midlet.procBackPage(m_feed, this);
+			}
+			//#else
+			try {
+				RssFeedParser parser = new RssFeedParser( m_feed );
+				parser.parseRssFeed( (c == m_updateModCmd),
+					m_midlet.getSettings().getMaximumItemCountInFeed());
+				m_midlet.procUpdHeader(parser);
+			}catch(Throwable e) {
+				m_midlet.procPageExc(m_feed, false, e);
+			}
+			//#endif
 		}
 		
 		//#ifdef DITUNES
