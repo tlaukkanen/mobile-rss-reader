@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
+*/
 
 // Expand to define logging define
 //#define DNOLOGGING
@@ -73,11 +76,6 @@
 //@	  */
 //@    String serialize();
 //@		
-//@	/* Copy to item. */
-//@	/* UNDO?
-//@	RssItemInfo copyTo(RssItemInfo item);
-//@	*/
-//@
 	//#ifdef DTEST
 //@	/* Compare item. */
 //@	boolean equals(RssItemInfo item);
