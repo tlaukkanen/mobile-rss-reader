@@ -309,6 +309,9 @@ v1.11.4 Release Candidate 1 (Mar 8th 2010)
 + Fix testing code of explicit.
 + Use googlecode_upload.pl to upload to Google Project Hosting.
 + Create smartphone version with just MIDP 2.0
++ Create archive files.  
++ Don't create empty version directory.  
++ Use zip for src as the file paths are too long for non-GPL tar.
 
 Device issues:
 
