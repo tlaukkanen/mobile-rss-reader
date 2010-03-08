@@ -293,8 +293,9 @@ v1.11.3 (Oct 2nd 2009)
 + Cosmetic source change.
 + This contains all previous changes (see above).
 
-v1.11.4 Release Candidate 1 (Mar 7th 2010)
-+ Use wtkjad to create non-Blackberry JAD/manifest file.
+v1.11.4 Release Candidate 1 (Mar 8th 2010)
++ Use latest antenna 1.2.1 beta.
++ Use latest proguard 4.5 beta3.
 + Prevent override message from causing hang on import feeds.
 + Use NULL pattern.
 + Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
@@ -306,6 +307,8 @@ v1.11.4 Release Candidate 1 (Mar 7th 2010)
 + Remove unused methods.
 + Fixed loop.
 + Fix testing code of explicit.
++ Use googlecode_upload.pl to upload to Google Project Hosting.
++ Create smartphone version with just MIDP 2.0
 
 Device issues:
 
