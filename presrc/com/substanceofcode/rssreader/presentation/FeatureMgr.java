@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Use NULL pattern.  Fixed loop.
+*/
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -81,10 +84,11 @@ public class FeatureMgr implements CommandListener, Runnable {
 	private Displayable disp;
 	private Displayable promptDisp1;
 	private Displayable promptDisp2;
-	private Command origCmd = null;
+	static private Command nullCmd = new Command("NullCmd", Command.SCREEN, 100);
+	private Command origCmd = nullCmd;
 	private boolean foundDisp = false;
 	private boolean foundPrompt = false;
-	protected Command exCmd = null;
+	protected Command exCmd = nullCmd;
 	private Displayable exDisp = null;
 	protected RssReaderMIDlet midlet;
     private Form        urlRrnForm = null; // The form to return to for URL box
@@ -96,6 +100,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 	//#ifdef DLOGGING
 	private Logger logger = Logger.getLogger("FeatureMgr");
 	private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
 	private CommandListener cmdFeatureUser = null;
@@ -111,6 +116,9 @@ public class FeatureMgr implements CommandListener, Runnable {
 
     public void setCommandListener(CommandListener cmdFeatureUser,
 			boolean background) {
+		//#ifdef DLOGGING
+		if (fineLoggable && (cmdFeatureUser != null)) {logger.fine("setCommandListener cmdFeatureUser,background=" + cmdFeatureUser.getClass().getName() + "," + cmdFeatureUser + "," + background);}
+		//#endif
 		synchronized(this) {
 			this.cmdFeatureUser = cmdFeatureUser;
 			if (background) {
@@ -163,29 +171,32 @@ public class FeatureMgr implements CommandListener, Runnable {
         long lngStart;
         long lngTimeTaken;
 		do {
+			//#ifdef DLOGGING
+			if (finestLoggable && (loop > 0)) {logger.finest("run loop,background,cmdFeatureUser,runFeatureUser,foundDisp,foundPrompt,exCmd,exDisp,origCmd=" + this.loop + "," + background + "," + cmdFeatureUser + "," + runFeatureUser + "," + foundDisp + "," + foundPrompt + "," + exCmd.getLabel() + "," + exDisp + "," + origCmd);}
+			//#endif
 			try {
-				Command ccmd = null;
+				Command ccmd = nullCmd;
 				Displayable cdisp = null;
-				Command corigCmd = null;
+				Command corigCmd = nullCmd;
 				boolean cfoundDisp = false;
 				boolean cfoundPrompt = false;
 				synchronized(this) {
 					cfoundDisp = foundDisp;
 					cfoundPrompt = foundPrompt;
-					if ((cfoundDisp || cfoundPrompt) && (exCmd != null)) {
+					if ((cfoundDisp || cfoundPrompt) && (exCmd != nullCmd)) {
 						ccmd = exCmd;
 						cdisp = exDisp;
 						corigCmd = origCmd;
 					}
 				}
-				if ((ccmd != null) && (cdisp != null)) {
+				if ((ccmd != nullCmd) && (cdisp != null)) {
 					try {
 						Hashtable cpromptCommands = null;
 						synchronized(this) {
 							cpromptCommands = promptCommands;
 						}
 						//#ifdef DLOGGING
-						if (fineLoggable) {logger.fine("disp,ccmd,cpromptCommands,corigCmd,thread=" + disp + "," + ccmd.getLabel() + "," + cpromptCommands + "," + "," + corigCmd + "," + Thread.currentThread());}
+						if (fineLoggable) {logger.fine("run disp,cdisp,ccmd,corigCmd,cfoundDisp,cfoundPrompt,thread,cpromptCommands="  + disp + "," + cdisp + "," + ccmd.getLabel() + "," + ((corigCmd == null) ? "null" : corigCmd.getLabel()) + "," + cfoundDisp + "," + cfoundPrompt + "," + netThread + "," + cpromptCommands);}
 						//#endif
 						if (cfoundDisp && (cpromptCommands != null)
 								&& cpromptCommands.containsKey(ccmd)) {
@@ -276,7 +287,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 								}
 							} finally {
 								synchronized(this) {
-									origCmd = null;
+									origCmd = nullCmd;
 									promptDisp1 = disp;
 									promptDisp2 = disp;
 								}
@@ -284,13 +295,14 @@ public class FeatureMgr implements CommandListener, Runnable {
 						}
 					} catch (Throwable e) {
 						//#ifdef DLOGGING
-						logger.severe("commandAction caught ", e);
+						logger.severe("run commandAction caught ", e);
 						//#endif
-						System.out.println("commandAction caught " + e + " " + e.getMessage());
+						System.out.println("run commandAction caught " + e + " " + e.getMessage());
 					} finally {
 						synchronized(this) {
 							foundDisp = false;
 							foundPrompt = false;
+							exCmd = nullCmd;
 							exDisp = disp;
 						}
 					}
@@ -301,10 +313,12 @@ public class FeatureMgr implements CommandListener, Runnable {
 				}
 				lngStart = System.currentTimeMillis();
 				lngTimeTaken = System.currentTimeMillis()-lngStart;
-				if(lngTimeTaken<100L) {
+				if(lngTimeTaken<500L) {
 					synchronized(this) {
-						if (loop-- <= 0) {
-							super.wait(75L-lngTimeTaken);
+						if (loop == 0) {
+							super.wait(500L-lngTimeTaken);
+						} else {
+							loop--;
 						}
 					}
 				}
@@ -320,7 +334,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 			foundDisp = (cdisp == disp);
 			foundPrompt = (cdisp != promptDisp1) &&
 				((cdisp == promptDisp1) || (cdisp == promptDisp2));
-			this.exCmd = cmd;
+			this.exCmd = (cmd == null) ? nullCmd : cmd;
 			this.exDisp = cdisp;
 		}
 		startWakeup(true);
