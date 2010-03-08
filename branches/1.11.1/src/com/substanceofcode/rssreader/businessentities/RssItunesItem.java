@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Fix testing code of explicit.
+*/
 
 // Expand to define logging define
 //#define DNOLOGGING
@@ -410,8 +413,8 @@ public class RssItunesItem extends RssItem
 //@			"m_summary", logger, fineLoggable)) {
 //@			result = false;
 //@		}
-//@		if (!TestLogUtil.fieldEquals(item.getExplicit(),
-//@					RssItunesItem.convExplicit(m_explicit),
+//@		if (!TestLogUtil.fieldEquals(item.getExplicit().toLowerCase(),
+//@					getExplicit().toLowerCase(),
 //@			"m_explicit", logger, fineLoggable)) {
 //@			result = false;
 //@		}
