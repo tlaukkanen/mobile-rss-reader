@@ -19,81 +19,85 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
+*/
 
-package com.substanceofcode.rssreader.businessentities;
-
-import java.util.Date;
-import java.util.Vector;
-
-/**
- * RssFeedInfo class contains one RSS feed's properties.
- * Properties include name and URL to RSS feed.
- *
- * @author Tommi Laukkanen
- */
-public interface RssFeedInfo {
-    
-    /** Return bookmark's name */
-    String getName();
-    
-    void setName(String m_name);
-
-    /** Return bookmark's URL */
-    String getUrl();
-    
-    void setUrl(String url);
-
-    /** Return bookmark's username for basic authentication */
-    String getUsername();
-    
-    /** Set bookmark's username for basic authentication */
-    void setUsername(String username);
-
-    /** Set bookmark's password for basic authentication */
-    void setPassword(String password);
-
-    /** Return bookmark's password for basic authentication */
-    String getPassword();
-    
-    Date getUpddate();
-
-    /** Set bookmark's password for basic authentication */
-    void setUpddate(Date upddate);
-
-    void setUpddateTz(String supddate);
-
-    String getUpddateTz();
-
-    String getEtag();
-
-    void setEtag(String etag);
-
-    /** Return record store string for feed only.  This excludes items which
-	    are put into store string by RssItunesFeed.  */
-    String getStoreString(boolean serializeItems, boolean encoded);
-
-	/** Copy feed to an existing feed.  **/
-	/* UNDO
-	void copyTo(RssFeedInfo toFeed);
-	*/
-    
+// Expand to define logging define
+//#define DNOLOGGING
+// Expand to define test define
+//#define DNOTEST
+//#ifdef DTEST
+//@package com.substanceofcode.rssreader.businessentities;
+//@
+//@import java.util.Date;
+//@import java.util.Vector;
+//@
+//@/**
+//@ * RssFeedInfo class contains one RSS feed's properties.
+//@ * Properties include name and URL to RSS feed.
+//@ *
+//@ * @author Tommi Laukkanen
+//@ */
+//@public interface RssFeedInfo {
+//@    
+//@    /** Return bookmark's name */
+//@    String getName();
+//@    
+//@    void setName(String m_name);
+//@
+//@    /** Return bookmark's URL */
+//@    String getUrl();
+//@    
+//@    void setUrl(String url);
+//@
+//@    /** Return bookmark's username for basic authentication */
+//@    String getUsername();
+//@    
+//@    /** Set bookmark's username for basic authentication */
+//@    void setUsername(String username);
+//@
+//@    /** Set bookmark's password for basic authentication */
+//@    void setPassword(String password);
+//@
+//@    /** Return bookmark's password for basic authentication */
+//@    String getPassword();
+//@    
+//@    Date getUpddate();
+//@
+//@    /** Set bookmark's password for basic authentication */
+//@    void setUpddate(Date upddate);
+//@
+//@    void setUpddateTz(String supddate);
+//@
+//@    String getUpddateTz();
+//@
+//@    String getEtag();
+//@
+//@    void setEtag(String etag);
+//@
+//@    /** Return record store string for feed only.  This excludes items which
+//@	    are put into store string by RssItunesFeed.  */
+//@    String getStoreString(boolean serializeItems, boolean encoded);
+//@
 	//#ifdef DTEST
 //@	/** Compare feed to an existing feed.  **/
 //@	boolean equals(RssFeedInfo feed);
 	//#endif
-    
-    /** Return RSS feed items */
-    Vector getItems();
-    
-    /** Set items */
-    void setItems(Vector items);
-    
-    String getLink();
-
-    void setLink(String link);
-
-    void setDate(Date date);
-
-    Date getDate();
-
-}
+//@    
+//@    /** Return RSS feed items */
+//@    Vector getItems();
+//@    
+//@    /** Set items */
+//@    void setItems(Vector items);
+//@    
+//@    String getLink();
+//@
+//@    void setLink(String link);
+//@
+//@    void setDate(Date date);
+//@
+//@    Date getDate();
+//@
+//@}
+//#endif
