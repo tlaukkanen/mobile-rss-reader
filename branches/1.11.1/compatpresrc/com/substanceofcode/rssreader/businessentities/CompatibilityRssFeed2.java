@@ -215,21 +215,6 @@ public class CompatibilityRssFeed2 implements RssFeedInfo {
 
     public String getEtag() { return null; }
 
-	/** Copy feed to an existing feed.  **/
-	/* UNDO?
-	public void copyTo(CompatibilityRssFeed2 toFeed) {
-		toFeed.m_url = this.m_url;
-		toFeed.m_name = this.m_name;
-		toFeed.m_username = this.m_username;
-		toFeed.m_password = this.m_password;
-		toFeed.m_upddate = this.m_upddate;
-		toFeed.m_items = new Vector();
-		for (int ic = 0; ic < this.m_items.size(); ic++) {
-			toFeed.m_items.addElement(this.m_items.elementAt(ic));
-		}
-	}
-	*/
-    
 	//#ifdef DTEST
 	/** Compare feed to an existing feed.  **/
 	public boolean equals(RssFeedInfo feed) {
