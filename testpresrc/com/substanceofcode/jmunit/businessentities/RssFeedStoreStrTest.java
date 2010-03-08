@@ -19,7 +19,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
+*/
 
+// Expand to define MIDP define
+@DMIDPVERS@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -39,8 +44,18 @@ import com.substanceofcode.jmunit.logging.LoggingTestCase;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
+//#ifdef DMIDP20
+import net.eiroca.j2me.observable.Observer;
+import net.eiroca.j2me.observable.Observable;
+//#endif
 
-final public class RssFeedStoreStrTest extends LoggingTestCase {
+final public class RssFeedStoreStrTest extends LoggingTestCase
+//#ifdef DMIDP20
+implements Observer
+//#endif
+{
+
+	private boolean ready = false;
 
 	public RssFeedStoreStrTest() {
 		super(7, "RssFeedStoreStrTest");
@@ -72,6 +87,16 @@ final public class RssFeedStoreStrTest extends LoggingTestCase {
 			default:
 				break;
 		}
+	}
+
+	//#ifdef DMIDP20
+	public void changed(Observable observable) {
+		ready = true;
+	}
+	//#endif
+
+	public boolean isReady() {
+		return ready;
 	}
 
 	public RssItunesFeed feedStoreStrFactory(String mname,
@@ -283,12 +308,20 @@ final public class RssFeedStoreStrTest extends LoggingTestCase {
 			RssItunesFeed feed = new RssItunesFeed(
 				"test3", "jar:///rss-1252.xml", "", "");
 
-			RssFeedParser fparser = new RssFeedParser(null, feed, true, 10);
-			while (!fparser.isReady()) {
+			RssFeedParser fparser = new RssFeedParser(feed);
+			//#ifdef DMIDP20
+			fparser.makeObserable(null, true, 10);
+			ready = false;
+			fparser.getObserverManager().addObserver(this);
+			fparser.getParsingThread().start();
+			while (!isReady()) {
 				synchronized(this) {
 					wait(1000L);
 				}
 			}
+			//#else
+			fparser.parseRssFeed( false, 10);
+			//#endif
 			feed = fparser.getRssFeed();
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest(mname + " exc,successfull=" + fparser.getEx() + "," + fparser.isSuccessfull());}
