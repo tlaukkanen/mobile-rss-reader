@@ -2,6 +2,12 @@
 
 <project name="RSSReader" default="build" basedir="." >
 
+	<!-- IB 2010-03-08 1.11.4RC1 Use wtkjad to create non-Blackberry JAD/manifest file. -->
+	<!-- IB 2010-03-08 1.11.4RC1 Use latest antenna 1.2.1 beta -->
+	<!-- IB 2010-03-08 1.11.4RC1 Use latest proguard 4.5 beta3 -->
+	<!-- IB 2010-03-08 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs. -->
+	<!-- IB 2010-03-08 1.11.4RC1 Use googlecode_upload.pl to upload to Google Project Hosting. -->
+	<!-- IB 2010-03-08 1.11.4RC1 Create smartphone version with just MIDP 2.0.  -->
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
 
@@ -24,6 +30,7 @@
 	<property name="filetestdata" value="${target}/filetestdata" />
 	<property name="analyze" value="${target}/analyze" />
 	<property name="dist" value="${target}/dist" />
+	<property name="distgooglecode" value="${target}/distgooglecode" />
 	<property name="distall" value="${target}/distall" />
 	<property name="dist.midp10" value="${target}/dist/midp10" />
 	<property name="dist.midp20" value="${target}/dist/midp20" />
@@ -714,6 +721,13 @@
 		</antcall>
 	</target>
 
+	<target name="google.upload.append" depends="prepare" if="upload.to.google">
+		<property name="jsr" value="" />
+		<property name="google.labels" value="" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=${build.file.root}.cod --summary=&quot;stable Blackberry MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=${build.file.root}.jar --summary=&quot;stable (not Blackberry) MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+	</target>
+
 	<!-- Distribute the version (e.g. MIDP-1.0, MIDP-2.0, etc) to -->
 	<!-- it's target/build and target/dist target/main -->
 		 
@@ -721,6 +735,7 @@
 		<property name="no.test" value="true" />
 		<delete dir="${dist.vers}" />
 		<mkdir dir="${dist.vers}" />
+		<mkdir dir="${distgooglecode}" />
 		<!-- delete TODO
 		<delete dir="${build.vers}" />
 		<mkdir dir="${build.vers}" />
@@ -757,6 +772,7 @@
 		<antcall target="build" >
 			<param name="build.jar" value="obfuscated.jar" />
 		</antcall>
+		<antcall target="google.upload.append" inheritAll="true" />
 		<antcall target="exec.create.rim.files" inheritAll="true" />
 		<antcall target="jar.create.rim.files" inheritAll="true" />
 		<delete dir="${obfuscated}" />
@@ -1038,6 +1054,8 @@
 	<target name="dist.midp.1.0" unless="no.1.0" >
 		<antcall target="dist.version" inheritAll="yes" >
 			<param name="wtk.properties" value="wtk1.0.properties${wtk.template}" />
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="Featured,Type-Executable,OpSys-All" />
 			<param name="make.build.files" value="true" />
 			<param name="dist.vers" value="${dist.midp10}" />
 			<param name="build.vers" value="${build.midp10}" />
@@ -1050,6 +1068,8 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20}" />
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="Featured,Type-Executable,OpSys-All" />
 			<param name="make.build.files" value="false" />
 			<param name="build.vers" value="${build.midp20}" />
 			<param name="no.test" value="true" />
@@ -1084,6 +1104,8 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.jsr75}" />
+			<param name="upload.to.google" value="true" />
+			<param name="jsr" value="JSR-75" />
 			<param name="make.build.files" value="false" />
 			<param name="build.vers" value="${build.midp20.jsr75}" />
 			<param name="no.test" value="true" />
@@ -1102,11 +1124,25 @@
 		</antcall>
 	</target>
 
+	<target name="dist.midp.2.0.itunes" unless="no.2.0.itunes" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="wtk.properties" value="wtk2.0.itunes.properties${wtk.template}" />
+			<param name="dist.vers" value="${dist.midp20.itunes}" />
+			<param name="make.build.files" value="false" />
+			<param name="upload.to.google" value="true" />
+			<param name="build.vers" value="${build.midp20.itunes}" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
 	<target name="dist.midp.2.0.itunes.jsr75" unless="no.2.0.itunes.jsr75" >
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
 			<param name="make.build.files" value="false" />
+			<param name="upload.to.google" value="true" />
+			<param name="jsr" value="JSR-75" />
 			<param name="build.vers" value="${build.midp20.itunes.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -1193,6 +1229,7 @@
 		<antcall target="clean" />
 		<delete dir="${dist}" />
 		<mkdir dir="${dist}" />
+		<mkdir dir="${distgooglecode}" />
 		<mkdir dir="${distall}" />
 		<delete dir="${build}" />
 		<mkdir dir="${build}" />
