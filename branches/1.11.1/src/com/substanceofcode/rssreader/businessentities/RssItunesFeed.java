@@ -307,23 +307,6 @@ public class RssItunesFeed extends RssFeed
         
     }
 
-	/** Copy feed to an existing feed.  **/
-	/* UNDO ?
-	public void copyTo(RssItunesFeed toFeed) {
-		super.copyTo(toFeed);
-		//#ifdef DITUNES
-//@		toFeed.m_items = this.m_items;
-//@		toFeed.m_title = this.m_title;
-//@		toFeed.m_description = this.m_description;
-//@		toFeed.m_language = this.m_language;
-//@		toFeed.m_author = this.m_author;
-//@		toFeed.m_subtitle = this.m_subtitle;
-//@		toFeed.m_summary = this.m_summary;
-//@		toFeed.m_explicit = this.m_explicit;
-		//#endif
-	}
-	UNDO */
-    
 	/** Compare feed to an existing feed.  **/
 	//#ifdef HAS_EQUALS
 	//#ifdef DJMTEST
@@ -376,7 +359,7 @@ public class RssItunesFeed extends RssFeed
 //@			result = false;
 //@		}
 //@		if (!TestLogUtil.fieldEquals(feed.getExplicit(),
-//@					RssItunesItem.convExplicit(m_explicit),
+//@					getExplicit().toLowerCase(),
 //@			"m_explicit", logger, fineLoggable)) {
 //@			result = false;
 //@		}
