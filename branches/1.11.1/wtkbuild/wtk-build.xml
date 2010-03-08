@@ -12,6 +12,7 @@
 	<!-- IB 2010-03-08 1.11.4RC1 Don't create empty version directory.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Use zip for src as the file paths are too long for non-GNU tar.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Use - in cod files before version instead of _.  -->
+	<!-- IB 2010-03-08 1.11.4RC1 Use project.file.prefix for project archives.  -->
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
 
@@ -1244,9 +1245,9 @@
 	    <echo message="main build.number=${build.number}" />
 		<antcall target="dist.svn.dirs" />
 		<echo message="#!/bin/bash&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader-v${FMIDLETVERSROOT}-bin.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader-v${FMIDLETVERSROOT}-expert-bin.zip --summary=&quot;Expert (use rssreader-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 4% of phones&quot; --labels=--labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=rssreader-v${FMIDLETVERSROOT}-src-zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest source zip.&quot; --labels=Type-Source&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${project.file.prefix}-v${FMIDLETVERSROOT}-bin.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${project.file.prefix}-v${FMIDLETVERSROOT}-expert-bin.zip --summary=&quot;Expert (use ${project.file.prefix}-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 4% of phones&quot; --labels=--labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${project.file.prefix}-v${FMIDLETVERSROOT}-src.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest source zip.&quot; --labels=Type-Source&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<antcall target="dist.midp.1.0" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
@@ -1286,17 +1287,17 @@
 			<fileset dir="${dist}" excludes="**/RE*.txt" />
 		</copy>
 		<copy file="${distall}/READMEAll.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
-		<zip destfile="${distproject}/rssreader-v${FMIDLETVERSROOT}-expert-bin.zip" basedir="${distjardir}" />
+		<zip destfile="${distproject}/${project.file.prefix}-v${FMIDLETVERSROOT}-expert-bin.zip" basedir="${distjardir}" />
 		<copy file="${distall}/README.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
 		<delete includeemptydirs="true">
 			<fileset dir="${distdir}" includes="**/**cldc**,**podcast**" />
 		</delete>
-		<zip destfile="${distproject}/rssreader-v${FMIDLETVERSROOT}-bin.zip" basedir="${distjardir}" />
+		<zip destfile="${distproject}/${project.file.prefix}-v${FMIDLETVERSROOT}-bin.zip" basedir="${distjardir}" />
 		<delete dir="${distdir}/dist" />
 		<copy todir="${distdir}" overwrite="true" >
 			<fileset dir="${main}" />
 		</copy>
-		<zip destfile="${distproject}/rssreader-v${FMIDLETVERSROOT}-src.zip" basedir="${distjardir}" />
+		<zip destfile="${distproject}/${project.file.prefix}-v${FMIDLETVERSROOT}-src.zip" basedir="${distjardir}" />
 		<copy todir="${distdir}/dist" overwrite="true" >
 			<fileset dir="${dist}" excludes="**/RE*.txt" />
 		</copy>
