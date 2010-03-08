@@ -724,8 +724,10 @@
 	<target name="google.upload.append" depends="prepare" if="upload.to.google">
 		<property name="jsr" value="" />
 		<property name="google.labels" value="" />
+		<echo message="cd dist" file="${distgooglecode}/googlupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=${build.file.root}.cod --summary=&quot;stable Blackberry MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=${build.file.root}.jar --summary=&quot;stable (not Blackberry) MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="cd .." file="${distgooglecode}/googlupload.sh" append="true" />
 	</target>
 
 	<!-- Distribute the version (e.g. MIDP-1.0, MIDP-2.0, etc) to -->
@@ -1236,6 +1238,11 @@
 		<mkdir dir="${dist}" />
 	    <echo message="main build.number=${build.number}" />
 		<antcall target="dist.svn.dirs" />
+		<echo message="cd .." file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-bin.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-expert-bin.zip --summary=&quot;Expert (use rssreader_v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 4% of phones&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file-name=rssreader_v${FMIDLETVERSROOT}-src-tar.bz2 --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest source using tar and bzip2 on most Unix/Linux systems and in cygwin (cygwin.com) on Windows.  To unzip in linux and cygwin, tar -xjf.  For Unix, you may first have to bunzip2 (file).  Then, untar tar -xf.&quot; --labels=${google.labels}&#13;&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="cd *${FMIDLETVERSROOT}" file="${distgooglecode}/googlupload.sh" append="true" />
 		<antcall target="dist.midp.1.0" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
