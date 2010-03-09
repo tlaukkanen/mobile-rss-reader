@@ -36,34 +36,34 @@ MIDP 1.0 phone versions.  These program versions will also run on other
 phones, but these program
 versions have less features as the language has improved since then.
 
-midp10_@STAGE@prc/RSSReader.prc - MIDP 1.0 IBM WME PRC version
-midp10_@STAGE@RSSReader.cod - MIDP 1.0 Blackberry COD
-midp10_@STAGE@RSSReader.cso - MIDP 1.0 Blackberry CSO
-midp10_@STAGE@RSSReader.debug - MIDP 1.0 debug
-midp10_@STAGE@RSSReader.jad - MIDP 1.0 jad
-midp10_@STAGE@RSSReader.jar - MIDP 1.0 jar
+midp10_@STAGEFILE@prc/RSSReader.prc - MIDP 1.0 IBM WME PRC version
+midp10_@STAGEFILE@RSSReader.cod - MIDP 1.0 Blackberry COD
+midp10_@STAGEFILE@RSSReader.cso - MIDP 1.0 Blackberry CSO
+midp10_@STAGEFILE@RSSReader.debug - MIDP 1.0 debug
+midp10_@STAGEFILE@RSSReader.jad - MIDP 1.0 jad
+midp10_@STAGEFILE@RSSReader.jar - MIDP 1.0 jar
 
 
 midp20_ programs/directories (without jsr75_) are for phones with MIDP 2.0.
 This should work for all recent phones.  
 
-midp20_@STAGE@prc/RSSReader.prc - MIDP 2.0 IBM WME PRC version
-midp20_@STAGE@RSSReader.cod - MIDP 2.0 IBM WME PRC versiond
-midp20_@STAGE@RSSReader.cso - MIDP 2.0 Blackberry COD
-midp20_@STAGE@RSSReader.debug - MIDP 2.0 debug
-midp20_@STAGE@RSSReader.jad - MIDP 2.0 jad
-midp20_@STAGE@RSSReader.jar - MIDP 2.0 jar
+midp20_@STAGEFILE@prc/RSSReader.prc - MIDP 2.0 IBM WME PRC version
+midp20_@STAGEFILE@RSSReader.cod - MIDP 2.0 IBM WME PRC versiond
+midp20_@STAGEFILE@RSSReader.cso - MIDP 2.0 Blackberry COD
+midp20_@STAGEFILE@RSSReader.debug - MIDP 2.0 debug
+midp20_@STAGEFILE@RSSReader.jad - MIDP 2.0 jad
+midp20_@STAGEFILE@RSSReader.jar - MIDP 2.0 jar
 
 
 midp20_cldc11 programs/directories (without jsr75_) are for phones with MIDP
 2.0 and CLDC 1.1.  This should work for most, but not all recent phones.  
 
-midp20_cldc11_@STAGE@prc/RSSReader.prc - MIDP 2.0 and CLDC 1.1 IBM WME PRC version
-midp20_cldc11_@STAGE@RSSReader.cod - MIDP 2.0 and CLDC 1.1 IBM WME PRC versiond
-midp20_cldc11_@STAGE@RSSReader.cso - MIDP 2.0 and CLDC 1.1 Blackberry COD
-midp20_cldc11_@STAGE@RSSReader.debug - MIDP 2.0 and CLDC 1.1 debug
-midp20_cldc11_@STAGE@RSSReader.jad - MIDP 2.0 and CLDC 1.1 jad
-midp20_cldc11_@STAGE@RSSReader.jar - MIDP 2.0 and CLDC 1.1 jar
+midp20_cldc11_@STAGEFILE@prc/RSSReader.prc - MIDP 2.0 and CLDC 1.1 IBM WME PRC version
+midp20_cldc11_@STAGEFILE@RSSReader.cod - MIDP 2.0 and CLDC 1.1 IBM WME PRC versiond
+midp20_cldc11_@STAGEFILE@RSSReader.cso - MIDP 2.0 and CLDC 1.1 Blackberry COD
+midp20_cldc11_@STAGEFILE@RSSReader.debug - MIDP 2.0 and CLDC 1.1 debug
+midp20_cldc11_@STAGEFILE@RSSReader.jad - MIDP 2.0 and CLDC 1.1 jad
+midp20_cldc11_@STAGEFILE@RSSReader.jar - MIDP 2.0 and CLDC 1.1 jar
 
 
 midp20_jsr75_ programs .  For newer phones and usually with media (e.g. MP3)
@@ -75,12 +75,12 @@ midp20_jsr75_ programs .  For newer phones and usually with media (e.g. MP3)
 		if it says true, it supports jsr75 (this is different than progarm
 		jsr75 which shows the version of the progam not the phone).
 
-midp20_jsr75_@STAGE@prc/RSSReader.prc - MIDP 2.0 and JSR-75 IBM WME PRC version
-midp20_jsr75_@STAGE@RSSReader.cod - MIDP 2.0 and JSR-75 IBM WME PRC version
-midp20_jsr75_@STAGE@RSSReader.cso - MIDP 2.0 and JSR-75 Blackberry COD
-midp20_jsr75_@STAGE@RSSReader.debug - MIDP 2.0 and JSR-75 debug
-midp20_jsr75_@STAGE@RSSReader.jad - MIDP 2.0 and JSR-75 jad
-midp20_jsr75_@STAGE@RSSReader.jar - MIDP 2.0 and JSR-75 jar
+midp20_jsr75_@STAGEFILE@prc/RSSReader.prc - MIDP 2.0 and JSR-75 IBM WME PRC version
+midp20_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0 and JSR-75 IBM WME PRC version
+midp20_jsr75_@STAGEFILE@RSSReader.cso - MIDP 2.0 and JSR-75 Blackberry COD
+midp20_jsr75_@STAGEFILE@RSSReader.debug - MIDP 2.0 and JSR-75 debug
+midp20_jsr75_@STAGEFILE@RSSReader.jad - MIDP 2.0 and JSR-75 jad
+midp20_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 jar
 
 midp20_cldc11_jsr75_ programs .  For newer phones and usually with media
         (e.g. MP3) capabilities, use files prefixed with
@@ -92,12 +92,12 @@ midp20_cldc11_jsr75_ programs .  For newer phones and usually with media
 		if it says true and phone CLDC has CLDC-1.1, it supports jsr75 (this is different than progarm
 		jsr75 which shows the version of the progam not the phone).
 
-midp20_cldc11_jsr75_@STAGE@prc/RSSReader.prc - MIDP 2.0, CLDC 1.1, and JSR-75 IBM WME PRC version
-midp20_cldc11_jsr75_@STAGE@RSSReader.cod - MIDP 2.0, CLDC 1.1, and JSR-75 IBM WME PRC version
-midp20_cldc11_jsr75_@STAGE@RSSReader.cso - MIDP 2.0, CLDC 1.1, and JSR-75 Blackberry COD
-midp20_cldc11_jsr75_@STAGE@RSSReader.debug - MIDP 2.0, CLDC 1.1, and JSR-75 debug
-midp20_cldc11_jsr75_@STAGE@RSSReader.jad - MIDP 2.0, CLDC 1.1, and JSR-75 jad
-midp20_cldc11_jsr75_@STAGE@RSSReader.jar - MIDP 2.0, CLDC 1.1, and JSR-75 jar
+midp20_cldc11_jsr75_@STAGEFILE@prc/RSSReader.prc - MIDP 2.0, CLDC 1.1, and JSR-75 IBM WME PRC version
+midp20_cldc11_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0, CLDC 1.1, and JSR-75 IBM WME PRC version
+midp20_cldc11_jsr75_@STAGEFILE@RSSReader.cso - MIDP 2.0, CLDC 1.1, and JSR-75 Blackberry COD
+midp20_cldc11_jsr75_@STAGEFILE@RSSReader.debug - MIDP 2.0, CLDC 1.1, and JSR-75 debug
+midp20_cldc11_jsr75_@STAGEFILE@RSSReader.jad - MIDP 2.0, CLDC 1.1, and JSR-75 jad
+midp20_cldc11_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0, CLDC 1.1, and JSR-75 jar
 
 midp20_podcast_jsr75_ programs .  For usually high end smartphones with large
 	    amounts of memory, and usually with media (e.g. MP3)
@@ -109,12 +109,12 @@ midp20_podcast_jsr75_ programs .  For usually high end smartphones with large
 		phones midp20_jsr75_ programs.  Also see above for using podcast
 		versions.
 
-midp20_podcast_jsr75_@STAGE@prc/RSSReader.prc - MIDP 2.0, JSR-75, and podcast IBM WME PRC version
-midp20_podcast_jsr75_@STAGE@RSSReader.cod - MIDP 2.0, podcast and JSR-75 IBM WME PRC version
-midp20_podcast_jsr75_@STAGE@RSSReader.cso - MIDP 2.0, podcast and JSR-75 Blackberry COD
-midp20_podcast_jsr75_@STAGE@RSSReader.debug - MIDP 2.0, podcast and JSR-75 debug
-midp20_podcast_jsr75_@STAGE@RSSReader.jad - MIDP 2.0, podcast and JSR-75 jad
-midp20_podcast_jsr75_@STAGE@RSSReader.jar - MIDP 2.0, podcast and JSR-75 jar
+midp20_podcast_jsr75_@STAGEFILE@prc/RSSReader.prc - MIDP 2.0, JSR-75, and podcast IBM WME PRC version
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0, podcast and JSR-75 IBM WME PRC version
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.cso - MIDP 2.0, podcast and JSR-75 Blackberry COD
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.debug - MIDP 2.0, podcast and JSR-75 debug
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.jad - MIDP 2.0, podcast and JSR-75 jad
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0, podcast and JSR-75 jar
 
 midp20_podcast_jsr75_ programs .  For usually high end smartphones with large
 	    amounts of memory, and usually with media (e.g. MP3)
@@ -126,9 +126,9 @@ midp20_podcast_jsr75_ programs .  For usually high end smartphones with large
 		phones midp20_jsr75_ programs.  Also see above for using podcast
 		versions.
 
-midp20_podcast_jsr75_@STAGE@prc/RSSReader.prc - MIDP 2.0, JSR-75, and podcast IBM WME PRC version
-midp20_podcast_jsr75_@STAGE@RSSReader.cod - MIDP 2.0, podcast and JSR-75 IBM WME PRC version
-midp20_podcast_jsr75_@STAGE@RSSReader.cso - MIDP 2.0, podcast and JSR-75 Blackberry COD
-midp20_podcast_jsr75_@STAGE@RSSReader.debug - MIDP 2.0, podcast and JSR-75 debug
-midp20_podcast_jsr75_@STAGE@RSSReader.jad - MIDP 2.0, podcast and JSR-75 jad
-midp20_podcast_jsr75_@STAGE@RSSReader.jar - MIDP 2.0, podcast and JSR-75 jar
+midp20_podcast_jsr75_@STAGEFILE@prc/RSSReader.prc - MIDP 2.0, JSR-75, and podcast IBM WME PRC version
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0, podcast and JSR-75 IBM WME PRC version
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.cso - MIDP 2.0, podcast and JSR-75 Blackberry COD
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.debug - MIDP 2.0, podcast and JSR-75 debug
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.jad - MIDP 2.0, podcast and JSR-75 jad
+midp20_podcast_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0, podcast and JSR-75 jar
