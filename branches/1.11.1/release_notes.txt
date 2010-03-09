@@ -318,6 +318,9 @@ v1.11.4 Release Candidate 2 (Mar 9th 2010)
 + Fix properties for MIDP 2.0 podcast/itunes.
 + Create itunes test target.
 
+v1.11.5 Release Candidate 1 (Mar 9th 2010)
++ Add labels to all artifacts.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
