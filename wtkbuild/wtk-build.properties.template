@@ -1,6 +1,7 @@
 #-- IB 2010-03-08 1.11.4RC1 Use latest antenna 1.2.1 beta.
 #-- IB 2010-03-08 1.11.4RC1 Use latest proguard 4.5 beta3.
 #-- IB 2010-03-08 1.11.4RC1 Use project.file.prefix for project archives.
+#-- IB 2010-03-09 1.11.5RC1 Use 1.11.5 because RC version was released as main version.
 
 #windows.drive = C:
 windows.drive = 
@@ -96,10 +97,10 @@ project.description = RSS/News/Blog Reader
 prc.longname = ${project.description}
 MIDLETURL_ROOT = http://mobile-rss-reader.googlecode.com/files
 separator = /
-MIDLETVERSROOT = 1.11.4
+MIDLETVERSROOT = 1.11.5
 #Need vers with '_' to allow uploading to sites that get confused by to
 #many '.'
-FMIDLETVERSROOT = 1_11_4
+FMIDLETVERSROOT = 1_11_5
 #Location of manifest source
 manifestsrc = ../manifestsrc
 #? src = src
