@@ -19,6 +19,7 @@
 	<!-- IB 2010-03-09 1.11.4RC2 Create non JSR-75 smartphone/podcast version.  -->
 	<!-- IB 2010-03-09 1.11.4RC2 Create itunes test target.  -->
 	<!-- IB 2010-03-09 1.11.4RC2 Fix smartphone zip.  -->
+	<!-- IB 2010-03-09 1.11.5RC1 Add labels to all artifacts.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1140,6 +1141,7 @@
 			<param name="wtk.properties" value="wtk2.0jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.jsr75}" />
 			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="jsr" value="JSR-75" />
 			<param name="make.build.files" value="false" />
 			<param name="build.vers" value="${build.midp20.jsr75}" />
@@ -1165,6 +1167,7 @@
 			<param name="dist.vers" value="${dist.midp20.itunes}" />
 			<param name="make.build.files" value="false" />
 			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="smartphone" value="Smartphone" />
 			<param name="build.vers" value="${build.midp20.itunes}" />
 			<param name="no.test" value="true" />
@@ -1177,6 +1180,7 @@
 			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
 			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="make.build.files" value="false" />
 			<param name="jsr" value="JSR-75" />
 			<param name="smartphone" value="Smartphone" />
