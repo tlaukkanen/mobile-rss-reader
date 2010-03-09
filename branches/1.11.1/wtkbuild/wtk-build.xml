@@ -13,6 +13,10 @@
 	<!-- IB 2010-03-08 1.11.4RC1 Use zip for src as the file paths are too long for non-GNU tar.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Use - in cod files before version instead of _.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Use project.file.prefix for project archives.  -->
+	<!-- IB 2010-03-08 1.11.4RC1 Use STAGE in description.  -->
+	<!-- IB 2010-03-08 1.11.4RC1 Make test distribution target with only MIDP 2.0 and MIDP 2.0 with JSR-75.  -->
+	<!-- IB 2010-03-08 1.11.4RC1 Remove unneeded directories.  -->
+
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
 
@@ -132,8 +136,17 @@
 		<property file="${basedir}/staging.properties" />
 	</target>
 
+	<target name="prepare.stage" if="stage" >
+	    <echo message="Using stage=${stage}" />
+		<property name="stage.file" value="${stage}_" />
+		<echo message="stage.file=${stage.file}" />
+		<property name="dist.stage.file" value="_${stage}" />
+		<echo message="dist.stage.file=${dist.stage.file}" />
+		<echo message="ustage=${ustage}" />
+	</target>
+
 	<!-- prepare the target folder -->
-	<target name="prepare" depends="test.prepare,release.prepare" >
+	<target name="prepare" depends="test.prepare,release.prepare,prepare.stage" >
 		<!-- Define the Wireless Toolkit home directory. Needed by the tasks. -->
 		<!-- Define some additional properties for this project. Not required. -->
 		<property name="optional.template" value="" />
@@ -146,9 +159,14 @@
 		<property name="NOVICE" value="false" />
 		<property name="novice.txt" value="${src}/data/novice.txt" />
 		<property name="stage" value="" />
-		<property name="build.prefix" value="${file.prefix}${stage}" />
+		<property name="stage" value="" />
+		<property name="ustage" value="" />
+		<property name="stage.file" value="" />
+		<property name="jsr75" value="" />
+		<property name="smartphone" value="" />
+		<property name="build.prefix" value="${file.prefix}${stage.file}" />
 		<property name="build.file.root" value="${build.prefix}${project.name}-${FMIDLETVERSROOT}" />
-		<property name="buildinfo" value="${SUFFIXVERS}-${stage}b${build.number}" />
+		<property name="buildinfo" value="${SUFFIXVERS}-${stage.file}b${build.number}" />
 		<!-- changed -->
 		<mkdir dir="${target}" />
 		<mkdir dir="${classes}" />
@@ -582,14 +600,20 @@
 		<copy todir="${dist}" >
 			<fileset file="${docs}/README.txt" />
 			<filterset>
-				<filter token="STAGE" value="${stage}" />
+				<filter token="STAGEFILE" value="${stage.file}" />
 			</filterset>
 		</copy>
 		<copy todir="${distall}" file="${dist}/README.txt" />
 		<copy todir="${distall}" >
 			<fileset file="${docs}/READMEAll.txt" />
 			<filterset>
-				<filter token="STAGE" value="${stage}" />
+				<filter token="STAGEFILE" value="${stage.file}" />
+			</filterset>
+		</copy>
+		<copy todir="${distall}" >
+			<fileset file="${docs}/READPODCASTME.txt" />
+			<filterset>
+				<filter token="STAGEFILE" value="${stage.file}" />
 			</filterset>
 		</copy>
 	</target>
@@ -732,8 +756,8 @@
 		<property name="jsr" value="" />
 		<property name="google.labels" value="" />
 		<echo message="cd */RSS*/dist&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${build.file.root}.cod --summary=&quot;stable Blackberry MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; ${google.labels}&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${build.file.root}.jar --summary=&quot;stable (not Blackberry) MIDP ${wtk.midp.version} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; ${google.labels}&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${build.file.root}.cod --summary=&quot;stable Blackberry MIDP ${wtk.midp.version} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; ${google.labels}&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${build.file.root}.jar --summary=&quot;stable (not Blackberry) MIDP ${wtk.midp.version} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest binary for direct phone install this is included in binary zip.  See documentation for which program to use.&quot; ${google.labels}&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<echo message="cd ../../..&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 	</target>
 
@@ -1138,6 +1162,7 @@
 			<param name="dist.vers" value="${dist.midp20.itunes}" />
 			<param name="make.build.files" value="false" />
 			<param name="upload.to.google" value="true" />
+			<param name="smartphone" value="Smartphone" />
 			<param name="build.vers" value="${build.midp20.itunes}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -1148,9 +1173,10 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="wtk.properties" value="wtk2.0.itunes.jsr75.properties${wtk.template}" />
 			<param name="dist.vers" value="${dist.midp20.itunes.jsr75}" />
-			<param name="make.build.files" value="false" />
 			<param name="upload.to.google" value="true" />
+			<param name="make.build.files" value="false" />
 			<param name="jsr" value="JSR-75" />
+			<param name="smartphone" value="Smartphone" />
 			<param name="build.vers" value="${build.midp20.itunes.jsr75}" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -1233,7 +1259,7 @@
 		</antcall>
 	</target>
 
-	<target name="dist.dev.status" depends="release.buildno,release.prepare" >
+	<target name="dist.dev.status" depends="release.buildno,release.prepare,prepare.stage" >
 		<antcall target="clean" />
 		<delete dir="${dist}" />
 		<mkdir dir="${dist}" />
@@ -1244,10 +1270,16 @@
 		<mkdir dir="${dist}" />
 	    <echo message="main build.number=${build.number}" />
 		<antcall target="dist.svn.dirs" />
+		<property name="dist.project.prefix" value="${project.file.prefix}-v${FMIDLETVERSROOT}${dist.stage.file}" />
+		<property name="dist.project.expert.zip" value="${dist.project.prefix}-expert-bin.zip" />
+		<property name="dist.project.smartphone.zip" value="${dist.project.prefix}-smartphone-bin.zip" />
+		<property name="dist.project.bin.zip" value="${dist.project.prefix}-bin.zip" />
+		<property name="dist.project.src.zip" value="${dist.project.prefix}-src.zip" />
 		<echo message="#!/bin/bash&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${project.file.prefix}-v${FMIDLETVERSROOT}-bin.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${project.file.prefix}-v${FMIDLETVERSROOT}-expert-bin.zip --summary=&quot;Expert (use ${project.file.prefix}-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest binaries for 4% of phones&quot; --labels=--labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${project.file.prefix}-v${FMIDLETVERSROOT}-src.zip --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} latest source zip.&quot; --labels=Type-Source&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.bin.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.smartphone.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest binaries for smartphones only (this uses up too much memory for non-smartphones.  also included in expert binaries)&quot; --labels=Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.expert.zip} --summary=&quot;Expert (use ${project.file.prefix}-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest binaries for 4% of phones&quot; --labels=--labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.src.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest source zip.&quot; --labels=Type-Source&#10;" file="${distgooglecode}/googlupload.sh" append="true" />
 		<antcall target="dist.midp.1.0" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
@@ -1281,32 +1313,50 @@
 			<param name="release.buildno" value="true" />
 		</antcall>
 		<chmod file="${distgooglecode}/googlupload.sh" perm="744" />
-		<property name="distdir" value="${distjardir}/RSSReader-${FMIDLETVERSROOT}" />
+		<property name="distdir" value="${distjardir}/RSSReader-${FMIDLETVERSROOT}${dist.stage.file}" />
 		<mkdir dir="${distdir}" />
 		<copy todir="${distdir}/dist" overwrite="true" >
 			<fileset dir="${dist}" excludes="**/RE*.txt" />
 		</copy>
 		<copy file="${distall}/READMEAll.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
-		<zip destfile="${distproject}/${project.file.prefix}-v${FMIDLETVERSROOT}-expert-bin.zip" basedir="${distjardir}" />
+		<zip destfile="${distproject}/${dist.project.expert.zip}" basedir="${distjardir}" />
+		<delete includeemptydirs="true">
+			<fileset dir="${distdir}" includes="**/**midp10**,**/**cldc**" excludes="**/**podcast**" />
+		</delete>
+		<copy file="${distall}/READPODCASTME.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
+		<zip destfile="${distproject}/${dist.project.smartphone.zip}" basedir="${distjardir}" />
 		<copy file="${distall}/README.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
 		<delete includeemptydirs="true">
 			<fileset dir="${distdir}" includes="**/**cldc**,**podcast**" />
 		</delete>
-		<zip destfile="${distproject}/${project.file.prefix}-v${FMIDLETVERSROOT}-bin.zip" basedir="${distjardir}" />
+		<zip destfile="${distproject}/${dist.project.bin.zip}" basedir="${distjardir}" />
 		<delete dir="${distdir}/dist" />
 		<copy todir="${distdir}" overwrite="true" >
 			<fileset dir="${main}" />
 		</copy>
-		<zip destfile="${distproject}/${project.file.prefix}-v${FMIDLETVERSROOT}-src.zip" basedir="${distjardir}" />
+		<zip destfile="${distproject}/${dist.project.src.zip}" basedir="${distjardir}" />
 		<copy todir="${distdir}/dist" overwrite="true" >
 			<fileset dir="${dist}" excludes="**/RE*.txt" />
 		</copy>
+		<delete includeemptydirs="true">
+			<fileset dir="./.rms" />
+			<fileset dir="./" includes="**/*.tmp" />
+			<fileset dir="../" includes="RSSReader-**.debug" />
+		</delete>
 	</target>
 
 	<target name="dist" >
 		<antcall target="dist.dev.status" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.test" >
+		<antcall target="dist" inheritAll="true" >
+			<param name="no.2.0.novice" value="true" />
+			<param name="no.2.0.cldc.1.1.itunes.jsr75" value="true" />
+			<param name="no.2.0.jsr238" value="true" />
 		</antcall>
 	</target>
 
