@@ -293,7 +293,7 @@ v1.11.3 (Oct 2nd 2009)
 + Cosmetic source change.
 + This contains all previous changes (see above).
 
-v1.11.4 Release Candidate 1 (Mar 8th 2010)
+v1.11.4 Release Candidate 2 (Mar 9th 2010)
 + Use latest antenna 1.2.1 beta.
 + Use latest proguard 4.5 beta3.
 + Prevent override message from causing hang on import feeds.
@@ -312,6 +312,9 @@ v1.11.4 Release Candidate 1 (Mar 8th 2010)
 + Create archive files.  
 + Don't create empty version directory.  
 + Use zip for src as the file paths are too long for non-GPL tar.
++ Use - in cod files before version instead of _.
++ Make test distribution target with only MIDP 2.0 and MIDP 2.0 with JSR-75.
++ Remove unneeded directories.
 
 Device issues:
 
