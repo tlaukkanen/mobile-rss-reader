@@ -316,6 +316,7 @@ v1.11.4 Release Candidate 2 (Mar 9th 2010)
 + Make test distribution target with only MIDP 2.0 and MIDP 2.0 with JSR-75.
 + Remove unneeded directories.
 + Fix properties for MIDP 2.0 podcast/itunes.
++ Create itunes test target.
 
 Device issues:
 
