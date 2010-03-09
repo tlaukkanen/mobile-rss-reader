@@ -1343,7 +1343,7 @@
 		<copy todir="${distdir}/dist" overwrite="true" >
 			<fileset dir="${dist}" excludes="**/RE*.txt" />
 		</copy>
-		<delete includeemptydirs="true">
+		<delete failonerror="false" includeemptydirs="true">
 			<fileset dir="./.rms" />
 			<fileset dir="./" includes="**/*.tmp" />
 			<fileset dir="../" includes="RSSReader-**.debug" />
