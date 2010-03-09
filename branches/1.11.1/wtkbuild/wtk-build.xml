@@ -15,7 +15,8 @@
 	<!-- IB 2010-03-08 1.11.4RC1 Use project.file.prefix for project archives.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Use STAGE in description.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Make test distribution target with only MIDP 2.0 and MIDP 2.0 with JSR-75.  -->
-	<!-- IB 2010-03-08 1.11.4RC1 Remove unneeded directories.  -->
+	<!-- IB 2010-03-08 1.11.4RC2 Remove unneeded directories.  -->
+	<!-- IB 2010-03-08 1.11.4RC2 Create non JSR-75 smartphone/podcast version.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1289,6 +1290,10 @@
 			<param name="release.buildno" value="true" />
 		</antcall>
 		<antcall target="dist.midp.2.0.cldc.1.1.jsr75" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.2.0.itunes" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
