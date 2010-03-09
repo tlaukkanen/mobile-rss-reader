@@ -15,8 +15,10 @@
 	<!-- IB 2010-03-08 1.11.4RC1 Use project.file.prefix for project archives.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Use STAGE in description.  -->
 	<!-- IB 2010-03-08 1.11.4RC1 Make test distribution target with only MIDP 2.0 and MIDP 2.0 with JSR-75.  -->
-	<!-- IB 2010-03-08 1.11.4RC2 Remove unneeded directories.  -->
-	<!-- IB 2010-03-08 1.11.4RC2 Create non JSR-75 smartphone/podcast version.  -->
+	<!-- IB 2010-03-09 1.11.4RC2 Remove unneeded directories.  -->
+	<!-- IB 2010-03-09 1.11.4RC2 Create non JSR-75 smartphone/podcast version.  -->
+	<!-- IB 2010-03-09 1.11.4RC2 Create itunes test target.  -->
+	<!-- IB 2010-03-09 1.11.4RC2 Fix smartphone zip.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1326,7 +1328,8 @@
 		<copy file="${distall}/READMEAll.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
 		<zip destfile="${distproject}/${dist.project.expert.zip}" basedir="${distjardir}" />
 		<delete includeemptydirs="true">
-			<fileset dir="${distdir}" includes="**/**midp10**,**/**cldc**" excludes="**/**podcast**" />
+			<fileset dir="${distdir}" excludes="**/**podcast**" />
+			<fileset dir="${distdir}" includes="**/**midp10**,**/**cldc**" />
 		</delete>
 		<copy file="${distall}/READPODCASTME.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
 		<zip destfile="${distproject}/${dist.project.smartphone.zip}" basedir="${distjardir}" />
@@ -1361,6 +1364,18 @@
 		<antcall target="dist" inheritAll="true" >
 			<param name="no.2.0.novice" value="true" />
 			<param name="no.2.0.cldc.1.1.itunes.jsr75" value="true" />
+			<param name="no.2.0.jsr238" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.itunes.test" >
+		<antcall target="dist" inheritAll="true" >
+			<param name="no.2.0.novice" value="true" />
+			<param name="no.1.0" value="true" />
+			<param name="no.2.0" value="true" />
+			<param name="no.2.0.cldc.1.1" value="true" />
+			<param name="no.2.0.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
 		</antcall>
 	</target>
