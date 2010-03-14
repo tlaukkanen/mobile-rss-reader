@@ -20,7 +20,7 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Have next item command on item display.
+ * IB 2010-03-07 1.11.4RC1 Have next item command on item display.
 */
 
 // Expand to define MIDP define
