@@ -21,7 +21,8 @@
  * This was modified no later than 2009-01-29
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Use observer pattern for feed/OPML/list parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed/OPML/list parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-14 1.11.5RC2 Remove unnecessary keywords.
 */
 // Expand to define MIDP define
 //#define DMIDP20
@@ -33,7 +34,7 @@ package net.eiroca.j2me.observable;
 	*/
 public interface Observer {
 
-	public abstract void changed(Observable observable);
+	void changed(Observable observable);
 
 }
 //#endif
