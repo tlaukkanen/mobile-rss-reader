@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.
+*/
 // Expand to define itunes define
 //#define DNOITUNES
 // Expand to define logging define
@@ -107,7 +110,7 @@ public class RssItunesFeed extends RssFeed
     /** Creates a new instance of RSSBookmark */
     public RssItunesFeed(String name, String url, String username,
 						String password,
-						Date upddate,
+						String upddate,
 						String link,
 						Date date,
 						String etag,
