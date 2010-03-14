@@ -21,7 +21,7 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Fix testing code of explicit.
+ * IB 2010-03-07 1.11.4RC1 Fix testing code of explicit.
 */
 
 // Expand to define logging define
