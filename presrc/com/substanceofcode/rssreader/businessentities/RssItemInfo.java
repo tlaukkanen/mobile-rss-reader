@@ -20,7 +20,7 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
+ * IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
 */
 
 // Expand to define logging define
