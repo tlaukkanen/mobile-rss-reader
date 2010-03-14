@@ -20,7 +20,8 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.  Don't set updated and etag if the updated and etag match since the values are not retrieved if it matches.  Use string for updated date (last-modified).
 */
 
 // Expand to define MIDP define
@@ -97,6 +98,9 @@ implements
     /** Make this observable. */
     public void makeObserable(RssReaderMIDlet midlet,
 			boolean updFeed, int maxItemCount) {
+		//#ifdef DLOGGING
+//@		if (fineLoggable) {logger.fine("makeObserable midlet,updFeed,maxItemCount=" + midlet + "," + updFeed + "," + maxItemCount);}
+		//#endif
 		m_midlet = midlet;
 		m_updFeed = updFeed;
 		m_maxItemCount = maxItemCount;
@@ -126,6 +130,9 @@ implements
      */
     public void parseRssFeed(boolean updFeed, int maxItemCount)
     throws IOException, Exception {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("parseRssFeed updFeed,maxItemCount=" + updFeed + "," + maxItemCount);}
+		//#endif
 		// Set this here as the instance of this class is reused
 		// for update of the current feed.
 		m_redirects = 0;
@@ -144,10 +151,13 @@ implements
     public void parseRssFeedUrl(String url, boolean updFeed, int maxItemCount)
     throws IOException, Exception {
         
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("parseRssFeedUrl url,maxItemCount=" + url + "," + maxItemCount);}
+		//#endif
 		try {
 			super.handleOpen(url, m_rssFeed.getUsername(),
 					  m_rssFeed.getPassword(), false, updFeed,
-					  m_rssFeed.getUpddateTz(), m_rssFeed.getEtag());
+					  m_rssFeed.getUpddate(), m_rssFeed.getEtag());
 			if (m_needRedirect) {
 				m_needRedirect = false;
 				parseHeaderRedirect(updFeed, m_location, maxItemCount);
@@ -158,23 +168,23 @@ implements
 				parseHTMLRedirect(updFeed, url, m_inputStream,
 								  maxItemCount);
 			} else {
-				String supdDate = m_rssFeed.getUpddateTz();
-				m_rssFeed.setUpddateTz(m_lastMod);
+				// If we're only processing if the feed is updated,
+				// check if we previously had a update value.
+				// If so and it does equals the new one, return
+				if (updFeed && m_same) {
+					return;
+				}
+				//#ifdef DLOGGING
+//@				if (finestLoggable) {logger.finest("run m_rssFeed.getUpddate()=" + m_rssFeed.getUpddate());}
+				//#endif
+				m_rssFeed.setUpddate(m_lastMod);
 				//#ifdef DLOGGING
 //@				String etag = m_rssFeed.getEtag();
 				//#endif
 				m_rssFeed.setEtag(m_etag);
 				//#ifdef DLOGGING
-//@				if (finestLoggable) {logger.finest("run supdDate,m_lastMod,etag,m_etag=" + supdDate + "," + m_lastMod + "," + etag + "," + m_etag);}
+//@				if (finestLoggable) {logger.finest("run m_lastMod,etag,m_etag=" + m_lastMod + "," + etag + "," + m_etag);}
 				//#endif
-				// If we're only processing if the feed is updated,
-				// check if we previously had a update value.
-				// If so and it does equals the new one, return
-				if (updFeed && (m_same || ((m_lastMod != null) &&
-					(m_lastMod.length() > 0) &&
-					(supdDate != null) && (m_lastMod.equals(supdDate))))) {
-					return;
-				}
 				parseRssFeedXml( m_inputStream, maxItemCount);
 			}
         } catch(Exception e) {
