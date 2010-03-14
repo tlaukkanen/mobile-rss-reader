@@ -24,7 +24,11 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-14 1.11.5RC2 Fix logging.
+ * IB 2010-03-14 1.11.5RC2 Synchronize use of opening or updating the feed.
+ * IB 2010-03-14 1.11.5RC2 Fix previous page for loading screen in procPage.
+ * IB 2010-03-14 1.11.5RC2 Combine if statements.
 */
 
 // Expand to define test define
@@ -1121,10 +1125,12 @@ implements
 	// Open existing bookmark and show headers (items).
 	final public void setPageInfo(boolean openPage, boolean getPage,
 		boolean getModPage, Displayable prevDisp) {
-		m_openPage = openPage;
-		m_getPage = getPage;
-		m_getModPage = getModPage;
-		m_prevDisp = prevDisp;
+		synchronized(this) {
+			m_openPage = openPage;
+			m_getPage = getPage;
+			m_getModPage = getModPage;
+			m_prevDisp = prevDisp;
+		}
 	}
 
 	// Open existing bookmark and show headers (items).
@@ -1144,8 +1150,7 @@ implements
 		// Open existing bookmark and show headers (items).
 		try {
 			/* Loading feed... */
-			initializeLoadingForm("Loading feed...",
-					m_bookmarkList);
+			initializeLoadingForm("Loading feed...", cprevDisp);
 			if(feed.getUrl().length() == 0) {
 				m_loadForm.recordExcFormFin("Unable to open feed.  No URL.",
 						new Exception(
@@ -1156,7 +1161,9 @@ implements
 		}catch(Throwable e) {
 			procPageExc(feed, copenPage, e);
 		} finally {
-			m_openPage = false;
+			synchronized(this) {
+				m_openPage = false;
+			}
 		}
 	}
 
@@ -1177,7 +1184,7 @@ implements
 		}
 
 		//#ifdef DLOGGING
-//@		if (finestLoggable) {logger.finest("procPage cgetPage,cgetModPage,cprevDisp,feed=" + cgetPage + "," + cgetModPage + "," + cprevDisp + "," + feed);}
+//@		if (finestLoggable) {logger.finest("procBackPage cgetPage,cgetModPage,cprevDisp,feed=" + cgetPage + "," + cgetModPage + "," + cprevDisp + "," + feed);}
 		//#endif
 
 		// Open existing bookmark and show headers (items).
@@ -2560,12 +2567,10 @@ implements
 			}
 			//#endif
 			
-			if( c == m_nextItemCmd ){
-				if ((m_itemRtnList != null) &&
+			if ((c == m_nextItemCmd) && (m_itemRtnList != null) &&
 					((m_itemRtnList instanceof HeaderList) ||
 					(m_itemRtnList instanceof AllNewsList))) {
-					((AllNewsList)m_itemRtnList).nextItem(true);
-				}
+				((AllNewsList)m_itemRtnList).nextItem(true);
 			}
 
 			execute();
