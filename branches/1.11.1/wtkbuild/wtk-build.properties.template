@@ -2,6 +2,8 @@
 #-- IB 2010-03-08 1.11.4RC1 Use latest proguard 4.5 beta3.
 #-- IB 2010-03-08 1.11.4RC1 Use project.file.prefix for project archives.
 #-- IB 2010-03-09 1.11.5RC1 Use 1.11.5 because RC version was released as main version.
+#-- IB 2010-03-12 1.11.5RC2 Use 4.2.5 version of PMD.
+#-- IB 2010-03-12 1.11.5RC2 Use WTK_HOME environment variable for wtk.home.
 
 #windows.drive = C:
 windows.drive = 
@@ -31,6 +33,7 @@ antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 #Comment out if you do not want to run PMD
 #pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
 #pmd.home = ${opt.tools}/pmd/pmd-4.2.4
+#pmd.home = ${opt.tools}/pmd/pmd-4.2.5
 pmd.xsl = pmd-compile-reduced.xsl
 cat.cmd = cat${windows.ext}
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
@@ -49,7 +52,7 @@ svn.pgm = ${svn.path}svn${windows.ext}
 #wtk.home = C:/opt/WTK2.5.1
 #wtk.home = ${windows.drive}/WTK2.5.2_01
 #wtk.home = ${opt.tools}/WTK2.5.2${wtk252}
-wtk.home = ${windows.drive}/opt/WTK2.5.2
+wtk.home = ${windows.drive}${env.WTK_HOME}
 #For Netbeans
 #wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
 #wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
@@ -57,7 +60,7 @@ wtk.home = ${windows.drive}/opt/WTK2.5.2
 #wtk.proguard.home = ${opt.tools}/proguard/proguard4.3
 wtk.proguard.home = ${opt.tools}/proguard/proguard4.5beta3
 #For phoneMe Windows
-phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
+#phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
 #For phoneMe Linux x86
 #phoneme.home = /media/SEA_DISK/linux/src/RSSReader-1_11_1rc2/bin/linux_x86_fb_chameleon_mvm
 #For phoneMe Windows and Linux
