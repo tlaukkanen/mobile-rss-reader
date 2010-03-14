@@ -20,7 +20,7 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
+ * IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
 */
 
 // Expand to define MIDP define
