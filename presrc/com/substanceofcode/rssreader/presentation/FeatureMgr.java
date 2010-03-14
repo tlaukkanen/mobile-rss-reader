@@ -20,7 +20,7 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Use NULL pattern.  Fixed loop.
+ * IB 2010-03-07 1.11.4RC1 Use NULL pattern.  Fixed loop.
 */
 
 // Expand to define MIDP define
