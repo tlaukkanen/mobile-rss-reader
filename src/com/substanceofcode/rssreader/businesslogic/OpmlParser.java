@@ -19,7 +19,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+   IB 2010-03-12 1.11.5RC1 Use htmlUrl which is link tag in feed for OPML.
+*/
 
+// Expand to define itunes define
+//#define DNOITUNES
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -104,6 +109,14 @@ public class OpmlParser extends FeedListParser {
 						link = parser.getAttributeValue( "url" );
 					}
 					
+					//#ifdef DITUNES
+//@					/** 
+//@					 * For Google htmlURL is the link in the feed.
+//@					 */
+//@
+//@					String htmlUrl = parser.getAttributeValue( "htmlUrl" );
+					//#endif
+					
 					/** Debugging information */
 					System.out.println("Title:       " + title);
 					System.out.println("Link:        " + link);
@@ -121,6 +134,12 @@ public class OpmlParser extends FeedListParser {
 						continue;
 					}
 					RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
+					//#ifdef DITUNES
+//@					if (htmlUrl.length() > 0) {
+//@						feed.setLink(htmlUrl);
+//@					}
+					//#endif
+
 					rssFeeds.addElement( feed );
 				}
 				
@@ -144,4 +163,3 @@ public class OpmlParser extends FeedListParser {
     }
     
 }
-
