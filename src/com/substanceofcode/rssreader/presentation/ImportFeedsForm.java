@@ -20,7 +20,9 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.  Prevent override message from causing hang on import feeds.
+ * IB 2010-03-07 1.11.4RC1 Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.  Prevent override message from causing hang on import feeds.
+ * IB 2010-03-14 1.11.5RC1 Use htmlUrl which is link tag in feed for OPML.  This happens for Google reader.
+ * IB 2010-03-14 1.11.5RC1 Code cleanup.
 */
 // FIX check for blank url
 
@@ -110,9 +112,6 @@ implements
 
     static private byte[] m_importSave = null; // Import form save
     static private byte[] m_exportSave = null; // Export form save
-	//#ifndef DTESTUI
-    private boolean     m_debugOutput = false; // Flag to write to output for test
-	//#endif
 	private boolean     m_getFeedList = false;      // The noticy flag for list parsing
 	// The noticy flag for override existing feeds
 	private boolean     m_override = false;  // The noticy flag for override
@@ -217,7 +216,6 @@ implements
    */
 	public void changed(Observable observable) {
 
-		boolean cparseBackground = false;
 		FeedListParser cbackGrListParser = null;
 		synchronized(this) {
 			cbackGrListParser = (FeedListParser)observable.getObserverManager(
@@ -327,8 +325,13 @@ implements
 //@							" text=" + feed.getName() + ">\n" +
 //@						"    <outline text=\"" + feed.getName() +
 //@							"\" title=" + feed.getName() + "\" type=\"rss\"\n" +
-//@						"xmlUrl=\"" + feed.getUrl() + "\" htmlUrl='\"" + feed.getUrl() +
-//@						"\"/>\n</outline>\n");
+//@						"xmlUrl=\"" + feed.getUrl() + "\" " +
+						//#ifdef DITUNES
+//@						"htmlUrl='\"" +
+//@						feed.getLink() +
+//@						"\"" +
+						//#endif
+//@						"/>\n</outline>\n");
 //@					} else {
 //@						sb.append(feed.getUrl() + " " + feed.getName());
 //@					}
