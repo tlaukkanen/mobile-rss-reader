@@ -21,6 +21,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-14 1.11.5RC2 Log m_same to help look at conditional get.
+*/
 
 // Expand to define MIDP define
 //#define DMIDP20
@@ -233,7 +236,7 @@ public class URLHandler {
 				}
 			}
 			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("handleOpen m_contentType=" + m_contentType);}
+//@			if (finestLoggable) {logger.finest("handleOpen m_contentType,m_same=" + m_contentType + "," + m_same);}
 			//#endif
             
         } catch(IllegalArgumentException e) {
