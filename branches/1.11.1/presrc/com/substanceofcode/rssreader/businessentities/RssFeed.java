@@ -19,6 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-12 1.11.5RC2 Use string for last modified date (m_upddate) to prevent problems from time zone differences from causing problems with deterining if a feed was updated.
+ * IB 2010-03-12 1.11.5RC2 If xml url is the same as html url, use xml url for html url.
+*/
 
 // Expand to define logging define
 @DLOGDEF@
@@ -94,10 +98,9 @@ public class RssFeed
 	protected String m_name = "";
 	protected String m_username = "";
 	protected String m_password = "";
-	protected Date m_upddate = null;
-	protected byte m_upddateTz = (byte)-1;
+	protected String m_upddate = "";
 	protected Date m_date = null;
-		protected String m_link = "";   // The RSS feed link
+	protected String m_link = "";   // The RSS feed link
 	protected String m_etag = ""; // The RSS feed etag
 
 	protected Vector m_items = new Vector();  // The RSS item vector
@@ -116,7 +119,7 @@ public class RssFeed
 
 	/** Creates a new instance of RSSBookmark */
 	public RssFeed(String name, String url, String username, String password,
-			Date upddate,
+			String upddate,
 			String link,
 			Date date,
 			String etag) {
@@ -125,7 +128,6 @@ public class RssFeed
 		m_username = username;
 		m_password = password;
 		m_upddate = upddate;
-		m_upddateTz = RssFormatParser.GMT;
 		//#ifdef DITUNES
 		m_link = link;
 		m_date = date;
@@ -183,14 +185,15 @@ public class RssFeed
 	 **/
 	protected void init(boolean firstSettings,
 			int startIndex, boolean iTunesCapable,
-			boolean modifyCapable, boolean hasPipe, boolean encoded,
+			boolean modifyCapable,
+			boolean hasPipe, boolean encoded,
 			String [ ] nodes) {
 
 		try {
 
 			/* Node count should be 9
 			 * name | url | username | password | upddate | link | date |
-			 * etag | items 
+			 * etag | place holder for time zone. | items 
 			 */
 			int NAME = 0;
 			//#ifdef DLOGGING
@@ -226,7 +229,6 @@ public class RssFeed
 				//#endif
 			}
 
-			m_items = new Vector();
 			if (firstSettings) {
 				// Given the bugs with the first settings, we do not
 				// retrieve the items so that we can restore them
@@ -245,20 +247,18 @@ public class RssFeed
 				ITEMS = 5;
 			}
 			int UPDDATE = 4;
-			String dateString = nodes[startIndex + UPDDATE];
+			m_upddate = nodes[startIndex + UPDDATE];
 			// In this version, we are adding ETag, so we cannot use
 			// m_upddate from before because they must be used together.
-			if((dateString.length()>0) && iTunesCapable && modifyCapable) {
-				m_upddate = new Date(Long.parseLong(dateString, 16));
-				int UPDDATETZ = 8;
-				String stz = nodes[startIndex + UPDDATETZ];
-				m_upddateTz = (stz.length() == 0) ? (byte)-1 : (byte)Integer.parseInt(stz);
+			if (hasPipe && (m_upddate.length()>0) && iTunesCapable &&
+					modifyCapable) {
+				m_upddate = m_upddate.replace(CONE, '|');
 			}
 			if(modifyCapable) {
 				int ETAG = 7;
-				String etagString = nodes[startIndex + ETAG];
-				if (etagString.length() > 0) {
-					m_etag = etagString;
+				m_etag = nodes[startIndex + ETAG];
+				if (hasPipe) {
+					m_etag = m_etag.replace(CONE, '|');
 				}
 			}
 			if (iTunesCapable && hasPipe) {
@@ -296,11 +296,14 @@ public class RssFeed
 				// Also, do not try to modify previous items as it
 				// unnecessarily complicates the code for a corner case
 				// of upgrading.
+				//#ifdef DLOGGING
+				if (traceLoggable) {logger.trace("init m_url,m_name,m_username,m_upddate,m_date,m_etag,m_password=" + m_url + "," + m_name + "," + m_username + "," + m_password + "," + m_upddate + "," + m_date + "," + m_etag);}
+				//#endif
 				return;
 			}
 			String itemArrayData = nodes[ startIndex + ITEMS ];
 			//#ifdef DLOGGING
-			if (traceLoggable) {logger.trace("init m_upddate,m_date,m_etag,first item=" + m_upddate + "," + m_date + "," + m_etag + "," + nodes[ startIndex + ITEMS ]);}
+			if (traceLoggable) {logger.trace("init m_url,m_name,m_username,m_upddate,m_date,m_etag,m_password,first item=" + m_url + "," + m_name + "," + m_username + "," + m_password + "," + m_upddate + "," + m_date + "," + m_etag + "," + nodes[ startIndex + ITEMS ]);}
 			//#endif
 
 			// Deserialize itemss
@@ -393,9 +396,11 @@ public class RssFeed
 				}
 			}
 		}
+		String url = m_url.replace('|', CONE);
 		String name = m_name.replace('|', CONE);
 		String username = m_username.replace('|' , CONE);
 		String password = m_password.replace('|' , CONE);
+		String link = m_link.replace('|' , CONE);
 		String encodedPassword;
 		// Encode password to make reading password difficult
 		Base64 b64 = new Base64();
@@ -412,21 +417,15 @@ public class RssFeed
 			// space for toString.
 			dateString = Long.toString( m_date.getTime(), 16 );
 		}
-		String updString;
-		if(m_upddate==null){
-			updString = "";
-		} else {
-			// We use base 16 (hex) for the update date so that we can save some
-			// space for toString.
-			updString = Long.toString( m_upddate.getTime(), 16 );
-		}
+		String updString = m_upddate.replace('|' , CONE);
+		String etag = m_etag.replace('|' , CONE);
+		// Leave space for former time zone.  We'll fix in next release.
 		String storeString = name + "|" +
-			m_url + "|" + username + "|" +
+			url + "|" + username + "|" +
 			encodedPassword + "|" + updString + "|" +
-			m_link + "|" + dateString + "|" +
-			m_etag + "|" +
-			((m_upddateTz == (byte)-1) ? "" : Integer.toString((int)m_upddateTz)) +
-			"|" + serializedItems;
+			link + "|" + dateString + "|" +
+			etag + "|" + "" + "|" +
+			serializedItems;
 		return storeString;
 
 	}
@@ -504,48 +503,15 @@ public class RssFeed
 		m_items = items;
 	}
 
-	public void setUpddate(Date upddate) {
+	public void setUpddate(String upddate) {
 		//#ifdef DLOGGING
-		if (traceLoggable) {logger.trace("setUpddate upddate=" + ((upddate == null) ? "null" : upddate.toString()));}
+		if (traceLoggable) {logger.trace("setUpddate upddate=" + upddate);}
 		//#endif
 		this.m_upddate = upddate;
-		if (upddate == null) {
-			this.m_upddateTz = (byte)-1;
-		} else {
-			this.m_upddateTz = RssFormatParser.GMT;
-		}
 	}
 
-	public void setUpddateTz(String supddate) {
-		//#ifdef DLOGGING
-		if (traceLoggable) {logger.trace("setUpddateTz supddate.length(),supddate=" + ((supddate == null) ? "null" : Integer.toString(supddate.length())) + "," + supddate);}
-		//#endif
-		Object[] objs = null;
-		if ((supddate != null) && (supddate.length() > 0)) {
-			objs = RssFormatParser.parseStdDateTZ(supddate);
-		}
-		//#ifdef DLOGGING
-		if (traceLoggable) {logger.trace("setUpddateTz objs,objs[0],objs[1]=" + ((objs == null) ? "null" : objs[0]) + "," + ((objs == null) ? "null" : objs[1]));}
-		//#endif
-		if (objs == null) {
-			this.m_upddate = null;
-			this.m_upddateTz = (byte)-1;
-		} else {
-			this.m_upddate = (Date)objs[0];
-			this.m_upddateTz = ((Byte)objs[1]).byteValue();
-		}
-	}
-
-	public Date getUpddate() {
+	public String getUpddate() {
 		return (m_upddate);
-	}
-
-	public String getUpddateTz() {
-		if (m_upddate == null) {
-			return null;
-		}
-		final String stz = (m_upddateTz == (byte)-1) ? "GMT" : RssFormatParser.stimeZones.substring((int)m_upddateTz + 1, (int)m_upddateTz + 4);
-		return RssFormatParser.stdDate(m_upddate, stz);
 	}
 
 	public void setEtag(String etag) {
@@ -578,17 +544,9 @@ public class RssFeed
 			// space for toString.
 			dateString = Long.toString( m_date.getTime(), 16 );
 		}
-		String updString;
-		if(m_upddate==null){
-			updString = "";
-		} else {
-			// We use base 16 (hex) for the update date so that we can save some
-			// space for toString.
-			updString = Long.toString( m_upddate.getTime(), 16 );
-		}
 		String storeString = m_name + "|" + m_url + "|" + m_username + "|" +
 			m_password + "|" +
-			updString + "|" + m_link + "|" + m_etag + "|" +
+			m_upddate + "|" + m_link + "|" + m_etag + "|" +
 			dateString + "|" + serializedItems.toString();
 		return storeString;
 
@@ -596,9 +554,7 @@ public class RssFeed
 
 	public void setLink(String link) {
 		//#ifdef DITUNES
-		if (!link.equals(m_url)) {
-			this.m_link = link;
-		}
+		this.m_link = link.equals(m_url) ? m_url : link;
 		//#endif
 	}
 
