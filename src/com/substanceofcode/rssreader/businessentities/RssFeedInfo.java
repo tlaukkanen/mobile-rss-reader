@@ -20,7 +20,8 @@
  *
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
+ * IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
+ * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.
 */
 
 // Expand to define logging define
@@ -63,14 +64,10 @@
 //@    /** Return bookmark's password for basic authentication */
 //@    String getPassword();
 //@    
-//@    Date getUpddate();
+//@    String getUpddate();
 //@
 //@    /** Set bookmark's password for basic authentication */
-//@    void setUpddate(Date upddate);
-//@
-//@    void setUpddateTz(String supddate);
-//@
-//@    String getUpddateTz();
+//@    void setUpddate(String upddate);
 //@
 //@    String getEtag();
 //@
