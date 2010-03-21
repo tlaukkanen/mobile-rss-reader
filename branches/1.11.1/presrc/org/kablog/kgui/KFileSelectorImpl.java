@@ -21,6 +21,9 @@
  * 
  * This software was originally modified no later than Sept 25, 2007.
  */
+/*
+ * IB 2010-03-14 1.11.5RC2 Fix comment to remove getInstance.
+*/
 
 // Expand to define DJSR75 define
 @DJSR75@
@@ -138,7 +141,7 @@ final public class KFileSelectorImpl
 			logger.severe("KFileSelectorImpl constructor", t);
 			//#endif
 			/** Error while executing constructor */
-			System.out.println("KFileSelectorFactory getInstance " + t.getMessage());
+			System.out.println("KFileSelectorImpl constructor " + t.getMessage());
 			t.printStackTrace();
 		}
 
@@ -247,7 +250,7 @@ final public class KFileSelectorImpl
 						logger.severe("KFileSelectorImpl openSelected ", t);
 						//#endif
 						/** Error while executing constructor */
-						System.out.println("KFileSelectorFactory openSelected " + t.getMessage());
+						System.out.println("KFileSelectorImpl openSelected " + t.getMessage());
 						t.printStackTrace();
 					}
 				} else if (cancelCmd) {
@@ -272,7 +275,7 @@ final public class KFileSelectorImpl
 			logger.severe("KFileSelectorImpl run ", t);
 			//#endif
 			/** Error while executing constructor */
-			System.out.println("KFileSelectorFactory run " + t.getMessage());
+			System.out.println("KFileSelectorImpl run " + t.getMessage());
 			t.printStackTrace();
 		}
 	}
