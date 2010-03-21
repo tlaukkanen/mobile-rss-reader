@@ -83,9 +83,6 @@ import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.businesslogic.HTMLAutoLinkParser;
 import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
-//#ifdef DJSR75
-import org.kablog.kgui.KFileSelectorMgr;
-//#endif
 //#ifdef DMIDP20
 import net.eiroca.j2me.observable.Observer;
 import net.eiroca.j2me.observable.Observable;
