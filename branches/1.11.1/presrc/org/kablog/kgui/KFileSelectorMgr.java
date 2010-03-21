@@ -22,6 +22,9 @@
  * 
  * This software was originally modified no later than Sept 25, 2007.
  */
+/*
+ * IB 2010-03-21 1.11.5RC1 Remove KFileSelector to save memory. 
+*/
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -58,7 +61,7 @@ implements KViewParent
 	protected RssReaderMIDlet midlet;
 	protected Form txtFrm;
 	protected TextField txtFld;
-	protected KFileSelector fileSelectorView; 
+	protected KFileSelectorImpl fileSelectorView; 
     protected KViewParent viewParent;
     protected boolean ready = false;
     protected boolean bDebug;
@@ -109,14 +112,15 @@ implements KViewParent
 		fileSelectorView = null;
 
 		try {
-			fileSelectorView = KFileSelectorFactory.getInstance(
-					midlet,
+			fileSelectorView = new KFileSelectorImpl();
+			fileSelectorView.init(midlet,
+					selectDir,
 					((txtFrm instanceof ImportFeedsForm) ? "Find import file" :
-					 "Find feed file"), selectDir, null, "/icons" );
-			((KFileSelectorImpl)fileSelectorView).setCommandListener(
-				(KFileSelectorImpl)fileSelectorView, true);
+					 "Find feed file"),
+					null, "/icons" );
+			fileSelectorView.setCommandListener(fileSelectorView, true);
 			fileSelectorView.setViewParent(this);
-			Display.getDisplay(midlet).setCurrent((List)fileSelectorView);
+			Display.getDisplay(midlet).setCurrent(fileSelectorView);
 		}
 		catch (Throwable e)
 		{
