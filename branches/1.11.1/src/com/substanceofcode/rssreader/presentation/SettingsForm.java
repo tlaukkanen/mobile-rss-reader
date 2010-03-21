@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.5RC1 Remove unneeded import.
+ */
 
 // Expand to define MIDP define
 //#define DMIDP20
@@ -61,9 +64,6 @@ import javax.microedition.lcdui.StringItem;
 //#endif
 import javax.microedition.lcdui.Item;
 
-//#ifdef DJSR75
-//@import org.kablog.kgui.KFileSelectorMgr;
-//#endif
 import com.substanceofcode.utils.Settings;
 
 //#ifdef DLOGGING
