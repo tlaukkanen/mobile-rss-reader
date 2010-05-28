@@ -1,0 +1,9 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+wtk.midp.version = 1.0
+file.nbr.midp1.0 = 10
+DMIDPVERS = DMIDP${file.nbr.midp1.0}
+JMIDPVERS = MIDP-1.0
+file.prefix.midp1.0 = midp${file.nbr.midp1.0}_
+bin.midp1.0 = bin${file.nbr.midp1.0}
+SUFFIXVERS.midp1.0 = midp1.0
+DMEMSIZEDEF = DSMALLMEM
