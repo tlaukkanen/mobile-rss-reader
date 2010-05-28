@@ -29,6 +29,13 @@
  * IB 2010-03-14 1.11.5RC2 Synchronize use of opening or updating the feed.
  * IB 2010-03-14 1.11.5RC2 Fix previous page for loading screen in procPage.
  * IB 2010-03-14 1.11.5RC2 Combine if statements.
+ * IB 2010-03-14 1.11.5RC2 Fix showing diagnostics.
+ * IB 2010-05-24 1.11.5RC2 Code cleanup.
+ * IB 2010-05-24 1.11.5RC2 Combine classes to save space.
+ * IB 2010-05-24 1.11.5RC2 Log thread info for diagnostics.
+ * IB 2010-05-24 1.11.5RC2 Use one thread for novice import.
+ * IB 2010-05-24 1.11.5RC2 Fix mispelling of bookmarks.
+ * IB 2010-05-24 1.11.5RC2 Only do export if signed.
 */
 
 // Expand to define test define
@@ -39,20 +46,12 @@
 //#define DMIDP20
 // Expand to define itunes define
 //#define DNOITUNES
+// Expand to define signed define
+//#define DNOSIGNED
 // Expand to define logging define
 //#define DNOLOGGING
 // Expand to define DJSR75 define
 //#define DNOJSR75
-// Expand to define compatibility
-//#define DNOCOMPAT
-
-//#ifdef DCOMPATIBILITY1
-//#define DCOMPATIBILITY
-//#elifdef DCOMPATIBILITY2
-//#define DCOMPATIBILITY
-//#elifdef DCOMPATIBILITY3
-//#define DCOMPATIBILITY
-//#endif
 
 package com.substanceofcode.rssreader.presentation;
 
@@ -63,17 +62,6 @@ import java.lang.SecurityException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
-//#ifdef DCOMPATIBILITY1
-//@import com.substanceofcode.rssreader.businessentities.CompatibilityRssFeed1;
-//@import com.substanceofcode.rssreader.businessentities.CompatibilityRssItem1;
-//#elifdef DCOMPATIBILITY2
-//@import com.substanceofcode.rssreader.businessentities.CompatibilityRssFeed2;
-//@import com.substanceofcode.rssreader.businessentities.CompatibilityRssItem2;
-//#elifdef DCOMPATIBILITY3
-//@import com.substanceofcode.rssreader.businessentities.CompatibilityRssItunesFeed3;
-//@import com.substanceofcode.rssreader.businessentities.CompatibilityRssFeed3;
-//@import com.substanceofcode.rssreader.businessentities.CompatibilityRssItunesItem3;
-//#endif
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
@@ -81,8 +69,7 @@ import com.substanceofcode.rssreader.businesslogic.RssFormatParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.presentation.AllNewsList;
 import com.substanceofcode.utils.Settings;
-import com.substanceofcode.utils.EncodingUtil;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.CauseException;
 import java.util.*;
 import java.io.IOException;
@@ -187,7 +174,9 @@ implements
     private boolean     m_refreshAllFeeds;  // The notify flag for all feeds
     private boolean     m_refreshUpdFeeds;  // The notify flag for updated feeds
     private boolean     m_getImportForm;    // The noticy flag for going to Import Feed list
-    private boolean     m_getExportForm;    // The noticy flag for going to Export Feed list
+	//#ifdef DSIGNED
+//@    private boolean     m_getExportForm;    // The noticy flag for going to Export Feed list
+	//#endif
     private boolean     m_getFile;          // The noticy flag for getting find files form
     private boolean     m_selectDir;          // The noticy flag for selecting directories
     private boolean     m_runNews = false;  // Run AllNewsList form.
@@ -260,7 +249,9 @@ implements
     private Command     m_delBookmark;      // The delete bookmark command
     static public Command m_backCommand = null; // The back to header list command
     private Command     m_importFeedListCmd;// The import feed list command
-    private Command     m_exportFeedListCmd;// The export feed list command
+	//#ifdef DSIGNED
+//@    private Command     m_exportFeedListCmd;// The export feed list command
+	//#endif
 	//#ifdef DTEST
 //@    private Command     m_importCurrFeedListCmd;// The import feed list command and default current seleected feed
 	//#endif
@@ -348,7 +339,9 @@ implements
 			m_editBookmark      = new Command("Edit feed", Command.SCREEN, 4);
 			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 5);
 			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 6);
-			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, 7);
+			//#ifdef DSIGNED
+//@			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, 7);
+			//#endif
 			//#ifdef DTEST
 //@			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 8);
 			//#endif
@@ -381,7 +374,9 @@ implements
 			m_refreshAllFeeds = false;
 			m_refreshUpdFeeds = false;
 			m_getImportForm = false;
-			m_getExportForm = false;
+			//#ifdef DSIGNED
+//@			m_getExportForm = false;
+			//#endif
 			m_getFile = false;
 			m_selectDir = false;
 			m_curBookmark = -1;
@@ -592,7 +587,9 @@ implements
 			if (!m_novice) {
 				m_bookmarkList.addCommand( m_importFeedListCmd );
 				//#ifdef DITUNES
+				//#ifdef DSIGNED
 //@				m_bookmarkList.addCommand( m_exportFeedListCmd );
+				//#endif
 				//#endif
 				//#ifdef DTEST
 //@				m_bookmarkList.addCommand( m_importCurrFeedListCmd );
@@ -668,27 +665,7 @@ implements
 						}
 						bms = bms.substring(pos+1);
 						if(part.length()>0) {
-							//#ifdef DCOMPATIBILITY
-//@							Object cbm = null;
-//@							RssFeed nbm = null;
-							//#endif
 							RssItunesFeed bm = null;
-							//#ifdef DCOMPATIBILITY1
-//@							cbm = new CompatibilityRssFeed1( part );
-//@							nbm = new RssItunesFeed( (RssFeed)cbm );
-							//#elifdef DCOMPATIBILITY2
-//@							cbm = new CompatibilityRssFeed2( part );
-//@							nbm = new RssItunesFeed( (RssFeed)cbm );
-							//#elifdef DCOMPATIBILITY3
-//@							if (itunesCapable) {
-//@								cbm = CompatibilityRssItunesFeed3.deserialize( true, part );
-//@							} else {
-//@								cbm = new CompatibilityRssItunesFeed3(
-//@										new CompatibilityRssFeed3(
-//@											firstSettings, true, part ));
-//@							}
-//@							nbm = new RssItunesFeed( (RssFeed)cbm );
-							//#endif
 							if (itunesCapable) {
 								bm = RssItunesFeed.deserialize(modifiedSettings,
 										true, part );
@@ -696,17 +673,6 @@ implements
 								bm = new RssItunesFeed(new RssFeed(
 											firstSettings, true, part ));
 							}
-							//#ifdef DCOMPATIBILITY
-//@							if (!cbm.equals(bm)) {
-								//#ifdef DLOGGING
-//@								logger.severe("itunes store stings not backwards compatible cbm.getName(),bm.getName()=" + ((RssFeed)cbm).getName() + "," + bm.getName());
-								//#endif
-//@								System.out.println("cbm cbm.getClass().getName(),part=" + cbm.getClass().getName() + "," + part);
-//@								System.out.println("cbm feed store=" + cbm.toString());
-//@								System.out.println("bm bm.getClass().getName(),store part=" + cbm.getClass().getName() + "," + bm.getStoreString(true, true));
-//@								System.out.println("bm feed store=" + bm.toString());
-//@							}
-							//#endif
 							if(bm.getName().length()>0){
 								m_bookmarkList.append(bm.getName(),null);
 								m_rssFeeds.put(bm.getName(), bm);
@@ -968,7 +934,11 @@ implements
 			}
 
 			// Go to import feed form
-			if( m_getImportForm || m_getExportForm ) {
+			if( m_getImportForm
+				//#ifdef DSIGNED
+//@					|| m_getExportForm
+				//#endif
+					) {
 				try {
 					initializeLoadingForm("Loading " +
 							(m_getImportForm ? "import" : "export") +
@@ -1011,7 +981,9 @@ implements
 							t);
 				} finally {
 					m_getImportForm = false;
-					m_getExportForm = false;
+					//#ifdef DSIGNED
+//@					m_getExportForm = false;
+					//#endif
 					//#ifdef DTEST
 //@					m_getTestImportForm = false;
 					//#endif
@@ -1635,7 +1607,7 @@ implements
 
 	/** Get the max words configured from the descritption. */
 	final public String getItemDescription( final RssItunesItem item ) {
-		final String [] parts = StringUtil.split(item.getDescription(), " ");
+		final String [] parts = MiscUtil.split(item.getDescription(), " ");
 		StringBuffer sb = new StringBuffer();
         final int wordCount = Math.min(parts.length,
 				m_appSettings.getMaxWordCountInDesc());
@@ -1672,8 +1644,7 @@ implements
 							listParser.setFeedNameFilter(null);
 							listParser.setFeedURLFilter(null);
 							listParser.setRedirectHtml(false);
-							listParser.startParsing();
-							listParser.join();
+							listParser.run();
 							ImportFeedsForm.addFeedLists(listParser,
 									0,
 									m_appSettings.getMaximumItemCountInFeed(),
@@ -1681,7 +1652,7 @@ implements
 									m_loadForm);
 						}catch(Throwable e) {
 							m_loadForm.recordExcForm(
-									"\nError loading intial bookmarkd\n", e);
+									"\nError loading intial bookmarks\n", e);
 						}
 						if (m_loadForm.size() > 0) {
 							Item item = m_loadForm.get(
@@ -1805,63 +1776,14 @@ implements
 					if( name.length()>0) {
 						final RssItunesFeed rss =
 							(RssItunesFeed)m_rssFeeds.get( name );
-						//#ifdef DCOMPATIBILITY1
-//@						CompatibilityRssFeed1 rss1 = new CompatibilityRssFeed1(rss);
-						//#ifdef DTEST
-//@						String prevStore = rss1.getStoreString(true);
-//@						RssItunesFeed nrss = RssItunesFeed.deserialize(
-//@								false, true, prevStore );
-//@						if (!rss1.equals(nrss)) {
-							//#ifdef DLOGGING
-//@							logger.severe("itunes store stings not backwards compatible i=" + i);
-							//#endif
-//@						}
-//@						long beginStore = System.currentTimeMillis();
-						//#endif
-//@						bookmarks.append(rss1.getStoreString(true));
-						//#elifdef DCOMPATIBILITY2
-//@						CompatibilityRssFeed2 rss2 = new CompatibilityRssFeed2(rss);
-//@						final String prevStore = rss2.getStoreString(true);
-//@						bookmarks.append(prevStore);
-						//#ifdef DTEST
-//@						RssItunesFeed nrss = new RssItunesFeed(new RssFeed(
-//@											false, true, prevStore ));
-//@						if (!rss2.equals(nrss)) {
-							//#ifdef DLOGGING
-//@							logger.severe("itunes store stings not backwards compatible i=" + i);
-							//#endif
-//@						}
-//@						long beginStore = System.currentTimeMillis();
-						//#endif
-						//#elifdef DCOMPATIBILITY3
-//@						CompatibilityRssItunesFeed3 rss3 =
-//@							new CompatibilityRssItunesFeed3(rss);
-//@						final String prevStore = rss3.getStoreString(true, true);
-//@						bookmarks.append(prevStore);
-						//#ifdef DTEST
-//@						RssItunesFeed nrss = RssItunesFeed.deserialize(
-//@											false, true, prevStore );
-//@						if (!rss3.equals(nrss)) {
-							//#ifdef DLOGGING
-//@							logger.severe("itunes store stings not backwards compatible i=" + i);
-							//#endif
-//@						}
-//@						long beginStore = System.currentTimeMillis();
-						//#endif
-						//#else
 						//#ifdef DTEST
 //@						long beginStore = System.currentTimeMillis();
 						//#endif
 						bookmarks.append(rss.getStoreString(true, true));
-						//#endif
 						//#ifdef DTEST
 //@						storeTime += System.currentTimeMillis() - beginStore;
 						//#endif
-						//#ifdef DCOMPATIBILITY
-//@						bookmarks.append(OLD_FEED_SEPARATOR);
-						//#else
 						bookmarks.append(CFEED_SEPARATOR);
-						//#endif
 						if (releaseMemory) {
 							vstored.addElement( name );
 						}
@@ -1907,10 +1829,6 @@ implements
 //@			System.out.println("storeTime=" + storeTime);
 			//#endif
             m_settings.setStringProperty("bookmarks",bookmarks.toString());
-			//#ifndef DCOMPATIBILITY
-			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
-			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
-			//#endif
 		} catch (Throwable t) {
             m_settings.setStringProperty("bookmarks", bookmarks.toString());
 			//#ifdef DTEST
@@ -1954,10 +1872,6 @@ implements
 		int pl = m_loadForm.append(gauge);
 		showLoadingForm();
 		try {
-			//#ifndef DCOMPATIBILITY
-			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
-			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
-			//#endif
 			m_settings.save(0, false);
 			gauge.setValue(1);
 			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
@@ -1967,10 +1881,6 @@ implements
 			}
 			// Set internal region back to 0.
 			m_settings.setStringProperty("bookmarks","");
-			//#ifndef DCOMPATIBILITY
-			m_settings.setBooleanProperty(m_settings.ITEMS_ENCODED, true);
-			m_settings.setLongProperty(m_settings.STORE_DATE, storeDate);
-			//#endif
 			m_settings.save(0, false);
 			gauge.setValue(m_settings.MAX_REGIONS + 1);
 			pl = -1;
@@ -2204,13 +2114,15 @@ implements
 			m_getImportForm = true;
         }
         
-        /** Show export feed list form */
-        if( c == m_exportFeedListCmd ) {
-			// Set current bookmark so that the added feeds go after
-			// the current boolmark.
-			m_curBookmark = m_bookmarkList.getSelectedIndex();
-			m_getExportForm = true;
-        }
+		//#ifdef DSIGNED
+//@        /** Show export feed list form */
+//@        if( c == m_exportFeedListCmd ) {
+//@			// Set current bookmark so that the added feeds go after
+//@			// the current boolmark.
+//@			m_curBookmark = m_bookmarkList.getSelectedIndex();
+//@			m_getExportForm = true;
+//@        }
+		//#endif
         
 		//#ifdef DTEST
 //@		/** Show import feed list form and default file */
@@ -2784,6 +2696,11 @@ implements
 					}
 				}
 				if (!showErrsOnly) {
+					super.append("Current threads:");
+					String[] threadInfo = MiscUtil.getDispThreads();
+					for (int ic = 0; ic < threadInfo.length; ic++) {
+						super.append(new StringItem(ic + ": ", threadInfo[ic]));
+					}
 					super.append(new StringItem("Active Threads:",
 								Integer.toString(Thread.activeCount())));
 				}
