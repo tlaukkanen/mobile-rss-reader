@@ -1,0 +1,5 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+NOVICE = true
+file.prefix.novice = novice_
+SUFFIXVERS.novice = -novice
+novice = novice
