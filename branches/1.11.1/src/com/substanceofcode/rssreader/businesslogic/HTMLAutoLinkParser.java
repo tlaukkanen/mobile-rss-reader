@@ -20,6 +20,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-03-07 1.11.4RC1 Recognize style sheet, and DOCTYPE and treat properly.
+ * IB 2010-05-26 1.11.5RC2 Use absolute address for redirects.
+ * IB 2010-05-26 1.11.5RC2 More logging.
+*/
 
 // Expand to define logging define
 //#define DNOLOGGING
@@ -36,7 +42,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
@@ -109,13 +115,15 @@ public class HTMLAutoLinkParser extends FeedListParser {
         Vector rssFeeds = new Vector();
         
         /** Initialize XML parser and parse OPML XML */
-        HTMLParser parser = new HTMLParser(encodingUtil);
+        HTMLParser parser = new HTMLParser(url, encodingUtil);
         try {
             
 			// The first element is the main tag.
             int elementType = parser.parse();
-			// If we found the prologue, get the next entry.
-			if( elementType == XmlParser.PROLOGUE ) {
+			// If we found the PROLOGUE, DOCTYPE, or STYLESHEET, get the next entry.
+			while ((elementType == XmlParser.PROLOGUE) ||
+					(elementType == XmlParser.DOCTYPE) ||
+					(elementType == XmlParser.STYLESHEET)) {
 				elementType = parser.parse();
 			}
 			if (elementType == XmlParser.END_DOCUMENT ) {
@@ -189,20 +197,31 @@ public class HTMLAutoLinkParser extends FeedListParser {
 							// to replace with uni chars.
 							title = encodingUtil.replaceSpChars(title);
 
-							title = StringUtil.removeHtml(title);
+							title = MiscUtil.removeHtml(title);
 						}
-						if (((link = parser.getAttributeValue( "href" ))
-									== null) || ( link.length() == 0 )) {
+						if ((link = parser.getAttributeValue( "href" ))
+									== null) {
 							continue;
 						}
-						if (link.charAt(0) == '/') {
-							link = url + link;
+						link = link.trim();
+						if ( link.length() == 0 ) {
+							continue;
 						}
 						
+						try {
+							HTMLParser.getAbsoluteUrl(url, link);
+						} catch (IllegalArgumentException e) {
+							//#ifdef DLOGGING
+//@							if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
+							//#endif
+						}
+			
 						/** Debugging information */
-						System.out.println("Title:       " + title);
-						System.out.println("Link:        " + link);
-						
+						//#ifdef DLOGGING
+//@						if (finerLoggable) {logger.finer("Title:       " + title);}
+//@						if (finerLoggable) {logger.finer("Link:        " + link);}
+						//#endif
+
 						/** 
 						 * Create new RSS item and add it do RSS document's item
 						 * collection.  Account for wrong OPML which is an
@@ -210,6 +229,9 @@ public class HTMLAutoLinkParser extends FeedListParser {
 						 * instead of link attribute.
 						 */
 						if (!needRss || needFirstRss) {
+							//#ifdef DLOGGING
+//@							if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+							//#endif
 							RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 							rssFeeds.addElement( feed );
 							process = false;
@@ -224,6 +246,9 @@ public class HTMLAutoLinkParser extends FeedListParser {
 							(title.toLowerCase().indexOf(feedNameFilter) < 0))) {
 							continue;
 						}
+						//#ifdef DLOGGING
+//@						if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+						//#endif
 						RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 						rssFeeds.addElement( feed );
 						break;
