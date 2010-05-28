@@ -21,7 +21,7 @@
  *
  */
 /*
- * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.
+ * IB 2010-03-14 1.11.5RC2 Combine classes to save space.
 */
 // Expand to define itunes define
 //#define DNOITUNES
@@ -41,8 +41,7 @@
 //#endif
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 //#ifdef DLOGGING
@@ -197,7 +196,7 @@ public class RssItunesFeed extends RssFeed
 		try {
         
 			boolean hasPipe = (storeString.indexOf(CONE) >= 0);
-			String[] nodes = StringUtil.split( storeString, "|" );
+			String[] nodes = MiscUtil.split( storeString, "|" );
 			RssItunesFeed feed = new RssItunesFeed();
 			feed.init(modifyCapable, hasPipe, encoded, nodes);
 			return feed;
@@ -371,16 +370,18 @@ public class RssItunesFeed extends RssFeed
 	//#endif
     
     /** Write record as a string */
-    public String toString(){
-        String storeString = m_itunes + "|" + m_title + "|" +
-			m_description + "|" + m_language + "|" +
-			m_author + "|" + m_subtitle + "|" + m_summary + "|" +
-                 ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
-						 Integer.toString((int)m_explicit)) + "|" +
-				 super.toString();
-        return storeString;
-        
-    }
+	//#ifdef DTEST
+//@    public String toString() {
+//@        String storeString = m_itunes + "|" + m_title + "|" +
+//@			m_description + "|" + m_language + "|" +
+//@			m_author + "|" + m_subtitle + "|" + m_summary + "|" +
+//@                 ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
+//@						 Integer.toString((int)m_explicit)) + "|" +
+//@				 super.toString();
+//@        return storeString;
+//@        
+//@    }
+	//#endif
 
     public void setDescription(String description) {
         this.m_description = description;
