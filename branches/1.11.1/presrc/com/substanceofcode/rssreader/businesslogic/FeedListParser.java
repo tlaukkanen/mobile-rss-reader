@@ -21,6 +21,9 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-04-30 1.11.5RC2 Track threads used.
+ * IB 2010-05-24 1.11.5RC2 Optionally use feed URL as feed name if not found in import file.
+ * IB 2010-05-25 1.11.5RC2 Give error if import file is empty/invalid.
 */
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -39,6 +42,7 @@ import com.substanceofcode.utils.CauseException;
 import net.eiroca.j2me.observable.Observable;
 import net.eiroca.j2me.observable.ObserverManager;
 //#endif
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 
 //#ifdef DLOGGING
@@ -59,7 +63,7 @@ implements
 //#endif
 	Runnable {
     
-    private Thread m_parsingThread;
+    final private Thread m_parsingThread;
     private RssReaderMIDlet.LoadingForm m_loadForm = null;
     private int m_maxItemCount = 10;
 	protected String m_url;
@@ -67,7 +71,8 @@ implements
 	protected String m_password;
 	protected String m_feedNameFilter;
 	protected String m_feedURLFilter;
-	protected boolean m_getFeedTitleList = false;
+	protected boolean m_getFeedTitleList = false;
+	protected boolean m_useFeedUrlList = false;
 	protected boolean m_redirectHtml = false;
 	protected RssItunesFeed[] m_feeds;
     private boolean m_successfull = false;
@@ -85,7 +90,8 @@ implements
     /** Creates a new instance of FeedListParser */
     public FeedListParser(String url, String username, String password) {
 		super();
-        m_parsingThread = new Thread(this);
+        m_parsingThread = MiscUtil.getThread(this, "FeedListParser", this,
+				"constructor");
 		m_url = url;
 		m_username = username;
 		m_password = password;
@@ -98,7 +104,7 @@ implements
     public void startParsing() {
         m_parsingThread.start();
 		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("Thread started=" + m_parsingThread);}
+		if (fineLoggable) {logger.fine("Thread started=" + MiscUtil.getThreadInfo(m_parsingThread));}
 		//#endif
     }
     
@@ -117,34 +123,42 @@ implements
     public void run() {
         try {
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("Thread running=" + this);}
+			if (fineLoggable) {logger.fine("Thread running=" + MiscUtil.getThreadInfo(m_parsingThread));}
 			//#endif
-            m_feeds = parseFeeds();
-			if (m_getFeedTitleList) {
+            if ((m_feeds = parseFeeds()) == null) {
+				m_successfull = false;
+				m_ex = new CauseException("Invalid or empty import file " +
+						m_url);
+				return;
+			} else if (m_getFeedTitleList || m_useFeedUrlList) {
 				for(int feedIndex=0; feedIndex<m_feeds.length; feedIndex++) {
 					String name = m_feeds[feedIndex].getName();
 					if ((name == null) || (name.length() == 0)) {
 						RssItunesFeed feed = m_feeds[feedIndex];
-						RssFeedParser fparser = new RssFeedParser( feed );
-						if (m_loadForm != null) {
-							m_loadForm.appendMsg("Loading title from " +
-										feed.getUrl());
-						}
-						//#ifdef DLOGGING
-						logger.finest("Getting title for url=" + feed.getUrl());
-						//#endif
-						fparser.setGetTitleOnly(true);
-						/** Get RSS feed */
-						try {
-							fparser.parseRssFeed( false, m_maxItemCount );
-							m_feeds[feedIndex] = fparser.getRssFeed();
+						if (m_useFeedUrlList) {
+							feed.setName(feed.getUrl());
+						} else {
+							RssFeedParser fparser = new RssFeedParser( feed );
 							if (m_loadForm != null) {
-								m_loadForm.appendMsg("ok\n");
+								m_loadForm.appendMsg("Loading title from " +
+											feed.getUrl());
 							}
-						} catch(Exception ex) {
-							if (m_loadForm != null) {
-								m_loadForm.recordExcForm("Error loading title for feed " +
-										feed.getUrl(), ex);
+							//#ifdef DLOGGING
+							logger.finest("Getting title for url=" + feed.getUrl());
+							//#endif
+							fparser.setGetTitleOnly(true);
+							/** Get RSS feed */
+							try {
+								fparser.parseRssFeed( false, m_maxItemCount );
+								m_feeds[feedIndex] = fparser.getRssFeed();
+								if (m_loadForm != null) {
+									m_loadForm.appendMsg("ok\n");
+								}
+							} catch(Exception ex) {
+								if (m_loadForm != null) {
+									m_loadForm.recordExcForm("Error loading title for feed " +
+											feed.getUrl(), ex);
+								}
 							}
 						}
 					}
@@ -190,6 +204,7 @@ implements
 			m_ex = new CauseException("Internal error while parsing feed " +
 									  m_url, t);
         } finally {
+			MiscUtil.removeThread(m_parsingThread);
 			//#ifdef DLOGGING
 			if (m_ex != null) {
 				logger.severe("run parse " + m_ex.getMessage(), m_ex);
@@ -351,6 +366,10 @@ implements
 
     public void setGetFeedTitleList(boolean getFeedTitleList) {
         this.m_getFeedTitleList = getFeedTitleList;
+    }
+
+    public void setUseFeedUrlList(boolean useFeedUrlList) {
+        this.m_useFeedUrlList = useFeedUrlList;
     }
 
     public void setLoadForm(RssReaderMIDlet.LoadingForm loadForm) {
