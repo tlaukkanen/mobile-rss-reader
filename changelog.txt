@@ -325,6 +325,11 @@ v1.11.5 Release Candidate 1 (rc1) (Mar 9th 2010)
 
 v1.11.5 Release Candidate 2 (rc2) (May 24th 2010)
 - Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+- Use cldc10 for naming in CLDC 1.0 versions.
+- Use common build.vers and dist.vers properties.
+- Handle stage releases better.
+- Remove *.debug file from regular and smartphone bin files.
+- Use CLDC 1.1 for smartphone versions.
 - Fix concurrency problems with exploring memory.
   - Use thread from FeatureMgr.
 - Combine classes to save space.
@@ -377,6 +382,13 @@ v1.11.5 Release Candidate 2 (rc2) (May 24th 2010)
 - Only do export of file if signed.
 - Log instead of out.println in OpmlParser.
 - Optionally use feed title for feed name or feed link for line by line parser.
+- Give error if run out of data before finding anything in import file.
+- Skip blank lines in line by line parser.
+- Have ImportFeedsForm export only if signed.
+- Have OpmlParser code to write to OPML file only if signed.
+- Allow creation of signed targets partial work.
+- Use proguard task.
+- Use wtkjad to create non-Blackberry JAD/manifest files.
 
 Device issues:
 
@@ -387,11 +399,6 @@ Program issues:
 
 - While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
 - Partial fix for using findbugs.
-- Give error if run out of data before finding anything in import file.
-- Skip blank lines in line by line parser.
-- Have ImportFeedsForm export only if signed.
-- Have OpmlParser code to write to OPML file only if signed.
-- Allow creation of signed targets partial work.
 
 TODO:
 
