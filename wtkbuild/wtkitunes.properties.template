@@ -1,0 +1,6 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-05-25 1.11.5RC2 Use smartphone for file name instead of podcast.
+DITUNESDEF = DITUNES
+file.prefix.itunes = smartphone_
+SUFFIXVERS.itunes = -smartphone
+smartphone = Smartphone
