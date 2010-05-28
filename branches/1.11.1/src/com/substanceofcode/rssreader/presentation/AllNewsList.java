@@ -21,6 +21,8 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Have next item command on item display.
+ * IB 2010-05-24 1.11.5RC2 Replace SortUtil with LGPL code to allow adding of LGPL license.
+ * IB 2010-05-27 1.11.5RC2 More logging.
 */
 
 // Expand to define MIDP define
@@ -59,7 +61,7 @@ import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
-import com.substanceofcode.utils.SortUtil;
+import com.substanceofcode.utils.MiscUtil;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
@@ -173,6 +175,9 @@ public class AllNewsList extends FeatureList
 		m_sortDesc  = !(this instanceof HeaderList);
 		m_directionCmd = new Command(
 				m_sortDesc ? "Sort ascending" : "Sort descending", Command.SCREEN, 100);
+		//#ifdef DLOGGING
+//@		if (m_finestLoggable) {m_logger.finest("Constructor m_sortDesc,m_directionCmd=" + m_sortDesc + "," + FeatureMgr.logCmd(m_directionCmd));}
+		//#endif
         super.addCommand(m_sortUnreadItemsCmd);
         super.addCommand(m_sortReadItemsCmd);
         super.addCommand(m_sortUnreadFeedsCmd);
@@ -653,7 +658,7 @@ public class AllNewsList extends FeatureList
 //@		m_loadForm.append("Sorting...\n");
 		//#endif
 		//#endif
-		SortUtil.sortLongs(indexes, ldates, 0, kc - 1);
+		MiscUtil.indexedSort(ldates, indexes, kc - 1);
 		//#ifdef DLARGEMEM
 		//#ifdef DMIDP20
 //@		m_loadForm.set(gitem, new StringItem(null, "Sorting finished."));
@@ -828,6 +833,9 @@ public class AllNewsList extends FeatureList
 							m_directionCmd = new Command("Sort ascending", Command.SCREEN, 100);
 						}
 						m_sort = true;
+						//#ifdef DLOGGING
+//@						if (m_finestLoggable) {m_logger.finest("Constructor m_sort,m_sortDesc,m_directionCmd=" + m_sort + "," + m_sortDesc + "," + FeatureMgr.logCmd(m_directionCmd));}
+						//#endif
 						super.addCommand(m_directionCmd);
 					}
 				}
