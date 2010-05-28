@@ -21,6 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-14 1.11.5RC2 Add toString to interface.
+ * IB 2010-03-14 1.11.5RC2 Code cleanup.
+*/
 
 // Expand to define logging define
 @DLOGDEF@
@@ -31,15 +35,7 @@
 //#ifdef DTEST
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
-import com.substanceofcode.utils.StringUtil;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.Hashtable;
-//#ifdef DLOGGING
-import net.sf.jlogmicro.util.logging.Logger;
-import net.sf.jlogmicro.util.logging.Level;
-//#endif
 
 /**
  * RssItunesItem class is a data store for a single item in RSS feed.
@@ -75,14 +71,14 @@ public interface RssItunesItemInfo extends RssItemInfo {
 
     String getDuration();
     
-	//#ifdef DTEST
 	/* Compare item. */
 	boolean equals(RssItemInfo item);
-	//#endif
 
     void setItunes(boolean itunes);
 
     boolean isItunes();
+
+    String toString();
 
 }
 //#endif
