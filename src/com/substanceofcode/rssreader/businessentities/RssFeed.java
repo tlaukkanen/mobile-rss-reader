@@ -22,6 +22,11 @@
 /*
  * IB 2010-03-12 1.11.5RC2 Use string for last modified date (m_upddate) to prevent problems from time zone differences from causing problems with deterining if a feed was updated.
  * IB 2010-03-12 1.11.5RC2 If xml url is the same as html url, use xml url for html url.
+ * IB 2010-03-12 1.11.5RC2 Combine classes to save space.
+ * IB 2010-03-12 1.11.5RC2 Use convenience method for encoding/decoding.
+ * IB 2010-03-12 1.11.5RC2 Use fieldEquals to compare items.
+ * IB 2010-03-12 1.11.5RC2 Better logging.
+ * IB 2010-05-25 1.11.5RC2 Don't deserialize items if not iTunesCapable.
 */
 
 // Expand to define logging define
@@ -46,8 +51,7 @@
 //#endif
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.rssreader.businesslogic.RssFormatParser;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -165,7 +169,7 @@ public class RssFeed
 
 		try {
 
-			String[] nodes = StringUtil.split( storeString, "|" );
+			String[] nodes = MiscUtil.split( storeString, "|" );
 			init(firstSettings, 0, false, false, false, encoded, nodes);
 		} catch(Exception e) {
 			System.err.println("Error while rssfeed initialization : " + e.toString());
@@ -214,13 +218,8 @@ public class RssFeed
 			int PASSWORD = 3;
 			m_password = nodes[ startIndex + PASSWORD ];
 			if (iTunesCapable) {
-				// Dencode so that password is not in regular lettters.
-				Base64 b64 = new Base64();
-				byte[] decodedPassword = b64.decode(m_password);
-				try {
-					m_password = new String( decodedPassword , "UTF-8" );
-				} catch (UnsupportedEncodingException e) {
-					m_password = new String( decodedPassword );
+				if (m_password.length() > 0) {
+					m_password = MiscUtil.decodeStr(m_password);
 				}
 				if (hasPipe) {
 					m_password = m_password.replace(CONE, '|');
@@ -268,13 +267,7 @@ public class RssFeed
 				if (!iTunesCapable) {
 					// Dencode for better UTF-8 and to allow '|' in the name.
 					// For iTunesCapable, replace | with (char)1
-					Base64 b64 = new Base64();
-					byte[] decodedName = b64.decode(m_name);
-					try {
-						m_name = new String( decodedName , "UTF-8" );
-					} catch (UnsupportedEncodingException e) {
-						m_name = new String( decodedName );
-					}
+					m_name = MiscUtil.decodeStr(m_name);
 				}
 			}
 			if (iTunesCapable) {
@@ -297,6 +290,8 @@ public class RssFeed
 				// Also, do not try to modify previous items as it
 				// unnecessarily complicates the code for a corner case
 				// of upgrading.
+				// Don't need to check for iTunesCapable as it's superceeded
+				// by modifyCapable.
 				//#ifdef DLOGGING
 //@				if (traceLoggable) {logger.trace("init m_url,m_name,m_username,m_upddate,m_date,m_etag,m_password=" + m_url + "," + m_name + "," + m_username + "," + m_password + "," + m_upddate + "," + m_date + "," + m_etag);}
 				//#endif
@@ -308,22 +303,18 @@ public class RssFeed
 			//#endif
 
 			// Deserialize itemss
-			String[] serializedItems = StringUtil.split(itemArrayData, ".");
+			String[] serializedItems = MiscUtil.split(itemArrayData, ".");
 
 			for(int itemIndex=0; itemIndex<serializedItems.length; itemIndex++) {
 				String serializedItem = serializedItems[ itemIndex ];
 				if(serializedItem.length()>0) {
 					RssItem rssItem;
-					if (iTunesCapable) {
-						if (encoded) {
-							rssItem = RssItunesItem.deserialize( 
-									serializedItem );
-						} else {
-							rssItem = RssItunesItem.unencodedDeserialize(
-									serializedItem );
-						}
+					if (encoded) {
+						rssItem = RssItunesItem.deserialize( 
+								serializedItem );
 					} else {
-						rssItem = RssItem.deserialize( serializedItem );
+						rssItem = RssItunesItem.unencodedDeserialize(
+								serializedItem );
 					}
 					if (rssItem != null) {
 						m_items.addElement( rssItem );
@@ -404,12 +395,7 @@ public class RssFeed
 		String link = m_link.replace('|' , CONE);
 		String encodedPassword;
 		// Encode password to make reading password difficult
-		Base64 b64 = new Base64();
-		try {
-			encodedPassword = b64.encode( password.getBytes("UTF-8") );
-		} catch (UnsupportedEncodingException e) {
-			encodedPassword = b64.encode( password.getBytes() );
-		}
+		encodedPassword = MiscUtil.encodeStr( password );
 		String dateString;
 		if(m_date==null){
 			dateString = "";
@@ -439,56 +425,66 @@ public class RssFeed
 //@	public boolean equals(RssFeed feed)
 	//#endif
 //@	{
+//@		if (feed == null) { return false;}
 //@		boolean result = true;
-//@		if (!TestLogUtil.fieldEquals(feed.getUrl(), m_url,
-//@					"m_url", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(feed.getName(), m_name,
-//@					"m_name", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(feed.getUsername(), m_username,
-//@					"m_username", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(feed.getPassword(), m_password,
-//@					"m_password", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(feed.getUpddate(), m_upddate,
-//@					"m_upddate", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(feed.getDate(), m_date,
-//@					"m_date", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(feed.getLink(), m_link,
-//@					"m_link", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(feed.getEtag(), m_etag,
-//@					"m_etag", logger, fineLoggable)) {
-//@			result = false;
-//@		}
 //@		int flen = feed.getItems().size();
 //@		int ilen = m_items.size();
-//@		if (!TestLogUtil.fieldEquals(flen, ilen,
-//@			"m_items.size() ilen", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		RssItem [] ritems = new RssItem[ilen];
-//@		m_items.copyInto(ritems);
-//@		RssItem [] fitems = new RssItem[flen];
-//@		feed.getItems().copyInto(fitems);
-//@		for (int ic = 0; (ic < ilen) && (ic < flen); ic++) {
-//@			if (!ritems[ic].equals(fitems[ic])) {
-				//#ifdef DLOGGING
-//@				if (fineLoggable) {logger.fine("equals equal ic,ritems[ic]=" + ic + "," + fitems[ic] + "," + ritems[ic]);}  
-				//#endif
+//@		try {
+//@			if (!TestLogUtil.fieldEquals(feed.getUrl(), m_url,
+//@						"m_url", logger, fineLoggable)) {
 //@				result = false;
 //@			}
+//@			if (!TestLogUtil.fieldEquals(feed.getName(), m_name,
+//@						"m_name", logger, fineLoggable)) {
+//@				result = false;
+//@			}
+//@			if (!TestLogUtil.fieldEquals(feed.getUsername(), m_username,
+//@						"m_username", logger, fineLoggable)) {
+//@				result = false;
+//@			}
+//@			if (!TestLogUtil.fieldEquals(feed.getPassword(), m_password,
+//@						"m_password", logger, fineLoggable)) {
+//@				result = false;
+//@			}
+//@			if (!TestLogUtil.fieldEquals(feed.getUpddate(), m_upddate,
+//@						"m_upddate", logger, fineLoggable)) {
+//@				result = false;
+//@			}
+//@			if (!TestLogUtil.fieldEquals(feed.getDate(), m_date,
+//@						"m_date", logger, fineLoggable)) {
+//@				result = false;
+//@			}
+//@			if (!TestLogUtil.fieldEquals(feed.getLink(), m_link,
+//@						"m_link", logger, fineLoggable)) {
+//@				result = false;
+//@			}
+//@			if (!TestLogUtil.fieldEquals(feed.getEtag(), m_etag,
+//@						"m_etag", logger, fineLoggable)) {
+//@				result = false;
+//@			}
+//@			if (!TestLogUtil.fieldEquals(flen, ilen,
+//@				"m_items.size() ilen", logger, fineLoggable)) {
+//@				result = false;
+//@			}
+//@			RssItem [] ritems = new RssItem[ilen];
+//@			if (ilen > 0) {
+//@				m_items.copyInto(ritems);
+//@			}
+//@			RssItem [] fitems = new RssItem[flen];
+//@			if (flen > 0) {
+//@				feed.getItems().copyInto(fitems);
+//@			}
+//@			for (int ic = 0; (ic < ilen) && (ic < flen); ic++) {
+//@				if (!TestLogUtil.fieldEquals(fitems[ic], ritems[ic],
+//@							"ritems[" + ic + "]", logger, fineLoggable)) {
+//@					result = false;
+//@				}
+//@			}
+//@		} catch (Throwable e) {
+//@			result = false;
+			//#ifdef DLOGGING
+//@			logger.severe("equals error feed.m_items,m_items=" + flen + "," + ((flen == 0) ? "n/a" : feed.getItems().elementAt(0)) + "," + ilen + "," + ((ilen == 0) ? "n/a" : m_items.elementAt(0)) , e);
+			//#endif
 //@		}
 //@		return result;
 //@	}
@@ -527,31 +523,33 @@ public class RssFeed
 	}
 
 	/** Write record as a string */
-	public String toString(){
-		StringBuffer serializedItems = new StringBuffer();
-		int ilen = m_items.size();
-		RssItunesItem [] ritems = new RssItunesItem[ilen];
-		m_items.copyInto(ritems);
-		for(int itemIndex=0; itemIndex<ilen;itemIndex++) {
-			RssItunesItem rssItem = (RssItunesItem)ritems[itemIndex];
-			serializedItems.append(rssItem.toString());
-			serializedItems.append(".");
-		}
-		String dateString;
-		if(m_date==null){
-			dateString = "";
-		} else {
-			// We use base 16 (hex) for the date so that we can save some
-			// space for toString.
-			dateString = Long.toString( m_date.getTime(), 16 );
-		}
-		String storeString = m_name + "|" + m_url + "|" + m_username + "|" +
-			m_password + "|" +
-			m_upddate + "|" + m_link + "|" + m_etag + "|" +
-			dateString + "|" + serializedItems.toString();
-		return storeString;
-
-	}
+	//#ifdef DTEST
+//@	public String toString() {
+//@		StringBuffer serializedItems = new StringBuffer();
+//@		int ilen = m_items.size();
+//@		RssItunesItem [] ritems = new RssItunesItem[ilen];
+//@		m_items.copyInto(ritems);
+//@		for(int itemIndex=0; itemIndex<ilen;itemIndex++) {
+//@			RssItunesItem rssItem = (RssItunesItem)ritems[itemIndex];
+//@			serializedItems.append(rssItem.toString());
+//@			serializedItems.append(".");
+//@		}
+//@		String dateString;
+//@		if(m_date==null){
+//@			dateString = "";
+//@		} else {
+//@			// We use base 16 (hex) for the date so that we can save some
+//@			// space for toString.
+//@			dateString = Long.toString( m_date.getTime(), 16 );
+//@		}
+//@		String storeString = m_name + "|" + m_url + "|" + m_username + "|" +
+//@			m_password + "|" +
+//@			m_upddate + "|" + m_link + "|" + m_etag + "|" +
+//@			dateString + "|" + serializedItems.toString();
+//@		return storeString;
+//@
+//@	}
+	//#endif
 
 	public void setLink(String link) {
 		//#ifdef DITUNES
