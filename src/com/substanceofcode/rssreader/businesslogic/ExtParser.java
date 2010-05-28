@@ -19,6 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-05-24 1.11.5RC2 Ignore contents within block tag for podcast.
+ */
 
 // Expand to define itunes define
 //#define DNOITUNES
@@ -39,7 +43,7 @@ import com.substanceofcode.utils.XmlParser;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businessentities.RssItem;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
@@ -121,7 +125,7 @@ final public class ExtParser {
 		if (feed.getName().equals(m_subtitle)) {
 			m_subtitle = "";
 		} else {
-			m_subtitle = StringUtil.removeHtml(m_subtitle);
+			m_subtitle = MiscUtil.removeHtml(m_subtitle);
 		}
 		feed.modifyItunes(true, title, desc, language, m_author, m_subtitle,
 						  m_summary, m_explicit);
@@ -148,9 +152,9 @@ final public class ExtParser {
 		if (title.equals(m_subtitle)) {
 			m_subtitle = "";
 		}
-		desc = StringUtil.removeHtml(desc);
+		desc = MiscUtil.removeHtml(desc);
 		desc = desc.trim();
-		m_subtitle = StringUtil.removeHtml(m_subtitle);
+		m_subtitle = MiscUtil.removeHtml(m_subtitle);
 		if ((m_author + m_subtitle + m_summary + m_duration).equals("") &&
 				(m_explicit == (byte)-1)) {
 			RssItunesItem item = new RssItunesItem(title, link, desc, date,
@@ -288,6 +292,17 @@ final public class ExtParser {
 					//#endif
 				}
 				break;
+			case 'b':
+				if( subElem.equals("block") ) {
+					if (!m_itunes) {
+						m_itunes = true;
+					}
+					String block = parser.getText();
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("block=" + block);}
+					//#endif
+				}
+				break;
 			case 'c':
 				if( subElem.equals("creator") ) {
 					m_creator = parser.getText();
@@ -339,7 +354,7 @@ final public class ExtParser {
 					//#endif
 				} else if( subElem.equals("summary") ) {
 					m_summary = parser.getText();
-					m_summary = StringUtil.removeHtml(m_summary);
+					m_summary = MiscUtil.removeHtml(m_summary);
 					if (!m_itunes) {
 						m_itunes = (m_summary.length() > 0);
 					}
