@@ -1,7 +1,7 @@
 /*
  * FeatureMgr.java
  *
- * Copyright (C) 2007 Irving Bunton
+ * Copyright (C) 2007-2010 Irving Bunton
  * http://code.google.com/p/mobile-rss-reader/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,12 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Use NULL pattern.  Fixed loop.
+ * IB 2010-04-30 1.11.5RC2 Track threads used.
+ * IB 2010-05-24 1.11.5RC2 Implement CmdReceiver interface to allow pause of thread.
+ * IB 2010-05-24 1.11.5RC2 Pause based on loop time not being reached.
+ * IB 2010-05-24 1.11.5RC2 Convience method for logging UI command.
+ * IB 2010-05-24 1.11.5RC2 Convience method for logging UI item.
+ * IB 2010-05-24 1.11.5RC2 Use null for nullCmd.
 */
 
 // Expand to define MIDP define
@@ -67,6 +73,8 @@ import com.substanceofcode.testlcdui.Form;
 import com.substanceofcode.testlcdui.TextField;
 //#endif
 
+import com.substanceofcode.utils.MiscUtil;
+import com.substanceofcode.utils.CmdReceiver;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 
 //#ifdef DLOGGING
@@ -78,13 +86,15 @@ import net.sf.jlogmicro.util.logging.Level;
 /* Form with optional commands added with addPromptCommand which if
    used, will give prompt message with OK/Cancel. */
 
-public class FeatureMgr implements CommandListener, Runnable {
+public class FeatureMgr implements CommandListener, CmdReceiver, Runnable {
 
 	private Hashtable promptCommands = null;
 	private Displayable disp;
 	private Displayable promptDisp1;
 	private Displayable promptDisp2;
-	static private Command nullCmd = new Command("NullCmd", Command.SCREEN, 100);
+    static final private long DEFAULT_LOOP_TIME = 500L;
+    static private long LOOP_TIME = DEFAULT_LOOP_TIME;  // Time to wait for loops.
+	static private Command nullCmd = null;
 	private Command origCmd = nullCmd;
 	private boolean foundDisp = false;
 	private boolean foundPrompt = false;
@@ -93,14 +103,16 @@ public class FeatureMgr implements CommandListener, Runnable {
 	protected RssReaderMIDlet midlet;
     private Form        urlRrnForm = null; // The form to return to for URL box
     private TextField   urlRrnItem = null; // The item to return to for URL box
-    private boolean     background = false;  // Flag to continue looping
-    private int         loop = 0;   // Number of times to loop
-    private Thread      netThread = null;  // The thread for networking, etc
+    volatile private boolean     background = false;  // Flag to continue looping
+    volatile private boolean     pauseApp = false;  // Flag to pause the application.
+    volatile private int         loop = 0;   // Number of times to loop
+    volatile private Thread      procThread = null;  // The thread for networking, other processing, etc
 
 	//#ifdef DLOGGING
 	private Logger logger = Logger.getLogger("FeatureMgr");
 	private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
 
 	private CommandListener cmdFeatureUser = null;
@@ -140,11 +152,15 @@ public class FeatureMgr implements CommandListener, Runnable {
 			}
 			this.background = background;
 		}
-		if (background) {
-			startWakeup(false);
+		synchronized(this) {
+			if (background) {
+				// If running in the background, allow thread to wake up
+				// on it's own.
+				startWakeup(false);
+			}
 		}
 		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("cmdFeatureUser,background,calling thread,new thread=" + cmdFeatureUser + "," + background + "," + Thread.currentThread() + "," + netThread);}
+		if (fineLoggable) {logger.fine("cmdFeatureUser,background,calling thread,new thread=" + cmdFeatureUser + "," + background + "," + Thread.currentThread() + "," + procThread);}
 		//#endif
     }
 
@@ -169,163 +185,179 @@ public class FeatureMgr implements CommandListener, Runnable {
 	public void run() {
         /* Use networking if necessary */
         long lngStart;
-        long lngTimeTaken;
-		do {
-			//#ifdef DLOGGING
-			if (finestLoggable && (loop > 0)) {logger.finest("run loop,background,cmdFeatureUser,runFeatureUser,foundDisp,foundPrompt,exCmd,exDisp,origCmd=" + this.loop + "," + background + "," + cmdFeatureUser + "," + runFeatureUser + "," + foundDisp + "," + foundPrompt + "," + exCmd.getLabel() + "," + exDisp + "," + origCmd);}
-			//#endif
-			try {
-				Command ccmd = nullCmd;
-				Displayable cdisp = null;
-				Command corigCmd = nullCmd;
-				boolean cfoundDisp = false;
-				boolean cfoundPrompt = false;
-				synchronized(this) {
-					cfoundDisp = foundDisp;
-					cfoundPrompt = foundPrompt;
-					if ((cfoundDisp || cfoundPrompt) && (exCmd != nullCmd)) {
-						ccmd = exCmd;
-						cdisp = exDisp;
-						corigCmd = origCmd;
-					}
-				}
-				if ((ccmd != nullCmd) && (cdisp != null)) {
-					try {
-						Hashtable cpromptCommands = null;
-						synchronized(this) {
-							cpromptCommands = promptCommands;
-						}
-						//#ifdef DLOGGING
-						if (fineLoggable) {logger.fine("run disp,cdisp,ccmd,corigCmd,cfoundDisp,cfoundPrompt,thread,cpromptCommands="  + disp + "," + cdisp + "," + ccmd.getLabel() + "," + ((corigCmd == null) ? "null" : corigCmd.getLabel()) + "," + cfoundDisp + "," + cfoundPrompt + "," + netThread + "," + cpromptCommands);}
-						//#endif
-						if (cfoundDisp && (cpromptCommands != null)
-								&& cpromptCommands.containsKey(ccmd)) {
-							synchronized(this) {
-								origCmd = ccmd;
-							}
-							String promptMsg = (String)cpromptCommands.get(ccmd);
-							// Due to a quirk on T637 (MIDP 1.0), we need to create a form
-							// before the alert or the alert will not be seen.
-							Form formAlert = new Form(ccmd.getLabel());
-							formAlert.append(promptMsg);
-							formAlert.addCommand(new Command("OK", Command.OK, 0));
-							formAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
-							formAlert.setCommandListener(this);
-							midlet.setCurrent(formAlert);
-							Alert promptAlert = new Alert(ccmd.getLabel(),
-									promptMsg, null,
-									AlertType.CONFIRMATION);
-							promptAlert.setTimeout(Alert.FOREVER);
-							promptAlert.addCommand(new Command("OK", Command.OK, 0));
-							promptAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
-							promptAlert.setCommandListener(this);
-							midlet.setCurrent(promptAlert, formAlert);
-							synchronized(this) {
-								promptDisp1 = formAlert;
-								promptDisp2 = promptAlert;
-							}
-						} else if( (urlRrnForm != null) &&
-								   (cdisp instanceof TextBox)) {
-							/** Paste into URL field from previous form.  */
-							int cmdType = ccmd.getCommandType();
-							if (cmdType == Command.OK) {
-								urlRrnItem.setString( ((TextBox)cdisp).getString() );
-								//#ifdef DMIDP20
-								midlet.setCurrentItem( urlRrnItem );
-								//#else
-								midlet.setCurrent( urlRrnForm );
-								//#endif
-								// Free memory
-								urlRrnForm = null;
-								// Free memory
-								urlRrnItem = null;
-							}
-							
-							/** Cancel the box go back to the return form.  */
-							if (cmdType == Command.CANCEL) {
-								//#ifdef DMIDP20
-								midlet.setCurrentItem( urlRrnItem );
-								//#else
-								midlet.setCurrent( urlRrnForm );
-								//#endif
-								// Free memory
-								urlRrnForm = null;
-								urlRrnItem = null;
-							}
-						} else if (cfoundDisp && cdisp.equals(disp)) {
-							//#ifdef DLOGGING
-							if (fineLoggable) {logger.fine("Equal cdisp,disp,cmdFeatureUser=" + ccmd.getLabel() + "," + cdisp + "," + disp + "," + cmdFeatureUser);}
-							//#endif
-							cmdFeatureUser.commandAction(ccmd, cdisp);
-							if (background && (runFeatureUser != null)) {
-								runFeatureUser.run();
-							}
-						}
-						if (cfoundPrompt && !cdisp.equals(disp)) {
-							//#ifdef DLOGGING
-							if (fineLoggable) {logger.fine("corigCmd,cdisp,disp=" + corigCmd.getLabel() + "," + cdisp + "," + disp);}
-							//#endif
-
-							try {
-								if ((ccmd.getCommandType() == Command.OK)
-								//#ifdef DMIDP20
-									   || ccmd.equals(Alert.DISMISS_COMMAND)
-								//#endif
-										) {
-									//#ifdef DLOGGING
-									if (fineLoggable) {
-										logger.fine("corigCmd,type=" + corigCmd.getLabel() + "," + corigCmd.getCommandType());
-									}
-									//#endif
-									midlet.setCurrent(disp);
-									cmdFeatureUser.commandAction(corigCmd, disp);
-									if (background && (runFeatureUser != null)) {
-										runFeatureUser.run();
-									}
-								} else if (ccmd.getCommandType() == Command.CANCEL) {
-									midlet.setCurrent(disp);
-								}
-							} finally {
-								synchronized(this) {
-									origCmd = nullCmd;
-									promptDisp1 = disp;
-									promptDisp2 = disp;
-								}
-							}
-						}
-					} catch (Throwable e) {
-						//#ifdef DLOGGING
-						logger.severe("run commandAction caught ", e);
-						//#endif
-						System.out.println("run commandAction caught " + e + " " + e.getMessage());
-					} finally {
-						synchronized(this) {
-							foundDisp = false;
-							foundPrompt = false;
-							exCmd = nullCmd;
-							exDisp = disp;
-						}
-					}
-				} else {
-					if (background && (runFeatureUser != null)) {
-						runFeatureUser.run();
-					}
-				}
+        long lngTaskEnd;
+        long lngTotalTimeTaken;
+		try {
+			do {
 				lngStart = System.currentTimeMillis();
-				lngTimeTaken = System.currentTimeMillis()-lngStart;
-				if(lngTimeTaken<500L) {
+				//#ifdef DLOGGING
+				if (finestLoggable && (loop > 0)) {logger.finest("run loop,background,cmdFeatureUser,runFeatureUser,foundDisp,foundPrompt,exCmd,exDisp,origCmd=" + this.loop + "," + background + "," + cmdFeatureUser + "," + runFeatureUser + "," + foundDisp + "," + foundPrompt + "," + logCmd(exCmd) + "," + exDisp + "," + logCmd(origCmd));}
+				//#endif
+				try {
+					Command ccmd = nullCmd;
+					Displayable cdisp = null;
+					Command corigCmd = nullCmd;
+					boolean cfoundDisp = false;
+					boolean cfoundPrompt = false;
 					synchronized(this) {
-						if (loop == 0) {
-							super.wait(500L-lngTimeTaken);
-						} else {
-							loop--;
+						cfoundDisp = foundDisp;
+						cfoundPrompt = foundPrompt;
+						if ((cfoundDisp || cfoundPrompt) && (exCmd != nullCmd)) {
+							ccmd = exCmd;
+							cdisp = exDisp;
+							corigCmd = origCmd;
 						}
 					}
+					if ((ccmd != nullCmd) && (cdisp != null)) {
+						try {
+							Hashtable cpromptCommands = null;
+							synchronized(this) {
+								cpromptCommands = promptCommands;
+							}
+							//#ifdef DLOGGING
+							if (fineLoggable) {logger.fine("run disp,cdisp,ccmd,corigCmd,cfoundDisp,cfoundPrompt,thread,cpromptCommands="  + disp + "," + cdisp + "," + logCmd(ccmd) + "," + logCmd(corigCmd) + "," + cfoundDisp + "," + cfoundPrompt + "," + procThread + "," + cpromptCommands);}
+							//#endif
+							if (cfoundDisp && (cpromptCommands != null)
+									&& cpromptCommands.containsKey(ccmd)) {
+								synchronized(this) {
+									origCmd = ccmd;
+								}
+								String promptMsg = (String)cpromptCommands.get(ccmd);
+								// Due to a quirk on T637 (MIDP 1.0), we need to create a form
+								// before the alert or the alert will not be seen.
+								Form formAlert = new Form(ccmd.getLabel());
+								formAlert.append(promptMsg);
+								formAlert.addCommand(new Command("OK", Command.OK, 0));
+								formAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
+								formAlert.setCommandListener(this);
+								midlet.setCurrent(formAlert);
+								Alert promptAlert = new Alert(ccmd.getLabel(),
+										promptMsg, null,
+										AlertType.CONFIRMATION);
+								promptAlert.setTimeout(Alert.FOREVER);
+								promptAlert.addCommand(new Command("OK", Command.OK, 0));
+								promptAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
+								promptAlert.setCommandListener(this);
+								midlet.setCurrent(promptAlert, formAlert);
+								synchronized(this) {
+									promptDisp1 = formAlert;
+									promptDisp2 = promptAlert;
+								}
+							} else if( (urlRrnForm != null) &&
+									   (cdisp instanceof TextBox)) {
+								/** Paste into URL field from previous form.  */
+								int cmdType = ccmd.getCommandType();
+								if (cmdType == Command.OK) {
+									urlRrnItem.setString( ((TextBox)cdisp).getString() );
+									//#ifdef DMIDP20
+									midlet.setCurrentItem( urlRrnItem );
+									//#else
+									midlet.setCurrent( urlRrnForm );
+									//#endif
+									// Free memory
+									urlRrnForm = null;
+									// Free memory
+									urlRrnItem = null;
+								}
+								
+								/** Cancel the box go back to the return form.  */
+								if (cmdType == Command.CANCEL) {
+									//#ifdef DMIDP20
+									midlet.setCurrentItem( urlRrnItem );
+									//#else
+									midlet.setCurrent( urlRrnForm );
+									//#endif
+									// Free memory
+									urlRrnForm = null;
+									urlRrnItem = null;
+								}
+							} else if (cfoundDisp && cdisp.equals(disp)) {
+								//#ifdef DLOGGING
+								if (fineLoggable) {logger.fine("Equal cdisp,disp,cmdFeatureUser=" + logCmd(ccmd) + "," + cdisp + "," + disp + "," + cmdFeatureUser);}
+								//#endif
+								cmdFeatureUser.commandAction(ccmd, cdisp);
+								if (background && (runFeatureUser != null)) {
+									runFeatureUser.run();
+								}
+							}
+							if (cfoundPrompt && !cdisp.equals(disp)) {
+								//#ifdef DLOGGING
+								if (fineLoggable) {logger.fine("run corigCmd,cdisp,disp=" + logCmd(corigCmd) + "," + cdisp + "," + disp);}
+								//#endif
+
+								try {
+									if ((ccmd.getCommandType() == Command.OK)
+									//#ifdef DMIDP20
+										   || ccmd.equals(Alert.DISMISS_COMMAND)
+									//#endif
+											) {
+										//#ifdef DLOGGING
+										if (fineLoggable) {
+											logger.fine("run corigCmd,type=" + logCmd(corigCmd));
+										}
+										//#endif
+										midlet.setCurrent(disp);
+										cmdFeatureUser.commandAction(corigCmd, disp);
+										if (background && (runFeatureUser != null)) {
+											runFeatureUser.run();
+										}
+									} else if (ccmd.getCommandType() == Command.CANCEL) {
+										midlet.setCurrent(disp);
+									}
+								} finally {
+									synchronized(this) {
+										origCmd = nullCmd;
+										promptDisp1 = disp;
+										promptDisp2 = disp;
+									}
+								}
+							}
+						} catch (Throwable e) {
+							//#ifdef DLOGGING
+							logger.severe("run commandAction caught ", e);
+							//#endif
+							System.out.println("run commandAction caught " + e + " " + e.getMessage());
+						} finally {
+							synchronized(this) {
+								foundDisp = false;
+								foundPrompt = false;
+								exCmd = nullCmd;
+								exDisp = disp;
+							}
+						}
+					} else {
+						if (background && (runFeatureUser != null)) {
+							runFeatureUser.run();
+						}
+					}
+					lngTotalTimeTaken = (lngTaskEnd = System.currentTimeMillis()) - lngStart;
+					lngTotalTimeTaken += System.currentTimeMillis() - lngTaskEnd;
+					//#ifdef DLOGGING
+					if (traceLoggable && (loop > 0)) {logger.trace("run loop,background,lngTaskEnd,lngTotalTimeTaken=" + this.loop + "," + background + "," + lngStart + "," + lngTaskEnd + "," + lngTotalTimeTaken);}
+					//#endif
+					synchronized(this) {
+						if (pauseApp) {
+							super.wait();
+						}
+					}
+					if(lngTotalTimeTaken < LOOP_TIME) {
+						synchronized(this) {
+							if (loop == 0) {
+								super.wait(LOOP_TIME - lngTotalTimeTaken);
+							} else {
+								loop--;
+							}
+						}
+					}
+				} catch (InterruptedException e) {
+					break;
 				}
-			} catch (InterruptedException e) {
-				break;
+			} while (background);
+		} finally {
+			if (procThread != null) {
+				MiscUtil.removeThread(procThread);
 			}
-		} while (background);
+		}
 	}
 
 	/* Prompt if command is in prompt camands.  */
@@ -341,14 +373,14 @@ public class FeatureMgr implements CommandListener, Runnable {
 	}
 
 	public void startWakeup(boolean wakeupThread) {
-		if ( (netThread == null) || !netThread.isAlive() ) {
+		if ( (procThread == null) || !procThread.isAlive() ) {
+			if (procThread != null) {
+				MiscUtil.removeThread(procThread);
+			}
 			try {
-				//#ifdef DCLDCV11
-				netThread = new Thread(this, disp.getClass().getName());
-				//#else
-				netThread = new Thread(this);
-				//#endif
-				netThread.start();
+				procThread = MiscUtil.getThread(this, disp.getClass().getName(),
+						this, "startWakeup");
+				procThread.start();
 			} catch (Exception e) {
 				System.err.println("Could not restart thread.");
 				e.printStackTrace();
@@ -361,6 +393,11 @@ public class FeatureMgr implements CommandListener, Runnable {
 					" thread not started.  Started now.");
 			//#endif
 		} else if (wakeupThread) {
+			synchronized(this) {
+				if (pauseApp) {
+					pauseApp = false;
+				}
+			}
 			wakeup(3);
 		}
 	}
@@ -516,7 +553,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 					((ChoiceGroup)item).setSelectedIndex(dis.readInt(),
 						true);
 					//#ifdef DLOGGING
-					if (cfinestLoggable) {logger.finest("set selected " + ((ChoiceGroup)item).getSelectedIndex());}
+					if (cfinestLoggable) {logger.finest("restorePrevValues set selected " + logItem(item));}
 					//#endif
 				} else if (item instanceof TextField) {
 					final int len = dis.readInt();
@@ -529,12 +566,12 @@ public class FeatureMgr implements CommandListener, Runnable {
 						} catch (UnsupportedEncodingException e) {
 							value = new String(bvalue, 0, blen);
 							//#ifdef DLOGGING
-							logger.severe("cannot convert value=" + value, e);
+							logger.severe("restorePrevValues cannot convert value=" + value, e);
 							//#endif
 						}
 						((TextField)item).setString(value);
 						//#ifdef DLOGGING
-						if (cfinestLoggable) {logger.finest("set string " + ((TextField)item).getString());}
+						if (cfinestLoggable) {logger.finest("restorePrevValues set string " + logItem(item));}
 						//#endif
 					}
 				}
@@ -552,6 +589,20 @@ public class FeatureMgr implements CommandListener, Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	public Object[] action(Object[] reqs) {
+		if ((reqs.length == 2) && (reqs[0] instanceof Short) &&
+			((Short)reqs[0] == MiscUtil.SPAUSE_APP)) {
+			synchronized(this) {
+				if (!(pauseApp = ((Boolean)reqs[1]).booleanValue())) {
+					wakeup(3);
+				}
+			}
+			return new Object[] {MiscUtil.SPAUSE_APP, reqs[1]};
+		} else {
+			return null;
 		}
 	}
 
@@ -574,7 +625,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 				if (item instanceof ChoiceGroup) {
 					dout.writeInt(((ChoiceGroup)item).getSelectedIndex());
 					//#ifdef DLOGGING
-					if (cfinestLoggable) {logger.finest("stored selected " + item.getLabel() + "," + ((ChoiceGroup)item).getSelectedIndex());}
+					if (cfinestLoggable) {logger.finest("storeValues stored selected " + logItem(item));}
 					//#endif
 				} else if (item instanceof TextField) {
 					final String value = ((TextField)item).getString();
@@ -584,7 +635,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 					} catch (UnsupportedEncodingException e) {
 						bvalue = value.getBytes();
 						//#ifdef DLOGGING
-						logger.severe("cannot store value=" + value, e);
+						logger.severe("storeValues cannot store value=" + value, e);
 						//#endif
 					}
 					dout.writeInt(bvalue.length);
@@ -592,7 +643,7 @@ public class FeatureMgr implements CommandListener, Runnable {
 						dout.write( bvalue, 0, bvalue.length );
 					}
 					//#ifdef DLOGGING
-					if (cfinestLoggable) {logger.finest("set string " + item.getLabel() + "," + ((TextField)item).getString());}
+					if (cfinestLoggable) {logger.finest("storeValues store string " + logItem(item));}
 					//#endif
 				}
 			} catch (IOException e) {
@@ -614,5 +665,29 @@ public class FeatureMgr implements CommandListener, Runnable {
 		}
 		return bout.toByteArray();
 	}
+
+
+	//#ifdef DLOGGING
+	static String logCmd(Command cmd) {
+	  return ((cmd == null) ? "null command" : (new StringBuffer(
+			cmd.getLabel()).append(",").append(cmd.getCommandType()).append(
+				",").append(cmd.getPriority()).toString()));
+	}
+
+	static String logItem(Item citem) {
+		if (citem == null) {
+			return "null item";
+		} else {
+			StringBuffer sb = new StringBuffer(citem.getLabel());
+			if (citem instanceof ChoiceGroup) {
+				sb.append(",").append(((ChoiceGroup)citem).getSelectedIndex());
+			} else if (citem instanceof TextField) {
+				sb.append(",").append(((TextField)citem).getString());
+			}
+			return sb.toString();
+		}
+	}
+
+	//#endif
 
 }
