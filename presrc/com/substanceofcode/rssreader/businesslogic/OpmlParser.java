@@ -20,11 +20,21 @@
  *
  */
 /*
-   IB 2010-03-12 1.11.5RC1 Use htmlUrl which is link tag in feed for OPML.
+ * IB 2010-03-12 1.11.5RC1 Use htmlUrl which is link tag in feed for OPML.
+ * IB 2010-03-07 1.11.4RC1 Better logging.
+ * IB 2010-05-25 1.11.5RC2 Log instead of out.println.
+ * IB 2010-05-25 1.11.4RC1 Recognize style sheet, and DOCTYPE and treat properly.
+ * IB 2010-05-25 1.11.4RC1 Only save htmlURL if it's not 0 length .
+ * IB 2010-05-27 1.11.5RC2 Put in code to write OPML file.
+ * IB 2010-05-27 1.11.5RC2 Have OpmlParser code to write to OPML file only if signed.
 */
 
 // Expand to define itunes define
 @DITUNESDEF@
+// Expand to define signed define
+@DSIGNEDDEF@
+// Expand to define logging define
+@DLOGDEF@
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -33,6 +43,11 @@ import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
 import com.substanceofcode.utils.EncodingUtil;
+
+//#ifdef DLOGGING
+import net.sf.jlogmicro.util.logging.Logger;
+import net.sf.jlogmicro.util.logging.Level;
+//#endif
 
 /**
  * OpmlParser is an utility class for aquiring and parsing a OPML lists.
@@ -47,6 +62,11 @@ public class OpmlParser extends FeedListParser {
 
 	private boolean opmlDirectory = false;
 
+	//#ifdef DLOGGING
+    private Logger logger = Logger.getLogger("OpmlParser");
+    private boolean warningLoggable = logger.isLoggable(Level.WARNING);
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+	//#endif
     /** Constructor with url, username and password parameters. */
     public OpmlParser(String url, String username, String password) {
         super(url, username, password);
@@ -63,8 +83,10 @@ public class OpmlParser extends FeedListParser {
             
 			// The first element is the main tag.
             int elementType = parser.parse();
-			// If we found the prologue, get the next entry.
-			if( elementType == XmlParser.PROLOGUE ) {
+			// If we found the PROLOGUE, DOCTYPE, or STYLESHEET get the next entry.
+			while ((elementType == XmlParser.PROLOGUE) ||
+					(elementType == XmlParser.DOCTYPE) ||
+					(elementType == XmlParser.STYLESHEET)) {
 				elementType = parser.parse();
 			}
 			if (elementType == XmlParser.END_DOCUMENT ) {
@@ -78,9 +100,13 @@ public class OpmlParser extends FeedListParser {
 				String link = "";
 												
 				String tagName = parser.getName();
-				System.out.println("tagname: " + tagName);
+				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine("tagname: " + tagName);}
+				//#endif
 				if (tagName.equals("outline")) {
-					System.out.println("Parsing <outline> tag");
+					//#ifdef DLOGGING
+					if (fineLoggable) {logger.fine("Parsing <outline> tag");}
+					//#endif
 					
 					title = parser.getAttributeValue( "text" );
 					if (title != null) {
@@ -118,24 +144,30 @@ public class OpmlParser extends FeedListParser {
 					//#endif
 					
 					/** Debugging information */
-					System.out.println("Title:       " + title);
-					System.out.println("Link:        " + link);
+					//#ifdef DLOGGING
+					if (fineLoggable) {logger.fine("parseFeeds title,link=" + title + "," + link);}
+					//#endif
 					
 					if(( link == null ) || ( link.length() == 0 )) {
 						continue;
 					}
+					// Allow null title so that it can be retrieved from
+					// the feed title
 					if (( m_feedNameFilter != null) &&
-						((title != null) &&
-						(title.toLowerCase().indexOf(m_feedNameFilter) < 0))) {
+						(title != null) &&
+						(title.toLowerCase().indexOf(m_feedNameFilter) < 0)) {
 						continue;
 					}
 					if (( m_feedURLFilter != null) &&
 						( link.toLowerCase().indexOf(m_feedURLFilter) < 0)) {
 						continue;
 					}
+					//#ifdef DLOGGING
+					if (warningLoggable && (title == null)) {logger.warning("parseFeeds warning null title for link=" + link);}
+					//#endif
 					RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 					//#ifdef DITUNES
-					if (htmlUrl.length() > 0) {
+					if ((htmlUrl != null) && (htmlUrl.length() > 0)) {
 						feed.setLink(htmlUrl);
 					}
 					//#endif
@@ -161,5 +193,27 @@ public class OpmlParser extends FeedListParser {
         rssFeeds.copyInto(feeds);
         return feeds;
     }
+
+		//#ifdef DSIGNED
+		static public String getOpmlBegin() {
+					return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<opml version=\"1.0\">\n<head>\n<title>Rss Reader subscriptions</title>\n</head>\n<body>\n";
+		}
+
+		static public String getOpmlLine(final RssItunesFeed feed) {
+					StringBuffer sb = new StringBuffer("    <outline text=\"").append(
+						feed.getName()).append("\" title=").append(feed.getName()).append(
+						"\" type=\"rss\"\n").append("xmlUrl=\"").append(
+							feed.getUrl()).append("\" ");
+						//#ifdef DITUNES
+					sb.append("htmlUrl='\"").append(feed.getLink()).append("\"");
+						//#endif
+					sb.append("/>\n</outline>\n");
+				return sb.toString();
+		}
+
+		static public String getOpmlEnd() {
+					return "<body>\n</opml>\n";
+		}
+		//#endif
     
 }
