@@ -19,6 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-04-30 1.11.5RC2 Cosmetic change for compatibility.
+ * IB 2010-05-25 1.11.5RC2 More logging.
+ * IB 2010-05-26 1.11.5RC2 Use defaults for ITEMS_ENCODED and STORE_DATE of 1 and current date respectively.
+ */
 
 // Expand to define CLDC define
 @DCLDCVERS@
@@ -343,19 +348,34 @@ final public class Settings {
 				}
 
 				Hashtable cproperties = m_properties;
-				//#ifndef DCOMPATIBILITY1
-				//#ifndef DCOMPATIBILITY2
-				//#ifndef DCOMPATIBILITY3
+				//#ifndef DCOMPATIBILITY
 				if (region > 0) {
 					cproperties = new Hashtable();
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest("save put bookmarks=" + m_properties.get("bookmarks"));}
+					//#endif
 					cproperties.put("bookmarks", m_properties.get("bookmarks"));
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest("save put settings=" + m_properties.get(SETTINGS_NAME));}
+					//#endif
 					cproperties.put(SETTINGS_NAME,
 							m_properties.get(SETTINGS_NAME));
-					cproperties.put(ITEMS_ENCODED, m_properties.get(ITEMS_ENCODED));
-					cproperties.put(STORE_DATE, m_properties.get(STORE_DATE));
+					String value;
+					if ((value = (String)m_properties.get(ITEMS_ENCODED)) == null) {
+						value = "1";
+					}
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest("save put items_encoded=" + value);}
+					//#endif
+					cproperties.put(ITEMS_ENCODED, value);
+					if ((value = (String)m_properties.get(STORE_DATE)) == null) {
+						value = Long.toString(System.currentTimeMillis());
+					}
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest("save put store_date=" + value);}
+					//#endif
+					cproperties.put(STORE_DATE, value);
 				}
-				//#endif
-				//#endif
 				//#endif
 
 				// Put version only if it is not DCOMPATIBILITY1 which is
@@ -374,7 +394,7 @@ final public class Settings {
 					String name = (String) e.nextElement();
 					String value = cproperties.get( name ).toString();
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest("name=" + name);}
+					if (finestLoggable) {logger.finest("save name=" + name);}
 					//#endif
 					dout.writeUTF( name );
 					byte[] bvalue;
@@ -384,16 +404,16 @@ final public class Settings {
 					} catch (UnsupportedEncodingException uee) {
 						bvalue = value.getBytes();
 						//#ifdef DLOGGING
-						logger.severe("cannot convert save name=" + name, uee);
+						logger.severe("save cannot convert save name=" + name, uee);
 						//#endif
 						/** Error while executing constructor */
-						System.out.println("cannot convert save name=" +
+						System.out.println("save cannot convert save name=" +
 								name + uee.getMessage());
 						uee.printStackTrace();
 					} catch (IOException ioe) {
 						bvalue = value.getBytes();
 						//#ifdef DLOGGING
-						logger.severe("cannot convert save name=" + name, ioe);
+						logger.severe("save cannot convert save name=" + name, ioe);
 						//#endif
 						/** Error while executing constructor */
 						System.out.println("cannot convert save name=" +
@@ -401,7 +421,7 @@ final public class Settings {
 						ioe.printStackTrace();
 					}
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest("value=" + value);}
+					if (finestLoggable) {logger.finest("save value=" + value);}
 					//#endif
 					dout.writeInt( bvalue.length );
 					dout.write( bvalue, 0, bvalue.length );
@@ -412,7 +432,7 @@ final public class Settings {
 				rs = RecordStore.openRecordStore( "Store", true );
 				rs.setRecord( (region + 1), data, 0, data.length );
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("stored region=" + region);}
+				if (fineLoggable) {logger.fine("save stored region=" + region);}
 				//#endif
 				//#ifndef DCOMPATIBILITY1
 				if ( vers != null) {
@@ -421,17 +441,17 @@ final public class Settings {
 				//#endif
 			} catch (Exception e) {
 				//#ifdef DLOGGING
-				logger.severe("catch ", e);
+				logger.severe("save catch ", e);
 				//#endif
 				/** Error while executing constructor */
 				System.out.println("catch " + e.getMessage());
 				e.printStackTrace();
 			} catch (Throwable e) {
 				//#ifdef DLOGGING
-				logger.severe("catch throwable ", e);
+				logger.severe("save catch throwable ", e);
 				//#endif
 				/** Error while executing constructor */
-				System.out.println("catch throwable " + e.getMessage());
+				System.out.println("save catch throwable " + e.getMessage());
 				e.printStackTrace();
 			} finally {
 				try { dout.close();
