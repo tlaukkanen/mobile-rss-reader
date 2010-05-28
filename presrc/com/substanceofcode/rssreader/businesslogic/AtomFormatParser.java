@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+*/
 
 // Expand to define test define
 @DTESTDEF@
@@ -35,7 +38,7 @@ import net.sf.jlogmicro.util.logging.Level;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.XmlParser;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,7 +115,7 @@ public class AtomFormatParser implements FeedFormatParser {
 					if ((elemChar == 's') &&
 						elementName.equals("subtitle") ) {
 						m_description = parser.getText();
-						m_description = StringUtil.removeHtml(
+						m_description = MiscUtil.removeHtml(
 								m_description ).trim();
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest("m_description=" + m_description);}
@@ -203,7 +206,7 @@ public class AtomFormatParser implements FeedFormatParser {
 					m_link = m_altLink;
 				}
 			}
-			m_link = StringUtil.removeHtml( m_link ).trim();
+			m_link = MiscUtil.removeHtml( m_link ).trim();
 			Date pubDate = null;
 			// Check date in case we cannot find it.
 			if (m_date.length() == 0) {
@@ -261,7 +264,7 @@ public class AtomFormatParser implements FeedFormatParser {
 			case 't':
 				if( elementName.equals("title") ) {
 					m_title = parser.getText();
-					m_title = StringUtil.removeHtml( m_title );
+					m_title = MiscUtil.removeHtml( m_title );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_title=" + m_title);}
 					//#endif
@@ -328,7 +331,7 @@ public class AtomFormatParser implements FeedFormatParser {
 			case 'a':
 				if( m_hasExt && elementName.equals("author") ) {
 					m_author = parser.getText();
-					m_author = StringUtil.removeHtml( m_author );
+					m_author = MiscUtil.removeHtml( m_author );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_author=" + m_author);}
 					//#endif
@@ -337,7 +340,7 @@ public class AtomFormatParser implements FeedFormatParser {
 			case 'c':
 				if( elementName.equals("content")) {
 					m_description = parser.getText();
-					m_description = StringUtil.removeHtml( m_description );
+					m_description = MiscUtil.removeHtml( m_description );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("content=m_description=" + m_description);}
 					//#endif
@@ -346,7 +349,7 @@ public class AtomFormatParser implements FeedFormatParser {
 			case 's':
 				if( elementName.equals("summary")) {
 					m_summary = parser.getText();
-					m_summary = StringUtil.removeHtml( m_summary );
+					m_summary = MiscUtil.removeHtml( m_summary );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_summary=" + m_summary);}
 					//#endif
