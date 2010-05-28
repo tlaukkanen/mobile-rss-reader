@@ -20,6 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-05-24 1.11.5RC2 Code cleanup.
+ * IB 2010-05-24 1.11.5RC2 Add modifyItunes and toString to interface.
+ */
 // Expand to define itunes define
 //#define DNOITUNES
 // Expand to define logging define
@@ -29,11 +33,6 @@
 //#ifdef DTEST
 //@package com.substanceofcode.rssreader.businessentities;
 //@
-//@import com.substanceofcode.utils.Base64;
-//@import com.substanceofcode.utils.StringUtil;
-//@import java.io.UnsupportedEncodingException;
-//@import java.util.*;
-//@
 //@/**
 //@ * RssItunesFeedInfo interface contains one RSS Itunes feed's properties.
 //@ * Properties include name and subtitle and summary.
@@ -42,14 +41,19 @@
 //@ */
 //@public interface RssItunesFeedInfo extends RssFeedInfo {
 //@    
+//@	void modifyItunes(boolean itunes, String title, String description,
+//@							String language,
+//@							String author,
+//@							String subtitle,
+//@							String summary,
+//@							byte explicit);
+//@
 //@    /** Creates a new instance of RSSBookmark */
 //@    /** Return record store string */
 //@    String getStoreString(boolean serializeItems, boolean encoded);
 //@
-	//#ifdef DTEST
 //@	/** Compare feed to an existing feed.  **/
 //@	boolean equals(RssFeedInfo feed);
-	//#endif
 //@    
 //@    void setDescription(String description);
 //@
@@ -82,6 +86,8 @@
 //@    void setTitle(String title);
 //@
 //@    String getTitle();
+//@
+//@    String toString();
 //@
 //@}
 //#endif
