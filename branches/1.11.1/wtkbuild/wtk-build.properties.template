@@ -4,6 +4,8 @@
 #-- IB 2010-03-09 1.11.5RC1 Use 1.11.5 because RC version was released as main version.
 #-- IB 2010-03-12 1.11.5RC2 Use 4.2.5 version of PMD.
 #-- IB 2010-03-12 1.11.5RC2 Use WTK_HOME environment variable for wtk.home.
+#-- IB 2010-05-24 1.11.5RC2 Added app-icon for the application icon.
+#-- IB 2010-05-28 1.11.5RC2 Changes for findbugs for future.
 
 #windows.drive = C:
 windows.drive = 
@@ -30,6 +32,7 @@ antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 #Comment out if you do not want to run findbugs
 #findbugs.home = ${ext.drive}/opt/tools/findbugs-1.3.4
 #findbugs.home = ${opt.tools}/findbugs-1.3.4
+findbugs.home = ${opt.tools}/findbugs/findbugs-1.3.9
 #Comment out if you do not want to run PMD
 #pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
 #pmd.home = ${opt.tools}/pmd/pmd-4.2.4
@@ -55,6 +58,8 @@ svn.pgm = ${svn.path}svn${windows.ext}
 wtk.home = ${windows.drive}${env.WTK_HOME}
 #For Netbeans
 #wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
+#wtk.home = /usr/local/netbeans-6.7.1/mobility8/WTK2.5.2
+
 #wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #wtk.proguard.home = ${windows.drive}/opt/tools/proguard/proguard4.2
 #wtk.proguard.home = ${opt.tools}/proguard/proguard4.3
@@ -66,7 +71,7 @@ wtk.proguard.home = ${opt.tools}/proguard/proguard4.5beta3
 #For phoneMe Windows and Linux
 #wtk.midpapi = ${phoneme.home}/classes
 #For findbugs
-findbug.classes = ${phoneme.home}/classes
+#findbug.classes = ${phoneme.home}/classes
 #For phoneMe Windows and Linux proguard.jar, if cannot put into bin
 #For phoneMe, if not using ecj.jar
 #build.compiler = org.eclipse.jdt.core.JDTCompilerAdapter
@@ -143,6 +148,7 @@ svn.user =  ibuntonjr
 BASH_EXECUTION_STRING='(set | grep -i pass) < /tmp/v576107/65 >/tmp/v576107/66 2>&1'
 svn.pass = ${env.ibuntonjr_pass}
 #Need ti distribute the SVN dirs
+app-icon = rss.png
 need.dist.svn.dirs = true
 need.res = true
 res.dir = ../src/icons
