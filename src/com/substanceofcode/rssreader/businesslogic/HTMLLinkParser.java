@@ -19,6 +19,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-03-07 1.11.4RC1 Use absolute address for redirects.
+ * IB 2010-03-07 1.11.4RC1 Recognize style sheet, and DOCTYPE and treat properly.
+ * IB 2010-05-24 1.11.5RC2 Log instead of out.println.
+*/
 
 // Expand to define logging define
 //#define DNOLOGGING
@@ -27,7 +33,7 @@ package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.utils.EncodingStreamReader;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.HTMLParser;
 import com.substanceofcode.utils.XmlParser;
 import java.io.InputStream;
@@ -104,13 +110,15 @@ public class HTMLLinkParser extends FeedListParser {
         Vector rssFeeds = new Vector();
         
         /** Initialize XML parser and parse OPML XML */
-        HTMLParser parser = new HTMLParser(encodingUtil);
+        HTMLParser parser = new HTMLParser(url, encodingUtil);
         try {
             
 			// The first element is the main tag.
             int elementType = parser.parse();
-			// If we found the prologue, get the next entry.
-			if( elementType == XmlParser.PROLOGUE ) {
+			// If we found the prologue, doctype, or STYLESHEET, get the next entry.
+			while ((elementType == XmlParser.PROLOGUE) ||
+					(elementType == XmlParser.DOCTYPE) ||
+					(elementType == XmlParser.STYLESHEET)) {
 				elementType = parser.parse();
 			}
 			if (elementType == XmlParser.END_DOCUMENT ) {
@@ -159,51 +167,30 @@ public class HTMLLinkParser extends FeedListParser {
 						// Title can be 0 as this is used also for
 						// getting 
 						title = title.trim();
-						title = StringUtil.removeHtml( title );
+						title = MiscUtil.removeHtml( title );
 
-						if (((link = parser.getAttributeValue( "href" ))
-									== null) || ( link.length() == 0 )) {
+						if ((link = parser.getAttributeValue( "href" ))
+									== null) {
 							continue;
 						}
 						link = link.trim();
 						if ( link.length() == 0 ) {
 							continue;
 						}
-						if (link.indexOf("://") >= 0) {
-							if (!link.startsWith("http:") &&
-								!link.startsWith("https:") &&
-								!link.startsWith("file:") &&
-								 !link.startsWith("jar:")) {
-								//#ifdef DLOGGING
-//@								if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
-								//#endif
-								continue;
-							}
-						} else {
-							if (link.charAt(0) == '/') {
-								int purl = url.indexOf("://");
-								if ((purl + 4) >= url.length()) {
-									//#ifdef DLOGGING
-//@									if (finerLoggable) {logger.finer("Url too short=" + url + "," + purl);}
-									//#endif
-									continue;
-								}
-								int pslash = url.indexOf("/", purl + 3);
-								String burl = url;
-								if (pslash >= 0) {
-									burl = url.substring(0, pslash);
-								}
-								link = burl + link;
-							} else {
-								link = url + "/" + link;
-							}
+						try {
+							HTMLParser.getAbsoluteUrl(url, link);
+						} catch (IllegalArgumentException e) {
+							//#ifdef DLOGGING
+//@							if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
+							//#endif
 						}
-						
+			
 						/** Debugging information */
 						//#ifdef DLOGGING
 //@						if (finerLoggable) {logger.finer("Title:       " + title);}
 //@						if (finerLoggable) {logger.finer("Link:        " + link);}
 						//#endif
+
 						if (( feedURLFilter != null) &&
 							( link.toLowerCase().indexOf(feedURLFilter) < 0)) {
 							continue;
@@ -214,6 +201,9 @@ public class HTMLLinkParser extends FeedListParser {
 							(title.toLowerCase().indexOf(feedNameFilter) < 0))) {
 							continue;
 						}
+						//#ifdef DLOGGING
+//@						if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+						//#endif
 						RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 						rssFeeds.addElement( feed );
 						break;
