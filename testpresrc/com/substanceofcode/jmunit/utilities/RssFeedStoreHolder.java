@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-05-24 1.11.5RC2 Code cleanup.
+ */
 
 // Expand to define test define
 @DTESTDEF@
@@ -28,16 +31,6 @@
 @DLOGDEF@
 // Expand to define compatibility
 @DCOMPATDEF@
-
-//#ifdef DCOMPATIBILITY1
-  //#define DCOMPATIBILITY
-//#endif
-//#ifdef DCOMPATIBILITY2
-  //#define DCOMPATIBILITY
-//#endif
-//#ifdef DCOMPATIBILITY3
-  //#define DCOMPATIBILITY
-//#endif
 
 //#ifdef DJMTEST
 //#ifdef DCOMPATIBILITY
