@@ -23,6 +23,8 @@
  */
 /*
  * IB 2010-03-14 1.11.5RC2 Fix comment to remove getInstance.
+ * IB 2010-04-30 1.11.5RC2 Track threads used.
+ * IB 2010-04-30 1.11.5RC2 Use thread from FeatureMgr.
 */
 
 // Expand to define DJSR75 define
@@ -41,8 +43,10 @@
 //@import java.util.Vector;
 //@import java.util.Enumeration;
 //@import javax.microedition.midlet.MIDlet;
-//@import javax.microedition.io.*;
-//@import javax.microedition.io.file.*;
+//@import javax.microedition.io.Connector;
+//@import javax.microedition.io.file.FileSystemListener;
+//@import javax.microedition.io.file.FileConnection;
+//@import javax.microedition.io.file.FileSystemRegistry;
 //@import javax.microedition.lcdui.Alert;
 //@import javax.microedition.lcdui.AlertType;
 //@import javax.microedition.lcdui.List;
@@ -54,6 +58,7 @@
 //@
 //@import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 //@import com.substanceofcode.rssreader.presentation.FeatureList;
+//@import com.substanceofcode.utils.MiscUtil;
 //@
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -104,7 +109,6 @@
 //@	protected boolean itemSelected = false;
 //@	protected boolean dirSelected = false;
 //@	protected boolean cancelCmd = false;
-//@	protected Thread kThread = null;
 //@	protected RssReaderMIDlet midlet = null;
 //@
 	//#ifdef DLOGGING
@@ -132,10 +136,6 @@
 //@			if (fineLoggable) {logger.fine("--- file sep: '" + FILE_SEPARATOR + "'");}
 //@			if (fineLoggable) {logger.fine("--- file sep_alt: '" + FILE_SEPARATOR_ALT + "'");}
 			//#endif
-//@			if (kThread == null) {
-//@				kThread = new Thread(this);
-//@				kThread.start();
-//@			}
 //@		} catch (Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("KFileSelectorImpl constructor", t);
@@ -194,6 +194,7 @@
 //@		FOLDER_IMAGE = getImage(iconDir + "/folder_icon.png");
 //@		FILE_IMAGE = getImage(iconDir + "/file_icon.png");
 //@		UPDIR_IMAGE =  getImage(iconDir + "/up_dir_icon.png");
+//@
 		//#ifdef DTEST
 //@		if (bDebug) System.out.println("MFS building cmds....");
 		//#endif
@@ -962,9 +963,13 @@
 //@	/* Complete the Op when we run if we have a target.  */
 //@	public void run() {
 //@		
-//@		if (null != target) {
-//@			
-//@			target.doNotifyOpComplete();
+//@		try {
+//@			if (null != target) {
+//@				
+//@				target.doNotifyOpComplete();
+//@			}
+//@		} finally {
+//@			MiscUtil.removeThread(Thread.currentThread());
 //@		}
 //@	}
 //@	
