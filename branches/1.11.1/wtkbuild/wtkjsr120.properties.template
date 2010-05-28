@@ -1,0 +1,9 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+wtk.wma.enabled = true
+DJSR120 = DJSR120
+file.prefix.jsr120 = jsr120_
+PERMISSIONS.jsr120 = ,javax.microedition.io.Connector.sms,javax.wireless.messaging.sms.receive,javax.wireless.messaging.sms.send
+SUFFIXVERS.jsr120 = -jsr120
+lib.jsr120 = :${wtk.home}/lib/wma11.jar
+nojsr120.res.excludes =
+jsr120 = JSR-120
