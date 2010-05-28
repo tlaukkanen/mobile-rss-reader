@@ -18,6 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-05-24 1.11.5RC2 Code cleanup.
+ * IB 2010-05-24 1.11.5RC2 Better logging.
+ */
 
 // Expand to define JMUnit test define
 @DJMTESTDEF@
@@ -27,24 +31,16 @@
 @DTESTDEF@
 // Expand to define compatibility
 @DCOMPATDEF@
-// Expand to define JMUnit test define @DJMTESTDEF@
-//#ifdef DCOMPATIBILITY1
-  //#define DCOMPATIBILITY
-//#endif
-//#ifdef DCOMPATIBILITY2
-  //#define DCOMPATIBILITY
-//#endif
-//#ifdef DCOMPATIBILITY3
-  //#define DCOMPATIBILITY
-//#endif
 //#ifdef DTEST
 package com.substanceofcode.testutil.logging;
 
 import java.lang.IllegalArgumentException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Hashtable;
 
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
+import com.substanceofcode.utils.MiscUtil;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
@@ -63,11 +59,6 @@ import javax.microedition.lcdui.Item;
 //#ifdef DJMTEST
 import com.substanceofcode.rssreader.businessentities.RssItemInfo;
 import com.substanceofcode.rssreader.businessentities.RssItunesItemInfo;
-//#ifdef DCOMPATIBILITY
-import com.substanceofcode.rssreader.businessentities.CompatibilityRssItem1;
-import com.substanceofcode.rssreader.businessentities.CompatibilityRssItem2;
-import com.substanceofcode.rssreader.businessentities.CompatibilityRssItunesItem3;
-//#endif
 //#endif
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.testutil.TestOutput;
@@ -96,18 +87,18 @@ public class TestLogUtil {
 		if ((parmValue != null) && (thisValue != null)) {
 			if (parmValue.equals(thisValue)) {
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
+				if (fineLoggable) {logger.fine("equals object equal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
 				//#endif
 				return true;
 			} else {
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
+				if (fineLoggable) {logger.fine("equals object unequal " + thisLog + ",this=" + parmValue.getClass().getName() + "," + parmValue.toString() + "," + thisValue.getClass().getName() + "," + thisValue.toString());}
 				//#endif
 				return false;
 			}
 		} else if ((parmValue != null) || (thisValue != null)) {
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + ((parmValue == null) ? "null" : parmValue.toString()) + "," + ((thisValue == null) ? "null" : thisValue.toString()));}
+			if (fineLoggable) {logger.fine("equals object unequal one is null " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + MiscUtil.toString(thisValue, true));}
 			//#endif
 			return false;
 		}
@@ -117,8 +108,7 @@ public class TestLogUtil {
 		return true;
 	}
 
-	static public boolean fieldEquals(RssItunesItem parmValue,
-			RssItunesItem thisValue,
+	static public boolean fieldEquals(String parmValue, String thisValue,
 			String thisLog,
 			//#ifdef DLOGGING
 			Logger logger,
@@ -129,12 +119,46 @@ public class TestLogUtil {
 		if ((parmValue != null) && (thisValue != null)) {
 			if (parmValue.equals(thisValue)) {
 				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine("equals String equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
+				//#endif
+				return true;
+			} else {
+				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine("equals String unequal " + thisLog + ",this=" + parmValue + "," + thisValue);}
+				//#endif
+				return false;
+			}
+		} else if ((parmValue != null) || (thisValue != null)) {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine("equals String unequal one is null " + thisLog + ",this=" + ((parmValue == null) ? "null" : parmValue) + "," + ((thisValue == null) ? "null" : thisValue));}
+			//#endif
+			return false;
+		}
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
+		//#endif
+		return true;
+	}
+
+	static public boolean fieldEquals(Date parmValue, Date thisValue,
+			String thisLog,
+			//#ifdef DLOGGING
+			Logger logger,
+			//#else
+			Object logger,
+			//#endif
+			boolean fineLoggable) {
+		if ((parmValue != null) && (thisValue != null)) {
+			if (parmValue.equals(thisValue) ||
+					(parmValue.getTime() == thisValue.getTime()) ||
+			(parmValue.toString().equals(thisValue.toString()))) {
+				//#ifdef DLOGGING
 				if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
 				//#endif
 				return true;
 			} else {
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
+				if (fineLoggable) {logger.fine("equals date unequal " + thisLog + ",this=" + parmValue.getTime() + "," + parmValue.toString() + "," + thisValue.getTime() +  "," + thisValue.toString());}
 				//#endif
 				return false;
 			}
@@ -150,8 +174,7 @@ public class TestLogUtil {
 		return true;
 	}
 
-	//#ifdef DCOMPATIBILITY
-	static public boolean fieldEquals(CompatibilityRssItem1 parmValue,
+	static public boolean fieldEquals(RssItemInfo parmValue,
 			RssItemInfo thisValue,
 			String thisLog,
 			//#ifdef DLOGGING
@@ -161,20 +184,30 @@ public class TestLogUtil {
 			//#endif
 			boolean fineLoggable) {
 		if ((parmValue != null) && (thisValue != null)) {
-			if (parmValue.equals(thisValue)) {
+			if (thisValue instanceof RssItunesItemInfo) {
+				RssItunesItemInfo thistItem = (RssItunesItemInfo)thisValue;
+
+				if (thistItem.equals(parmValue)) {
+					//#ifdef DLOGGING
+					if (fineLoggable) {logger.fine("equals RssItunesItemInfo equal " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + thistItem.toString());}
+					//#endif
+					return true;
+				} else {
+					if (fineLoggable) {logger.fine("equals RssItunesItemInfo unequal " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + MiscUtil.toString(thisValue, true));}
+					return false;
+				}
+			} else if (thisValue.equals(parmValue)) {
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
+				if (fineLoggable) {logger.fine("equals RssItemInfo equal " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + thisValue.toString());}
 				//#endif
 				return true;
 			} else {
-				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
-				//#endif
+				if (fineLoggable) {logger.fine("equals RssItemInfo unequal " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + MiscUtil.toString(thisValue, true));}
 				return false;
 			}
 		} else if ((parmValue != null) || (thisValue != null)) {
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + ((parmValue == null) ? "null" : parmValue.toString()) + "," + ((thisValue == null) ? "null" : thisValue.toString()));}
+			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + ((parmValue == null) ? "null" : MiscUtil.toString(parmValue, true)) + "," + ((thisValue == null) ? "null" : thisValue.toString()));}
 			//#endif
 			return false;
 		}
@@ -183,74 +216,6 @@ public class TestLogUtil {
 		//#endif
 		return true;
 	}
-
-	static public boolean fieldEquals(CompatibilityRssItem2 parmValue,
-			RssItemInfo thisValue,
-			String thisLog,
-			//#ifdef DLOGGING
-			Logger logger,
-			//#else
-			Object logger,
-			//#endif
-			boolean fineLoggable) {
-		if ((parmValue != null) && (thisValue != null)) {
-			if (parmValue.equals(thisValue)) {
-				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
-				//#endif
-				return true;
-			} else {
-				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
-				//#endif
-				return false;
-			}
-		} else if ((parmValue != null) || (thisValue != null)) {
-			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + ((parmValue == null) ? "null" : parmValue.toString()) + "," + ((thisValue == null) ? "null" : thisValue.toString()));}
-			//#endif
-			return false;
-		}
-		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
-		//#endif
-		return true;
-	}
-
-	static public boolean fieldEquals(CompatibilityRssItunesItem3 parmValue,
-			RssItemInfo thisValue,
-			String thisLog,
-			//#ifdef DLOGGING
-			Logger logger,
-			//#else
-			Object logger,
-			//#endif
-			boolean fineLoggable) {
-		if ((parmValue != null) && (thisValue != null)) {
-			if (parmValue.equals(thisValue)) {
-				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
-				//#endif
-				return true;
-			} else {
-				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());}
-				//#endif
-				return false;
-			}
-		} else if ((parmValue != null) || (thisValue != null)) {
-			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + ((parmValue == null) ? "null" : parmValue.toString()) + "," + ((thisValue == null) ? "null" : thisValue.toString()));}
-			//#endif
-			return false;
-		}
-		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
-		//#endif
-		return true;
-	}
-
-	//#endif
 
 	static public boolean fieldEquals(int parmValue, int thisValue,
 			String thisLog,
