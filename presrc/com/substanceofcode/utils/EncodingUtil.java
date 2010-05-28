@@ -1,6 +1,5 @@
- /*
+/*
  * EncodingUtil.java
- TODO methods for booleans
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
  * http://www.substanceofcode.com
@@ -20,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-14 1.11.5RC2 Combine classes to save space.
+*/
 
 // Expand to define test define
 @DTESTDEF@
@@ -347,7 +349,7 @@ final public class EncodingUtil {
 		} else if (cencoding.startsWith("ISO-8859")) {
 			if (hasIso8859Encoding) {
 				if (isoEncoding.indexOf("-") == -1) {
-					docEncoding = StringUtil.replace(cencoding, "ISO-",
+					docEncoding = MiscUtil.replace(cencoding, "ISO-",
 							"ISO");
 					docEncoding = docEncoding.replace('-', '_');
 				} else {
@@ -369,7 +371,7 @@ final public class EncodingUtil {
 		} else if (cencoding.startsWith("ISO8859")) {
 			if (hasIso8859Encoding) {
 				if (isoEncoding.indexOf("-") >= 0) {
-					docEncoding = StringUtil.replace(cencoding, "ISO",
+					docEncoding = MiscUtil.replace(cencoding, "ISO",
 							"ISO-");
 					docEncoding = docEncoding.replace('_', '-');
 				} else {
@@ -384,7 +386,7 @@ final public class EncodingUtil {
 		} else if (cencoding.startsWith("WINDOWS-12")) {
 			if (hasWinEncoding) {
 				if (winEncoding.indexOf("-") == -1) {
-					docEncoding = StringUtil.replace(cencoding, "WINDOWS-",
+					docEncoding = MiscUtil.replace(cencoding, "WINDOWS-",
 							"Cp");
 				} else {
 					docEncoding = cencoding;
@@ -398,10 +400,10 @@ final public class EncodingUtil {
 		} else if (cencoding.indexOf("CP-") == 0) {
 			if (hasWinEncoding) {
 				if (winEncoding.indexOf("-") >= 0) {
-					docEncoding = StringUtil.replace(cencoding, "CP-",
+					docEncoding = MiscUtil.replace(cencoding, "CP-",
 							"WINDOWS-");
 				} else {
-					docEncoding = StringUtil.replace(cencoding, "CP-",
+					docEncoding = MiscUtil.replace(cencoding, "CP-",
 							"Cp");
 				}
 			} else {
@@ -413,10 +415,10 @@ final public class EncodingUtil {
 		} else if (cencoding.startsWith("CP")) {
 			if (hasWinEncoding) {
 				if (winEncoding.indexOf("-") >= 0) {
-					docEncoding = StringUtil.replace(cencoding, "CP",
+					docEncoding = MiscUtil.replace(cencoding, "CP",
 							"WINDOWS-");
 				} else {
-					docEncoding = StringUtil.replace(cencoding, "CP", "Cp");
+					docEncoding = MiscUtil.replace(cencoding, "CP", "Cp");
 				}
 			} else {
 				docEncoding = "";
