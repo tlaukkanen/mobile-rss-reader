@@ -1,5 +1,5 @@
 /*
- * FeedParser.java
+ * FeedFormatParser.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
  * http://www.substanceofcode.com
