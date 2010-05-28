@@ -21,6 +21,8 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
+ * IB 2010-03-07 1.11.4RC1 Code cleanup.
+ * IB 2010-03-07 1.11.4RC1 Need toString.
 */
 
 // Expand to define logging define
@@ -30,9 +32,6 @@
 //#ifdef DTEST
 //@package com.substanceofcode.rssreader.businessentities;
 //@
-//@import com.substanceofcode.utils.Base64;
-//@import com.substanceofcode.utils.StringUtil;
-//@import java.io.UnsupportedEncodingException;
 //@import java.util.Date;
 //@
 //@/**
@@ -76,10 +75,8 @@
 //@	  */
 //@    String serialize();
 //@		
-	//#ifdef DTEST
 //@	/* Compare item. */
 //@	boolean equals(RssItemInfo item);
-	//#endif
 //@
 //@    void setUnreadItem(boolean unreadItem);
 //@
@@ -88,6 +85,8 @@
 //@    void setEnclosure(String enclosure);
 //@
 //@    String getEnclosure();
+//@
+//@    String toString();
 //@
 //@}
 //#endif
