@@ -23,6 +23,9 @@
  */
 /*
  * IB 2010-03-14 1.11.5RC2 Log m_same to help look at conditional get.
+ * IB 2010-03-14 1.11.4RC2 Use absolute address for redirects.
+ * IB 2010-03-14 1.11.5RC2 Use convenience method for encoding.
+ * IB 2010-05-27 1.11.5RC2 If write to jar file, give error.
 */
 
 // Expand to define MIDP define
@@ -56,7 +59,8 @@ import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
 import net.sf.jlogmicro.util.logging.Level;
 //#endif
-import com.substanceofcode.utils.Base64;
+import com.substanceofcode.utils.MiscUtil;
+import com.substanceofcode.utils.HTMLParser;
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.CauseException;
 
@@ -126,6 +130,9 @@ public class URLHandler {
 				m_inputStream = m_ic.openInputStream();
 				//#endif
 			} else if (url.startsWith("jar://")) {
+				if (writePost) {
+					throw new IOException("Not allowed to write to jar file jar:  " + url);
+				}
 				// If testing, allow opening of files in the jar.
 				m_inputStream = super.getClass().getResourceAsStream( url.substring(6));
 				if (m_inputStream == null) {
@@ -174,9 +181,8 @@ public class URLHandler {
 					 *     Authorization: Basic QWRtaW46Zm9vYmFy
 					 */
 					String userPass;
-					Base64 b64 = new Base64();
 					userPass = username + ":" + password;
-					userPass = b64.encode(userPass.getBytes());
+					userPass = MiscUtil.encodeStr(userPass);
 					m_hc.setRequestProperty("Authorization", "Basic " + userPass);
 				}            
 				int respCode = m_hc.getResponseCode();
@@ -228,6 +234,13 @@ public class URLHandler {
 					 ((respCode == HttpConnection.HTTP_OK) &&
 					  respMsg.equals("Moved Temporarily"))) && 
 					 (m_location != null)) {
+					try {
+						m_location = HTMLParser.getAbsoluteUrl(url, m_location);
+					} catch (IllegalArgumentException e) {
+						throw new CauseException(
+								"Error while parsing RSS redirect data: " +
+								url, e);
+					}
 					m_needRedirect = true;
 					return;
 				}
