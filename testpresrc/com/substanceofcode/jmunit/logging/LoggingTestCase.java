@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-04-05 1.11.5RC1 Log loading of test case.
+*/
 
 // Expand to define test define
 @DTESTDEF@
@@ -55,7 +58,9 @@ abstract public class LoggingTestCase extends TestCase {
 	//#ifdef DLOGGING
     protected Logger logger;
     protected boolean fineLoggable;
+    protected boolean finerLoggable;
     protected boolean finestLoggable;
+    protected boolean traceLoggable;
     protected LoggerRptForm debugForm = null;
 	//#endif
 
@@ -67,8 +72,12 @@ abstract public class LoggingTestCase extends TestCase {
 		logger = Logger.getLogger(name);
 		fineLoggable = logger.isLoggable(Level.FINE);
 		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+		finerLoggable = logger.isLoggable(Level.FINER);
+		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
 		finestLoggable = logger.isLoggable(Level.FINEST);
 		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+		traceLoggable = logger.isLoggable(Level.TRACE);
+		logger.fine("obj,traceLoggable=" + this + "," + traceLoggable);
 		for (Enumeration eHandlers = logger.getParent().getHandlers().elements();
 				eHandlers.hasMoreElements();) {
 			Object ohandler = eHandlers.nextElement();
@@ -79,6 +88,7 @@ abstract public class LoggingTestCase extends TestCase {
 		}
 		debugForm = new LoggerRptForm(logManager, this,
 					null, "net.sf.jlogmicro.util.logging.FormHandler");
+		logger.info("Loading test case,nbr cases=" + name + "," + nbr);
 		//#endif
 	}
 
