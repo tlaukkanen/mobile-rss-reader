@@ -323,12 +323,30 @@ v1.11.5 Release Candidate 1 (rc1) (Mar 9th 2010)
 + Add labels to all artifacts.
 
 v1.11.5 Release Candidate 2 (rc2) (Mar 14th 2010)
++ Convert M-dash to '-'.
++ Fixed problem with end tags not recognized if spaces are inside.
++ Fix problem with redirects not working if they have relative addressing.
++ Allow line by line parser import to recognise Byte Order Mark (BOM).
 + Fixed problem with conditional get.
 + Fix previous page for loading screen from bookmarks and from header list.
 + Cosmetic but not execution code changes.
 + Minor stack save for smart phone version for html link for the feed.
 + Synchronize use of opening or updating the feed.
 + Fix and add logging.
++ Remove classes to save memory.
++ Ignore comments to allow more XML to parse successfully.
++ Replace SortUtil with LGPL code to allow adding of LGPL license.
++ Unit test additions and changes for better testing.
++ Better diagnostics.
++ Warn if 0 feeds in import.
++ Optionally use feed URL as feed name if not found in import file.
++ Ignore contents within block tag for podcast.
++ For line by line, remove control characters beginning and ending of text to prevent blank lines at beginning or end from being processed.  This prevents a line at the beginning or end which is what comes before/after the final line feed or carriage return.
++ Log instead of out.println in OpmlParser.
++ Only do export of file if signed.
++ Optionally use feed title for feed name or feed link for line by line parser.
++ Skip blank lines in line by line parser.
++ Give error if run out of data before finding anything in import file.
 
 Device issues:
 
@@ -337,12 +355,14 @@ Device issues:
 
 Program issues:
 
-- While the program will not hang if there is a network problem when opening a bookmark/feed, it can hang if update, update modifyed, update all, or update modified all.  These other situations will be resolved in another release (TBD).
+- While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
 - Update if modified only works on sites that use GMT for the modified date.
 - Partial fix for using findbugs.
 
 TODO:
 
+- Optionally keep the back light on with desired intensity.
+- Optionally flash the backlight for a specific duration when update all is complete.
 - Check if need to set to itunes feed if not in header, but in items.
 - Add some media fields.
 - Use decorator patteren for media fields.
