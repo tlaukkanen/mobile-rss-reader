@@ -1,0 +1,10 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-05-25 1.11.5RC2 Fix references to change 2 to 1.
+wtk.cldc.version = 1.0
+file.nbr.cldc = 10
+file.nbr.cldc1.0 = ${file.nbr.cldc}
+DCLDCVERS = DCLDC${file.nbr.cldc1.0}
+JCLDCVERS = CLDC-1.0
+file.prefix.cldc1.0 = cldc${file.nbr.cldc1.0}_
+bin.cldc1.0 = bin10
+SUFFIXVERS.cldc1.0 = -cldc1.0
