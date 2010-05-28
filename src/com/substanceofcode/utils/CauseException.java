@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-04-30 1.11.5RC2 Track thread info.
+ */
 
 package com.substanceofcode.utils;
 
@@ -28,19 +31,23 @@ public class CauseException extends Exception {
     
     private static final long serialVersionUID = 50L;
     private Throwable cause = null;
+    final private String threadInfo;
     private boolean causeSet = false;
 
     public CauseException() {
 		super();
+		threadInfo = MiscUtil.getThreadInfo(Thread.currentThread());
     }
 
     public CauseException(String message) {
 		super(message);
+		threadInfo = MiscUtil.getThreadInfo(Thread.currentThread());
 		causeSet = true;
     }
 
     public CauseException(String message, Throwable cause) {
 		super(message);
+		threadInfo = MiscUtil.getThreadInfo(Thread.currentThread());
 		this.cause = cause;
 		causeSet = true;
     }
@@ -53,6 +60,10 @@ public class CauseException extends Exception {
 
     public Throwable getCause() {
         return (cause);
+    }
+
+    public String getThreadInfo() {
+        return (threadInfo);
     }
 
 }
