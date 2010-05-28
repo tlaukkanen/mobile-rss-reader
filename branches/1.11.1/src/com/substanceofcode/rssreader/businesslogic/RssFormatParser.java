@@ -21,6 +21,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ */
 
 // Expand to define test define
 //#define DNOTEST
@@ -34,7 +37,7 @@ package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.XmlParser;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +57,7 @@ public class RssFormatParser implements FeedFormatParser {
 	static {
 		String[] timeZones = TimeZone.getAvailableIDs();
 		StringBuffer sb = new StringBuffer();
-		sb.append(StringUtil.join(timeZones, ",", 0));
+		sb.append(MiscUtil.join(timeZones, ",", 0));
 		sb.insert(0, "UTC,");
 		stimeZones = sb.toString();
 		GMT = (byte)stimeZones.indexOf(",GMT,");
@@ -275,7 +278,7 @@ public class RssFormatParser implements FeedFormatParser {
 			case 't':
 				if( elementName.equals("title") ) {
 					m_title = parser.getText();
-					m_title = StringUtil.removeHtml( m_title );
+					m_title = MiscUtil.removeHtml( m_title );
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_title=" + m_title);}
 					//#endif
@@ -285,7 +288,7 @@ public class RssFormatParser implements FeedFormatParser {
 			case 'd':
 				if( elementName.equals("description")) {
 					m_description = parser.getText();
-					m_description = StringUtil.removeHtml( m_description );
+					m_description = MiscUtil.removeHtml( m_description );
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_description=" + m_description);}
 					//#endif
@@ -295,7 +298,7 @@ public class RssFormatParser implements FeedFormatParser {
 			case 'l':
 				if( elementName.equals("link") ) {
 					m_link = parser.getText();
-					m_link = StringUtil.removeHtml( m_link );
+					m_link = MiscUtil.removeHtml( m_link );
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_link=" + m_link);}
 					//#endif
@@ -395,10 +398,10 @@ public class RssFormatParser implements FeedFormatParser {
 			int kc = 0;
             while ((dateString.indexOf("  ") >= 0) &&
 					(kc++ < dateString.length())) {
-				dateString = StringUtil.replace(dateString, "  ", " ");
+				dateString = MiscUtil.replace(dateString, "  ", " ");
 			}
 
-            String[] values = StringUtil.split(dateString, " ");
+            String[] values = MiscUtil.split(dateString, " ");
             int columnCount = values.length;
             if( columnCount==5 ) {
                 // Expected format:
@@ -448,7 +451,7 @@ public class RssFormatParser implements FeedFormatParser {
             }
             
             // Time
-            String[] timeValues = StringUtil.split(values[ timeIndex ],":");
+            String[] timeValues = MiscUtil.split(values[ timeIndex ],":");
             int hours = Integer.parseInt( timeValues[0] );
             int minutes = Integer.parseInt( timeValues[1] );
             int seconds = Integer.parseInt( timeValues[2] );
@@ -525,7 +528,7 @@ public class RssFormatParser implements FeedFormatParser {
 				dateString = dateString.substring(1);
 			}
             
-            String[] values = StringUtil.split(dateString, "-");
+            String[] values = MiscUtil.split(dateString, "-");
 
             if( values.length<3 ) {
                 throw new Exception("Invalid date format: " + dateString);
@@ -542,7 +545,7 @@ public class RssFormatParser implements FeedFormatParser {
             int dayOfMonth = Integer.parseInt( sdayOfMonth );
             
             String time = values[ dayOfMonthTimeIndex ].substring(3);
-            String [] timeValues = StringUtil.split(time, ":");
+            String [] timeValues = MiscUtil.split(time, ":");
 
             int hours = Integer.parseInt( timeValues[0] );
             int minutes = Integer.parseInt( timeValues[1] );
