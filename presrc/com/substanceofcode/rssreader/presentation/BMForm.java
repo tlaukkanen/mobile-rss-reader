@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-05-26 1.11.5RC2 Code cleanup.
+ */
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -51,8 +54,6 @@ import javax.microedition.lcdui.StringItem;
 // If using the test UI define the Test UI's
 import com.substanceofcode.testlcdui.ChoiceGroup;
 import com.substanceofcode.testlcdui.Form;
-import com.substanceofcode.testlcdui.List;
-import com.substanceofcode.testlcdui.TextBox;
 import com.substanceofcode.testlcdui.TextField;
 import com.substanceofcode.testlcdui.StringItem;
 //#endif
