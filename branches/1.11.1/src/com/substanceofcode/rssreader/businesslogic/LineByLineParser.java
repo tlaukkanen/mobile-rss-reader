@@ -19,13 +19,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-05-24 1.11.5RC2 Fix line by line parser to recognise Byte Order Mark (BOM).
+ * IB 2010-05-24 1.11.5RC2 Combine classes to save space.
+ * IB 2010-05-24 1.11.5RC2 Remove control characters beginning and ending of text to prevent blank lines at beginning or end from being processed.
+ * IB 2010-05-24 1.11.5RC2 More logging.
+ * IB 2010-05-24 1.11.5RC2 Optionally use feed title for feed name.
+*/
 
 // Expand to define logging define
 //#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.EncodingStreamReader;
+import com.substanceofcode.utils.MiscUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
@@ -45,6 +54,8 @@ public class LineByLineParser extends FeedListParser {
     
 	//#ifdef DLOGGING
 //@    private Logger m_logger = Logger.getLogger("LineByLineParser");
+//@    private boolean warningLoggable = m_logger.isLoggable(Level.WARNING);
+//@    private boolean fineLoggable = m_logger.isLoggable(Level.FINE);
 	//#endif
 
     /** Creates a new instance of LineByLineParser */
@@ -53,15 +64,31 @@ public class LineByLineParser extends FeedListParser {
     }
 
     public RssItunesFeed[] parseFeeds(InputStream is) {
+		return parseFeeds(new EncodingUtil(is));
+	}
+
+    public RssItunesFeed[] parseFeeds(EncodingUtil encodingUtil) {
         // Prepare buffer for input data
         StringBuffer inputBuffer = new StringBuffer();
+		EncodingStreamReader isr = encodingUtil.getEncodingStreamReader();
         
         // Read all data to buffer
         int inputCharacter;
         try {
-            while ((inputCharacter = is.read()) != -1) {
+			if ((inputCharacter = isr.read()) == -1) {
+				return new RssItunesFeed[0];
+			}
+			if (isr.isUtfDoc()) {
+				if (isr.isModBit16()) {
+					encodingUtil.getEncoding(isr.getFileEncoding(), "UTF-8");
+				} else {
+					encodingUtil.getEncoding(isr.getFileEncoding(), "UTF-16");
+				}
+			}
+            do {
                 inputBuffer.append((char)inputCharacter);
             }
+            while ((inputCharacter = isr.read()) != -1);
         } catch (IOException ex) {
 			//#ifdef DLOGGING
 //@			m_logger.severe("parseFeeds Could not read string.", ex);
@@ -71,8 +98,38 @@ public class LineByLineParser extends FeedListParser {
         
         // Split buffer string by each new line
         String text = inputBuffer.toString();
-        text = StringUtil.replace(text, "\r", "");
-        String[] lines = StringUtil.split(text, "\n");
+		if (isr.isUtfDoc()) {
+			try {
+				// We read the bytes in as ISO8859_1, so we must get them
+				// out as that and then encode as they should be.
+				if (isr.getFileEncoding().length() == 0) {
+					text = new String(inputBuffer.toString().getBytes(),
+									  encodingUtil.getDocEncoding());
+				} else {
+					text = new String(inputBuffer.toString().getBytes(
+								isr.getFileEncoding()),
+							encodingUtil.getDocEncoding());
+				}
+			} catch (IOException e) {
+				//#ifdef DLOGGING
+//@				m_logger.severe("parseFeeds Could not convert string from,to" + isr.getFileEncoding() + "," + encodingUtil.getDocEncoding(), e);
+				//#endif
+				System.out.println("parseFeeds Could not convert string " +
+						"from,to=" + isr.getFileEncoding() + "," +
+						encodingUtil.getDocEncoding() +
+						" " + e + " " + e.getMessage());
+				e.printStackTrace();
+				text = inputBuffer.toString();
+			}
+		} else {
+			text = inputBuffer.toString();
+		}
+		// Save memory
+		inputBuffer = null;
+        text = MiscUtil.replace(text.trim(), "\r", "");
+        String[] lines = MiscUtil.split(text, "\n");
+		// Save memory
+		text = null;
         
         RssItunesFeed[] feeds = new RssItunesFeed[ lines.length ];
         for(int lineIndex=0; lineIndex<lines.length; lineIndex++) {
@@ -83,10 +140,21 @@ public class LineByLineParser extends FeedListParser {
             if(indexOfSpace>0) {
                 name = line.substring(indexOfSpace+1);
                 url = line.substring(0, indexOfSpace);
+            } else if (line.length() == 0) {
+				//#ifdef DLOGGING
+//@				if (warningLoggable) {m_logger.warning("parseFeeds warning skipping blank line for url=" + m_url);}
+				//#endif
+				continue;
             } else {
-                name = line;
+                name = null;
                 url = line;
+				//#ifdef DLOGGING
+//@				if (warningLoggable) {m_logger.warning("parseFeeds warning null title for url=" + url);}
+				//#endif
             }
+			//#ifdef DLOGGING
+//@			if (fineLoggable) {m_logger.fine("parseFeeds name,url=" + name + "," + url);}
+			//#endif
 			if((( m_feedNameFilter != null) &&
 			  (name.toLowerCase().indexOf(m_feedNameFilter) < 0)) ||
 			  (( m_feedURLFilter != null) &&
