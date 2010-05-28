@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-05-24 1.11.5RC2 Add logging.
+ */
 
 // Expand to define test ui define
 @DTESTUIDEF@
@@ -46,7 +49,6 @@ import com.substanceofcode.testlcdui.TextField;
 import com.substanceofcode.testlcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
-import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.testutil.TestOutput;
 
 /**
@@ -64,6 +66,9 @@ public class TestLogUtil {
 			boolean dummyFineLoggable) {
 		if ((parmValue != null) && (thisValue != null)) {
 			if (parmValue.equals(thisValue)) {
+				//#ifdef DLOGGING
+				TestOutput.println("equals equal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());
+				//#endif
 				return true;
 			} else {
 				TestOutput.println("equals unequal " + thisLog + ",this=" + parmValue.toString() + "," + thisValue.toString());
