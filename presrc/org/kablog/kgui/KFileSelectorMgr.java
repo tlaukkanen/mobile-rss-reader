@@ -24,6 +24,7 @@
  */
 /*
  * IB 2010-03-21 1.11.5RC1 Remove KFileSelector to save memory. 
+ * IB 2010-04-30 1.11.5RC2 Track threads used.
 */
 
 // Expand to define MIDP define
@@ -41,6 +42,7 @@ import javax.microedition.midlet.MIDlet;
 
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.ImportFeedsForm;
+import com.substanceofcode.utils.MiscUtil;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -170,7 +172,7 @@ implements KViewParent
     	if (viewParent != null) {
 			viewParent.addDeferredAction(runny);
 		} else {
-			new Thread(runny).start();
+			MiscUtil.getThread(runny, "KFileSelectorMgr", this, "addDeferredAction").start();
 		}
     }
 
