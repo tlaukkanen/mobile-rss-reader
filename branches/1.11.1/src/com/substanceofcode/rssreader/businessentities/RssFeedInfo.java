@@ -22,10 +22,10 @@
 /*
  * IB 2010-03-07 1.11.4RC1 Use feed interface only for testing.
  * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.
+ * IB 2010-03-14 1.11.5RC2 Add toString to interface.
+ * IB 2010-03-14 1.11.5RC2 Code cleanup.
 */
 
-// Expand to define logging define
-//#define DNOLOGGING
 // Expand to define test define
 //#define DNOTEST
 //#ifdef DTEST
@@ -77,10 +77,8 @@
 //@	    are put into store string by RssItunesFeed.  */
 //@    String getStoreString(boolean serializeItems, boolean encoded);
 //@
-	//#ifdef DTEST
 //@	/** Compare feed to an existing feed.  **/
 //@	boolean equals(RssFeedInfo feed);
-	//#endif
 //@    
 //@    /** Return RSS feed items */
 //@    Vector getItems();
@@ -95,6 +93,8 @@
 //@    void setDate(Date date);
 //@
 //@    Date getDate();
+//@
+//@    String toString();
 //@
 //@}
 //#endif
