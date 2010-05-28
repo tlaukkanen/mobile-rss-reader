@@ -22,6 +22,8 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Fix testing code of explicit.
+ * IB 2010-03-07 1.11.4RC1 Use convenience method for encoding/decoding.
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
 */
 
 // Expand to define logging define
@@ -42,8 +44,7 @@
 //#endif
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Hashtable;
@@ -177,14 +178,7 @@ public class RssItunesItem extends RssItem
 	}
 
     public String serialize() {
-        String preData = unencodedSerialize();
-        Base64 b64 = new Base64();
-        String encodedSerializedData = null;
-		try {
-			encodedSerializedData = b64.encode( preData.getBytes("UTF-8") );
-		} catch (UnsupportedEncodingException e) {
-			encodedSerializedData = b64.encode( preData.getBytes() );
-		}
+        String encodedSerializedData = MiscUtil.encodeStr(unencodedSerialize());
 		return encodedSerializedData;
 	}
 		
@@ -193,7 +187,7 @@ public class RssItunesItem extends RssItem
 			
 		try {
 			boolean hasPipe = (data.indexOf((char)1) >= 0);
-			String[] nodes = StringUtil.split( data, "|");
+			String[] nodes = MiscUtil.split( data, "|");
 			RssItunesItem item = new RssItunesItem();
 			item.init(hasPipe, nodes);
 			return item;
@@ -207,15 +201,7 @@ public class RssItunesItem extends RssItem
 	/** Deserialize the object */
 	public static RssItem deserialize(String data) {
 		try {
-			// Base64 decode
-			Base64 b64 = new Base64();
-			byte[] decodedData = b64.decode(data);
-			try {
-				data = new String( decodedData, "UTF-8" );
-			} catch (UnsupportedEncodingException e) {
-				data = new String( decodedData );
-			}
-			return unencodedDeserialize(data);
+			return unencodedDeserialize(MiscUtil.decodeStr(data));
         } catch(Exception e) {
             System.err.println("Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
@@ -282,11 +268,13 @@ public class RssItunesItem extends RssItem
     }
 
     /** Write record as a string */
-    public String toString(){
-        String storeString = m_itunes + "|" + m_author + "|" + m_subtitle + "|" +
-			m_summary + "|" + + (int)m_explicit + super.toString();
-        return storeString;
-    }
+	//#ifdef DTEST
+//@    public String toString() {
+//@        String storeString = m_itunes + "|" + m_author + "|" + m_subtitle + "|" +
+//@			m_summary + "|" + + (int)m_explicit + super.toString();
+//@        return storeString;
+//@    }
+	//#endif
 
     public void setAuthor(String m_author) {
         this.m_author = m_author;
