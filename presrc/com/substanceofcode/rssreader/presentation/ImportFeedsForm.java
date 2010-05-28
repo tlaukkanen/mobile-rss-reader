@@ -23,6 +23,11 @@
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.  Prevent override message from causing hang on import feeds.
  * IB 2010-03-14 1.11.5RC1 Use htmlUrl which is link tag in feed for OPML.  This happens for Google reader.
  * IB 2010-03-14 1.11.5RC1 Code cleanup.
+ * IB 2010-05-24 1.11.5RC2 Optionally use feed URL as feed name if not found in import file.
+ * IB 2010-05-24 1.11.5RC2 Give warning if no feeds found in import.
+ * IB 2010-05-24 1.11.5RC2 Change out.println to log instead.
+ * IB 2010-05-24 1.11.5RC2 Only do export if signed.
+ * IB 2010-05-27 1.11.5RC2 Modified code to write OPML file using OpmlParser.
 */
 // FIX check for blank url
 
@@ -32,6 +37,8 @@
 @DJSR75@
 // Expand to define itunes define
 @DITUNESDEF@
+// Expand to define signed define
+@DSIGNEDDEF@
 // Expand to define logging define
 @DLOGDEF@
 // Expand to define test ui define
@@ -60,14 +67,11 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.TextField;
-import javax.microedition.lcdui.StringItem;
 //#else
 // If using the test UI define the Test UI's
 import com.substanceofcode.testlcdui.ChoiceGroup;
 import com.substanceofcode.testlcdui.Form;
-import com.substanceofcode.testlcdui.List;
 import com.substanceofcode.testlcdui.TextField;
-import com.substanceofcode.testlcdui.StringItem;
 //#endif
 import javax.microedition.lcdui.Item;
 
@@ -157,11 +161,13 @@ implements
 						"Append import", "Append end import");
 			formats = new String[] {"OPML", "line by line", "HTML OPML Auto link",
 								"HTML RSS Auto links", "HTML Links"};
+			//#ifdef DSIGNED
 		} else {
 			super.initUrlUI(url, true,
 					"Are you sure you want to export?  \r\n" +
 					"This can cause endless prompts on some phones.", 1);
 			formats = new String[] {"OPML", "line by line"};
+			//#endif
 		}
 		m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
 
@@ -175,7 +181,8 @@ implements
 			
 			String[] titleInfo =
 					{"Skip feed with missing title",
-					 "Get missing titles from feed"};
+					 "Get missing titles from feed",
+					 "Use link for missing title"};
 			m_importTitleGroup  = new ChoiceGroup("Missing title (optionl)",
 					ChoiceGroup.EXCLUSIVE, titleInfo, null);
 			super.append(m_importTitleGroup);
@@ -281,6 +288,7 @@ implements
 		super.execute();
 
 		//This (OK) happens only for export.  Import has insert/add/append
+		//#ifdef DSIGNED
 		//#ifdef DJSR75
 		if (m_ok) {
 			m_ok = false;
@@ -308,9 +316,7 @@ implements
 				}
 				int selectedImportType = m_importFormatGroup.getSelectedIndex();
 				if (selectedImportType == 0) {
-					sb.append("<opml version=\"1.0\">\n<head>\n" +
-							"<title>Rss Reader subscriptions</title>\n" +
-							"</head>\n<body>\n");
+					sb.append(OpmlParser.getOpmlBegin());
 				}
 				// Line by line is URL followed by name
 				final int blen = m_bookmarkList.size();
@@ -318,26 +324,17 @@ implements
 					final RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
 							m_bookmarkList.getString(i));
 					if (selectedImportType == 0) {
-						sb.append("<outline title=" + feed.getName() +
-							" text=" + feed.getName() + ">\n" +
-						"    <outline text=\"" + feed.getName() +
-							"\" title=" + feed.getName() + "\" type=\"rss\"\n" +
-						"xmlUrl=\"" + feed.getUrl() + "\" " +
-						//#ifdef DITUNES
-						"htmlUrl='\"" +
-						feed.getLink() +
-						"\"" +
-						//#endif
-						"/>\n</outline>\n");
+						sb.append(OpmlParser.getOpmlLine(feed));
 					} else {
 						sb.append(feed.getUrl() + " " + feed.getName());
 					}
 				}
 				if (selectedImportType == 0) {
-					sb.append("<body>\n</opml>\n");
+					sb.append(OpmlParser.getOpmlEnd());
 				}
 				//#ifdef DLOGGING
 				if (m_finestLoggable) {m_logger.finest("Export sb.length()=" + sb.length());}
+				if (m_finestLoggable) {m_logger.finest("Export sb=" + sb.toString());}
 				//#endif
 				osw.write(sb.toString());
 				Item[] items = getItemFields();
@@ -369,6 +366,7 @@ implements
 			}
 		}
 		//#endif
+		//#endif
 
 		// Add feeds from import.
 
@@ -388,9 +386,10 @@ implements
 				String username = m_UrlUsername.getString();
 				String password = m_UrlPassword.getString();
 				boolean getFeedTitleList = m_importTitleGroup.isSelected(1);
+				boolean useFeedUrlList = m_importTitleGroup.isSelected(2);
 				m_override = m_importOvrGroup.isSelected(1);
 				//#ifdef DLOGGING
-				if (m_finestLoggable) {m_logger.finest("getFeedTitleList=" + getFeedTitleList);}
+				if (m_finestLoggable) {m_logger.finest("getFeedTitleList,useFeedUrlList=" + getFeedTitleList + "," + useFeedUrlList);}
 				if (m_finestLoggable) {m_logger.finest("selectedImportType=" + selectedImportType);}
 				//#endif
 				
@@ -425,6 +424,7 @@ implements
 						break;
 				}
 				clistParser.setGetFeedTitleList(getFeedTitleList);
+				clistParser.setUseFeedUrlList(useFeedUrlList);
 				clistParser.setLoadForm(m_loadForm);
 				clistParser.setMaxItemCount(
 						m_appSettings.getMaximumItemCountInFeed());
@@ -539,20 +539,27 @@ implements
 			int maxItemCount, boolean override, Hashtable rssFeeds,
 			FeatureList bookmarkList, RssReaderMIDlet.LoadingForm loadForm)
 	throws CauseException, Exception {
-		// Feed list parsing is ready
-		System.out.println("Feed list parsing is ready");
 		//#ifdef DLOGGING
 		Logger logger = Logger.getLogger("ImportFeedsForm");
+		// Feed list parsing is ready
+		logger.info("Feed list parsing is ready");
 		logger.finest("addFeedLists rssFeeds=" + rssFeeds);
 		//#endif
 		if(!listParser.isSuccessfull()) {
 			throw listParser.getEx();
 		}
 		RssItunesFeed[] feeds = listParser.getFeeds();
+		if (feeds.length == 0) {
+			loadForm.appendNote(
+					"No feeds found in file or file does not match requested " +
+					"format URL:" + listParser.getUrl());
+		}
 		for(int feedIndex=0; feedIndex<feeds.length; feedIndex++) {
 			String name = feeds[feedIndex].getName();
 			//#ifdef DTEST
-			System.out.println("Adding: " + name);
+			//#ifdef DLOGGING
+			logger.info("Adding: " + name);
+			//#endif
 			//#endif
 			if((name != null) && (name.length()>0)) {
 				final boolean pres = rssFeeds.containsKey( name );
