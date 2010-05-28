@@ -1,0 +1,9 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+wtk.optionalpda.enabled = true
+DJSR75 = DJSR75
+file.prefix.jsr75 = jsr75_
+PERMISSIONS.jsr75 = ,javax.microedition.io.Connector.file.read,javax.microedition.io.HttpsConnection,javax.microedition.io.Connector.file.write
+SUFFIXVERS.jsr75 = -jsr75
+lib.jsr75 = :${wtk.home}/lib/jsr75.jar
+nojsr75.res.excludes =
+jsr75 = JSR-75
