@@ -21,7 +21,11 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-03-07 1.11.4RC1 Recognize style sheet, and DOCTYPE and treat properly.
  * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.  Don't set updated and etag if the updated and etag match since the values are not retrieved if it matches.  Use string for updated date (last-modified).
+ * IB 2010-04-30 1.11.5RC2 Track threads used.
+ * IB 2010-05-26 1.11.5RC2 Give error if run out of data before finding anything.
 */
 
 // Expand to define MIDP define
@@ -36,14 +40,13 @@ package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.XmlParser;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
 
-import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.CauseException;
 //#ifdef DMIDP20
 import net.eiroca.j2me.observable.Observable;
@@ -105,13 +108,10 @@ implements
 		m_updFeed = updFeed;
 		m_maxItemCount = maxItemCount;
 		observerMgr = new ObserverManager(this);
-		//#ifdef DCLDCV11
-        m_parsingThread = new Thread(this, "RssFeedParser");
-		//#else
-        m_parsingThread = new Thread(this);
-		//#endif
+        m_parsingThread = MiscUtil.getThread(this, "RssFeedParser", this,
+				"makeObserable");
 		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("Thread created=" + m_parsingThread);}
+		if (fineLoggable) {logger.fine("Thread created=" + MiscUtil.getThreadInfo(m_parsingThread));}
 		//#endif
     }
 	//#endif
@@ -215,12 +215,13 @@ implements
 								     int maxItemCount)
     throws IOException, Exception {
 		if (++m_redirects >= MAX_REDIRECTS) {
-			//#ifdef DLOGGING
-			logger.severe("Error redirect url:  " + url);
-			//#endif
-			System.out.println("Error redirect url:  " + url);
-			throw new IOException("Error url " + m_redirectUrl +
+            IOException ioe = new IOException("Error url " + m_redirectUrl +
 					" to redirect url:  " + url);
+			//#ifdef DLOGGING
+			logger.severe(ioe.getMessage(), ioe);
+			//#endif
+			System.out.println(ioe.getMessage());
+			throw ioe;
 		}
 		m_redirectUrl = url;
 		parseRssFeedUrl(url, updFeed, maxItemCount);
@@ -248,11 +249,23 @@ implements
         
         /** <?xml...*/
         int parsingResult = parser.parse();
-		/** if prologue was found, parse after prologue.  **/
-		if (parsingResult == XmlParser.PROLOGUE) {
-			parser.parse();
+		/** if prologue, DOCTYPE, or STYLESHEET was found, parse after them.  **/
+		while ((parsingResult == XmlParser.PROLOGUE) ||
+				(parsingResult == XmlParser.DOCTYPE) ||
+				(parsingResult == XmlParser.STYLESHEET)) {
+			parsingResult = parser.parse();
 		}
         
+		if (parsingResult == XmlParser.END_DOCUMENT) {
+            IOException ioe = new IOException(
+					"Unable to parse feed. Feed has no data.");
+			//#ifdef DLOGGING
+			logger.severe(ioe.getMessage(), ioe);
+			//#endif
+            /** Unknown feed */
+            throw ioe;
+            
+        }
         FeedFormatParser formatParser = null;
         String entryElementName = parser.getName();
         if(entryElementName.equals("rss") || 
@@ -289,7 +302,7 @@ implements
     public void run() {
         try {
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("Thread running=" + this);}
+			if (fineLoggable) {logger.fine("Thread running=" + MiscUtil.getThreadInfo(m_parsingThread));}
 			//#endif
 			parseRssFeed(m_updFeed, m_maxItemCount);
         } catch( IOException ex ) {
@@ -331,6 +344,9 @@ implements
 			m_ex = new CauseException("Internal error while parsing feed " +
 									  m_rssFeed.getUrl(), t);
         } finally {
+			if (m_parsingThread != null) {
+				MiscUtil.removeThread(m_parsingThread);
+			}
 			if (m_midlet != null) {
 				m_midlet.wakeup(2);
 			}
