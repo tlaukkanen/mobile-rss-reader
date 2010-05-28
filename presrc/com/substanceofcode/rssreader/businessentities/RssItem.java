@@ -19,6 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-04-30 1.11.5RC2 Combine classes.
+ * IB 2010-04-30 1.11.5RC2 Use method to encode/decode.
+ */
 
 // Expand to define logging define
 @DLOGDEF@
@@ -36,8 +40,7 @@
 //#endif
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
@@ -172,14 +175,7 @@ public class RssItem
 	  that no fields were added to make it capable/enabled
 	  */
     public String serialize() {
-        String preData = unencodedSerialize();
-        Base64 b64 = new Base64();
-        String encodedSerializedData = null;
-		try {
-			encodedSerializedData = b64.encode( preData.getBytes("UTF-8") );
-		} catch (UnsupportedEncodingException e) {
-			encodedSerializedData = b64.encode( preData.getBytes() );
-		}
+        String encodedSerializedData = MiscUtil.encodeStr(unencodedSerialize());
 		return encodedSerializedData;
 	}
 		
@@ -242,7 +238,7 @@ public class RssItem
 			// If description has '|', we need to join.
 			int DESC = 5;
 			if (DESC + startIndex < (nodes.length - 1)) {
-				m_desc = StringUtil.join(nodes, "|", startIndex + DESC);
+				m_desc = MiscUtil.join(nodes, "|", startIndex + DESC);
 			} else {
 				m_desc = nodes[startIndex + DESC];
 			}
@@ -256,15 +252,8 @@ public class RssItem
 	/** Deserialize the object **/
 	public static RssItem deserialize(String encodedData) {
 		try {
-			// Base64 decode
-			Base64 b64 = new Base64();
-			byte[] decodedData = b64.decode(encodedData);
-			String data;
-			try {
-				data = new String( decodedData, "UTF-8" );
-			} catch (UnsupportedEncodingException e) {
-				data = new String( decodedData );
-			}
+			// Base 64 decode
+			String data = MiscUtil.decodeStr(encodedData);
 			return unencodedDeserialize(data);
         } catch(Exception e) {
             System.err.println("Error while rssitem deserialize : " + e.toString());
@@ -281,7 +270,7 @@ public class RssItem
 		RssItem item = new RssItem();
 		try {
 			boolean hasPipe = (data.indexOf('\n') >= 0);
-			String[] nodes = StringUtil.split( data, "|");
+			String[] nodes = MiscUtil.split( data, "|");
 			item.init(0, false, hasPipe, nodes);
 			return item;
 			
@@ -346,10 +335,12 @@ public class RssItem
     }
 
     /** convert the object to string */
+	//#ifdef DTEST
     public String toString() {
         String preData = m_title + "|" + m_link + "|" + m_date + "|" +
 			    m_enclosure + "|" + m_unreadItem + "|" + m_desc;
 		return (preData);
 	}
+	//#endif
     
 }
