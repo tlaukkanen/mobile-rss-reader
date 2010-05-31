@@ -22,6 +22,8 @@
  */
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
+ * IB 2010-05-29 1.11.5RC2 Fix equals to use interface.
+ * IB 2010-05-29 1.11.5RC2 Check explicit with toLowerCase().
  */
 
 // Expand to define itunes define
@@ -288,7 +290,7 @@ implements RssItunesFeedInfo
     }
 
 	/** Compare feed to an existing feed.  **/
-	public boolean equals(RssFeed pfeed)
+	public boolean equals(RssFeedInfo pfeed)
 	{
 		boolean result = true;
 		if (!super.equals(pfeed)) {
@@ -327,8 +329,8 @@ implements RssItunesFeedInfo
 			"m_summary", logger, fineLoggable)) {
 			result = false;
 		}
-		if (!TestLogUtil.fieldEquals(feed.getExplicit(),
-					RssItunesItem.convExplicit(m_explicit),
+		if (!TestLogUtil.fieldEquals(feed.getExplicit().toLowerCase(),
+					RssItunesItem.convExplicit(m_explicit).toLowerCase(),
 			"m_explicit", logger, fineLoggable)) {
 			result = false;
 		}
