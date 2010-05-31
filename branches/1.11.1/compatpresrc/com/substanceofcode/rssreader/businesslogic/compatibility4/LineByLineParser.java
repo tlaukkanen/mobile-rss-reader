@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-05-24 1.11.5RC2 Test compatibility LineByLineParser.
+ * IB 2010-05-24 1.11.5RC2 Put compatibility4 in getLogger.
  */
 
 // Expand to define logging define
@@ -48,7 +49,7 @@ import net.sf.jlogmicro.util.logging.Level;
 public class LineByLineParser extends FeedListParser {
     
 	//#ifdef DLOGGING
-    private Logger m_logger = Logger.getLogger("LineByLineParser");
+    private Logger m_logger = Logger.getLogger("compatibility4.LineByLineParser");
 	//#endif
 
     /** Creates a new instance of LineByLineParser */
