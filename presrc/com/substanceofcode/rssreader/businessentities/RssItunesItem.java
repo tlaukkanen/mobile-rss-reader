@@ -24,6 +24,7 @@
  * IB 2010-03-07 1.11.4RC1 Fix testing code of explicit.
  * IB 2010-03-07 1.11.4RC1 Use convenience method for encoding/decoding.
  * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-05-30 1.11.4RC2 Use RssItemInfo for equals.
 */
 
 // Expand to define logging define
@@ -365,9 +366,9 @@ implements RssItunesItemInfo
 	/* Compare item. */
 	//#ifdef HAS_EQUALS
 	//#ifdef DJMTEST
-	public boolean equals(RssItunesItemInfo pitem)
+	public boolean equals(RssItemInfo pitem)
 	//#else
-	public boolean equals(RssItunesItem pitem)
+	public boolean equals(RssItem pitem)
 	//#endif
 	{
 		boolean result = true;
