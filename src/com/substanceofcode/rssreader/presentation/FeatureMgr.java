@@ -27,6 +27,7 @@
  * IB 2010-05-24 1.11.5RC2 Convience method for logging UI command.
  * IB 2010-05-24 1.11.5RC2 Convience method for logging UI item.
  * IB 2010-05-24 1.11.5RC2 Use null for nullCmd.
+ * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
 */
 
 // Expand to define MIDP define
@@ -74,7 +75,9 @@ import javax.microedition.lcdui.TextField;
 //#endif
 
 import com.substanceofcode.utils.MiscUtil;
+//#ifdef DMIDP20
 import com.substanceofcode.utils.CmdReceiver;
+//#endif
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 
 //#ifdef DLOGGING
@@ -86,7 +89,12 @@ import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 /* Form with optional commands added with addPromptCommand which if
    used, will give prompt message with OK/Cancel. */
 
-public class FeatureMgr implements CommandListener, CmdReceiver, Runnable {
+public class FeatureMgr implements CommandListener,
+	   Runnable
+		//#ifdef DMIDP20
+	   ,CmdReceiver
+		//#endif
+{
 
 	private Hashtable promptCommands = null;
 	private Displayable disp;
@@ -354,9 +362,11 @@ public class FeatureMgr implements CommandListener, CmdReceiver, Runnable {
 				}
 			} while (background);
 		} finally {
+			//#ifdef DMIDP20
 			if (procThread != null) {
 				MiscUtil.removeThread(procThread);
 			}
+			//#endif
 		}
 	}
 
@@ -374,9 +384,11 @@ public class FeatureMgr implements CommandListener, CmdReceiver, Runnable {
 
 	public void startWakeup(boolean wakeupThread) {
 		if ( (procThread == null) || !procThread.isAlive() ) {
+			//#ifdef DMIDP20
 			if (procThread != null) {
 				MiscUtil.removeThread(procThread);
 			}
+			//#endif
 			try {
 				procThread = MiscUtil.getThread(this, disp.getClass().getName(),
 						this, "startWakeup");
@@ -592,6 +604,7 @@ public class FeatureMgr implements CommandListener, CmdReceiver, Runnable {
 		}
 	}
 
+	//#ifdef DMIDP20
 	public Object[] action(Object[] reqs) {
 		if ((reqs.length == 2) && (reqs[0] instanceof Short) &&
 			((Short)reqs[0] == MiscUtil.SPAUSE_APP)) {
@@ -605,6 +618,7 @@ public class FeatureMgr implements CommandListener, CmdReceiver, Runnable {
 			return null;
 		}
 	}
+	//#endif
 
 	/* Store current values. */
 	final static public byte[] storeValues(Item[] items) {
