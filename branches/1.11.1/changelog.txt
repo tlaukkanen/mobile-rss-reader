@@ -350,6 +350,8 @@ v1.11.5 Release Candidate 2 (rc2) (May 24th 2010)
 - Ignore comments to allow more XML to parse successfully.
   - Change REDIRECT_URL to be after the last XmlParser token.
 - Replace SortUtil with LGPL code to allow adding of LGPL license.
+- Fix and add logging.
+- Cosmetic but not execution code changes.
 - Use BaseTestCase to log start of test.
 - Test ParserSuite and UtilitySuite.
 - Move compatibility tests to compatibility packages.
@@ -381,6 +383,8 @@ v1.11.5 Release Candidate 2 (rc2) (May 24th 2010)
 - For line by line, remove control characters beginning and ending of text to prevent blank lines at beginning or end from being processed.  This prevents a line at the beginning or end which is what comes before/after the final line feed or carriage return.
 - Only do export of file if signed.
 - Log instead of out.println in OpmlParser.
+- Unit test additions and changes for better testing.
+- Better diagnostics.
 - Optionally use feed title for feed name or feed link for line by line parser.
 - Give error if run out of data before finding anything in import file.
 - Skip blank lines in line by line parser.
@@ -399,6 +403,16 @@ Program issues:
 
 - While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
 - Partial fix for using findbugs.
+- Make input file for sftp for sites that allow upload with sftp, sourceforge.net and yinlight.net.
+- Put all resource files in src/main/resources.
+- Change order of uploads for zips so that regular bin zip is last so that it will be at the top of the list.
+- Partial fix for using findbugs.
+- Update OPML from links.html to get more tests.
+- Do comparison tests from OPML files since for MIDP 1.0 small memory, we don't have HTML based classes.
+- Don't use HTML in small memory MIDP 1.0 to save space.
+- Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+- Fix MIDP 1.0 parsing.
+- Check for html, htm, shtml, and shtm suffixes.
 
 TODO:
 
