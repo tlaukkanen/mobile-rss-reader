@@ -28,6 +28,9 @@
  * IB 2010-04-30 1.11.5RC2 Fixed problem with end tags not recognized if spaces are inside.
  * IB 2010-04-30 1.11.5RC2 Free up memory from string when getting text.
  * IB 2010-04-30 1.11.5RC2 Recognize CDATA, style sheet, and DOCTYPE and treat properly.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+ * IB 2010-05-29 1.11.5RC2 Allow multiple meta statements.
+ * IB 2010-05-29 1.11.5RC2 Reprocess PROLOGUE if we find it again.
 */
 
 // Expand to define testing define
@@ -116,6 +119,31 @@ public class XmlParser {
 		m_inputStream = m_encodingStreamReader.getInputStream();
     }
 
+  /**
+   * Process the prologue.  Set encoding.
+   *
+   * @return    int
+   * @author Irv Bunton
+   */
+	private int procPrologue() {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("procPrologue m_currentElementData.length(),m_currentElementData=" + m_currentElementData.length() + "," + m_currentElementData);}
+		//#endif
+		String cencoding = getAttributeValue("encoding");
+		if (cencoding == null) {
+			//#ifdef DLOGGING
+//@			if (finestLoggable) {logger.finest("parseStream Prologue cencoding,m_defEncoding=" + cencoding + "," + m_defEncoding);}
+			//#endif
+			cencoding = m_defEncoding;
+		}
+		m_encodingUtil.getEncoding(m_fileEncoding,
+				cencoding);
+		// Get doc encoding.  The encoding to translate
+		// the bytes into.
+		m_docEncoding = m_encodingUtil.getDocEncoding();
+		return PROLOGUE;
+	}
+
     /** Parse next element */
     protected int parseStream(InputStreamReader is) throws IOException {
 		
@@ -188,25 +216,7 @@ public class XmlParser {
 										case PROLOGUE:
 											if (m_getPrologue) {
 												m_getPrologue = false;
-												//#ifdef DLOGGING
-//@												if (finestLoggable) {logger.finest("parseStream m_currentElementData.length(),m_currentElementData=" + m_currentElementData.length() + "," + m_currentElementData);}
-												//#endif
-												String cencoding = getAttributeValue("encoding");
-												if (cencoding == null) {
-													//#ifdef DLOGGING
-//@													if (finestLoggable) {logger.finest("parseStream Prologue cencoding,m_defEncoding=" + cencoding + "," + m_defEncoding);}
-													//#endif
-													cencoding = m_defEncoding;
-												}
-												m_encodingUtil.getEncoding(m_fileEncoding,
-														cencoding);
-												// Get doc encoding.  The encoding to translate
-												// the bytes into.
-												m_docEncoding = m_encodingUtil.getDocEncoding();
-												//#ifdef DLOGGING
-//@												if (traceLoggable) {logger.trace("parseStream block 1 ? PROLOGUE c,m_currentElementData=" + c + "," + m_currentElementData.toString());}
-												//#endif
-												return PROLOGUE;
+												return procPrologue();
 											}
 											break;
 										default:
@@ -816,6 +826,31 @@ public class XmlParser {
 		}
     }
     
+  /**
+   * Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+   *
+   * @return    int
+   * @author Irv Bunton
+   */
+	public int parseXmlElement() throws IOException {
+        int parsingResult;
+		if (((parsingResult = parse()) == ELEMENT) &&
+			getName().equals("link")) {
+			while (((parsingResult = parse()) == ELEMENT) &&
+				getName().equals("meta")) {
+			}
+		}
+		while ((parsingResult == XmlParser.PROLOGUE) ||
+				(parsingResult == XmlParser.DOCTYPE) ||
+				(parsingResult == XmlParser.STYLESHEET)) {
+			if (parsingResult == XmlParser.PROLOGUE) {
+				procPrologue();
+			}
+			parsingResult = parse();
+		}
+		return parsingResult;
+	}
+
     /** 
      * Get namesapces.  Return two dimension array with the first column
 	 * the namespace and the second on the URL for the namespace.
