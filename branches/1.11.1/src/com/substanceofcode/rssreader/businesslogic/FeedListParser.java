@@ -24,19 +24,27 @@
  * IB 2010-04-30 1.11.5RC2 Track threads used.
  * IB 2010-05-24 1.11.5RC2 Optionally use feed URL as feed name if not found in import file.
  * IB 2010-05-25 1.11.5RC2 Give error if import file is empty/invalid.
+ * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser, HTMLLinkParser, and HTMLAutoLinkParser in small memory MIDP 1.0 to save space.
+ * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
 */
 // Expand to define MIDP define
 //#define DMIDP20
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define test define
 //#define DNOTEST
 // Expand to define logging define
 //#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
-import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+//#ifndef DSMALLMEM
+import com.substanceofcode.utils.HTMLParser;
+//#endif
 import com.substanceofcode.utils.CauseException;
 //#ifdef DMIDP20
 import net.eiroca.j2me.observable.Observable;
@@ -74,7 +82,9 @@ implements
 	protected boolean m_getFeedTitleList = false;
 	protected boolean m_useFeedUrlList = false;
 
+	//#ifndef DSMALLMEM
 	protected boolean m_redirectHtml = false;
+	//#endif
 	protected RssItunesFeed[] m_feeds;
     private boolean m_successfull = false;
     private CauseException m_ex = null;
@@ -205,7 +215,9 @@ implements
 			m_ex = new CauseException("Internal error while parsing feed " +
 									  m_url, t);
         } finally {
+			//#ifdef DMIDP20
 			MiscUtil.removeThread(m_parsingThread);
+			//#endif
 			//#ifdef DLOGGING
 //@			if (m_ex != null) {
 //@				logger.severe("run parse " + m_ex.getMessage(), m_ex);
@@ -232,16 +244,19 @@ implements
 				return m_feeds;
 			}
 
+			//#ifndef DSMALLMEM
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("m_redirectHtml=" + m_redirectHtml);}
 			//#endif
 			// If we find HTML, usually it is redirection
-			if (m_redirectHtml && (m_contentType != null) &&
-					(m_contentType.indexOf("html") >= 0)) {
+			if (m_redirectHtml && HTMLParser.isHtml(m_contentType)) {
 				return parseHTMLRedirect();
 			} else {
+			//#endif
 				return parseFeeds(m_inputStream);
+			//#ifndef DSMALLMEM
 			}
+			//#endif
         } catch(Exception e) {
 			//#ifdef DLOGGING
 //@			logger.severe("Import error with " + m_url, e);
@@ -275,7 +290,7 @@ implements
         } finally {
 			super.handleClose();
 		}
-    }    
+    }
     
 	/** If header shows redirect, handle it here. */
 	private RssItunesFeed[] parseHeaderRedirect(String newUrl)
@@ -299,6 +314,7 @@ implements
 		}
 	}
 
+	//#ifndef DSMALLMEM
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private RssItunesFeed[] parseHTMLRedirect()
     throws IOException, Exception {
@@ -310,6 +326,7 @@ implements
 			m_url = svUrl;
 		}
 	}
+	//#endif
 
     abstract RssItunesFeed[] parseFeeds(InputStream is);
 
@@ -345,6 +362,7 @@ implements
         return (m_successfull);
     }
 
+	//#ifndef DSMALLMEM
     public void setRedirectHtml(boolean m_redirectHtml) {
         this.m_redirectHtml = m_redirectHtml;
     }
@@ -352,6 +370,7 @@ implements
     public boolean isRedirectHtml() {
         return (m_redirectHtml);
     }
+	//#endif
 
     public CauseException getEx() {
         return (m_ex);
