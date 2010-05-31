@@ -21,6 +21,10 @@
  */
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
+ * IB 2010-05-30 1.11.5RC2 Alter alterning of log level for better debugging.
+ * IB 2010-05-30 1.11.5RC2 Split up tests for better results.
+ * IB 2010-05-30 1.11.5RC2 Check if the successful results match for both current and compatibility.
+ * IB 2010-05-30 1.11.5RC2 Allow end of altering based on nextIx.
  */
 
 // Expand to define MIDP define
@@ -55,13 +59,29 @@ import net.eiroca.j2me.observable.Observable;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
+//#ifdef DLOGGING
+import net.sf.jlogmicro.util.logging.Level;
+//#endif
+
 final public class HtmlLinkParserTest extends BaseTestCase
 //#ifdef DMIDP20
 implements Observer
 //#endif
 {
 
+	//#ifdef DMIDP20
 	private boolean ready = false;
+	//#endif
+	private int nextIx = 0;
+	//#ifdef DLOGGING
+	private boolean alterLogLevel = false;
+	private boolean endAlterLogLevel = false;
+	private boolean levelAltered = false;
+	private int alterix = 0;
+	private int endAlterix = 2;
+	private String newLogLevel = Level.FINEST.getName();
+	private Level svLogLevel = null;
+	//#endif
 
 	public HtmlLinkParserTest() {
 		super(1, "compatibility4.HtmlLinkParserTest");
@@ -71,6 +91,18 @@ implements Observer
 		switch (testNumber) {
 			case 0:
 				testHtmlParse1();
+				break;
+			case 1:
+				testHtmlParse2();
+				break;
+			case 2:
+				testHtmlParse3();
+				break;
+			case 3:
+				testHtmlParse4();
+				break;
+			case 4:
+				testHtmlParse5();
 				break;
 			default:
 				fail("Bad number for switch testNumber=" + testNumber);
@@ -82,11 +114,11 @@ implements Observer
 	public void changed(Observable observable) {
 		ready = true;
 	}
-	//#endif
 
 	public boolean isReady() {
 		return ready;
 	}
+	//#endif
 
 	/* Test parse HTML. */
 	public void testHtmlParse1() throws Throwable {
@@ -97,20 +129,68 @@ implements Observer
 		HTMLLinkParser cmpHtmlParser =
 			new HTMLLinkParser("jar:///links.html", "", "");
 
-		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser);
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, false);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse2() throws Throwable {
+		String mname = "testHtmlParse2";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				"jar:///links.html", "", "");
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser("jar:///links.html", "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, false);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse3() throws Throwable {
+		String mname = "testHtmlParse3";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				"jar:///links.html", "", "");
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser("jar:///links.html", "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, false);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse4() throws Throwable {
+		String mname = "testHtmlParse4";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				"jar:///links.html", "", "");
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser("jar:///links.html", "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, false);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse5() throws Throwable {
+		String mname = "testHtmlParse5";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				"jar:///links.html", "", "");
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser("jar:///links.html", "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, true);
 	}
 
     public void compatibilityHtmlLinkParserTestSub(final String mname,
 			final com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser,
-			final HTMLLinkParser compatibilityHtmlParser)
+			final HTMLLinkParser compatibilityHtmlParser, boolean endFeeds)
 	throws Throwable {
 		try {
 			//#ifdef DLOGGING
 			logger.info("Started " + mname);
 			if (finestLoggable) {logger.finest(mname + " compatibilityHtmlLinkParserTestSub htmlParser=" + htmlParser);}
 			//#endif
-			ready = false;
 			//#ifdef DMIDP20
+			ready = false;
 			htmlParser.getObserverManager().addObserver(this);
 			//#endif
 			htmlParser.startParsing();
@@ -121,7 +201,7 @@ implements Observer
 				}
 			}
 			//#else
-			htmlParser.join();
+			htmlParser.run();
 			//#endif
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine(mname + " htmlParser.isSuccessfull()=" + htmlParser.isSuccessfull());}
@@ -132,23 +212,41 @@ implements Observer
 			if (fineLoggable) {logger.fine(mname + " compatibilityHtmlParser.isSuccessfull()=" + compatibilityHtmlParser.isSuccessfull());}
 			RssItunesFeed[] cmpRssFeeds =
 				(RssItunesFeed[])compatibilityHtmlParser.getFeeds();
-			for (int i = 0; (i < rssfeeds.length) && (i < cmpRssFeeds.length);
-					i++) {
-				RssItunesFeedInfo feed = rssfeeds[i];
+			assertTrue(mname + " rssfeeds feed length should be > 0",
+					rssfeeds.length > 0);
+			assertTrue(mname + " cmpRssFeeds feed length should be > 0",
+					cmpRssFeeds.length > 0);
+			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / 5));
+			for (; (nextIx < endIx) && (nextIx < rssfeeds.length) && (nextIx < cmpRssFeeds.length);
+					nextIx++) {
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest(mname + " i,feed 1=" + i + "," + feed.toString());}
+				if (alterLogLevel && (nextIx >= alterix) && (alterix >= 0)) {
+					endAlterLogLevel = true;
+					svLogLevel = logger.getParent().getLevel();
+					logger.getParent().setLevel(Level.parse(newLogLevel));
+					alterLogLevel = false;
+					logger.info(mname + " altering level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
+				} else if (endAlterLogLevel && (nextIx >= endAlterix)) {
+					endAlterLogLevel = false;
+					logger.getParent().setLevel(svLogLevel);
+					logger.info(mname + " reverting level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
+				}
 				//#endif
-				RssItunesFeed cmpfeed = cmpRssFeeds[i];
+				RssItunesFeedInfo feed = rssfeeds[nextIx];
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest(mname + " i,cmpfeed 1=" + i + "," + cmpfeed.toString());}
+				if (finestLoggable) {logger.finest(mname + " nextIx,feed 1=" + nextIx + "," + feed.toString());}
 				//#endif
-				String assertInfo = new String("i,name,url=" + i + "," + feed.getName() + "," +  feed.getUrl());
+				RssItunesFeed cmpfeed = cmpRssFeeds[nextIx];
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.toString());}
+				//#endif
+				String assertInfo = new String("nextIx,name,url=" + nextIx + "," + feed.getName() + "," +  feed.getUrl());
 				assertTrue("Original feed must equal expected feed " + assertInfo, cmpfeed.equals(feed));
 				if (((feed.getUrl().indexOf("http://") >= 0) &&
 				   (feed.getName().indexOf("Russian") >= 0)) ||
 				   (feed.getUrl().indexOf("rss-gnu-utf8.xml") >= 0)) {
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest(mname + " skipping http or gnu XML URL i,feed.getName(),feed.getUrl() 2=" + i + "," + feed.getName() + "," + feed.getUrl());}
+					if (finestLoggable) {logger.finest(mname + " skipping http or gnu XML URL nextIx,feed.getName(),feed.getUrl() 2=" + nextIx + "," + feed.getName() + "," + feed.getUrl());}
 					//#endif
 					continue;
 				}
@@ -165,12 +263,17 @@ implements Observer
 						wait(1000L);
 					}
 				}
+				boolean successful = fparser.isSuccessfull();
+				Throwable fexc = fparser.getEx();
 				//#else
-				fparser.parseRssFeed( false, 10);
-				//#endif
-				RssItunesFeedInfo nfeed = fparser.getRssFeed();
-				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest(mname + " i,feed 3=" + i + "," + feed.toString());}
+				boolean successful = true;
+				Throwable fexc = null;
+				try {
+					fparser.parseRssFeed( false, 10);
+				} catch(Throwable e) {
+					successful = false;
+					fexc = e;
+				}
 				//#endif
 				RssFeedParser cmpFparser = new RssFeedParser(cmpfeed);
 				//#ifdef DMIDP20
@@ -183,18 +286,38 @@ implements Observer
 						wait(1000L);
 					}
 				}
+				boolean cmpSuccessful = cmpFparser.isSuccessfull();
+				Throwable cmpFexc = cmpFparser.getEx();
 				//#else
-				cmpFparser.parseRssFeed( false, 10);
+				boolean cmpSuccessful = true;
+				Throwable cmpFexc = null;
+				try {
+					cmpFparser.parseRssFeed( false, 10);
+				} catch(Throwable e) {
+					cmpSuccessful = false;
+					cmpFexc = e;
+				}
+				//#endif
+				assertEquals("compatibilityHtmlLinkParserTestSub isSuccessfull() must equal nextIx=" + nextIx, cmpSuccessful, successful);
+				if (!cmpSuccessful) {
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest(mname + " compatibilityHtmlLinkParserTestSub not successful nextIx,feed.getName(),fexc,cmpFexc=" + nextIx + "," + feed.getName() + "," + fexc + "," + cmpFexc);}
+					//#endif
+					continue;
+				}
+				RssItunesFeedInfo nfeed = fparser.getRssFeed();
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest(mname + " nextIx,feed 3=" + nextIx + "," + feed.toString());}
 				//#endif
 				RssItunesFeed ncmpfeed = (RssItunesFeed)cmpFparser.getRssFeed();
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest(mname + " i,ncmpfeed 3=" + i + "," + ncmpfeed.toString());}
+				if (finestLoggable) {logger.finest(mname + " nextIx,ncmpfeed 3=" + nextIx + "," + ncmpfeed.toString());}
 				//#endif
 				assertTrue("Feed must equal expected feed " + assertInfo, ncmpfeed.equals(nfeed));
 				// Free up memory.
-				rssfeeds[i] = null;
+				rssfeeds[nextIx] = null;
 				// Free up memory.
-				cmpRssFeeds[i] = null;
+				cmpRssFeeds[nextIx] = null;
 
 			}
 			//#ifdef DLOGGING
