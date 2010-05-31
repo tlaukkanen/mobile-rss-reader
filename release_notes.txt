@@ -165,7 +165,6 @@ v1.11.1 (August 2nd 2008)
 + Minor performance improvement for creating items, reading stored feeds.
 + Allow feeds with '^' in title, description, subtitle, summary, and author.
 + Workaround loading form not being shown on N95.  With the workaround the problem is fixed.
-+ Prepare for future store of items without encoding
 + Show micro edition platform.
 + Workaround problem with some Sony Ericsson phones with dynamic retrieval of display.  Need to use setCurrent using original display for alerts.  This problem prevented exit/delete of feed, but is not fixed.
 + Update exit key of when change of standard exit enabling.
@@ -176,25 +175,17 @@ v1.11.1 (August 2nd 2008)
 + Workaround Sony Ericsson T637 problem with Exit and Delete (Alerts on MIDP 1.0 device)
 + Handle Content module
 + Add to disclaimer
-+ Include jadsrc and manifestsrc directories in source zip
 + Allow '|' in feed name, password, and podcast attributes author, subtitle, summary.
 + Fix bugs in wtk-build.xml when properties suffixes not used.
-+ Allow creation of jar using Free software:  Phone ME, ECJ (Eclipse compiler), GNU Classpath, and JamVM or GNU JavaVM (gcj)
 + Workaround for MicroEmulator
 + Optionally create PRC if present.
 + Put in correct URL for jad for jar midlets.
 + Put in optional midlet permissions
-+ Make creation of RIM optional
-+ Put missing directories into released zip
 + Allow build of novice version with dist.midp.2.0.novice.  Can take novice.txt from a different file using ant -Dnovice.txt=(full path) dist.midp.2.0.novice The novice version has novice property true in manifest disables add, edit, delete, and import and reads from /data/novice.txt line by line file.  The novice version is not the default, normally all functions are enabled.
-+ Only copy to device bin if midlet.home exists during build.  
 + Remove html from link for rss like from EBay.
 + Allow override in place of existing feeds that are also in the import file.  This means that the feed in the import file will be used instead of what was loaded earlier.  Override in place means that the duplicate feed will be in the same place as it was before.  This is different from the non-overrided feeds which will be added based on command used either insert, add, or append.
 + Support RSS Atoms without published tag (version 0.3, 1,0 e.g. from google) by using updated or modified for date if not published tag.  v1.11.2 Development 2 (dev2) (Dec 12th 2008)
-+ Check in the rest of novice enhancement
 + Fix OPML with line feed/carriage return immediately after 'outline' tag.
-+ Combine if statements
-+ Changes from code analysis:  Remove unnecessary modifiers. Put stack trace into empty catch statements.  Combine if statements.  Remove unused equals.
 + Fix problems with hangs (not present on most devices).  Some methods are required to not spend much time.  As features are added to these methods, they become too long and cause a hang as J2ME has limited resources.  This change workaround this by doing operations in a separate thread.
 + Allow options to change font size for lists.
 + Turn on/off wraparound for lists
@@ -203,7 +194,6 @@ v1.11.1 (August 2nd 2008)
 + Allow ascending and descending for river of news.
 + Encode passwords
 + Fix handling passwords for feeds
-+ Allow findbugs and PMD analyzers
 + Give error if having problem doing find files
 + Fix development 1 introduced problem with find files aborting (this problem is not in stable versions)
 + Allow bookmark/feed name at the beginning of river of news items.
@@ -213,57 +203,35 @@ v1.11.2 Development 3 (dev2) (Dec 22th 2008)
 + Attempts to fix problem on some devices where River of News leaves cursor is put in the middle of the screen
 + Progress bars for large memory version (future)
 + Braces around optional feed names in River of News
-+ Better handling of forms/lists wakeup for command and other events.
 + Show device locale in settings
 + Fix problem of loss of data when going to link.  This fixes a possibly introduced defect into dev-2.
-+ Changes for next release of JLogMicro
 + Fix turning on/off wraparound for lists
 
 v1.11.2 Beta 1 (beta1) (Dec 22th 2008)
 + Show language for podcast version
 + Allow sorting, etc from River of News for showing headers/items screen
-+ Have semi-automated tests go from the last item down to the first item
 + Fixed problem where if sort yielded 0 items, the loading form is displayed without showing the list with 0 items.
 + Fix if CDATA and a tag is embedded in it, the text following the last tag is now displayed
 + Fix problem where if using "River of News" or Header sort of the number of items is 0, but a previous command displayed some results, there are items shown instead of 0 items.
 + Synchronize sort variables to prevent unintended results
 + Enhance to replace p, td, and br tags with a space.
-+ Fix test ui logging
 + Have separate RIM (cod) jad file to prevent conversion of jar from corrupting the main jad file.
-+ Make building in windows and linux easier to switch between the two choices
-+ Change load for to have it's own logging methods to allow future putting load of form in a separate thread
-+ Combine classes for future enhancements.
 + Fix description problem introduced in previous Alpha release
-+ Log command for testui for semi-automated tests
-+ More logging
 
 v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
 + Allow optional font size for forms.  This only works for display only items and ChoiceGroups.
 + Allow export only for podcast version.
 + Separate saved items for export form.
-+ Use method for getting fields to save/restore.
-+ Changes for next release of JLogMicro.
 + Changed disclaimer to take from a standard one from modified BSD.
 + Include modified BSD license file with source/binary tar/zip.
-+ Use export to get source instead of checkout.
 
 v1.11.2 Release Candidate 2 (rc2) (April 17th 2009)
 + Allow optional retrieval of previous (last) values used by the previous add bookmark and import feeds.
-+ Do redirect for see other status from HTTP.
++ Do redirect to see other status from HTTP.
 + If the feed name is changed with edit feed, remove the previous one.
-+ More logging.
-+ Fix logging typeos.
-+ Use less finals.
-+ Use printStackTrace in catch.
 + Redirect for HTTP other status.
-+ Combine nested if's.
-+ Get file only in URLHandler.
-+ Remove unused variables.
 + Allow descending feed sorted for headers/river of news.
-+ Remove empty if statements.
 + Put parsing of feed from bookmarks in separate thread to prevent hang if the internet is not accessible (or someone selected the wrong access point).
-+ Better logging form info.
-+ Change final modifiers for methods/classes.
 + Conditional get with last-modified or ETag.
 + For MIDP 1.0 create GMT date string as JVM does not have to make toString give the date.  + Trim title, description, and link.
 + Allow 3 redirects for getting to a feed.
@@ -271,78 +239,52 @@ v1.11.2 Release Candidate 2 (rc2) (April 17th 2009)
 + Better error message if problem loading edit bookmark.
 + Log imported feed for import current with test.
 + Fix 1.11.2 not recognizing data from 1.11.1.
-+ Better tests for equals to show more differences.
-+ Allow compatibility testing for the previous rms version layout.
 + Put ascending/descending as last command.
 
 v1.11.3 Release Candidate 1 (rc1) (Sep 22st 2009)
 + Simplify distribution.
-+ Remove unused fields.
 + Handle Big5, BIG-HSCS, MS932, MS936, EUC_CN, SJIS, EUC_JP, EUC_JP_LINUX, ISO-2202-JP, MS949, MS950, ISCII91, EUC_TW, TIS-620, GBK, GB18030, and other encodings (only Big5 tested).
-+ Allow logging characters read for testing other encodings.
-+ Use/write JMUnit tests.
-+ Use interfaces for equals.
-+ Simplify/fix compatibility tests.
 + Have dist-private to have a release with the private directory.
-+ Simplify explicit.
 + Trim title for atoms if both title and description are present.
-+ Allow using RIM building of cod file using jar files.
 + Export source without authorization as it is read only.
 
 v1.11.3 (Oct 2nd 2009)
-+ Cosmetic source change.
 + This contains all previous changes (see above).
 
 v1.11.4 Release Candidate 2 (rc2) (Mar 9th 2010)
-+ Use feed interface only for testing.
-+ Use latest antenna 1.2.1 beta.
-+ Use latest proguard 4.5 beta3.
 + Prevent override message from causing hang on import feeds.
-+ Use NULL pattern.
 + Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
 + Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.
 + Don't use observer pattern for MIDP 1.0 as it increases size.
 + Get feed titles for blank names in OPML in FeedListParser.
 + Have next item command on item display.
-+ Use antenna to create manifest and jad.
-+ Remove unused methods.
 + Fixed loop.
-+ Fix testing code of explicit.
-+ Use googlecode_upload.pl to upload to Google Project Hosting.
 + Create smartphone version with just MIDP 2.0
-+ Create archive files.  
-+ Don't create empty version directory.  
 + Use zip for src as the file paths are too long for non-GPL tar.
 + Use - in cod files before version instead of _.
-+ Make test distribution target with only MIDP 2.0 and MIDP 2.0 with JSR-75.
 + Remove unneeded directories.
 + Fix properties for MIDP 2.0 podcast/itunes.
-+ Create itunes test target.
 
 v1.11.5 Release Candidate 1 (rc1) (Mar 9th 2010)
 + Add labels to all artifacts.
 
 v1.11.5 Release Candidate 2 (rc2) (Mar 14th 2010)
-+ Convert M-dash to '-'.
++ Move developer related fixes to changelog.txt to easier reading for end users.
 + Fixed problem with end tags not recognized if spaces are inside.
 + Fix problem with redirects not working if they have relative addressing.
 + Allow line by line parser import to recognise Byte Order Mark (BOM).
 + Fixed problem with conditional get.
 + Fix previous page for loading screen from bookmarks and from header list.
-+ Cosmetic but not execution code changes.
 + Minor stack save for smart phone version for html link for the feed.
 + Synchronize use of opening or updating the feed.
-+ Fix and add logging.
 + Remove classes to save memory.
 + Ignore comments to allow more XML to parse successfully.
 + Replace SortUtil with LGPL code to allow adding of LGPL license.
-+ Unit test additions and changes for better testing.
 + Better diagnostics.
 + Warn if 0 feeds in import.
 + Optionally use feed URL as feed name if not found in import file.
 + Ignore contents within block tag for podcast.
 + For line by line, remove control characters beginning and ending of text to prevent blank lines at beginning or end from being processed.  This prevents a line at the beginning or end which is what comes before/after the final line feed or carriage return.
-+ Log instead of out.println in OpmlParser.
 + Only do export of file if signed.
 + Optionally use feed title for feed name or feed link for line by line parser.
 + Skip blank lines in line by line parser.
@@ -356,8 +298,6 @@ Device issues:
 Program issues:
 
 - While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
-- Update if modified only works on sites that use GMT for the modified date.
-- Partial fix for using findbugs.
 
 TODO:
 
