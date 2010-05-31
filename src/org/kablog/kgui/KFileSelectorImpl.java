@@ -25,8 +25,11 @@
  * IB 2010-03-14 1.11.5RC2 Fix comment to remove getInstance.
  * IB 2010-04-30 1.11.5RC2 Track threads used.
  * IB 2010-04-30 1.11.5RC2 Use thread from FeatureMgr.
+ * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
 */
 
+// Expand to define MIDP define
+//#define DMIDP20
 // Expand to define DJSR75 define
 //#define DNOJSR75
 // Expand to define test define
@@ -968,8 +971,10 @@
 //@				
 //@				target.doNotifyOpComplete();
 //@			}
+		//#ifdef DMIDP20
 //@		} finally {
 //@			MiscUtil.removeThread(Thread.currentThread());
+		//#endif
 //@		}
 //@	}
 //@	
