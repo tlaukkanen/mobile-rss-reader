@@ -22,6 +22,7 @@
 /*
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
+ * IB 2010-05-30 1.11.5RC2 Use compatibility URLHandler.
 */
 
 // Expand to define MIDP define
@@ -34,7 +35,7 @@ package com.substanceofcode.rssreader.businesslogic.compatibility4;
 
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
-import com.substanceofcode.rssreader.businesslogic.URLHandler;
+import com.substanceofcode.rssreader.businesslogic.compatibility4.URLHandler;
 import java.io.IOException;
 import java.io.InputStream;
 
