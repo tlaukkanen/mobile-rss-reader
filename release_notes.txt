@@ -289,6 +289,7 @@ v1.11.5 Release Candidate 2 (rc2) (Mar 14th 2010)
 + Optionally use feed title for feed name or feed link for line by line parser.
 + Skip blank lines in line by line parser.
 + Give error if run out of data before finding anything in import file.
++ Do export only for signed, Itunes and JSR-75.
 
 Device issues:
 
