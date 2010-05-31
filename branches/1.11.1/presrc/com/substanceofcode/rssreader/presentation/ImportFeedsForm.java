@@ -28,11 +28,15 @@
  * IB 2010-05-24 1.11.5RC2 Change out.println to log instead.
  * IB 2010-05-24 1.11.5RC2 Only do export if signed.
  * IB 2010-05-27 1.11.5RC2 Modified code to write OPML file using OpmlParser.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser, HTMLLinkParser, and HTMLAutoLinkParser in small memory MIDP 1.0 to save space.
+ * IB 2010-05-28 1.11.5RC2 Only do export if signed and MIDP 2.0.
 */
 // FIX check for blank url
 
 // Expand to define MIDP define
 @DMIDPVERS@
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define DJSR75 define
 @DJSR75@
 // Expand to define itunes define
@@ -85,8 +89,10 @@ import com.substanceofcode.rssreader.businesslogic.URLHandler;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
+//#ifndef DSMALLMEM
 import com.substanceofcode.rssreader.businesslogic.HTMLAutoLinkParser;
 import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
+//#endif
 //#ifdef DMIDP20
 import net.eiroca.j2me.observable.Observer;
 import net.eiroca.j2me.observable.Observable;
@@ -125,7 +131,9 @@ implements
 	private TextField   m_feedURLFilter;    // The feed URL filter string
 	private ChoiceGroup m_importFormatGroup;// The import type choice group
 	private ChoiceGroup m_importTitleGroup; // The import title choice group
+	//#ifndef DSMALLMEM
 	private ChoiceGroup m_importHTMLGroup;  // The import HTML redirect choice group
+	//#endif
 	private ChoiceGroup m_importOvrGroup; // The import override choice group
 	//#ifdef DTESTUI
 	private Command     m_testImportCmd;      // Tet UI rss opml command
@@ -159,14 +167,20 @@ implements
 						"Insert import", "Insert current import",
 						"Add import", "Add current import",
 						"Append import", "Append end import");
-			formats = new String[] {"OPML", "line by line", "HTML OPML Auto link",
-								"HTML RSS Auto links", "HTML Links"};
+			formats = new String[] {"OPML", "line by line"
+								//#ifndef DSMALLMEM
+								, "HTML OPML Auto link",
+								"HTML RSS Auto links", "HTML Links"
+								//#endif
+								};
+			//#ifdef DMIDP20
 			//#ifdef DSIGNED
 		} else {
 			super.initUrlUI(url, true,
 					"Are you sure you want to export?  \r\n" +
 					"This can cause endless prompts on some phones.", 1);
 			formats = new String[] {"OPML", "line by line"};
+			//#endif
 			//#endif
 		}
 		m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
@@ -186,6 +200,7 @@ implements
 			m_importTitleGroup  = new ChoiceGroup("Missing title (optionl)",
 					ChoiceGroup.EXCLUSIVE, titleInfo, null);
 			super.append(m_importTitleGroup);
+			//#ifndef DSMALLMEM
 			String[] HTMLInfo =
 					{"Redirect if HTML (ignored for HTML link import)",
 					 "Treat HTML as import"};
@@ -193,6 +208,7 @@ implements
 				new ChoiceGroup("Treat HTML mime type as valid import (optional)",
 					ChoiceGroup.EXCLUSIVE, HTMLInfo, null);
 			super.append(m_importHTMLGroup);
+			//#endif
 			m_importOvrGroup  = new ChoiceGroup(
 					"Override existing feeds in place (optionl)",
 					ChoiceGroup.EXCLUSIVE,
@@ -209,7 +225,7 @@ implements
 
 	}
 
-    //#ifdef DMIDP20
+	//#ifdef DMIDP20
   /**
    * If the observer (list parser) has changed, add the feeds (or give error
    * message).  If observable is null, remove the observer as this means that
@@ -403,6 +419,7 @@ implements
 						// Use line by line parser
 						clistParser = new LineByLineParser(url, username, password);
 						break;
+					//#ifndef DSMALLMEM
 					case 2:
 						// Use line by HMTL OPML auto link parser
 						clistParser = new HTMLAutoLinkParser(url, username, password);
@@ -417,6 +434,7 @@ implements
 						// Use line by HMTL link parser
 						clistParser = new HTMLLinkParser(url, username, password);
 						break;
+					//#endif
 					case 0:
 					default:
 						// Use OPML parser
@@ -430,11 +448,13 @@ implements
 						m_appSettings.getMaximumItemCountInFeed());
 				clistParser.setFeedNameFilter(feedNameFilter);
 				clistParser.setFeedURLFilter(feedURLFilter);
+				//#ifndef DSMALLMEM
 				clistParser.setRedirectHtml(m_importHTMLGroup.isSelected(0)
 					&& !(clistParser instanceof HTMLAutoLinkParser)
 					&& !(clistParser instanceof HTMLLinkParser));
 				//#ifdef DLOGGING
 				if (m_fineLoggable) {m_logger.fine("redirect html=" + clistParser.isRedirectHtml());}
+				//#endif
 				//#endif
 				
 				// Start parsing
@@ -475,7 +495,11 @@ implements
 			m_feedNameFilter,
 			m_feedURLFilter, m_UrlUsername,
 			m_UrlPassword,
-			m_importFormatGroup, m_importTitleGroup, m_importHTMLGroup};
+			m_importFormatGroup, m_importTitleGroup
+		//#ifndef DSMALLMEM
+				, m_importHTMLGroup
+		//#endif
+		};
 		return items;
 	}
 
