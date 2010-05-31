@@ -22,6 +22,7 @@
  */
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
+ * IB 2010-05-30 1.11.5RC2 Fix equals to use RssItemInfo interface.
  */
 
 // Expand to define logging define
@@ -368,7 +369,7 @@ implements RssItunesItemInfo
     }
     
 	/* Compare item. */
-	public boolean equals(RssItunesItemInfo pitem) {
+	public boolean equals(RssItemInfo pitem) {
 		boolean result = true;
 		if (!super.equals(pitem)) {
 			result = false;
@@ -393,8 +394,8 @@ implements RssItunesItemInfo
 			"m_summary", logger, fineLoggable)) {
 			result = false;
 		}
-		if (!TestLogUtil.fieldEquals(item.getExplicit(),
-					RssItunesItem.convExplicit(m_explicit),
+		if (!TestLogUtil.fieldEquals(item.getExplicit().toLowerCase(),
+					RssItunesItem.convExplicit(m_explicit).toLowerCase(),
 			"m_explicit", logger, fineLoggable)) {
 			result = false;
 		}
