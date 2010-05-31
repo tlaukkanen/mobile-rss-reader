@@ -39,6 +39,7 @@
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
  * IB 2010-05-29 1.11.5RC2 Fix opening of feed that causes parsing error with MIDP 1.0.
  * IB 2010-05-29 1.11.5RC2 Don't use HTML in small memory MIDP 1.0 to save space.
+ * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
 */
 
 // Expand to define test define
@@ -47,6 +48,8 @@
 //#define DNOTESTUI
 // Expand to define MIDP define
 //#define DMIDP20
+// Expand to define DJSR75 define
+//#define DNOJSR75
 // Expand to define itunes define
 //#define DNOITUNES
 // Expand to define memory size define
@@ -55,8 +58,6 @@
 //#define DNOSIGNED
 // Expand to define logging define
 //#define DNOLOGGING
-// Expand to define DJSR75 define
-//#define DNOJSR75
 
 package com.substanceofcode.rssreader.presentation;
 
@@ -180,7 +181,11 @@ implements
     private boolean     m_refreshUpdFeeds;  // The notify flag for updated feeds
     private boolean     m_getImportForm;    // The noticy flag for going to Import Feed list
 	//#ifdef DSIGNED
+	//#ifdef DITUNES
+	//#ifdef DJSR75
 //@    private boolean     m_getExportForm;    // The noticy flag for going to Export Feed list
+	//#endif
+	//#endif
 	//#endif
     private boolean     m_getFile;          // The noticy flag for getting find files form
     private boolean     m_selectDir;          // The noticy flag for selecting directories
@@ -255,7 +260,11 @@ implements
     static public Command m_backCommand = null; // The back to header list command
     private Command     m_importFeedListCmd;// The import feed list command
 	//#ifdef DSIGNED
+	//#ifdef DMIDP20
+	//#ifdef DJSR75
 //@    private Command     m_exportFeedListCmd;// The export feed list command
+	//#endif
+	//#endif
 	//#endif
 	//#ifdef DTEST
 //@    private Command     m_importCurrFeedListCmd;// The import feed list command and default current seleected feed
@@ -345,7 +354,11 @@ implements
 			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 5);
 			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 6);
 			//#ifdef DSIGNED
+			//#ifdef DITUNES
+			//#ifdef DJSR75
 //@			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, 7);
+			//#endif
+			//#endif
 			//#endif
 			//#ifdef DTEST
 //@			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 8);
@@ -380,7 +393,11 @@ implements
 			m_refreshUpdFeeds = false;
 			m_getImportForm = false;
 			//#ifdef DSIGNED
+			//#ifdef DITUNES
+			//#ifdef DJSR75
 //@			m_getExportForm = false;
+			//#endif
+			//#endif
 			//#endif
 			m_getFile = false;
 			m_selectDir = false;
@@ -591,9 +608,11 @@ implements
 			}
 			if (!m_novice) {
 				m_bookmarkList.addCommand( m_importFeedListCmd );
-				//#ifdef DITUNES
 				//#ifdef DSIGNED
+				//#ifdef DJSR75
+				//#ifdef DITUNES
 //@				m_bookmarkList.addCommand( m_exportFeedListCmd );
+				//#endif
 				//#endif
 				//#endif
 				//#ifdef DTEST
@@ -941,7 +960,11 @@ implements
 			// Go to import feed form
 			if( m_getImportForm
 				//#ifdef DSIGNED
+				//#ifdef DJSR75
+				//#ifdef DITUNES
 //@					|| m_getExportForm
+				//#endif
+				//#endif
 				//#endif
 					) {
 				try {
@@ -987,7 +1010,11 @@ implements
 				} finally {
 					m_getImportForm = false;
 					//#ifdef DSIGNED
+					//#ifdef DITUNES
+					//#ifdef DJSR75
 //@					m_getExportForm = false;
+					//#endif
+					//#endif
 					//#endif
 					//#ifdef DTEST
 //@					m_getTestImportForm = false;
@@ -2121,6 +2148,8 @@ implements
         }
         
 		//#ifdef DSIGNED
+		//#ifdef DITUNES
+		//#ifdef DJSR75
 //@        /** Show export feed list form */
 //@        if( c == m_exportFeedListCmd ) {
 //@			// Set current bookmark so that the added feeds go after
@@ -2128,6 +2157,8 @@ implements
 //@			m_curBookmark = m_bookmarkList.getSelectedIndex();
 //@			m_getExportForm = true;
 //@        }
+		//#endif
+		//#endif
 		//#endif
         
 		//#ifdef DTEST
