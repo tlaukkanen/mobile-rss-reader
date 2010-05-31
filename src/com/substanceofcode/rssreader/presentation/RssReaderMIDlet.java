@@ -36,6 +36,9 @@
  * IB 2010-05-24 1.11.5RC2 Use one thread for novice import.
  * IB 2010-05-24 1.11.5RC2 Fix mispelling of bookmarks.
  * IB 2010-05-24 1.11.5RC2 Only do export if signed.
+ * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
+ * IB 2010-05-29 1.11.5RC2 Fix opening of feed that causes parsing error with MIDP 1.0.
+ * IB 2010-05-29 1.11.5RC2 Don't use HTML in small memory MIDP 1.0 to save space.
 */
 
 // Expand to define test define
@@ -46,6 +49,8 @@
 //#define DMIDP20
 // Expand to define itunes define
 //#define DNOITUNES
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define signed define
 //#define DNOSIGNED
 // Expand to define logging define
@@ -1643,7 +1648,9 @@ implements
 							listParser.setGetFeedTitleList(true);
 							listParser.setFeedNameFilter(null);
 							listParser.setFeedURLFilter(null);
+							//#ifndef DSMALLMEM
 							listParser.setRedirectHtml(false);
+							//#endif
 							listParser.run();
 							ImportFeedsForm.addFeedLists(listParser,
 									0,
@@ -2050,9 +2057,8 @@ implements
 //@						RssFeedParser parser = new RssFeedParser( feed );
 //@						/* Updating feed... */
 //@						initializeLoadingForm(
-//@								"Updating feed..." , m_bookmarkList, parser);
+//@								"Updating feed..." , m_bookmarkList);
 //@						setPageInfo(false, false, false, m_bookmarkList);
-//@						parser = new RssFeedParser( feed );
 //@						final int maxItemCount =
 //@							m_appSettings.getMaximumItemCountInFeed();
 //@						parser.parseRssFeed( false, maxItemCount);
@@ -2696,11 +2702,13 @@ implements
 					}
 				}
 				if (!showErrsOnly) {
+					//#ifdef DMIDP20
 					super.append("Current threads:");
 					String[] threadInfo = MiscUtil.getDispThreads();
 					for (int ic = 0; ic < threadInfo.length; ic++) {
 						super.append(new StringItem(ic + ": ", threadInfo[ic]));
 					}
+					//#endif
 					super.append(new StringItem("Active Threads:",
 								Integer.toString(Thread.activeCount())));
 				}
