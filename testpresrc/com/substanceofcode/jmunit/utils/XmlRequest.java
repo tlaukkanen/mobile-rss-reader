@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-03-14 1.11.5RC2 Test results from XmlParser.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
 */
 
 // Expand to define test define
@@ -34,14 +35,16 @@ package com.substanceofcode.jmunit.utils;
 public interface XmlRequest
 {
 	static int GET_PARSE = 0;
-	static int GET_IS_UTF =	1;
-	static int GET_IS_WIN = 2;
-	static int GET_IS_DOCENCODING = 3;
-	static int GET_NAMESPACES = 4;
-	static int GET_ATTRIBUTE = 5;
-	static int GET_TEXT = 6;
-	static int GET_NAME = 7;
+	static int GET_PARSE_XML_ELEMENT = 1;
+	static int GET_IS_UTF =	2;
+	static int GET_IS_WIN = 3;
+	static int GET_IS_DOCENCODING = 4;
+	static int GET_NAMESPACES = 5;
+	static int GET_ATTRIBUTE = 6;
+	static int GET_TEXT = 7;
+	static int GET_NAME = 8;
 	static Integer IGET_PARSE = new Integer(GET_PARSE);
+	static Integer IGET_PARSE_XML_ELEMENT = new Integer(GET_PARSE_XML_ELEMENT);
 	static Integer IGET_IS_UTF =	new Integer(GET_IS_UTF);
 	static Integer IGET_IS_WIN = new Integer(GET_IS_WIN);
 	static Integer IGET_IS_DOCENCODING = new Integer(GET_IS_DOCENCODING);
