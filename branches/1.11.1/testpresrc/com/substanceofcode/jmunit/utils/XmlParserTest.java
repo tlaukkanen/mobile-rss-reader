@@ -22,6 +22,7 @@
 /*
  * IB 2010-04-05 1.11.4RC1 Allow logging of characters for different expected tokens.
  * IB 2010-04-30 1.11.5RC2 Test line feeds in code.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
 */
 
 // Expand to define test define
@@ -53,6 +54,7 @@ final public class XmlParserTest extends BaseTestCase
 	//#ifdef DTEST
 	//#ifdef DLOGGING
 	private boolean logParseChar = traceLoggable; // or traceLoggable
+	private boolean logParseXmlElemChar = traceLoggable; // or traceLoggable
 	private boolean logNameChar = false;
 	private boolean logTextChar = false;
 	private boolean logAttrChar = false;
@@ -60,7 +62,7 @@ final public class XmlParserTest extends BaseTestCase
 	//#endif
 
 	public XmlParserTest() {
-		super(2, "XmlParserTest");
+		super(3, "XmlParserTest");
 	}
 
 	public void test(int testNumber) throws Throwable {
@@ -71,11 +73,9 @@ final public class XmlParserTest extends BaseTestCase
 			case 1:
 				testXmlParse2();
 				break;
-				/*
-			case XmlRequest.2:
+			case 2:
 				testXmlParse3();
 				break;
-				*/
 			default:
 				Exception e = new Exception(
 						"No such test testNumber=" + testNumber);
@@ -121,7 +121,8 @@ final public class XmlParserTest extends BaseTestCase
 			"</channel>",
 			"</rss>"};
 
-		Object [] xmlRequests = new Object[] {XmlRequest.IGET_PARSE, // prologue
+		Object [] xmlRequests = new Object[] {XmlRequest.IGET_PARSE, // doctype
+		XmlRequest.IGET_PARSE, // prologue
 		XmlRequest.IGET_PARSE, // stylesheet
 		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, // rss
 		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, // channel
@@ -212,7 +213,8 @@ final public class XmlParserTest extends BaseTestCase
 			"</channel>",
 			"</rss>"};
 
-		Object [] xmlRequests = new Object[] {XmlRequest.IGET_PARSE, // prologue
+		Object [] xmlRequests = new Object[] {XmlRequest.IGET_PARSE, // doctype
+		XmlRequest.IGET_PARSE, // prologue
 		XmlRequest.IGET_PARSE, // stylesheet
 		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, // rss
 		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, // channel
@@ -269,6 +271,96 @@ final public class XmlParserTest extends BaseTestCase
 				xmlResults);
 	}
 
+	public void testXmlParse3() throws Throwable {
+		String mname = "testXmlParse3";
+	String[] xmlStrings = {"<link rel=\"canonical\" href=\"http://internet-nexus.blogspot.com/\" />",
+		"<meta http-equiv=\"refresh\" content=\"30;url=http://internet-nexus.blogspot.com/\" />",
+		"<!DOCTYPE\nchapter PUBLIC \"-//OASIS//DTD DocBook XML//EN\"",
+          "\"../dtds/chapter.dtd\">",
+		"<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+			"<?xml-stylesheet\nhref=\"http://feeds.feedburner.com/~d/styles/rss2full.xsl\" type=\"text/xsl\" media=\"screen\"?>",
+			"<!-- comment1 -->",
+			"<rss\nversion=\"0.91\">",
+			"<!-- comment2 -->",
+			"<channel>",
+			"<!-- comment3 -->",
+			"<title>Andere | Lander - Anderes Deutsch</title>",
+			"<!-- comment4 -->",
+			"<link>http://german.lss.wisc.edu/gdgsa/podcast/Andere_Lander/</link>",
+			"<image></image>",
+			"<!-- comment5 -->",
+			"<item>",
+			"<!-- comment6 -->",
+			"<title>Episode| 1</title>",
+			"<!-- comment7 -->",
+			"<enclosure\nurl=\"http://german.lss.wisc.edu/gdgsa/podcast/Andere_Lander/episodes/Episode1.mp3\" length=\"9681361\" type=\"audio/mpeg\" />",
+			"<!-- comment8 -->",
+			"</item>",
+			"<item>",
+			"<!-- comment9 -->",
+			"<title>Episode| 2</title>",
+			"<! comment10 >",
+			"<description>desc2",
+			"</description>",
+			"<!-- comment11 -->",
+			"</item>",
+			"</channel>",
+			"</rss>"};
+
+		Object [] xmlRequests = new Object[] {
+		XmlRequest.IGET_PARSE_XML_ELEMENT, XmlRequest.IGET_NAME, // rss
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, // channel
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, XmlRequest.IGET_TEXT, // feed title
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, XmlRequest.IGET_TEXT, // link
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, XmlRequest.IGET_TEXT, // image
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, // item
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, XmlRequest.IGET_TEXT, // feed title
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, XmlRequest.IGET_ATTRIBUTE, "url", XmlRequest.IGET_ATTRIBUTE, "length",
+		   XmlRequest.IGET_ATTRIBUTE, "type", // feed enclosure
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, // item
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, XmlRequest.IGET_TEXT, // feed title
+		XmlRequest.IGET_PARSE, XmlRequest.IGET_NAME, XmlRequest.IGET_TEXT, // feed description
+		XmlRequest.IGET_PARSE // end document
+		};
+
+		Vector expXmlResults = new Vector();
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("rss"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("channel"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("title"));
+		expXmlResults.addElement(new String("Andere | Lander - Anderes Deutsch"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("link"));
+		expXmlResults.addElement(new String("http://german.lss.wisc.edu/gdgsa/podcast/Andere_Lander/"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("image"));
+		expXmlResults.addElement(new String(""));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("item"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("title"));
+		expXmlResults.addElement(new String("Episode| 1"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("enclosure"));
+		expXmlResults.addElement(new String("http://german.lss.wisc.edu/gdgsa/podcast/Andere_Lander/episodes/Episode1.mp3"));
+		expXmlResults.addElement(new String("9681361"));
+		expXmlResults.addElement(new String("audio/mpeg"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("item"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("title"));
+		expXmlResults.addElement(new String("Episode| 2"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
+		expXmlResults.addElement(new String("description"));
+		expXmlResults.addElement(new String("desc2"));
+		expXmlResults.addElement(new Integer(SgmlParserIntr.END_DOCUMENT));
+		Vector xmlResults = new Vector();
+		xmlParserTestSub(mname, xmlStrings, "utf-8", xmlRequests, expXmlResults,
+				xmlResults);
+	}
+
     public void xmlParserTestSub(final String mname, String[] xmlStrings,
 			String enc,
 			Object [] xmlRequests, Vector expXmlResults, Vector xmlResults )
@@ -284,21 +376,36 @@ final public class XmlParserTest extends BaseTestCase
 			XmlParser parser = new XmlParser(
 						new ByteArrayInputStream(
 							xmlsb.toString().getBytes(enc)));
+			int i = 0;
+			int parseReq = ((Integer)xmlRequests[i]).intValue();
 			//#ifdef DTEST
 			//#ifdef DLOGGING
-			if (logParseChar) {
-				parser.setLogChar(logParseChar);
+			if (parseReq == XmlRequest.GET_PARSE) {
+				if (logParseChar) {
+					parser.setLogChar(logParseChar);
+				}
+			} else {
+				if (logParseXmlElemChar) {
+					parser.setLogChar(logParseXmlElemChar);
+				}
 			}
 			//#endif
 			//#endif
-			int parsingResult = parser.parse();
+			int parsingResult = (parseReq == XmlRequest.GET_PARSE) ? parser.parse() : parser.parseXmlElement();
 			//#ifdef DTEST
 			//#ifdef DLOGGING
-			if (logParseChar) {
-				parser.setLogChar(false);
+			if (parseReq == XmlRequest.GET_PARSE) {
+				if (logParseChar) {
+					parser.setLogChar(false);
+				}
+			} else {
+				if (logParseXmlElemChar) {
+					parser.setLogChar(false);
+				}
 			}
 			//#endif
 			//#endif
+			i++;
 			int j = 0;
 			int pexpValue = 
 					((Integer)expXmlResults.elementAt(j)).intValue();
@@ -308,7 +415,7 @@ final public class XmlParserTest extends BaseTestCase
 			assertEquals(mname + " 0 parser result not expected.", pexpValue,
 					parsingResult);
 			j++;
-			for (int i = 0; i < xmlRequests.length; i++) {
+			for (; i < xmlRequests.length; i++) {
 				Object expObj = expXmlResults.elementAt(j++);
 				//#ifdef DLOGGING
 				if (traceLoggable) {logger.trace(mname + " xmlParserTestSub i,j,expObj.getClass().getName(),expObj.hashCode(),expObj.toString()=" + i + "," + (j - 1) + "," + ((expObj == null) ? "null" : expObj.getClass().getName()) + "," + ((expObj == null) ? "null" : Integer.toString(expObj.hashCode())) + "," + ((expObj == null) ? "null" : expObj.toString()) );}
@@ -337,6 +444,30 @@ final public class XmlParserTest extends BaseTestCase
 						//#endif
 						assertEquals(mname + "parser result " + parsingResult + " not expected " + expValue,
 								expValue, parsingResult);
+						break;
+					case XmlRequest.GET_PARSE_XML_ELEMENT:
+						//#ifdef DTEST
+						//#ifdef DLOGGING
+						if (logParseChar) {
+							parser.setLogChar(logParseChar);
+						}
+						//#endif
+						//#endif
+						parsingResult = parser.parse();
+						//#ifdef DTEST
+						//#ifdef DLOGGING
+						if (logParseChar) {
+							parser.setLogChar(false);
+						}
+						//#endif
+						//#endif
+						int expElemValue = 
+								((Integer)expObj).intValue();
+						//#ifdef DLOGGING
+						if (finestLoggable) {logger.finest(mname + " parse i,j,expElemValue,parsingResult=" + i + "," + (j - 1) + "," + expElemValue + "," + SgmlParserIntr.PARSING_RESULTS[expElemValue] + "," + parsingResult + "," + SgmlParserIntr.PARSING_RESULTS[parsingResult]);}
+						//#endif
+						assertEquals(mname + "parser result " + parsingResult + " not expected " + expElemValue,
+								expElemValue, parsingResult);
 						break;
 					case XmlRequest.GET_IS_UTF:
 						boolean bexpValue = 
