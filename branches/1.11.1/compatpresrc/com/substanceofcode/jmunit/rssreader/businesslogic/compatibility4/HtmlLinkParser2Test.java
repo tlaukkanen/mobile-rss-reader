@@ -22,6 +22,12 @@
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-04-26 1.11.5RC2 Set link to "" as it's not read by previous version.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser, HTMLLinkParser, and HtmlLinkParser2Test in small memory MIDP 1.0 to save space.
+ * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
+ * IB 2010-05-28 1.11.5RC2 Fix last test case to go to the end of the feeds.
+ * IB 2010-05-30 1.11.5RC2 Move RssCompFeeds to it's own class file.
+ * IB 2010-05-30 1.11.5RC2 Allow endAlterix to specify end of altering logging.
+ * IB 2010-05-30 1.11.5RC2 Skip result that shows fix of relative URLs.
  */
 
 // Expand to define MIDP define
@@ -47,13 +53,12 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
 import com.substanceofcode.utils.compatibility4.CauseException;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.RssFeedParser;
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFeed;
-//#ifndef DSMALLMEM
+import com.substanceofcode.utils.HTMLParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.HTMLLinkParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.HTMLAutoLinkParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.LineByLineParser;
-//#endif
 //#ifdef DMIDP20
 import net.eiroca.j2me.observable.Observer;
 import net.eiroca.j2me.observable.Observable;
@@ -75,12 +80,16 @@ implements Observer
 //#endif
 {
 
+	//#ifdef DMIDP20
 	private boolean ready = false;
+	//#endif
 	private int nextIx = 0;
 	//#ifdef DLOGGING
 	private boolean alterLogLevel = false;
+	private boolean endAlterLogLevel = false;
 	private boolean levelAltered = false;
-	private int alterix = 28;
+	private int alterix = 25;
+	private int endAlterix = 27;
 	private String newLogLevel = Level.FINEST.getName();
 	private Level svLogLevel = null;
 	//#endif
@@ -116,11 +125,11 @@ implements Observer
 	public void changed(Observable observable) {
 		ready = true;
 	}
-	//#endif
 
 	public boolean isReady() {
 		return ready;
 	}
+	//#endif
 
 	/* Test parse HTML. */
 	public void testHtmlParse1() throws Throwable {
@@ -149,7 +158,7 @@ implements Observer
 	/* Test parse HTML. */
 	public void testHtmlParse5() throws Throwable {
 		String mname = "testHtmlParse5";
-		compatibilityHtmlLinkParserTestSub(mname, "links2.html", "jar:///links2.html", false);
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", "jar:///links2.html", true);
 	}
 
 	private RssItunesFeedInfo[] parseHtml(final String mname,
@@ -164,7 +173,7 @@ implements Observer
 				feedListParser =
 				new com.substanceofcode.rssreader.businesslogic.LineByLineParser(
 					url, "", "");
-			} else if (url.endsWith(".html")) {
+			} else if (HTMLParser.isHtml(url)) {
 				if (name.indexOf("option=htmlautolink") >= 0) {
 					feedListParser =
 					new com.substanceofcode.rssreader.businesslogic.HTMLAutoLinkParser(
@@ -179,7 +188,6 @@ implements Observer
 				new com.substanceofcode.rssreader.businesslogic.OpmlParser(
 					url, "", "");
 			}
-			ready = false;
 			if (name.indexOf("option=missing title") >= 0) {
 				feedListParser.setGetFeedTitleList(true);
 			}
@@ -191,6 +199,7 @@ implements Observer
 				feedListParser.setFeedURLFilter("/rss");
 			}
 			//#ifdef DMIDP20
+			ready = false;
 			feedListParser.getObserverManager().addObserver(this);
 			//#endif
 			feedListParser.startParsing();
@@ -235,7 +244,7 @@ implements Observer
 			FeedListParser compatibilityFeedListParser;
 			if (url.endsWith(".txt")) {
 				compatibilityFeedListParser = new LineByLineParser( url, "", "");
-			} else if (url.endsWith(".html")) {
+			} else if (HTMLParser.isHtml(url)) {
 				if (name.indexOf("option=htmlautolink") >= 0) {
 					compatibilityFeedListParser =
 					new HTMLAutoLinkParser( url, "", "");
@@ -349,11 +358,16 @@ implements Observer
 					nextIx++) {
 				try {
 					//#ifdef DLOGGING
-					if (alterLogLevel && (nextIx >= alterix)) {
+					if (alterLogLevel && (nextIx >= alterix) && (alterix >= 0)) {
+						endAlterLogLevel = true;
 						svLogLevel = logger.getParent().getLevel();
 						logger.getParent().setLevel(Level.parse(newLogLevel));
 						alterLogLevel = false;
 						logger.info(mname + " altering level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
+					} else if (endAlterLogLevel && (nextIx >= endAlterix)) {
+						endAlterLogLevel = false;
+						logger.getParent().setLevel(svLogLevel);
+						logger.info(mname + " reverting level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
 					}
 					//#endif
 					RssItunesFeedInfo feed = rssfeeds[nextIx];
@@ -411,6 +425,13 @@ implements Observer
 						if (finestLoggable) {logger.finest(mname + " j,subCmpfeed 1=" + j + "," + subCmpfeed.toString());}
 						//#endif
 						subFeed.setLink("");
+						if ((nextIx == 26) &&
+								feed.getUrl().equals("http://www.nytimes.com/services/xml/rss/index.html")) {
+							//#ifdef DLOGGING
+							if (fineLoggable) {logger.fine(mname + " skipping fix for relative URLs for nextIx,subFeed.getUrl()=" + nextIx + "," + subFeed.getUrl());}
+							//#endif
+							continue;
+						}
 						assertTrue("Original sub feed must equal expected sub feed " + assertInfo, ((RssItunesFeed)subCmpfeed).equals(subFeed));
 					}
 				} finally {
@@ -436,27 +457,6 @@ implements Observer
 			throw e;
 		}
 	}
-
-}
-
-class RssCompFeeds {
-
-	final private RssItunesFeedInfo[] rssfeeds;
-	final private RssItunesFeedInfo[] cmpRssFeeds;
-
-	public RssCompFeeds(final RssItunesFeedInfo[] rssfeeds,
-		final RssItunesFeedInfo[] cmpRssFeeds) {
-		this.rssfeeds = rssfeeds;
-		this.cmpRssFeeds = cmpRssFeeds;
-	}
-
-    public RssItunesFeedInfo[] getRssfeeds() {
-        return (rssfeeds);
-    }
-
-    public RssItunesFeedInfo[] getCmpRssFeeds() {
-        return (cmpRssFeeds);
-    }
 
 }
 //#endif
