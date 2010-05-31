@@ -21,8 +21,12 @@
  */
 /*
  * IB 2010-03-14 1.11.5RC2 Provide a command receiver to execute actions as part of the command pattern.
+ * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
 */
 
+// Expand to define MIDP define
+@DMIDPVERS@
+//#ifdef DMIDP20
 package com.substanceofcode.utils;
 
 /**
@@ -35,3 +39,4 @@ public interface CmdReceiver {
 	Object[] action(Object[] reqs);
 
 }
+//#endif
