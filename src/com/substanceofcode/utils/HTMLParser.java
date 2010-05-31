@@ -24,10 +24,14 @@
  * IB 2010-04-09 1.11.5RC2 Change REDIRECT_URL to be after the last XmlParser token.
  * IB 2010-04-30 1.11.5RC2 Use absolute address for redirects.
  * IB 2010-04-30 1.11.5RC2 Fixed problem with end tags not recognized if spaces are inside by making changes in XmlParser and calling getTextStream from there.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser in small memory MIDP 1.0 to save space.
 */
 
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifndef DSMALLMEM
 package com.substanceofcode.utils;
 
 import java.io.IOException;
@@ -302,7 +306,7 @@ public class HTMLParser extends XmlParser {
 	static public String getAbsoluteUrl(String  url, String link)
 	throws IllegalArgumentException {
 		//#ifdef DLOGGING
-//@		Logger logger = Logger.getLogger("HTMLLinkParser");
+//@		Logger logger = Logger.getLogger("HTMLParser");
 		//#endif
 		link = link.trim();
 		if (link.indexOf("://") >= 0) {
@@ -346,6 +350,14 @@ public class HTMLParser extends XmlParser {
 		}
 	}
 
+    static public boolean isHtml(String contentType) {
+		return ((contentType != null) &&
+				(contentType.endsWith("html") ||
+				contentType.endsWith("htm") ||
+				contentType.endsWith("shtml") ||
+				contentType.endsWith("shtm")));
+	}
+
     public void setMetaFound(boolean metaFound) {
         this.m_metaFound = metaFound;
     }
@@ -371,3 +383,4 @@ public class HTMLParser extends XmlParser {
     }
 
 }
+//#endif
