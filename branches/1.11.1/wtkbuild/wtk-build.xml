@@ -34,6 +34,7 @@
     <!-- IB 2010-05-28 1.11.5RC2 Change order of uploads for zips so that regular bin zip is last so that it will be at the top of the list.  -->
     <!-- IB 2010-05-28 1.11.5RC2 Make input file for sftp for sites that allow upload with sftp.  -->
     <!-- IB 2010-05-30 1.11.5RC2 Improve dist.test.  -->
+    <!-- IB 2010-05-30 1.11.5RC2 Add signed targets for MIDP 1.0, MIDP 2.0, MIDP 2.0 and JSR 75. -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1389,7 +1390,29 @@
 		</antcall>
 	</target>
 
+	<target name="dist.midp.1.0.signed" depends="prepare.midp1.0,prepare.cldc1.0,prepare.signed" unless="no.1.0.signed" >
+		<antcall target="dist.version" inheritAll="yes" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Featured,Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
 	<target name="dist.midp.2.0" depends="prepare.midp2.0,prepare.cldc1.0" unless="no.2.0" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Featured,Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.signed" depends="prepare.midp2.0,prepare.cldc1.0,prepare.signed" unless="no.2.0.signed" >
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="upload.to.google" value="true" />
 			<param name="google.labels" value="--labels=Featured,Type-Executable,OpSys-All" />
@@ -1418,6 +1441,18 @@
 	</target>
 
 	<target name="dist.midp.2.0.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75" unless="no.2.0.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="jsr" value="JSR-75" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr75.signed" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75,prepare.signed" unless="no.2.0.jsr75.signed" >
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="upload.to.google" value="true" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
@@ -1571,7 +1606,15 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		<antcall target="dist.midp.1.0.signed" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
 		<antcall target="dist.midp.2.0.jsr75" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.2.0.jsr75.signed" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
@@ -1607,6 +1650,10 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		<antcall target="dist.midp.2.0.signed" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
 		<antcall target="dist.midp.2.0" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
@@ -1633,8 +1680,8 @@
 			<fileset dir="${distdir}"/>
 		</delete>
 		<copy todir="${distdir}/dist" overwrite="true" >
-			<fileset dir="${dist}" excludes="**/RE*.txt,**/**smartphone**" />
-			<fileset dir="${dist}" includes="**/midp10**cldc10**,**midp20**cldc10**,**/*.debug" />
+			<fileset dir="${dist}" excludes="**/RE*.txt,**/**smartphone**,**/*cldc11**" />
+			<fileset dir="${dist}" includes="**/midp10**cldc10**,**midp20**cldc10**" />
 		</copy>
 		<copy file="${distall}/README.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
 		<zip destfile="${distproject}/${dist.project.bin.zip}" basedir="${distjardir}" />
@@ -1662,8 +1709,13 @@
 
 	<target name="dist" >
 		<antcall target="dist.all" inheritAll="true" >
+			<param name="no.1.0.signed" value="true" />
+			<param name="no.2.0.signed" value="true" />
 			<param name="no.2.0.itunes" value="true" />
 			<param name="no.2.0.itunes.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.itunes.signed" value="true" />
+			<param name="no.2.0.cldc.1.1.itunes.signed.jsr75" value="true" />
+			<param name="no.2.0.jsr75.signed" value="true" />
 			<param name="no.2.0.cldc.1.1" value="true" />
 			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
 			<param name="no.2.0.novice" value="true" />
@@ -1675,12 +1727,16 @@
 		<antcall target="dist.all" inheritAll="true" >
 			<param name="stage" value="test_" />
 			<param name="no.1.0" value="true" />
+			<param name="no.1.0.signed" value="true" />
 			<param name="no.2.0" value="true" />
+			<param name="no.2.0.signed" value="true" />
 			<param name="no.2.0.novice" value="true" />
 			<param name="no.2.0.itunes" value="true" />
 			<param name="no.2.0.itunes.jsr75" value="true" />
 			<param name="no.2.0.cldc.1.1" value="true" />
 			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.itunes.signed" value="true" />
+			<param name="no.2.0.cldc.1.1.itunes.signed.jsr75" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
 		</antcall>
 	</target>
