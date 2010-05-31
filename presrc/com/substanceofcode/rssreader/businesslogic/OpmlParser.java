@@ -28,8 +28,13 @@
  * IB 2010-05-27 1.11.5RC2 Put in code to write OPML file.
  * IB 2010-05-27 1.11.5RC2 Have OpmlParser code to write to OPML file only if signed.
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+ * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
 */
 
+// Expand to define MIDP define
+@DMIDPVERS@
+// Expand to define DJSR75 define
+@DJSR75@
 // Expand to define itunes define
 @DITUNESDEF@
 // Expand to define signed define
@@ -194,6 +199,8 @@ public class OpmlParser extends FeedListParser {
     }
 
 		//#ifdef DSIGNED
+		//#ifdef DITUNES
+		//#ifdef DJSR75
 		static public String getOpmlBegin() {
 					return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<opml version=\"1.0\">\n<head>\n<title>Rss Reader subscriptions</title>\n</head>\n<body>\n";
 		}
@@ -213,6 +220,8 @@ public class OpmlParser extends FeedListParser {
 		static public String getOpmlEnd() {
 					return "<body>\n</opml>\n";
 		}
+		//#endif
+		//#endif
 		//#endif
     
 }
