@@ -31,6 +31,9 @@
     <!-- IB 2010-05-26 1.11.5RC2 Handle stage releases better. -->
     <!-- IB 2010-05-26 1.11.5RC2 Remove *.debug file from regular and smartphone bin files. -->
     <!-- IB 2010-05-28 1.11.5RC2 Changes for findbugs for future.  -->
+    <!-- IB 2010-05-28 1.11.5RC2 Change order of uploads for zips so that regular bin zip is last so that it will be at the top of the list.  -->
+    <!-- IB 2010-05-28 1.11.5RC2 Make input file for sftp for sites that allow upload with sftp.  -->
+    <!-- IB 2010-05-30 1.11.5RC2 Improve dist.test.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -52,9 +55,18 @@
 	<property name="webtestdata" value="${target}/webtestdata" />
 	<property name="filetestdata" value="${target}/filetestdata" />
 	<property name="analyze" value="${target}/analyze" />
-	<property name="dist" value="${target}/dist" />
+	<property name="dist.name" value="dist" />
+	<property name="dist" value="${target}/${dist.name}" />
 	<property name="distgooglecode" value="${target}/distgooglecode" />
-	<property name="distproject" value="${target}/distproject" />
+	<property name="distsourceforge" value="${target}/distsourceforge" />
+	<property name="ftpdist.name" value="ftpdist" />
+	<property name="ftpdist.dir" value="${target}/${ftpdist.name}" />
+	<property name="distsourceforge" value="${target}/distsourceforge" />
+	<property name="sourceforge.ftp.in.file" value="${distsourceforge}/sfftpin" />
+	<property name="distyinlight" value="${target}/distyinlight" />
+	<property name="yinlight.ftp.in.file" value="${distyinlight}/ylftpin" />
+	<property name="distproject-name" value="distproject" />
+	<property name="distproject" value="${target}/${distproject-name}" />
 	<property name="distjardir" value="${distproject}/distjardir" />
 	<property name="distall" value="${target}/distall" />
 	<property name="main" value="${target}/main" />
@@ -184,6 +196,10 @@
 		<property name="dist.stage.file" value="_${stage}" />
 		<echo message="dist.stage.file=${dist.stage.file}" />
 		<echo message="ustage=${ustage}" />
+		<property name="ustage.txt" value="${ustage} " />
+		<echo message="ustage.txt=${ustage.txt}" />
+		<property name="ftp.ustage.txt" value="${ustage}\ " />
+		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
 	</target>
 
 	<!-- Prepare to init stage properties if not set already.  -->
@@ -196,6 +212,10 @@
 		<echo message="dist.stage.file=${dist.stage.file}" />
 		<property name="ustage" value="" />
 		<echo message="ustage=${ustage}" />
+		<property name="ustage.txt" value="" />
+		<echo message="ustage.txt=${ustage.txt}" />
+		<property name="ftp.ustage.txt" value="" />
+		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
 	</target>
 
 	<!-- prepare the target folder -->
@@ -925,7 +945,7 @@
 	</target>
 
 	<target name="google.upload.line.append" depends="prepare" if="upload.to.google">
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${file.name} --summary=&quot;stable ${device.type} MIDP ${wtk.midp.version} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} ${latest.binary.desc}&quot; ${google.labels}&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${file.name} --summary=&quot;stable ${device.type} MIDP ${wtk.midp.version} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}${latest.binary.desc}&quot; ${google.labels}&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 	</target>
 
 	<target name="google.upload.append" depends="prepare" if="upload.to.google">
@@ -933,6 +953,7 @@
 		<property name="google.labels" value="" />
 		<property name="latest.binary.desc" value="latest binary for direct phone install this is included in binary zip.  See documentation for which program to use." />
 		<echo message="cd */RSS*/dist&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<antcall target="google.upload.line.append" inheritAll="true" >
 			<param name="file.name" value="${build.file.root}.cod" />
 			<param name="device.type" value="Blackberry" />
@@ -942,6 +963,66 @@
 			<param name="device.type" value="(not Blackberry)" />
 		</antcall>
 		<echo message="cd ../../..&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+	</target>
+
+	<target name="sftp.upload.line.append" depends="prepare" if="upload.to.sftp">
+		<echo message="put ${file.name}&#10;" file="${sftp.in.file}" append="true" />
+	</target>
+
+	<target name="sftp.upload.append" depends="prepare" if="upload.to.sftp">
+		<antcall target="sftp.upload.line.append" inheritAll="true" >
+			<param name="file.name" value="${build.file.root}.cso" />
+		</antcall>
+		<antcall target="sftp.upload.line.append" inheritAll="true" >
+			<param name="file.name" value="${build.file.root}_cod.jad" />
+		</antcall>
+		<antcall target="sftp.upload.line.append" inheritAll="true" >
+			<param name="file.name" value="${build.file.root}.cod" />
+		</antcall>
+		<antcall target="sftp.upload.line.append" inheritAll="true" >
+			<param name="file.name" value="${build.file.root}.jad" />
+		</antcall>
+		<antcall target="sftp.upload.line.append" inheritAll="true" >
+			<param name="file.name" value="${build.file.root}.jar" />
+		</antcall>
+	</target>
+
+	<target name="sftp.upload.archives" depends="prepare" if="upload.to.sftp">
+		<echo message="lcd ../${distproject-name}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ${dist.project.src.zip}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ${dist.project.expert.zip}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ${dist.project.smartphone.zip}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ${dist.project.bin.zip}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="lcd ../${dist.name}&#10;" file="${sftp.in.file}" append="true" />
+	</target>
+
+	<target name="sftp.upload.initialize" depends="prepare" if="upload.to.sftp">
+		<mkdir dir="${ftp.in.dir}" />
+		<echo message="cd ${sftp.root.dir}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
+		<property name="ftp.vers.dir" value="Version\ ${MIDLETVERSROOT}\ ${ftp.ustage.txt}Source\ and\ Binaries" />
+		<echo message="-mkdir ${ftp.vers.dir}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="cd ${ftp.vers.dir}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ../${ftpdist.name}/apache.htaccess .htaccess&#10;" file="${sftp.in.file}" append="true" />
+		<antcall target="sftp.upload.archives" inheritAll="true" />
+	</target>
+
+	<target name="sourceforge.initialize" depends="prepare" if="upload.to.sftp">
+		<antcall target="sftp.upload.initialize" inheritAll="true" >
+			<param name="ftp.in.dir" value="${distsourceforge}" />
+			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
+			<param name="sftp.root.dir" value="${sourceforge.rootdir}" />
+		</antcall>
+	</target>
+
+	<target name="yinlight.initialize" depends="prepare" if="upload.to.sftp">
+		<antcall target="sftp.upload.initialize" inheritAll="true" >
+			<param name="ftp.in.dir" value="${distyinlight}" />
+			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
+			<param name="sftp.root.dir" value="${yinlight.rootdir}" />
+		</antcall>
 	</target>
 
 	<!-- Distribute the version (e.g. MIDP-1.0, MIDP-2.0, etc) to -->
@@ -987,6 +1068,15 @@
 			<param name="build.jar" value="obfuscated.jar" />
 		</antcall>
 		<antcall target="google.upload.append" inheritAll="true" />
+		<antcall target="sftp.upload.append" >
+			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
+		</antcall>
+		<antcall target="sftp.upload.append" >
+			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
+		</antcall>
+		<antcall target="sftp.upload.append" >
+			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
+		</antcall>
 		<antcall target="exec.create.rim.files" inheritAll="true" />
 		<antcall target="jar.create.rim.files" inheritAll="true" />
 		<delete dir="${obfuscated}" />
@@ -1292,6 +1382,7 @@
 		<antcall target="dist.version" inheritAll="yes" >
 			<param name="upload.to.google" value="true" />
 			<param name="google.labels" value="--labels=Featured,Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
 			<param name="make.build.files" value="true" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -1302,6 +1393,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="upload.to.google" value="true" />
 			<param name="google.labels" value="--labels=Featured,Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
 			<param name="make.build.files" value="false" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -1329,6 +1421,7 @@
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="upload.to.google" value="true" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
 			<param name="jsr" value="JSR-75" />
 			<param name="make.build.files" value="false" />
 			<param name="no.test" value="true" />
@@ -1365,6 +1458,7 @@
 			<param name="make.build.files" value="false" />
 			<param name="upload.to.google" value="true" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1383,6 +1477,7 @@
 			<param name="make.build.files" value="false" />
 			<param name="upload.to.google" value="true" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1460,10 +1555,18 @@
 		<property name="dist.project.bin.zip" value="${dist.project.prefix}-bin.zip" />
 		<property name="dist.project.src.zip" value="${dist.project.prefix}-src.zip" />
 		<echo message="#!/bin/bash&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.bin.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.smartphone.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest binaries for smartphones only (this uses up too much memory for non-smartphones.  also included in expert binaries)&quot; --labels=Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.expert.zip} --summary=&quot;Expert (use ${project.file.prefix}-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest binaries for 4% of phones&quot; --labels=--labels=Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.src.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage} latest source zip.&quot; --labels=Type-Source&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.src.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest source zip.&quot; --labels=Type-Source&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.expert.zip} --summary=&quot;Expert (use ${project.file.prefix}-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest binaries for 4% of phones&quot; --labels=--labels=Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.smartphone.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest binaries for smartphones only (this uses up too much memory for non-smartphones.  also included in expert binaries)&quot; --labels=Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.bin.zip} --summary=&quot;stable Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=Featured,Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<mkdir dir="${ftpdist.dir}" />
+		<copy file="${res.dir}/apache.htaccess" todir="${ftpdist.dir}" overwrite="true" />
+		<antcall target="sourceforge.initialize" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+		</antcall>
+		<antcall target="yinlight.initialize" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+		</antcall>
 		<antcall target="dist.midp.1.0" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
@@ -1571,8 +1674,13 @@
 	<target name="dist.test" >
 		<antcall target="dist.all" inheritAll="true" >
 			<param name="stage" value="test_" />
+			<param name="no.1.0" value="true" />
+			<param name="no.2.0" value="true" />
 			<param name="no.2.0.novice" value="true" />
-			<param name="no.2.0.cldc.1.1.itunes.jsr75" value="true" />
+			<param name="no.2.0.itunes" value="true" />
+			<param name="no.2.0.itunes.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1" value="true" />
+			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
 		</antcall>
 	</target>
