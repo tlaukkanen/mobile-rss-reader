@@ -47,6 +47,9 @@
  *
  * This software was originally modified no later than Sept 10, 2007.
  */
+/*
+ * IB 2010-05-30 1.11.5RC2 More and better logging.
+ */
 
 // Expand to define logging define
 @DLOGDEF@
@@ -63,7 +66,7 @@ import net.sf.jlogmicro.util.logging.Level;
 public class SortUtil {
 
 	//#ifdef DLOGGING
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private Logger logger = Logger.getLogger("compatibility4.SortUtil");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finerLoggable = logger.isLoggable(Level.FINER);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
@@ -78,6 +81,12 @@ public class SortUtil {
    */
 
 	public static void sortLongs(int [] indexes, long [] lngValues, int lo0, int hi0) {
+		//#ifdef DLOGGING
+		Logger logger = Logger.getLogger("com.substanceofcode.utilsSortUtil");
+		if (logger.isLoggable(Level.FINE)) {logger.fine("sortLongs indexes.length,lngValues.length,lo0,hi0=" + indexes.length + "," + lngValues.length + "," + lo0 + "," + hi0);}
+		boolean finestLoggable = logger.isLoggable(Level.FINEST);
+		//#endif
+
 		long mid;
 
 		Vector vlos = new Vector();
@@ -115,15 +124,7 @@ public class SortUtil {
 				}
 
 				//#ifdef DLOGGING
-				Logger logger = Logger.getLogger("com.substanceofcode.utilsSortUtil");
-				logger.finest("lo,lo0,hi0,hi,mid=" + lo +"," + lo0 + "," + hi0 + "," + hi + "," + mid);
-				/*
-				if (finestLoggable) {
-					for (int ic = lo0; ic < hi0; ic++) {
-						logger.finer("ic,lngValues=" + ic +"," + lngValues[indexes[ic]);
-					}
-				}
-				*/
+				if (finestLoggable) {logger.finest("lo,lo0,hi0,hi,mid=" + lo +"," + lo0 + "," + hi0 + "," + hi + "," + mid);}
 				//#endif
 				if (lo0 < hi) {
 					vlos.addElement(new Integer(lo0));
