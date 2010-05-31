@@ -21,6 +21,8 @@
  */
 /*
  * IB 2010-05-24 1.11.5RC2 Test compatibility FeedListParser.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser, HTMLLinkParser, HtmlLinkParserTest, and HtmlLinkParser2Test in small memory MIDP 1.0 to save space.
+ * IB 2010-05-28 1.11.5RC2 Test compatibility OpmlParser so that we can do comparision tests.
  */
 
 // Expand to define memory size define
@@ -41,10 +43,12 @@ final public class FeedListParserSuite extends TestSuite {
 
 	public FeedListParserSuite() {
 		super("compatibility4.FeedListParserSuite");
-//#ifndef DSMALLMEM
+		//#ifndef DSMALLMEM
 		add(new HtmlLinkParserTest());
 		add(new HtmlLinkParser2Test());
 		//#endif
+		add(new OpmlParserTest());
+		add(new OpmlParser2Test());
 	}
 }
 //#endif
