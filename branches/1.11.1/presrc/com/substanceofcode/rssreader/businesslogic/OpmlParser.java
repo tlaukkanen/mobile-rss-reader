@@ -27,6 +27,7 @@
  * IB 2010-05-25 1.11.4RC1 Only save htmlURL if it's not 0 length .
  * IB 2010-05-27 1.11.5RC2 Put in code to write OPML file.
  * IB 2010-05-27 1.11.5RC2 Have OpmlParser code to write to OPML file only if signed.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
 */
 
 // Expand to define itunes define
@@ -82,13 +83,11 @@ public class OpmlParser extends FeedListParser {
         try {
             
 			// The first element is the main tag.
-            int elementType = parser.parse();
 			// If we found the PROLOGUE, DOCTYPE, or STYLESHEET get the next entry.
-			while ((elementType == XmlParser.PROLOGUE) ||
-					(elementType == XmlParser.DOCTYPE) ||
-					(elementType == XmlParser.STYLESHEET)) {
-				elementType = parser.parse();
-			}
+			// If link followed by meta found, go to following XML.
+
+            int elementType = parser.parseXmlElement();
+
 			if (elementType == XmlParser.END_DOCUMENT ) {
 				return null;
 			}
