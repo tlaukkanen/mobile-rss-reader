@@ -26,12 +26,19 @@
  * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.  Don't set updated and etag if the updated and etag match since the values are not retrieved if it matches.  Use string for updated date (last-modified).
  * IB 2010-04-30 1.11.5RC2 Track threads used.
  * IB 2010-05-26 1.11.5RC2 Give error if run out of data before finding anything.
+ * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser and HTMLLinkParser in small memory MIDP 1.0 to save space.
+ * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+ * IB 2010-05-29 1.11.5RC2 Better logging.
 */
 
 // Expand to define MIDP define
 @DMIDPVERS@
 // Expand to define CLDC define
 @DCLDCVERS@
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -42,6 +49,9 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.XmlParser;
+//#ifndef DSMALLMEM
+import com.substanceofcode.utils.HTMLParser;
+//#endif
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import javax.microedition.io.*;
 import java.util.*;
@@ -149,7 +159,7 @@ implements
      *
      */
     public void parseRssFeedUrl(String url, boolean updFeed, int maxItemCount)
-    throws IOException, Exception {
+    throws IOException, CauseException, Exception {
         
 		//#ifdef DLOGGING
 		if (finestLoggable) {logger.finest("parseRssFeedUrl url,maxItemCount=" + url + "," + maxItemCount);}
@@ -163,11 +173,13 @@ implements
 				parseHeaderRedirect(updFeed, m_location, maxItemCount);
 				return;
 			}
+			//#ifndef DSMALLMEM
 			// If we find HTML, usually it is redirection
-			if ((m_contentType != null) && (m_contentType.indexOf("html") >= 0)) {
+			if (HTMLParser.isHtml(m_contentType)) {
 				parseHTMLRedirect(updFeed, url, m_inputStream,
 								  maxItemCount);
 			} else {
+			//#endif
 				// If we're only processing if the feed is updated,
 				// check if we previously had a update value.
 				// If so and it does equals the new one, return
@@ -186,7 +198,9 @@ implements
 				if (finestLoggable) {logger.finest("run m_lastMod,etag,m_etag=" + m_lastMod + "," + etag + "," + m_etag);}
 				//#endif
 				parseRssFeedXml( m_inputStream, maxItemCount);
+			//#ifndef DSMALLMEM
 			}
+			//#endif
         } catch(Exception e) {
 			//#ifdef DLOGGING
 			logger.severe("parseRssFeedUrl error with " + url, e);
@@ -194,8 +208,8 @@ implements
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new Exception("Error while parsing RSS data: " 
-                    + e.toString());
+            throw new CauseException("Error while parsing RSS data url: " + url,
+					e);
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 			logger.severe("parseRssFeedUrl error with " + url, t);
@@ -227,6 +241,7 @@ implements
 		parseRssFeedUrl(url, updFeed, maxItemCount);
 	}
 
+	//#ifndef DSMALLMEM
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	private void parseHTMLRedirect(boolean updFeed, String url,
 								   InputStream is, int maxItemCount)
@@ -234,13 +249,14 @@ implements
 		String newUrl = super.parseHTMLRedirect(url, is);
 		parseRssFeedUrl(newUrl, updFeed, maxItemCount);
 	}
+	//#endif
 
     /**
      * Nasty RSS feed XML parser.
      * Seems to work with all RSS 0.91, 0.92 and 2.0.
      */
     public void parseRssFeedXml(InputStream is, int maxItemCount)
-    throws IOException {
+    throws IOException, CauseException {
         /** Initialize item collection */
         m_rssFeed.getItems().removeAllElements();
         
@@ -248,22 +264,19 @@ implements
         XmlParser parser = new XmlParser(is);
         
         /** <?xml...*/
-        int parsingResult = parser.parse();
-		/** if prologue, DOCTYPE, or STYLESHEET was found, parse after them.  **/
-		while ((parsingResult == XmlParser.PROLOGUE) ||
-				(parsingResult == XmlParser.DOCTYPE) ||
-				(parsingResult == XmlParser.STYLESHEET)) {
-			parsingResult = parser.parse();
-		}
+		/** If prologue, DOCTYPE, or STYLESHEET was found, parse after them.  **/
+		/** If link followed by meta found, go to following XML.  **/
+
+        int parsingResult = parser.parseXmlElement();
         
 		if (parsingResult == XmlParser.END_DOCUMENT) {
-            IOException ioe = new IOException(
-					"Unable to parse feed. Feed has no data.");
+            CauseException ce = new CauseException(
+					"Unable to parse feed. Feed has no data:" + m_rssFeed.getName() + "," + m_rssFeed.getUrl());
 			//#ifdef DLOGGING
-			logger.severe(ioe.getMessage(), ioe);
+			logger.severe(ce.getMessage(), ce);
 			//#endif
             /** Unknown feed */
-            throw ioe;
+            throw ce;
             
         }
         FeedFormatParser formatParser = null;
@@ -282,12 +295,13 @@ implements
 					maxItemCount, m_getTitleOnly );
             
         } else {
+            CauseException ce = new CauseException(
+					"Unable to parse feed type:" + m_rssFeed.getName() + "," + m_rssFeed.getUrl() + "," + entryElementName);
 			//#ifdef DLOGGING
-			logger.severe("Unable to parse feed type:  " + entryElementName);
+			logger.severe(ce.getMessage(), ce);
 			//#endif
             /** Unknown feed */
-            throw new IOException("Unable to parse feed. Feed format is not supported.");
-            
+            throw ce;
         }
         
     }
@@ -344,9 +358,11 @@ implements
 			m_ex = new CauseException("Internal error while parsing feed " +
 									  m_rssFeed.getUrl(), t);
         } finally {
+			//#ifndef DSMALLMEM
 			if (m_parsingThread != null) {
 				MiscUtil.removeThread(m_parsingThread);
 			}
+			//#endif
 			if (m_midlet != null) {
 				m_midlet.wakeup(2);
 			}
