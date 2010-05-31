@@ -22,6 +22,7 @@
 /*
  * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
  * IB 2010-05-24 1.11.5RC2 Ignore contents within block tag for podcast.
+ * IB 2010-05-24 1.11.5RC2 Check isItunes for block.
  */
 
 // Expand to define itunes define
@@ -293,7 +294,7 @@ final public class ExtParser {
 				}
 				break;
 			case 'b':
-				if( subElem.equals("block") ) {
+				if( isItunes && subElem.equals("block") ) {
 					if (!m_itunes) {
 						m_itunes = true;
 					}
