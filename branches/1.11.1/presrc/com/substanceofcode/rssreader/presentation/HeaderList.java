@@ -177,7 +177,7 @@ implements
 				parser.parseRssFeed( (c == m_updateModCmd),
 					m_midlet.getSettings().getMaximumItemCountInFeed());
 				m_midlet.procUpdHeader(parser);
-			}catch(Throwable e) {
+			} catch(Throwable e) {
 				m_midlet.procPageExc(m_feed, false, e);
 			}
 			//#endif
