@@ -6,6 +6,8 @@
 #-- IB 2010-03-12 1.11.5RC2 Use WTK_HOME environment variable for wtk.home.
 #-- IB 2010-05-24 1.11.5RC2 Added app-icon for the application icon.
 #-- IB 2010-05-28 1.11.5RC2 Changes for findbugs for future.
+#-- IB 2010-05-28 1.11.5RC2 Make input file for sftp for sites that allow upload with sftp, sourceforge.net and yinlight.net.
+#-- IB 2010-05-28 1.11.5RC2 Put all resource files in src/main/resources.
 
 #windows.drive = C:
 windows.drive = 
@@ -32,7 +34,7 @@ antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 #Comment out if you do not want to run findbugs
 #findbugs.home = ${ext.drive}/opt/tools/findbugs-1.3.4
 #findbugs.home = ${opt.tools}/findbugs-1.3.4
-findbugs.home = ${opt.tools}/findbugs/findbugs-1.3.9
+#findbugs.home = ${opt.tools}/findbugs/findbugs-1.3.9
 #Comment out if you do not want to run PMD
 #pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
 #pmd.home = ${opt.tools}/pmd/pmd-4.2.4
@@ -95,7 +97,12 @@ midlet.class = com.substanceofcode.rssreader.presentation.${midlet.name}
 logging.package = net.sf.jlogmicro.util.logging
 obfuscate.classes = ${midlet.class},${logging.package}.ConsoleHandler,${logging.package}.FormHandler,${logging.package}.RecStoreHandler,${logging.package}.SimpleFormatter
 project.info.url = http://www.substanceofcode.com
-project.test.url = http://mobilerssreader.sourceforge.net/testdata
+yinlight.rootdir = html/mobile-rss-reader/downloads
+sourceforge.project = mobilerssreader
+sourceforge.project.first = m
+sourceforge.project.first2 = mo
+sourceforge.rootdir = /home/frs/project/${sourceforge.project.first}/${sourceforge.project.first2}/${sourceforge.project}/${sourceforge.project}
+project.test.url = http://${sourceforge.project}.sourceforge.net/testdata
 file.test.url = file:///root1/testdata
 project.name = RSSReader
 project.file.prefix = rssreader
@@ -151,7 +158,7 @@ svn.pass = ${env.ibuntonjr_pass}
 app-icon = rss.png
 need.dist.svn.dirs = true
 need.res = true
-res.dir = ../src/icons
+res.dir = ../src/main/resources
 res.todir = 
 icons.dir = icons
 #add.jars = true
