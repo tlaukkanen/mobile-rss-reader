@@ -22,8 +22,11 @@
 /*
  * IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
  * IB 2010-04-05 1.11.4RC1 Allow logging of characters for different expected tokens.
+ * IB 2010-05-29 1.11.5RC2 Don't use HTML in small memory MIDP 1.0 to save space.
 */
 
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -31,6 +34,7 @@
 // Expand to define logging define
 @DLOGDEF@
 
+//#ifndef DSMALLMEM
 //#ifdef DJMTEST
 package com.substanceofcode.jmunit.utils;
 
@@ -412,4 +416,5 @@ final public class HtmlParserTest extends BaseTestCase
 	}
 
 }
+//#endif
 //#endif
