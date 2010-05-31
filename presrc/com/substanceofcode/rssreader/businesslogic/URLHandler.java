@@ -26,12 +26,15 @@
  * IB 2010-03-14 1.11.4RC2 Use absolute address for redirects.
  * IB 2010-03-14 1.11.5RC2 Use convenience method for encoding.
  * IB 2010-05-27 1.11.5RC2 If write to jar file, give error.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser and HTMLLinkParser in small memory MIDP 1.0 to save space.
 */
 
 // Expand to define MIDP define
 @DMIDPVERS@
 // Expand to define DJSR75 define
 @DJSR75@
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -60,7 +63,9 @@ import net.sf.jlogmicro.util.logging.LogManager;
 import net.sf.jlogmicro.util.logging.Level;
 //#endif
 import com.substanceofcode.utils.MiscUtil;
+//#ifndef DSMALLMEM
 import com.substanceofcode.utils.HTMLParser;
+//#endif
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.CauseException;
 
@@ -234,6 +239,7 @@ public class URLHandler {
 					 ((respCode == HttpConnection.HTTP_OK) &&
 					  respMsg.equals("Moved Temporarily"))) && 
 					 (m_location != null)) {
+					//#ifndef DSMALLMEM
 					try {
 						m_location = HTMLParser.getAbsoluteUrl(url, m_location);
 					} catch (IllegalArgumentException e) {
@@ -241,6 +247,7 @@ public class URLHandler {
 								"Error while parsing RSS redirect data: " +
 								url, e);
 					}
+					//#endif
 					m_needRedirect = true;
 					return;
 				}
@@ -324,6 +331,7 @@ public class URLHandler {
         }
     }
     
+	//#ifndef DSMALLMEM
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	protected String parseHTMLRedirect(String url, InputStream is)
     throws IOException, Exception {
@@ -362,6 +370,7 @@ public class URLHandler {
 		// Use last link as the site may have adds in the beginning.
 		return feeds[feeds.length - 1].getUrl();
 	}
+	//#endif
 
 	final public void handleClose() {
 		try {
