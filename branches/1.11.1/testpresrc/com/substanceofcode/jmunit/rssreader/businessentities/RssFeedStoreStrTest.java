@@ -23,6 +23,7 @@
  * IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
  * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.
  * IB 2010-05-24 1.11.5RC2 Use BaseTestCase to log start of test.
+ * IB 2010-05-29 1.11.5RC2 Use ready only for MIDP 2.0 with observer pattern.
 */
 
 // Expand to define MIDP define
@@ -58,7 +59,9 @@ implements Observer
 //#endif
 {
 
+	//#ifdef DMIDP20
 	private boolean ready = false;
+	//#endif
 
 	public RssFeedStoreStrTest() {
 		super(7, "RssFeedStoreStrTest");
@@ -102,11 +105,19 @@ implements Observer
 	public void changed(Observable observable) {
 		ready = true;
 	}
-	//#endif
 
 	public boolean isReady() {
 		return ready;
 	}
+
+	private void waitReady() throws Throwable {
+		while (!isReady()) {
+			synchronized(this) {
+				wait(1000L);
+			}
+		}
+	}
+	//#endif
 
 	public RssItunesFeed feedStoreStrFactory(String mname,
 			String step, int nbr,
@@ -323,13 +334,16 @@ implements Observer
 			ready = false;
 			fparser.getObserverManager().addObserver(this);
 			fparser.getParsingThread().start();
-			while (!isReady()) {
-				synchronized(this) {
-					wait(1000L);
-				}
-			}
+			waitReady();
 			//#else
-			fparser.parseRssFeed( false, 10);
+			try {
+				fparser.parseRssFeed( false, 10);
+			} catch(Throwable e) {
+				//#ifdef DLOGGING
+				logger.severe(mname + " failure parseRssFeed feed=" + feed.getName() + "," + feed.getUrl(),e);
+				//#endif
+				throw e;
+			}
 			//#endif
 			feed = fparser.getRssFeed();
 			//#ifdef DLOGGING
