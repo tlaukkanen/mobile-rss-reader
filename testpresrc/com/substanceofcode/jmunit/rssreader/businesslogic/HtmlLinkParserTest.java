@@ -21,10 +21,10 @@
  */
 /*
  * IB 2010-05-24 1.11.5RC2 Unit test HTMLLinkParser class.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser HtmlLinkParserTest in small memory MIDP 1.0 to save space.
+ * IB 2010-05-28 1.11.5RC2 Code cleanup.
  */
 
-// Expand to define MIDP define
-@DMIDPVERS@
 // Expand to define memory size define
 @DMEMSIZEDEF@
 // Expand to define test define
