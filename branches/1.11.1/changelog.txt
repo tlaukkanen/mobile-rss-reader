@@ -413,6 +413,8 @@ Program issues:
 - Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
 - Fix MIDP 1.0 parsing.
 - Check for html, htm, shtml, and shtm suffixes.
+- Do export only for signed, Itunes and JSR-75.
+- Add signed targets for MIDP 1.0, MIDP 2.0, MIDP 2.0 and JSR 75.  Targets are disabled normally.  They are for future use.
 
 TODO:
 
