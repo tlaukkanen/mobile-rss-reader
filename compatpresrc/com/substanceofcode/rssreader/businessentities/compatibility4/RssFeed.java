@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
+ * IB 2010-05-30 1.11.5RC2 Better logging.
  */
 
 // Expand to define logging define
@@ -497,7 +498,8 @@ public class RssFeed implements RssFeedInfo {
 		} catch (Throwable e) {
 			result = false;
 			//#ifdef DLOGGING
-			logger.severe("equals error feed.m_items,m_items=" + flen + "," + ((flen == 0) ? "n/a" : feed.getItems().elementAt(0)) + "," + ilen + "," + ((ilen == 0) ? "n/a" : m_items.elementAt(0)) , e);
+			logger.severe("equals unequal error flen,ilen=" + flen + "," + ilen, e);
+			logger.severe("equals error feed.m_items,m_items=" + ((flen == 0) ? "n/a" : feed.getItems().elementAt(0)) + "," + ((ilen == 0) ? "n/a" : m_items.elementAt(0)) , e);
 			//#endif
 		}
 		return result;
