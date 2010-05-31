@@ -26,8 +26,12 @@
  * IB 2010-04-30 1.11.5RC2 Have toString classes for easier logging.
  * IB 2010-05-24 1.11.5RC2 Use convenience method for encoding/decoding.
  * IB 2010-05-24 1.11.5RC2 Replace SortUtil with LGPL code to allow adding of LGPL license.
+ * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
+ * IB 2010-05-30 1.11.5RC2 More logging.
  */
 
+// Expand to define MIDP define
+@DMIDPVERS@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -43,7 +47,9 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+//#ifdef DMIDP20
 import com.substanceofcode.utils.CmdReceiver;
+//#endif
 //#ifdef DTEST
 import com.substanceofcode.rssreader.businessentities.RssItemInfo;
 import com.substanceofcode.rssreader.businessentities.RssItunesItemInfo;
@@ -67,8 +73,10 @@ public class MiscUtil {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
             .toCharArray();
 
+	//#ifdef DMIDP20
 	public final static Short SPAUSE_APP = new Short((short)0);
 	static private final Hashtable cthreads = new Hashtable();
+	//#endif
     static private long threadNbr = 1L;
     static final private int MAX_STR_DISP = 50;
 
@@ -101,7 +109,9 @@ public class MiscUtil {
 			//#else
 			Thread thread = new Thread(runnable);
 			//#endif
+			//#ifdef DMIDP20
 			cthreads.put(thread, new Object[] {cname, runnable});
+			//#endif
 		//#ifdef DCLDCV11
 		}
 		//#endif
@@ -126,6 +136,9 @@ public class MiscUtil {
 		synchronized(MiscUtil.class) {
 		//#endif
 			StringBuffer tsb = new StringBuffer("Thread ");
+			//#ifdef DMIDP10
+			return tsb.append(thread.hashCode() + "," + thread.toString()).toString();
+			//#else
 			Object[] threadObjs;
 			if ((threadObjs = (Object[])cthreads.get(thread)) == null) {
 				return tsb.append(thread.hashCode()).append(
@@ -136,11 +149,13 @@ public class MiscUtil {
 						threadInfo).append(" ").append(
 						new Boolean(thread.isAlive()).toString()).toString();
 			}
+			//#endif
 		//#ifdef DCLDCV11
 		}
 		//#endif
 	}
 
+	//#ifdef DMIDP20
 	static public
 	//#ifdef DCLDCV10
 	synchronized
@@ -183,6 +198,7 @@ public class MiscUtil {
 		return cthread;
 		//#endif
 	}
+	//#endif
 
     /** Base 64 encode the given data */
     static public String encode(byte[] data) {
@@ -553,6 +569,10 @@ public class MiscUtil {
 	 * @param hi0	 right boundary of array partition */
 	static private void longQuickSort(long[] a, int[] indexes, int lo0, int hi0)
 	{
+		//#ifdef DLOGGING
+		Logger logger = Logger.getLogger("MiscUtil");
+		if (logger.isLoggable(Level.FINE)) {logger.fine("longQuickSort a.length,indexes.length,lo0,hi0=" + a.length + "," + indexes.length + "," + lo0 + "," + hi0);}
+		//#endif
 
 		long mid;
 		int swap;
