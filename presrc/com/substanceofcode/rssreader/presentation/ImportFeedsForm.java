@@ -30,6 +30,7 @@
  * IB 2010-05-27 1.11.5RC2 Modified code to write OPML file using OpmlParser.
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser, HTMLLinkParser, and HTMLAutoLinkParser in small memory MIDP 1.0 to save space.
  * IB 2010-05-28 1.11.5RC2 Only do export if signed and MIDP 2.0.
+ * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
 */
 // FIX check for blank url
 
@@ -173,13 +174,15 @@ implements
 								"HTML RSS Auto links", "HTML Links"
 								//#endif
 								};
-			//#ifdef DMIDP20
 			//#ifdef DSIGNED
+			//#ifdef DITUNES
+			//#ifdef DJSR75
 		} else {
 			super.initUrlUI(url, true,
 					"Are you sure you want to export?  \r\n" +
 					"This can cause endless prompts on some phones.", 1);
 			formats = new String[] {"OPML", "line by line"};
+			//#endif
 			//#endif
 			//#endif
 		}
@@ -305,6 +308,7 @@ implements
 
 		//This (OK) happens only for export.  Import has insert/add/append
 		//#ifdef DSIGNED
+		//#ifdef DITUNES
 		//#ifdef DJSR75
 		if (m_ok) {
 			m_ok = false;
@@ -381,6 +385,7 @@ implements
 				}
 			}
 		}
+		//#endif
 		//#endif
 		//#endif
 
