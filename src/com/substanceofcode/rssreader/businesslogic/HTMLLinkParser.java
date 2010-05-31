@@ -24,11 +24,16 @@
  * IB 2010-03-07 1.11.4RC1 Use absolute address for redirects.
  * IB 2010-03-07 1.11.4RC1 Recognize style sheet, and DOCTYPE and treat properly.
  * IB 2010-05-24 1.11.5RC2 Log instead of out.println.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser andd HTMLLinkParser in small memory MIDP 1.0 to save space.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
 */
 
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define logging define
 //#define DNOLOGGING
 
+//#ifndef DSMALLMEM
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -114,13 +119,8 @@ public class HTMLLinkParser extends FeedListParser {
         try {
             
 			// The first element is the main tag.
-            int elementType = parser.parse();
 			// If we found the prologue, doctype, or STYLESHEET, get the next entry.
-			while ((elementType == XmlParser.PROLOGUE) ||
-					(elementType == XmlParser.DOCTYPE) ||
-					(elementType == XmlParser.STYLESHEET)) {
-				elementType = parser.parse();
-			}
+            int elementType = parser.parseXmlElement();
 			if (elementType == XmlParser.END_DOCUMENT ) {
 				return null;
 			}
@@ -229,3 +229,4 @@ public class HTMLLinkParser extends FeedListParser {
     }
     
 }
+//#endif
