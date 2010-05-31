@@ -22,6 +22,7 @@
 /*
  * IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
  * IB 2010-05-24 1.11.5RC2 Unit test RssFeedParser class.
+ * IB 2010-05-29 1.11.5RC2 Fix MIDP 1.0 parsing.
 */
 
 // Expand to define MIDP define
@@ -155,14 +156,17 @@ implements Observer
 			//#ifdef DMIDP20
 			fparser.makeObserable(null, updFeed, maxItemCount);
 			fparser.getObserverManager().addObserver(this);
-			//#else
-			fparser.parseRssFeed( false, 10);
-			//#endif
 			fparser.getParsingThread().start();
-			//#ifdef DMIDP20
 			waitReady();
 			//#else
-			fparser.getParsingThread().join();
+			try {
+				fparser.parseRssFeed( false, 10);
+			} catch(Throwable e) {
+				//#ifdef DLOGGING
+				logger.severe(mname + " feedParserTestSub failure parseRssFeed feed=" + feed.getName() + "," + feed.getUrl(),e);
+				//#endif
+				throw e;
+			}
 			//#endif
 			RssItunesFeed nfeed = fparser.getRssFeed();
 			//#ifdef DLOGGING
