@@ -22,11 +22,15 @@
  */
 /*
  * IB 2010-05-24 1.11.5RC2 Test compatibility HTMLAutoLinkParser.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser and HTMLLinkParser in small memory MIDP 1.0 to save space.
  */
 
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define logging define
 @DLOGDEF@
 
+//#ifndef DSMALLMEM
 package com.substanceofcode.rssreader.businesslogic.compatibility4;
 
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFeed;
@@ -263,3 +267,4 @@ public class HTMLAutoLinkParser extends FeedListParser {
     }
 
 }
+//#endif
