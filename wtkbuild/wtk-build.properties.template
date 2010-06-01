@@ -8,6 +8,7 @@
 #-- IB 2010-05-28 1.11.5RC2 Changes for findbugs for future.
 #-- IB 2010-05-28 1.11.5RC2 Make input file for sftp for sites that allow upload with sftp, sourceforge.net and yinlight.net.
 #-- IB 2010-05-28 1.11.5RC2 Put all resource files in src/main/resources.
+#-- IB 2010-05-31 1.11.5RC2 Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
 
 #windows.drive = C:
 windows.drive = 
@@ -159,7 +160,7 @@ app-icon = rss.png
 need.dist.svn.dirs = true
 need.res = true
 res.dir = ../src/main/resources
-res.todir = 
+res.todir = icons
 icons.dir = icons
 #add.jars = true
 #copy.jar.src = true
