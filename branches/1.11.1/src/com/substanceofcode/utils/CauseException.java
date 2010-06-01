@@ -18,6 +18,7 @@
  */
 /*
  * IB 2010-04-30 1.11.5RC2 Track thread info.
+ * IB 2010-04-30 1.11.5RC2 Method to get the first cause.
  */
 
 package com.substanceofcode.utils;
@@ -30,6 +31,7 @@ package com.substanceofcode.utils;
 public class CauseException extends Exception {
     
     private static final long serialVersionUID = 50L;
+    final static protected int MAX_CAUSES = 50;
     private Throwable cause = null;
     final private String threadInfo;
     private boolean causeSet = false;
@@ -64,6 +66,36 @@ public class CauseException extends Exception {
 
     public String getThreadInfo() {
         return (threadInfo);
+    }
+
+    public Throwable getFirstCause() {
+		Throwable e = getCause();
+		if (e == null) {
+			return null;
+		}
+		for (int ic = 0; ic < MAX_CAUSES; ic++) {
+			if (e instanceof CauseException) {
+				CauseException ce = (CauseException)e;
+				Throwable nce;
+				if ((nce = ce.getCause()) == null) {
+					return ce;
+				} else {
+					e = nce;
+				}
+			} else if (e instanceof CauseRuntimeException) {
+				CauseRuntimeException ce = (CauseRuntimeException)e;
+				Throwable nce = ce.getCause();
+				if (nce == null) {
+					return ce;
+				} else {
+					e = nce;
+				}
+			} else {
+				return e;
+			}
+		}
+
+        return null;
     }
 
 }
