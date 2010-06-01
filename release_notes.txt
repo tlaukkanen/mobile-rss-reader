@@ -290,8 +290,11 @@ v1.11.5 Release Candidate 2 (rc2) (Mar 14th 2010)
 + Skip blank lines in line by line parser.
 + Give error if run out of data before finding anything in import file.
 + Do export only for signed, Itunes and JSR-75.
++ Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
++ Give errors for load/store errors.
++ Keep better track of loading finished and display finished message.
 
-Device issues:
+Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
   allow an MP3 to be read from a URL, but play them from the file system)
