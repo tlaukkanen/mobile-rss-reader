@@ -35,6 +35,8 @@
     <!-- IB 2010-05-28 1.11.5RC2 Make input file for sftp for sites that allow upload with sftp.  -->
     <!-- IB 2010-05-30 1.11.5RC2 Improve dist.test.  -->
     <!-- IB 2010-05-30 1.11.5RC2 Add signed targets for MIDP 1.0, MIDP 2.0, MIDP 2.0 and JSR 75. -->
+    <!-- IB 2010-06-01 1.11.5RC2 Taylor images in the jar for the right releases.  File images are only applicable to JSR-75.  -->
+    <!-- IB 2010-06-01 1.11.5RC2 New target compile for distribution for CLDC 1.1, itunes, and JSR-75.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -226,6 +228,7 @@
 		<property name="optional.template" value="" />
 		<property file="${basedir}/optional.properties${optional.template}" />
 		<property name="propdir" value="${basedir}" />
+		<property name="res.includes" value="**/unread.png,**/rss.png" />
 		<property name="MIDLETVERS" value="${MIDLETVERSROOT}" />
 		<property name="PERMISSIONS.jsr75" value="" />
 		<property name="PERMISSIONS.jsr238" value="" />
@@ -646,9 +649,10 @@
 		</copy>
 	</target>
 
-	<target name="copy.res" if="need.res" >
+	<target name="copy.res" depends="prepare" if="need.res" >
+		<echo message="res.includes=${res.includes}" />
 		<copy todir="${tmpres}/${res.todir}" >
-			<fileset dir="${res.dir}" />
+			<fileset dir="${res.dir}" includes="${res.includes}" />
 		</copy>
 	</target>
 
@@ -1317,6 +1321,14 @@
 
 	<!-- Compile for MIDP 2.0 and Itunes and JSR-75 for release -->
 	<target name="dist.compile.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes,prepare.jsr75" >
+		<antcall target="compile" >
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile using WTK with MIDP-2.0, CLDC 1.1, Itunes, JSR-75 and test -->
+	<target name="dist.compile.2.0.cldc.1.1.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.jsr75" >
 		<antcall target="compile" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
