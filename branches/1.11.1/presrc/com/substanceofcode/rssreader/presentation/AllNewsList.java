@@ -23,6 +23,7 @@
  * IB 2010-03-07 1.11.4RC1 Have next item command on item display.
  * IB 2010-05-24 1.11.5RC2 Replace SortUtil with LGPL code to allow adding of LGPL license.
  * IB 2010-05-27 1.11.5RC2 More logging.
+ * IB 2010-06-01 1.11.5RC2 Use back from RssReaderMIDlet if priority matches.
 */
 
 // Expand to define MIDP define
@@ -153,8 +154,7 @@ public class AllNewsList extends FeatureList
 		//#endif
 		m_openHeaderCmd     = new Command("Open", Command.SCREEN,
 				(open1st ? 1 : 2));
-		m_backHeaderCmd     = new Command("Back", Command.BACK,
-				(open1st ? 2 : 1));
+		m_backHeaderCmd     = open1st ? new Command("Back", Command.BACK, 2) : RssReaderMIDlet.m_backCommand;
 		priority++;
 		super.addCommand(m_openHeaderCmd);
 		super.addCommand(m_backHeaderCmd);
