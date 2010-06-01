@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-06-01 1.11.5RC2 Have back be the default first command instead of open to be standard.
+ */
 
 // Expand to define MIDP define
 //#define DMIDP20
@@ -154,7 +157,7 @@ final public class RssReaderSettings {
     
     /** Get feed list back is first command */
     public boolean getFeedListOpen() {
-        return m_settings.getBooleanProperty( FEED_LIST_OPEN, true);
+        return m_settings.getBooleanProperty( FEED_LIST_OPEN, false);
     }
     
     /** Set feed list back is first command */
