@@ -1,11 +1,8 @@
 /*
-   if setCommandListener again, just change user, restart thread, join
-   TODO fix KFileSelectorMgr setCommandListener, deprecated?
-   TODO handle OutOfMemoryError
-   TODO storeDate
  * RssReaderMIDlet.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
+ * Copyright (C) 2007-2010 Irving Bunton, Jr
  * http://www.substanceofcode.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -40,6 +37,10 @@
  * IB 2010-05-29 1.11.5RC2 Fix opening of feed that causes parsing error with MIDP 1.0.
  * IB 2010-05-29 1.11.5RC2 Don't use HTML in small memory MIDP 1.0 to save space.
  * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
+ * IB 2010-05-31 1.11.5RC2 Move display of loading form before loading of settings to allow reporting of settings errors.
+ * IB 2010-05-31 1.11.5RC2 Keep better track of loading finished.
+ * IB 2010-05-31 1.11.5RC2 Change setCurrentNotes so that it will set loading finished if need be and use the current displayable if it's a LoadingForm or use a LoadingForm paramater.
+ * IB 2010-06-01 1.11.5RC2 If we are finished loading or exiting, but there is no back screen, add quit.  Also allow quit if exiting with error.
 */
 
 // Expand to define test define
@@ -77,6 +78,7 @@ import com.substanceofcode.rssreader.presentation.AllNewsList;
 import com.substanceofcode.utils.Settings;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.CauseRecStoreException;
 import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -301,6 +303,7 @@ implements
 
 		//#ifdef DLOGGING
 		initializeLoadingForm("Loading items...", null);
+		m_loadForm.addQuit();
 		try {
 			LogManager logManager = LogManager.getLogManager();
 			logManager.readConfiguration(this);
@@ -334,6 +337,11 @@ implements
 
 		try {
 
+			if (m_loadForm == null) {
+				initializeLoadingForm("Loading items...", null);
+				m_loadForm.addQuit();
+			}
+
 			m_appSettings = RssReaderSettings.getInstance(this);
 			m_itunesEnabled = m_appSettings.getItunesEnabled();
 
@@ -342,7 +350,9 @@ implements
 			m_testBMCmd         = new Command("Test bookmarks shown", Command.SCREEN, 9);
 			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 10);
 			//#endif
-			m_backCommand       = new Command("Back", Command.BACK, 1);
+			if (m_backCommand == null) {
+				m_backCommand       = new Command("Back", Command.BACK, 1);
+			}
 			initExit();
 			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 10);
 			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
@@ -407,12 +417,9 @@ implements
 				m_settings = Settings.getInstance(this);
 				m_firstTime = !m_settings.isInitialized();
 			} catch(Exception e) {
-				ce = new CauseException("Error while getting settings/stored bookmarks", e);
-				//#ifdef DLOGGING
-				logger.severe(e.getMessage(), ce);
-				//#endif
-				System.err.println(ce.getMessage());
-				e.printStackTrace();
+				m_loadForm.recordExcForm(
+						"Internal error.  Error while getting settings/stored bookmarks",
+						e);
 			}
 
 			//#ifdef DLOGGING
@@ -429,7 +436,6 @@ implements
 			logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
 			//#endif
 
-			initializeLoadingForm("Loading items...", null);
 			if (m_appSettings.getMarkUnreadItems()) {
 				try {
 					try {
@@ -1448,6 +1454,7 @@ implements
 					if ( m_exit ) {
 						initializeLoadingForm("Exiting saving data...",
 								m_bookmarkList);
+						m_loadForm.addQuit();
 					} else if ( m_saveBookmarks ) {
 						initializeLoadingForm("Saving data...",
 								m_bookmarkList);
@@ -1525,27 +1532,18 @@ implements
 
 	/* Set current displayable and wake up the thread. */
 	final public void setCurrentNotes(Displayable disp) {
-
-		//#ifdef DTESTUI
-		String title = "";
-		if (disp instanceof Form) {
-			title = ((Form)disp).getTitle();
-		} else if (disp instanceof List) {
-			title = ((List)disp).getTitle();
-		}
-		System.out.println("Test UI setCurrentNotes " + disp.getClass().getName() + "," + title);
-		//#endif
-		if (m_loadForm.hasNotes() || m_loadForm.hasExc()) {
-			m_loadForm.replaceRef(null, disp);
-			setCurrent( m_loadForm );
-		} else {
-			setCurrent( disp );
-		}
+		setCurrentNotes(null, disp);
 	}
 
 	/* Set current displayable and wake up the thread. */
 	final public void setCurrentNotes(Alert alert, Displayable disp) {
 
+		setCurrentNotes(alert, disp, null);
+	}
+
+	/* Set current displayable and wake up the thread. */
+	final public void setCurrentNotes(Alert alert, Displayable disp,
+			LoadingForm cloadForm) {
 		//#ifdef DTESTUI
 		String title = "";
 		if (disp instanceof Form) {
@@ -1555,11 +1553,25 @@ implements
 		}
 		System.out.println("Test UI setCurrentNotes " + disp.getClass().getName() + "," + title);
 		//#endif
-		if (m_loadForm.hasNotes()) {
-			m_loadForm.replaceRef(null, disp);
-			setCurrent( alert, m_loadForm );
+		if (cloadForm == null) {
+			cloadForm = (disp instanceof LoadingForm) ? (LoadingForm)disp : m_loadForm;
+		}
+		if (cloadForm.hasNotes() || cloadForm.hasExc()) {
+			cloadForm.replaceRef(null, disp);
+			if (!cloadForm.isLoadFinished()) {
+				cloadForm.recordFin();
+			}
+			if (alert != null) {
+				setCurrent( alert, cloadForm );
+			} else {
+				setCurrent( cloadForm );
+			}
 		} else {
-			setCurrent( alert, disp );
+			if (alert != null) {
+				setCurrent( alert, disp );
+			} else {
+				setCurrent( disp );
+			}
 		}
 	}
 
@@ -1779,6 +1791,7 @@ implements
 		System.gc();
 		StringBuffer bookmarks = new StringBuffer();
 		m_settings.setStringProperty("bookmarks", bookmarks.toString());
+		m_settings.setLongProperty(Settings.STORE_DATE, storeDate);
 		final int bsize = m_bookmarkList.size();
 		if (bsize == 0) {
 			return;
@@ -1904,6 +1917,7 @@ implements
 		int pl = m_loadForm.append(gauge);
 		showLoadingForm();
 		try {
+			m_settings.setLongProperty(Settings.STORE_DATE, storeDate);
 			m_settings.save(0, false);
 			gauge.setValue(1);
 			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
@@ -1916,18 +1930,20 @@ implements
 			m_settings.save(0, false);
 			gauge.setValue(m_settings.MAX_REGIONS + 1);
 			pl = -1;
+		} catch(CauseRecStoreException e) {
+			if ((e.getFirstCause() != null) &&
+				!(e.getFirstCause() instanceof RecordStoreFullException)) {
+				/* Error saving feeds to database.  Database error. */
+				m_loadForm.recordExcForm(
+						"Error saving feeds to database.  Database error. ", e);
+			} else {
+				/* Error saving feeds to database.  Database full. */
+				m_loadForm.recordExcForm("Error saving feeds to database.  Database full. ", e);
+			}
 		} catch(Exception e) {
-			//#ifdef DLOGGING
-			logger.severe("Saving feeds.", e);
-			//#endif
-			/** Error while parsing RSS feed */
-			System.out.println("Error saving: " + e + e.getMessage());
+			m_loadForm.recordExcForm("Internal error saving feeds.", e);
 		} catch(Throwable t) {
-			//#ifdef DLOGGING
-			logger.severe("Saving feeds.", t);
-			//#endif
-			/** Error while parsing RSS feed */
-			System.out.println("Error saving: " + t + t.getMessage());
+			m_loadForm.recordExcForm("Internal error saving feeds.", t);
 		} finally {
 			if (pl >= 0) {
 				m_loadForm.delete(pl);
@@ -2570,9 +2586,11 @@ implements
 		//#ifdef DMIDP10
 		private String      m_title;         // Store title.
 		//#endif
+		private boolean     m_loadFinished = false;  // Store loading finished.
 		private Command     m_loadMsgsCmd;   // The load form messages command
 		private Command     m_loadDiagCmd;   // The load form diagnostic command
 		private Command     m_loadErrCmd;    // The load form error command
+		private Command     m_loadQuitCmd = null;   // The load form quit command
 		private Vector m_msgs = new Vector(); // Original messages
 		private Vector m_notes = new Vector(); // Notes
 		private Vector m_excs = new Vector(); // Only errors
@@ -2612,6 +2630,16 @@ implements
 			}
 		}
 
+		/* Add quit command used for errors during exit. */
+		public void addQuit() {
+			/* Quit */
+			if (m_loadQuitCmd == null) {
+				m_loadQuitCmd = new Command("Quit", Command.CANCEL, 200);
+			}
+			super.addPromptCommand( m_loadQuitCmd,
+					"Are you sure you want to quit the program without saving?");
+		}
+
 		/** Respond to commands */
 		public void commandAction(Command c, Displayable s) {
 
@@ -2626,6 +2654,15 @@ implements
 				}
 				//#endif
 				setCurrent( cdisp );
+			}
+
+			if( c == m_loadQuitCmd ){
+				try {
+					destroyApp(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				m_midlet.notifyDestroyed();
 			}
 
 			/** Give messages for loading */
@@ -2653,12 +2690,14 @@ implements
 			if (msg != null) {
 				appendMsg(msg);
 			}
+			setLoadFinished(true);
 		}
 		
 		/* Record the exception in the loading form, log it and give std error. */
 		public void recordFin() {
 			setTitle("Finished with errors or exceptions below");
 			appendMsg("Finished with errors or exceptions above");
+			setLoadFinished(true);
 		}
 
 		/* Record the exception in the loading form, log it and give std error. */
@@ -2816,6 +2855,21 @@ implements
 			return m_title;
 		}
 		//#endif
+
+		public void setLoadFinished(boolean loadFinished) {
+			this.m_loadFinished = loadFinished;
+			Displayable cdisp = null;
+			synchronized(this) {
+				cdisp = m_disp;
+			}
+			if (cdisp == null) {
+				addQuit();
+			}
+		}
+
+		public boolean isLoadFinished() {
+			return (m_loadFinished);
+		}
 
 		//#ifdef DMIDP20
 		public void setObservable(Observable observable) {
