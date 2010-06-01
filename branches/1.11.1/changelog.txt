@@ -415,9 +415,32 @@ Program issues:
 - Check for html, htm, shtml, and shtm suffixes.
 - Do export only for signed, Itunes and JSR-75.
 - Add signed targets for MIDP 1.0, MIDP 2.0, MIDP 2.0 and JSR 75.  Targets are disabled normally.  They are for future use.
+- Taylor images in the jar for the right releases.  File images are only applicable to JSR-75.
+- Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
+- Give errors for load/store errors.
+- If ITEMS_ENCODED or STORE_DATE not set, set it.
+- Use constant for store name.
+- Move display of loading form before loading of settings to allow reporting of settings errors.
+- Keep better track of loading finished.
+- Change setCurrentNotes so that it will set loading finished if need be and use the current displayable if it's a LoadingForm or use a LoadingForm paramater.
+- Have RuntimException with cause.
+- Have record store exception with cause.
+- Use back from RssReaderMIDlet if priority matches for AllNewsList.
+- Have back be the default first command instead of open to be standard.
+- If we are finished loading or exiting, but there is no back screen, add quit.  Also allow quit if exiting with error.
+- New target compile for distribution for CLDC 1.1, itunes, and JSR-75.
+
+Issues:
+
+- For some emulators, bookmarks are not saved.
 
 TODO:
 
+- Have the same order for OK, Back, Cancel, Exit, and Open.
+- Share cancel command.
+- If setCommandListener again, just change user, restart thread, join
+- Handle storeDate.
+- Handle OutOfMemoryError.
 - Optionally keep the back light on with desired intensity.
 - Optionally flash the backlight for a specific duration when update all is complete.
 - Check if need to set to itunes feed if not in header, but in items.
