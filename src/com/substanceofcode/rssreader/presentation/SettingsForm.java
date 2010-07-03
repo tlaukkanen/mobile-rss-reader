@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-03-07 1.11.5RC1 Remove unneeded import.
+ * IB 2010-06-27 1.11.5Dev2 Change getSettingMemInfo to return int array to save memory and simplify.
  */
 
 // Expand to define MIDP define
@@ -37,7 +38,6 @@
 package com.substanceofcode.rssreader.presentation;
 
 import java.lang.IllegalArgumentException;
-import java.io.IOException;
 import java.util.Hashtable;
 
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
@@ -307,7 +307,7 @@ implements CommandListener {
     
 	/* Update form items that change per run. */
 	public void updateForm() {
-		Hashtable memInfo = null;
+		int[] memInfo = null;
         RssReaderSettings settings = m_midlet.getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
         m_itemCountField.setString(String.valueOf(maxCount));
@@ -344,7 +344,7 @@ implements CommandListener {
 			Settings m_settings = Settings.getInstance(m_midlet);
 			memInfo = m_settings.getSettingMemInfo();
 		} catch (Exception e) {
-			memInfo = new Hashtable(0);
+			memInfo = new int[0];
 		}
 
 		System.gc();
@@ -352,12 +352,12 @@ implements CommandListener {
 		long freeMem = Runtime.getRuntime().freeMemory();
 		m_pgmMemUsedItem.setText(((totalMem - freeMem)/1024L) + "kb");
 		m_pgmMemAvailItem.setText((freeMem/1024L) + "kb");
-        if (memInfo.size() == 0) {
+        if (memInfo.length == 0) {
 			m_memUsedItem.setText("0");
 			m_memAvailItem.setText("0");
 		} else {
-			m_memUsedItem.setText((String)memInfo.get("used"));
-			m_memAvailItem.setText((String)memInfo.get("available"));
+			m_memUsedItem.setText(Integer.toString(memInfo[0]));
+			m_memAvailItem.setText(Integer.toString(memInfo[1]));
 		}
 		m_threadsUsed.setText(Integer.toString(Thread.activeCount()));
 	}
