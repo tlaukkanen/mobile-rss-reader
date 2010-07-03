@@ -31,6 +31,7 @@
  * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-05-29 1.11.5RC2 Better logging.
+ * IB 2010-05-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
 */
 
 // Expand to define MIDP define
@@ -59,8 +60,8 @@ import java.io.*;
 
 import com.substanceofcode.utils.CauseException;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observable;
-import net.eiroca.j2me.observable.ObserverManager;
+import net.yinlight.j2me.observable.Observable;
+import net.yinlight.j2me.observable.ObservableHandler;
 //#endif
 
 //#ifdef DLOGGING
@@ -92,7 +93,7 @@ implements
     private boolean m_successfull = false;
     private CauseException m_ex = null;
 	//#ifdef DMIDP20
-    private ObserverManager observerMgr = null;
+    private ObservableHandler observableHandler = null;
 	//#endif
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssFeedParser");
@@ -117,7 +118,7 @@ implements
 		m_midlet = midlet;
 		m_updFeed = updFeed;
 		m_maxItemCount = maxItemCount;
-		observerMgr = new ObserverManager(this);
+		observableHandler = new ObservableHandler();
         m_parsingThread = MiscUtil.getThread(this, "RssFeedParser", this,
 				"makeObserable");
 		//#ifdef DLOGGING
@@ -307,8 +308,8 @@ implements
     }
     
 	//#ifdef DMIDP20
-	public ObserverManager getObserverManager() {
-		return observerMgr;
+	public ObservableHandler getObservableHandler() {
+		return observableHandler;
 	}
 	//#endif
 
@@ -367,8 +368,8 @@ implements
 				m_midlet.wakeup(2);
 			}
 			//#ifdef DMIDP20
-			if (observerMgr != null) {
-				observerMgr.notifyObservers(this);
+			if (observableHandler != null) {
+				observableHandler.notifyObservers(this);
 			}
 			//#endif
 			//#ifdef DLOGGING
