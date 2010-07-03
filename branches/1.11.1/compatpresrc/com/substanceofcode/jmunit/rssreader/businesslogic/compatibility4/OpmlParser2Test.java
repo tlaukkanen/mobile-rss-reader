@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-05-28 1.11.5RC2 Do comparison test using OpmlParser with links-opml.xml.
+ * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  */
 
 // Expand to define MIDP define
@@ -54,8 +55,8 @@ import com.substanceofcode.rssreader.businesslogic.compatibility4.HTMLAutoLinkPa
 import com.substanceofcode.rssreader.businesslogic.compatibility4.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.LineByLineParser;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observer;
-import net.eiroca.j2me.observable.Observable;
+import net.eiroca.j2me.observable.compatibility4.Observer;
+import net.eiroca.j2me.observable.compatibility4.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -71,7 +72,7 @@ import net.sf.jlogmicro.util.logging.Level;
    */
 final public class OpmlParser2Test extends BaseTestCase
 //#ifdef DMIDP20
-implements Observer
+implements Observer, net.yinlight.j2me.observable.Observer
 //#endif
 {
 
@@ -118,6 +119,10 @@ implements Observer
 
 	//#ifdef DMIDP20
 	public void changed(Observable observable) {
+		ready = true;
+	}
+
+	public void changed(net.yinlight.j2me.observable.Observable observable, Object arg) {
 		ready = true;
 	}
 
@@ -199,7 +204,7 @@ implements Observer
 				feedListParser.setFeedURLFilter("/rss");
 			}
 			//#ifdef DMIDP20
-			feedListParser.getObserverManager().addObserver(this);
+			feedListParser.getObservableHandler().addObserver(this);
 			//#endif
 			feedListParser.startParsing();
 			//#ifdef DMIDP20
