@@ -24,6 +24,7 @@
  * IB 2010-05-24 1.11.5RC2 Replace SortUtil with LGPL code to allow adding of LGPL license.
  * IB 2010-05-27 1.11.5RC2 More logging.
  * IB 2010-06-01 1.11.5RC2 Use back from RssReaderMIDlet if priority matches.
+ * IB 2010-06-01 1.11.5RC2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
 */
 
 // Expand to define MIDP define
@@ -59,6 +60,7 @@ import com.substanceofcode.testlcdui.LogActIntr;
 // If using the test UI define the Test UI's
 
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
@@ -84,7 +86,7 @@ public class AllNewsList extends FeatureList
 	//#endif
     protected RssReaderMIDlet m_midlet;
 	// The loading form
-	protected RssReaderMIDlet.LoadingForm m_loadForm;
+	protected LoadingForm m_loadForm;
     protected boolean     m_sort      = false; // Process sort
     protected boolean     m_sortDesc;          // Sort descending
     protected boolean     m_sortByDate = true; // Sort by date
@@ -135,7 +137,7 @@ public class AllNewsList extends FeatureList
 					   final FeatureList bookmarkList,
 					   final Hashtable rssFeeds,
 					   Image unreadImage,
-			RssReaderMIDlet.LoadingForm loadForm, int priority) {
+					   LoadingForm loadForm, int priority) {
 		super(midlet, title, listType);
 		//#ifdef DLOGGING
 		if (m_fineLoggable) {m_logger.fine("Starting AllNewsList");}
