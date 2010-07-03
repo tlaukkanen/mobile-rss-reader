@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-06-27 1.11.5Dev2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+ */
 
 // Expand to define MIDP define
 //#define DMIDP20
@@ -70,6 +73,7 @@ import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 //@import org.kablog.kgui.KFileSelectorMgr;
 //#endif
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -111,7 +115,7 @@ public class URLForm extends FeatureForm
 	protected Hashtable m_rssFeeds;         // The bookmark URLs
 	protected RssReaderSettings m_appSettings;// The application settings
 	// The loading form
-	protected RssReaderMIDlet.LoadingForm m_loadForm;
+	protected LoadingForm m_loadForm;
 	protected Thread m_thread = null; // The thread
 
 	//#ifdef DLOGGING
@@ -123,7 +127,7 @@ public class URLForm extends FeatureForm
 			boolean selectDir,
 			Hashtable rssFeeds,
 			RssReaderSettings appSettings,
-			RssReaderMIDlet.LoadingForm loadForm) {
+			LoadingForm loadForm) {
 		super(midlet, formName);
 		m_midlet = midlet;
 		//#ifdef DJSR75
