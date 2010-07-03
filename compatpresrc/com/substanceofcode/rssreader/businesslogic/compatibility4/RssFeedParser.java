@@ -24,6 +24,7 @@
  * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.  Don't set updated and etag if the updated and etag match since the values are not retrieved if it matches.  Use string for updated date (last-modified).
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-05-30 1.11.5RC2 Use compatibility URLHandler.
+ * IB 2010-06-29 1.11.5RC2 Use compatibility observer pattern.
 */
 
 // Expand to define MIDP define
@@ -54,8 +55,8 @@ import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.rssreader.businesslogic.SgmlFormatParser;
 import com.substanceofcode.utils.CauseException;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observable;
-import net.eiroca.j2me.observable.ObserverManager;
+import net.eiroca.j2me.observable.compatibility4.Observable;
+import net.eiroca.j2me.observable.compatibility4.ObserverManager;
 //#endif
 
 //#ifdef DLOGGING
