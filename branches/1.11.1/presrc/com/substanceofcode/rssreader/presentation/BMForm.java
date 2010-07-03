@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-05-26 1.11.5RC2 Code cleanup.
+ * IB 2010-06-27 1.11.5RC2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
  */
 
 // Expand to define MIDP define
@@ -69,6 +70,7 @@ import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -91,7 +93,7 @@ final public class BMForm extends URLForm
 			Hashtable rssFeeds,
 			RssReaderSettings appSettings,
 			FeatureList bookmarkList,
-			RssReaderMIDlet.LoadingForm loadForm) {
+			LoadingForm loadForm) {
 		super(midlet, "New Bookmark", false, rssFeeds, appSettings, loadForm);
 		this.m_addForm = true;
 		this.m_bookmarkList = bookmarkList;
@@ -107,7 +109,7 @@ final public class BMForm extends URLForm
 			Hashtable rssFeeds,
 			RssReaderSettings appSettings,
 			FeatureList bookmarkList,
-			RssReaderMIDlet.LoadingForm loadForm,
+			LoadingForm loadForm,
 			final RssItunesFeed bm) {
 		super(midlet, "Edit Bookmark", false, rssFeeds, appSettings,
 				loadForm);
