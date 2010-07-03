@@ -24,6 +24,7 @@
  * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.
  * IB 2010-05-24 1.11.5RC2 Use BaseTestCase to log start of test.
  * IB 2010-05-29 1.11.5RC2 Use ready only for MIDP 2.0 with observer pattern.
+ * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
 */
 
 // Expand to define MIDP define
@@ -49,8 +50,8 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observer;
-import net.eiroca.j2me.observable.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 final public class RssFeedStoreStrTest extends BaseTestCase
@@ -102,7 +103,7 @@ implements Observer
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 		ready = true;
 	}
 
@@ -332,7 +333,7 @@ implements Observer
 			//#ifdef DMIDP20
 			fparser.makeObserable(null, true, 10);
 			ready = false;
-			fparser.getObserverManager().addObserver(this);
+			fparser.getObservableHandler().addObserver(this);
 			fparser.getParsingThread().start();
 			waitReady();
 			//#else
