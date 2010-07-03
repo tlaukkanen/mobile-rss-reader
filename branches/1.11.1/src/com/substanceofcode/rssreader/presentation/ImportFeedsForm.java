@@ -31,6 +31,8 @@
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser, HTMLLinkParser, and HTMLAutoLinkParser in small memory MIDP 1.0 to save space.
  * IB 2010-05-28 1.11.5RC2 Only do export if signed and MIDP 2.0.
  * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
+ * IB 2010-06-27 1.11.5Dev2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-06-27 1.11.5Dev2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
 */
 // FIX check for blank url
 
@@ -80,6 +82,8 @@ import javax.microedition.lcdui.TextField;
 //#endif
 import javax.microedition.lcdui.Item;
 
+import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -95,8 +99,8 @@ import com.substanceofcode.rssreader.businesslogic.HTMLAutoLinkParser;
 import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
 //#endif
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observer;
-import net.eiroca.j2me.observable.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 //#ifdef DLOGGING
@@ -152,7 +156,7 @@ implements
 			FeatureList bookmarkList, boolean importFeeds,
 			Hashtable rssFeeds,
 			RssReaderSettings appSettings,
-			RssReaderMIDlet.LoadingForm loadForm, String url) {
+			LoadingForm loadForm, String url) {
 		super(midlet, (importFeeds ? "Import" : "Export") + " feeds",
 				!importFeeds, rssFeeds, appSettings, loadForm);
 		m_bookmarkList = bookmarkList;
@@ -237,11 +241,11 @@ implements
    * @param observable
    * @author Irv Bunton
    */
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 
 		FeedListParser cbackGrListParser = null;
 		synchronized(this) {
-			cbackGrListParser = (FeedListParser)observable.getObserverManager(
+			cbackGrListParser = (FeedListParser)observable.getObservableHandler(
 						).checkActive(m_parseBackground,
 						m_backGrListParser, observable);
 		}
@@ -249,7 +253,7 @@ implements
 			return;
 		}
 
-		if (!cbackGrListParser.getObserverManager().isCanceled()) {
+		if (!cbackGrListParser.getObservableHandler().isCanceled()) {
 			addFeedLists(cbackGrListParser);
 		}
 	}
@@ -286,8 +290,8 @@ implements
 					cfeedListParser.getUrl(), t);
 		} finally {
 			//#ifdef DMIDP20
-			if (cfeedListParser.getObserverManager() != null) {
-				cfeedListParser.getObserverManager().removeObserver(this);
+			if (cfeedListParser.getObservableHandler() != null) {
+				cfeedListParser.getObservableHandler().deleteObserver(this);
 			}
 			//#endif
 			m_loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
@@ -466,7 +470,7 @@ implements
 				//#ifdef DMIDP20
 				synchronized(this) {
 					m_backGrListParser = clistParser;
-					m_backGrListParser.getObserverManager().addObserver(this);
+					m_backGrListParser.getObservableHandler().addObserver(this);
 					m_parseBackground = true;
 					m_loadForm.setObservable(m_backGrListParser);
 				}
@@ -566,7 +570,7 @@ implements
 	public static void addFeedLists(FeedListParser listParser,
 			int addBkmrk,
 			int maxItemCount, boolean override, Hashtable rssFeeds,
-			FeatureList bookmarkList, RssReaderMIDlet.LoadingForm loadForm)
+			FeatureList bookmarkList, LoadingForm loadForm)
 	throws CauseException, Exception {
 		//#ifdef DLOGGING
 //@		Logger logger = Logger.getLogger("ImportFeedsForm");
