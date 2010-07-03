@@ -23,6 +23,7 @@
  * IB 2010-05-24 1.11.5RC2 Unit test HTMLLinkParser class.
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser HtmlLinkParserTest in small memory MIDP 1.0 to save space.
  * IB 2010-05-28 1.11.5RC2 Code cleanup.
+ * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  */
 
 // Expand to define memory size define
@@ -47,8 +48,8 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
 //#endif
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observer;
-import net.eiroca.j2me.observable.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -77,7 +78,7 @@ implements Observer
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 		ready = true;
 	}
 	//#endif
@@ -120,7 +121,7 @@ implements Observer
 			//#endif
 			ready = false;
 			//#ifdef DMIDP20
-			htmlParser.getObserverManager().addObserver(this);
+			htmlParser.getObservableHandler().addObserver(this);
 			//#endif
 			htmlParser.startParsing();
 			//#ifdef DMIDP20
