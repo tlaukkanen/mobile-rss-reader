@@ -9,6 +9,10 @@
 #-- IB 2010-05-28 1.11.5RC2 Make input file for sftp for sites that allow upload with sftp, sourceforge.net and yinlight.net.
 #-- IB 2010-05-28 1.11.5RC2 Put all resource files in src/main/resources.
 #-- IB 2010-05-31 1.11.5RC2 Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
+#-- IB 2010-05-31 1.11.5RC2 Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
+#-- IB 2010-06-29 1.11.5RC2 Put in option for Proguard 4.4.
+#-- IB 2010-06-29 1.11.5RC2 Put in option for using timestamp for Thawte (currently not supported for code signing certificates).
+#-- IB 2010-06-29 1.11.5RC2 Put in option for using netbeans src directory.
 
 #windows.drive = C:
 windows.drive = 
@@ -66,6 +70,7 @@ wtk.home = ${windows.drive}${env.WTK_HOME}
 #wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #wtk.proguard.home = ${windows.drive}/opt/tools/proguard/proguard4.2
 #wtk.proguard.home = ${opt.tools}/proguard/proguard4.3
+#wtk.proguard.home = ${opt.tools}/proguard/proguard4.4
 wtk.proguard.home = ${opt.tools}/proguard/proguard4.5beta3
 #For phoneMe Windows
 #phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
@@ -112,6 +117,7 @@ prc.creater = MRSS
 project.description = RSS/News/Blog Reader
 prc.longname = ${project.description}
 MIDLETURL_ROOT = http://mobile-rss-reader.googlecode.com/files
+thawte.tsa.url = http://tsa.starfieldtech.com/
 separator = /
 MIDLETVERSROOT = 1.11.5
 #Need vers with '_' to allow uploading to sites that get confused by to
@@ -146,6 +152,7 @@ src.controlled.copy = true
 #wtk.src = ../../src
 #wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReader/src
 wtk.src = ${env.j2mewtk}/${project.name}/src
+#wtk.src = ${env.j2menetbeans}/${project.name}/src
 zipdir = ../zipedsrc
 need.svn.preprocessed = true
 #svn.home = C:\\PROGRA~1\\COLLAB~1
