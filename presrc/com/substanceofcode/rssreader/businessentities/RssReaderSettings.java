@@ -21,14 +21,25 @@
  */
 /*
  * IB 2010-06-01 1.11.5RC2 Have back be the default first command instead of open to be standard.
+ * IB 2010-06-02 1.11.5RC2 Have getSettingsInstance to get the Settings instance.
+ * IB 2010-06-02 1.11.5RC2 Have deleteSettings to allow tests to delete/null settings.
+ * IB 2010-06-02 1.11.5RC2 Need to use logging define to set logging.
+ * IB 2010-06-02 1.11.5RC2 Save error from loading settings.
+ * IB 2010-06-02 1.11.5RC2 More logging.
+ * IB 2010-06-27 1.11.5RC2 If CLDC 1.1, use synchronized class statement vs static synchronized modifier.
+ * IB 2010-06-27 1.11.5Dev2 Use volatile for instance vars.
  */
 
 // Expand to define MIDP define
 @DMIDPVERS@
+// Expand to define CLDC define
+@DCLDCVERS@
 // Expand to define itunes define
 @DITUNESDEF@
 // Expand to define test define
 @DTESTDEF@
+// Expand to define logging define
+@DLOGDEF@
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Settings;
@@ -38,6 +49,10 @@ import javax.microedition.rms.RecordStoreException;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.List;
 
+//#ifdef DLOGGING
+import net.sf.jlogmicro.util.logging.Logger;
+//#endif
+
 /**
  * RssFeedReaderSettings contains application's settings.
  *
@@ -45,8 +60,8 @@ import javax.microedition.lcdui.List;
  */
 final public class RssReaderSettings {
     
-    private Settings m_settings;
-    private static RssReaderSettings m_singleton;    
+    volatile private Settings m_settings;
+    volatile private static RssReaderSettings m_singleton = null;
 	//#ifdef DMIDP20
     public static final int DEFAULT_FONT_CHOICE = 0;
 	//#endif
@@ -68,6 +83,7 @@ final public class RssReaderSettings {
     private static final String USE_STANDARD_EXIT = "use-standard-exit";
     private static final String NOVICE = "novice";
     public static final int INIT_MAX_ITEM_COUNT = 10;
+    private Throwable m_loadExc = null;
 	//#ifdef DLOGGING
     private static final String LOG_LEVEL = "log-level";
 	//#endif
@@ -75,18 +91,38 @@ final public class RssReaderSettings {
     /** Creates a new instance of RssReaderSettings */
     private RssReaderSettings(MIDlet midlet) {
         try {
+			//#ifdef DLOGGING
+			Logger.getLogger("RssReaderSettings").info("Constructor midlet=" +
+					midlet);
+			//#endif
             m_settings = Settings.getInstance(midlet);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Throwable e) {
+			m_loadExc = e;
+            e.printStackTrace();
         }
     }
     
     /** Get instance */
-    public static RssReaderSettings getInstance(MIDlet midlet) {
+	//#ifdef DCLDCV11
+    public static RssReaderSettings getInstance(MIDlet midlet)
+	//#else
+    public static synchronized RssReaderSettings getInstance(MIDlet midlet)
+	//#endif
+	{
+		//#ifdef DCLDCV11
+		synchronized(Settings.class) {
+		//#endif
+		//#ifdef DLOGGING
+		Logger.getLogger("RssReaderSettings").info(
+				"Constructor midlet,m_singleton=" + midlet + "," + m_singleton);
+		//#endif
         if(m_singleton==null) {
             m_singleton = new RssReaderSettings(midlet);
         }
         return m_singleton;
+		//#ifdef DCLDCV11
+        }
+		//#endif
     }
     
     /** Get maximum item count */
@@ -147,7 +183,11 @@ final public class RssReaderSettings {
     
     /** Get mark unread items */
     public boolean getMarkUnreadItems() {
+		//#ifdef DMIDP20
+        return m_settings.getBooleanProperty( MARK_UNREAD_ITEMS, true);
+		//#else
         return m_settings.getBooleanProperty( MARK_UNREAD_ITEMS, false);
+		//#endif
     }
     
     /** Set import URL password */
@@ -279,5 +319,23 @@ final public class RssReaderSettings {
     public String getSettingsVers() {
         return m_settings.getStringProperty( 0, Settings.SETTINGS_NAME, "");
     }
+    
+    public Throwable getLoadExc() {
+        return (m_loadExc);
+    }
+
+    public Settings getSettingsInstance() {
+        return (m_settings);
+    }
+
+	//#ifdef DTEST
+	final public void deleteSettings() {
+		if (m_settings != null) {
+			m_settings.deleteSettings();
+			m_settings = null;
+		}
+		m_singleton = null;    
+	}
+	//#endif
     
 }
