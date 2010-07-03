@@ -18,6 +18,7 @@
  */
 /*
  * IB 2010-05-24 1.11.5RC2 Use CauseException in compatibility package for testing.
+ * IB 2010-07-03 1.11.5RC2 Have different serialVersionUID.
  */
 
 package com.substanceofcode.utils.compatibility4;
