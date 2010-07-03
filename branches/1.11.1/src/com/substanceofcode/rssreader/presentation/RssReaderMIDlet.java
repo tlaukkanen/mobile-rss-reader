@@ -41,6 +41,20 @@
  * IB 2010-05-31 1.11.5RC2 Keep better track of loading finished.
  * IB 2010-05-31 1.11.5RC2 Change setCurrentNotes so that it will set loading finished if need be and use the current displayable if it's a LoadingForm or use a LoadingForm paramater.
  * IB 2010-06-01 1.11.5RC2 If we are finished loading or exiting, but there is no back screen, add quit.  Also allow quit if exiting with error.
+ * IB 2010-06-02 1.11.5RC2 Use settings instance from RssReaderSettings to make sure that we share the same one.
+ * IB 2010-06-27 1.11.5Dev2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-06-27 1.11.5Dev2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+ * IB 2010-06-27 1.11.5Dev2 Use volatile for m_firstTime in RssReaderMIDlet.
+ * IB 2010-06-27 1.11.5Dev2 Have test reload db.
+ * IB 2010-06-27 1.11.5Dev2 Make sure m_loadForm is not null when using RssReaderMIDlet.
+ * IB 2010-06-27 1.11.5Dev2 Have static methods to load/save settings and bookmarks for better testing.
+ * IB 2010-06-27 1.11.5Dev2 Have set current allow displayable as alert to handle alert bugs in the future.
+ * IB 2010-06-27 1.11.5Dev2 Have static initSettingsEnabled to load app and general settings to help with testing.
+ * IB 2010-06-27 1.11.5Dev2 Have static loadBookmarkList load bookmarks from settings DB to help with testing.
+ * IB 2010-06-27 1.11.5Dev2 Make sure m_appSettings is not null when using RssReaderMIDlet.
+ * IB 2010-06-27 1.11.5Dev2 Change command priorities to be in the right order and have update mod ahead of udpate all.
+ * IB 2010-06-27 1.11.5Dev2 Set gauge based on max value to be more flexible.
+ * IB 2010-06-27 1.11.5Dev2 Have procBookmarkExc to handle exceptions for init/load of bookmarks.
 */
 
 // Expand to define test define
@@ -87,6 +101,7 @@ import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.rms.*;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
@@ -122,8 +137,8 @@ import javax.microedition.lcdui.StringItem;
 //#endif
 
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observer;
-import net.eiroca.j2me.observable.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 //#ifdef DLOGGING
@@ -157,10 +172,10 @@ implements
     // Attributes
     private Display     m_display;          // The display for this MIDlet
     private Displayable m_prevDisp;         // The displayable to return to
-    private Settings    m_settings;         // The settings
-    private RssReaderSettings m_appSettings;// The application settings
+    private Settings    m_settings = null;         // The settings
+    private RssReaderSettings m_appSettings = null;// The application settings
 
-    private Hashtable   m_rssFeeds;         // The bookmark URLs
+    private Hashtable   m_rssFeeds = new Hashtable(); // The bookmark URLs
     private RssReaderMIDlet m_midlet;       // The display for this MIDlet
     final static public boolean JSR75_ENABLED =
 	          (System.getProperty(
@@ -210,7 +225,7 @@ implements
 	// Tells us if this is the first time program was used.  This is
 	// done by seeing if max item count is set.  We also set it after
 	// showing the about.
-    private boolean     m_firstTime = false;
+    volatile private boolean m_firstTime = false;
     private boolean     m_novice = false;
     private boolean     m_itunesEnabled = false;
 	//#ifdef DMIDP20
@@ -269,7 +284,8 @@ implements
 	//#endif
 	//#endif
 	//#ifdef DTEST
-//@    private Command     m_importCurrFeedListCmd;// The import feed list command and default current seleected feed
+//@    private Command     m_importCurrFeedListCmd; // The import feed list command and default current seleected feed
+//@    private Command     m_reloadDbCmd; // The close and reload the database.
 	//#endif
 	//#ifdef DTESTUI
 //@    private Command     m_testEncCmd;     // The test encoding
@@ -304,8 +320,15 @@ implements
 		//#endif
 
 		//#ifdef DLOGGING
-//@		initializeLoadingForm("Loading items...", null);
-//@		m_loadForm.addQuit();
+//@		try {
+//@			initializeLoadingForm("Loading items...", null);
+//@			m_loadForm.addQuit();
+//@		} catch (Throwable t) {
+//@			if (m_loadForm != null) {
+//@				m_loadForm.recordExcForm("Internal error loading form.",
+//@						t);
+//@			}
+//@		}
 //@		try {
 //@			LogManager logManager = LogManager.getLogManager();
 //@			logManager.readConfiguration(this);
@@ -340,12 +363,32 @@ implements
 		try {
 
 			if (m_loadForm == null) {
-				initializeLoadingForm("Loading items...", null);
-				m_loadForm.addQuit();
+				try {
+					initializeLoadingForm("Loading items...", null);
+					m_loadForm.addQuit();
+				} catch (Throwable t) {
+					if (m_loadForm != null) {
+						m_loadForm.recordExcForm("Internal error loading form.",
+								t);
+					}
+				}
 			}
 
-			m_appSettings = RssReaderSettings.getInstance(this);
-			m_itunesEnabled = m_appSettings.getItunesEnabled();
+			//#ifdef DLOGGING
+//@			fineLoggable = logger.isLoggable(Level.FINE);
+//@			logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+			//#endif
+			Object[] arrsettings = FeatureMgr.initSettingsEnabled(
+					this, m_loadForm
+				    //#ifdef DLOGGING
+//@					,logger
+//@					,fineLoggable
+					//#endif
+					);
+			m_appSettings = (RssReaderSettings)arrsettings[0];
+			m_settings = (Settings)arrsettings[1];
+			m_firstTime = ((Boolean)arrsettings[2]).booleanValue();
+			m_itunesEnabled = ((Boolean)arrsettings[3]).booleanValue();
 
 			/** Initialize commands */
 			//#ifdef DTESTUI
@@ -356,28 +399,31 @@ implements
 				m_backCommand       = new Command("Back", Command.BACK, 1);
 			}
 			initExit();
-			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 10);
-			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 2);
-			m_openBookmark      = new Command("Open feed", Command.SCREEN, 1);
-			m_readUnreadItems   = new Command("River of news", Command.SCREEN, 3);
-			m_editBookmark      = new Command("Edit feed", Command.SCREEN, 4);
-			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 5);
-			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 6);
+			m_openBookmark      = new Command("Open feed", Command.SCREEN, 2);
+			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 3);
+			m_readUnreadItems   = new Command("River of news", Command.SCREEN, 4);
+			m_editBookmark      = new Command("Edit feed", Command.SCREEN, 5);
+			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 6);
+			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 7);
 			//#ifdef DSIGNED
 			//#ifdef DITUNES
 			//#ifdef DJSR75
-//@			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, 7);
+//@			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, 8);
 			//#endif
 			//#endif
 			//#endif
 			//#ifdef DTEST
-//@			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 8);
+//@			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 9);
 			//#endif
-			m_settingsCmd       = new Command("Settings", Command.SCREEN, 11);
-			m_aboutCmd          = new Command("About", Command.SCREEN, 12);
-			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 9);
 			m_updateAllModCmd   = new Command("Update modified all",
 											  Command.SCREEN, 10);
+			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 11);
+			//#ifdef DTEST
+//@			m_reloadDbCmd       = new Command("Reload DB", Command.SCREEN, 12);
+			//#endif
+			m_settingsCmd       = new Command("Settings", Command.SCREEN, 13);
+			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 14);
+			m_aboutCmd          = new Command("About", Command.SCREEN, 17);
 			//#ifdef DTESTUI
 //@			m_testEncCmd        = new Command("Testing Form", Command.SCREEN, 4);
 			//#endif
@@ -386,7 +432,7 @@ implements
 //@			m_debugCmd          = new Command("Debug Log", Command.SCREEN, 4);
 //@			m_clearDebugCmd     = new Command("Clear", Command.SCREEN, 1);
 //@			m_backFrDebugCmd    = new Command("Back", Command.BACK, 2);
-		//#endif
+			//#endif
 			
 			m_getPage = false;
 			m_exit = false;
@@ -415,30 +461,26 @@ implements
 			CauseException ce = null;
 			
 			// To get proper initialization, need to 
-			try {
-				m_settings = Settings.getInstance(this);
-				m_firstTime = !m_settings.isInitialized();
-			} catch(Exception e) {
-				m_loadForm.recordExcForm(
-						"Internal error.  Error while getting settings/stored bookmarks",
-						e);
-			}
+			//#ifdef DLOGGING
+//@			if (m_appSettings != null) {
+//@				if (m_appSettings.getLogLevel().length() == 0) {
+//@					m_appSettings.setLogLevel(
+//@							logger.getParent().getLevel().getName());
+//@				} else {
+//@					logger.getParent().setLevel(
+//@					Level.parse(m_appSettings.getLogLevel()));
+//@				}
+//@			}
+			//#endif
 
 			//#ifdef DLOGGING
-//@			if (m_appSettings.getLogLevel().length() == 0) {
-//@				m_appSettings.setLogLevel(
-//@						logger.getParent().getLevel().getName());
-//@			} else {
-//@				logger.getParent().setLevel(
-//@				Level.parse(m_appSettings.getLogLevel()));
-//@			}
 //@			fineLoggable = logger.isLoggable(Level.FINE);
 //@			logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
 //@			finestLoggable = logger.isLoggable(Level.FINEST);
 //@			logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
 			//#endif
 
-			if (m_appSettings.getMarkUnreadItems()) {
+			if ((m_appSettings != null) && m_appSettings.getMarkUnreadItems()) {
 				try {
 					try {
 						// createImage("/icons/unread.png") does not always work
@@ -453,8 +495,10 @@ implements
 						is.close();
 						//#endif
 					}
-				} catch(Exception e) {
-					System.err.println("Error while getting mark image: " + e.toString());
+				} catch(Throwable e) {
+					ce = new CauseException("Error while getting mark image: " +
+							e.toString(), e);
+					System.err.println(ce.getMessage());
 				}
 			}
 			
@@ -462,7 +506,7 @@ implements
 				m_loadForm.addExc(ce.getMessage(), ce);
 			}
 
-		}catch(Throwable t) {
+		} catch(Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("RssReaderMIDlet constructor ", t);
 			//#endif
@@ -482,9 +526,13 @@ implements
 		if (prevExit) {
 			m_bookmarkList.removeCommand(m_exitCommand);
 		}
-		m_exitCommand       = new Command("Exit",
+		if (m_appSettings != null) {
+			m_exitCommand       = new Command("Exit",
 				(m_appSettings.getUseStandardExit() ? Command.EXIT
-				 : Command.SCREEN), 14);
+				 : Command.SCREEN), 15);
+		} else {
+			m_exitCommand       = new Command("Exit", Command.SCREEN, 15);
+		}
 		if (prevExit) {
 			m_bookmarkList.addPromptCommand(m_exitCommand,
 					"Are you sure you want to exit?");
@@ -495,7 +543,7 @@ implements
 	final private void initForms() {
 		try {
 			// Get here so that bookmarklist knows to not use some commands
-			m_novice = m_appSettings.getNovice();
+			m_novice = (m_appSettings != null) && m_appSettings.getNovice();
 			/** Initialize GUI items */
 			initializeBookmarkList();
 			//initializeLoadingForm();
@@ -522,10 +570,18 @@ implements
 			if( m_firstTime ) {
 				try {
 					// Set Max item count to default so that it is initialized.
-					m_appSettings.setMaximumItemCountInFeed(
-							m_appSettings.getMaximumItemCountInFeed());
+					if (m_appSettings != null) {
+						m_appSettings.setMaximumItemCountInFeed(
+								m_appSettings.getMaximumItemCountInFeed());
+					}
 					saveBkMrkSettings("Initializing database...",
-							System.currentTimeMillis(), false);
+							System.currentTimeMillis(), m_firstTime, false,
+							m_rssFeeds, m_bookmarkList, m_loadForm, m_settings
+							//#ifdef DLOGGING
+//@							,logger
+//@							,finestLoggable
+							//#endif
+							);
 					// If novice, show about later.
 					if (!m_novice) {
 						m_firstTime = false;
@@ -574,7 +630,8 @@ implements
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("before m_itunesEnabled=" + m_itunesEnabled);}
 		//#endif
-		m_itunesEnabled = m_appSettings.getItunesEnabled();
+		m_itunesEnabled = (m_appSettings != null) &&
+			m_appSettings.getItunesEnabled();
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("after m_itunesEnabled=" + m_itunesEnabled);}
 		//#endif
@@ -587,13 +644,12 @@ implements
 //@		System.gc();
 //@		long beginMem = Runtime.getRuntime().freeMemory();
 		//#endif
+		int nbrRegions = m_firstTime ? (m_novice ? 2 : 1) : (Settings.MAX_REGIONS + 1);
 		Gauge gauge = new Gauge("Initializing bookmarks...",
-				false, m_settings.MAX_REGIONS +
-				((m_novice && m_firstTime) ?  1 : 0), 0);
+				false, nbrRegions, 0);
 		//#ifdef DLOGGING
-//@		if (finestLoggable) {logger.finest("m_settings.MAX_REGIONS,gauge.getMaxValue()=" + m_settings.MAX_REGIONS + "," + gauge.getMaxValue());}
+//@		if (finestLoggable) {logger.finest("Settings.MAX_REGIONS,gauge.getMaxValue()=" + Settings.MAX_REGIONS + "," + gauge.getMaxValue());}
 		//#endif
-		int pl = m_loadForm.append(gauge);
         try {
             m_bookmarkList = new FeatureList(this, "Bookmarks", List.IMPLICIT);
 			//#ifdef DMIDP20
@@ -625,8 +681,11 @@ implements
 //@				m_bookmarkList.addCommand( m_importCurrFeedListCmd );
 				//#endif
 			}
-            m_bookmarkList.addCommand( m_updateAllCmd );
             m_bookmarkList.addCommand( m_updateAllModCmd );
+            m_bookmarkList.addCommand( m_updateAllCmd );
+			//#ifdef DTEST
+//@            m_bookmarkList.addCommand( m_reloadDbCmd );
+			//#endif
             m_bookmarkList.addCommand( m_saveCommand );
             m_bookmarkList.addCommand( m_settingsCmd );
             m_bookmarkList.addPromptCommand( m_exitCommand,
@@ -650,77 +709,22 @@ implements
 //@			System.out.println("empty bookmarkList size=" + (beginMem - Runtime.getRuntime().freeMemory()));
 			//#endif
             
-            m_rssFeeds = new Hashtable();
-			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
-				boolean stop = false;
-				final String vers = m_settings.getStringProperty(ic,
-						m_settings.SETTINGS_NAME, "");
-				final boolean firstSettings =
-					 vers.equals(m_settings.FIRST_SETTINGS_VERS);
-				final boolean itunesCapable = ((vers.length() > 0) &&
-					 (vers.compareTo(m_settings.ITUNES_CAPABLE_VERS) >= 0));
-				final boolean encodingSettings = ((vers.length() > 0) &&
-					 (vers.compareTo(m_settings.ENCODING_VERS) >= 0));
-				final boolean modifiedSettings = vers.equals(
-						m_settings.MODIFIED_VERS);
-				m_settings.getBooleanProperty(m_settings.ITEMS_ENCODED,
-							true);
-				/* FUTURE
-				final long storeDate = m_settings.getLongProperty(
-						m_settings.STORE_DATE, 0L);
-					*/
-				final char feedSeparator =
-					encodingSettings ? CFEED_SEPARATOR : OLD_FEED_SEPARATOR;
-				//#ifdef DLOGGING
-//@				if (fineLoggable) {logger.fine("Settings region,vers,firstSettings,itunesCapable,encodingSettings,modifiedSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + encodingSettings + "," + modifiedSettings);}
-				//#endif
-				//#ifdef DTEST
-//@				if (m_debugOutput) System.out.println("Settings region,vers,firstSettings,itunesCapable,encodingSettings,modifiedSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + encodingSettings + "," + modifiedSettings);
-				//#endif
-				String bms = m_settings.getStringProperty(ic, "bookmarks", "");
-				//#ifdef DLOGGING
-//@				if (fineLoggable) {logger.fine("bms.length()=" + bms.length());}
-				//#endif
-				// Save memory by setting bookmarks to "" now that
-				// we will convert them to objects.
-				m_settings.setStringProperty("bookmarks", "");
-				
-				if(bms.length()>0) {
-					do{
-						
-						String part = "";
-						int pos = bms.indexOf(feedSeparator);
-						if(pos > 0) {
-							part = bms.substring(0, pos);
-						}
-						bms = bms.substring(pos+1);
-						if(part.length()>0) {
-							RssItunesFeed bm = null;
-							if (itunesCapable) {
-								bm = RssItunesFeed.deserialize(modifiedSettings,
-										true, part );
-							} else {
-								bm = new RssItunesFeed(new RssFeed(
-											firstSettings, true, part ));
-							}
-							if(bm.getName().length()>0){
-								m_bookmarkList.append(bm.getName(),null);
-								m_rssFeeds.put(bm.getName(), bm);
-							}
-						}
-						if( part.length()==0)
-							stop = true;
-					}while(!stop);
-				}
-				gauge.setValue(ic);
-            }
-			pl = -1;
-			gauge.setValue(m_settings.MAX_REGIONS);
-			// Reset internal region to 0.
-			m_settings.getStringProperty(0, "bookmarks", "");
+			loadBookmarkList(gauge, m_rssFeeds, m_bookmarkList, m_loadForm,
+							 m_settings,
+							 m_firstTime
+						//#ifdef DTEST
+//@						,m_debugOutput
+						//#endif
+						//#ifdef DLOGGING
+//@						,logger
+//@						,fineLoggable
+						//#endif
+					);
+
 			//#ifdef DMIDP20
-			if (m_appSettings.getFontChoice() !=
-					RssReaderSettings.DEFAULT_FONT_CHOICE) {
+			if ((m_appSettings != null) &&
+					(m_appSettings.getFontChoice() !=
+					RssReaderSettings.DEFAULT_FONT_CHOICE)) {
 				final int len = m_bookmarkList.size();
 				m_bookmarkList.initFont(this);
 				final Font font = m_bookmarkList.getFont();
@@ -729,58 +733,179 @@ implements
 				}
 			}
 			//#endif
+		} catch (Throwable t) {
+			procBookmarkExc("Error while initializing bookmark list", t,
+					m_loadForm
+						//#ifdef DLOGGING
+//@						,logger
+						//#endif
+					);
+		}
+	}
+
+    /** Load bookmarks from record store */
+    static final public void loadBookmarkList(Gauge gauge,
+			Hashtable rssFeeds, final Choice bookmarkList,
+			final LoadingForm loadForm,
+			final Settings settings,
+			final boolean firstTime
+					//#ifdef DTEST
+//@					,boolean debugOutput
+					//#endif
+				//#ifdef DLOGGING
+//@				,Logger logger
+//@				,boolean fineLoggable
+				//#endif
+			) {
+
+		//#ifdef DTEST
+//@		System.gc();
+//@		long beginMem = Runtime.getRuntime().freeMemory();
+		//#endif
+		//#ifdef DLOGGING
+//@		if (fineLoggable) {logger.fine("loadBookmarkList firstTime=" + firstTime);}
+		//#endif
+		int pl = -1;
+		try {
+			if (gauge != null) {
+				pl = loadForm.append(gauge);
+			}
+			if (!firstTime) {
+				for (int ic = 1; ic < Settings.MAX_REGIONS; ic++) {
+					boolean stop = false;
+					String bms = settings.getStringProperty(ic, Settings.BOOKMARKS_NAME, "");
+					//#ifdef DLOGGING
+//@					if (fineLoggable) {logger.fine("loadBookmarkList bms.length()=" + bms.length());}
+					//#endif
+					try {
+						if(bms.length() == 0) {
+							continue;
+						}
+						final String vers = settings.getStringProperty(ic,
+								Settings.SETTINGS_NAME, "");
+						final boolean firstSettings =
+							 vers.equals(Settings.FIRST_SETTINGS_VERS);
+						final boolean itunesCapable = ((vers.length() > 0) &&
+							 (vers.compareTo(Settings.ITUNES_CAPABLE_VERS) >= 0));
+						final boolean encodingSettings = ((vers.length() > 0) &&
+							 (vers.compareTo(Settings.ENCODING_VERS) >= 0));
+						final boolean modifiedSettings = vers.equals(
+								Settings.MODIFIED_VERS);
+						settings.getBooleanProperty(Settings.ITEMS_ENCODED,
+									true);
+						/* FUTURE
+						final long storeDate = settings.getLongProperty(
+								Settings.STORE_DATE, 0L);
+							*/
+						final char feedSeparator =
+							encodingSettings ? CFEED_SEPARATOR : OLD_FEED_SEPARATOR;
+						//#ifdef DLOGGING
+//@						if (fineLoggable) {logger.fine("loadBookmarkList region,vers,firstSettings,itunesCapable,encodingSettings,modifiedSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + encodingSettings + "," + modifiedSettings);}
+						//#endif
+						//#ifdef DTEST
+//@						if (debugOutput) System.out.println("loadBookmarkList region,vers,firstSettings,itunesCapable,encodingSettings,modifiedSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + encodingSettings + "," + modifiedSettings);
+						//#endif
+						// Save memory by setting bookmarks to "" now that
+						// we will convert them to objects.
+						settings.setStringProperty(Settings.BOOKMARKS_NAME, "");
+						
+						do{
+							
+							String part = "";
+							int pos = bms.indexOf(feedSeparator);
+							if(pos > 0) {
+								part = bms.substring(0, pos);
+							}
+							bms = bms.substring(pos+1);
+							if(part.length()>0) {
+								RssItunesFeed bm = null;
+								if (itunesCapable) {
+									bm = RssItunesFeed.deserialize(modifiedSettings,
+											true, part );
+								} else {
+									bm = new RssItunesFeed(new RssFeed(
+												firstSettings, true, part ));
+								}
+								if(bm.getName().length()>0){
+									bookmarkList.append(bm.getName(),null);
+									rssFeeds.put(bm.getName(), bm);
+								}
+							}
+							if( part.length()==0)
+								stop = true;
+						}while(!stop);
+					} finally {
+						if (gauge != null) {
+							gauge.setValue(ic);
+						}
+					}
+				}
+				//#ifdef DTEST
+//@				System.gc();
+//@				System.out.println("full bookmarkList size=" + (beginMem - Runtime.getRuntime().freeMemory()));
+				//#endif
+			}
+			pl = -1;
+			if (gauge != null) {
+				gauge.setValue(gauge.getMaxValue());
+			}
+			// Reset internal region to 0.
+			settings.getStringProperty(0, Settings.BOOKMARKS_NAME, "");
 			//#ifdef DTEST
 //@			System.gc();
 //@			System.out.println("full bookmarkList size=" + (beginMem - Runtime.getRuntime().freeMemory()));
 			//#endif
-        } catch(Exception e) {
-			//#ifdef DLOGGING
-//@			logger.severe("Error while initializing bookmark list: ", e);
-			//#endif
-            System.err.println("Error while initializing bookmark list: " + e.toString());
-        } catch(OutOfMemoryError e) {
-			//#ifdef DLOGGING
-//@			logger.severe("Error while initializing bookmark list: ", e);
-			//#endif
-            System.err.println("Error while initializing bookmark list: " + e.toString());
-            final Alert memoryAlert = new Alert(
-                    "Out of memory", 
-                    "Loading bookmarks without all news items.",
-                    null,
-                    AlertType.WARNING);
-			memoryAlert.setTimeout(Alert.FOREVER);
-            setCurrent( memoryAlert, m_loadForm );
-		}catch(Throwable t) {
-			//#ifdef DLOGGING
-//@			logger.severe("Error while initializing bookmark list: ", t);
-			//#endif
-			/** Error while parsing RSS feed */
-			System.out.println("Error while initializing bookmark list: " + t.getMessage());
+		} catch(Throwable t) {
+			procBookmarkExc("Error while loading bookmark list", t, loadForm
+						//#ifdef DLOGGING
+//@						,logger
+						//#endif
+					);
 		} finally {
 			if (pl >= 0) {
-				m_loadForm.delete(pl);
+				loadForm.delete(pl);
 			}
 		}
     }
     
-    /** Show loading form */
-    final public void showLoadingForm() {
-        setCurrent( m_loadForm );
-    }
-    
-    /** Initialize loading form */
-    final public LoadingForm initializeLoadingForm(final String desc,
-									   Displayable disp,
-									   //#ifdef DMIDP20
-									   Observable observable
-									   //#else
-//@									   Object observable
-									   //#endif
-			)
-	{
-		m_loadForm = new LoadingForm("Loading", disp, observable);
-		m_loadForm.appendMsg( desc + "\n" );
-		m_loadForm.setCommandListener( m_loadForm, false );
+	static public void procBookmarkExc(String excMsg, Throwable t,
+								  final LoadingForm loadForm
+								  //#ifdef DLOGGING
+//@								  ,Logger logger
+								  //#endif
+			) {
+		if (t instanceof Exception) {
+			Exception e = (Exception)t;
+			loadForm.recordExcForm(excMsg, e);
+		} else if (t instanceof OutOfMemoryError) {
+			OutOfMemoryError e = (OutOfMemoryError)t;
+			CauseException ce = new CauseException(excMsg, e);
+			loadForm.recordExcForm(
+					"Out Of Memory Error initializing/loading form", ce);
+		} else {
+			CauseException ce = new CauseException(excMsg, t);
+			loadForm.recordExcForm(
+					"Internal error initializing/loading form", ce);
+		}
+	}
+
+					/** Show loading form */
+					final public void showLoadingForm() {
+						setCurrent( m_loadForm );
+					}
+					
+					/** Initialize loading form */
+					final public LoadingForm initializeLoadingForm(final String desc,
+													   Displayable disp,
+													   //#ifdef DMIDP20
+													   Observable observable
+													   //#else
+//@													   Object observable
+													   //#endif
+							)
+					{
+		m_loadForm = LoadingForm.getLoadingForm(desc, disp, m_bookmarkList,
+				observable, m_midlet);
 		setCurrent( m_loadForm );
 		return m_loadForm;
     }
@@ -1229,9 +1354,9 @@ implements
 				m_loadForm.addPromptCommand(m_backCommand,
 									"Are you sure that you want to go back? Parsing has not finished.");
 				if (obs1 != null) {
-					cbackGrParser.getObserverManager().addObserver(obs1);
+					cbackGrParser.getObservableHandler().addObserver(obs1);
 				}
-				cbackGrParser.getObserverManager().addObserver(this);
+				cbackGrParser.getObservableHandler().addObserver(this);
 				((RssFeedParser)cbackGrParser).getParsingThread().start();
 				synchronized(this) {
 					m_backGrParser = cbackGrParser;
@@ -1299,7 +1424,7 @@ implements
     //#ifdef DMIDP20
 	public RssFeedParser checkActive(Observable observable) {
 		synchronized(this) {
-			observable = observable.getObserverManager().checkActive(m_parseBackground,
+			observable = observable.getObservableHandler().checkActive(m_parseBackground,
 					m_backGrParser, observable);
 		}
 		if ((observable == null) || !(observable instanceof RssFeedParser)) {
@@ -1464,7 +1589,13 @@ implements
 						return;
 					}
 					saveBkMrkSettings("Saving items to database...",
-							System.currentTimeMillis(), m_exit);
+							System.currentTimeMillis(), m_firstTime, m_exit,
+							m_rssFeeds, m_bookmarkList, m_loadForm, m_settings
+							//#ifdef DLOGGING
+//@							,logger
+//@							,fineLoggable
+							//#endif
+							);
 					if (m_exit) {
 						try {
 							destroyApp(true);
@@ -1538,13 +1669,13 @@ implements
 	}
 
 	/* Set current displayable and wake up the thread. */
-	final public void setCurrentNotes(Alert alert, Displayable disp) {
+	final public void setCurrentNotes(Displayable alert, Displayable disp) {
 
 		setCurrentNotes(alert, disp, null);
 	}
 
 	/* Set current displayable and wake up the thread. */
-	final public void setCurrentNotes(Alert alert, Displayable disp,
+	final public void setCurrentNotes(Displayable alert, Displayable disp,
 			LoadingForm cloadForm) {
 		//#ifdef DTESTUI
 //@		String title = "";
@@ -1585,8 +1716,8 @@ implements
 	//#endif
 
 	/* Set current displayable and wake up the thread. */
-	final public void setCurrent(Alert alert, Displayable disp) {
-		m_display.setCurrent( alert, disp );
+	final public void setCurrent(Displayable alert, Displayable disp) {
+		m_display.setCurrent( (Alert)alert, disp );
 		// Prevents loading screen Display.getDisplay(this).setCurrent( alert, disp );
 		wakeup(2);
 	}
@@ -1788,13 +1919,22 @@ implements
         releaseMemory use true if exiting as we do not need
 		the rss feeds anymore, so we can save memory and avoid
 		having extra memory around.  */
-    final public void saveBookmarks(final long storeDate,
-			int region, boolean releaseMemory) {
+    static final public void saveBookmarks(final long storeDate,
+			int region, boolean releaseMemory,
+			Hashtable rssFeeds, final Choice bookmarkList,
+			final LoadingForm loadForm,
+			final Settings settings
+			//#ifdef DLOGGING
+//@			,final Logger logger
+//@			,final boolean finestLoggable
+			//#endif
+			) {
 		System.gc();
 		StringBuffer bookmarks = new StringBuffer();
-		m_settings.setStringProperty("bookmarks", bookmarks.toString());
-		m_settings.setLongProperty(Settings.STORE_DATE, storeDate);
-		final int bsize = m_bookmarkList.size();
+		settings.setStringProperty(Settings.BOOKMARKS_NAME,
+				bookmarks.toString());
+		settings.setLongProperty(Settings.STORE_DATE, storeDate);
+		final int bsize = bookmarkList.size();
 		if (bsize == 0) {
 			return;
 		}
@@ -1802,7 +1942,7 @@ implements
 //@		int storeTime = 0;
 		//#endif
 		final int bookRegion = region - 1;
-		final int iparts = m_settings.MAX_REGIONS - 1;
+		final int iparts = Settings.MAX_REGIONS - 1;
 		final int firstIx = bookRegion * bsize / iparts;
 		final int endIx = (bookRegion + 1) * bsize / iparts - 1;
         try {
@@ -1813,16 +1953,16 @@ implements
 			try {
 				/** Try to save feeds including items */
 				for( int i=firstIx; i<=endIx; i++) {
-					final String name = m_bookmarkList.getString(i);
+					final String name = bookmarkList.getString(i);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("i,name=" + i + "," + name);}
 					//#endif
-					if (!m_rssFeeds.containsKey( name )) {
+					if (!rssFeeds.containsKey( name )) {
 						continue;
 					}
 					if( name.length()>0) {
 						final RssItunesFeed rss =
-							(RssItunesFeed)m_rssFeeds.get( name );
+							(RssItunesFeed)rssFeeds.get( name );
 						//#ifdef DTEST
 //@						long beginStore = System.currentTimeMillis();
 						//#endif
@@ -1848,16 +1988,16 @@ implements
 						null,
 						AlertType.WARNING);
 				memoryAlert.setTimeout(Alert.FOREVER);
-				setCurrent( memoryAlert, m_loadForm );
+				loadForm.getFeatureMgr().showMe( memoryAlert );
 				
 				/** Save feeds without items */
 				bookmarks.setLength(0);
 				for( int i=firstIx; i<=endIx; i++) {
-					final String name = m_bookmarkList.getString(i);
+					final String name = bookmarkList.getString(i);
 					if( name.length() == 0) {
 						continue;
 					}
-					final RssItunesFeed rss = (RssItunesFeed)m_rssFeeds.get( name );
+					final RssItunesFeed rss = (RssItunesFeed)rssFeeds.get( name );
 					bookmarks.append(rss.getStoreString(false, true));
 					bookmarks.append(CFEED_SEPARATOR);
 					if (releaseMemory) {
@@ -1868,16 +2008,16 @@ implements
 				if (releaseMemory) {
 					final int vslen = vstored.size();
 					for (int ic = 0; ic < vslen; ic++) {
-						m_rssFeeds.remove( (String)vstored.elementAt( ic ));
+						rssFeeds.remove( (String)vstored.elementAt( ic ));
 					}
 				}
 			}
 			//#ifdef DTEST
 //@			System.out.println("storeTime=" + storeTime);
 			//#endif
-            m_settings.setStringProperty("bookmarks",bookmarks.toString());
+            settings.setStringProperty(Settings.BOOKMARKS_NAME, bookmarks.toString());
 		} catch (Throwable t) {
-            m_settings.setStringProperty("bookmarks", bookmarks.toString());
+            settings.setStringProperty(Settings.BOOKMARKS_NAME, bookmarks.toString());
 			//#ifdef DTEST
 //@			System.out.println("storeTime=" + storeTime);
 			//#endif
@@ -1911,44 +2051,63 @@ implements
 	   releaseMemory - true if memory used is to be released as the
 	   				   bookmarks are saved.  Used when exitiing as true.
 	*/
-	final private synchronized void saveBkMrkSettings(String guageTxt,
+	static final public synchronized void saveBkMrkSettings(String guageTxt,
 			final long storeDate,
-			final boolean releaseMemory) {
-		Gauge gauge = new Gauge(guageTxt, false,
-				m_settings.MAX_REGIONS + 1, 0);
-		int pl = m_loadForm.append(gauge);
-		showLoadingForm();
+			final boolean firstTime,
+			final boolean releaseMemory,
+			Hashtable rssFeeds, final Choice bookmarkList,
+			final LoadingForm loadForm,
+			final Settings settings
+			//#ifdef DLOGGING
+//@			,final Logger logger
+//@			,final boolean finestLoggable
+			//#endif
+			) {
+		int nbrRegions = firstTime ? 1 : Settings.MAX_REGIONS + 1;
+		Gauge gauge = new Gauge(guageTxt, false, nbrRegions, 0);
+		int pl = loadForm.append(gauge);
+		loadForm.getFeatureMgr().showMe();
 		try {
-			m_settings.setLongProperty(Settings.STORE_DATE, storeDate);
-			m_settings.save(0, false);
-			gauge.setValue(1);
-			for (int ic = 1; ic < m_settings.MAX_REGIONS; ic++) {
-				saveBookmarks(storeDate, ic, releaseMemory);
-				m_settings.save(ic, false);
-				gauge.setValue(ic + 1);
+			if (!firstTime) {
+				settings.setLongProperty(Settings.STORE_DATE, storeDate);
+				settings.save(0, false);
 			}
-			// Set internal region back to 0.
-			m_settings.setStringProperty("bookmarks","");
-			m_settings.save(0, false);
-			gauge.setValue(m_settings.MAX_REGIONS + 1);
+			gauge.setValue(1);
+			if (!firstTime) {
+				for (int ic = 1; ic < Settings.MAX_REGIONS; ic++) {
+					saveBookmarks(storeDate, ic, releaseMemory, rssFeeds,
+							bookmarkList, loadForm, settings
+							//#ifdef DLOGGING
+//@							,logger
+//@							,finestLoggable
+							//#endif
+							);
+					settings.save(ic, false);
+					gauge.setValue(ic + 1);
+				}
+				// Set internal region back to 0.
+				settings.setStringProperty(Settings.BOOKMARKS_NAME, "");
+				settings.save(0, false);
+			}
 			pl = -1;
+			gauge.setValue(gauge.getMaxValue());
 		} catch(CauseRecStoreException e) {
 			if ((e.getFirstCause() != null) &&
 				!(e.getFirstCause() instanceof RecordStoreFullException)) {
 				/* Error saving feeds to database.  Database error. */
-				m_loadForm.recordExcForm(
+				loadForm.recordExcForm(
 						"Error saving feeds to database.  Database error. ", e);
 			} else {
 				/* Error saving feeds to database.  Database full. */
-				m_loadForm.recordExcForm("Error saving feeds to database.  Database full. ", e);
+				loadForm.recordExcForm("Error saving feeds to database.  Database full. ", e);
 			}
 		} catch(Exception e) {
-			m_loadForm.recordExcForm("Internal error saving feeds.", e);
+			loadForm.recordExcForm("Internal error saving feeds.", e);
 		} catch(Throwable t) {
-			m_loadForm.recordExcForm("Internal error saving feeds.", t);
+			loadForm.recordExcForm("Internal error saving feeds.", t);
 		} finally {
 			if (pl >= 0) {
-				m_loadForm.delete(pl);
+				loadForm.delete(pl);
 			}
 		}
 	}
@@ -1960,7 +2119,7 @@ implements
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 
 		RssFeedParser cbackGrRssParser = null;
 		cbackGrRssParser = checkActive(observable);
@@ -1968,7 +2127,7 @@ implements
 			return;
 		}
 		try {
-			if (!cbackGrRssParser.getObserverManager().isCanceled()) {
+			if (!cbackGrRssParser.getObservableHandler().isCanceled()) {
 				RssItunesFeed feed = cbackGrRssParser.getRssFeed();
 				m_rssFeeds.put(feed.getName(), feed);
 				procBackHeader(cbackGrRssParser, observable);
@@ -2192,6 +2351,26 @@ implements
 //@        }
 		//#endif
 
+        /** Update all modified RSS feeds */
+		//#ifdef DTEST
+//@        if( c == m_reloadDbCmd ) {
+//@			m_appSettings.deleteSettings();
+//@			m_appSettings = null;
+//@			m_settings = null;
+//@			Object[] arrsettings = FeatureMgr.initSettingsEnabled(
+//@					this, m_loadForm
+					//#ifdef DLOGGING
+//@					,logger
+//@					,fineLoggable
+					//#endif
+//@					);
+//@			m_appSettings = (RssReaderSettings)arrsettings[0];
+//@			m_settings = (Settings)arrsettings[1];
+//@			m_firstTime = ((Boolean)arrsettings[2]).booleanValue();
+//@			m_itunesEnabled = ((Boolean)arrsettings[3]).booleanValue();
+//@        }
+		//#endif
+        
 		//#ifdef DTESTUI
 //@        /** Auto edit feeds/bookmarks to */
 //@        if( c == m_testBMCmd ) {
@@ -2263,7 +2442,7 @@ implements
 			if (m_parseBackground && (cbackGrParser == m_backGrParser)) {
 				m_parseBackground = false;
 				setPageInfo(false, false, false, m_prevDisp);
-				m_backGrParser.getObserverManager().removeObserver(this);
+				m_backGrParser.getObservableHandler().deleteObserver(this);
 				m_loadForm.removeCommandPrompt(m_backCommand);
 			}
 		}
@@ -2577,314 +2756,6 @@ implements
 		//#endif
 
 		}
-
-	}
-
-	/* Form to show data being loaded.  Save messages and exceptions to
-	   allow them to be viewed separately as well as diagnostics for
-	   reporting errors. */
-	final public class LoadingForm extends FeatureForm
-		implements CommandListener {
-		//#ifdef DMIDP10
-//@		private String      m_title;         // Store title.
-		//#endif
-		private boolean     m_loadFinished = false;  // Store loading finished.
-
-		private Command     m_loadMsgsCmd;   // The load form messages command
-		private Command     m_loadDiagCmd;   // The load form diagnostic command
-		private Command     m_loadErrCmd;    // The load form error command
-		private Command     m_loadQuitCmd = null;   // The load form quit command
-		private Vector m_msgs = new Vector(); // Original messages
-		private Vector m_notes = new Vector(); // Notes
-		private Vector m_excs = new Vector(); // Only errors
-		//#ifdef DMIDP20
-		private Observable m_observable;
-
-		//#else
-//@		private Object m_observable;
-//@
-		//#endif
-		private Displayable m_disp;
-
-		/* Constructor */
-		LoadingForm(final String title,
-				    final Displayable disp,
-					//#ifdef DMIDP20
-					final Observable observable
-					//#else
-//@					final Object observable
-					//#endif
-					) {
-			super(m_midlet, title);
-			//#ifdef DMIDP10
-//@			this.m_title = title;
-			//#endif
-			this.m_observable = observable;
-			m_loadMsgsCmd       = new Command("Messages", Command.SCREEN, 2);
-			m_loadErrCmd        = new Command("Errors", Command.SCREEN, 3);
-			m_loadDiagCmd       = new Command("Diagnostics", Command.SCREEN, 4);
-			if (m_backCommand == null) {
-				m_backCommand   = new Command("Back", Command.BACK, 1);
-			}
-			super.addCommand( m_loadMsgsCmd );
-			super.addCommand( m_loadErrCmd );
-			super.addCommand( m_loadDiagCmd );
-			m_disp = disp;
-			if (disp != null) {
-				super.addCommand( m_backCommand );
-			}
-		}
-
-		/* Add quit command used for errors during exit. */
-		public void addQuit() {
-			/* Quit */
-			if (m_loadQuitCmd == null) {
-				m_loadQuitCmd = new Command("Quit", Command.CANCEL, 200);
-			}
-			super.addPromptCommand( m_loadQuitCmd,
-					"Are you sure you want to quit the program without saving?");
-		}
-
-		/** Respond to commands */
-		public void commandAction(Command c, Displayable s) {
-
-			if( c == m_backCommand ){
-				Displayable cdisp = null;
-				synchronized(this) {
-					cdisp = m_disp;
-				}
-				//#ifdef DMIDP20
-				if (m_observable != null) {
-					m_observable.getObserverManager().setCanceled(true);
-				}
-				//#endif
-				setCurrent( cdisp );
-			}
-
-			if( c == m_loadQuitCmd ){
-				try {
-					destroyApp(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				m_midlet.notifyDestroyed();
-			}
-
-			/** Give messages for loading */
-			if( c == m_loadMsgsCmd ) {
-				showMsgs();
-			}
-
-			/** Give errors for loading */
-			if( c == m_loadErrCmd ) {
-				showErrMsgs(true);
-			}
-
-			/** Give diagnostics for loading */
-			if( c == m_loadDiagCmd ) {
-				showErrMsgs(false);
-			}
-
-		}
-
-		/** Set title and addmessage for loading form */
-		public void setLoadingFinished(final String title, String msg) {
-			if (title != null) {
-				super.setTitle(title);
-			}
-			if (msg != null) {
-				appendMsg(msg);
-			}
-			setLoadFinished(true);
-		}
-		
-		/* Record the exception in the loading form, log it and give std error. */
-		public void recordFin() {
-			setTitle("Finished with errors or exceptions below");
-			appendMsg("Finished with errors or exceptions above");
-			setLoadFinished(true);
-		}
-
-		/* Record the exception in the loading form, log it and give std error. */
-		public void recordExcForm(final String causeMsg, final Throwable e) {
-			final CauseException ce = new CauseException(causeMsg, e);
-			//#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), e);
-			//#endif
-			/** Error while parsing RSS feed */
-			System.out.println(e.getClass().getName() + " " + ce.getMessage());
-			e.printStackTrace();
-			setTitle("Finished with errors below");
-			addExc(ce.getMessage(), ce);
-			setCurrent( this );
-		}
-
-		/* Record the exception in the loading form, log it and give std error. */
-		public void recordExcFormFin(final String causeMsg, final Throwable e) {
-			recordExcForm(causeMsg, e);
-			recordFin();
-		}
-
-		/* Show errors and diagnostics. */
-		private void showMsgs() {
-			try {
-				while(super.size()>0) {
-					super.delete(0);
-				}
-				final int elen = m_msgs.size();
-				for (int ic = 0; ic < elen; ic++) {
-					super.append((String)m_msgs.elementAt(ic));
-				}
-			}catch(Throwable t) {
-				//#ifdef DLOGGING
-//@				logger.severe("showMsgs", t);
-				//#endif
-				/** Error while executing constructor */
-				System.out.println("showMsgs " + t.getMessage());
-				t.printStackTrace();
-			}
-		}
-
-		/* Show errors and diagnostics. */
-		private void showErrMsgs(final boolean showErrsOnly) {
-			try {
-				while(super.size()>0) {
-					super.delete(0);
-				}
-				final int elen = m_excs.size();
-				for (int ic = 0; ic < elen; ic++) {
-					Throwable nexc = (Throwable)m_excs.elementAt(ic);
-					while (nexc != null) {
-						String msg = nexc.getMessage();
-						if (msg != null) {
-							super.append(nexc.getMessage());
-							// If showing errs only, only show the first error found
-							if (showErrsOnly) {
-								break;
-							}
-						} else if (!showErrsOnly) {
-							super.append("Error " + nexc.getClass().getName());
-						}
-						if (nexc instanceof CauseException) {
-							nexc = ((CauseException)nexc).getCause();
-						} else {
-							break;
-						}
-					}
-				}
-				if (!showErrsOnly) {
-					//#ifdef DMIDP20
-					super.append("Current threads:");
-					String[] threadInfo = MiscUtil.getDispThreads();
-					for (int ic = 0; ic < threadInfo.length; ic++) {
-						super.append(new StringItem(ic + ": ", threadInfo[ic]));
-					}
-					//#endif
-					super.append(new StringItem("Active Threads:",
-								Integer.toString(Thread.activeCount())));
-				}
-			}catch(Throwable t) {
-				//#ifdef DLOGGING
-//@				logger.severe("showErrMsgs", t);
-				//#endif
-				/** Error while executing constructor */
-				System.out.println("showErrMsgs " + t.getMessage());
-				t.printStackTrace();
-			}
-		}
-
-		/* Append message to form and save in messages. */
-		public void appendMsg(final String msg) {
-			if (msg != null) {
-				super.append(msg);
-				m_msgs.addElement(msg);
-			}
-		}
-
-		/* Append note to form and save in messages and notes. */
-		public void appendNote(final String note) {
-			if (note != null) {
-				super.append(note);
-				m_notes.addElement(note);
-			}
-		}
-
-		/* Add exception. */
-		public void addExc(final String msg, final Throwable exc) {
-			appendMsg(msg);
-			m_excs.addElement(exc);
-		}
-
-		/* Replace reference to displayable to free memory or
-		   define where to return to.  Use null to go to m_bookmarkList. */
-		public void replaceRef(final Displayable disp,
-				final Displayable newDisp) {
-			//#ifdef DLOGGING
-//@			boolean removed = false;
-			//#endif
-			synchronized (this) {
-				Displayable odisp = m_disp;
-				if (m_disp == disp) {
-					m_disp = null;
-				}
-				m_disp = (newDisp == null) ? m_bookmarkList : newDisp;
-				if ((odisp == null) && (m_disp != null)) {
-					super.addCommand( m_backCommand);
-				}
-			}
-			//#ifdef DLOGGING
-//@			if (removed) {
-//@				removed = true;
-//@				if (finestLoggable) {logger.finest("Ref removed " + disp);}
-//@			}
-			//#endif
-		}
-
-		/* Check for exceptions. */
-		public boolean hasExc() {
-			return (m_excs.size() > 0);
-		}
-
-		/* Check for notes. */
-		public boolean hasNotes() {
-			return (m_notes.size() > 0);
-		}
-
-		/* Check for messages. */
-		public boolean hasMsgs() {
-			return (m_msgs.size() > 0);
-		}
-
-		//#ifdef DMIDP10
-//@		public String getTitle() {
-//@			return m_title;
-//@		}
-		//#endif
-
-		public void setLoadFinished(boolean loadFinished) {
-			this.m_loadFinished = loadFinished;
-			Displayable cdisp = null;
-			synchronized(this) {
-				cdisp = m_disp;
-			}
-			if (cdisp == null) {
-				addQuit();
-			}
-		}
-
-		public boolean isLoadFinished() {
-			return (m_loadFinished);
-		}
-
-		//#ifdef DMIDP20
-		public void setObservable(Observable observable) {
-			this.m_observable = observable;
-		}
-
-		public Observable getObservable() {
-			return (m_observable);
-		}
-		//#endif
 
 	}
 
