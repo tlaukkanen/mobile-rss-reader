@@ -23,6 +23,7 @@
  * IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
  * IB 2010-05-24 1.11.5RC2 Unit test RssFeedParser class.
  * IB 2010-05-29 1.11.5RC2 Fix MIDP 1.0 parsing.
+ * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
 */
 
 // Expand to define MIDP define
@@ -46,8 +47,8 @@ import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observer;
-import net.eiroca.j2me.observable.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -87,7 +88,7 @@ implements Observer
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 		ready = true;
 	}
 	//#endif
@@ -155,7 +156,7 @@ implements Observer
 			RssFeedParser fparser = new RssFeedParser(new RssItunesFeed(feed));
 			//#ifdef DMIDP20
 			fparser.makeObserable(null, updFeed, maxItemCount);
-			fparser.getObserverManager().addObserver(this);
+			fparser.getObservableHandler().addObserver(this);
 			fparser.getParsingThread().start();
 			waitReady();
 			//#else
