@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-06-27 1.11.5Dev2 Make midlet and LoadingForm optional in FeatureForm and FeatureList.
+ */
 
 // Expand to define MIDP define
 //#define DMIDP20
@@ -165,11 +168,17 @@ public class FeatureForm extends Form {
 //@		logger.warning(msg + " possible error with setFont.", e);
 		//#endif
 		e.printStackTrace();
-		featureMgr.getMidlet().getLoadForm().appendNote(
-				"Font not supported by device.  Reset to default or pick another font.");
-		featureMgr.getMidlet().getLoadForm().addExc("Error changing font.", e);
-		featureMgr.getMidlet().getSettings().setFontChoice(
+		RssReaderMIDlet midlet = featureMgr.getMidlet();
+		if (midlet != null) {
+			LoadingForm loadForm = midlet.getLoadForm();
+			if (loadForm != null) {
+				loadForm.appendNote(
+					"Font not supported by device.  Reset to default or pick another font.");
+				loadForm.addExc("Error changing font.", e);
+			}
+			midlet.getSettings().setFontChoice(
 				RssReaderSettings.DEFAULT_FONT_CHOICE);
+		}
 		this.font = null;
 		final int flen = super.size();
 		for (int i = 0; i < flen; i++) {
