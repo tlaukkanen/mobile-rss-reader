@@ -27,6 +27,8 @@
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser, HTMLLinkParser, and HTMLAutoLinkParser in small memory MIDP 1.0 to save space.
  * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
+ * IB 2010-06-27 1.11.5Dev2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-06-27 1.11.5Dev2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
 */
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -47,11 +49,12 @@ import com.substanceofcode.utils.HTMLParser;
 //#endif
 import com.substanceofcode.utils.CauseException;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observable;
-import net.eiroca.j2me.observable.ObserverManager;
+import net.yinlight.j2me.observable.Observable;
+import net.yinlight.j2me.observable.ObservableHandler;
 //#endif
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -72,7 +75,7 @@ implements
 	Runnable {
     
     final private Thread m_parsingThread;
-    private RssReaderMIDlet.LoadingForm m_loadForm = null;
+    private LoadingForm m_loadForm = null;
     private int m_maxItemCount = 10;
 	protected String m_url;
 	protected String m_username;
@@ -89,7 +92,7 @@ implements
     private CauseException m_ex = null;
     private boolean m_redirect = false;  // The RSS feed is redirected
 	//#ifdef DMIDP20
-    private ObserverManager observerMgr = null;
+    private ObservableHandler observableHandler = null;
 	//#endif
     
 	//#ifdef DLOGGING
@@ -106,7 +109,7 @@ implements
 		m_username = username;
 		m_password = password;
 		//#ifdef DMIDP20
-		observerMgr = new ObserverManager(this);
+		observableHandler = new ObservableHandler();
 		//#endif
     }
     
@@ -124,8 +127,8 @@ implements
     }
     
 	//#ifdef DMIDP20
-	public ObserverManager getObserverManager() {
-		return observerMgr;
+	public ObservableHandler getObservableHandler() {
+		return observableHandler;
 	}
 	//#endif
 
@@ -223,8 +226,8 @@ implements
 			}
 			//#endif
 			//#ifdef DMIDP20
-			if (observerMgr != null) {
-				observerMgr.notifyObservers(this);
+			if (observableHandler != null) {
+				observableHandler.notifyObservers(this);
 			}
 			//#endif
         }        
@@ -391,7 +394,7 @@ implements
         this.m_useFeedUrlList = useFeedUrlList;
     }
 
-    public void setLoadForm(RssReaderMIDlet.LoadingForm loadForm) {
+    public void setLoadForm(LoadingForm loadForm) {
         this.m_loadForm = loadForm;
     }
 
