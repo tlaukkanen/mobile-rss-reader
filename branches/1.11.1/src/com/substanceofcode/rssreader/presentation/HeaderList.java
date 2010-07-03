@@ -21,6 +21,8 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-07 1.11.5Dev2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-03-07 1.11.5Dev2 Cosmetic but not execution code changes.
 */
 
 // Expand to define MIDP define
@@ -55,18 +57,18 @@ import javax.microedition.lcdui.List;
 // If using the test UI define the Test UI's
 
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observer;
-import net.eiroca.j2me.observable.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
@@ -95,7 +97,7 @@ implements
 			final FeatureList bookmarkList, final int selectedIx,
 			final Hashtable rssFeeds, Image unreadImage,
 			boolean itunesEnabled,
-			RssReaderMIDlet.LoadingForm loadForm, final RssItunesFeed feed) {
+			LoadingForm loadForm, final RssItunesFeed feed) {
 		super(midlet, feed.getName(), List.IMPLICIT,
 				selectedIx, 1, bookmarkList,
 				rssFeeds, unreadImage, loadForm, 6);
@@ -142,13 +144,13 @@ implements
 	//#endif
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 
 		RssFeedParser cbackGrRssParser = m_midlet.checkActive(observable);
 		if (cbackGrRssParser == null) {
 			return;
 		}
-		if (!cbackGrRssParser.getObserverManager().isCanceled()) {
+		if (!cbackGrRssParser.getObservableHandler().isCanceled()) {
 			m_feed = cbackGrRssParser.getRssFeed();
 		}
 	}
