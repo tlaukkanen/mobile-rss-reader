@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-05-24 1.11.5RC2 Unit test utility classes.
+ * IB 2010-06-27 1.11.5Dev2 Test 1st and 2nd settings test classes.
  */
 
 // Expand to define memory size define
@@ -43,6 +44,8 @@ final public class UtilitySuite extends TestSuite {
 
 	public UtilitySuite() {
 		super("UtilitySuite");
+		add(new Settings1Test());
+		add(new Settings2Test());
 		add(new XmlParserTest());
 		//#ifndef DSMALLMEM
 		add(new HtmlParserTest());
