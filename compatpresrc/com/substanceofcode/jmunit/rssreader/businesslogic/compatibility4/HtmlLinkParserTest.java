@@ -25,6 +25,7 @@
  * IB 2010-05-30 1.11.5RC2 Split up tests for better results.
  * IB 2010-05-30 1.11.5RC2 Check if the successful results match for both current and compatibility.
  * IB 2010-05-30 1.11.5RC2 Allow end of altering based on nextIx.
+ * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  */
 
 // Expand to define MIDP define
@@ -53,8 +54,8 @@ import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFe
 import com.substanceofcode.rssreader.businesslogic.compatibility4.HTMLLinkParser;
 //#endif
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observer;
-import net.eiroca.j2me.observable.Observable;
+import net.eiroca.j2me.observable.compatibility4.Observer;
+import net.eiroca.j2me.observable.compatibility4.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -65,7 +66,7 @@ import net.sf.jlogmicro.util.logging.Level;
 
 final public class HtmlLinkParserTest extends BaseTestCase
 //#ifdef DMIDP20
-implements Observer
+implements Observer, net.yinlight.j2me.observable.Observer
 //#endif
 {
 
@@ -112,6 +113,10 @@ implements Observer
 
 	//#ifdef DMIDP20
 	public void changed(Observable observable) {
+		ready = true;
+	}
+
+	public void changed(net.yinlight.j2me.observable.Observable observable, Object arg) {
 		ready = true;
 	}
 
@@ -191,7 +196,7 @@ implements Observer
 			//#endif
 			//#ifdef DMIDP20
 			ready = false;
-			htmlParser.getObserverManager().addObserver(this);
+			htmlParser.getObservableHandler().addObserver(this);
 			//#endif
 			htmlParser.startParsing();
 			//#ifdef DMIDP20
@@ -256,7 +261,7 @@ implements Observer
 				//#ifdef DMIDP20
 				fparser.makeObserable(null, true, 10);
 				ready = false;
-				fparser.getObserverManager().addObserver(this);
+				fparser.getObservableHandler().addObserver(this);
 				fparser.getParsingThread().start();
 				while (!isReady()) {
 					synchronized(this) {
