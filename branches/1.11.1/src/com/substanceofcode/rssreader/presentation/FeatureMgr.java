@@ -28,6 +28,8 @@
  * IB 2010-05-24 1.11.5RC2 Convience method for logging UI item.
  * IB 2010-05-24 1.11.5RC2 Use null for nullCmd.
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
+ * IB 2010-06-27 1.11.5Dev2 Have convenience methods showme with/without alert.
+ * IB 2010-06-27 1.11.5Dev2 Have static initSettingsEnabled to load app and general settings to help with testing.
 */
 
 // Expand to define MIDP define
@@ -75,14 +77,15 @@ import javax.microedition.lcdui.TextField;
 //#endif
 
 import com.substanceofcode.utils.MiscUtil;
+import com.substanceofcode.utils.Settings;
 //#ifdef DMIDP20
 import com.substanceofcode.utils.CmdReceiver;
 //#endif
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
@@ -530,6 +533,18 @@ public class FeatureMgr implements CommandListener,
 		midlet.setCurrent( boxURL );
     }
     
+	public void showMe() {
+		if (midlet != null) {
+			midlet.setCurrent(disp);
+		}
+	}
+
+	public void showMe(Displayable alert) {
+		if (midlet != null) {
+			midlet.setCurrent(alert, disp);
+		}
+	}
+
 	//#ifdef DMIDP20
 	public Font getCustomFont() {
 		final RssReaderSettings appSettings = midlet.getSettings();
@@ -703,5 +718,45 @@ public class FeatureMgr implements CommandListener,
 //@	}
 //@
 	//#endif
+
+	static public Object[] initSettingsEnabled(MIDlet midlet,
+											   LoadingForm loadForm
+												//#ifdef DLOGGING
+//@												,Logger logger
+//@												,boolean fineLoggable
+												//#endif
+			) {
+		Object[] arrsettings = new Object[] {null, null, null, null};
+		RssReaderSettings appSettings = null;
+		Settings             settings = null;
+		boolean firstTime = false;
+		boolean itunesEnabled = false;
+		try {
+			appSettings = RssReaderSettings.getInstance(midlet);
+			arrsettings[0] = appSettings;
+			Throwable le = appSettings.getLoadExc();
+			if (le != null) {
+				loadForm.recordExcForm("Error while loading settings.", le);
+			}
+			try {
+				settings = appSettings.getSettingsInstance();
+				arrsettings[1] = settings;
+				firstTime = !settings.isInitialized();
+				arrsettings[2] = new Boolean(firstTime);
+				itunesEnabled = appSettings.getItunesEnabled();
+				arrsettings[3] = new Boolean(itunesEnabled);
+			} catch(Exception e) {
+				loadForm.recordExcForm(
+						"Internal error.  Error while getting settings/stored bookmarks",
+						e);
+			}
+		} catch(Exception e) {
+			loadForm.recordExcForm("Error while loading settings.", e);
+		}
+		//#ifdef DLOGGING
+//@		if (fineLoggable) {logger.fine("Constructor appSettings,settings,firstTime,itunesEnabled=" + appSettings + "," + settings + "," + firstTime + "," + itunesEnabled);}
+		//#endif
+		return arrsettings;
+	}
 
 }
