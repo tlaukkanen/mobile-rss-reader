@@ -23,6 +23,7 @@
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-05-30 1.11.5RC2 Use compatibility URLHandler.
+ * IB 2010-06-29 1.11.5RC2 Use compatibility observer pattern.
 */
 
 // Expand to define MIDP define
@@ -41,10 +42,11 @@ import java.io.InputStream;
 
 import com.substanceofcode.utils.compatibility4.CauseException;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.Observable;
-import net.eiroca.j2me.observable.ObserverManager;
+import net.eiroca.j2me.observable.compatibility4.Observable;
+import net.eiroca.j2me.observable.compatibility4.ObserverManager;
 //#endif
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 import com.substanceofcode.utils.MiscUtil;
 
 //#ifdef DLOGGING
@@ -66,7 +68,7 @@ implements
 	Runnable {
     
     private Thread m_parsingThread;
-    private RssReaderMIDlet.LoadingForm m_loadForm = null;
+    private LoadingForm m_loadForm = null;
     private int m_maxItemCount = 10;
 	protected String m_url;
 	protected String m_username;
@@ -360,7 +362,7 @@ implements
         this.m_getFeedTitleList = getFeedTitleList;
     }
 
-    public void setLoadForm(RssReaderMIDlet.LoadingForm loadForm) {
+    public void setLoadForm(LoadingForm loadForm) {
         this.m_loadForm = loadForm;
     }
 
