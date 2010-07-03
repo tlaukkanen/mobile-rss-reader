@@ -323,7 +323,7 @@ v1.11.4 Release Candidate 2 (rc2) (Mar 9th 2010)
 v1.11.5 Release Candidate 1 (rc1) (Mar 9th 2010)
 - Add labels to all artifacts.
 
-v1.11.5 Release Candidate 2 (rc2) (May 24th 2010)
+v1.11.5 Development 2 (dev2) (July 3th 2010)
 - Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
 - Use cldc10 for naming in CLDC 1.0 versions.
 - Use common build.vers and dist.vers properties.
@@ -393,15 +393,49 @@ v1.11.5 Release Candidate 2 (rc2) (May 24th 2010)
 - Allow creation of signed targets partial work.
 - Use proguard task.
 - Use wtkjad to create non-Blackberry JAD/manifest files.
-
-Device issues:
-
-- Phone must support MP3 links, etc to play enclosures (many phones do not
-  allow an MP3 to be read from a URL, but play them from the file system)
-
-Program issues:
-
-- While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
+- Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+- Need to define test define for tests.
+- When initializing the RMS, set record 0 and record 1 to their final initialization values instead of first setting them to null and then updating.  This allows the emulator to sometimes work.
+- Don't create null or empty records.
+- Move synchronized to have lesser scope to reduce proguard preverfy failures.
+- Remove compatibility code from non test code.
+- If updating record and the record does not exist, add instead.
+- Use constant for bookmarks.
+- Use RECORD_STORE_NAME for store to match 1.12Alpha1.
+- Use volatile for m_store and m_properties
+- Use volatile for m_firstTime in RssReaderMIDlet.
+- Use openRecStore to standardize openning of record store.  First open as existing if there are record stores.
+- Use closeStore to standardize closing of record store and giving error.
+- If we get a property that is not set, set it to default value in addition to returning the default value.
+- Have load return number of records in store.
+- Only read record if not null and length > 1.
+- If IOException when reading from store, make string without encoding.
+- Flush the save output buffer to make sure it's finished.
+- Change getSettingMemInfo to return int array to save memory and simplify.
+- Have deleteStore for testing deleting the store.
+- Have deleteSettings for testing deleting the settings to be used for reload.
+- Allow access to the initialization records.
+- Allow listRecordStores() for logging.
+- If loading, and the region is beyond existing records, set bookmarks to "".
+- Have getSettingsInstance to get the Settings instance.
+- Need to use logging define to set logging in RssReaderSettings.
+- Save error from loading settings.
+- If CLDC 1.1, use synchronized class statement vs static synchronized modifier.
+- Use volatile for instance vars in RssReaderSettings.
+- Have test reload db in RssReaderMIDlet.
+- Make sure m_loadForm is not null when used RssReaderMIDlet.
+- Have static methods to load/save settings and bookmarks for better testing.
+- Have set current allow displayable as alert to handle alert bugs in the future.
+- Have static loadBookmarkList load bookmarks from settings DB to help with testing.
+- Make sure m_appSettings is not null when using RssReaderMIDlet.
+- Change command priorities to be in the right order and have update mod ahead of udpate all.
+- Set gauge based on max value to be more flexible.
+- Have 1st and 2nd settings test classes.
+- Put in option for Proguard 4.4.
+- Put in option for using timestamp for Thawte (currently not supported for code signing certificates).
+- Put in option for using netbeans src directory.
+- Use signed.text to handle signed modifier in properties file.
+- Allow Thawte signing of jad/jar.
 - Partial fix for using findbugs.
 - Make input file for sftp for sites that allow upload with sftp, sourceforge.net and yinlight.net.
 - Put all resource files in src/main/resources.
@@ -429,10 +463,34 @@ Program issues:
 - Have back be the default first command instead of open to be standard.
 - If we are finished loading or exiting, but there is no back screen, add quit.  Also allow quit if exiting with error.
 - New target compile for distribution for CLDC 1.1, itunes, and JSR-75.
+- Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+- Make midlet and LoadingForm optional in FeatureForm and FeatureList.
+- Have convenience methods showme with/without alert.
+- Have static initSettingsEnabled to load app and general settings to help with testing.
+- Change getSettingMemInfo to return int array to save memory and simplify.
+- Have different serialVersionUID for CauseRecStoreException.
+- Use stage.stable.text to specify if this stage is stable or unstable.
+- Put signed into file names for signed targets.
+- Delete and then create the zip file to avoid problems from previous creation.
+- Allow parameters mjadfile and mjarfile to specify the jad/jar names for more flexibility.
+- Don't create RIM version if Thawte signed.
+- Use stage.featured to allow featured label to be changed.
+- Use wtkpreprocess and wtkobfuscate since proguard task does not work directly.
+- Don't have MIDP 1.0 signed or unsigned or MIDP 2.0 signed be featured.
+- Only use signed versions for smartphone version.
+
+Device issues:
+
+- Phone must support MP3 links, etc to play enclosures (many phones do not
+  allow an MP3 to be read from a URL, but play them from the file system)
+
+Program issues:
+
+- While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
 
 Issues:
 
-- For some emulators, bookmarks are not saved.
+- For some emulators and devices, bookmarks are not saved.
 
 TODO:
 
