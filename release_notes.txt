@@ -268,7 +268,7 @@ v1.11.4 Release Candidate 2 (rc2) (Mar 9th 2010)
 v1.11.5 Release Candidate 1 (rc1) (Mar 9th 2010)
 + Add labels to all artifacts.
 
-v1.11.5 Release Candidate 2 (rc2) (Mar 14th 2010)
+v1.11.5 Development 2 (dev2) (July 3th 2010)
 + Move developer related fixes to changelog.txt to easier reading for end users.
 + Fixed problem with end tags not recognized if spaces are inside.
 + Fix problem with redirects not working if they have relative addressing.
@@ -293,15 +293,20 @@ v1.11.5 Release Candidate 2 (rc2) (Mar 14th 2010)
 + Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
 + Give errors for load/store errors.
 + Keep better track of loading finished and display finished message.
++ Put signed into file names for signed artifacts.  The Blackberry artifacts are not signed.
++ Fix Thawte signing so that the signed jar gets distributed and that the jad gets signed with correct byte size.
++ Replace observer classes and interfaces with new GPL/LGPL code to allow adding of LGPL license for the whole project.
++ If we are finished loading or exiting, but there is no back screen, add quit.  Also allow quit if exiting with error.
++ Allow reporting of settings errors.
 
 Device notes:
 
-- Phone must support MP3 links, etc to play enclosures (many phones do not
-  allow an MP3 to be read from a URL, but play them from the file system)
+- Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
 
 Program issues:
 
-- While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
+- While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modified, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
+- Some devices and emulators are unable to store the feed data.  You can quickly test if this happens with your phone by opening the program and getting the about screen automatically displayed.  Add one feed with add feed:  Use a simple feed so that it is quick to do.  Or, you can import an OPML.  You do not need to open the resulting feeds as this is unnecessary to prove that this works.  Then, use the exit menu item to exit.  Respond OK to exit.  Then, open the program again.  If the about is not shown, then the program is saving data.  Also, the feeds that you added or imported should be there.
 
 TODO:
 
