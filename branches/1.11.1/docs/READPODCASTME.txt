@@ -24,8 +24,8 @@ This should work for all recent phones.
 
 midp20_cldc11_smartphone@STAGEFILE@RSSReader.cod - MIDP 2.0 Blackberry COD
 midp20_cldc11_smartphone@STAGEFILE@RSSReader.cso - MIDP 2.0 Blackberry CSO
-midp20_cldc11_smartphone@STAGEFILE@RSSReader.jad - MIDP 2.0 jad
-midp20_cldc11_smartphone@STAGEFILE@RSSReader.jar - MIDP 2.0 jar
+midp20_cldc11_smartphone_signed@STAGEFILE@RSSReader.jad - MIDP 2.0 jad
+midp20_cldc11_smartphone_signed@STAGEFILE@RSSReader.jar - MIDP 2.0 jar
 
 
 
@@ -40,6 +40,6 @@ midp20_jsr75_ programs .  For newer phones and usually with media (e.g. MP3)
 
 midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0 and JSR-75 Blackberry COD
 midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.cso - MIDP 2.0 and JSR-75 Blackberry CSO
-midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.jad - MIDP 2.0 and JSR-75 jad
-midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 jar
+midp20_cldc11_smartphone_signed_jsr75@STAGEFILE@RSSReader.jad - MIDP 2.0 and JSR-75 jad
+midp20_cldc11_smartphone_signed_jsr75@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 jar
 
