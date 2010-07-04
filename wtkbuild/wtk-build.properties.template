@@ -13,6 +13,7 @@
 #-- IB 2010-06-29 1.11.5RC2 Put in option for Proguard 4.4.
 #-- IB 2010-06-29 1.11.5RC2 Put in option for using timestamp for Thawte (currently not supported for code signing certificates).
 #-- IB 2010-06-29 1.11.5RC2 Put in option for using netbeans src directory.
+#-- IB 2010-07-03 1.11.5Dev4 Put in jarsigner executable, jarsigner.cmd.
 
 #windows.drive = C:
 windows.drive = 
@@ -46,6 +47,7 @@ antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 #pmd.home = ${opt.tools}/pmd/pmd-4.2.5
 pmd.xsl = pmd-compile-reduced.xsl
 cat.cmd = cat${windows.ext}
+jarsigner.cmd = jarsigner${windows.ext}
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
 #
