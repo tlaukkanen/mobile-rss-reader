@@ -486,6 +486,10 @@ v1.11.5 Development 4 (dev4) (July 3th 2010)
 - Fix Thawte signing so that jarsigner and JadTool are used instead of wtksign.  This puts the certificates into the jar file and adds 3 certificates to the jad file instead of 1.
 - Put release_notes-(current version w/underscores).txt into sftp download directory.
 
+v1.11.5 Development 5 (dev5) (July 4th 2010)
+- Use '.' before extension for .htaccess.
+- Add extensions for zip, gzip, bzip2, and compress.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
