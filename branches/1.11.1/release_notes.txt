@@ -259,7 +259,7 @@ v1.11.4 Release Candidate 2 (rc2) (Mar 9th 2010)
 + Get feed titles for blank names in OPML in FeedListParser.
 + Have next item command on item display.
 + Fixed loop.
-+ Create smartphone version with just MIDP 2.0
++ Create smart phone version with just MIDP 2.0
 + Use zip for src as the file paths are too long for non-GPL tar.
 + Use - in cod files before version instead of _.
 + Remove unneeded directories.
@@ -269,6 +269,7 @@ v1.11.5 Release Candidate 1 (rc1) (Mar 9th 2010)
 + Add labels to all artifacts.
 
 v1.11.5 Development 2 (dev2) (July 3th 2010)
++ Use CLDC 1.1 for smart phone versions.
 + Move developer related fixes to changelog.txt to easier reading for end users.
 + Fixed problem with end tags not recognized if spaces are inside.
 + Fix problem with redirects not working if they have relative addressing.
@@ -298,6 +299,10 @@ v1.11.5 Development 2 (dev2) (July 3th 2010)
 + Replace observer classes and interfaces with new GPL/LGPL code to allow adding of LGPL license for the whole project.
 + If we are finished loading or exiting, but there is no back screen, add quit.  Also allow quit if exiting with error.
 + Allow reporting of settings errors.
++ Recognize CDATA, style sheet, and DOCTYPE and treat properly.
++ Only initialize two records the first time that a store is opened.
++ Reduce the number of times the store is opened/closed on startup.
++ Check for html, htm, shtml, and shtm suffixes for HTML files.
 
 Device notes:
 
