@@ -482,6 +482,9 @@ v1.11.5 Development 2 (dev2) (July 3th 2010)
 v1.11.5 Development 3 (dev3) (July 3th 2010 9:31 PM)
 - Fix Thawte signing so that the signed jar gets distributed and that the jad gets signed with correct byte size.
 
+v1.11.5 Development 4 (dev4) (July 3th 2010)
+- Fix Thawte signing so that jarsigner and JadTool are used instead of wtksign.  This puts the certificates into the jar file and adds 3 certificates to the jad file instead of 1.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
