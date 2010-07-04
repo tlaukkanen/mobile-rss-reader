@@ -49,6 +49,7 @@
     <!-- IB 2010-07-02 1.11.5RC2 Don't have MIDP 1.0 signed or unsigned or MIDP 2.0 signed be featured. -->
     <!-- IB 2010-07-02 1.11.5RC2 Only use signed versions for smartphone version.  -->
     <!-- IB 2010-07-03 1.11.5Dev3 Fix Thawte signing so that the signed jar gets distributed and that the jad gets signed with correct byte size.  -->
+    <!-- IB 2010-07-03 1.11.5Dev4 Fix Thawte signing so that jarsigner and JadTool are used instead of wtksign.  This puts the certificates into the jar file and adds 3 certificates to the jad file instead of 1.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -743,7 +744,22 @@
 		<copy file="${bin}/${build.file.root}.jar" tofile="${bin}/${project.name}.jar" />
 	</target>
 
-	<target name="thawte.jad.sign" depends="prepare" if="signed" >
+	<target name="thawte.tool.sign" depends="prepare" if="signed" >
+		<exec executable="${env.JAVA_HOME}/bin/${jarsigner.cmd}" >
+			<arg value="-verbose" />
+			<arg value="-keystore" />
+			<arg value="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" />
+			<arg value="-storepass" />
+			<arg value="${env.THAWTE_KEYSTORE_PASS}" />
+			<arg value="${jsjar.in}" />
+			<arg value="${env.THAWTE_ALIAS}" />
+		</exec>
+		<antcall target="make.jad" inheritAll="true" >
+			<param name="mjadfile" value="${jsjad1.in}" />
+			<param name="mmanifest" value="${bin}/manifest.mf" />
+			<param name="mjarfile" value="${jsjar.in}" />
+			<param name="update.parm" value="true" />
+		</antcall>
 		<delete file="${jsjad2.in}" />
 		<java jar="${wtk.home}/bin/JadTool.jar" fork="true" >
 			<arg value="-addcert" />
@@ -791,15 +807,17 @@
 		<move file="${jsjad3.in}" tofile="${jsjad.out}" />
 	</target>
 
-	<target name="thawte.jar.sign" depends="prepare" if="signed">
+	<target name="thawte.wtksign" depends="prepare" if="signed">
 		  <echo message="&lt;wtksign keystore=&quot;${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}&quot; jadfile=&quot;${sjadfile}&quot; jarfile=&quot;${sjarfile}&quot; certalias=&quot;${env.THAWTE_ALIAS}&quot; storepass=&quot;${env.THAWTE_KEYSTORE_PASS}&quot; keypass=&quot;${env.THAWTE_KEYSTORE_PASS}&quot; &gt;" />
 		<wtksign keystore="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" jadfile="${sjadfile}" jarfile="${sjarfile}" certalias="${env.THAWTE_ALIAS}" storepass="${env.THAWTE_KEYSTORE_PASS}" certpass="${env.THAWTE_KEYSTORE_PASS}" />
+		<!-- Not needed
 		<antcall target="make.jad" inheritAll="true" >
 			<param name="mjadfile" value="${sjadfile}" />
 			<param name="mmanifest" value="${bin}/manifest.mf" />
 			<param name="mjarfile" value="${sjarfile}" />
 			<param name="update.parm" value="true" />
 		</antcall>
+		-->
 	</target>
 
 	<target name="build" depends="prepare" >
@@ -894,12 +912,14 @@
 			<param name="mjarfile" value="${bin}/${build.file.root}.jar" />
 			<param name="update.parm" value="false" />
 		</antcall>
-		<antcall target="thawte.jar.sign" inheritAll="true" >
+		<!-- Do not use as it does not sign the jar file and does only 1 certificate for the jad.
+		<antcall target="thawte.wtksign" inheritAll="true" >
 			<param name="stsaurl" value="${thawte.tsa.url}" />
-			<param name="sjarfile" value="${bin}/${build.file.root}.jad" />
-			<param name="sjadfile" value="${bin}/${build.file.root}.jar" />
+			<param name="sjadfile" value="${bin}/${build.file.root}.jad" />
+			<param name="sjarfile" value="${bin}/${build.file.root}.jar" />
 		</antcall>
-		<antcall target="thawte.jad.sign" inheritAll="true" >
+		-->
+		<antcall target="thawte.tool.sign" inheritAll="true" >
 			<param name="jsadd.parm" value="-addcert" />
 			<param name="jsjar.in" value="${bin}/${build.file.root}.jar" />
 			<param name="jsjad1.in" value="${bin}/${build.file.root}.jad" />
