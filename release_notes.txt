@@ -304,6 +304,10 @@ v1.11.5 Development 2 (dev2) (July 3th 2010)
 + Reduce the number of times the store is opened/closed on startup.
 + Check for html, htm, shtml, and shtm suffixes for HTML files.
 
+v1.11.5 Development 4 (dev4) (July 3th 2010)
+
+- Fix Thawte signing so that certificates are put into the jar file and add 3 certificates to the jad file.
+
 Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
