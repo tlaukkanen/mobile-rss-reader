@@ -50,6 +50,7 @@
     <!-- IB 2010-07-02 1.11.5RC2 Only use signed versions for smartphone version.  -->
     <!-- IB 2010-07-03 1.11.5Dev3 Fix Thawte signing so that the signed jar gets distributed and that the jad gets signed with correct byte size.  -->
     <!-- IB 2010-07-03 1.11.5Dev4 Fix Thawte signing so that jarsigner and JadTool are used instead of wtksign.  This puts the certificates into the jar file and adds 3 certificates to the jad file instead of 1.  -->
+    <!-- IB 2010-07-03 1.11.5Dev4 Put release_notes-(current version w/underscores).txt into sftp download directory. -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1183,6 +1184,7 @@
 		<echo message="cd ${ftp.vers.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${ftpdist.name}/apache.htaccess .htaccess&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ../${main}/release_notes.txt release_notes-${FMIDLETVERSROOT}.txt&#10;" file="${sftp.in.file}" append="true" />
 		<antcall target="sftp.upload.archives" inheritAll="true" />
 	</target>
 
