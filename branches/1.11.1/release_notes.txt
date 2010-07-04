@@ -307,6 +307,7 @@ v1.11.5 Development 2 (dev2) (July 3th 2010)
 v1.11.5 Development 4 (dev4) (July 3th 2010)
 
 - Fix Thawte signing so that certificates are put into the jar file and add 3 certificates to the jad file.
+- Put release_notes-(current version w/underscores).txt into sftp download directory.
 
 Device notes:
 
