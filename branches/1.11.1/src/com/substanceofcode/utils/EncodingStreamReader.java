@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
+ */
 
 // Expand to define testing define
 //#define DNOTEST
@@ -271,16 +274,16 @@ public class EncodingStreamReader extends InputStreamReader {
         return (m_fileEncoding);
     }
 
-    public void setGetPrologue(boolean m_getPrologue) {
-        this.m_getPrologue = m_getPrologue;
+    public void setGetPrologue(boolean getPrologue) {
+        this.m_getPrologue = getPrologue;
     }
 
     public boolean isGetPrologue() {
         return (m_getPrologue);
     }
 
-    public void setInputStream(InputStreamReader m_inputStream) {
-        this.m_inputStream = m_inputStream;
+    public void setInputStream(InputStreamReader inputStream) {
+        this.m_inputStream = inputStream;
     }
 
     public InputStreamReader getInputStream() {
