@@ -28,6 +28,9 @@
  * IB 2010-05-24 1.11.5RC2 Replace SortUtil with LGPL code to allow adding of LGPL license.
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
  * IB 2010-05-30 1.11.5RC2 More logging.
+ * IB 2010-07-04 1.11.5Dev6 Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-07-04 1.11.5Dev6 Code cleanup.
  */
 
 // Expand to define MIDP define
@@ -67,6 +70,7 @@ import net.sf.jlogmicro.util.logging.Level;
 public class MiscUtil {
     
 
+	final static Object nullPtr = null;
     private final static String breakTags = "<p><br><td><p/><br/><td/>";
 
     private static final char[] legalChars =
@@ -137,7 +141,8 @@ public class MiscUtil {
 		//#endif
 			StringBuffer tsb = new StringBuffer("Thread ");
 			//#ifdef DMIDP10
-			return tsb.append(thread.hashCode() + "," + thread.toString()).toString();
+			return tsb.append(thread.hashCode()).append(",").append(
+					thread.toString()).toString();
 			//#else
 			Object[] threadObjs;
 			if ((threadObjs = (Object[])cthreads.get(thread)) == null) {
@@ -147,7 +152,7 @@ public class MiscUtil {
 				String threadInfo = (String)threadObjs[0];
 				return tsb.append("#").append(thread.toString()).append("@").append(
 						threadInfo).append(" ").append(
-						new Boolean(thread.isAlive()).toString()).toString();
+						thread.isAlive()).toString();
 			}
 			//#endif
 		//#ifdef DCLDCV11
@@ -300,7 +305,7 @@ public class MiscUtil {
         try {
             bos.close();
 			// Save memory
-            bos = null;
+            bos = (ByteArrayOutputStream)nullPtr;
         } catch (IOException ex) {
             System.err.println("Error while decoding BASE 64: " + ex.toString());
         }
@@ -515,8 +520,7 @@ public class MiscUtil {
 			((showClass) ? obj.getClass().getName() : ""));
 		sb.append(",");
 		if (maxStrLen > 0) {
-			int slen;
-			if ((slen = obj.toString().length()) < maxStrLen) {
+			if (obj.toString().length() < maxStrLen) {
 				sb.append(obj.toString());
 			} else {
 				sb.append(obj.toString().substring(0, maxStrLen - 1));
