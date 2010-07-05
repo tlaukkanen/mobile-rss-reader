@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-07-05 1.11.5Dev6 Cosmetic code cleanup.
+ */
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -80,9 +83,9 @@ implements CommandListener {
 		m_cmdListener.commandAction(cmd, this);
 	}
 
-    public void setCommandListener(CommandListener m_cmdListener) {
+    public void setCommandListener(CommandListener cmdListener) {
 		super.setCommandListener(this);
-        this.m_cmdListener = m_cmdListener;
+        this.m_cmdListener = cmdListener;
     }
 
 }
