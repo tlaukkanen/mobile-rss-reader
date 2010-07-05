@@ -26,6 +26,8 @@
  * IB 2010-04-30 1.11.5RC2 Track threads used.
  * IB 2010-04-30 1.11.5RC2 Use thread from FeatureMgr.
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
+ * IB 2010-07-04 1.11.5Dev6 Move test statement to be all in define to prevent unused code.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
 */
 
 // Expand to define MIDP define
@@ -73,6 +75,7 @@ final public class KFileSelectorImpl
  extends FeatureList
   implements KFileSelector, CommandListener, FileSystemListener, Runnable {
 
+	final       Object nullPtr = null;
 	protected   Image UPDIR_IMAGE;
 	protected   Image FOLDER_IMAGE;
 	protected   Image FILE_IMAGE;
@@ -95,8 +98,8 @@ final public class KFileSelectorImpl
 	private Vector rootsList = new Vector();
 
 	// Stores the current root, if null we are showing all the roots
-	private FileConnection currentRoot = null;
-	protected String[] filePatterns = null;
+	private FileConnection currentRoot = (FileConnection)nullPtr;
+	protected String[] filePatterns = (String[])nullPtr;
 	protected byte[] fileDataBlock = null;
 	protected String selectedFile = null;
 	protected String selectedURL = null;
@@ -126,9 +129,9 @@ final public class KFileSelectorImpl
 	{
 		super(null, List.IMPLICIT);
 
+		//#ifdef DTEST
 		try {
 
-			//#ifdef DTEST
 			if (bDebug) 
 			{
 				System.out.println("--- file sep: '" + FILE_SEPARATOR + "'");
@@ -138,7 +141,6 @@ final public class KFileSelectorImpl
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("--- file sep: '" + FILE_SEPARATOR + "'");}
 			if (fineLoggable) {logger.fine("--- file sep_alt: '" + FILE_SEPARATOR_ALT + "'");}
-			//#endif
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
 			logger.severe("KFileSelectorImpl constructor", t);
@@ -147,6 +149,7 @@ final public class KFileSelectorImpl
 			System.out.println("KFileSelectorImpl constructor " + t.getMessage());
 			t.printStackTrace();
 		}
+		//#endif
 
 	} //constructor
 
@@ -303,8 +306,8 @@ final public class KFileSelectorImpl
 	public void doCleanup()
 	{
 		// Save memory.
-		this.selectedFile = null;
-		this.selectedURL = null;
+		this.selectedFile = (String)nullPtr;
+		this.selectedURL = (String)nullPtr;
 
 		if (null != currentRoot) {
 			try {currentRoot.close();}
@@ -315,7 +318,7 @@ final public class KFileSelectorImpl
 				ioEx.printStackTrace();
 			}
 			// Save memory.
-			currentRoot = null;
+			currentRoot = (FileConnection)nullPtr;
 		}
 
 		// Save memory.
@@ -422,7 +425,7 @@ final public class KFileSelectorImpl
 			super.append(root.substring(1), FOLDER_IMAGE);
 		}
 		// Save memory.
-		currentRoot = null;
+		currentRoot = (FileConnection)nullPtr;
 	}//displayAllRoots
 
 
@@ -652,8 +655,8 @@ final public class KFileSelectorImpl
 			}
 		}
 
-		currentRoot = null; //reset it
-		//selectedFile = null;
+		currentRoot = (FileConnection)nullPtr; //reset it
+		//selectedFile = (String)nullPtr;
 
 		parent.childFinished(this);
 	}
@@ -876,7 +879,7 @@ final public class KFileSelectorImpl
 					}
 
 					currentRoot.close(); //no longer needed
-					currentRoot = null;
+					currentRoot = (FileConnection)nullPtr;
 				}
 				catch (IOException ioEx)
 				{
