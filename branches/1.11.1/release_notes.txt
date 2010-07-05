@@ -318,6 +318,16 @@ v1.11.5 Development 6 (dev6) (July 5th 2010)
 - Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.  This may be a slight performance improvement.
 - Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.
 - Fix creating signed JAD so that it copies the jad with overwrite.
+- Allow to create distribution with no signed files.  This helps if the certificate is pending.
+- Do not create any signed targets because the certificate is pending.
+
+v1.11.5 Development 7 (dev7) (July 5th 2010)
+- Create signed targets (and for now on) because the certificate was issued.
+- Put changelog-(current version w/underscores).txt into sftp download directory.
+- Put gpl.txt into sftp download directory.
+- Update source text to make distribution/redistribution license options clearer.
+- Include version number in gpl.txt as gpl-2.txt.
+- Include version 2.1 of the LGPL as lgpl-2_1.txt and distribute where gpl-2.txt is.
 
 Device notes:
 
