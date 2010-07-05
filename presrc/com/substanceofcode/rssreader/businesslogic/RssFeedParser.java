@@ -32,6 +32,8 @@
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-05-29 1.11.5RC2 Better logging.
  * IB 2010-05-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
 */
 
 // Expand to define MIDP define
@@ -84,6 +86,7 @@ implements
 //#endif
 	Runnable {
     
+	final       Object nullPtr = null;
     private RssReaderMIDlet m_midlet = null;
     private Thread m_parsingThread = null;
     private RssItunesFeed m_rssFeed;  // The RSS feed
@@ -339,7 +342,7 @@ implements
         } catch( OutOfMemoryError t ) {
 			System.gc();
 			// Save memory by releasing it.
-			m_rssFeed = null;
+			m_rssFeed = (RssItunesFeed)nullPtr;
 			//#ifdef DLOGGING
 			logger.severe("RssFeedParser.run(): Out Of Memory Error while " +
 					"parsing feeds: " + m_rssFeed.getUrl(), t);
@@ -386,8 +389,8 @@ implements
         return (m_successfull);
     }
 
-    public void setGetTitleOnly(boolean m_getTitleOnly) {
-        this.m_getTitleOnly = m_getTitleOnly;
+    public void setGetTitleOnly(boolean getTitleOnly) {
+        this.m_getTitleOnly = getTitleOnly;
     }
 
     public boolean isGetTitleOnly() {
