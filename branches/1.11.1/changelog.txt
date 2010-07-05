@@ -509,6 +509,8 @@ v1.11.5 Development 6 (dev6) (July 5th 2010)
 - Use Yinlight, LLC as vendor and http://www.yinlight.net as info URL to be consistent with code signing.
 - Use wtksign from antenna to sign the jar.
 - Don't make the zip files if we are skipping svn export.
+- Use '.' before extension for .htaccess.
+- Add extensions for zip, gzip, bzip2, and compress to .htaccess.
 
 Device issues:
 
