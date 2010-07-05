@@ -27,6 +27,7 @@
  * IB 2010-03-14 1.11.5RC2 Use convenience method for encoding.
  * IB 2010-05-27 1.11.5RC2 If write to jar file, give error.
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser and HTMLLinkParser in small memory MIDP 1.0 to save space.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
 */
 
 // Expand to define MIDP define
@@ -397,8 +398,8 @@ public class URLHandler {
 		//#endif
 	}
 
-    final public void setLastMod(String m_lastMod) {
-        this.m_lastMod = m_lastMod;
+    final public void setLastMod(String lastMod) {
+        this.m_lastMod = lastMod;
     }
 
     final public String getLastMod() {
