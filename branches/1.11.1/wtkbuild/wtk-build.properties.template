@@ -17,6 +17,7 @@
 #-- IB 2010-07-05 1.11.5Dev6 Use Yinlight, LLC as vendor to be consistent with code signing.
 #-- IB 2010-07-05 1.11.5Dev6 Use http://www.yinlight.net as info URL to be consistent with code signing.
 #-- IB 2010-07-05 1.11.5Dev6 Use original.author to put in Tommi's name.
+#-- IB 2010-07-05 1.11.5Dev6 Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.
 
 #windows.drive = C:
 windows.drive = 
@@ -102,14 +103,15 @@ emulator.jar=${emulator.home}/me4se-2.2.0.zip
 emulator.class=org.me4se.MIDletRunner
 #emulator.class=org.microemu.app.Main
 wtk.encoding = UTF-8
-vendor = Yinlight, LLC
 original.author = Tommi Laukkanen
+tommi.vendor = ${original.author}
+yinlight.vendor = Yinlight, LLC
 midlet.name = RssReaderMIDlet
 midlet.class = com.substanceofcode.rssreader.presentation.${midlet.name}
 logging.package = net.sf.jlogmicro.util.logging
 obfuscate.classes = ${midlet.class},${logging.package}.ConsoleHandler,${logging.package}.FormHandler,${logging.package}.RecStoreHandler,${logging.package}.SimpleFormatter
-#project.info.url = http://www.substanceofcode.com
-project.info.url = http://www.yinlight.net
+tommi.project.info.url = http://www.substanceofcode.com
+yinlight.project.info.url = http://www.yinlight.net
 yinlight.rootdir = html/mobile-rss-reader/downloads
 sourceforge.project = mobilerssreader
 sourceforge.project.first = m
