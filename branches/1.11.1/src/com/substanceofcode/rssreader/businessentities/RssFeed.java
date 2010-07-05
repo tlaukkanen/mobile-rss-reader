@@ -27,6 +27,7 @@
  * IB 2010-03-12 1.11.5RC2 Use fieldEquals to compare items.
  * IB 2010-03-12 1.11.5RC2 Better logging.
  * IB 2010-05-25 1.11.5RC2 Don't deserialize items if not iTunesCapable.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
 */
 
 // Expand to define logging define
@@ -336,8 +337,8 @@ public class RssFeed
 		return m_name;
 	}
 
-	public void setName(String m_name) {
-		this.m_name = m_name;
+	public void setName(String name) {
+		this.m_name = name;
 	}
 
 	/** Return bookmark's URL */
