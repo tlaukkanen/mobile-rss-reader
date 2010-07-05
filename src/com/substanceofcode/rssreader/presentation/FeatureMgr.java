@@ -30,6 +30,7 @@
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
  * IB 2010-06-27 1.11.5Dev2 Have convenience methods showme with/without alert.
  * IB 2010-06-27 1.11.5Dev2 Have static initSettingsEnabled to load app and general settings to help with testing.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
 */
 
 // Expand to define MIDP define
@@ -99,6 +100,7 @@ public class FeatureMgr implements CommandListener,
 		//#endif
 {
 
+	final       Object nullPtr = null;
 	private Hashtable promptCommands = null;
 	private Displayable disp;
 	private Displayable promptDisp1;
@@ -266,9 +268,9 @@ public class FeatureMgr implements CommandListener,
 //@									midlet.setCurrent( urlRrnForm );
 									//#endif
 									// Free memory
-									urlRrnForm = null;
+									urlRrnForm = (Form)nullPtr;
 									// Free memory
-									urlRrnItem = null;
+									urlRrnItem = (TextField)nullPtr;
 								}
 								
 								/** Cancel the box go back to the return form.  */
@@ -279,8 +281,8 @@ public class FeatureMgr implements CommandListener,
 //@									midlet.setCurrent( urlRrnForm );
 									//#endif
 									// Free memory
-									urlRrnForm = null;
-									urlRrnItem = null;
+									urlRrnForm = (Form)nullPtr;
+									urlRrnItem = (TextField)nullPtr;
 								}
 							} else if (cfoundDisp && cdisp.equals(disp)) {
 								//#ifdef DLOGGING
