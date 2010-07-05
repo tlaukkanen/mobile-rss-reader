@@ -55,6 +55,7 @@
  * IB 2010-06-27 1.11.5Dev2 Change command priorities to be in the right order and have update mod ahead of udpate all.
  * IB 2010-06-27 1.11.5Dev2 Set gauge based on max value to be more flexible.
  * IB 2010-06-27 1.11.5Dev2 Have procBookmarkExc to handle exceptions for init/load of bookmarks.
+ * IB 2010-07-05 1.11.5Dev6 Use null pattern using nullPtr.
 */
 
 // Expand to define test define
@@ -167,6 +168,7 @@ implements
 	CommandListener,
 	Runnable {
     
+	final       Object nullPtr = null;
     final static public char CFEED_SEPARATOR = (char)4;
     final static public char OLD_FEED_SEPARATOR = '^';
     // Attributes
@@ -2288,7 +2290,7 @@ implements
             (((Form)s) == ((Form)m_itemForm)) && (ctype == Command.BACK) &&
 			( m_itemRtnList != null)) {
 			setCurrent( m_itemRtnList );
-			m_itemRtnList  = null;
+			m_itemRtnList  = (Displayable)nullPtr;
 		}
 
 		//#ifdef DTESTUI
