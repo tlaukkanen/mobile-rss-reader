@@ -29,6 +29,7 @@
  * IB 2010-05-27 1.11.5RC2 Have OpmlParser code to write to OPML file only if signed.
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
+ * IB 2010-07-04 1.11.5Dev6 Use "" when feedNameFilter and feedURLFilter are not used.
 */
 
 // Expand to define MIDP define
@@ -157,12 +158,12 @@ public class OpmlParser extends FeedListParser {
 					}
 					// Allow null title so that it can be retrieved from
 					// the feed title
-					if (( m_feedNameFilter != null) &&
+					if (( m_feedNameFilter.length() > 0) &&
 						(title != null) &&
 						(title.toLowerCase().indexOf(m_feedNameFilter) < 0)) {
 						continue;
 					}
-					if (( m_feedURLFilter != null) &&
+					if (( m_feedURLFilter.length() > 0) &&
 						( link.toLowerCase().indexOf(m_feedURLFilter) < 0)) {
 						continue;
 					}
