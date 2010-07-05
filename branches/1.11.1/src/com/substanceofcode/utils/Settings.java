@@ -51,6 +51,11 @@
  * IB 2010-06-27 1.11.5Dev2 Allow access to the initialization records.
  * IB 2010-06-27 1.11.5Dev2 Allow listRecordStores() for logging.
  * IB 2010-06-27 1.11.5Dev2 If loading, and the region is beyond existing records, set bookmarks to &quot;&quot;.
+ * IB 2010-07-04 1.11.5Dev6 Return array from openRecStore to return record store and number of records.
+ * IB 2010-07-04 1.11.5Dev6 Also return number of records from init.
+ * IB 2010-07-04 1.11.5Dev6 Catch CauseRecStoreException instead of RecordStoreException since RecordStoreException is not thrown.
+ * IB 2010-07-04 1.11.5Dev6 Don't return from witin a finally block.
+ * IB 2010-07-05 1.11.5Dev6 Use null pattern using nullPtr.
  */
 
 // Expand to define CLDC define
@@ -97,6 +102,7 @@ import com.substanceofcode.utils.CauseRecStoreException;
  */
 final public class Settings {
     
+	final       Object nullPtr = null;
     public static final int OLD_MAX_REGIONS = 1;
     public static final int MAX_REGIONS = 15;
     public static final String SETTINGS_NAME = "RssReader-setttings-vers";
@@ -154,7 +160,7 @@ final public class Settings {
         load(0);
     }
 
-	private RecordStore openRecStore(boolean createIfNecessary)
+	private Object[] openRecStore(boolean createIfNecessary)
 	throws CauseRecStoreException {
 		int numRecs = 0;
 		String[] listStores = RecordStore.listRecordStores();
@@ -166,9 +172,9 @@ final public class Settings {
 		if (createIfNecessary && (listStores != null) &&
 				(listStores.length > 0)) {
 			try {
-				rs = openRecStore(false);
-				if (rs != null) {
-					return rs;
+				Object[] openObjs = openRecStore(false);
+				if (openObjs != null) {
+					return openObjs;
 				}
 			} catch (CauseRecStoreException e) {
 				return null;
@@ -199,7 +205,7 @@ final public class Settings {
 			//#endif
 			throw ce;
 		}
-		return rs;
+		return new Object[] {rs, new Integer(numRecs)};
 	}
     
 	private Object[] init()
@@ -210,11 +216,12 @@ final public class Settings {
 		int recix = 0;
 		
 		try {
-			rs = openRecStore(true);
+			Object[] openObjs = openRecStore(true);
+			rs = (RecordStore)openObjs[0];
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("init openRecStore rs info=" + rs + "," + getStoreInfo(rs));}
 			//#endif
-			numRecs = rs.getNumRecords();
+			numRecs = ((Integer)openObjs[1]).intValue();
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("init numRecs=" + numRecs);}
 			//#endif
@@ -243,7 +250,7 @@ final public class Settings {
 					m_initRecs = numRecs;
 				}
 			}
-		} catch (RecordStoreException e) {
+		} catch (CauseRecStoreException e) {
 			//#ifdef DLOGGING
 //@			logger.severe("init ", e);
 			//#endif
@@ -272,7 +279,7 @@ final public class Settings {
 			throw new CauseException("Internal error while loading " +
 					"recix=" + recix, e);
 		}
-		return new Object[] {rs, new Boolean(currentSettings)};
+		return new Object[] {rs, new Integer(numRecs), new Boolean(currentSettings)};
 	}
 
 	private RecordStore closeStore(RecordStore rs) {
@@ -403,21 +410,23 @@ final public class Settings {
 				m_firstLoad = false;
 				Object[] res = init();
 				rs = (RecordStore)res[0];
-				currentSettings = ((Boolean)res[1]).booleanValue();
+				numRecs = ((Integer)res[1]).intValue();
+				currentSettings = ((Boolean)res[2]).booleanValue();
 			} else {
 				currentSettings = true;
 			}
 			
 			try {
 				if (rs == null) {
-					rs = openRecStore(true);
+					Object[] openObjs = openRecStore(true);
+					rs = (RecordStore)openObjs[0];
+					numRecs = ((Integer)openObjs[1]).intValue();
 				}
 
 				//#ifdef DLOGGING
 //@				logger.info("load region=" + region);
 //@				logger.info("load rs=" + rs);
 				//#endif
-				numRecs = rs.getNumRecords();
 				//#ifdef DLOGGING
 //@				logger.info("load numRecs=" + numRecs);
 				//#endif
@@ -566,8 +575,8 @@ final public class Settings {
 				if (rs != null) {
 					closeStore(rs);
 				}
-				return numRecs;
 			}
+			return numRecs;
 		}
     }
     
@@ -581,7 +590,8 @@ final public class Settings {
 			//#endif
 			RecordStore rs = null;
 			try {
-				rs = openRecStore(true);
+				Object[] openObjs = openRecStore(true);
+				rs = (RecordStore)openObjs[0];
 				saveRec( rs, region, force );
 			} finally {
 				
@@ -758,7 +768,7 @@ final public class Settings {
 				if (dout != null) {
 					try {
 						dout.close();
-						dout = null;
+						dout = (DataOutputStream)nullPtr;
 					} catch( Exception e ){
 						e.printStackTrace();
 					}
@@ -766,7 +776,7 @@ final public class Settings {
 				if (bout != null) {
 					try {
 						bout.close();
-						bout = null;
+						bout = (ByteArrayOutputStream)nullPtr;
 					} catch( Exception e ){
 						e.printStackTrace();
 					}
@@ -786,9 +796,11 @@ final public class Settings {
 					try {
 						
 						synchronized(this) {
-							rs = openRecStore(false);
-							if (rs == null) {
+							Object[] openObjs = openRecStore(false);
+							if (openObjs == null) {
 								return new int[0];
+							} else {
+								rs = (RecordStore)openObjs[0];
 							}
 							memInfo = new int[2];
 							memInfo[0] = rs.getSize();
