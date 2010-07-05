@@ -23,6 +23,7 @@
 /*
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
  * IB 2010-06-09 1.11.5RC2 Add parameters and variables to make this class independent for easier testing.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
  */
 
 // Expand to define MIDP define
@@ -68,6 +69,8 @@ import net.sf.jlogmicro.util.logging.Level;
    reporting errors. */
 final public class LoadingForm extends FeatureForm
 	implements CommandListener {
+
+	final       Object nullPtr = null;
 	//#ifdef DMIDP10
 	private String      m_title;         // Store title.
 	//#endif
@@ -332,7 +335,7 @@ final public class LoadingForm extends FeatureForm
 		synchronized (this) {
 			Displayable odisp = m_disp;
 			if (m_disp == disp) {
-				m_disp = null;
+				m_disp = (Displayable)nullPtr;
 			}
 			m_disp = (newDisp == null) ? m_mainDisp : newDisp;
 			if ((odisp == null) && (m_disp != null)) {
