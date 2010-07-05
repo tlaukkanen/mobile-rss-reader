@@ -22,6 +22,7 @@
 /*
  * IB 2010-04-30 1.11.5RC2 Combine classes.
  * IB 2010-04-30 1.11.5RC2 Use method to encode/decode.
+ * IB 2010-07-04 1.11.5Dev6 Code cleanup.
  */
 
 // Expand to define logging define
@@ -224,8 +225,6 @@ public class RssItem
 				} else {
 					m_date = new Date(Long.parseLong(dateString));
 				}
-			} else {
-				m_date = null;
 			}        
 			
 			int ENCLOSURE = 3;
