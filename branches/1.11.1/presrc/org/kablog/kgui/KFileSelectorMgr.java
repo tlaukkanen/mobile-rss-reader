@@ -25,6 +25,7 @@
 /*
  * IB 2010-03-21 1.11.5RC1 Remove KFileSelector to save memory. 
  * IB 2010-04-30 1.11.5RC2 Track threads used.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
 */
 
 // Expand to define MIDP define
@@ -60,6 +61,7 @@ public class KFileSelectorMgr
 implements KViewParent 
 {
 
+	final       Object nullPtr = null;
 	protected RssReaderMIDlet midlet;
 	protected Form txtFrm;
 	protected TextField txtFld;
@@ -85,7 +87,7 @@ implements KViewParent
 			}
 			fileSelectorView.doCleanup();
 			// Save memory
-			fileSelectorView = null;
+			fileSelectorView = (KFileSelectorImpl)nullPtr;
 			//#ifdef DMIDP20
 			midlet.setCurrentItem( txtFld );
 			//#else
@@ -111,7 +113,7 @@ implements KViewParent
 		this.txtFrm = txtFrm;
 		this.txtFld = txtFld;
 
-		fileSelectorView = null;
+		fileSelectorView = (KFileSelectorImpl)nullPtr;
 
 		try {
 			fileSelectorView = new KFileSelectorImpl();
