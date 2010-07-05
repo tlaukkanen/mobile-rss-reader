@@ -31,6 +31,11 @@
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-05-29 1.11.5RC2 Allow multiple meta statements.
  * IB 2010-05-29 1.11.5RC2 Reprocess PROLOGUE if we find it again.
+ * IB 2010-07-04 1.11.5Dev6 Collapse nested if statements.
+ * IB 2010-07-04 1.11.5Dev6 Cosmetic code cleanup.
+ * IB 2010-07-04 1.11.5Dev6 Replace empty while with for.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-07-04 1.11.5Dev6 Code cleanup.
 */
 
 // Expand to define testing define
@@ -56,6 +61,7 @@ import java.util.Vector;
  */
 public class XmlParser {
     
+	final       Object nullPtr = null;
     /** Current XML element name (eg. <title> = title) */
     final protected StringBuffer m_currentElementName = new StringBuffer();
     final protected StringBuffer m_currentElementData = new StringBuffer();
@@ -288,28 +294,26 @@ public class XmlParser {
 					}
 					// If we find end tag '>' can also be the
 					// end of the prologe so we check.
-					if(c=='>') {
-						if(m_currentElementName.length()>0) {
-							elementFound = true;
-							parsingElementName = false;
-							elementStart = false;
+					if ((c=='>') && (m_currentElementName.length()>0)) {
+						elementFound = true;
+						parsingElementName = false;
+						elementStart = false;
+						//#ifdef DLOGGING
+//@						if (m_logChar) {
+//@							m_logChar = false;
 							//#ifdef DLOGGING
-//@							if (m_logChar) {
-//@								m_logChar = false;
-								//#ifdef DLOGGING
-//@								if (traceLoggable) {logger.trace("parseStream m_currentElementName=" + m_currentElementName);}
-								//#endif
-//@								m_encodingStreamReader.setLogChar(false);
-//@							}
+//@							if (traceLoggable) {logger.trace("parseStream m_currentElementName=" + m_currentElementName);}
 							//#endif
-							// If we find XML without a prologue, need
-							// to treat as default UTF-8 encoding for XML.
-							if (m_getPrologue) {
-								m_getPrologue = false;
-								m_encodingUtil.getEncoding(m_fileEncoding,
-										m_defEncoding);
-								m_docEncoding = m_encodingUtil.getDocEncoding();
-							}
+//@							m_encodingStreamReader.setLogChar(false);
+//@						}
+						//#endif
+						// If we find XML without a prologue, need
+						// to treat as default UTF-8 encoding for XML.
+						if (m_getPrologue) {
+							m_getPrologue = false;
+							m_encodingUtil.getEncoding(m_fileEncoding,
+									m_defEncoding);
+							m_docEncoding = m_encodingUtil.getDocEncoding();
 						}
 					}
 
@@ -440,7 +444,6 @@ public class XmlParser {
 
 	static public Character getChar(InputStreamReader is)
 	throws IOException {
-		char c;
 		int inputCharacter;
 		if ((inputCharacter = is.read()) == -1) {
 			return null;
@@ -460,7 +463,6 @@ public class XmlParser {
 			//#endif
 			)
 	throws IOException {
-        int inputCharacter;
 		sb.append(c);
 		if (readNext) {
 			Character oc = skipBlanks(is);
@@ -475,8 +477,8 @@ public class XmlParser {
 //@			if (logChar && traceLoggable) {logger.trace("parseBeginEntity 1 c1,c2,sb=" + sb.charAt(sb.length() - 1) + "," +  c + "," + sb.toString());}
 			//#endif
 			sb.append(c);
-		} else {
 			//#ifdef DLOGGING
+//@		} else {
 //@			if (logChar && traceLoggable) {logger.trace("parseBeginEntity 1 c,sb=" + c + "," + sb.toString());}
 			//#endif
 		}
@@ -562,7 +564,6 @@ public class XmlParser {
 			return parseResult;
 		} else if (c == '?') {
 			int parseResult;
-			int clen = sb.length();
 			if ((parseResult = parseBlock(is, sb, PROLOGUE, true, true, false,
 							BEGIN_PROLOGUE, END_PROLOGUE)) == PROLOGUE) {
 				return parseResult;
@@ -719,7 +720,7 @@ public class XmlParser {
 				}
 			}
 			// Save memory.
-			textBuffer = null;
+			textBuffer = (StringBuffer)nullPtr;
 			text = MiscUtil.replace(text, endCurrentElement, "");
 			
 			/** Handle some entities and encoded characters */
@@ -837,8 +838,7 @@ public class XmlParser {
 		if (((parsingResult = parse()) == ELEMENT) &&
 			getName().equals("link")) {
 			while (((parsingResult = parse()) == ELEMENT) &&
-				getName().equals("meta")) {
-			}
+				getName().equals("meta")) {};
 		}
 		while ((parsingResult == XmlParser.PROLOGUE) ||
 				(parsingResult == XmlParser.DOCTYPE) ||
