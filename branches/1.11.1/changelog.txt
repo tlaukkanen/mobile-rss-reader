@@ -490,6 +490,26 @@ v1.11.5 Development 5 (dev5) (July 4th 2010)
 - Use '.' before extension for .htaccess.
 - Add extensions for zip, gzip, bzip2, and compress.
 
+v1.11.5 Development 6 (dev6) (July 5th 2010)
+- Use godaddy.sign to cause Godaddy certificate to be used.
+- Use null pattern for nulls to initialize and save memory.
+- Move test statement to be all in define to prevent unused code.
+- Return array from openRecStore to return record store and number of records.
+- Also return number of records from init.
+- Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.
+- Catch CauseRecStoreException instead of RecordStoreException since RecordStoreException is not thrown.
+- Don't return from within a finally block.
+- Collapse nested if statements.
+- Cosmetic code cleanup.
+- Replace empty while with for.
+- Use null pattern for nulls to initialize and save memory.
+- Don't use m_ prefix for parameter definitions.
+- Do not have empty catch block.
+- Use "" when feedNameFilter and feedURLFilter are not used.
+- Use Yinlight, LLC as vendor and http://www.yinlight.net as info URL to be consistent with code signing.
+- Use wtksign from antenna to sign the jar.
+- Don't make the zip files if we are skipping svn export.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
