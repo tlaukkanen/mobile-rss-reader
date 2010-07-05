@@ -25,6 +25,7 @@
  * IB 2010-03-07 1.11.4RC1 Use convenience method for encoding/decoding.
  * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
  * IB 2010-05-30 1.11.4RC2 Use RssItemInfo for equals.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
 */
 
 // Expand to define logging define
@@ -277,24 +278,24 @@ public class RssItunesItem extends RssItem
 //@    }
 	//#endif
 
-    public void setAuthor(String m_author) {
-        this.m_author = m_author;
+    public void setAuthor(String author) {
+        this.m_author = author;
     }
 
     public String getAuthor() {
         return (m_author);
     }
 
-    public void setSubtitle(String m_subtitle) {
-        this.m_subtitle = m_subtitle;
+    public void setSubtitle(String subtitle) {
+        this.m_subtitle = subtitle;
     }
 
     public String getSubtitle() {
         return (m_subtitle);
     }
 
-    public void setSummary(String m_summary) {
-        this.m_summary = m_summary;
+    public void setSummary(String summary) {
+        this.m_summary = summary;
     }
 
     public String getSummary() {
@@ -355,8 +356,8 @@ public class RssItunesItem extends RssItem
         this.m_explicit = convExplicit(explicit);
     }
 
-    public void setDuration(String m_duration) {
-        this.m_duration = m_duration;
+    public void setDuration(String duration) {
+        this.m_duration = duration;
     }
 
     public String getDuration() {
