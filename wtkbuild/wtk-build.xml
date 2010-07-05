@@ -51,6 +51,8 @@
     <!-- IB 2010-07-03 1.11.5Dev3 Fix Thawte signing so that the signed jar gets distributed and that the jad gets signed with correct byte size.  -->
     <!-- IB 2010-07-03 1.11.5Dev4 Fix Thawte signing so that jarsigner and JadTool are used instead of wtksign.  This puts the certificates into the jar file and adds 3 certificates to the jad file instead of 1.  -->
     <!-- IB 2010-07-03 1.11.5Dev4 Put release_notes-(current version w/underscores).txt into sftp download directory. -->
+    <!-- IB 2010-07-05 1.11.5Dev6 Use original.author to put in Tommi's name. -->
+    <!-- IB 2010-07-05 1.11.5Dev6 Don't make the zip files if we are skipping svn export. -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -199,6 +201,20 @@
 		<property file="${basedir}/wtksigned.properties${build.template}" />
 	</target>
 
+	<target name="prepare.thawte" if="thawte.sign" unless="godaddy.sign" >
+		<property name="tsalias" value="${env.THAWTE_ALIAS}" />
+		<property name="tsstorepass" value="${env.THAWTE_KEYSTORE_PASS}" />
+		<property name="tskeystore" value="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" />
+		<property name="tskeypass" value="${env.THAWTE_KEYSTORE_PASS}" />
+	</target>
+
+	<target name="prepare.godaddy" if="godaddy.sign" >
+		<property name="tsalias" value="${env.GODADDY_ALIAS}" />
+		<property name="tsstorepass" value="${env.GODADDY_KEYSTORE_PASS}" />
+		<property name="tskeystore" value="${env.GODADDY_KEYSTORE_LOCATION}/${env.GODADDY_KEYSTORE_NAME}" />
+		<property name="tskeypass" value="${env.GODADDY_KEYSTORE_PASS}" />
+	</target>
+
 	<target name="prepare.novice" >
 		<property file="${basedir}/wtknovice.properties${build.template}" />
 	</target>
@@ -243,6 +259,7 @@
 	<target name="prepare" depends="test.prepare,release.prepare,prepare.stage,prepare.no.stage" >
 		<!-- Define the Wireless Toolkit home directory. Needed by the tasks. -->
 		<!-- Define some additional properties for this project. Not required. -->
+		<property name="thawte.sign" value="true" />
 		<property name="optional.template" value="" />
 		<property file="${basedir}/optional.properties${optional.template}" />
 		<property name="propdir" value="${basedir}" />
@@ -699,13 +716,14 @@
 			<attribute name="MIDlet-Description" value="${project.description}" />
 			<attribute name="MIDlet-Icon" value="/${icons.dir}/${app-icon}" />
 			<attribute name="MIDlet-Info-URL" value="${project.info.url}" />
-			<attribute name="MIDlet-Jar-URL" value="${build.file.root}.jar" />
+			<attribute name="MIDlet-Jar-URL" value="${mjarfile}" />
 			<attribute name="MicroEdition-Configuration" value="${JCLDCVERS}" />
 			<attribute name="MicroEdition-Profile" value="${JMIDPVERS}" />
 			<attribute name="MIDlet-Permissions-Opt" value="${PERMISSIONS}" />
 			<attribute name="MIDlet-Data-Size" value="3000" />
 			<attribute name="novice" value="${NOVICE}" />
 			<attribute name="Program-Version" value="${buildinfo}" />
+			<attribute name="original-author" value="${original.author}" />
 			<attribute name="jlomicro-level" value="${jlomicro-level}" unless="no.test" />
 			<attribute name="jlomicro-handlers" value="${jlomicro-handlers}" unless="no.test" />
 			<attribute name="jlomicro-ConsoleHandler-formatter" value="${jlomicro-ConsoleHandler-formatter}" unless="no.test" />
@@ -745,16 +763,23 @@
 		<copy file="${bin}/${build.file.root}.jar" tofile="${bin}/${project.name}.jar" />
 	</target>
 
-	<target name="thawte.tool.sign" depends="prepare" if="signed" >
+	<target name="tool.sign" depends="prepare,prepare.thawte,prepare.godaddy" if="signed" >
+		<echo message="tsalias=${tsalias}" />
+		<echo message="tsstorepass=${tsstorepass}" />
+		<echo message="tskeystore=${tskeystore}" />
+		<echo message="tskeypass=${tskeypass}" />
+		<signjar jar="${jsjar.in}" alias="${tsalias}" storepass="${tsstorepass}" keystore="${tskeystore}" keypass="${tskeystore}" verbose="true" internalsf="true" force="true" />
+		<!-- Try task above
 		<exec executable="${env.JAVA_HOME}/bin/${jarsigner.cmd}" >
 			<arg value="-verbose" />
 			<arg value="-keystore" />
-			<arg value="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" />
+			<arg value="${tskeystore}" />
 			<arg value="-storepass" />
-			<arg value="${env.THAWTE_KEYSTORE_PASS}" />
+			<arg value="${tskeypass}" />
 			<arg value="${jsjar.in}" />
-			<arg value="${env.THAWTE_ALIAS}" />
+			<arg value="${tsalias}" />
 		</exec>
+		-->
 		<antcall target="make.jad" inheritAll="true" >
 			<param name="mjadfile" value="${jsjad1.in}" />
 			<param name="mmanifest" value="${bin}/manifest.mf" />
@@ -765,13 +790,13 @@
 		<java jar="${wtk.home}/bin/JadTool.jar" fork="true" >
 			<arg value="-addcert" />
 			<arg value="-alias" />
-			<arg value="${env.THAWTE_ALIAS}" />
+			<arg value="${tsalias}" />
 			<arg value="-storepass" />
-			<arg value="${env.THAWTE_KEYSTORE_PASS}" />
+			<arg value="${tsstorepass}" />
 			<arg value="-keystore" />
-			<arg value="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" />
+			<arg value="${tskeystore}" />
 			<arg value="-storepass" />
-			<arg value="${env.THAWTE_KEYSTORE_PASS}" />
+			<arg value="${tskeypass}" />
 			<arg value="-inputjad" />
 			<arg value="${jsjad1.in}" />
 			<arg value="-outputjad" />
@@ -785,17 +810,17 @@
 		<java jar="${wtk.home}/bin/JadTool.jar" fork="true" >
 			<arg value="-addjarsig" />
 			<arg value="-alias" />
-			<arg value="${env.THAWTE_ALIAS}" />
+			<arg value="${tsalias}" />
 			<arg value="-jarfile" />
 			<arg value="${jsjar.in}" />
 			<arg value="-storepass" />
-			<arg value="${env.THAWTE_KEYSTORE_PASS}" />
+			<arg value="${tsstorepass}" />
 			<arg value="-keypass" />
-			<arg value="${env.THAWTE_KEYSTORE_PASS}" />
+			<arg value="${tskeypass}" />
 			<arg value="-keystore" />
-			<arg value="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" />
+			<arg value="${tskeystore}" />
 			<arg value="-storepass" />
-			<arg value="${env.THAWTE_KEYSTORE_PASS}" />
+			<arg value="${tskeypass}" />
 			<arg value="-inputjad" />
 			<arg value="${jsjad2.in}" />
 			<arg value="-outputjad" />
@@ -808,9 +833,9 @@
 		<move file="${jsjad3.in}" tofile="${jsjad.out}" />
 	</target>
 
-	<target name="thawte.wtksign" depends="prepare" if="signed">
-		  <echo message="&lt;wtksign keystore=&quot;${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}&quot; jadfile=&quot;${sjadfile}&quot; jarfile=&quot;${sjarfile}&quot; certalias=&quot;${env.THAWTE_ALIAS}&quot; storepass=&quot;${env.THAWTE_KEYSTORE_PASS}&quot; keypass=&quot;${env.THAWTE_KEYSTORE_PASS}&quot; &gt;" />
-		<wtksign keystore="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" jadfile="${sjadfile}" jarfile="${sjarfile}" certalias="${env.THAWTE_ALIAS}" storepass="${env.THAWTE_KEYSTORE_PASS}" certpass="${env.THAWTE_KEYSTORE_PASS}" />
+	<target name="antenna.wtksign" depends="prepare,prepare.thawte,prepare.godaddy" if="signed" >
+		  <echo message="&lt;wtksign keystore=&quot;${tskeystore}&quot; jadfile=&quot;${sjadfile}&quot; jarfile=&quot;${sjarfile}&quot; certalias=&quot;${tsalias}&quot; storepass=&quot;${tsstorepass}&quot; keypass=&quot;${tsstorepass}&quot; &gt;" />
+		<wtksign keystore="${tskeystore}" jadfile="${sjadfile}" jarfile="${sjarfile}" certalias="${tsalias}" storepass="${tsstorepass}" certpass="${tsstorepass}" />
 		<!-- Not needed
 		<antcall target="make.jad" inheritAll="true" >
 			<param name="mjadfile" value="${sjadfile}" />
@@ -914,13 +939,13 @@
 			<param name="update.parm" value="false" />
 		</antcall>
 		<!-- Do not use as it does not sign the jar file and does only 1 certificate for the jad.
-		<antcall target="thawte.wtksign" inheritAll="true" >
+		<antcall target="antenna.wtksign" inheritAll="true" >
 			<param name="stsaurl" value="${thawte.tsa.url}" />
 			<param name="sjadfile" value="${bin}/${build.file.root}.jad" />
 			<param name="sjarfile" value="${bin}/${build.file.root}.jar" />
 		</antcall>
 		-->
-		<antcall target="thawte.tool.sign" inheritAll="true" >
+		<antcall target="tool.sign" inheritAll="true" >
 			<param name="jsadd.parm" value="-addcert" />
 			<param name="jsjar.in" value="${bin}/${build.file.root}.jar" />
 			<param name="jsjad1.in" value="${bin}/${build.file.root}.jad" />
@@ -960,13 +985,19 @@
 	</target>
 
 	<target name="exec.create.rim.files" depends="prepare" if="rim.home" >
-		<copy file="${bin}/${project.name}.jad" tofile="${dist}/${build.file.root}_cod.jad" />
+		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.file.root}_cod_in.jar" />
+		<antcall target="make.jad" inheritAll="true" >
+			<param name="mjadfile" value="${bin}/${build.file.root}_cod_in.jad" />
+			<param name="mmanifest" value="${bin}/manifest.mf" />
+			<param name="mjarfile" value="${bin}/${build.file.root}_cod_in.jar" />
+			<param name="update.parm" value="false" />
+		</antcall>
 		<exec executable="${rim.home}\\bin\\rapc" >
 			<arg value="import=&quot;${rim.home}\\lib\\net_rim_api.jar&quot;" />
 			<arg value="codename=${project.name}" />
 			<arg value="-midlet" />
 			<arg value="jad=${dist}/${build.file.root}_cod.jad" />
-			<arg value="${bin}/${project.name}.jar" />
+			<arg value="${bin}/${build.file.root}_cod_in.jar" />
 		</exec>
 		<move file="${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}_${FMIDLETVERSROOT}.cso" />
 		<move file="${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cod" />
@@ -977,14 +1008,19 @@
 	    <echo message="basedir=${basedir}" />
 	    <echo message="jde.home=${jde.home}" />
 	    <echo message="${basedir}/${dist}/${build.file.root}.jar=${basedir}/${dist}/${build.file.root}.jar}" />
-		<copy file="${bin}/${project.name}.jad" tofile="${dist}/${build.file.root}_cod.jad" />
-		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${project.name}_in.jar" />
+		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${project.name}_cod_in.jar" />
+		<antcall target="make.jad" inheritAll="true" >
+			<param name="mjadfile" value="${bin}/${build.file.root}_cod_in.jad" />
+			<param name="mmanifest" value="${bin}/manifest.mf" />
+			<param name="mjarfile" value="${bin}/${build.file.root}_cod_in.jar" />
+			<param name="update.parm" value="false" />
+		</antcall>
 		<java classpathref="jde.classpath" classname="net.rim.tools.compiler.Compiler" >
 			<arg value="import=${jde.home}/lib/net_rim_api.jar" />
 			<arg value="codename=${project.name}" />
 			<arg value="-midlet" />
-			<arg value="jad=${basedir}/${dist}/${build.file.root}_cod.jad" />
-			<arg value="${basedir}/${bin}/${project.name}_in.jar" />
+			<arg value="jad=${basedir}/${bin}/${build.file.root}_cod_in.jad" />
+			<arg value="${basedir}/${bin}/${project.name}_cod_in.jar" />
 		</java>
 		<move file="../${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cso" />
 		<move file="../${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cod" />
@@ -1770,7 +1806,8 @@
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.bin.zip} --summary=&quot;${stage.stable.text} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=${stage.featured}Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 	</target>
 
-	<target name="make.zip.files" depends="prepare" >
+	<target name="make.zip.files" depends="prepare" unless="skip.svn.op" >
+		<property name="distdir" value="${distjardir}/RSSReader-${FMIDLETVERSROOT}${dist.stage.file}" />
 		<mkdir dir="${distdir}" />
 		<copy todir="${distdir}/dist" overwrite="true" >
 			<fileset dir="${dist}" excludes="**/RE*.txt" />
@@ -1800,6 +1837,9 @@
 			<fileset dir="${main}" />
 		</copy>
 		<zip destfile="${distproject}/${dist.project.src.zip}" basedir="${distjardir}" />
+		<copy todir="${distdir}/dist" overwrite="true" >
+			<fileset dir="${dist}" excludes="**/RE*.txt" />
+		</copy>
 	</target>
 
 	<target name="dist.dev.status" depends="release.buildno,release.prepare,prepare.stage,prepare.no.stage" >
@@ -1890,11 +1930,7 @@
 			<param name="release.buildno" value="true" />
 		</antcall>
 		<chmod file="${distgooglecode}/googleupload.sh" perm="744" />
-		<property name="distdir" value="${distjardir}/RSSReader-${FMIDLETVERSROOT}${dist.stage.file}" />
 		<antcall target="make.zip.files" inheritAll="true" />
-		<copy todir="${distdir}/dist" overwrite="true" >
-			<fileset dir="${dist}" excludes="**/RE*.txt" />
-		</copy>
 		<delete failonerror="false" includeemptydirs="true">
 			<fileset dir="./.rms" />
 			<fileset dir="./" includes="**/*.tmp" />
