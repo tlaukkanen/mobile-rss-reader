@@ -55,6 +55,12 @@
     <!-- IB 2010-07-05 1.11.5Dev6 Don't make the zip files if we are skipping svn export. -->
     <!-- IB 2010-07-05 1.11.5Dev6 Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.  -->
     <!-- IB 2010-07-05 1.11.5Dev6 Fix creating signed JAD so that it copies the jad with overwrite.  -->
+    <!-- IB 2010-07-05 1.11.5Dev6 Have dist.no.signed target to not sign any files.  This helps if the certificate is pending.  -->
+    <!-- IB 2010-07-05 1.11.5Dev7 Use new ant feature that allows you to use an expression that evaluates to true in the target attribute 'if'.  -->
+    <!-- IB 2010-07-05 1.11.5Dev7 Put changelog-(current version w/underscores).txt into sftp download directory.  -->
+    <!-- IB 2010-07-05 1.11.5Dev7 Put gpl.txt into sftp download directory.  -->
+    <!-- IB 2010-07-05 1.11.5Dev7 Include version number in gpl.txt as gpl-2.txt.  -->
+    <!-- IB 2010-07-05 1.11.5Dev7 Include version 2.1 of the LGPL as lgpl-2_1.txt and distribute where gpl-2.txt is.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1037,72 +1043,63 @@
 		<move file="../${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.debug" />
 	</target>
 
-	<target name="svn.op.dist" unless="skip.svn.op" >
+	<target name="svn.op.dist" if="${need.svn.preprocessed}" unless="skip.svn.op" >
 		<delete dir="${op.dir}" />
 		<mkdir dir="${op.dir}" />
 
-		<if>
-			<equals arg1="${need.svn.preprocessed}" arg2="true" />
-			<then>
-			<echo message="${svn.pgm} ${svn.op} ${svn.url} ${svn.src}" />
-			<exec executable="${svn.pgm}" dir="${op.dir}" >
-				<arg value="${svn.op}" />
-				<arg value="${svn.url}" />
-				<arg value="${svn.src}" />
-			</exec>
-			</then>
-		</if>
-
-		<if>
-			<equals arg1="${need.svn.preprocessed}" arg2="true" />
-			<then>
-			<move todir="${op.dir}/src" >
-				<fileset dir="${op.dir}/${svn.src}/src" />
-			</move>
-			<move todir="${op.dir}/presrc" >
-				<fileset dir="${op.dir}/${svn.src}/presrc" />
-			</move>
-			<move todir="${op.dir}/testpresrc" >
-				<fileset dir="${op.dir}/${svn.src}/testpresrc" />
-			</move>
-			<move todir="${op.dir}/compatpresrc" >
-				<fileset dir="${op.dir}/${svn.src}/compatpresrc" />
-			</move>
-			<move todir="${op.dir}/testdata" >
-				<fileset dir="${op.dir}/${svn.src}/testdata" />
-			</move>
-			<move todir="${op.dir}/jadsrc" >
-				<fileset dir="${op.dir}/${svn.src}/jadsrc" />
-			</move>
-			<mkdir dir="${op.dir}/docs" />
-			<move todir="${op.dir}/docs" >
-				<fileset file="${op.dir}/${svn.src}/docs/README.txt" />
-			</move>
-			<move todir="${op.dir}/manifestsrc" >
-				<fileset dir="${op.dir}/${svn.src}/manifestsrc" />
-			</move>
-			<move todir="${op.dir}/zipedsrc" >
-				<fileset dir="${op.dir}/${svn.src}/zipedsrc" />
-			</move>
-			<move todir="${op.dir}/wtkbuild" >
-				<fileset dir="${op.dir}/${svn.src}/wtkbuild" />
-			</move>
-			<copy todir="${dist}" file="${op.dir}/${svn.src}/gpl.txt" />
-			<move todir="${op.dir}" >
-				<fileset file="${op.dir}/${svn.src}/release_notes.txt" />
-				<fileset file="${op.dir}/${svn.src}/gpl.txt" />
-				<fileset file="${op.dir}/${svn.src}/build.xml" />
-			</move>
-			<move todir="${op.dir}/nbproject" >
-				<fileset dir="${op.dir}/${svn.src}/nbproject" />
-			</move>
-			<delete dir="${op.dir}/nbproject/private" />
-			<move todir="${op.dir}/nbproject/private" >
-				<fileset dir="${op.dir}/${svn.src}/nbproject-private" />
-			</move>
-			<delete dir="${op.dir}/${svn.src}" />
-			</then>
-		</if>
+		<echo message="${svn.pgm} ${svn.op} ${svn.url} ${svn.src}" />
+		<exec executable="${svn.pgm}" dir="${op.dir}" >
+			<arg value="${svn.op}" />
+			<arg value="${svn.url}" />
+			<arg value="${svn.src}" />
+		</exec>
+		<move todir="${op.dir}/src" >
+			<fileset dir="${op.dir}/${svn.src}/src" />
+		</move>
+		<move todir="${op.dir}/presrc" >
+			<fileset dir="${op.dir}/${svn.src}/presrc" />
+		</move>
+		<move todir="${op.dir}/testpresrc" >
+			<fileset dir="${op.dir}/${svn.src}/testpresrc" />
+		</move>
+		<move todir="${op.dir}/compatpresrc" >
+			<fileset dir="${op.dir}/${svn.src}/compatpresrc" />
+		</move>
+		<move todir="${op.dir}/testdata" >
+			<fileset dir="${op.dir}/${svn.src}/testdata" />
+		</move>
+		<move todir="${op.dir}/jadsrc" >
+			<fileset dir="${op.dir}/${svn.src}/jadsrc" />
+		</move>
+		<mkdir dir="${op.dir}/docs" />
+		<move todir="${op.dir}/docs" >
+			<fileset file="${op.dir}/${svn.src}/docs/README.txt" />
+		</move>
+		<move todir="${op.dir}/manifestsrc" >
+			<fileset dir="${op.dir}/${svn.src}/manifestsrc" />
+		</move>
+		<move todir="${op.dir}/zipedsrc" >
+			<fileset dir="${op.dir}/${svn.src}/zipedsrc" />
+		</move>
+		<move todir="${op.dir}/wtkbuild" >
+			<fileset dir="${op.dir}/${svn.src}/wtkbuild" />
+		</move>
+		<copy todir="${dist}" file="${op.dir}/${svn.src}/gpl-2.txt" />
+		<copy todir="${dist}" file="${op.dir}/${svn.src}/lgpl-2_1.txt" />
+		<move todir="${op.dir}" >
+			<fileset file="${op.dir}/${svn.src}/release_notes.txt" />
+			<fileset file="${op.dir}/${svn.src}/gpl-2.txt" />
+			<fileset file="${op.dir}/${svn.src}/lgpl-2_1.txt" />
+			<fileset file="${op.dir}/${svn.src}/build.xml" />
+		</move>
+		<move todir="${op.dir}/nbproject" >
+			<fileset dir="${op.dir}/${svn.src}/nbproject" />
+		</move>
+		<delete dir="${op.dir}/nbproject/private" />
+		<move todir="${op.dir}/nbproject/private" >
+			<fileset dir="${op.dir}/${svn.src}/nbproject-private" />
+		</move>
+		<delete dir="${op.dir}/${svn.src}" />
 		<!--
 		<svn javahl="false" >
 			<export srcUrl="${svn.url}" srcPath="${svn.src}" destPath="${op.dir}" />
@@ -1230,6 +1227,9 @@
 		<echo message="cd ${ftp.vers.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${ftpdist.name}/apache.htaccess .htaccess&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ../${main}/changelog.txt changelog-${FMIDLETVERSROOT}.txt&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ../${main}/gpl-2.txt gpl-2.txt&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ../${main}/lgpl-2_1.txt lgpl-2_1.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/release_notes.txt release_notes-${FMIDLETVERSROOT}.txt&#10;" file="${sftp.in.file}" append="true" />
 		<antcall target="sftp.upload.archives" inheritAll="true" />
 	</target>
@@ -1959,6 +1959,7 @@
 		<antcall target="dist.all" inheritAll="true" >
 			<param name="no.1.0.signed" value="true" />
 			<param name="no.2.0.signed" value="true" />
+			<param name="no.2.0.jsr75.signed" value="true" />
 			<param name="no.2.0.itunes" value="true" />
 			<param name="no.2.0.itunes.jsr75" value="true" />
 			<param name="no.2.0.jsr75.signed" value="true" />
@@ -1966,6 +1967,13 @@
 			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
 			<param name="no.2.0.novice" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.no.signed" >
+		<antcall target="dist" inheritAll="true" >
+			<param name="no.2.0.cldc.1.1.itunes.signed" value="true" />
+			<param name="no.2.0.cldc.1.1.itunes.signed.jsr75" value="true" />
 		</antcall>
 	</target>
 
