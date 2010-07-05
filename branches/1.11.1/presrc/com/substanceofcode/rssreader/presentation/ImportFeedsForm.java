@@ -33,6 +33,7 @@
  * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
  * IB 2010-06-27 1.11.5Dev2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  * IB 2010-06-27 1.11.5Dev2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+ * IB 2010-07-05 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
 */
 // FIX check for blank url
 
@@ -122,6 +123,7 @@ implements
 	CommandListener,
 	Runnable {
 
+	final       Object nullPtr = null;
     static private byte[] m_importSave = null; // Import form save
     static private byte[] m_exportSave = null; // Export form save
 	private boolean     m_getFeedList = false;      // The noticy flag for list parsing
@@ -298,7 +300,7 @@ implements
 			// Free memory.
 			//#ifdef DMIDP20
 			synchronized(this) {
-				m_backGrListParser = null;
+				m_backGrListParser = (Observable)nullPtr;
 				m_parseBackground = false;
 			}
 			//#endif
