@@ -25,6 +25,8 @@
  * IB 2010-05-24 1.11.5RC2 Remove control characters beginning and ending of text to prevent blank lines at beginning or end from being processed.
  * IB 2010-05-24 1.11.5RC2 More logging.
  * IB 2010-05-24 1.11.5RC2 Optionally use feed title for feed name.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
+ * IB 2010-07-05 1.11.5Dev6 Do not have feedNameFilter and feedUrlFilter null.
 */
 
 // Expand to define logging define
@@ -52,6 +54,7 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class LineByLineParser extends FeedListParser {
     
+	final       Object nullPtr = null;
 	//#ifdef DLOGGING
     private Logger m_logger = Logger.getLogger("LineByLineParser");
     private boolean warningLoggable = m_logger.isLoggable(Level.WARNING);
@@ -125,11 +128,11 @@ public class LineByLineParser extends FeedListParser {
 			text = inputBuffer.toString();
 		}
 		// Save memory
-		inputBuffer = null;
+		inputBuffer = (StringBuffer)nullPtr;
         text = MiscUtil.replace(text.trim(), "\r", "");
         String[] lines = MiscUtil.split(text, "\n");
 		// Save memory
-		text = null;
+		text = (String)nullPtr;
         
         RssItunesFeed[] feeds = new RssItunesFeed[ lines.length ];
         for(int lineIndex=0; lineIndex<lines.length; lineIndex++) {
@@ -146,7 +149,7 @@ public class LineByLineParser extends FeedListParser {
 				//#endif
 				continue;
             } else {
-                name = null;
+                name = (String)nullPtr;
                 url = line;
 				//#ifdef DLOGGING
 				if (warningLoggable) {m_logger.warning("parseFeeds warning null title for url=" + url);}
@@ -155,9 +158,9 @@ public class LineByLineParser extends FeedListParser {
 			//#ifdef DLOGGING
 			if (fineLoggable) {m_logger.fine("parseFeeds name,url=" + name + "," + url);}
 			//#endif
-			if((( m_feedNameFilter != null) &&
+			if((( m_feedNameFilter.length() > 0) &&
 			  (name.toLowerCase().indexOf(m_feedNameFilter) < 0)) ||
-			  (( m_feedURLFilter != null) &&
+			  (( m_feedURLFilter.length() > 0) &&
 			  (url.toLowerCase().indexOf(m_feedURLFilter) < 0))) {
 				continue;
 			}
