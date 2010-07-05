@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-03-14 1.11.5RC2 Combine classes to save space.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
 */
 
 // Expand to define test define
@@ -1244,16 +1245,16 @@ final public class EncodingUtil {
 		return false;
 	}
 
-    public void setDocEncoding(String m_docEncoding) {
-        this.m_docEncoding = m_docEncoding;
+    public void setDocEncoding(String docEncoding) {
+        this.m_docEncoding = docEncoding;
     }
 
     public String getDocEncoding() {
         return (m_docEncoding);
     }
 
-    public void setEncodingStreamReader(EncodingStreamReader m_encodingStreamReader) {
-        this.m_encodingStreamReader = m_encodingStreamReader;
+    public void setEncodingStreamReader(EncodingStreamReader encodingStreamReader) {
+        this.m_encodingStreamReader = encodingStreamReader;
     }
 
     public EncodingStreamReader getEncodingStreamReader() {
