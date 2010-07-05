@@ -29,6 +29,10 @@
  * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
  * IB 2010-06-27 1.11.5Dev2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  * IB 2010-06-27 1.11.5Dev2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
+ * IB 2010-07-04 1.11.5Dev6 Do not have feedNameFilter and feedUrlFilter as null.
+ * IB 2010-07-04 1.11.5Dev6 Cosmetic code cleanup.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
 */
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -74,14 +78,15 @@ implements
 //#endif
 	Runnable {
     
+	final       Object nullPtr = null;
     final private Thread m_parsingThread;
     private LoadingForm m_loadForm = null;
     private int m_maxItemCount = 10;
 	protected String m_url;
 	protected String m_username;
 	protected String m_password;
-	protected String m_feedNameFilter;
-	protected String m_feedURLFilter;
+	protected String m_feedNameFilter = "";
+	protected String m_feedURLFilter = "";
 	protected boolean m_getFeedTitleList = false;
 	protected boolean m_useFeedUrlList = false;
 	//#ifndef DSMALLMEM
@@ -197,7 +202,7 @@ implements
         } catch( OutOfMemoryError t ) {
 			System.gc();
 			// Save memory by releasing it.
-			m_feeds = null;
+			m_feeds = (RssItunesFeed[])nullPtr;
 			//#ifdef DLOGGING
 			logger.severe("FeedListParser.run(): Out Of Memory Error while " +
 					"parsing feeds: " + m_url, t);
@@ -270,7 +275,7 @@ implements
                     + e.toString(), e);
         } catch(OutOfMemoryError t) {
 			// Save memory by releasing it.
-			m_feeds = null;
+			m_feeds = (RssItunesFeed[])nullPtr;
 			System.gc();
 			//#ifdef DLOGGING
 			logger.severe("Out Of Memory Error with " + m_url, t);
@@ -334,9 +339,7 @@ implements
 
     public void setFeedNameFilter(String feedNameFilter) {
         if (feedNameFilter == null) {
-			this.m_feedNameFilter = null;
-		} else if (feedNameFilter.length() == 0) {
-			this.m_feedNameFilter = null;
+			this.m_feedNameFilter = "";
 		} else {
 			this.m_feedNameFilter = feedNameFilter.toLowerCase();
 		}
@@ -346,13 +349,11 @@ implements
         return (m_feedNameFilter);
     }
 
-    public void setFeedURLFilter(String m_feedURLFilter) {
-        if (m_feedURLFilter == null) {
-			this.m_feedURLFilter = null;
-		} else if (m_feedURLFilter.length() == 0) {
-			this.m_feedURLFilter = null;
+    public void setFeedURLFilter(String feedURLFilter) {
+        if (feedURLFilter == null) {
+			this.m_feedURLFilter = "";
 		} else {
-			this.m_feedURLFilter = m_feedURLFilter.toLowerCase();
+			this.m_feedURLFilter = feedURLFilter.toLowerCase();
 		}
     }
 
@@ -365,8 +366,8 @@ implements
     }
 
 	//#ifndef DSMALLMEM
-    public void setRedirectHtml(boolean m_redirectHtml) {
-        this.m_redirectHtml = m_redirectHtml;
+    public void setRedirectHtml(boolean redirectHtml) {
+        this.m_redirectHtml = redirectHtml;
     }
 
     public boolean isRedirectHtml() {
