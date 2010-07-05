@@ -23,6 +23,8 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-07-05 1.11.5Dev6 Code cleanup.
+ * IB 2010-07-05 1.11.5Dev6 Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.
  */
 
 // Expand to define test define
@@ -458,17 +460,15 @@ public class RssFormatParser implements FeedFormatParser {
             
 			Date pubDate = getCal(
 					dayOfMonth, month, year, hours, minutes, seconds);
-			objs = new Object[2];
-			objs[0] = pubDate;
 			if ((tzIndex == -1) || (tzIndex >= values.length)) {
-				objs[1] = null;
+				objs = new Object[] {pubDate, null};
 			} else {
 				final String stz = values[tzIndex];
 				//#ifdef DLOGGING
 				logger.finest("parseStdDateTZ values.length,tzIndex,stz=" + values.length + "," + tzIndex + "," + stz);
 				//#endif
-				objs[1] = new Byte(
-						(byte)RssFormatParser.stimeZones.indexOf("," + stz + ","));
+				objs = new Object[] {pubDate, new Byte(
+						(byte)RssFormatParser.stimeZones.indexOf("," + stz + ","))};
 			}
             
         } catch(Exception ex) {
@@ -588,7 +588,7 @@ public class RssFormatParser implements FeedFormatParser {
 		sdate.append("SunMonTueWedThuFriSat".substring(doff, doff + 3));
 		sdate.append(", ");
 		final int dm = cal.get(Calendar.DAY_OF_MONTH);
-		sdate.append(Integer.toString(dm));
+		sdate.append(dm);
 		sdate.append(" ");
 		final int moff = cal.get(Calendar.MONTH) * 3;
 		sdate.append("JanFebMarAprMayJunJulAugSepNovOctDec".substring(moff,
@@ -601,7 +601,7 @@ public class RssFormatParser implements FeedFormatParser {
 		} else {
 			year = syear;
 		}
-		sdate.append(Integer.toString(year));
+		sdate.append(year);
 		sdate.append(" ");
 		final int hour = cal.get(Calendar.HOUR_OF_DAY);
 		String shour = Integer.toString(hour);
