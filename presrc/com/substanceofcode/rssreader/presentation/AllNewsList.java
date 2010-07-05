@@ -25,6 +25,7 @@
  * IB 2010-05-27 1.11.5RC2 More logging.
  * IB 2010-06-01 1.11.5RC2 Use back from RssReaderMIDlet if priority matches.
  * IB 2010-06-01 1.11.5RC2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
 */
 
 // Expand to define MIDP define
@@ -75,6 +76,7 @@ import net.sf.jlogmicro.util.logging.Level;
 public class AllNewsList extends FeatureList
 	implements CommandListener, Runnable {
 
+	final       Object nullPtr = null;
     protected Image       m_unreadImage;
     protected int       m_offset;             // Offset into bookmarkList
     protected int       m_len;                // length from offset above
@@ -648,8 +650,8 @@ public class AllNewsList extends FeatureList
 			//#endif
 		}
 		// Save memory by making null
-		uitems = null;
-		ufeeds = null;
+		uitems = (RssItunesItem[])nullPtr;
+		ufeeds = (RssItunesFeed[])nullPtr;
 		//#ifdef DLARGEMEM
 		//#ifdef DMIDP20
 		gauge.setValue(diffDelta + 1);
@@ -672,11 +674,11 @@ public class AllNewsList extends FeatureList
 		uitems = new RssItunesItem[kc];
 		vunsorted.copyInto(uitems);
 		// Save memory by making null
-		vunsorted = null;
+		vunsorted = (Vector)nullPtr;
 		ufeeds = new RssItunesFeed[kc];
 		vfeedUnsorted.copyInto(ufeeds);
 		// Save memory by making null
-		vfeedUnsorted = null;
+		vfeedUnsorted = (Vector)nullPtr;
 		for (int ic = 0; ic < kc ; ic++) {
 			//#ifdef DLOGGING
 			if (m_finestLoggable) {m_logger.finest("ic,index,date=" + ic + "," + indexes[ic] + "," + new Date(ldates[indexes[ic]]) + "," + uitems[indexes[ic]].getDate());}
@@ -690,7 +692,7 @@ public class AllNewsList extends FeatureList
 			//#endif
 		}
 		// Save memory by making null
-		uitems = null;
+		uitems = (RssItunesItem[])nullPtr;
 		//#ifdef DLARGEMEM
 		gauge.setValue(diffDelta + 1);
 		gauge = new Gauge("After sorting 2...", false, diffDelta + 1, 0);
@@ -700,7 +702,7 @@ public class AllNewsList extends FeatureList
 		RssItunesItem[] sitems = new RssItunesItem[vsorted.size()];
 		vsorted.copyInto(sitems);
 		// Save memory by making null
-		vsorted = null;
+		vsorted = (Vector)nullPtr;
 		unsortedItems.removeAllElements();
 		for( int ic = 0; ic < sitems.length; ic++){
 			unsortedItems.addElement(sitems[ic]);
@@ -711,7 +713,7 @@ public class AllNewsList extends FeatureList
 			//#endif
 		}
 		// Save memory by making null
-		ufeeds = null;
+		ufeeds = (RssItunesFeed[])nullPtr;
 		//#ifdef DLARGEMEM
 		gauge.setValue(diffDelta + 1);
 		gauge = new Gauge("After sorting 3...", false, diffDelta + 1, 0);
@@ -721,7 +723,7 @@ public class AllNewsList extends FeatureList
 		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedSorted.size()];
 		vfeedSorted.copyInto(sfeeds);
 		// Save memory by making null
-		vfeedSorted = null;
+		vfeedSorted = (Vector)nullPtr;
 		m_itemFeeds.removeAllElements();
 		for( int ic = 0; ic < sitems.length; ic++){
 			m_itemFeeds.addElement(sfeeds[ic]);
