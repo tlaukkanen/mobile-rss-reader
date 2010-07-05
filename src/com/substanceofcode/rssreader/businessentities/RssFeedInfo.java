@@ -24,6 +24,7 @@
  * IB 2010-03-14 1.11.5RC2 Fixed problem with conditional get.
  * IB 2010-03-14 1.11.5RC2 Add toString to interface.
  * IB 2010-03-14 1.11.5RC2 Code cleanup.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
 */
 
 // Expand to define test define
@@ -45,7 +46,7 @@
 //@    /** Return bookmark's name */
 //@    String getName();
 //@    
-//@    void setName(String m_name);
+//@    void setName(String name);
 //@
 //@    /** Return bookmark's URL */
 //@    String getUrl();
