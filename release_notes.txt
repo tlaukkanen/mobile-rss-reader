@@ -316,7 +316,8 @@ v1.11.5 Development 5 (dev5) (July 4th 2010)
 v1.11.5 Development 6 (dev6) (July 5th 2010)
 - Reduce startup time by having methods return arrays with method values.
 - Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.  This may be a slight performance improvement.
-- Use Yinlight, LLC as vendor and http://www.yinlight.net as info URL to be consistent with code signing.
+- Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.
+- Fix creating signed JAD so that it copies the jad with overwrite.
 
 Device notes:
 
