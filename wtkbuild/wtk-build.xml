@@ -53,6 +53,8 @@
     <!-- IB 2010-07-03 1.11.5Dev4 Put release_notes-(current version w/underscores).txt into sftp download directory. -->
     <!-- IB 2010-07-05 1.11.5Dev6 Use original.author to put in Tommi's name. -->
     <!-- IB 2010-07-05 1.11.5Dev6 Don't make the zip files if we are skipping svn export. -->
+    <!-- IB 2010-07-05 1.11.5Dev6 Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.  -->
+    <!-- IB 2010-07-05 1.11.5Dev6 Fix creating signed JAD so that it copies the jad with overwrite.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -199,6 +201,8 @@
 
 	<target name="prepare.signed" >
 		<property file="${basedir}/wtksigned.properties${build.template}" />
+		<property name="vendor" value="${yinlight.vendor}" />
+		<property name="project.info.url" value="${yinlight.project.info.url}" />
 	</target>
 
 	<target name="prepare.thawte" if="thawte.sign" unless="godaddy.sign" >
@@ -331,6 +335,8 @@
 		<property name="smartphone" value="" />
 		<property name="stage.stable.text" value="stable" />
 		<property name="signed.text" value="" />
+		<property name="vendor" value="${tommi.vendor}" />
+		<property name="project.info.url" value="${tommi.project.info.url}" />
 		<property name="build.prefix" value="${file.prefix}${stage.file}" />
 		<property name="build.file.root" value="${build.prefix}${project.name}-${FMIDLETVERSROOT}" />
 		<property name="buildinfo" value="${SUFFIXVERS}-${stage.file}b${build.number}" />
@@ -764,6 +770,8 @@
 	</target>
 
 	<target name="tool.sign" depends="prepare,prepare.thawte,prepare.godaddy" if="signed" >
+		<parallel>
+		<sequential>
 		<echo message="tsalias=${tsalias}" />
 		<echo message="tsstorepass=${tsstorepass}" />
 		<echo message="tskeystore=${tskeystore}" />
@@ -830,7 +838,9 @@
 			<available file="${jsjad3.in}"/>
 		</waitfor>
 	    <echo message="Second sleep finished." />
-		<move file="${jsjad3.in}" tofile="${jsjad.out}" />
+		<copy file="${jsjad3.in}" tofile="${jsjad.out}" overwrite="true" />
+		</sequential>
+		</parallel>
 	</target>
 
 	<target name="antenna.wtksign" depends="prepare,prepare.thawte,prepare.godaddy" if="signed" >
