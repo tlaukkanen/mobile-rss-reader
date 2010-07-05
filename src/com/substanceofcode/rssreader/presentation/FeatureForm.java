@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-06-27 1.11.5Dev2 Make midlet and LoadingForm optional in FeatureForm and FeatureList.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
  */
 
 // Expand to define MIDP define
@@ -64,6 +65,8 @@ import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 /* List with optional commands added with addPromptCommand which if
    used, will give prompt message with OK/Cancel.  */
 public class FeatureForm extends Form {
+
+	final       Object nullPtr = null;
 	protected FeatureMgr featureMgr;
 	private Font font = null;
 
@@ -157,7 +160,7 @@ public class FeatureForm extends Form {
 			}
 		} catch (RuntimeException e) {
 			if (font != null) {
-				font = null;
+				font = (Font)nullPtr;
 				setItemFont(item);
 			}
 		}
@@ -179,7 +182,7 @@ public class FeatureForm extends Form {
 			midlet.getSettings().setFontChoice(
 				RssReaderSettings.DEFAULT_FONT_CHOICE);
 		}
-		this.font = null;
+		this.font = (Font)nullPtr;
 		final int flen = super.size();
 		for (int i = 0; i < flen; i++) {
 			Item item = super.get(i);
