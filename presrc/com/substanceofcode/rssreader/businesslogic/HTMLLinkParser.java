@@ -26,6 +26,8 @@
  * IB 2010-05-24 1.11.5RC2 Log instead of out.println.
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser andd HTMLLinkParser in small memory MIDP 1.0 to save space.
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+ * IB 2010-07-04 1.11.5Dev6 Use "" when feedNameFilter and feedURLFilter are not used.
+ * IB 2010-07-04 1.11.5Dev6 Do not have empty catch block.
 */
 
 // Expand to define memory size define
@@ -183,6 +185,7 @@ public class HTMLLinkParser extends FeedListParser {
 							//#ifdef DLOGGING
 							if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
 							//#endif
+							e.printStackTrace();
 						}
 			
 						/** Debugging information */
@@ -191,12 +194,12 @@ public class HTMLLinkParser extends FeedListParser {
 						if (finerLoggable) {logger.finer("Link:        " + link);}
 						//#endif
 
-						if (( feedURLFilter != null) &&
+						if ((feedURLFilter.length() > 0) &&
 							( link.toLowerCase().indexOf(feedURLFilter) < 0)) {
 							continue;
 						}
 						
-						if (( feedNameFilter != null) &&
+						if ((feedNameFilter.length() > 0) &&
 							((title != null) &&
 							(title.toLowerCase().indexOf(feedNameFilter) < 0))) {
 							continue;
