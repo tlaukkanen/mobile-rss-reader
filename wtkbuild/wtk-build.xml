@@ -61,6 +61,7 @@
     <!-- IB 2010-07-05 1.11.5Dev7 Put gpl.txt into sftp download directory.  -->
     <!-- IB 2010-07-05 1.11.5Dev7 Include version number in gpl.txt as gpl-2.txt.  -->
     <!-- IB 2010-07-05 1.11.5Dev7 Include version 2.1 of the LGPL as lgpl-2_1.txt and distribute where gpl-2.txt is.  -->
+    <!-- IB 2010-07-09 1.11.5Dev7 Use no.individual.file to turn off copying jad/jar/cod files to google distribution.  This is done for dev releases.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -246,6 +247,8 @@
 		<property name="stage.featured" value="Featured," />
 		<property name="ftp.ustage.txt" value="${ustage}\ " />
 		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
+		<property name="no.individual.file" value="false" />
+	    <echo message="no.individual.file=${no.individual.file}" />
 	</target>
 
 	<!-- Prepare to init stage properties if not set already.  -->
@@ -263,6 +266,8 @@
 		<property name="stage.featured" value="Featured," />
 		<property name="ftp.ustage.txt" value="" />
 		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
+		<property name="no.individual.file" value="false" />
+	    <echo message="no.individual.file=${no.individual.file}" />
 	</target>
 
 	<!-- prepare the target folder -->
@@ -1134,7 +1139,7 @@
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${file.name} --summary=&quot;${stage.stable.text} ${signed.text}${device.type} MIDP ${wtk.midp.version} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}${latest.binary.desc}&quot; ${append.google.labels}&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 	</target>
 
-	<target name="google.upload.line.append.file" depends="prepare" >
+	<target name="google.upload.line.append.file" depends="prepare" unless="${no.individual.file}" >
 		<antcall target="google.upload.line.append" inheritAll="true" >
 			<param name="file.name" value="${build.file.root}${fext.suffix}.${fext}" />
 		</antcall>
