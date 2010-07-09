@@ -321,13 +321,14 @@ v1.11.5 Development 6 (dev6) (July 5th 2010)
 - Allow to create distribution with no signed files.  This helps if the certificate is pending.
 - Do not create any signed targets because the certificate is pending.
 
-v1.11.5 Development 7 (dev7) (July 5th 2010)
+v1.11.5 Development 7 (dev7) (July 7th 2010)
 - Create signed targets (and for now on) because the certificate was issued.
 - Put changelog-(current version w/underscores).txt into sftp download directory.
 - Put gpl.txt into sftp download directory.
 - Update source text to make distribution/redistribution license options clearer.
 - Include version number in gpl.txt as gpl-2.txt.
 - Include version 2.1 of the LGPL as lgpl-2_1.txt and distribute where gpl-2.txt is.
+- Allow turn off of distributing jad/jar/cod.  For this release and other development releases, the jad/jar/cod will not be distributed as separate files.  Only the zip files will be distributed.
 
 Device notes:
 
