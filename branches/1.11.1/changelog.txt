@@ -515,7 +515,7 @@ v1.11.5 Development 6 (dev6) (July 5th 2010)
 - Have dist.no.signed target to not sign any files.  This helps if the certificate is pending.
 - Do not create any signed targets because the certificate is pending.
 
-v1.11.5 Development 7 (dev7) (July 5th 2010)
+v1.11.5 Development 7 (dev7) (July 7th 2010)
 - Create signed targets (and for now on) because the certificate was issued.
 - Use new ant feature that allows you to use an expression that evaluates to true in the target attribute 'if'.
 - Put changelog-(current version w/underscores).txt into sftp download directory.
@@ -524,6 +524,7 @@ v1.11.5 Development 7 (dev7) (July 5th 2010)
 - Update source text to make distribution/redistribution license options clearer.
 - Include version number in gpl.txt as gpl-2.txt.
 - Include version 2.1 of the LGPL as lgpl-2_1.txt and distribute where gpl-2.txt is.
+- Use no.individual.file to turn off copying jad/jar/cod files to google distribution.  This is done for dev releases.  For this release and other development releases, the jad/jar/cod will not be distributed as separate files.  Only the zip files will be distributed.
 
 Device issues:
 
