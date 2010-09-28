@@ -28,6 +28,7 @@
  * IB 2010-06-02 1.11.5RC2 More logging.
  * IB 2010-06-27 1.11.5RC2 If CLDC 1.1, use synchronized class statement vs static synchronized modifier.
  * IB 2010-06-27 1.11.5Dev2 Use volatile for instance vars.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
  */
 
 // Expand to define MIDP define
@@ -44,10 +45,11 @@ package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Settings;
 import java.io.IOException;
-import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStoreException;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.List;
+
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -89,13 +91,13 @@ final public class RssReaderSettings {
 	//#endif
     
     /** Creates a new instance of RssReaderSettings */
-    private RssReaderSettings(MIDlet midlet) {
+    private RssReaderSettings() {
         try {
 			//#ifdef DLOGGING
 //@			Logger.getLogger("RssReaderSettings").info("Constructor midlet=" +
-//@					midlet);
+//@					FeatureMgr.getMidlet());
 			//#endif
-            m_settings = Settings.getInstance(midlet);
+            m_settings = Settings.getInstance();
         } catch (Throwable e) {
 			m_loadExc = e;
             e.printStackTrace();
@@ -104,9 +106,9 @@ final public class RssReaderSettings {
     
     /** Get instance */
 	//#ifdef DCLDCV11
-//@    public static RssReaderSettings getInstance(MIDlet midlet)
+//@    public static RssReaderSettings getInstance()
 	//#else
-    public static synchronized RssReaderSettings getInstance(MIDlet midlet)
+    public static synchronized RssReaderSettings getInstance()
 	//#endif
 	{
 		//#ifdef DCLDCV11
@@ -114,10 +116,10 @@ final public class RssReaderSettings {
 		//#endif
 		//#ifdef DLOGGING
 //@		Logger.getLogger("RssReaderSettings").info(
-//@				"Constructor midlet,m_singleton=" + midlet + "," + m_singleton);
+//@				"Constructor midlet,m_singleton=" + FeatureMgr.getMidlet() + "," + m_singleton);
 		//#endif
         if(m_singleton==null) {
-            m_singleton = new RssReaderSettings(midlet);
+            m_singleton = new RssReaderSettings();
         }
         return m_singleton;
 		//#ifdef DCLDCV11
