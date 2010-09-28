@@ -1,4 +1,5 @@
-/* Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
+/*
+ * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +29,11 @@
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
  * IB 2010-07-04 1.11.5Dev6 Move test statement to be all in define to prevent unused code.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
+ * IB 2010-08-15 1.11.5Dev8 Need LoadingForm for FeatureList.
+ * IB 2010-08-15 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-08-15 1.11.5Dev8 Use showMe for getDisplay.setCurrent.
+ * IB 2010-08-15 1.11.5Dev8 Use featureMgr for super.getFeatureMgr().
+ * IB 2010-09-27 1.11.5Dev8 Move title to construtor for KFileSelectorImpl.
 */
 
 // Expand to define MIDP define
@@ -47,7 +53,6 @@ import java.io.InputStream;
 import java.io.*;
 import java.util.Vector;
 import java.util.Enumeration;
-import javax.microedition.midlet.MIDlet;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileSystemListener;
 import javax.microedition.io.file.FileConnection;
@@ -61,8 +66,8 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Image;
 
-import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.FeatureList;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 import com.substanceofcode.utils.MiscUtil;
 
 //#ifdef DLOGGING
@@ -115,7 +120,6 @@ final public class KFileSelectorImpl
 	protected boolean itemSelected = false;
 	protected boolean dirSelected = false;
 	protected boolean cancelCmd = false;
-	protected RssReaderMIDlet midlet = null;
 
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("KFileSelectorImpl");
@@ -125,9 +129,9 @@ final public class KFileSelectorImpl
 	//#endif
 
 	/* Create the list and initialization. */
-	public KFileSelectorImpl()
+	public KFileSelectorImpl(String title, LoadingForm loadForm)
 	{
-		super(null, List.IMPLICIT);
+		super(title, List.IMPLICIT, loadForm);
 
 		//#ifdef DTEST
 		try {
@@ -218,14 +222,10 @@ final public class KFileSelectorImpl
 	}
 
 	// Init fields.
-	public void init(RssReaderMIDlet midlet, boolean selectDir, String title,
-			String defaultDir, String iconDir)
+	public void init(boolean selectDir, String defaultDir, String iconDir)
 	{
 
-		super.setTitle(title);
-		this.midlet = midlet;
 		this.selectDir = selectDir;
-		super.init(midlet);
 		this.title = title;
 		this.defaultDir = defaultDir;
 		this.iconDir = iconDir;
@@ -243,16 +243,13 @@ final public class KFileSelectorImpl
 					try {
 						openSelected(dirSelected);
 					} catch (Throwable t) {
-						if (midlet != null) {
-							Alert internalAlert = new Alert(
-									"Internal problem", 
-									"Internal error.  Unable to open.",
-									null,
-									AlertType.ERROR);
-							internalAlert.setTimeout(Alert.FOREVER);
-							Display.getDisplay(midlet).setCurrent(
-									internalAlert, this );
-						}
+						Alert internalAlert = new Alert(
+								"Internal problem", 
+								"Internal error.  Unable to open.",
+								null,
+								AlertType.ERROR);
+						internalAlert.setTimeout(Alert.FOREVER);
+						featureMgr.showMe( internalAlert );
 						//#ifdef DLOGGING
 						logger.severe("KFileSelectorImpl openSelected ", t);
 						//#endif
@@ -264,7 +261,7 @@ final public class KFileSelectorImpl
 					doCleanup();
 					parent.childFinished(this);
 					cancelCmd = false;
-					super.getFeatureMgr().setBackground(false);
+					featureMgr.setBackground(false);
 				}
 			} catch (Exception e) {
 				//#ifdef DLOGGING
@@ -517,32 +514,26 @@ final public class KFileSelectorImpl
 						logger.severe("openSelected security exception selected:  " + selectedFile, e);
 						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
 						//#endif
-						if (midlet != null) {
-							Alert securityAlert = new Alert(
-									"Security problem", 
-									"Security problem found either access " +
-									" denied or access refused by the user.",
-									null,
-									AlertType.ERROR);
-							securityAlert.setTimeout(Alert.FOREVER);
-							Display.getDisplay(midlet).setCurrent(
-									securityAlert, this );
-						}
+						Alert securityAlert = new Alert(
+								"Security problem", 
+								"Security problem found either access " +
+								" denied or access refused by the user.",
+								null,
+								AlertType.ERROR);
+						securityAlert.setTimeout(Alert.FOREVER);
+						featureMgr.showMe( securityAlert );
 						throw e;
 					}
 					catch (IllegalArgumentException e)
 					{
-						if (midlet != null) {
-							Alert illegalAlert = new Alert(
-									"Security problem", 
-									"Security problem found either access " +
-									" denied or access refused by the user.",
-									null,
-									AlertType.ERROR);
-							illegalAlert.setTimeout(Alert.FOREVER);
-							Display.getDisplay(midlet).setCurrent(
-									illegalAlert, this );
-						}
+						Alert illegalAlert = new Alert(
+								"Security problem", 
+								"Security problem found either access " +
+								" denied or access refused by the user.",
+								null,
+								AlertType.ERROR);
+						illegalAlert.setTimeout(Alert.FOREVER);
+						featureMgr.showMe( illegalAlert );
 						//#ifdef DTEST
 						if (bDebug) System.out.println("### open file: " + e);
 						//#endif
@@ -622,7 +613,7 @@ final public class KFileSelectorImpl
 					//parent.childFinished(this);
 
 					// Stop thread of FeatureMgr
-					super.getFeatureMgr().setBackground(false);
+					featureMgr.setBackground(false);
 
 					// Clean up in separate thread.  This also saves
 					// the selectedURL and sends childFinished.
@@ -940,16 +931,6 @@ final public class KFileSelectorImpl
     public String[] getFilePatterns() {
         return (filePatterns);
     }
-
-    public void setMidlet(RssReaderMIDlet midlet) {
-        this.midlet = midlet;
-    }
-
-	//#ifdef DTEST
-    final public MIDlet getMidlet() {
-        return (midlet);
-    }
-	//#endif
 
 } //class KFileSelectorImpl
 
