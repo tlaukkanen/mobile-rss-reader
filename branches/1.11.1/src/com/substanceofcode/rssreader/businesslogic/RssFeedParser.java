@@ -34,6 +34,7 @@
  * IB 2010-05-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-09-26 1.1.5Dev8 Don't use midlet directly.
 */
 
 // Expand to define MIDP define
@@ -55,7 +56,7 @@ import com.substanceofcode.utils.XmlParser;
 //#ifndef DSMALLMEM
 import com.substanceofcode.utils.HTMLParser;
 //#endif
-import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
@@ -87,7 +88,6 @@ implements
 	Runnable {
     
 	final       Object nullPtr = null;
-    private RssReaderMIDlet m_midlet = null;
     private Thread m_parsingThread = null;
     private RssItunesFeed m_rssFeed;  // The RSS feed
     private int m_maxItemCount;  // Max count of itetms to get for a feed.
@@ -113,12 +113,10 @@ implements
     
 	//#ifdef DMIDP20
     /** Make this observable. */
-    public void makeObserable(RssReaderMIDlet midlet,
-			boolean updFeed, int maxItemCount) {
+    public void makeObserable(boolean updFeed, int maxItemCount) {
 		//#ifdef DLOGGING
-//@		if (fineLoggable) {logger.fine("makeObserable midlet,updFeed,maxItemCount=" + midlet + "," + updFeed + "," + maxItemCount);}
+//@		if (fineLoggable) {logger.fine("makeObserable updFeed,maxItemCount=" + updFeed + "," + maxItemCount);}
 		//#endif
-		m_midlet = midlet;
 		m_updFeed = updFeed;
 		m_maxItemCount = maxItemCount;
 		observableHandler = new ObservableHandler();
@@ -367,8 +365,8 @@ implements
 				MiscUtil.removeThread(m_parsingThread);
 			}
 			//#endif
-			if (m_midlet != null) {
-				m_midlet.wakeup(2);
+			if (FeatureMgr.getMidlet() != null) {
+				FeatureMgr.getMidlet().wakeup(2);
 			}
 			//#ifdef DMIDP20
 			if (observableHandler != null) {
