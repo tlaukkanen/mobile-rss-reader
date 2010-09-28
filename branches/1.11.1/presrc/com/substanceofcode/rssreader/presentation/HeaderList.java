@@ -23,6 +23,15 @@
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
  * IB 2010-03-07 1.11.5Dev2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  * IB 2010-03-07 1.11.5Dev2 Cosmetic but not execution code changes.
+ * IB 2010-07-28 1.11.5Dev8 Show details if 0 items.
+ * IB 2010-07-28 1.11.5Dev8 More logging.
+ * IB 2010-07-29 1.11.5Dev8 Also, show details if date is not empty.
+ * IB 2010-07-29 1.11.5Dev8 Fix order of commands for header list.
+ * IB 2010-07-29 1.11.5Dev8 More logging.
+ * IB 2010-09-26 1.11.5Dev8 Use midlet from FeatureMgr.
+ * IB 2010-09-26 1.11.5Dev8 Have procBackPage create loading form.
+ * IB 2010-09-27 1.11.5Dev8 Have "Loading detail form..." when going to the detail form.
+ * IB 2010-09-27 1.11.5Dev8 Have update give updating feed loading form for MIDP 1.0.
 */
 
 // Expand to define MIDP define
@@ -93,14 +102,19 @@ implements
 	//#endif
     
 	/* Constructor */
-	public HeaderList(final RssReaderMIDlet midlet,
-			final FeatureList bookmarkList, final int selectedIx,
+	public HeaderList(final FeatureList bookmarkList, final int selectedIx,
 			final Hashtable rssFeeds, Image unreadImage,
 			boolean itunesEnabled,
 			LoadingForm loadForm, final RssItunesFeed feed) {
-		super(midlet, feed.getName(), List.IMPLICIT,
+		super(feed.getName(), List.IMPLICIT,
 				selectedIx, 1, bookmarkList,
 				rssFeeds, unreadImage, loadForm, 6);
+		//#ifdef DLOGGING
+		if (m_finestLoggable) {m_logger.finest("Constructor m_feed.getName(),m_feed.getItems().size(),selectedIx,itunesEnabled=" + m_feed.getName() + "," + m_feed.getItems().size() + "," + selectedIx + "," + itunesEnabled);}
+		//#ifdef DITUNES
+		if (m_finestLoggable) {m_logger.finest("Constructor feed.getName(),feed.getLink(),feed.getItems().size()=" + feed.getName() + "," + feed.getLink() + "," + feed.getItems().size());}
+		//#endif
+		//#endif
 		m_feed = feed;
 		this.m_itunesEnabled = itunesEnabled;
 		m_updateCmd         = new Command("Update feed", Command.SCREEN, 3);
@@ -109,9 +123,10 @@ implements
 		super.addCommand(m_updateCmd);
 		super.addCommand(m_updateModCmd);
 		//#ifdef DITUNES
-		if (m_itunesEnabled && feed.isItunes()) { 
+		if (m_itunesEnabled && (feed.isItunes() ||
+		   (feed.getLink().length() > 0) || (feed.getDate() != null))) { 
 			m_bookmarkDetailsCmd    = new Command("Show bookmark details",
-					Command.SCREEN, 4);
+					Command.SCREEN, 5);
 			super.addCommand(m_bookmarkDetailsCmd);
 		}
 		//#endif
@@ -137,7 +152,7 @@ implements
 				System.out.println("feed store=" + store);
 			}
 		} catch(Throwable t) {
-			m_loadForm.recordExcForm(
+			featureMgr.getLoadForm().recordExcForm(
 					"\ntestFeed Internal error", t);
 		}
 	}
@@ -146,7 +161,7 @@ implements
 	//#ifdef DMIDP20
 	public void changed(Observable observable, Object arg) {
 
-		RssFeedParser cbackGrRssParser = m_midlet.checkActive(observable);
+		RssFeedParser cbackGrRssParser = FeatureMgr.getMidlet().checkActive(observable);
 		if (cbackGrRssParser == null) {
 			return;
 		}
@@ -164,23 +179,29 @@ implements
 		if (m_finestLoggable) {m_logger.finest("commandAction c=" + c.getLabel());}
 		//#endif
 
+		RssReaderMIDlet midlet = featureMgr.getMidlet();
 		/** Update currently selected RSS feed's headers */
 		if( (c == m_updateCmd) ||  (c == m_updateModCmd) ) {
-			m_midlet.setPageInfo(false, (c == m_updateCmd),
+			midlet.setPageInfo(false, (c == m_updateCmd),
 					(c == m_updateModCmd), this);
 			// Update existing bookmark.
 			//#ifdef DMIDP20
 			synchronized(this) {
-				m_midlet.procBackPage(m_feed, this);
+				// Have procBackPage create loading form.
+				midlet.procBackPage(m_feed, null, true, this, null);
 			}
 			//#else
+			/* Updating feed... */
+			LoadingForm loadForm = LoadingForm.getLoadingForm(
+					"Updating feed...", this, null);
+			featureMgr.setLoadForm(loadForm);
 			try {
 				RssFeedParser parser = new RssFeedParser( m_feed );
 				parser.parseRssFeed( (c == m_updateModCmd),
-					m_midlet.getSettings().getMaximumItemCountInFeed());
-				m_midlet.procUpdHeader(parser);
+					midlet.getSettings().getMaximumItemCountInFeed());
+				midlet.procUpdHeader(parser, loadForm);
 			} catch(Throwable e) {
-				m_midlet.procPageExc(m_feed, false, e);
+				midlet.procPageExc(m_feed, false, e);
 			}
 			//#endif
 		}
@@ -188,7 +209,10 @@ implements
 		//#ifdef DITUNES
 		/** Display Itune's feed detail */
 		if( c == m_bookmarkDetailsCmd ) {
-			m_midlet.initializeDetailForm(m_feed, this);
+			LoadingForm loadForm = LoadingForm.getLoadingForm(
+					"Loading detail form...", this, null);
+			featureMgr.setLoadForm(loadForm);
+			midlet.initializeDetailForm(m_feed, this, loadForm);
 		}
 		//#endif
 
