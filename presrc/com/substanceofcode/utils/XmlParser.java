@@ -36,6 +36,9 @@
  * IB 2010-07-04 1.11.5Dev6 Replace empty while with for.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
  * IB 2010-07-04 1.11.5Dev6 Code cleanup.
+ * IB 2010-07-28 1.11.5Dev8 Don't convert entities if CDATA used or not forced.
+ * IB 2010-09-27 1.11.5Dev8 Combine if statements.
+ * IB 2010-09-27 1.11.5Dev8 Remove unneeded ;.
 */
 
 // Expand to define testing define
@@ -602,7 +605,7 @@ public class XmlParser {
     
     /** Get element text including inner xml
 	  * If no text, return empty string "" */
-    private String getTextStream(InputStreamReader is) throws IOException {
+    private String getTextStream(InputStreamReader is, final boolean convEnts) throws IOException {
         
 		if(!m_currentElementContainsText) {
 			return "";
@@ -725,8 +728,10 @@ public class XmlParser {
 			
 			/** Handle some entities and encoded characters */
 			text = MiscUtil.replace(text, BEGIN_CDATA, "");
+			int flen = text.length();
 			text = MiscUtil.replace(text, END_CDATA, "");
-			if (text.indexOf('&') >= 0) {
+			if (((flen == text.length()) || convEnts) &&
+					(text.indexOf('&') >= 0)) {
 				text = m_encodingUtil.replaceAlphaEntities(text);
 				// No need to convert from UTF-8 to Unicode using replace
 				// umlauts now because it is done with new String...,encoding.
@@ -753,14 +758,20 @@ public class XmlParser {
 		return text;
     }
 
+	//#ifdef DTEST
+    public String getText() throws IOException {
+		return getText(true);
+	}
+	//#endif
+
     /** Get element text including inner xml
 	  * save some time by using the normal m_inputStream when we
 	  * know that we are not reading UTF-8/16. */
-    public String getText() throws IOException {
+    public String getText(boolean convEnts) throws IOException {
 		if (m_encodingStreamReader.isModEncoding()) {
-			return getTextStream(m_encodingStreamReader);
+			return getTextStream(m_encodingStreamReader, convEnts);
 		} else {
-			return getTextStream(m_inputStream);
+			return getTextStream(m_inputStream, convEnts);
 		}
 	}
 
@@ -838,7 +849,8 @@ public class XmlParser {
 		if (((parsingResult = parse()) == ELEMENT) &&
 			getName().equals("link")) {
 			while (((parsingResult = parse()) == ELEMENT) &&
-				getName().equals("meta")) {};
+				getName().equals("meta")) {
+			}
 		}
 		while ((parsingResult == XmlParser.PROLOGUE) ||
 				(parsingResult == XmlParser.DOCTYPE) ||
