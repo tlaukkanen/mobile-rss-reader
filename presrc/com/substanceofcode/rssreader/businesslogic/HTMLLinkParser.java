@@ -28,6 +28,7 @@
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-07-04 1.11.5Dev6 Use "" when feedNameFilter and feedURLFilter are not used.
  * IB 2010-07-04 1.11.5Dev6 Do not have empty catch block.
+ * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
 */
 
 // Expand to define memory size define
@@ -165,7 +166,7 @@ public class HTMLLinkParser extends FeedListParser {
 						if (finerLoggable) {logger.finer("Parsing <a> tag");}
 						//#endif
 						
-						title = parser.getText();
+						title = parser.getText(true);
 						// Title can be 0 as this is used also for
 						// getting 
 						title = title.trim();
