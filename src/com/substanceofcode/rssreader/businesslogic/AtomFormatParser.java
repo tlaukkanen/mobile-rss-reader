@@ -21,6 +21,9 @@
  */
 /*
  * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-07-19 1.11.5Dev8 Don't convert HTML for link.
+ * IB 2010-07-19 1.11.5Dev8 Don't remove entities for link with CDATA.
+ * IB 2010-07-19 1.11.5Dev8 For smartphone, set feed header fields if no items.
 */
 
 // Expand to define test define
@@ -92,53 +95,59 @@ public class AtomFormatParser implements FeedFormatParser {
 		RssItunesFeed feed = cfeed;
         feed.setItems(items);
         
-        /** Parse to first entry element */
-        while(!parser.getName().equals("entry")) {
-			//#ifdef DTEST
-			//#ifndef DTESTUI
-//@            System.out.println("Parsing to first entry");
-			//#endif
-			//#endif
-            switch (parser.parse()) {
-				case XmlParser.END_DOCUMENT:
-					System.out.println("No entries found.");
-					return feed;
-				case XmlParser.ELEMENT:
-					String elementName = parser.getName();
-					char elemChar = elementName.charAt(0);
-					if (parseCommon(parser, elemChar, elementName) &&
-						(elemChar == 't') && 
-								getTitleOnly && elementName.equals("title") ) {
-						feed.setName(m_title);
+		//#ifdef DITUNES
+//@		try {
+		//#endif
+			/** Parse to first entry element */
+			while(!parser.getName().equals("entry")) {
+				//#ifdef DTEST
+				//#ifndef DTESTUI
+//@				System.out.println("Parsing to first entry");
+				//#endif
+				//#endif
+				switch (parser.parse()) {
+					case XmlParser.END_DOCUMENT:
+						System.out.println("No entries found.");
 						return feed;
-					}
-					if ((elemChar == 's') &&
-						elementName.equals("subtitle") ) {
-						m_description = parser.getText();
-						m_description = MiscUtil.removeHtml(
-								m_description ).trim();
-						//#ifdef DLOGGING
-//@						if (finestLoggable) {logger.finest("m_description=" + m_description);}
-						//#endif
-						continue;
-					}
-					if (m_hasExt) {
-						m_extParser.parseExtItem(parser, elemChar,
-												 elementName);
-					}
-					break;
-				default:
-					break;
-            }
-        }
-
-		feed.setLink(m_link);
-		// Atom has not feed level date.
-		feed.setDate(null);
-		if (m_extParser.isItunes()) {
-			feed = m_extParser.getFeedInstance(feed, m_language,
-					m_title, m_description);
-		}
+					case XmlParser.ELEMENT:
+						String elementName = parser.getName();
+						char elemChar = elementName.charAt(0);
+						if (parseCommon(parser, elemChar, elementName) &&
+							(elemChar == 't') && 
+									getTitleOnly && elementName.equals("title") ) {
+							feed.setName(m_title);
+							return feed;
+						}
+						if ((elemChar == 's') &&
+							elementName.equals("subtitle") ) {
+							m_description = parser.getText(true);
+							m_description = MiscUtil.removeHtml(
+									m_description ).trim();
+							//#ifdef DLOGGING
+//@							if (finestLoggable) {logger.finest("m_description=" + m_description);}
+							//#endif
+							continue;
+						}
+						if (m_hasExt) {
+							m_extParser.parseExtItem(parser, elemChar,
+													 elementName);
+						}
+						break;
+					default:
+						break;
+				}
+			}
+		//#ifdef DITUNES
+//@		} finally {
+//@			feed.setLink(m_link);
+//@			// Atom has not feed level date.
+//@			feed.setDate(null);
+//@			if (m_extParser.isItunes()) {
+//@				feed = m_extParser.getFeedInstance(feed, m_language,
+//@						m_title, m_description);
+//@			}
+//@		}
+		//#endif
         
 		reset();
 
@@ -206,7 +215,6 @@ public class AtomFormatParser implements FeedFormatParser {
 					m_link = m_altLink;
 				}
 			}
-			m_link = MiscUtil.removeHtml( m_link ).trim();
 			Date pubDate = null;
 			// Check date in case we cannot find it.
 			if (m_date.length() == 0) {
@@ -263,7 +271,7 @@ public class AtomFormatParser implements FeedFormatParser {
 		switch (elemChar) {
 			case 't':
 				if( elementName.equals("title") ) {
-					m_title = parser.getText();
+					m_title = parser.getText(true);
 					m_title = MiscUtil.removeHtml( m_title );
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_title=" + m_title);}
@@ -273,7 +281,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'l':
 				if( elementName.equals("link") ) {
-					String clink = parser.getText().trim();
+					String clink = parser.getText(false).trim();
 					// Some atoms have href= attribute.
 					if (clink.length() == 0) {
 						String hlink = parser.getAttributeValue("href");
@@ -330,7 +338,7 @@ public class AtomFormatParser implements FeedFormatParser {
 		switch (elemChar) {
 			case 'a':
 				if( m_hasExt && elementName.equals("author") ) {
-					m_author = parser.getText();
+					m_author = parser.getText(true);
 					m_author = MiscUtil.removeHtml( m_author );
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_author=" + m_author);}
@@ -339,7 +347,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'c':
 				if( elementName.equals("content")) {
-					m_description = parser.getText();
+					m_description = parser.getText(true);
 					m_description = MiscUtil.removeHtml( m_description );
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("content=m_description=" + m_description);}
@@ -348,7 +356,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 's':
 				if( elementName.equals("summary")) {
-					m_summary = parser.getText();
+					m_summary = parser.getText(true);
 					m_summary = MiscUtil.removeHtml( m_summary );
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_summary=" + m_summary);}
@@ -357,7 +365,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'u': // Updated for Atom 1.0
 				if( elementName.equals("updated")) {
-					m_updated = parser.getText();
+					m_updated = parser.getText(true);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("published=m_updated=" + m_updated);}
 					//#endif
@@ -365,7 +373,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'm': // Modified for Atom 0.3
 				if( elementName.equals("modified")) {
-					m_modified = parser.getText();
+					m_modified = parser.getText(true);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("published=m_modified=" + m_modified);}
 					//#endif
@@ -373,7 +381,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'p': // Published
 				if( elementName.equals("published")) {
-					m_date = parser.getText();
+					m_date = parser.getText(true);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("published=m_date=" + m_date);}
 					//#endif
