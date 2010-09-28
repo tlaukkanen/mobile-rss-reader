@@ -23,6 +23,7 @@
  * IB 2010-04-05 1.11.4RC1 Allow logging of characters for different expected tokens.
  * IB 2010-04-30 1.11.5RC2 Test line feeds in code.
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+ * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
 */
 
 // Expand to define test define
@@ -552,7 +553,7 @@ final public class XmlParserTest extends BaseTestCase
 						}
 						//#endif
 						//#endif
-						String sactValue3 = parser.getText();
+						String sactValue3 = parser.getText(true);
 						//#ifdef DTEST
 						//#ifdef DLOGGING
 						if (logTextChar) {
