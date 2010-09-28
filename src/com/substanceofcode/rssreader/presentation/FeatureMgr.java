@@ -31,6 +31,26 @@
  * IB 2010-06-27 1.11.5Dev2 Have convenience methods showme with/without alert.
  * IB 2010-06-27 1.11.5Dev2 Have static initSettingsEnabled to load app and general settings to help with testing.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-08-14 1.11.5Dev8 Support loading form with FeatureMgr.
+ * IB 2010-08-14 1.11.5Dev8 Support setCurrentItem in FeatureMgr.
+ * IB 2010-08-18 1.11.5Dev8 Have static RssReaderMIDlet variable.
+ * IB 2010-08-18 1.11.5Dev8 Have static mainDisp to keep main starting form.
+ * IB 2010-08-18 1.11.5Dev8 Have static display to keep display from midlet.
+ * IB 2010-08-18 1.11.5Dev8 Have getCurrent for test UI.
+ * IB 2010-08-18 1.11.5Dev8 Have setCurrentMgr to setCurrent display to alert and display and wakeup the featureMgr parameter.
+ * IB 2010-08-18 1.11.5Dev8 Have setCurrentItemMgr to setCurrent display item or display if MIDP 1.0 and wakeup the featureMgr parameter.
+ * IB 2010-08-18 1.11.5Dev8 Have setCurrentItemFeature to setCurrent display item or display if MIDP 1.0 and wakeup the featureMgr for fdisp parameter.
+ * IB 2010-08-18 1.11.5Dev8 Have wakeupDisp wakeup the featureMgr for disp parameter with loop parameter.
+ * IB 2010-08-18 1.11.5Dev8 Have setCurrentFeature to setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter.
+ * IB 2010-08-18 1.11.5Dev8 Have setCurrentAlt to setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter if not null or cmainDisp if not null or disp.
+ * IB 2010-08-18 1.11.5Dev8 Have setMainCurrentAlt to setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter if not null or mainDisp if not null or disp.
+ * IB 2010-08-18 1.11.5Dev8 Have setCurrent to setCurrent display to display and wakeup the featureMgr for the disp parameter or the current featureMgr.
+ * IB 2010-08-18 1.11.5Dev8 Have setCurrent to setCurrent display to alert and display and wakeup the featureMgr for the disp parameter and the current featureMgr.
+ * IB 2010-09-26 1.11.5Dev8 Have callSerially to serialize threads.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for initSettingsEnabled.
+ * IB 2010-09-27 1.11.5Dev8 Use loadForm in FeatureMgr.
+ * IB 2010-09-27 1.11.5Dev8 Need getCurrent for setCurrentItemMgr.
 */
 
 // Expand to define MIDP define
@@ -55,7 +75,6 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
@@ -66,14 +85,17 @@ import javax.microedition.lcdui.Displayable;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.StringItem;
+import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.TextBox;
 //#ifndef DTESTUI
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Form;
+import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.TextField;
 //#else
 //@import com.substanceofcode.testlcdui.ChoiceGroup;
 //@import com.substanceofcode.testlcdui.Form;
+//@import com.substanceofcode.testlcdui.List;
 //@import com.substanceofcode.testlcdui.TextField;
 //#endif
 
@@ -102,7 +124,10 @@ public class FeatureMgr implements CommandListener,
 
 	final       Object nullPtr = null;
 	private Hashtable promptCommands = null;
+	static private Displayable mainDisp = null;
 	private Displayable disp;
+	private LoadingForm dispLoadForm = null;
+    static private Display display = null; // The display for this MIDlet
 	private Displayable promptDisp1;
 	private Displayable promptDisp2;
     static final private long DEFAULT_LOOP_TIME = 500L;
@@ -113,7 +138,7 @@ public class FeatureMgr implements CommandListener,
 	private boolean foundPrompt = false;
 	protected Command exCmd = nullCmd;
 	private Displayable exDisp = null;
-	protected RssReaderMIDlet midlet;
+	static protected RssReaderMIDlet midlet = null;
     private Form        urlRrnForm = null; // The form to return to for URL box
     private TextField   urlRrnItem = null; // The item to return to for URL box
     volatile private boolean     background = false;  // Flag to continue looping
@@ -131,12 +156,16 @@ public class FeatureMgr implements CommandListener,
 	private CommandListener cmdFeatureUser = null;
 	private Runnable runFeatureUser = null;
 
-	public FeatureMgr (RssReaderMIDlet midlet, Displayable disp) {
-		this.midlet = midlet;
+	public FeatureMgr(Displayable disp, LoadingForm loadForm) {
 		this.disp = disp;
+		this.dispLoadForm = loadForm;
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("Starting FeatureMgr " + disp.getClass().getName());}
 		//#endif
+	}
+
+	public FeatureMgr(Displayable disp) {
+		this(disp, null);
 	}
 
     public void setCommandListener(CommandListener cmdFeatureUser,
@@ -243,7 +272,7 @@ public class FeatureMgr implements CommandListener,
 								formAlert.addCommand(new Command("OK", Command.OK, 0));
 								formAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
 								formAlert.setCommandListener(this);
-								midlet.setCurrent(formAlert);
+								FeatureMgr.setCurrentMgr(this, null, formAlert);
 								Alert promptAlert = new Alert(ccmd.getLabel(),
 										promptMsg, null,
 										AlertType.CONFIRMATION);
@@ -251,22 +280,18 @@ public class FeatureMgr implements CommandListener,
 								promptAlert.addCommand(new Command("OK", Command.OK, 0));
 								promptAlert.addCommand(new Command("Cancel", Command.CANCEL, 1));
 								promptAlert.setCommandListener(this);
-								midlet.setCurrent(promptAlert, formAlert);
+								FeatureMgr.setCurrentMgr(this, promptAlert, formAlert);
 								synchronized(this) {
 									promptDisp1 = formAlert;
 									promptDisp2 = promptAlert;
 								}
-							} else if( (urlRrnForm != null) &&
+							} else if ((urlRrnForm != null) &&
 									   (cdisp instanceof TextBox)) {
 								/** Paste into URL field from previous form.  */
 								int cmdType = ccmd.getCommandType();
 								if (cmdType == Command.OK) {
-									urlRrnItem.setString( ((TextBox)cdisp).getString() );
-									//#ifdef DMIDP20
-									midlet.setCurrentItem( urlRrnItem );
-									//#else
-//@									midlet.setCurrent( urlRrnForm );
-									//#endif
+									urlRrnItem.setString(((TextBox)cdisp).getString());
+									FeatureMgr.setCurrentItemMgr(this, urlRrnItem, urlRrnForm);
 									// Free memory
 									urlRrnForm = (Form)nullPtr;
 									// Free memory
@@ -275,11 +300,7 @@ public class FeatureMgr implements CommandListener,
 								
 								/** Cancel the box go back to the return form.  */
 								if (cmdType == Command.CANCEL) {
-									//#ifdef DMIDP20
-									midlet.setCurrentItem( urlRrnItem );
-									//#else
-//@									midlet.setCurrent( urlRrnForm );
-									//#endif
+									FeatureMgr.setCurrentItemMgr(this, urlRrnItem, urlRrnForm);
 									// Free memory
 									urlRrnForm = (Form)nullPtr;
 									urlRrnItem = (TextField)nullPtr;
@@ -309,13 +330,13 @@ public class FeatureMgr implements CommandListener,
 //@											logger.fine("run corigCmd,type=" + logCmd(corigCmd));
 //@										}
 										//#endif
-										midlet.setCurrent(disp);
+										FeatureMgr.setCurrentMgr(this, null, disp);
 										cmdFeatureUser.commandAction(corigCmd, disp);
 										if (background && (runFeatureUser != null)) {
 											runFeatureUser.run();
 										}
 									} else if (ccmd.getCommandType() == Command.CANCEL) {
-										midlet.setCurrent(disp);
+										FeatureMgr.setCurrentMgr(this, null, disp);
 									}
 								} finally {
 									synchronized(this) {
@@ -353,7 +374,7 @@ public class FeatureMgr implements CommandListener,
 							super.wait();
 						}
 					}
-					if(lngTotalTimeTaken < LOOP_TIME) {
+					if (lngTotalTimeTaken < LOOP_TIME) {
 						synchronized(this) {
 							if (loop == 0) {
 								super.wait(LOOP_TIME - lngTotalTimeTaken);
@@ -388,7 +409,7 @@ public class FeatureMgr implements CommandListener,
 	}
 
 	public void startWakeup(boolean wakeupThread) {
-		if ( (procThread == null) || !procThread.isAlive() ) {
+		if ( (procThread == null) || !procThread.isAlive()) {
 			//#ifdef DMIDP20
 			if (procThread != null) {
 				MiscUtil.removeThread(procThread);
@@ -432,12 +453,12 @@ public class FeatureMgr implements CommandListener,
         this.background = background;
     }
 
-    public void setMidlet(RssReaderMIDlet midlet) {
-        this.midlet = midlet;
+    static public void setMidlet(RssReaderMIDlet midlet) {
+        FeatureMgr.midlet = midlet;
     }
 
-    public RssReaderMIDlet getMidlet() {
-        return (midlet);
+    static public RssReaderMIDlet getMidlet() {
+        return (FeatureMgr.midlet);
     }
 
   /**
@@ -480,18 +501,18 @@ public class FeatureMgr implements CommandListener,
 							Command addCmd,
 							Command appndCmd,
 							javax.microedition.lcdui.List plist) {
-		if( (insCmd == null ) || (addCmd == null ) || (appndCmd == null )) {
+		if ((insCmd == null) || (addCmd == null) || (appndCmd == null)) {
 			return -1;
 		}
 
-		if( (c == insCmd ) || (c == addCmd ) || (c == appndCmd )) {
+		if ((c == insCmd) || (c == addCmd) || (c == appndCmd)) {
 			final int blen = plist.size();
 			int cplace = getSelectedIndex(plist);
 			int addElem = (cplace == -1) ? blen : cplace;
-			if(( c == addCmd ) && (addElem < blen)) {
+			if ((c == addCmd) && (addElem < blen)) {
 				addElem++;
 			}
-			if (c == appndCmd ) {
+			if (c == appndCmd) {
 				addElem = blen;
 			}
 			if ((addElem < 0) || (addElem > blen)) {
@@ -518,38 +539,196 @@ public class FeatureMgr implements CommandListener,
 		//#ifdef DMIDP20
 		choiceGroup.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        form.append( choiceGroup );
+        form.append(choiceGroup);
 		return choiceGroup;
 	}
 
     /** Initialize URL text Box */
-    public static void initializeURLBox(RssReaderMIDlet midlet,
-			final String url, Form prevForm, TextField prevItem) {
+    public static void initializeURLBox(final String url,
+			Form prevForm, TextField prevItem) {
 		TextBox boxURL = new TextBox("URL", url, 256, TextField.URL);
-		FeatureMgr featureMgr = new FeatureMgr(midlet, boxURL);
+		FeatureMgr featureMgr = new FeatureMgr(boxURL, null);
 		featureMgr.urlRrnForm = prevForm;
 		featureMgr.urlRrnItem = prevItem;
 		boxURL.addCommand(new Command("OK", Command.OK, 1));
 		boxURL.addCommand(new Command("Cancel", Command.CANCEL, 2));
         boxURL.setCommandListener(featureMgr);
-		midlet.setCurrent( boxURL );
+		FeatureMgr.setCurrentMgr(featureMgr, null, boxURL);
     }
     
 	public void showMe() {
-		if (midlet != null) {
-			midlet.setCurrent(disp);
-		}
+		FeatureMgr.setCurrentMgr(this, null, disp);
 	}
 
 	public void showMe(Displayable alert) {
-		if (midlet != null) {
-			midlet.setCurrent(alert, disp);
+		FeatureMgr.setCurrentMgr(this, alert, disp);
+	}
+
+	public void showMe(Item item) {
+		FeatureMgr.setCurrentItemMgr(this, item, disp);
+	}
+
+    static public void setMainDisp(Displayable mainDisp) {
+        FeatureMgr.mainDisp = mainDisp;
+    }
+
+    static public Displayable getMainDisp() {
+        return FeatureMgr.mainDisp;
+    }
+
+    static public void setDisplay(Display display) {
+        FeatureMgr.display = display;
+    }
+
+    static public Display getDisplay() {
+        return (FeatureMgr.display);
+    }
+
+	static final public void callSerially(Runnable r) {
+		FeatureMgr.display.callSerially(r);
+	}
+
+    static public Displayable getCurrent() {
+        return (FeatureMgr.display.getCurrent());
+    }
+
+	/* Set setCurrent display to alert and display and wakeup the featureMgr parameter. */
+	/* If alert is null, it is not used.  */
+	static final public void setCurrentMgr(FeatureMgr featureMgr,
+								        Displayable alert, Displayable disp) {
+
+		//#ifdef DTESTUI
+//@		String title = "";
+//@		if (disp instanceof Form) {
+//@			title = ((Form)disp).getTitle();
+//@		} else if (disp instanceof List) {
+//@			title = ((List)disp).getTitle();
+//@		}
+//@		String alertTitle;
+//@		if (alert instanceof Form) {
+//@			alertTitle = "," + ((Form)alert).getTitle();
+//@		} else if (alert instanceof List) {
+//@			alertTitle = "," + ((List)alert).getTitle();
+//@		} else {
+//@			alertTitle = "";
+//@		}
+//@		System.out.println("Test UI setCurrent " + disp.getClass().getName() + alertTitle +  "," + title);
+		//#endif
+		if (display != null) {
+			if (alert != null) {
+				display.setCurrent((Alert)alert, disp);
+			} else {
+				display.setCurrent(disp);
+			}
 		}
+		FeatureMgr wfeatureMgr = wakeupDisp(disp, 2);
+		if ((featureMgr != wfeatureMgr) && (featureMgr != null)) {
+			featureMgr.wakeup(2);
+		}
+	}
+
+	/* Set setCurrent display item or display if MIDP 1.0 and wakeup the featureMgr parameter.  */
+	static final public void setCurrentItemMgr(FeatureMgr featureMgr,
+								        Item item, Displayable disp) {
+
+		//#ifdef DTESTUI
+//@		String title = "";
+//@		if (disp instanceof Form) {
+//@			title = ((Form)disp).getTitle();
+//@		} else if (disp instanceof List) {
+//@			title = ((List)disp).getTitle();
+//@		}
+//@		System.out.println("Test UI setCurrentItem " + disp.getClass().getName() + item.getLabel() +  "," + title);
+		//#endif
+		//#ifdef DMIDP20
+		// To prevent loading form from being displayed instead of the
+		// next form when that form has no items, show the load form
+		// again as a workaround.
+		if (featureMgr != null) {
+			LoadingForm loadForm = featureMgr.getLoadForm(); 
+			if ((loadForm != null) &&
+					(FeatureMgr.getCurrent() == loadForm)) {
+				display.setCurrent(loadForm);
+			}
+		}
+		display.setCurrentItem(item);
+		//#else
+//@		display.setCurrent(disp);
+		//#endif
+		FeatureMgr wfeatureMgr = wakeupDisp(disp, 2);
+		if ((featureMgr != wfeatureMgr) && (featureMgr != null)) {
+			featureMgr.wakeup(2);
+		}
+	}
+
+	/* Set setCurrent display item or display if MIDP 1.0 and wakeup the featureMgr for fdisp parameter. */
+	static final public void setCurrentItemFeature(Displayable fdisp,
+								        Item item, Displayable disp) {
+		FeatureMgr featureMgr = (fdisp instanceof FeatureForm) ? ((FeatureForm)fdisp).getFeatureMgr() : ((FeatureList)fdisp).getFeatureMgr();
+		FeatureMgr.setCurrentItemMgr(featureMgr, item, disp);
+	}
+
+	/* Wakeup the featureMgr for disp parameter with loop parameter.  */
+	static public FeatureMgr wakeupDisp(Displayable disp, int loop) {
+		FeatureMgr featureMgr;
+		if (disp instanceof FeatureForm) {
+			featureMgr = ((FeatureForm)disp).getFeatureMgr();
+		} else if (disp instanceof FeatureList) {
+			featureMgr = ((FeatureList)disp).getFeatureMgr();
+		} else {
+			return null;
+		}
+		if (featureMgr != null) {
+			featureMgr.wakeup(loop);
+			return featureMgr;
+		} else {
+			return null;
+		}
+	}
+
+	/* Set setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter. */
+	final static public void setCurrentFeature(Displayable fdisp, Displayable alert, Displayable disp) {
+		FeatureMgr featureMgr = (fdisp instanceof FeatureForm) ? ((FeatureForm)fdisp).getFeatureMgr() : ((FeatureList)fdisp).getFeatureMgr();
+		featureMgr.setCurrentMgr(featureMgr, alert, disp);
+	}
+
+	/* Set setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter if not null or cmainDisp if not null or disp.  */
+	final static public void setCurrentAlt(Displayable cmainDisp, Displayable fdisp, Displayable alert, Displayable disp) {
+
+		if (fdisp != null) {
+			setCurrentFeature(fdisp, alert, disp);
+			if (fdisp != disp) {
+				wakeupDisp(disp, 2);
+			}
+		} else if (cmainDisp != null) {
+			setCurrentFeature(cmainDisp, alert, disp);
+			if (cmainDisp != disp) {
+				wakeupDisp(disp, 2);
+			}
+		} else {
+			if ((disp instanceof FeatureForm) ||
+					(disp instanceof FeatureList)) {
+				setCurrentFeature((FeatureForm)disp, alert, disp);
+			} else {
+				FeatureMgr.setCurrentMgr(null, alert, disp);
+			}
+		}
+	}
+
+	/* Set setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter if not null or mainDisp if not null or disp. */
+	static final public void setMainCurrentAlt(Displayable fdisp, Displayable alert, Displayable disp) {
+		setCurrentAlt(mainDisp, fdisp, alert, disp);
+	}
+
+	/* Set setCurrent display to alert and display and wakeup the featureMgr parameter. */
+	static final public void setCurrentMgr(FeatureMgr featureMgr,
+								        Displayable disp) {
+		setCurrentMgr(featureMgr, null, disp);
 	}
 
 	//#ifdef DMIDP20
 	public Font getCustomFont() {
-		final RssReaderSettings appSettings = midlet.getSettings();
+		final RssReaderSettings appSettings = FeatureMgr.getMidlet().getSettings();
 		if (appSettings == null) {
 			return null;
 		}
@@ -637,6 +816,15 @@ public class FeatureMgr implements CommandListener,
 	}
 	//#endif
 
+
+    public void setLoadForm(LoadingForm dispLoadForm) {
+        this.dispLoadForm = dispLoadForm;
+    }
+
+    public LoadingForm getLoadForm() {
+        return (dispLoadForm);
+    }
+
 	/* Store current values. */
 	final static public byte[] storeValues(Item[] items) {
 		//#ifdef DLOGGING
@@ -646,7 +834,7 @@ public class FeatureMgr implements CommandListener,
 		ByteArrayOutputStream bout = new
 				ByteArrayOutputStream();
 		DataOutputStream dout = new
-				DataOutputStream( bout );
+				DataOutputStream(bout);
 		for (int ic = 0; ic < items.length; ic++) {
 			try {
 				final Item item = items[ic];
@@ -671,7 +859,7 @@ public class FeatureMgr implements CommandListener,
 					}
 					dout.writeInt(bvalue.length);
 					if (bvalue.length > 0) {
-						dout.write( bvalue, 0, bvalue.length );
+						dout.write(bvalue, 0, bvalue.length);
 					}
 					//#ifdef DLOGGING
 //@					if (cfinestLoggable) {logger.finest("storeValues store string " + logItem(item));}
@@ -721,8 +909,7 @@ public class FeatureMgr implements CommandListener,
 //@
 	//#endif
 
-	static public Object[] initSettingsEnabled(MIDlet midlet,
-											   LoadingForm loadForm
+	static public Object[] initSettingsEnabled(LoadingForm loadForm
 												//#ifdef DLOGGING
 //@												,Logger logger
 //@												,boolean fineLoggable
@@ -734,7 +921,7 @@ public class FeatureMgr implements CommandListener,
 		boolean firstTime = false;
 		boolean itunesEnabled = false;
 		try {
-			appSettings = RssReaderSettings.getInstance(midlet);
+			appSettings = RssReaderSettings.getInstance();
 			arrsettings[0] = appSettings;
 			Throwable le = appSettings.getLoadExc();
 			if (le != null) {
