@@ -330,6 +330,19 @@ v1.11.5 Development 7 (dev7) (July 7th 2010)
 - Include version 2.1 of the LGPL as lgpl-2_1.txt and distribute where gpl-2.txt is.
 - Allow turn off of distributing jad/jar/cod.  For this release and other development releases, the jad/jar/cod will not be distributed as separate files.  Only the zip files will be distributed.
 
+v1.11.5 Development 8 (dev8) (Sep 28th 2010)
+- Use only JSR-75 versions for smartphones.
+- Don't remove entities/HTML from links.  This allows parameters in links.
+- Allow open of feed link on details screen for smartphone version if not empty and no items are found.
+- Fixed MIDP 1.0 version update from river of news and headers to not repeat the same item if only one item is in the feed.
+- More diagnostics for font errors.
+- Add line feeds to diagnostics for readability.
+- Fix OPML exported for smart phone version.
+- OPML exported for smart phone version works on some phones including Nokia N86.
+- Have "Loading detail form..." when going to the detail form.
+- Allow open of feed link on details screen for smartphone version if not empty.
+- Allow details screen if not podcast for smartphone version if not empty.  (Podcast still allows details screen).
+
 Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
