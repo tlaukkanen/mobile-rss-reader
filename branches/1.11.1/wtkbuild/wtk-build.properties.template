@@ -18,6 +18,9 @@
 #-- IB 2010-07-05 1.11.5Dev6 Use http://www.yinlight.net as info URL to be consistent with code signing.
 #-- IB 2010-07-05 1.11.5Dev6 Use original.author to put in Tommi's name.
 #-- IB 2010-07-05 1.11.5Dev6 Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.
+#-- IB 2010-07-11 1.11.5Dev8 Don't use manifestsrc as it is in src/main/resources.
+#-- IB 2010-07-30 1.11.5Dev8 Use release.name for build file name for projects with multiple release files.
+#-- IB 2010-08-14 1.11.5Dev8 Use bb.ant.tools.home and bb.ant.tools.jar for Blackberry ant tools.
 
 #windows.drive = C:
 windows.drive = 
@@ -61,6 +64,8 @@ jarsigner.cmd = jarsigner${windows.ext}
 #Comment out for linux
 #rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
 jde.home = ${opt.tools}/blackberry4.2.1
+bb.ant.tools.home = ${opt.tools}/bb-ant-tools/bb-ant-tools-1.2.8
+bb.ant.tools.jar = bb-ant-tools.jar
 #wine = /usr/bin/wine
 #svn.path = C:\\cygwin\\bin\\
 svn.path = /usr/bin/
@@ -120,6 +125,7 @@ sourceforge.rootdir = /home/frs/project/${sourceforge.project.first}/${sourcefor
 project.test.url = http://${sourceforge.project}.sourceforge.net/testdata
 file.test.url = file:///root1/testdata
 project.name = RSSReader
+release.name = ${project.name}
 project.file.prefix = rssreader
 midlet.home = ${wtk.home}/apps/${project.name}
 prc.creater = MRSS
@@ -133,7 +139,6 @@ MIDLETVERSROOT = 1.11.5
 #many '.'
 FMIDLETVERSROOT = 1_11_5
 #Location of manifest source
-manifestsrc = ../manifestsrc
 #? src = src
 #? lib = lib
 #Compile source dir generted by non-preprocessed source and generted source
