@@ -34,6 +34,12 @@
  * IB 2010-06-27 1.11.5Dev2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  * IB 2010-06-27 1.11.5Dev2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
  * IB 2010-07-05 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
+ * IB 2010-09-26 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-09-26 1.11.5Dev8 Repalce setCurrent with showMe.
+ * IB 2010-09-26 1.11.5Dev8 Use loadingForm from FeatureMgr.
+ * IB 2010-09-26 1.11.5Dev8 Use getLoadingForm instead of initializeLoadingForm.
+ * IB 2010-09-26 1.11.5Dev8 Allow non-smartphone to export the OPML if signed.
+ * IB 2010-09-26 1.11.5Dev8 Have loading form display Write OPML or line by line.
 */
 // FIX check for blank url
 
@@ -154,12 +160,12 @@ implements
 
 	/* Constructor */
     /** Initialize import form */
-	public ImportFeedsForm(RssReaderMIDlet midlet,
+	public ImportFeedsForm(
 			FeatureList bookmarkList, boolean importFeeds,
 			Hashtable rssFeeds,
 			RssReaderSettings appSettings,
 			LoadingForm loadForm, String url) {
-		super(midlet, (importFeeds ? "Import" : "Export") + " feeds",
+		super((importFeeds ? "Import" : "Export") + " feeds",
 				!importFeeds, rssFeeds, appSettings, loadForm);
 		m_bookmarkList = bookmarkList;
 		m_importFeeds = importFeeds;
@@ -181,14 +187,12 @@ implements
 								//#endif
 								};
 			//#ifdef DSIGNED
-			//#ifdef DITUNES
 			//#ifdef DJSR75
 //@		} else {
 //@			super.initUrlUI(url, true,
 //@					"Are you sure you want to export?  \r\n" +
 //@					"This can cause endless prompts on some phones.", 1);
 //@			formats = new String[] {"OPML", "line by line"};
-			//#endif
 			//#endif
 			//#endif
 		}
@@ -263,31 +267,32 @@ implements
 
 	public void addFeedLists(FeedListParser cfeedListParser) {
 
+		LoadingForm loadForm = featureMgr.getLoadForm();
 		try {
 			addFeedLists(cfeedListParser,
 					m_addBkmrk,
 					m_appSettings.getMaximumItemCountInFeed(),
 					 m_override, m_rssFeeds,
-					 m_bookmarkList, m_loadForm);
-			if (m_loadForm.hasNotes() || m_loadForm.hasExc()) {
-				m_loadForm.recordFin();
-				m_midlet.setCurrent( m_loadForm );
+					 m_bookmarkList, loadForm);
+			if (loadForm.hasNotes() || loadForm.hasExc()) {
+				loadForm.recordFin();
+				loadForm.getFeatureMgr().showMe();
 			} else {
-				m_loadForm.replaceRef(this, null);
+				loadForm.replaceRef(this, null);
 				Item[] items = getItemFields();
 				ImportFeedsForm.m_importSave = FeatureMgr.storeValues(items);
-				m_midlet.showBookmarkList();
-				super.getFeatureMgr().setBackground(false);
+				featureMgr.getMidlet().showBookmarkList();
+				featureMgr.setBackground(false);
 			}
 		} catch(Exception ex) {
-			m_loadForm.recordExcFormFin(
+			loadForm.recordExcFormFin(
 					"Error importing feeds from " +
 					cfeedListParser.getUrl(), ex);
 		} catch(OutOfMemoryError e) {
-			m_loadForm.recordExcForm(e.getMessage(), e);
-			m_loadForm.recordFin();
+			loadForm.recordExcForm(e.getMessage(), e);
+			loadForm.recordFin();
 		} catch(Throwable t) {
-			m_loadForm.recordExcFormFin(
+			loadForm.recordExcFormFin(
 					"Internal error importing feeds from " +
 					cfeedListParser.getUrl(), t);
 		} finally {
@@ -296,7 +301,7 @@ implements
 				cfeedListParser.getObservableHandler().deleteObserver(this);
 			}
 			//#endif
-			m_loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
+			loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
 			// Free memory.
 			//#ifdef DMIDP20
 			synchronized(this) {
@@ -314,10 +319,14 @@ implements
 
 		//This (OK) happens only for export.  Import has insert/add/append
 		//#ifdef DSIGNED
-		//#ifdef DITUNES
 		//#ifdef DJSR75
 //@		if (m_ok) {
 //@			m_ok = false;
+//@			int selectedImportType = m_importFormatGroup.getSelectedIndex();
+//@			LoadingForm loadForm = LoadingForm.getLoadingForm(
+//@					((selectedImportType == 0) ? "Writing OPML." : "Writing line by line."),
+//@					this, null);
+//@			featureMgr.setLoadForm(loadForm);
 //@			final String url = m_url.getString().trim();
 			//#ifdef DLOGGING
 //@			if (m_finestLoggable) {m_logger.finest("Writing to url=" + url);}
@@ -340,7 +349,6 @@ implements
 //@					m_logger.severe("run Unable to use UTF-8 for export", e);
 					//#endif
 //@				}
-//@				int selectedImportType = m_importFormatGroup.getSelectedIndex();
 //@				if (selectedImportType == 0) {
 //@					sb.append(OpmlParser.getOpmlBegin());
 //@				}
@@ -365,17 +373,18 @@ implements
 //@				osw.write(sb.toString());
 //@				Item[] items = getItemFields();
 //@				ImportFeedsForm.m_exportSave = FeatureMgr.storeValues(items);
-//@				m_midlet.showBookmarkList();
+//@				featureMgr.getMidlet().showBookmarkList();
+//@				loadForm.recordFin();
 //@			} catch(IllegalArgumentException ex) {
-//@				m_loadForm.recordExcForm("Invalid url:  " + url, ex);
+//@				loadForm.recordExcForm("Invalid url:  " + url, ex);
 //@			} catch(ConnectionNotFoundException ex) {
-//@				m_loadForm.recordExcForm("Invalid connection or url:  " + url, ex);
+//@				loadForm.recordExcForm("Invalid connection or url:  " + url, ex);
 //@			} catch(IOException ex) {
-//@				m_loadForm.recordExcForm("Error exporting feeds to " + url, ex);
+//@				loadForm.recordExcForm("Error exporting feeds to " + url, ex);
 //@			} catch(SecurityException ex) {
-//@				m_loadForm.recordExcForm("Security error exporting feeds to " + url, ex);
+//@				loadForm.recordExcForm("Security error exporting feeds to " + url, ex);
 //@			} catch(Throwable t) {
-//@				m_loadForm.recordExcForm("Internal error exporting feeds to " +
+//@				loadForm.recordExcForm("Internal error exporting feeds to " +
 //@						url, t);
 //@			} finally {
 //@				uhandler.handleClose();
@@ -393,17 +402,16 @@ implements
 //@		}
 		//#endif
 		//#endif
-		//#endif
 
 		// Add feeds from import.
 
 		if( m_getFeedList ) {
 			m_getFeedList = false;
 			final String url = m_url.getString().trim();
-			try {
-				m_loadForm = m_midlet.initializeLoadingForm(
+			LoadingForm loadForm = LoadingForm.getLoadingForm(
 						"Loading feeds from import...",
-						this);
+						this, null);
+			try {
 					
 				// 2. Import feeds
 				int selectedImportType = m_importFormatGroup.getSelectedIndex();
@@ -454,7 +462,7 @@ implements
 				}
 				clistParser.setGetFeedTitleList(getFeedTitleList);
 				clistParser.setUseFeedUrlList(useFeedUrlList);
-				clistParser.setLoadForm(m_loadForm);
+				clistParser.setLoadForm(loadForm);
 				clistParser.setMaxItemCount(
 						m_appSettings.getMaximumItemCountInFeed());
 				clistParser.setFeedNameFilter(feedNameFilter);
@@ -474,9 +482,9 @@ implements
 					m_backGrListParser = clistParser;
 					m_backGrListParser.getObservableHandler().addObserver(this);
 					m_parseBackground = true;
-					m_loadForm.setObservable(m_backGrListParser);
+					loadForm.setObservable(m_backGrListParser);
 				}
-				m_loadForm.addPromptCommand(RssReaderMIDlet.m_backCommand,
+				loadForm.addPromptCommand(RssReaderMIDlet.m_backCommand,
 									"Are you sure that you want to go back? Reading the list has not finished.");
 				//#endif
 				clistParser.startParsing();
@@ -489,12 +497,12 @@ implements
 				// 4. Show list of feeds
 				
 			} catch(Exception ex) {
-				m_loadForm.recordExcForm("Error importing feeds from " + url, ex);
+				loadForm.recordExcForm("Error importing feeds from " + url, ex);
 			} catch(OutOfMemoryError ex) {
-				m_loadForm.recordExcForm("Out Of Memory Error importing feeds from " +
+				loadForm.recordExcForm("Out Of Memory Error importing feeds from " +
 						url, ex);
 			} catch(Throwable t) {
-				m_loadForm.recordExcForm("Internal error importing feeds from " +
+				loadForm.recordExcForm("Internal error importing feeds from " +
 						url, t);
 			}
 		}
@@ -530,7 +538,7 @@ implements
 				cparseBackground = m_parseBackground;
 			}
 			if (cparseBackground) {
-				m_midlet.getLoadForm().appendNote(
+				featureMgr.getMidlet().getLoadForm().appendNote(
 						"NOTE:  Import parsing has already started.  Please wait for it to finish.");
 			} else {
 				m_getFeedList = true;
@@ -559,9 +567,10 @@ implements
 		//#ifdef DTESTUI
 //@		/** Import list of feeds and auto edit bookmarks/feeds */
 //@		if( c == m_testImportCmd ) {
-//@			m_midlet.setBookmarkIndex(m_bookmarkList.size());
+//@			RssReaderMIDlet midlet = featureMgr.getMidlet();
+//@			midlet.setBookmarkIndex(m_bookmarkList.size());
 //@			System.out.println("Test UI Test Rss feeds m_bookmarkIndex=" +
-//@					m_midlet.getBookmarkIndex());
+//@					midlet.getBookmarkIndex());
 //@			commandAction(m_appndCmd, this);
 //@		}
 		//#endif
