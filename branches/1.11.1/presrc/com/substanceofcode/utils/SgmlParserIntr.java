@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-03-14 1.11.5RC2 Use interface to make compatibility testing easier.
+ * IB 2010-07-28 1.11.5Dev8 Convert entities if CDATA used.
 */
 
 // Expand to define testing define
@@ -74,6 +75,8 @@ public interface SgmlParserIntr {
     String getName();
 	
     String getText() throws IOException;
+
+    String getText(boolean convEnts) throws IOException;
 
     /** 
      * Get attribute value from current element 
