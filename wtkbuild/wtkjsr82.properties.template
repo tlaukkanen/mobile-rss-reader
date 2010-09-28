@@ -1,4 +1,6 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-09-28 1.11.5RC2 Allow versions with JSR-82.
+lib.classpath = GASPBT.jar
 wtk.bluetooth.enabled = true
 DJSR82 = DJSR82
 file.prefix.jsr82 = jsr82_
