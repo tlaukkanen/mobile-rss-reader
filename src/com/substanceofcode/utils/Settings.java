@@ -56,6 +56,8 @@
  * IB 2010-07-04 1.11.5Dev6 Catch CauseRecStoreException instead of RecordStoreException since RecordStoreException is not thrown.
  * IB 2010-07-04 1.11.5Dev6 Don't return from witin a finally block.
  * IB 2010-07-05 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-07-29 1.11.5Dev8 If default set from get, set m_valuesChanged to true.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
  */
 
 // Expand to define CLDC define
@@ -75,7 +77,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import javax.microedition.lcdui.*;
-import javax.microedition.midlet.*;
+import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
 import javax.microedition.rms.InvalidRecordIDException;
@@ -85,6 +87,7 @@ import javax.microedition.rms.RecordStoreNotOpenException;
 
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.utils.CauseRecStoreException;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -118,7 +121,6 @@ final public class Settings {
     public static final String STORE_DATE = "store-date";
     public static final String SETTINGS_VERS = MODIFIED_VERS;
     volatile private static Settings m_store;
-    private MIDlet          m_midlet;
     private boolean         m_valuesChanged = false;
     private boolean         m_initialized = true;
     private int             m_initRecs = 0;
@@ -136,16 +138,16 @@ final public class Settings {
      * only one instance of record store
      */
 	//#ifdef DCLDCV11
-//@    public static Settings getInstance( MIDlet midlet )
+//@    public static Settings getInstance()
 	//#else
-    public static synchronized Settings getInstance( MIDlet midlet )
+    public static synchronized Settings getInstance()
 	//#endif
     throws IOException, CauseRecStoreException, CauseException {
 		//#ifdef DCLDCV11
 //@		synchronized(Settings.class) {
 		//#endif
 			if( m_store == null ) {
-				m_store = new Settings( midlet );
+				m_store = new Settings();
 			}
 			return m_store;
 		//#ifdef DCLDCV11
@@ -154,9 +156,8 @@ final public class Settings {
     }
 
     /** Constructor */
-    private Settings( MIDlet midlet )
+    private Settings()
     throws IOException, CauseRecStoreException, CauseException {
-        m_midlet = midlet;
         load(0);
     }
 
@@ -314,10 +315,14 @@ final public class Settings {
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("getProperty 1 m_region,m_properties.size(),name,value=" + m_region + "," + m_properties.size() + "," + name + "," + value);}
 			//#endif
-			if( value == null && m_midlet != null ) {
-				value = m_midlet.getAppProperty( name );
-				if( value != null ) {
-					m_properties.put( name, value );
+			if (value == null) {
+				MIDlet midlet = FeatureMgr.getMidlet();
+				if (midlet != null) {
+					value = midlet.getAppProperty( name );
+					if( value != null ) {
+						m_properties.put( name, value );
+						m_valuesChanged = true;
+					}
 				}
 			}
 			//#ifdef DLOGGING
