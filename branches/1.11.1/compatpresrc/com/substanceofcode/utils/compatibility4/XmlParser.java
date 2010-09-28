@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
+ * IB 2010-07-29 1.11.5Dev8 Convert entities if CDATA used.
  */
 
 // Expand to define testing define
@@ -418,6 +419,10 @@ public class XmlParser implements SgmlParserIntr {
 		} else {
 			return getTextStream(m_inputStream);
 		}
+	}
+
+    public String getText(boolean convEnts) throws IOException {
+		return getText();
 	}
 
     /** 
