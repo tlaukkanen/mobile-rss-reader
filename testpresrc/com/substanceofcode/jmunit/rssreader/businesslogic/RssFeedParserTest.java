@@ -24,6 +24,7 @@
  * IB 2010-05-24 1.11.5RC2 Unit test RssFeedParser class.
  * IB 2010-05-29 1.11.5RC2 Fix MIDP 1.0 parsing.
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-06-29 1.11.5RC2 Don't use midlet in makeObserable.
 */
 
 // Expand to define MIDP define
@@ -155,7 +156,7 @@ implements Observer
 			//#endif
 			RssFeedParser fparser = new RssFeedParser(new RssItunesFeed(feed));
 			//#ifdef DMIDP20
-			fparser.makeObserable(null, updFeed, maxItemCount);
+			fparser.makeObserable(updFeed, maxItemCount);
 			fparser.getObservableHandler().addObserver(this);
 			fparser.getParsingThread().start();
 			waitReady();
