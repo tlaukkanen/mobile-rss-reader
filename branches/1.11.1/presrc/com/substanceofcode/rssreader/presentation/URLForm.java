@@ -21,6 +21,9 @@
  */
 /*
  * IB 2010-06-27 1.11.5Dev2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+ * IB 2010-09-26 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-09-26 1.11.5Dev8 Repalce setCurrent with showMe.
+ * IB 2010-09-26 1.11.5Dev8 Use loadingForm from FeatureMgr.
  */
 
 // Expand to define MIDP define
@@ -111,11 +114,9 @@ public class URLForm extends FeatureForm
 	//#ifdef DMIDP20
 	protected Command     m_pasteURLCmd;// The paste command
 	//#endif
-	protected RssReaderMIDlet m_midlet;       // The application midlet
 	protected Hashtable m_rssFeeds;         // The bookmark URLs
 	protected RssReaderSettings m_appSettings;// The application settings
 	// The loading form
-	protected LoadingForm m_loadForm;
 	protected Thread m_thread = null; // The thread
 
 	//#ifdef DLOGGING
@@ -123,19 +124,16 @@ public class URLForm extends FeatureForm
 	//#endif
 
 	/** Initialize import form */
-	public URLForm(RssReaderMIDlet midlet, String formName,
-			boolean selectDir,
+	public URLForm(String formName, boolean selectDir,
 			Hashtable rssFeeds,
 			RssReaderSettings appSettings,
 			LoadingForm loadForm) {
-		super(midlet, formName);
-		m_midlet = midlet;
+		super(formName, loadForm);
 		//#ifdef DJSR75
 		m_selectDir = selectDir;
 		//#endif
 		m_rssFeeds = rssFeeds;
 		m_appSettings = appSettings;
-		m_loadForm = loadForm;
 	}
 
   /**
@@ -250,26 +248,29 @@ public class URLForm extends FeatureForm
 		}
 		if (m_cancel) {
 			m_cancel = false;
-			m_loadForm.replaceRef(this, null);
-			m_midlet.showBookmarkList();
+			featureMgr.getLoadForm().replaceRef(this, null);
+			featureMgr.getMidlet().showBookmarkList();
 		}
 
 		//#ifdef DJSR75
 		if (m_fileReq) {
 			m_fileReq = false;
-			if (!m_midlet.JSR75_ENABLED) {
+			if (!featureMgr.getMidlet().JSR75_ENABLED) {
 				Alert invalidAlert = new Alert(
 						"JSR-75 not enabled", 
 						"Find files (JSR-75) not enabled on the phone.",
 						null,
 						AlertType.WARNING);
 				invalidAlert.setTimeout(Alert.FOREVER);
-				m_midlet.setCurrent( invalidAlert, this );
+				featureMgr.showMe( invalidAlert );
 				return;
 			}
 			try {
-				m_midlet.reqFindFiles( m_selectDir, this, m_url);
-				m_midlet.getFile();
+				RssReaderMIDlet midlet = featureMgr.getMidlet();
+				if (midlet != null) {
+					midlet.reqFindFiles( m_selectDir, this, m_url);
+					midlet.getFile();
+				}
 			}catch(Throwable t) {
 				//#ifdef DLOGGING
 				m_logger.severe("URLForm find files ", t);
@@ -305,8 +306,7 @@ public class URLForm extends FeatureForm
 		//#ifdef DMIDP20
 		/** Put current bookmark URL into URL box.  */
 		if( c == m_pasteURLCmd ) {
-			FeatureMgr.initializeURLBox( m_midlet, m_url.getString(),
-					this, m_url );
+			FeatureMgr.initializeURLBox( m_url.getString(), this, m_url );
 		}
 		//#endif
 
