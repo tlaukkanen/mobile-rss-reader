@@ -25,6 +25,11 @@
  * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
  * IB 2010-07-05 1.11.5Dev6 Code cleanup.
  * IB 2010-07-05 1.11.5Dev6 Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.
+ * IB 2010-07-28 1.11.5Dev8 Don't remove HTML for link.
+ * IB 2010-07-28 1.11.5Dev8 Don't remove entities for link with CDATA.
+ * IB 2010-07-28 1.11.5Dev8 Don't convert entities for skipped/unused items.
+ * IB 2010-07-28 1.11.5Dev8 Set feed header fields if no items.
+ * IB 2010-07-28 1.11.5Dev8 More logging.
  */
 
 // Expand to define test define
@@ -72,6 +77,7 @@ public class RssFormatParser implements FeedFormatParser {
 	private boolean m_hasExt = false;
 	//#ifdef DLOGGING
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
 	private String m_title = "";
 	private String m_author = "";
@@ -86,6 +92,9 @@ public class RssFormatParser implements FeedFormatParser {
 			            int maxItemCount, boolean getTitleOnly)
 	throws IOException {
         
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("parse cfeed.getName(),maxItemCount,getTitleOnly=" + cfeed.getName() + "," + + maxItemCount + "," + getTitleOnly);}
+		//#endif
         Vector items = new Vector();
 		m_extParser.parseNamespaces(parser);
 		m_hasExt = m_extParser.isHasExt();
@@ -93,68 +102,75 @@ public class RssFormatParser implements FeedFormatParser {
         feed.setItems(items);
         
         /** Parse to first entry element */
-        while(!parser.getName().equals("item")) {
-            switch (parser.parse()) {
-				case XmlParser.END_DOCUMENT:
-					System.out.println("No entries found.");
-					return feed;
-				case XmlParser.ELEMENT:
-					String elementName = parser.getName();
-					if (elementName.length() == 0) {
-						continue;
-					}
-					char elemChar = elementName.charAt(0);
-					if (parseCommon(parser, elemChar, elementName)) {
-						if ((elemChar == 't') && 
-								getTitleOnly && elementName.equals("title") ) {
-							feed.setName(m_title);
-							return feed;
+		//#ifdef DITUNES
+		try {
+		//#endif
+			while(!parser.getName().equals("item")) {
+				switch (parser.parse()) {
+					case XmlParser.END_DOCUMENT:
+						System.out.println("No entries found.");
+						return feed;
+					case XmlParser.ELEMENT:
+						String elementName = parser.getName();
+						if (elementName.length() == 0) {
+							continue;
 						}
-						continue;
-					}
-					switch (elemChar) {
-						case 'l':
-							 if (elementName.equals("language")) {
-								 m_language = parser.getText();
-								 //#ifdef DLOGGING
-								 if (finestLoggable) {logger.finest("m_language=" + m_language);}
-								 //#endif
-								 continue;
-							 }
-							 break;
-						case 'i':
-							 if (elementName.equals("image")) {
-								 // Skip image text as it includes link
-								 // and title.
-								 parser.getText();
-								 //#ifdef DLOGGING
-								 if (finestLoggable) {logger.finest("skipping image");}
-								 //#endif
-								 continue;
-							 }
-							 break;
-						default:
-							 break;
-					}
-					if (m_hasExt) {
-						m_extParser.parseExtItem(parser, elemChar, elementName);
-					}
-					break;
-				default:
-					break;
-            }
-        }
-		feed.setLink(m_link);
-		if (m_date.length() > 0) {
-			Date pubDate = parseRssDate(m_date);
-			feed.setDate(pubDate);
-		} else {
-			feed.setDate(null);
+						char elemChar = elementName.charAt(0);
+						if (parseCommon(parser, elemChar, elementName)) {
+							if ((elemChar == 't') && 
+									getTitleOnly && elementName.equals("title") ) {
+								feed.setName(m_title);
+								return feed;
+							}
+							continue;
+						}
+						switch (elemChar) {
+							case 'l':
+								 if (elementName.equals("language")) {
+									 m_language = parser.getText(true);
+									 //#ifdef DLOGGING
+									 if (finestLoggable) {logger.finest("m_language=" + m_language);}
+									 //#endif
+									 continue;
+								 }
+								 break;
+							case 'i':
+								 if (elementName.equals("image")) {
+									 // Skip image text as it includes link
+									 // and title.
+									 parser.getText(false);
+									 //#ifdef DLOGGING
+									 if (finestLoggable) {logger.finest("skipping image");}
+									 //#endif
+									 continue;
+								 }
+								 break;
+							default:
+								 break;
+						}
+						if (m_hasExt) {
+							m_extParser.parseExtItem(parser, elemChar, elementName);
+						}
+						break;
+					default:
+						break;
+				}
+			}
+		//#ifdef DITUNES
+		} finally {
+			feed.setLink(m_link);
+			if (m_date.length() > 0) {
+				Date pubDate = parseRssDate(m_date);
+				feed.setDate(pubDate);
+			} else {
+				feed.setDate(null);
+			}
+			if (m_extParser.isItunes()) {
+				feed = m_extParser.getFeedInstance(feed, m_language, m_title,
+						m_description);
+			}
 		}
-		if (m_extParser.isItunes()) {
-			feed = m_extParser.getFeedInstance(feed, m_language, m_title,
-					m_description);
-		}
+		//#endif
         
 		reset();
 
@@ -192,7 +208,7 @@ public class RssFormatParser implements FeedFormatParser {
 					// Textinput has required sub element description.
 					// We don't want the overriding description.
 					if (elementName.equals("textinput") ) {
-						parser.getText();
+						parser.getText(false);
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest("skipping textinput data");}
 						//#endif
@@ -267,10 +283,13 @@ public class RssFormatParser implements FeedFormatParser {
 	private boolean parseCommon(XmlParser parser, char elemChar,
 			String elementName)
 	throws IOException {
+		//#ifdef DLOGGING
+		if (traceLoggable) {logger.trace("parseCommon elemChar,elementName=" + elemChar + "," + elementName);}
+		//#endif
 		switch (elemChar) {
 			case 'p':
 				if( elementName.equals("pubDate")) {
-					m_date = parser.getText();
+					m_date = parser.getText(true);
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_date=" + m_date);}
 					//#endif
@@ -279,7 +298,7 @@ public class RssFormatParser implements FeedFormatParser {
 				break;
 			case 't':
 				if( elementName.equals("title") ) {
-					m_title = parser.getText();
+					m_title = parser.getText(true);
 					m_title = MiscUtil.removeHtml( m_title );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_title=" + m_title);}
@@ -289,7 +308,7 @@ public class RssFormatParser implements FeedFormatParser {
 				break;
 			case 'd':
 				if( elementName.equals("description")) {
-					m_description = parser.getText();
+					m_description = parser.getText(true);
 					m_description = MiscUtil.removeHtml( m_description );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_description=" + m_description);}
@@ -299,8 +318,7 @@ public class RssFormatParser implements FeedFormatParser {
 				break;
 			case 'l':
 				if( elementName.equals("link") ) {
-					m_link = parser.getText();
-					m_link = MiscUtil.removeHtml( m_link );
+					m_link = parser.getText(false);
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_link=" + m_link);}
 					//#endif
@@ -318,7 +336,7 @@ public class RssFormatParser implements FeedFormatParser {
 		switch (elemChar) {
 			case 'a':
 				if( elementName.equals("author")) {
-					m_author = parser.getText();
+					m_author = parser.getText(true);
 					return;
 				}
 				break;
