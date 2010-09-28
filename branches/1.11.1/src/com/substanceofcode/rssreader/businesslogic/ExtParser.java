@@ -23,6 +23,9 @@
  * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
  * IB 2010-05-24 1.11.5RC2 Ignore contents within block tag for podcast.
  * IB 2010-05-24 1.11.5RC2 Check isItunes for block.
+ * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
+ * IB 2010-07-28 1.11.5Dev8 Don't convert entities for skipped/unused items.
+ * IB 2010-09-27 1.11.5Dev8 Don't use block if not logging.
  */
 
 // Expand to define itunes define
@@ -284,7 +287,7 @@ final public class ExtParser {
 			case 'a':
 				if( subElem.equals("author") ||
 				    subElem.equals("artist") ) {
-					m_author = parser.getText();
+					m_author = parser.getText(true);
 					if (!m_itunes) {
 						m_itunes = (m_author.length() > 0);
 					}
@@ -298,7 +301,10 @@ final public class ExtParser {
 					if (!m_itunes) {
 						m_itunes = true;
 					}
-					String block = parser.getText();
+					//#ifdef DLOGGING
+//@					String block =
+					//#endif
+								parser.getText(false);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("block=" + block);}
 					//#endif
@@ -306,7 +312,7 @@ final public class ExtParser {
 				break;
 			case 'c':
 				if( subElem.equals("creator") ) {
-					m_creator = parser.getText();
+					m_creator = parser.getText(true);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_creator=" + m_creator);}
 					//#endif
@@ -314,12 +320,12 @@ final public class ExtParser {
 				}
 			case 'd':
 				if( subElem.equals("description") ) {
-					m_description = parser.getText();
+					m_description = parser.getText(true);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_description=" + m_description);}
 					//#endif
 				} else if( subElem.equals("duration") ) {
-					m_duration = parser.getText();
+					m_duration = parser.getText(true);
 					if (!m_itunes) {
 						m_itunes = (m_duration.length() > 0);
 					}
@@ -327,7 +333,7 @@ final public class ExtParser {
 //@					if (finestLoggable) {logger.finest("m_duration=" + m_duration);}
 					//#endif
 				} else if( subElem.equals("date") ) {
-					m_date = parser.getText();
+					m_date = parser.getText(true);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_date=" + m_date);}
 					//#endif
@@ -335,7 +341,7 @@ final public class ExtParser {
 				break;
 			case 'l':
 					if( subElem.equals("language") ) {
-						m_language = parser.getText();
+						m_language = parser.getText(true);
 						if (!m_itunes) {
 							m_itunes = (isItunes && (m_language.length() > 0));
 						}
@@ -346,7 +352,7 @@ final public class ExtParser {
 					break;
 			case 's':
 				if( subElem.equals("subtitle") ) {
-					m_subtitle = parser.getText();
+					m_subtitle = parser.getText(true);
 					if (!m_itunes) {
 						m_itunes = (m_subtitle.length() > 0);
 					}
@@ -354,7 +360,7 @@ final public class ExtParser {
 //@					if (finestLoggable) {logger.finest("m_subtitle=" + m_subtitle);}
 					//#endif
 				} else if( subElem.equals("summary") ) {
-					m_summary = parser.getText();
+					m_summary = parser.getText(true);
 					m_summary = MiscUtil.removeHtml(m_summary);
 					if (!m_itunes) {
 						m_itunes = (m_summary.length() > 0);
@@ -367,13 +373,13 @@ final public class ExtParser {
 			case 'e':
 				if( subElem.equals("explicit") ) {
 					m_itunes = true;
-					String sexplicit = parser.getText();
+					String sexplicit = parser.getText(true);
 					m_explicit = RssItunesItem.convExplicit(sexplicit);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_explicit=" + m_explicit);}
 					//#endif
 				} else if( subElem.equals("encoded") ) {
-					m_encoded = parser.getText();
+					m_encoded = parser.getText(true);
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_encoded=" + m_encoded);}
 					//#endif
