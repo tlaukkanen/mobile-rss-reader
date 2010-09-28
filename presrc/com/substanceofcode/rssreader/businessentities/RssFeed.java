@@ -28,6 +28,7 @@
  * IB 2010-03-12 1.11.5RC2 Better logging.
  * IB 2010-05-25 1.11.5RC2 Don't deserialize items if not iTunesCapable.
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
+ * IB 2010-07-29 1.11.5Dev8 Don't allocate space for m_date and m_link if not smartphone.
 */
 
 // Expand to define logging define
@@ -104,8 +105,10 @@ public class RssFeed
 	protected String m_username = "";
 	protected String m_password = "";
 	protected String m_upddate = "";
+	//#ifdef DITUNES
 	protected Date m_date = null;
 	protected String m_link = "";   // The RSS feed link
+	//#endif
 	protected String m_etag = ""; // The RSS feed etag
 
 	protected Vector m_items = new Vector();  // The RSS item vector
@@ -293,13 +296,21 @@ public class RssFeed
 				// Don't need to check for iTunesCapable as it's superceeded
 				// by modifyCapable.
 				//#ifdef DLOGGING
-				if (traceLoggable) {logger.trace("init m_url,m_name,m_username,m_upddate,m_date,m_etag,m_password=" + m_url + "," + m_name + "," + m_username + "," + m_password + "," + m_upddate + "," + m_date + "," + m_etag);}
+				//#ifdef DITUNES
+				if (traceLoggable) {logger.trace("init m_upddate,m_date,m_link,m_etag=" + m_upddate + "," + m_date + "," + m_link + "," + m_etag);}
+				//#else
+				if (traceLoggable) {logger.trace("init m_upddate,m_date,m_link,m_etag=" + m_upddate + ",,," + m_etag);}
+				//#endif
 				//#endif
 				return;
 			}
 			String itemArrayData = nodes[ startIndex + ITEMS ];
 			//#ifdef DLOGGING
-			if (traceLoggable) {logger.trace("init m_url,m_name,m_username,m_upddate,m_date,m_etag,m_password,first item=" + m_url + "," + m_name + "," + m_username + "," + m_password + "," + m_upddate + "," + m_date + "," + m_etag + "," + nodes[ startIndex + ITEMS ]);}
+			//#ifdef DITUNES
+			if (traceLoggable) {logger.trace("init m_url,m_name,m_username,m_upddate,m_date,m_link,m_etag,m_password,first item=" + m_url + "," + m_name + "," + m_username + "," + m_password + "," + m_upddate + "," + m_date + "," + m_link + "," + m_etag + "," + nodes[ startIndex + ITEMS ]);}
+			//#else
+			if (traceLoggable) {logger.trace("init m_url,m_name,m_username,m_upddate,m_date,m_link,m_etag,m_password,first item=" + m_url + "," + m_name + "," + m_username + "," + m_password + "," + m_upddate + ",,," + m_etag + "," + nodes[ startIndex + ITEMS ]);}
+			//#endif
 			//#endif
 
 			// Deserialize itemss
@@ -392,10 +403,15 @@ public class RssFeed
 		String name = m_name.replace('|', CONE);
 		String username = m_username.replace('|' , CONE);
 		String password = m_password.replace('|' , CONE);
+		//#ifdef DITUNES
 		String link = m_link.replace('|' , CONE);
+		//#else
+		String link = "";
+		//#endif
 		String encodedPassword;
 		// Encode password to make reading password difficult
 		encodedPassword = MiscUtil.encodeStr( password );
+		//#ifdef DITUNES
 		String dateString;
 		if(m_date==null){
 			dateString = "";
@@ -404,6 +420,9 @@ public class RssFeed
 			// space for toString.
 			dateString = Long.toString( m_date.getTime(), 16 );
 		}
+		//#else
+		String dateString = "";
+		//#endif
 		String updString = m_upddate.replace('|' , CONE);
 		String etag = m_etag.replace('|' , CONE);
 		// Leave space for former time zone.  We'll fix in next release.
@@ -450,6 +469,7 @@ public class RssFeed
 						"m_upddate", logger, fineLoggable)) {
 				result = false;
 			}
+			//#ifdef DITUNES
 			if (!TestLogUtil.fieldEquals(feed.getDate(), m_date,
 						"m_date", logger, fineLoggable)) {
 				result = false;
@@ -458,6 +478,7 @@ public class RssFeed
 						"m_link", logger, fineLoggable)) {
 				result = false;
 			}
+			//#endif
 			if (!TestLogUtil.fieldEquals(feed.getEtag(), m_etag,
 						"m_etag", logger, fineLoggable)) {
 				result = false;
@@ -534,6 +555,7 @@ public class RssFeed
 			serializedItems.append(rssItem.toString());
 			serializedItems.append(".");
 		}
+		//#ifdef DITUNES
 		String dateString;
 		if(m_date==null){
 			dateString = "";
@@ -542,9 +564,17 @@ public class RssFeed
 			// space for toString.
 			dateString = Long.toString( m_date.getTime(), 16 );
 		}
+		//#else
+		String dateString = "";
+		//#endif
 		String storeString = m_name + "|" + m_url + "|" + m_username + "|" +
 			m_password + "|" +
-			m_upddate + "|" + m_link + "|" + m_etag + "|" +
+			m_upddate + "|" +
+			//#ifdef DITUNES
+			m_link +
+			//#endif
+			"|" +
+			m_etag + "|" +
 			dateString + "|" + serializedItems.toString();
 		return storeString;
 
@@ -558,7 +588,11 @@ public class RssFeed
 	}
 
 	public String getLink() {
+		//#ifdef DITUNES
 		return (m_link);
+		//#else
+		return "";
+		//#endif
 	}
 
 	public void setDate(Date date) {
@@ -568,7 +602,11 @@ public class RssFeed
 	}
 
 	public Date getDate() {
+		//#ifdef DITUNES
 		return (m_date);
+		//#else
+		return null;
+		//#endif
 	}
 
 }
