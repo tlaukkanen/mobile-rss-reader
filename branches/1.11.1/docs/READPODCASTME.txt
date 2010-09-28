@@ -17,19 +17,10 @@ frustration, if you try to run one version of the program and you do not
 see anything to show that it was run, try a version with less features.
 There is a web site http://www.mobref.com/device/ which allows you to look
 up which features are supported on most phones.  If JSR75 available is true, you can use
-versions with jsr75_ in the name.
+the versions in this file.  If it is not available, you must use the
+non-smart phone versions.
 
-midp20_ programs/directories (without jsr75_) are for phones with MIDP 2.0.
-This should work for all recent phones.  
-
-midp20_cldc11_smartphone@STAGEFILE@RSSReader.cod - MIDP 2.0 Blackberry COD
-midp20_cldc11_smartphone@STAGEFILE@RSSReader.cso - MIDP 2.0 Blackberry CSO
-midp20_cldc11_smartphone_signed@STAGEFILE@RSSReader.jad - MIDP 2.0 jad
-midp20_cldc11_smartphone_signed@STAGEFILE@RSSReader.jar - MIDP 2.0 jar
-
-
-
-midp20_jsr75_ programs .  For newer phones and usually with media (e.g. MP3)
+midp20_jsr75_ programs .  For newer smart phones and usually with media (e.g. MP3)
 	    capabilities, use files prefixed with
 		midp20_jsr75_ if the phones have MIDP-2.0 and JSR-75 use midp20_jsr75_
 		version.  To
