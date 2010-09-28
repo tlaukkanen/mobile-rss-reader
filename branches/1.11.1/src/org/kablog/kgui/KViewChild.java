@@ -1,4 +1,5 @@
-/* Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
+/*
+ * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,9 +19,14 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. 
  * 
+ */
+/*
  *
  * Created on June 17, 2003, 12:47 PM
  * This software was originally modified no later than Sept 25, 2007.
+ */
+/*
+ * IB 2010-09-27 1.11.5Dev8 Remove unused import.
  */
 
 // Expand to define DJSR75 define
@@ -29,7 +35,6 @@
 //#ifdef DJSR75
 //@package org.kablog.kgui;
 //@
-//@import javax.microedition.midlet.*;
 //@import javax.microedition.lcdui.*;
 //@
 //@/**
