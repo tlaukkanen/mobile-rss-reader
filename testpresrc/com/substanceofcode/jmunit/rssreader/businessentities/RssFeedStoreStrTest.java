@@ -25,6 +25,7 @@
  * IB 2010-05-24 1.11.5RC2 Use BaseTestCase to log start of test.
  * IB 2010-05-29 1.11.5RC2 Use ready only for MIDP 2.0 with observer pattern.
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-06-29 1.11.5RC2 Don't use midlet in makeObserable.
 */
 
 // Expand to define MIDP define
@@ -331,7 +332,7 @@ implements Observer
 
 			RssFeedParser fparser = new RssFeedParser(feed);
 			//#ifdef DMIDP20
-			fparser.makeObserable(null, true, 10);
+			fparser.makeObserable(true, 10);
 			ready = false;
 			fparser.getObservableHandler().addObserver(this);
 			fparser.getParsingThread().start();
