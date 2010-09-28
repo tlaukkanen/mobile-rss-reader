@@ -22,6 +22,7 @@
 /*
  * IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
  * IB 2010-04-05 1.11.4RC1 Allow logging of characters for different expected tokens.
+ * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
 */
 
 // Expand to define test define
@@ -263,7 +264,7 @@ final public class MiscUtil1Test extends BaseTestCase implements Runnable
 						}
 						//#endif
 						//#endif
-						String sactValue3 = parser.getText();
+						String sactValue3 = parser.getText(true);
 						//#ifdef DTEST
 						//#ifdef DLOGGING
 						if (logTextChar) {
