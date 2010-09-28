@@ -26,6 +26,12 @@
  * IB 2010-06-01 1.11.5RC2 Use back from RssReaderMIDlet if priority matches.
  * IB 2010-06-01 1.11.5RC2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
+ * IB 2010-08-14 1.11.5Dev8 Support loading form with FeatureMgr.
+ * IB 2010-08-15 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-08-15 1.11.5Dev8 Use featureMgr for super.getFeatureMgr().
+ * IB 2010-08-15 1.11.5Dev8 Support loading form with FeatureMgr.
+ * IB 2010-08-15 1.11.5Dev8 Use showMe for setCurrent(this).
+ * IB 2010-09-27 1.11.5Dev8 Fix river of news/headers for MIDP 1.0 error.
 */
 
 // Expand to define MIDP define
@@ -86,9 +92,7 @@ public class AllNewsList extends FeatureList
 //@    protected final static int AND_VAL = 15;
 //@    protected final static int DIV_VAL = 16;
 	//#endif
-    protected RssReaderMIDlet m_midlet;
 	// The loading form
-	protected LoadingForm m_loadForm;
     protected boolean     m_sort      = false; // Process sort
     protected boolean     m_sortDesc;          // Sort descending
     protected boolean     m_sortByDate = true; // Sort by date
@@ -134,24 +138,23 @@ public class AllNewsList extends FeatureList
     
     /** Creates a new instance of AllNewsList
 	    unreadImage - if non-null, put image for unread items for all list. */
-	public AllNewsList(final RssReaderMIDlet midlet, String title,
+	public AllNewsList(String title,
 			int listType, int offset, int len,
 					   final FeatureList bookmarkList,
 					   final Hashtable rssFeeds,
 					   Image unreadImage,
 					   LoadingForm loadForm, int priority) {
-		super(midlet, title, listType);
+		super(title, listType, loadForm);
 		//#ifdef DLOGGING
 //@		if (m_fineLoggable) {m_logger.fine("Starting AllNewsList");}
 		//#endif
 
-		m_midlet = midlet;
 		m_offset = offset;
 		m_len = len;
-		m_loadForm = loadForm;
 		m_bookmarkList = bookmarkList;
 		m_rssFeeds = rssFeeds;
 		m_unreadImage = unreadImage;
+		RssReaderMIDlet midlet = FeatureMgr.getMidlet();
 		final boolean open1st = midlet.getSettings().getFeedListOpen();
 		//#ifdef DLOGGING
 //@		if (m_fineLoggable) {m_logger.fine("AllNewsList open1st=" + open1st);}
@@ -295,16 +298,17 @@ public class AllNewsList extends FeatureList
 		//#ifdef DMIDP20
 		super.deleteAll();
 		//#else
-//@		int lc = super.size() - 1;
-//@		while(lc-- >= 0) {
+//@		int lc = super.size();
+//@		while(--lc >= 0) {
 //@			super.delete(lc);
 //@		}
 		//#endif
 		final int slen = sortedItems.size();
 		RssItunesItem [] sitems = new RssItunesItem[slen];
 		sortedItems.copyInto(sitems);
+		RssReaderMIDlet midlet = FeatureMgr.getMidlet();
 		//#ifdef DMIDP20
-		final boolean addName = m_midlet.getSettings().getBookmarkNameNews();
+		final boolean addName = midlet.getSettings().getBookmarkNameNews();
 		RssItunesFeed [] sfeeds = null;
 		if (addName) {
 			sfeeds = new RssItunesFeed[slen];
@@ -314,7 +318,7 @@ public class AllNewsList extends FeatureList
 		for( int ic = 0; ic < slen; ic++){
 			String text = sitems[ic].getTitle();
 			if (text.length() == 0) {
-				text = m_midlet.getItemDescription(sitems[ic]);
+				text = midlet.getItemDescription(sitems[ic]);
 			}
 			//#ifdef DMIDP20
 			if (addName) {
@@ -441,7 +445,9 @@ public class AllNewsList extends FeatureList
 				//#ifdef DLOGGING
 //@				newSort = true;
 				//#endif
-				m_loadForm = m_midlet.initializeLoadingForm("Sorting items...", this);
+				LoadingForm loadForm = LoadingForm.getLoadingForm(
+							"Sorting items...", this, null);
+				featureMgr.setLoadForm(loadForm);
 				if (m_showAll) {
 					sortAllItems( m_sortByDate, m_bookmarkList, m_rssFeeds );
 				} else if (m_showUnread) {
@@ -449,9 +455,9 @@ public class AllNewsList extends FeatureList
 				} else {
 					sortReadItems( m_sortByDate, m_bookmarkList, m_rssFeeds );
 				}
-				m_loadForm.setLoadingFinished("Sorting finished",
+				loadForm.setLoadingFinished("Sorting finished",
 						"Sorting finished use back to return.");
-				m_midlet.setCurrent(this);
+				featureMgr.showMe();
 			}
 
 			if ( m_openItem || m_nextItem ) {
@@ -464,15 +470,19 @@ public class AllNewsList extends FeatureList
 					m_openItem = false;
 				}
 				if( selIdx >= 0){
-					m_loadForm = m_midlet.initializeLoadingForm("Loading item...", this);
+					LoadingForm loadForm = LoadingForm.getLoadingForm(
+							"Loading item...", this, null);
+					featureMgr.setLoadForm(loadForm);
 					try {
 						getUpdSel(true);
-						m_midlet.initializeItemForm( m_feed, m_item, this );
+						FeatureMgr.getMidlet().initializeItemForm( m_feed,
+								m_item, this,
+								loadForm);
 						//#ifdef DTESTUI
 //@							checkTest();
 						//#endif
 					}catch(OutOfMemoryError t) {
-						m_loadForm.recordExcForm(
+						loadForm.recordExcForm(
 								"Out Of Memory Error selecting item", t);
 					}
 				}
@@ -486,7 +496,7 @@ public class AllNewsList extends FeatureList
 //@			synchronized(this) {
 //@				if (m_newsNext && (m_newsIndex >= 0) && m_testNews &&
 //@					(m_newsIndex < super.size()) &&
-//@					(m_midlet.getCurrent() == this)) {
+//@					(FeatureMgr.getCurrent() == this)) {
 //@					m_newsNext = false;
 //@					if (super.getSelectedIndex() >= 0) {
 //@						super.setSelectedIndex(
@@ -498,18 +508,21 @@ public class AllNewsList extends FeatureList
 //@				// After intializing the form (which was already logged by
 //@				// testui classes), simulate the back command
 //@				if (m_itemNext && (m_newsIndex >= 0) && m_testNews &&
-//@					(m_newsIndex < super.size()) && m_midlet.isItemForm()) {
-//@					m_itemNext = false;
-//@					m_newsNext = true;
-//@					m_midlet.backFrItemForm();
+//@					(m_newsIndex < super.size())) {
+//@					RssReaderMIDlet midlet = FeatureMgr.getMidlet();
+//@					if (midlet.isItemForm()) {
+//@						m_itemNext = false;
+//@						m_newsNext = true;
+//@						midlet.backFrItemForm();
+//@					}
 //@				}
 //@			}
 			//#endif
 
 		}catch(OutOfMemoryError t) {
-			m_loadForm.recordExcForm("\nOut Of Memory Error sorting items", t);
+			featureMgr.getLoadForm().recordExcForm("\nOut Of Memory Error sorting items", t);
 		}catch(Throwable t) {
-			m_loadForm.recordExcForm("\nInternal error sorting items", t);
+			featureMgr.getLoadForm().recordExcForm("\nInternal error sorting items", t);
 		}
 
 		//#ifdef DLOGGING
@@ -597,8 +610,8 @@ public class AllNewsList extends FeatureList
 //@		final int diffDelta = unsortedItems.size() / DIV_VAL;
 //@		Gauge gauge = new Gauge("Preparing to sort...", false, diffDelta + 1, 0);
 //@		int gcnt = 0;
-//@		m_loadForm = m_midlet.getLoadForm();
-//@		m_loadForm.append(gauge);
+//@		LoadingForm loadForm = featureMgr.getLoadForm();
+//@		loadForm.append(gauge);
 		//#endif
 		this.m_showUnread = showUnread;
 		int [] indexes = new int[unsortedItems.size()];
@@ -657,18 +670,18 @@ public class AllNewsList extends FeatureList
 //@		gauge.setValue(diffDelta + 1);
 //@		gauge = new Gauge("Sorting...", false, Gauge.INDEFINITE,
 //@				Gauge.CONTINUOUS_RUNNING);
-//@		int gitem = m_loadForm.append(gauge);
+//@		int gitem = loadForm.append(gauge);
 		//#else
-//@		m_loadForm.append("Sorting...\n");
+//@		loadForm.append("Sorting...\n");
 		//#endif
 		//#endif
 		MiscUtil.indexedSort(ldates, indexes, kc - 1);
 		//#ifdef DLARGEMEM
 		//#ifdef DMIDP20
-//@		m_loadForm.set(gitem, new StringItem(null, "Sorting finished."));
+//@		loadForm.set(gitem, new StringItem(null, "Sorting finished."));
 		//#endif
 //@		gauge = new Gauge("After sorting 1...", false, diffDelta + 1, 0);
-//@		m_loadForm.append(gauge);
+//@		loadForm.append(gauge);
 //@		gcnt = 0;
 		//#endif
 		uitems = new RssItunesItem[kc];
@@ -696,7 +709,7 @@ public class AllNewsList extends FeatureList
 		//#ifdef DLARGEMEM
 //@		gauge.setValue(diffDelta + 1);
 //@		gauge = new Gauge("After sorting 2...", false, diffDelta + 1, 0);
-//@		m_loadForm.append(gauge);
+//@		loadForm.append(gauge);
 //@		gcnt = 0;
 		//#endif
 		RssItunesItem[] sitems = new RssItunesItem[vsorted.size()];
@@ -717,7 +730,7 @@ public class AllNewsList extends FeatureList
 		//#ifdef DLARGEMEM
 //@		gauge.setValue(diffDelta + 1);
 //@		gauge = new Gauge("After sorting 3...", false, diffDelta + 1, 0);
-//@		m_loadForm.append(gauge);
+//@		loadForm.append(gauge);
 //@		gcnt = 0;
 		//#endif
 		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedSorted.size()];
@@ -853,9 +866,10 @@ public class AllNewsList extends FeatureList
 //@					m_itemNext = false;
 //@				}
 				//#endif
-				super.getFeatureMgr().setBackground(false);
-				m_midlet.replaceRef(this, null);
-				m_midlet.showBookmarkList();
+				featureMgr.setBackground(false);
+				RssReaderMIDlet midlet = FeatureMgr.getMidlet();
+				featureMgr.getLoadForm().replaceRef(this, null);
+				midlet.showBookmarkList();
 
 				//#ifdef DTESTUI
 //@				/** Indicate that we want to test the headers/items.  */
@@ -879,7 +893,7 @@ public class AllNewsList extends FeatureList
 			//#endif
 			
 		}catch(Throwable t) {
-			m_loadForm.recordExcForm("Internal error", t);
+			featureMgr.getLoadForm().recordExcForm("Internal error", t);
 		}
 	}
 
@@ -904,13 +918,13 @@ public class AllNewsList extends FeatureList
 				synchronized(this) {
 					m_nextItem = true;
 				}
-				super.getFeatureMgr().wakeup(2);
+				featureMgr.wakeup(2);
 			}
 		}
 		//#ifdef DLOGGING
 //@		if (m_finestLoggable) {m_logger.finest("nextItem nselected,asize,m_nextItem=" + nselected + "," + asize + "," + m_nextItem);}
 		//#endif
-		super.getFeatureMgr().wakeup(2);
+		featureMgr.wakeup(2);
 	}
 
 }
