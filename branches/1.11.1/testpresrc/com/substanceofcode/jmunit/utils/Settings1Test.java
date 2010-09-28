@@ -21,6 +21,7 @@
  */
 /*
  * IB 2010-06-27 1.11.5Dev2 Have 1st settings test class.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
 */
 
 // Expand to define test define
@@ -78,7 +79,7 @@ final public class Settings1Test extends BaseTestCase {
 				Settings.listRecordStores();
 			}
 			//#endif
-			m_appSettings = RssReaderSettings.getInstance(this);
+			m_appSettings = RssReaderSettings.getInstance();
 		}
 		if (m_settings == null) {
 			m_settings = m_appSettings.getSettingsInstance();
