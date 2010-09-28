@@ -21,8 +21,13 @@
  */
 /*
  * IB 2010-06-27 1.11.5Dev2 Have 2nd settings test class.
+ * IB 2010-07-29 1.11.5Dev8 For testSettings1, ITEMS_ENCODED defaults to given default of false.
+ * IB 2010-07-29 1.11.5Dev8 For testSettings3, markUnreadItems defaults to true.
+ * IB 2010-08-16 1.11.5Dev8 For small memory, don't test mark unread items as it is not used.
 */
 
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -48,7 +53,11 @@ final public class Settings2Test extends BaseTestCase {
 	final static String TEST_LONG = "test-long";
 
 	public Settings2Test() {
+		//#ifndef DSMALLMEM
 		super(13, "Settings2Test");
+		//#else
+		super(12, "Settings2Test");
+		//#endif
 	}
 
 	public void test(int testNumber) throws Throwable {
@@ -60,38 +69,40 @@ final public class Settings2Test extends BaseTestCase {
 				testSettings2();
 				break;
 			case 2:
-				testSettings3();
-				break;
-			case 3:
 				testSettings4();
 				break;
-			case 4:
+			case 3:
 				testSettings5();
 				break;
-			case 5:
+			case 4:
 				testSettings6();
 				break;
-			case 6:
+			case 5:
 				testSettings7();
 				break;
-			case 7:
+			case 6:
 				testSettings8();
 				break;
-			case 8:
+			case 7:
 				testSettings9();
 				break;
-			case 9:
+			case 8:
 				testSettings10();
 				break;
-			case 10:
+			case 9:
 				testSettings11();
 				break;
-			case 11:
+			case 10:
 				testSettings12();
 				break;
-			case 12:
+			case 11:
 				testSettings13();
 				break;
+			//#ifndef DSMALLMEM
+			case 12:
+				testSettings3();
+				break;
+			//#endif
 			default:
 				fail("Bad number for switch testNumber=" + testNumber);
 				break;
@@ -108,7 +119,7 @@ final public class Settings2Test extends BaseTestCase {
 			//#ifdef DLOGGING
 			Settings.listRecordStores();
 			//#endif
-			m_appSettings = RssReaderSettings.getInstance(this);
+			m_appSettings = RssReaderSettings.getInstance();
 		}
 		if (m_settings == null) {
 			m_settings = m_appSettings.getSettingsInstance();
@@ -119,7 +130,7 @@ final public class Settings2Test extends BaseTestCase {
 		String mname = "testSettings1";
 		boolean itemsEncoding = m_settings.getBooleanProperty(
 				Settings.ITEMS_ENCODED, false);
-		settingsTestSub(mname, 0, Settings.ITEMS_ENCODED, new Boolean(true),
+		settingsTestSub(mname, 0, Settings.ITEMS_ENCODED, new Boolean(false),
 				new Boolean(itemsEncoding));
 		m_settings.save(0, false);
 	}
@@ -132,12 +143,14 @@ final public class Settings2Test extends BaseTestCase {
 		m_settings.save(0, false);
 	}
 
+	//#ifndef DSMALLMEM
 	public void testSettings3() throws Throwable {
 		String mname = "testSettings3";
 		boolean markUnreadItems = m_appSettings.getMarkUnreadItems();
-		appSettingsTestSub(mname, "markUnreadItems", new Boolean(false), new Boolean(markUnreadItems));
+		appSettingsTestSub(mname, "markUnreadItems", new Boolean(true), new Boolean(markUnreadItems));
 		m_settings.save(0, false);
 	}
+	//#endif
 
 	public void testSettings4() throws Throwable {
 		String mname = "testSettings4";
