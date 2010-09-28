@@ -26,6 +26,7 @@
  * IB 2010-05-30 1.11.5RC2 Check if the successful results match for both current and compatibility.
  * IB 2010-05-30 1.11.5RC2 Allow end of altering based on nextIx.
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-09-27 1.11.5Dev8 Remove midlet which is now not used directly.
  */
 
 // Expand to define MIDP define
@@ -259,7 +260,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					new com.substanceofcode.rssreader.businesslogic.RssFeedParser(
 							(com.substanceofcode.rssreader.businessentities.RssItunesFeed)feed);
 				//#ifdef DMIDP20
-				fparser.makeObserable(null, true, 10);
+				fparser.makeObserable(true, 10);
 				ready = false;
 				fparser.getObservableHandler().addObserver(this);
 				fparser.getParsingThread().start();
