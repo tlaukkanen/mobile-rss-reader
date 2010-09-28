@@ -22,6 +22,7 @@
 /*
  * IB 2010-05-28 1.11.5RC2 Do comparison test using OpmlParser with links-opml.xml.
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-09-26 1.11.5Dev8 Use OpmlParser2Test only if not small memory.
  */
 
 // Expand to define MIDP define
@@ -51,7 +52,9 @@ import com.substanceofcode.utils.HTMLParser;
 //#endif
 import com.substanceofcode.rssreader.businesslogic.compatibility4.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.HTMLLinkParser;
+//#ifndef DSMALLMEM
 import com.substanceofcode.rssreader.businesslogic.compatibility4.HTMLAutoLinkParser;
+//#endif
 import com.substanceofcode.rssreader.businesslogic.compatibility4.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.LineByLineParser;
 //#ifdef DMIDP20
