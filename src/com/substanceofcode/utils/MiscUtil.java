@@ -31,6 +31,7 @@
  * IB 2010-07-04 1.11.5Dev6 Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
  * IB 2010-07-04 1.11.5Dev6 Code cleanup.
+ * IB 2010-08-15 1.11.5Dev8 Add runnable for thread class name to thread info.
  */
 
 // Expand to define MIDP define
@@ -150,9 +151,15 @@ public class MiscUtil {
 						" not in thread list.").toString();
 			} else {
 				String threadInfo = (String)threadObjs[0];
+				String runnable;
+				try {
+					runnable = threadObjs[1].getClass().getName() + " ";
+				} catch (Throwable e) {
+					runnable = " ";
+				}
 				return tsb.append("#").append(thread.toString()).append("@").append(
-						threadInfo).append(" ").append(
-						thread.isAlive()).toString();
+						threadInfo).append(" ").append(runnable).append(
+						" ").append(thread.isAlive()).toString();
 			}
 			//#endif
 		//#ifdef DCLDCV11
