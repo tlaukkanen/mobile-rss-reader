@@ -30,6 +30,12 @@
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
  * IB 2010-07-04 1.11.5Dev6 Use "" when feedNameFilter and feedURLFilter are not used.
+ * IB 2010-09-26 1.11.5Dev8 Add quote after title=.
+ * IB 2010-09-26 1.11.5Dev8 Remove apostrophe after htmlUrl=.
+ * IB 2010-09-26 1.11.5Dev8 Remove </outline> because the outline is already closed with />.
+ * IB 2010-09-26 1.11.5Dev8 Put title= on a separate line.
+ * IB 2010-09-26 1.11.5Dev8 Upshift utf-8.
+ * IB 2010-09-26 1.11.5Dev8 Allow export of feeds with non-smartphones.
 */
 
 // Expand to define MIDP define
@@ -200,28 +206,26 @@ public class OpmlParser extends FeedListParser {
     }
 
 		//#ifdef DSIGNED
-		//#ifdef DITUNES
 		//#ifdef DJSR75
 		static public String getOpmlBegin() {
-					return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<opml version=\"1.0\">\n<head>\n<title>Rss Reader subscriptions</title>\n</head>\n<body>\n";
+					return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<opml version=\"1.0\">\n<head>\n<title>Rss Reader subscriptions</title>\n</head>\n<body>\n";
 		}
 
 		static public String getOpmlLine(final RssItunesFeed feed) {
-					StringBuffer sb = new StringBuffer("    <outline text=\"").append(
-						feed.getName()).append("\" title=").append(feed.getName()).append(
-						"\" type=\"rss\"\n").append("xmlUrl=\"").append(
-							feed.getUrl()).append("\" ");
-						//#ifdef DITUNES
-					sb.append("htmlUrl='\"").append(feed.getLink()).append("\"");
-						//#endif
-					sb.append("/>\n</outline>\n");
-				return sb.toString();
+			StringBuffer sb = new StringBuffer("    <outline text=\"").append(
+					feed.getName()).append("\"\ntitle=\"").append(feed.getName()).append(
+					"\" type=\"rss\"\n").append("xmlUrl=\"").append(
+						feed.getUrl()).append("\" ");
+			//#ifdef DITUNES
+			sb.append("htmlUrl=\"").append(feed.getLink()).append("\"");
+			//#endif
+			sb.append("/>\n");
+			return sb.toString();
 		}
 
 		static public String getOpmlEnd() {
 					return "<body>\n</opml>\n";
 		}
-		//#endif
 		//#endif
 		//#endif
     
