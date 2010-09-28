@@ -22,6 +22,10 @@
 /*
  * IB 2010-06-27 1.11.5Dev2 Make midlet and LoadingForm optional in FeatureForm and FeatureList.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-08-14 1.11.5Dev8 Support loading form with FeatureMgr.
+ * IB 2010-08-15 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-09-26 1.11.5Dev8 Support loadingForm with FeatureMgr.
+ * IB 2010-09-27 1.11.5Dev8 Add exception for setFont error to exception stack.
  */
 
 // Expand to define MIDP define
@@ -54,6 +58,7 @@ import javax.microedition.lcdui.Form;
 import com.substanceofcode.testlcdui.Form;
 //#endif
 
+import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 
@@ -75,13 +80,13 @@ public class FeatureForm extends Form {
 	private boolean fineLoggable = logger.isLoggable(Level.FINE);
 	//#endif
 
-	public FeatureForm(RssReaderMIDlet midlet, String title) {
+	public FeatureForm(String title, LoadingForm loadForm) {
 		super(title);
-		init(midlet);
+		init(loadForm);
 	}
 
-	private void init(RssReaderMIDlet midlet) {
-		featureMgr = new FeatureMgr(midlet, this);
+	private void init(LoadingForm loadForm) {
+		featureMgr = new FeatureMgr(this, loadForm);
 		//#ifdef DLOGGING
 		if (fineLoggable) {logger.fine("Starting FeatureForm "
 			//#ifdef DMIDP20
@@ -167,18 +172,19 @@ public class FeatureForm extends Form {
 	}
 
 	private void handleError(String msg, Throwable e) {
+		CauseException ce = new CauseException("Internal error: " + msg, e);
 		//#ifdef DLOGGING
-		logger.warning(msg + " possible error with setFont.", e);
+		logger.warning(msg + " possible error with setFont.", ce);
 		//#endif
 		e.printStackTrace();
+		LoadingForm loadForm = featureMgr.getLoadForm();
+		if (loadForm != null) {
+			loadForm.appendNote(
+				"Font not supported by device.  Reset to default or pick another font.");
+			loadForm.addExc("Error changing font.", ce);
+		}
 		RssReaderMIDlet midlet = featureMgr.getMidlet();
 		if (midlet != null) {
-			LoadingForm loadForm = midlet.getLoadForm();
-			if (loadForm != null) {
-				loadForm.appendNote(
-					"Font not supported by device.  Reset to default or pick another font.");
-				loadForm.addExc("Error changing font.", e);
-			}
 			midlet.getSettings().setFontChoice(
 				RssReaderSettings.DEFAULT_FONT_CHOICE);
 		}
@@ -192,9 +198,9 @@ public class FeatureForm extends Form {
 
 	//#endif
 
-	public FeatureForm(RssReaderMIDlet midlet, String title, Item[] items) {
+	public FeatureForm(String title, Item[] items, LoadingForm loadForm) {
 		super(title, items);
-		init(midlet);
+		init(loadForm);
 	}
 
 	final public void addPromptCommand(Command cmd, String prompt) {
