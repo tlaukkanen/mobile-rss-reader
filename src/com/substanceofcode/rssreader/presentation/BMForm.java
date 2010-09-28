@@ -22,6 +22,8 @@
 /*
  * IB 2010-05-26 1.11.5RC2 Code cleanup.
  * IB 2010-06-27 1.11.5RC2 Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+ * IB 2010-08-15 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-09-26 1.11.5Dev8 Support loadingForm with FeatureMgr.
  */
 
 // Expand to define MIDP define
@@ -88,13 +90,11 @@ final public class BMForm extends URLForm
 	private FeatureList m_bookmarkList;
 
 	/* Constructor */
-	/* Constructor */
-	public BMForm(RssReaderMIDlet midlet,
-			Hashtable rssFeeds,
+	public BMForm(Hashtable rssFeeds,
 			RssReaderSettings appSettings,
 			FeatureList bookmarkList,
 			LoadingForm loadForm) {
-		super(midlet, "New Bookmark", false, rssFeeds, appSettings, loadForm);
+		super("New Bookmark", false, rssFeeds, appSettings, loadForm);
 		this.m_addForm = true;
 		this.m_bookmarkList = bookmarkList;
 		m_bmName = new TextField("Name", "", RssFeed.MAX_NAME_LEN, TextField.ANY);
@@ -105,13 +105,12 @@ final public class BMForm extends URLForm
 						"Append bookmark", "Append end bookmark");
 	}
 
-	public BMForm(RssReaderMIDlet midlet,
-			Hashtable rssFeeds,
+	public BMForm(Hashtable rssFeeds,
 			RssReaderSettings appSettings,
 			FeatureList bookmarkList,
 			LoadingForm loadForm,
 			final RssItunesFeed bm) {
-		super(midlet, "Edit Bookmark", false, rssFeeds, appSettings,
+		super("Edit Bookmark", false, rssFeeds, appSettings,
 				loadForm);
 		this.m_addForm = false;
 		this.m_bookmarkList = bookmarkList;
@@ -166,11 +165,11 @@ final public class BMForm extends URLForm
 
 			if( m_addBkmrk >= 0 ) {
 				saveBookmark();
-				m_loadForm.replaceRef(this, null);
+				featureMgr.getLoadForm().replaceRef(this, null);
 				Item[] items = {m_bmName, m_url,
 					m_UrlUsername, m_UrlPassword};
 				BMForm.m_addBMSave = FeatureMgr.storeValues(items);
-				m_midlet.showBookmarkList();
+				FeatureMgr.getMidlet().showBookmarkList();
 			}
 		}
 
@@ -178,8 +177,8 @@ final public class BMForm extends URLForm
 		if( m_ok ){
 			m_ok = false;
 			saveBookmark();
-			m_loadForm.replaceRef(this, null);
-			m_midlet.showBookmarkList();
+			featureMgr.getLoadForm().replaceRef(this, null);
+			FeatureMgr.getMidlet().showBookmarkList();
 		}
 
 		/** Clear data. */
