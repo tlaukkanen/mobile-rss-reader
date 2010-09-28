@@ -24,6 +24,13 @@
  * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
  * IB 2010-06-09 1.11.5RC2 Add parameters and variables to make this class independent for easier testing.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-08-15 1.11.5Dev8 Have setCurrent done in getLoadingForm.
+ * IB 2010-08-15 1.11.5Dev8 Add line feeds to diagnostics for loading display.
+ * IB 2010-08-15 1.11.5Dev8 Use showMe for setCurrent(this).
+ * IB 2010-08-21 1.11.5Dev8 Have getLoadingForm without main display which is defaulted to midlet main display.
+ * IB 2010-08-21 1.11.5Dev8 Use local midlet var to save time..
+ * IB 2010-08-16 1.11.5Dev8 Use featureMgr for super.getFeatureMgr().
+ * IB 2010-08-16 1.11.5Dev8 Use already retrieved msg for getMessage().
  */
 
 // Expand to define MIDP define
@@ -39,6 +46,7 @@ package com.substanceofcode.rssreader.presentation;
 
 import java.util.Vector;
 
+import javax.microedition.midlet.MIDlet;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
@@ -100,13 +108,12 @@ final public class LoadingForm extends FeatureForm
 				final Displayable disp,
 				final Displayable mainDisp,
 				//#ifdef DMIDP20
-				final Observable observable,
+				final Observable observable
 				//#else
-				final Object observable,
+				final Object observable
 				//#endif
-				RssReaderMIDlet midlet
 				) {
-		super(midlet, title);
+		super(title, null);
 		//#ifdef DMIDP10
 		this.m_title = title;
 		//#endif
@@ -131,17 +138,31 @@ final public class LoadingForm extends FeatureForm
 									   Displayable disp,
 									   Displayable mainDisp,
 									   //#ifdef DMIDP20
-									   Observable observable,
+									   Observable observable
 									   //#else
-									   Object observable,
+									   Object observable
 									   //#endif
-										RssReaderMIDlet midlet
 			) {
 		LoadingForm loadForm = new LoadingForm("Loading", disp, mainDisp,
-				observable, midlet);
+				observable);
 		loadForm.appendMsg( desc + "\n" );
 		loadForm.setCommandListener( loadForm, false );
+		loadForm.getFeatureMgr().showMe();
 		return loadForm;
+	}
+
+	static public LoadingForm getLoadingForm(final String desc,
+									   Displayable disp,
+									   //#ifdef DMIDP20
+									   Observable observable
+									   //#else
+									   Object observable
+									   //#endif
+			) {
+		return LoadingForm.getLoadingForm(desc,
+									   disp,
+									   FeatureMgr.getMainDisp(),
+									   observable);
 	}
 
 	/* Add quit command used for errors during exit. */
@@ -168,16 +189,21 @@ final public class LoadingForm extends FeatureForm
 						true);
 			}
 			//#endif
-			super.getFeatureMgr().getMidlet().setCurrent( cdisp );
+			if (cdisp != null) {
+				featureMgr.setCurrentAlt( cdisp, null, null, cdisp );
+			}
 		}
 
 		if( c == m_loadQuitCmd ){
-			try {
-				super.getFeatureMgr().getMidlet().destroyApp(true);
-			} catch (Exception e) {
-				e.printStackTrace();
+			RssReaderMIDlet midlet = featureMgr.getMidlet();
+			if (midlet != null) {
+				try {
+					featureMgr.getMidlet().destroyApp(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				midlet.notifyDestroyed();
 			}
-			super.getFeatureMgr().getMidlet().notifyDestroyed();
 		}
 
 		/** Give messages for loading */
@@ -226,7 +252,7 @@ final public class LoadingForm extends FeatureForm
 		e.printStackTrace();
 		setTitle("Finished with errors below");
 		addExc(ce.getMessage(), ce);
-		super.getFeatureMgr().getMidlet().setCurrent( this );
+		featureMgr.showMe();
 	}
 
 	/* Record the exception in the loading form, log it and give std error. */
@@ -267,13 +293,13 @@ final public class LoadingForm extends FeatureForm
 				while (nexc != null) {
 					String msg = nexc.getMessage();
 					if (msg != null) {
-						super.append(nexc.getMessage());
+						super.append(msg + "\n");
 						// If showing errs only, only show the first error found
 						if (showErrsOnly) {
 							break;
 						}
 					} else if (!showErrsOnly) {
-						super.append("Error " + nexc.getClass().getName());
+						super.append("Error " + nexc.getClass().getName() + "\n");
 					}
 					if (nexc instanceof CauseException) {
 						nexc = ((CauseException)nexc).getCause();
@@ -284,10 +310,11 @@ final public class LoadingForm extends FeatureForm
 			}
 			if (!showErrsOnly) {
 				//#ifdef DMIDP20
-				super.append("Current threads:");
+				super.append("Current threads:\n");
 				String[] threadInfo = MiscUtil.getDispThreads();
 				for (int ic = 0; ic < threadInfo.length; ic++) {
-					super.append(new StringItem(ic + ": ", threadInfo[ic]));
+					super.append(new StringItem(ic + ": ", threadInfo[ic] +
+								"\n"));
 				}
 				//#endif
 				super.append(new StringItem("Active Threads:",
