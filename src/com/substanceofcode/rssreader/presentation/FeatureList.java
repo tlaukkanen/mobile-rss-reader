@@ -22,6 +22,12 @@
 /*
  * IB 2010-06-27 1.11.5Dev2 Make midlet and LoadingForm optional in FeatureForm and FeatureList.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-08-14 1.11.5Dev8 Support loadingForm with FeatureMgr.
+ * IB 2010-08-15 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-09-27 1.11.5Dev8 Add msg for setFont error.
+ * IB 2010-09-27 1.11.5Dev8 Add exception for setFont error to exception stack.
+ * IB 2010-09-27 1.11.5Dev8 Log setFont error as warning.
+ * IB 2010-09-27 1.11.5Dev8 Add setFont errors that are not ArrayIndexOutOfBoundsException to stack.
  */
 
 // Expand to define MIDP define
@@ -51,7 +57,9 @@ import javax.microedition.lcdui.List;
 //@import com.substanceofcode.testlcdui.List;
 //#endif
 
+import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
+import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 
 //#ifdef DLOGGING
@@ -72,17 +80,18 @@ public class FeatureList extends List {
 //@	private boolean fineLoggable = logger.isLoggable(Level.FINE);
 	//#endif
 
-	public FeatureList(RssReaderMIDlet midlet, String title, int listType) {
+	public FeatureList(String title, int listType, LoadingForm loadForm) {
 		super(title, listType);
-		init(midlet);
+		init(loadForm);
 	}
 
 	public FeatureList(String title, int listType) {
 		super(title, listType);
+		init(null);
 	}
 
-	public void init(RssReaderMIDlet midlet) {
-		featureMgr = new FeatureMgr(midlet, this);
+	public void init(LoadingForm loadForm) {
+		featureMgr = new FeatureMgr(this, loadForm);
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("Starting FeatureList "
 			//#ifdef DMIDP20
@@ -91,24 +100,27 @@ public class FeatureList extends List {
 //@				);}
 		//#endif
 		//#ifdef DMIDP20
-		initFont(midlet);
+		initFont();
 		//#endif
 	}
 
 	//#ifdef DMIDP20
-	public void initFont(RssReaderMIDlet midlet) {
+	public void initFont() {
 		font = featureMgr.getCustomFont();
-        final int fitPolicy = midlet.getSettings().getFitPolicy();
-        if (fitPolicy != List.TEXT_WRAP_DEFAULT) {
-			super.setFitPolicy(fitPolicy);
+        RssReaderMIDlet midlet = featureMgr.getMidlet();
+        if (midlet != null) {
+			final int fitPolicy = midlet.getSettings().getFitPolicy();
+			if (fitPolicy != List.TEXT_WRAP_DEFAULT) {
+				super.setFitPolicy(fitPolicy);
+			}
 		}
 	}
 	//#endif
 
-	public FeatureList(RssReaderMIDlet midlet, String title, int listType,
+	public FeatureList(String title, int listType,
 			          String [] stringElements,  Image[] imageElements) {
 		super(title, listType, stringElements, imageElements);
-		init(midlet);
+		init(null);
 	}
 
 	final public void addPromptCommand(Command cmd, String prompt) {
@@ -142,7 +154,7 @@ public class FeatureList extends List {
 		try {
 			rtn = super.append(stringPart, imagePart);
 		} catch (RuntimeException e) {
-			handleError(e);
+			handleError("append", e);
 			rtn = super.append(stringPart, imagePart);
 		}
 		if (font != null) {
@@ -155,7 +167,7 @@ public class FeatureList extends List {
 		try {
 			super.insert(elementnum, stringPart, imagePart);
 		} catch (RuntimeException e) {
-			handleError(e);
+			handleError("insert", e);
 			super.insert(elementnum, stringPart, imagePart);
 		}
 		int newElement = (elementnum < 0) ? 0 : elementnum;
@@ -168,7 +180,7 @@ public class FeatureList extends List {
 		try {
 			super.set(elementnum, stringPart, imagePart);
 		} catch (RuntimeException e) {
-			handleError(e);
+			handleError("set", e);
 			super.set(elementnum, stringPart, imagePart);
 		}
 		if (font != null) {
@@ -176,24 +188,30 @@ public class FeatureList extends List {
 		}
 	}
 
-	private void handleError(RuntimeException e) {
+	private void handleError(String msg, RuntimeException e) {
+		CauseException ce = new CauseException("Internal error: " + msg, e);
+		//#ifdef DLOGGING
+//@		logger.warning(msg + " possible error with setFont.", ce);
+		//#endif
 		// Using emulator, this can throw array out of bounds, but
 		// this is not in the 
-		if (e instanceof ArrayIndexOutOfBoundsException) {
-			//#ifdef DLOGGING
+		//#ifdef DLOGGING
+//@		if (e instanceof ArrayIndexOutOfBoundsException) {
 //@			logger.warning("ArrayIndexOutOfBoundsException on setFont");
-			//#endif
-			RssReaderMIDlet midlet = featureMgr.getMidlet();
-			if (midlet != null) {
-				LoadingForm loadForm = midlet.getLoadForm();
-				if (loadForm != null) {
-					loadForm.appendNote(
-					"Font not supported by device.  Reset to default or pick another font.");
-					loadForm.addExc("Error changing font.", e);
-				}
-				midlet.getSettings().setFontChoice(
-						RssReaderSettings.DEFAULT_FONT_CHOICE);
+//@		}
+		//#endif
+		RssReaderMIDlet midlet = featureMgr.getMidlet();
+		if (midlet != null) {
+			LoadingForm loadForm = featureMgr.getLoadForm();
+			if (loadForm != null) {
+				loadForm.appendNote(
+				"Font not supported by device.  Reset to default or pick another font.");
+				loadForm.addExc("Error changing font.", ce);
 			}
+			midlet.getSettings().setFontChoice(
+					RssReaderSettings.DEFAULT_FONT_CHOICE);
+		}
+		if (e instanceof ArrayIndexOutOfBoundsException) {
 			this.font = (Font)nullPtr;
 			final int last = super.size() - 1;
 			if (last >= 0) {
@@ -201,7 +219,7 @@ public class FeatureList extends List {
 			}
 		} else {
 			//#ifdef DLOGGING
-//@			logger.severe("Other exception " + e.getClass().getName());
+//@			logger.severe("Other exception " + e.getClass().getName(), ce);
 			//#endif
 			throw e;
 		}
