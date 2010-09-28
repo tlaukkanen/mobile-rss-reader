@@ -1,4 +1,5 @@
-/* Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
+/*
+ * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +23,10 @@
  * Created on June 17, 2003, 12:23 PM
  * This software was originally modified no later than Sept 25, 2007.
  */
+/*
+ * IB 2010-08-15 1.11.5Dev8 Remove unused reqSetVisible.
+ * IB 2010-09-27 1.11.5Dev8 Remove unused import.
+ */
 
 // Expand to define DJSR75 define
 @DJSR75@
@@ -31,7 +36,6 @@
 //#ifdef DJSR75
 package org.kablog.kgui;
 
-import javax.microedition.midlet.*;
 import javax.microedition.lcdui.*;
 
 
@@ -52,11 +56,6 @@ public interface KViewParent {
      */
     void childStatusChanged(KViewChild child, int statusType, int status);
 
-    
-    /**
-     * @param newView object to make visible, if possible.
-     */
-    void reqSetVisible(Displayable newView);
     
     /**
     * @param runny Object to run at a deferred time.
