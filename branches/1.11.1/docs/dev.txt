@@ -1,0 +1,14 @@
+vim macros
+diff and cmt
+@m
+/presrc.*va$
+@n
+$F/l"ay$0jjjw/"apAk
+@y
+0WWWWW"jy$j0
+@u
+0f""ly$/"apn
+@i
+0f-WWWW"jy$/"jpBD0"jy$:q0jw
+@h
+0f-WWWW"jy$j0w
