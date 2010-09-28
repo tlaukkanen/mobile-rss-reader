@@ -23,6 +23,7 @@
  * IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
  * IB 2010-04-05 1.11.4RC1 Allow logging of characters for different expected tokens.
  * IB 2010-05-29 1.11.5RC2 Don't use HTML in small memory MIDP 1.0 to save space.
+ * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
 */
 
 // Expand to define memory size define
@@ -365,7 +366,7 @@ final public class HtmlParserTest extends BaseTestCase
 						}
 						//#endif
 						//#endif
-						String sactValue3 = parser.getText();
+						String sactValue3 = parser.getText(true);
 						//#ifdef DTEST
 						//#ifdef DLOGGING
 						if (logTextChar) {
