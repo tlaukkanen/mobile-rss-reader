@@ -1,4 +1,5 @@
-/* Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
+/*
+ * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +27,14 @@
  * IB 2010-03-21 1.11.5RC1 Remove KFileSelector to save memory. 
  * IB 2010-04-30 1.11.5RC2 Track threads used.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
+ * IB 2010-08-15 1.11.5Dev8 Remove unused reqSetVisible.
+ * IB 2010-08-15 1.11.5Dev8 Need LoadingForm for FeatureList.
+ * IB 2010-08-15 1.11.5Dev8 Use FeatureForm for txtFrm.
+ * IB 2010-08-15 1.11.5Dev8 Use setCurrentItemMgr for setCurrentItem/setCurrent.
+ * IB 2010-08-15 1.11.5Dev8 Use setMainCurrentAlt for getDisplay.setCurrent.
+ * IB 2010-08-15 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-09-26 1.11.5Dev8 Use setCurrentItemFeature instead of setCurrentItemMgr.
+ * IB 2010-09-27 1.11.5Dev8 Move title to construtor for KFileSelectorImpl.
 */
 
 // Expand to define MIDP define
@@ -39,10 +48,10 @@
 package org.kablog.kgui;
 
 import javax.microedition.lcdui.*;
-import javax.microedition.midlet.MIDlet;
 
-import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.ImportFeedsForm;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
+import com.substanceofcode.rssreader.presentation.FeatureForm;
 import com.substanceofcode.utils.MiscUtil;
 
 //#ifdef DLOGGING
@@ -62,8 +71,7 @@ implements KViewParent
 {
 
 	final       Object nullPtr = null;
-	protected RssReaderMIDlet midlet;
-	protected Form txtFrm;
+	protected FeatureForm txtFrm;
 	protected TextField txtFld;
 	protected KFileSelectorImpl fileSelectorView; 
     protected KViewParent viewParent;
@@ -88,11 +96,8 @@ implements KViewParent
 			fileSelectorView.doCleanup();
 			// Save memory
 			fileSelectorView = (KFileSelectorImpl)nullPtr;
-			//#ifdef DMIDP20
-			midlet.setCurrentItem( txtFld );
-			//#else
-			midlet.setCurrent( txtFrm );
-			//#endif
+			fileSelectorView.getFeatureMgr().setCurrentItemFeature(txtFrm,
+					txtFld, txtFrm);
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
 			logger.severe("Sort dates error.", t);
@@ -104,27 +109,26 @@ implements KViewParent
 	}
         
 	/* Start the file selector list. */
-	final public void doLaunchSelector(RssReaderMIDlet midlet,
-			boolean selectDir, Form txtFrm, TextField txtFld)
+	final public void doLaunchSelector(
+			boolean selectDir, FeatureForm txtFrm, TextField txtFld,
+			LoadingForm loadForm)
 	throws Throwable {
 
 		System.out.println("doLaunchSelector...");
-		this.midlet = midlet;
 		this.txtFrm = txtFrm;
 		this.txtFld = txtFld;
 
 		fileSelectorView = (KFileSelectorImpl)nullPtr;
 
 		try {
-			fileSelectorView = new KFileSelectorImpl();
-			fileSelectorView.init(midlet,
-					selectDir,
+			fileSelectorView = new KFileSelectorImpl(
 					((txtFrm instanceof ImportFeedsForm) ? "Find import file" :
-					 "Find feed file"),
-					null, "/icons" );
+					 "Find feed file"), loadForm);
+			fileSelectorView.init(selectDir, null, "/icons" );
 			fileSelectorView.setCommandListener(fileSelectorView, true);
 			fileSelectorView.setViewParent(this);
-			Display.getDisplay(midlet).setCurrent(fileSelectorView);
+			fileSelectorView.getFeatureMgr().setMainCurrentAlt(null, null,
+					fileSelectorView);
 		}
 		catch (Throwable e)
 		{
@@ -144,16 +148,6 @@ implements KViewParent
 		if (bDebug) System.out.println("Child status changed: " + status);
 	} 
 
-    /** @param newView object o make visible, if possible.
-     */
-    final public void reqSetVisible(Displayable newView) {
-    	if (viewParent != null) {
-			viewParent.reqSetVisible(newView);
-		} else {
-			Display.getDisplay(midlet).setCurrent(newView);
-		}
-    }
-    
     /** @param The callback client interested in receiving finished status.
      */
     final public void setViewParent(KViewParent parent) {
