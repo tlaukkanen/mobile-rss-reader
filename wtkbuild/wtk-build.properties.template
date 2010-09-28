@@ -18,9 +18,9 @@
 #-- IB 2010-07-05 1.11.5Dev6 Use http://www.yinlight.net as info URL to be consistent with code signing.
 #-- IB 2010-07-05 1.11.5Dev6 Use original.author to put in Tommi's name.
 #-- IB 2010-07-05 1.11.5Dev6 Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.
-#-- IB 2010-07-11 1.11.5Dev8 Don't use manifestsrc as it is in src/main/resources.
 #-- IB 2010-07-30 1.11.5Dev8 Use release.name for build file name for projects with multiple release files.
 #-- IB 2010-08-14 1.11.5Dev8 Use bb.ant.tools.home and bb.ant.tools.jar for Blackberry ant tools.
+#-- IB 2010-07-11 1.11.5Dev8 Don't use manifestsrc as now wtkjad is used to create the JAD file.
 
 #windows.drive = C:
 windows.drive = 
