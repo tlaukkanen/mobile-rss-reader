@@ -22,6 +22,12 @@
 /*
  * IB 2010-03-07 1.11.5RC1 Remove unneeded import.
  * IB 2010-06-27 1.11.5Dev2 Change getSettingMemInfo to return int array to save memory and simplify.
+ * IB 2010-08-21 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-08-15 1.11.5Dev8 Support loading form with FeatureMgr.
+ * IB 2010-08-21 1.11.5Dev8 Use showMe for setCurrent.
+ * IB 2010-08-21 1.11.5Dev8 Have loading form for updating settings.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
  */
 
 // Expand to define MIDP define
@@ -79,7 +85,6 @@ import com.substanceofcode.utils.Settings;
 public class SettingsForm extends FeatureForm
 implements CommandListener {
     
-    private RssReaderMIDlet m_midlet;
     private Command m_okCommand;
     private Command m_cancelCommand;
     
@@ -117,9 +122,8 @@ implements CommandListener {
 	//#endif
     
     /** Creates a new instance of SettingsForm */
-    public SettingsForm(RssReaderMIDlet midlet) {
-        super(midlet, "Settings");
-        m_midlet = midlet;
+    public SettingsForm(LoadingForm loadForm) {
+        super("Settings", loadForm);
         
         m_okCommand = new Command("OK", Command.OK, 1);
         super.addCommand( m_okCommand );
@@ -127,7 +131,8 @@ implements CommandListener {
         m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
         super.addCommand( m_cancelCommand );
         
-        RssReaderSettings settings = m_midlet.getSettings();
+        RssReaderSettings settings = featureMgr.getMidlet(
+				).getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
         
         m_itemCountField = new TextField("Max item count in feed",
@@ -307,8 +312,8 @@ implements CommandListener {
     
 	/* Update form items that change per run. */
 	public void updateForm() {
-		int[] memInfo = null;
-        RssReaderSettings settings = m_midlet.getSettings();
+        RssReaderMIDlet midlet = featureMgr.getMidlet();
+        RssReaderSettings settings = midlet.getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
         m_itemCountField.setString(String.valueOf(maxCount));
         boolean markUnreadItems = settings.getMarkUnreadItems();
@@ -340,8 +345,9 @@ implements CommandListener {
         boolean feedListOpen = settings.getFeedListOpen();
 		boolean [] boolFeedListOpen = {feedListOpen, !feedListOpen};
 		m_feedListOpen.setSelectedFlags( boolFeedListOpen );
+		int[] memInfo = null;
 		try {
-			Settings m_settings = Settings.getInstance(m_midlet);
+			Settings m_settings = Settings.getInstance();
 			memInfo = m_settings.getSettingMemInfo();
 		} catch (Exception e) {
 			memInfo = new int[0];
@@ -363,9 +369,13 @@ implements CommandListener {
 	}
 
     public void commandAction(Command command, Displayable displayable) {
+        RssReaderMIDlet midlet = featureMgr.getMidlet();
         if(command==m_okCommand) {
             // Save settings
-            RssReaderSettings settings = m_midlet.getSettings();
+            RssReaderSettings settings = midlet.getSettings();
+			LoadingForm loadForm = LoadingForm.getLoadingForm(
+						"Updating settings...", this, null);
+			featureMgr.setLoadForm(loadForm);
             try {
                 int maxCount = Integer.parseInt( m_itemCountField.getString() );
                 settings.setMaximumItemCountInFeed( maxCount );
@@ -378,7 +388,7 @@ implements CommandListener {
 				boolean useStdExit = m_useStandardExit.isSelected(0);
 				settings.setUseStandardExit(useStdExit);
 				if (useStdExit != prevStdExit) {
-					m_midlet.initExit();
+					midlet.initExit();
 				}
 				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
 				//#ifdef DITUNES
@@ -417,19 +427,20 @@ implements CommandListener {
 //@									null,
 //@									AlertType.ERROR);
 //@					invalidData.setTimeout(Alert.FOREVER);
-//@					Display.getDisplay(m_midlet).setCurrent(invalidData, this);
+//@					featureMgr.showMe(invalidData);
 //@					return;
 //@				}
 				//#endif
-            } catch(Exception e) {
-                System.err.println("Error: " + e.toString());
+			} catch(Throwable e) {
+				/* Internal error.:\n */
+				loadForm.recordExcFormFin("Internal error.", e);
             }
             
-            m_midlet.showBookmarkList();
+            midlet.showBookmarkList();
         }
         
         if(command==m_cancelCommand) {
-            m_midlet.showBookmarkList();
+            midlet.showBookmarkList();
         }
     }
 
