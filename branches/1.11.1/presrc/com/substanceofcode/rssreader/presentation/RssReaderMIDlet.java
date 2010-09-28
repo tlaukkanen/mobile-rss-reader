@@ -56,6 +56,36 @@
  * IB 2010-06-27 1.11.5Dev2 Set gauge based on max value to be more flexible.
  * IB 2010-06-27 1.11.5Dev2 Have procBookmarkExc to handle exceptions for init/load of bookmarks.
  * IB 2010-07-05 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-07-28 1.11.5Dev8 Use static open link command to share with Item form and detail form.
+ * IB 2010-07-28 1.11.5Dev8 Allow open of feed link on details screen for smartphone version if not empty.
+ * IB 2010-07-28 1.11.5Dev8 More logging.
+ * IB 2010-08-15 1.11.5Dev8 Don't use midlet directly for FileSelectorMgr.
+ * IB 2010-08-15 1.11.5Dev8 Have setCurrent done in getLoadingForm.
+ * IB 2010-09-26 1.11.5Dev8 Allow export of OPML/line by line if not the smartphone version.
+ * IB 2010-09-26 1.11.5Dev8 Don't access m_display directly since it's in FeatureMgr.
+ * IB 2010-09-26 1.11.5Dev8 Have setCurrentItem done in FeatureMgr.
+ * IB 2010-09-26 1.11.5Dev8 Have getCurrent in FeatureMgr.
+ * IB 2010-09-26 1.11.5Dev8 Have callSerially in FeatureMgr.
+ * IB 2010-09-26 1.11.5Dev8 Have setCurrent directly using display in FeatureMgr.
+ * IB 2010-09-26 1.11.5Dev8 Have loadForm parm for procBackPage to use the current loadForm.
+ * IB 2010-09-26 1.11.5Dev8 Have main observer obsmain for procBackPage to use the main observer.
+ * IB 2010-09-26 1.11.5Dev8 Have initLoad to allow initialization of loading form.
+ * IB 2010-09-26 1.11.5Dev8 Don't use midlet for makeObserable.
+ * IB 2010-09-26 1.11.5Dev8 Have m_fileRtnForm be a feature form.
+ * IB 2010-09-26 1.11.5Dev8 Have m_openLinkCmd be static to use with detail form  and item form.
+ * IB 2010-09-26 1.11.5Dev8 Have m_backCommand be static to be used for several forms.
+ * IB 2010-09-26 1.11.5Dev8 Don't need midlet for BMForm because it's used indirectly.
+ * IB 2010-09-26 1.11.5Dev8 Don't need midlet for ImportFeedsForm because it's used indirectly.
+ * IB 2010-09-26 1.11.5Dev8 Don't need midlet for AllNewsList because it's used indirectly.
+ * IB 2010-09-26 1.11.5Dev8 Don't need midlet for HeaderList because it's used indirectly.
+ * IB 2010-09-26 1.11.5Dev8 Don't need midlet for ItemForm because it's used indirectly.
+ * IB 2010-09-26 1.11.5Dev8 Checks to make sure that the commandAction is for the item form for back.
+ * IB 2010-09-26 1.11.5Dev8 Use procPlatform in DetailForm and ItemForm.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for initSettingsEnabled.
+ * IB 2010-09-27 1.11.5Dev8 Have convenience method setCurrentAlt.
+ * IB 2010-09-27 1.11.5Dev8 Use setCurrentFeature to go back to list before item form.
+ * IB 2010-09-27 1.11.5Dev8 Have loadForm for procUpdHeader.
+ * IB 2010-09-27 1.11.5Dev8 Have loadForm for procBackHeader.
 */
 
 // Expand to define test define
@@ -172,12 +202,10 @@ implements
     final static public char CFEED_SEPARATOR = (char)4;
     final static public char OLD_FEED_SEPARATOR = '^';
     // Attributes
-    private Display     m_display;          // The display for this MIDlet
     private Displayable m_prevDisp;         // The displayable to return to
     private Settings    m_settings = null;         // The settings
     private RssReaderSettings m_appSettings = null;// The application settings
     private Hashtable   m_rssFeeds = new Hashtable(); // The bookmark URLs
-    private RssReaderMIDlet m_midlet;       // The display for this MIDlet
     final static public boolean JSR75_ENABLED =
 	          (System.getProperty(
 			"microedition.io.file.FileConnection.version") != null);
@@ -199,10 +227,8 @@ implements
     private boolean     m_refreshUpdFeeds;  // The notify flag for updated feeds
     private boolean     m_getImportForm;    // The noticy flag for going to Import Feed list
 	//#ifdef DSIGNED
-	//#ifdef DITUNES
 	//#ifdef DJSR75
     private boolean     m_getExportForm;    // The noticy flag for going to Export Feed list
-	//#endif
 	//#endif
 	//#endif
     private boolean     m_getFile;          // The noticy flag for getting find files form
@@ -257,7 +283,7 @@ implements
     private ItemForm    m_itemForm;         // The item form
     private LoadingForm m_loadForm;         // The "loading..." form
     private TextField   m_fileURL;          // The file URL field from a form
-    private Form        m_fileRtnForm;      // The form to return to for file
+    private FeatureForm m_fileRtnForm;      // The form to return to for file
 	//#ifdef DTESTUI
     private TestingForm m_testingForm;    // The testing form
 	//#endif
@@ -275,6 +301,9 @@ implements
     private Command     m_editBookmark;     // The edit bookmark command
     private Command     m_delBookmark;      // The delete bookmark command
     static public Command m_backCommand = null; // The back to header list command
+	//#ifdef DMIDP20
+	static public Command m_openLinkCmd = null;// The open link command
+	//#endif
     private Command     m_importFeedListCmd;// The import feed list command
 	//#ifdef DSIGNED
 	//#ifdef DMIDP20
@@ -312,8 +341,8 @@ implements
     
     public RssReaderMIDlet()
 	throws SecurityException {
-        m_display = Display.getDisplay(this);
-		m_midlet = this;
+		FeatureMgr.setDisplay(Display.getDisplay(this));
+		FeatureMgr.setMidlet(this);
         
 		//#ifdef DTESTUI
 		TestOutput.init(System.out, "UTF-8");
@@ -378,8 +407,7 @@ implements
 			fineLoggable = logger.isLoggable(Level.FINE);
 			logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
 			//#endif
-			Object[] arrsettings = FeatureMgr.initSettingsEnabled(
-					this, m_loadForm
+			Object[] arrsettings = FeatureMgr.initSettingsEnabled(m_loadForm
 				    //#ifdef DLOGGING
 					,logger
 					,fineLoggable
@@ -395,9 +423,14 @@ implements
 			m_testBMCmd         = new Command("Test bookmarks shown", Command.SCREEN, 9);
 			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 10);
 			//#endif
-			if (m_backCommand == null) {
-				m_backCommand       = new Command("Back", Command.BACK, 1);
+			if (RssReaderMIDlet.m_backCommand == null) {
+				RssReaderMIDlet.m_backCommand = new Command("Back", Command.BACK, 1);
 			}
+			//#ifdef DMIDP20
+			if (RssReaderMIDlet.m_openLinkCmd == null) {
+				RssReaderMIDlet.m_openLinkCmd  = new Command("Open link", Command.SCREEN, 3);
+			}
+			//#endif
 			initExit();
 			m_openBookmark      = new Command("Open feed", Command.SCREEN, 2);
 			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 3);
@@ -406,10 +439,8 @@ implements
 			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 6);
 			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 7);
 			//#ifdef DSIGNED
-			//#ifdef DITUNES
 			//#ifdef DJSR75
 			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, 8);
-			//#endif
 			//#endif
 			//#endif
 			//#ifdef DTEST
@@ -449,10 +480,8 @@ implements
 			m_refreshUpdFeeds = false;
 			m_getImportForm = false;
 			//#ifdef DSIGNED
-			//#ifdef DITUNES
 			//#ifdef DJSR75
 			m_getExportForm = false;
-			//#endif
 			//#endif
 			//#endif
 			m_getFile = false;
@@ -635,7 +664,9 @@ implements
 		//#ifdef DLOGGING
 		if (fineLoggable) {logger.fine("after m_itunesEnabled=" + m_itunesEnabled);}
 		//#endif
-		setCurrent( m_bookmarkList );
+		if ( m_bookmarkList != null) {
+			setCurrentAlt( null, null, m_bookmarkList );
+		}
     }
     
     /** Load bookmarks from record store */
@@ -651,7 +682,9 @@ implements
 		if (finestLoggable) {logger.finest("Settings.MAX_REGIONS,gauge.getMaxValue()=" + Settings.MAX_REGIONS + "," + gauge.getMaxValue());}
 		//#endif
         try {
-            m_bookmarkList = new FeatureList(this, "Bookmarks", List.IMPLICIT);
+            m_bookmarkList = new FeatureList("Bookmarks", List.IMPLICIT,
+											 m_loadForm);
+            FeatureMgr.setMainDisp(m_bookmarkList);
 			//#ifdef DMIDP20
 			// If font is wrong, it can cause an exception for some
 			// devices.  This leaves some of the data not loaded.
@@ -672,9 +705,7 @@ implements
 				m_bookmarkList.addCommand( m_importFeedListCmd );
 				//#ifdef DSIGNED
 				//#ifdef DJSR75
-				//#ifdef DITUNES
 				m_bookmarkList.addCommand( m_exportFeedListCmd );
-				//#endif
 				//#endif
 				//#endif
 				//#ifdef DTEST
@@ -726,7 +757,7 @@ implements
 					(m_appSettings.getFontChoice() !=
 					RssReaderSettings.DEFAULT_FONT_CHOICE)) {
 				final int len = m_bookmarkList.size();
-				m_bookmarkList.initFont(this);
+				m_bookmarkList.initFont();
 				final Font font = m_bookmarkList.getFont();
 				for (int ic = 0; ic < len; ic++) {
 					m_bookmarkList.setFont(ic, font);
@@ -889,24 +920,32 @@ implements
 		}
 	}
 
-					/** Show loading form */
-					final public void showLoadingForm() {
-						setCurrent( m_loadForm );
-					}
-					
-					/** Initialize loading form */
-					final public LoadingForm initializeLoadingForm(final String desc,
-													   Displayable disp,
-													   //#ifdef DMIDP20
-													   Observable observable
-													   //#else
-													   Object observable
-													   //#endif
-							)
+	/** Show loading form */
+	final public void showLoadingForm() {
+		if ( m_loadForm != null) {
+			m_loadForm.getFeatureMgr().showMe();
+		}
+	}
+	
+	/** Show loading form */
+	final public void showLoadingForm(Displayable fform) {
+		if ( m_loadForm != null) {
+			m_loadForm.getFeatureMgr().setCurrentFeature( fform, (Displayable)null, m_loadForm );
+		}
+	}
+	
+	/** Initialize loading form */
+	final public LoadingForm initializeLoadingForm(final String desc,
+									   Displayable disp,
+									   //#ifdef DMIDP20
+									   Observable observable
+									   //#else
+									   Object observable
+									   //#endif
+			)
 					{
 		m_loadForm = LoadingForm.getLoadingForm(desc, disp, m_bookmarkList,
-				observable, m_midlet);
-		setCurrent( m_loadForm );
+				observable);
 		return m_loadForm;
     }
 
@@ -935,7 +974,7 @@ implements
 			if (m_headerNext && (m_headerIndex >= 0) &&
 					(m_headerTestList != null) &&
 				(m_headerIndex < m_headerTestList.size()) &&
-				(m_display.getCurrent() == m_headerTestList)) {
+				(FeatureMgr.getCurrent() == m_headerTestList)) {
 				m_headerNext = false;
 				if (m_headerTestList.getSelectedIndex() >= 0) {
 					m_headerTestList.setSelectedIndex(
@@ -950,9 +989,9 @@ implements
 			if (m_itemNext && (m_headerIndex >= 0) &&
 					(m_headerTestList != null) &&
 				(m_headerIndex < m_headerTestList.size()) &&
-				(m_display.getCurrent() == m_itemForm )) {
+				(FeatureMgr.getCurrent() == m_itemForm )) {
 				m_itemNext = false;
-				m_itemForm.commandAction( m_backCommand, m_itemForm );
+				m_itemForm.commandAction( RssReaderMIDlet.m_backCommand, m_itemForm );
 				m_headerIndex++;
 				if (m_headerIndex >= m_headerTestList.size()) {
 					System.out.println("Test UI Test Rss items last");
@@ -970,7 +1009,8 @@ implements
 					System.gc();
 					long beginMem = Runtime.getRuntime().freeMemory();
 					//#endif
-					final SettingsForm settingsForm = new SettingsForm(this);
+					final SettingsForm settingsForm = new SettingsForm(
+							m_loadForm);
 					settingsForm.setCommandListener( settingsForm, false );
         
 					settingsForm.updateForm();
@@ -979,7 +1019,7 @@ implements
 					System.out.println("SettingsForm size=" +
 							(beginMem - Runtime.getRuntime().freeMemory()));
 					//#endif
-					setCurrent( settingsForm );
+					setCurrent( null, settingsForm );
 				} catch(OutOfMemoryError t) {
 					m_loadForm.recordExcForm("\nOut Of Memory Error " +
 							"loading settings form", t);
@@ -1008,10 +1048,10 @@ implements
 					if (m_getEditBMForm) {
 						bm = (RssItunesFeed)m_rssFeeds.get(
 								m_bookmarkList.getString(m_curBookmark));
-						bmForm = new BMForm(this, m_rssFeeds, m_appSettings,
+						bmForm = new BMForm(m_rssFeeds, m_appSettings,
 								m_bookmarkList, m_loadForm, bm);
 					} else {
-						bmForm = new BMForm(this, m_rssFeeds, m_appSettings,
+						bmForm = new BMForm(m_rssFeeds, m_appSettings,
 								m_bookmarkList, m_loadForm);
 					}
 					bmForm.setCommandListener( bmForm, false );
@@ -1020,7 +1060,7 @@ implements
 					System.out.println("BMForm size=" +
 							(beginMem - Runtime.getRuntime().freeMemory()));
 					//#endif
-					setCurrent( bmForm );
+					setCurrent( null, bmForm );
 				} catch(OutOfMemoryError t) {
 					m_loadForm.recordExcForm("\nOut Of Memory Error loading " +
 							"bookmark form", t);
@@ -1068,7 +1108,7 @@ implements
 								"or errors.",
 								"Updating finished with one or more " +
 								"exceptions or errors..");
-						setCurrent( cloadForm );
+						cloadForm.getFeatureMgr().showMe();
 					} else {
 						cloadForm.setLoadingFinished("Updating finished",
 								"Updating finished use back to return.");
@@ -1092,9 +1132,7 @@ implements
 			if( m_getImportForm
 				//#ifdef DSIGNED
 				//#ifdef DJSR75
-				//#ifdef DITUNES
 					|| m_getExportForm
-				//#endif
 				//#endif
 				//#endif
 					) {
@@ -1112,13 +1150,13 @@ implements
 					if (m_getTestImportForm) {
 						RssItunesFeed bm = (RssItunesFeed)m_rssFeeds.get(
 								m_bookmarkList.getString(m_curBookmark));
-						importFeedsForm = new ImportFeedsForm(this,
+						importFeedsForm = new ImportFeedsForm(
 								m_bookmarkList, m_getImportForm, m_rssFeeds,
 								m_appSettings, m_loadForm, bm.getUrl());
 					} else
 					//#endif
 					{
-						importFeedsForm = new ImportFeedsForm(this,
+						importFeedsForm = new ImportFeedsForm(
 								m_bookmarkList, m_getImportForm, m_rssFeeds,
 								m_appSettings,
 								m_loadForm, m_appSettings.getImportUrl());
@@ -1128,7 +1166,7 @@ implements
 					System.gc();
 					System.out.println("ImportForm size=" + (beginMem - Runtime.getRuntime().freeMemory()));
 					//#endif
-					setCurrent( importFeedsForm );
+					setCurrent( null, importFeedsForm );
 				} catch(Exception ex) {
 					m_loadForm.recordExcForm("Error parsing feeds from:\n",
 							ex);
@@ -1141,10 +1179,8 @@ implements
 				} finally {
 					m_getImportForm = false;
 					//#ifdef DSIGNED
-					//#ifdef DITUNES
 					//#ifdef DJSR75
 					m_getExportForm = false;
-					//#endif
 					//#endif
 					//#endif
 					//#ifdef DTEST
@@ -1177,7 +1213,7 @@ implements
 				try {
 					initializeLoadingForm("Sorting items...",
 							m_bookmarkList);
-					AllNewsList allNewsList = new AllNewsList(this,
+					AllNewsList allNewsList = new AllNewsList(
 							AllNewsList.TITLE, List.IMPLICIT, 0,
 						m_bookmarkList.size(), m_bookmarkList, m_rssFeeds,
 								m_unreadImage, m_loadForm, 3);
@@ -1235,16 +1271,16 @@ implements
 				System.out.println("Throwable Error: " + t.getMessage());
 				t.printStackTrace();
 				m_loadForm.addExc(ce.getMessage(), ce);
-				setCurrent( m_loadForm );
+				setCurrent( null, m_loadForm );
 			} catch (Throwable e) {
-				t.printStackTrace();
+				e.printStackTrace();
 				final Alert internalAlert = new Alert(
 						"Internal error", 
 						"Internal error while processing",
 						null,
 						AlertType.WARNING);
 				internalAlert.setTimeout(Alert.FOREVER);
-				setCurrent( internalAlert );
+				setCurrent( internalAlert, m_loadForm );
 			}
 		}
     }
@@ -1304,8 +1340,14 @@ implements
 
 	//#ifdef DMIDP20
 	// Open existing bookmark and show headers (items).
-	final public RssFeedParser procBackPage(RssItunesFeed feed, Observer obs1) {
+	final public RssFeedParser procBackPage(RssItunesFeed feed,
+										    Observer obsmain,
+										    boolean initLoad,
+											Observer obs1, LoadingForm loadForm) {
 
+		if (obsmain == null) {
+			obsmain = this;
+		}
 		RssFeedParser cbackGrParser = new RssFeedParser(new RssItunesFeed(feed));
 		Displayable cprevDisp = null;
 		boolean     cgetPage = false;
@@ -1326,17 +1368,27 @@ implements
 		if( cgetPage || cgetModPage ) {
 			try {
 				/* Updating feed... */
-				initializeLoadingForm(
-						cgetModPage ? "Updating modified feed..." :
-						"Updating feed..." , cprevDisp, cbackGrParser);
+				if (initLoad || (loadForm == null)) {
+					loadForm = LoadingForm.getLoadingForm(
+							cgetModPage ? "Updating modified feed..." :
+							"Updating feed..." , cprevDisp, cbackGrParser);
+					if (obs1 == null) {
+						m_loadForm = loadForm;
+						m_bookmarkList.getFeatureMgr().setLoadForm(loadForm);
+					} else if (obs1 instanceof FeatureList) {
+						((FeatureList)obs1).getFeatureMgr().setLoadForm(loadForm);
+					} else if (obs1 instanceof FeatureForm) {
+						((FeatureForm)obs1).getFeatureMgr().setLoadForm(loadForm);
+					}
+				}
 				if(feed.getUrl().length() == 0) {
-					m_loadForm.recordExcFormFin("Unable to open feed.  No URL.",
+					loadForm.recordExcFormFin("Unable to open feed.  No URL.",
 							new Exception(
 							"Feed has no URL cannot load."));
 					return null;
 				}
 				if (cparseBackground) {
-					m_midlet.getLoadForm().appendNote("Note: feed is still parsing.  Wait for it to finish.");
+					loadForm.appendNote("Note: feed is still parsing.  Wait for it to finish.");
 					return null;
 				}
 				synchronized(this) {
@@ -1349,14 +1401,13 @@ implements
 				System.gc();
 				long beginMem = Runtime.getRuntime().freeMemory();
 				//#endif
-				cbackGrParser.makeObserable(this,
-						cgetModPage, maxItemCount);
-				m_loadForm.addPromptCommand(m_backCommand,
+				cbackGrParser.makeObserable(cgetModPage, maxItemCount);
+				loadForm.addPromptCommand(RssReaderMIDlet.m_backCommand,
 									"Are you sure that you want to go back? Parsing has not finished.");
 				if (obs1 != null) {
 					cbackGrParser.getObservableHandler().addObserver(obs1);
 				}
-				cbackGrParser.getObservableHandler().addObserver(this);
+				cbackGrParser.getObservableHandler().addObserver(obsmain);
 				((RssFeedParser)cbackGrParser).getParsingThread().start();
 				synchronized(this) {
 					m_backGrParser = cbackGrParser;
@@ -1389,7 +1440,7 @@ implements
 			System.gc();
 			long beginMem = Runtime.getRuntime().freeMemory();
 			//#endif
-			HeaderList hdrList = new HeaderList(this, m_bookmarkList,
+			HeaderList hdrList = new HeaderList(m_bookmarkList,
 				m_curBookmark, m_rssFeeds,
 				m_unreadImage, m_itunesEnabled, m_loadForm,
 				feed);
@@ -1398,7 +1449,7 @@ implements
 			//#endif
 			hdrList.sortAllItems( false, m_bookmarkList, m_rssFeeds );
 			hdrList.setCommandListener(hdrList, true);
-			setCurrent( hdrList );
+			setCurrent( null, hdrList );
 			m_loadForm.replaceRef(null, hdrList);
 		}catch(Exception e) {
 			m_loadForm.recordExcFormFin(
@@ -1435,7 +1486,7 @@ implements
 
 	// Open existing bookmark and show headers (items).
 	final public void procBackHeader(RssFeedParser cbackGrRssParser,
-			Observable observable) {
+			Observable observable, LoadingForm loadForm) {
 
 		cbackGrRssParser = checkActive(observable);
 		if (cbackGrRssParser == null) {
@@ -1445,11 +1496,12 @@ implements
 		//#ifdef DLOGGING
 		if (finestLoggable) {logger.finest("procBackHeader m_parseBackground=" + m_parseBackground);}
 		//#endif
-		procUpdHeader(cbackGrRssParser);
+		procUpdHeader(cbackGrRssParser, loadForm);
 	}
 	//#endif
 
-	final public void procUpdHeader(RssFeedParser parser) {
+	final public void procUpdHeader(RssFeedParser parser,
+			LoadingForm loadForm) {
 		// Open existing bookmark and show headers (items).
 		//#ifdef DLOGGING
 		if (finestLoggable) {logger.finest("procUpdHeader m_getPage,m_getModPage,parser=" + m_getPage + "," + m_getModPage + "," + parser);}
@@ -1471,9 +1523,9 @@ implements
 			if (m_prevDisp instanceof HeaderList) {
 				hdrList = (HeaderList)m_prevDisp;
 			} else {
-				hdrList = new HeaderList(this, m_bookmarkList,
+				hdrList = new HeaderList(m_bookmarkList,
 					m_curBookmark, m_rssFeeds,
-					m_unreadImage, m_itunesEnabled, m_loadForm,
+					m_unreadImage, m_itunesEnabled, loadForm,
 					feed);
 			}
 			//#ifdef DTEST
@@ -1481,25 +1533,25 @@ implements
 			//#endif
 			hdrList.sortAllItems( false, m_bookmarkList, m_rssFeeds );
 			hdrList.setCommandListener(hdrList, true);
-			setCurrent( hdrList );
-			m_loadForm.replaceRef(null, hdrList);
+			setCurrent( null, hdrList );
+			loadForm.replaceRef(null, hdrList);
 		}catch(Exception e) {
-			m_loadForm.recordExcFormFin(
+			loadForm.recordExcFormFin(
 					"\nError parsing feed on:\n" +
 					parser.getRssFeed().getUrl(), e);
 
 		}catch(OutOfMemoryError e) {
-			m_loadForm.recordExcFormFin(
+			loadForm.recordExcFormFin(
 					"\nOut of memory parsing feed on:\n" +
 					parser.getRssFeed().getUrl(), e);
 		}catch(Throwable t) {
-			m_loadForm.recordExcFormFin(
+			loadForm.recordExcFormFin(
 					"\nInternal error parsing feed on:\n" +
 					parser.getRssFeed().getUrl(), t);
 		} finally {
 			synchronized(this) {
 				if (parser != null) {
-					m_loadForm.removeCommandPrompt(m_backCommand);
+					loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
 					//#ifdef DMIDP20
 					m_parseBackground = false;
 					//#ifdef DLOGGING
@@ -1522,7 +1574,7 @@ implements
 		   import from. */
 		boolean cgetFile = false;
 		boolean cselectDir = false;
-		Form cfileRtnForm = null;
+		FeatureForm cfileRtnForm = null;
 		TextField   cfileURL;
 		synchronized(this) {
 			cselectDir = m_selectDir;
@@ -1531,29 +1583,29 @@ implements
 			cgetFile = m_getFile;
 		}
 		if( cgetFile ) {
+			LoadingForm loadForm = m_loadForm;
 			try {
 				if (cfileRtnForm instanceof ImportFeedsForm) {
-					initializeLoadingForm(
+					loadForm = LoadingForm.getLoadingForm(
 							"Loading files to " + (cselectDir ? "import" :
 								"export") + " from...",
-							cfileRtnForm);
+							cfileRtnForm, null);
 				} else {
-					initializeLoadingForm(
+					loadForm = LoadingForm.getLoadingForm(
 							"Loading files to bookmark from...",
-							cfileRtnForm);
+							cfileRtnForm, null);
 				}
-				final KFileSelectorMgr fileSelectorMgr =
-					new KFileSelectorMgr();
+				final KFileSelectorMgr fileSelectorMgr = new KFileSelectorMgr();
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest("cselectDir,cfileRtnForm,cfileURL=" + cselectDir + "," + cfileRtnForm + "," + cfileURL);}
 				//#endif
-				fileSelectorMgr.doLaunchSelector(this,
-							cselectDir, cfileRtnForm, cfileURL);
+				fileSelectorMgr.doLaunchSelector(
+							cselectDir, cfileRtnForm, cfileURL, loadForm);
 			} catch(OutOfMemoryError ex) {
-				m_loadForm.recordExcForm("Out Of Memory Error getting " +
+				loadForm.recordExcForm("Out Of Memory Error getting " +
 						"file form.", ex);
 			} catch (Throwable t) {
-				m_loadForm.recordExcForm("Internal error getting file " +
+				loadForm.recordExcForm("Internal error getting file " +
 						"form.", t);
 			} finally {
 				synchronized(this) {
@@ -1631,36 +1683,10 @@ implements
 		}
 	}
 
-	//#ifdef DMIDP20
-	final public void setCurrentItem(Item item) {
-		// To prevent loading form from being displayed instead of the
-		// next form when that form has no items, show the load form
-		// again as a workaround.
-		if ((m_loadForm != null) &&
-				(m_display.getCurrent() == m_loadForm)) {
-			m_display.setCurrent(m_loadForm);
-		}
-		m_display.setCurrentItem(item);
-		// Prevents loading screen Display.getDisplay(this).setCurrentItem(item);
-		wakeup(2);
-	}
-	//#endif
-
 	/* Set current displayable and wake up the thread. */
-	final public void setCurrent(Displayable disp) {
+	final public void setCurrentAlt(Displayable fform, Displayable alert, Displayable disp) {
+		FeatureMgr.setMainCurrentAlt(fform, alert, disp);
 
-		//#ifdef DTESTUI
-		String title = "";
-		if (disp instanceof Form) {
-			title = ((Form)disp).getTitle();
-		} else if (disp instanceof List) {
-			title = ((List)disp).getTitle();
-		}
-		System.out.println("Test UI setCurrent " + disp.getClass().getName() + "," + title);
-		//#endif
-		m_display.setCurrent( disp );
-		// Prevents loading screen Display.getDisplay(this).setCurrent( disp );
-		wakeup(2);
 	}
 
 	/* Set current displayable and wake up the thread. */
@@ -1697,52 +1723,43 @@ implements
 			if (alert != null) {
 				setCurrent( alert, cloadForm );
 			} else {
-				setCurrent( cloadForm );
+				setCurrent( null, cloadForm );
 			}
 		} else {
 			if (alert != null) {
 				setCurrent( alert, disp );
 			} else {
-				setCurrent( disp );
+				setCurrent( null, disp );
 			}
 		}
 	}
 
-	//#ifdef DTESTUI
-	/* Get current displayable. */
-	final public Displayable getCurrent() {
-		return m_display.getCurrent();
-	}
-	//#endif
-
 	/* Set current displayable and wake up the thread. */
 	final public void setCurrent(Displayable alert, Displayable disp) {
-		m_display.setCurrent( (Alert)alert, disp );
-		// Prevents loading screen Display.getDisplay(this).setCurrent( alert, disp );
-		wakeup(2);
+		FeatureMgr.setMainCurrentAlt(null, alert, disp);
 	}
 
     /** Show item form */
     final public void showItemForm() {
-        setCurrent( m_itemForm );
+        setCurrent( null, m_itemForm );
     }
     
 	//#ifdef DTESTUI
 	/** Cause item form to go back to the prev form. */
     final public void backFrItemForm() {
-		m_itemForm.commandAction( m_backCommand, m_itemForm );
+		m_itemForm.commandAction( RssReaderMIDlet.m_backCommand, m_itemForm );
     }
     
     /** Show item form */
     final public boolean isItemForm() {
-        return (m_display.getCurrent() == m_itemForm);
+        return (FeatureMgr.getDisplay().getCurrent() == m_itemForm);
     }
 	//#endif
     
     /** Initialize RSS item form */
     final public void initializeItemForm(final RssItunesFeed feed,
 								   final RssItunesItem item,
-								   List prevList) {
+								   List prevList, LoadingForm loadForm) {
         System.out.println("Create new item form");
 		//#ifdef DTEST
 		System.gc();
@@ -1751,32 +1768,32 @@ implements
 		final String title = item.getTitle();
 		m_itemRtnList = prevList;
 		if (title.length() > 0) {
-			m_itemForm = new ItemForm( title, title, feed, item);
+			m_itemForm = new ItemForm( title, title, feed, item, loadForm);
 		} else {
 			m_itemForm = new ItemForm( getItemDescription(item), title,
-					feed, item);
+					feed, item, loadForm);
 		}
 		m_itemForm.setCommandListener(m_itemForm, false);
 		//#ifdef DTEST
 		System.out.println("itemForm size=" + (beginMem - Runtime.getRuntime().freeMemory()));
 		//#endif
-		setCurrent( m_itemForm );
+		setCurrent( null, m_itemForm );
     }
 
 	//#ifdef DITUNES
     /** Initialize RSS item form */
     final public void initializeDetailForm(final RssItunesFeed feed,
-								   List prevList) {
+								   FeatureList prevList, LoadingForm loadForm) {
 		//#ifdef DTEST
 		System.gc();
 		long beginMem = Runtime.getRuntime().freeMemory();
 		//#endif
-		DetailForm displayDtlForm = new DetailForm( feed, prevList );
+		DetailForm displayDtlForm = new DetailForm( feed, prevList, loadForm);
 		displayDtlForm.setCommandListener(displayDtlForm, false);
 		//#ifdef DTEST
 		System.out.println("displayDtlForm size=" + (beginMem - Runtime.getRuntime().freeMemory()));
 		//#endif
-		setCurrent( displayDtlForm );
+		displayDtlForm.getFeatureMgr().showMe();
     }
 	//#endif
 
@@ -2037,7 +2054,7 @@ implements
 	   			 as field to go back to if 2.0 is valid.
 	*/
 	final public void reqFindFiles( final boolean selectDir,
-			final Form fileRtnForm, final TextField fileURL) {
+			final FeatureForm fileRtnForm, final TextField fileURL) {
 		synchronized(this) {
 			m_fileRtnForm = fileRtnForm;
 			m_fileURL = fileURL;
@@ -2130,7 +2147,7 @@ implements
 			if (!cbackGrRssParser.getObservableHandler().isCanceled()) {
 				RssItunesFeed feed = cbackGrRssParser.getRssFeed();
 				m_rssFeeds.put(feed.getName(), feed);
-				procBackHeader(cbackGrRssParser, observable);
+				procBackHeader(cbackGrRssParser, observable, m_loadForm);
 			}
 		} finally {
 			stopRssBackground((Observable)cbackGrRssParser);
@@ -2253,7 +2270,7 @@ implements
 					procPage(feed);
 				} else {
 					//#ifdef DMIDP20
-					procBackPage(feed, null);
+					procBackPage(feed, this, true, null, m_loadForm);
 					//#else
 					try {
 						RssFeedParser parser = new RssFeedParser( feed );
@@ -2264,7 +2281,7 @@ implements
 						final int maxItemCount =
 							m_appSettings.getMaximumItemCountInFeed();
 						parser.parseRssFeed( false, maxItemCount);
-						procUpdHeader(parser);
+						procUpdHeader(parser, m_loadForm);
 					}catch(Throwable e) {
 						procPageExc(feed, false, e);
 					} finally {
@@ -2286,10 +2303,10 @@ implements
         
         /** Open RSS feed's selected topic */
         /** Get back to RSS feed headers */
-        if( (s instanceof Form) &&
-            (((Form)s) == ((Form)m_itemForm)) && (ctype == Command.BACK) &&
-			( m_itemRtnList != null)) {
-			setCurrent( m_itemRtnList );
+        if ((ctype == Command.BACK) && (m_itemRtnList != null) &&
+            (s instanceof Form) &&
+            (((Form)s) == m_itemForm)) {
+			FeatureMgr.setCurrentAlt(m_itemRtnList, null, null, m_itemRtnList);
 			m_itemRtnList  = (Displayable)nullPtr;
 		}
 
@@ -2323,7 +2340,6 @@ implements
         }
         
 		//#ifdef DSIGNED
-		//#ifdef DITUNES
 		//#ifdef DJSR75
         /** Show export feed list form */
         if( c == m_exportFeedListCmd ) {
@@ -2332,7 +2348,6 @@ implements
 			m_curBookmark = m_bookmarkList.getSelectedIndex();
 			m_getExportForm = true;
         }
-		//#endif
 		//#endif
 		//#endif
         
@@ -2357,8 +2372,7 @@ implements
 			m_appSettings.deleteSettings();
 			m_appSettings = null;
 			m_settings = null;
-			Object[] arrsettings = FeatureMgr.initSettingsEnabled(
-					this, m_loadForm
+			Object[] arrsettings = FeatureMgr.initSettingsEnabled(m_loadForm
 					//#ifdef DLOGGING
 					,logger
 					,fineLoggable
@@ -2407,7 +2421,7 @@ implements
 		if( c == m_testEncCmd ) {
 			try {
 				initializeLoadingForm("Loading test form...", m_bookmarkList);
-				setCurrent( m_testingForm );
+				setCurrent( null, m_testingForm );
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -2417,7 +2431,7 @@ implements
 	//#ifdef DLOGGING
         /** Show about */
 		if( c == m_debugCmd ) {
-			setCurrent( m_debug );
+			setCurrent( null, m_debug );
 		}
 
         /** Clear form */
@@ -2443,7 +2457,7 @@ implements
 				m_parseBackground = false;
 				setPageInfo(false, false, false, m_prevDisp);
 				m_backGrParser.getObservableHandler().deleteObserver(this);
-				m_loadForm.removeCommandPrompt(m_backCommand);
+				m_loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
 			}
 		}
 		//#ifdef DLOGGING
@@ -2462,16 +2476,60 @@ implements
     }
 	//#endif
 
+	//#ifdef DMIDP20
+	public void procPlatform(String platformURL, FeatureForm cfm,
+							 Displayable rtn) {
+		FeatureMgr featureMgr = cfm.getFeatureMgr();
+		LoadingForm loadForm = featureMgr.getLoadForm();
+		try {
+			loadForm = LoadingForm.getLoadingForm(
+					"Loading web page...", cfm, null);
+			featureMgr.setLoadForm(loadForm);
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("procPlatform platformURL=" + platformURL);}
+			//#endif
+			if( super.platformRequest(platformURL) ) {
+				loadForm = LoadingForm.getLoadingForm(
+						"Exiting saving data...", rtn, null);
+				featureMgr.setLoadForm(loadForm);
+				synchronized(this) {
+					m_exit = true;
+					exitApp();
+				}
+			} else {
+				setCurrent( null, rtn );
+			}
+		} catch (ConnectionNotFoundException e) {
+			//#ifdef DLOGGING
+			logger.severe("procPlatform Error opening link " + platformURL, e);
+			//#endif
+			final Alert badLink = new Alert("Could not connect to link",
+					"Bad link:  " + platformURL,
+					null, AlertType.ERROR);
+			badLink.setTimeout(Alert.FOREVER);
+			setCurrent( badLink, rtn );
+		}
+	}
+	//#endif
+
 	//#ifdef DITUNES
 	/* Form to look at item. */
 	final public class DetailForm extends FeatureForm
 		implements CommandListener {
+		private boolean     m_platformReq = false; // Flag to get platform req open link
+		private String m_platformURL;         // Platform request URL
 		private Displayable        m_rtn;
 
-		private DetailForm (final RssItunesFeed feed, Displayable rtn ) {
-			super(m_midlet, feed.getName());
+		private DetailForm (final RssItunesFeed feed, Displayable rtn,
+							LoadingForm loadForm) {
+			super(feed.getName(), loadForm);
 			this.m_rtn = rtn;
-			super.addCommand( m_backCommand );
+			m_platformReq = false;
+			super.addCommand( RssReaderMIDlet.m_backCommand );
+			m_platformURL = feed.getLink();
+			if (m_platformURL.length() > 0) {
+				super.addCommand( m_openLinkCmd );
+			}
 			if (m_itunesEnabled && feed.isItunes()) {
 				final String language = feed.getLanguage();
 				if (language.length() > 0) {
@@ -2499,13 +2557,12 @@ implements
 					super.append(new StringItem("Description:", description));
 				}
 			}
-			final String link = feed.getLink();
-			if (link.length() > 0) {
+			if (m_platformURL.length() > 0) {
 				//#ifdef DMIDP20
-				StringItem slink = new StringItem("Link:", link,
+				StringItem slink = new StringItem("Link:", m_platformURL,
 												  Item.HYPERLINK);
 				//#else
-				StringItem slink = new StringItem("Link:", link);
+				StringItem slink = new StringItem("Link:", m_platformURL);
 				//#endif
 				super.append(slink);
 			}
@@ -2518,11 +2575,33 @@ implements
 
 		public void commandAction(Command c, Displayable s) {
 			/* Back from details form. */
-			if( c == m_backCommand ){
-				setCurrent( m_rtn );
+			if( c == RssReaderMIDlet.m_backCommand ){
+				setCurrent( null, m_rtn );
 			}
+			/** Go to link and get back to RSS feed headers */
+			if( c == RssReaderMIDlet.m_openLinkCmd ){
+				synchronized(this) {
+					m_platformReq = true;
+				}
+			}
+
+			execute();
+
 		}
 			
+		public void execute() {
+
+			/* Handle going to link (platform request.). */
+			if ( m_platformReq ) {
+				try {
+					procPlatform(m_platformURL, this, m_rtn);
+				} finally {
+					m_platformReq = false;
+				}
+			}
+
+		}
+
 	}
 	//#endif
 
@@ -2532,7 +2611,6 @@ implements
 		private boolean     m_platformReq;    // Flag to get platform req open link
 		private String m_platformURL;         // Platform request URL
 		//#ifdef DMIDP20
-		private Command     m_openLinkCmd;      // The open link command
 		private Command     m_openEnclosureCmd; // The open enclosure command
 		//#endif
 		private Command     m_nextItemCmd;      // The next item
@@ -2541,17 +2619,17 @@ implements
 
 		private ItemForm(final String title, final String actTitle,
 								final RssItunesFeed feed,
-								   final RssItunesItem item) {
-			super(m_midlet, title);
+								   final RssItunesItem item,
+								   LoadingForm loadForm) {
+			super(title, loadForm);
 			m_platformReq = false;
 			m_nextItemCmd = new Command("Next Item", Command.SCREEN, 2);
 			//#ifdef DMIDP20
-			m_openLinkCmd       = new Command("Open link", Command.SCREEN, 3);
 			m_openEnclosureCmd  = new Command("Open enclosure", Command.SCREEN, 2);
 			//#endif
 			m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 4);
 			m_copyEnclosureCmd  = new Command("Copy enclosure", Command.SCREEN, 5);
-			super.addCommand( m_backCommand );
+			super.addCommand( RssReaderMIDlet.m_backCommand );
 			final String sienclosure = item.getEnclosure();
 			final String desc = item.getDescription();
 			if ((actTitle.length()>0) && (desc.length()>0)) {
@@ -2656,15 +2734,16 @@ implements
 
 		public void commandAction(Command c, Displayable s) {
 			/** Get back to RSS feed headers */
-			if( c == m_backCommand ){
+			if( c == RssReaderMIDlet.m_backCommand ){
 				if ((m_itemRtnList != null) &&
 					((m_itemRtnList instanceof HeaderList) ||
 					(m_itemRtnList instanceof AllNewsList))) {
 					((AllNewsList)m_itemRtnList).nextItem(false);
 				}
-				setCurrent( m_itemRtnList );
+				FeatureMgr.setCurrentFeature( m_itemRtnList, null,
+						m_itemRtnList );
 				//#ifdef DTESTUI
-				m_midlet.updHeaderNext();
+				FeatureMgr.getMidlet().updHeaderNext();
 				//#endif
 			}
 			
@@ -2673,11 +2752,7 @@ implements
 				String link = citem.getLink();
 				super.set(citemLnkNbr, new TextField("Link:", link,
 						link.length(), TextField.URL));
-				//#ifdef DMIDP10
-				setCurrent(this);
-				//#else
-				setCurrentItem(m_itemForm.get(citemLnkNbr));
-				//#endif
+				featureMgr.showMe(super.get(citemLnkNbr));
 			}
 			
 			/** Copy enclosure to clipboard.  */
@@ -2685,11 +2760,7 @@ implements
 				final String link = citem.getEnclosure();
 				super.set(citemEnclNbr, new TextField("Enclosure:",
 					link, link.length(), TextField.URL));
-				//#ifdef DMIDP10
-				setCurrent(m_itemForm);
-				//#else
-				setCurrentItem(m_itemForm.get(citemEnclNbr));
-				//#endif
+				featureMgr.showMe(super.get(citemEnclNbr));
 			}
 			
 			//#ifdef DMIDP20
@@ -2727,28 +2798,7 @@ implements
 			//#ifdef DMIDP20
 			if ( m_platformReq ) {
 				try {
-
-					initializeLoadingForm("Loading web page...",
-							m_itemForm);
-					if( m_midlet.platformRequest(m_platformURL) ) {
-						initializeLoadingForm("Exiting saving data...",
-								m_itemRtnList);
-						synchronized(this) {
-							m_exit = true;
-							exitApp();
-						}
-					} else {
-						setCurrent( m_itemRtnList );
-					}
-				} catch (ConnectionNotFoundException e) {
-					//#ifdef DLOGGING
-					logger.severe("Error opening link " + m_platformURL, e);
-					//#endif
-					final Alert badLink = new Alert("Could not connect to link",
-							"Bad link:  " + m_platformURL,
-							null, AlertType.ERROR);
-					badLink.setTimeout(Alert.FOREVER);
-					setCurrent( badLink, m_itemRtnList );
+					procPlatform(m_platformURL, this, m_itemRtnList);
 				} finally {
 					m_platformReq = false;
 				}
