@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HTMLAutoLinkParser.java
  *
@@ -29,6 +30,7 @@
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-07-04 1.11.5Dev6 Do not have empty catch block.
  * IB 2010-07-04 1.11.5Dev6 Do not have feedNameFilter and feedUrlFilter null.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define memory size define
