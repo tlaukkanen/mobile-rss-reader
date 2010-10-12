@@ -6,6 +6,7 @@ diff and cmt
 $F/l"ay$0jjjw/"apAk
 @y
 0WWWWW"jy$j0
+"Put quoted into l buffer.  Search for "a buffer.
 @u
 0f""ly$/"apn
 @i
