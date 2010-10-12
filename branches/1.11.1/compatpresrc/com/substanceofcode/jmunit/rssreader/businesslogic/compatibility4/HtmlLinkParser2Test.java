@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HtmlLinkParser2Test.java
  *
@@ -29,6 +30,7 @@
  * IB 2010-05-30 1.11.5RC2 Allow endAlterix to specify end of altering logging.
  * IB 2010-05-30 1.11.5RC2 Skip result that shows fix of relative URLs.
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
