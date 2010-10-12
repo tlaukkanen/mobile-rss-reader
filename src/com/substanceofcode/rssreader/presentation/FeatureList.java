@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * FeatureList.java
  *
@@ -28,6 +29,7 @@
  * IB 2010-09-27 1.11.5Dev8 Add exception for setFont error to exception stack.
  * IB 2010-09-27 1.11.5Dev8 Log setFont error as warning.
  * IB 2010-09-27 1.11.5Dev8 Add setFont errors that are not ArrayIndexOutOfBoundsException to stack.
+ * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
