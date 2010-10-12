@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * Base64.java
  *
@@ -21,6 +22,8 @@
  */
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
+ * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 package com.substanceofcode.utils.compatibility4;
