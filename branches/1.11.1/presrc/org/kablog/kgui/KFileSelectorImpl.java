@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
@@ -34,6 +35,7 @@
  * IB 2010-08-15 1.11.5Dev8 Use showMe for getDisplay.setCurrent.
  * IB 2010-08-15 1.11.5Dev8 Use featureMgr for super.getFeatureMgr().
  * IB 2010-09-27 1.11.5Dev8 Move title to construtor for KFileSelectorImpl.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define MIDP define
