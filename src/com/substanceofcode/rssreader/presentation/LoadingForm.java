@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * LoadingForm.java
  *
@@ -31,6 +32,7 @@
  * IB 2010-08-21 1.11.5Dev8 Use local midlet var to save time..
  * IB 2010-08-16 1.11.5Dev8 Use featureMgr for super.getFeatureMgr().
  * IB 2010-08-16 1.11.5Dev8 Use already retrieved msg for getMessage().
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
