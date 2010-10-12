@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HtmlParserTest.java
  *
@@ -24,6 +25,7 @@
  * IB 2010-04-05 1.11.4RC1 Allow logging of characters for different expected tokens.
  * IB 2010-05-29 1.11.5RC2 Don't use HTML in small memory MIDP 1.0 to save space.
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define memory size define
