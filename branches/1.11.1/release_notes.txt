@@ -332,6 +332,7 @@ v1.11.5 Development 7 (dev7) (July 7th 2010)
 - Allow turn off of distributing jad/jar/cod.  For this release and other development releases, the jad/jar/cod will not be distributed as separate files.  Only the zip files will be distributed.
 
 v1.11.5 Development 9 (dev9) (Oct 12th 2010)
+- Fix jad files by changing to dos had files if not using windows build.
 - Use only JSR-75 versions for smartphones.
 - Don't remove entities/HTML from links.  This allows parameters in links.
 - Allow open of feed link on details screen for smartphone version if not empty and no items are found.
