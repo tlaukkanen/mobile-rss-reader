@@ -23,6 +23,7 @@
 /*
  * IB 2010-03-14 1.11.5RC2 Use interface to make compatibility testing easier.
  * IB 2010-07-28 1.11.5Dev8 Convert entities if CDATA used.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define testing define
