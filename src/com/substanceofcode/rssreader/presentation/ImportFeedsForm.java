@@ -42,6 +42,8 @@
  * IB 2010-09-26 1.11.5Dev8 Allow non-smartphone to export the OPML if signed.
  * IB 2010-09-26 1.11.5Dev8 Have loading form display Write OPML or line by line.
  * IB 2010-09-28 1.11.5Dev9 Combine statements with getItemFields into one statement.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Dev9 More logging.
 */
 // FIX check for blank url
 
