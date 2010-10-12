@@ -81,6 +81,7 @@
     <!-- IB 2010-10-11 1.11.5Dev9 Use bb.jde.home for Blackberry ant tasks path to jde.home.  -->
     <!-- IB 2010-10-11 1.11.5Dev9 Use mweb.jarfile to use correct jar path in jad file.  -->
     <!-- IB 2010-10-11 1.11.5Dev9 Use jsjar.fn for jar file name including suffix.  -->
+    <!-- IB 2010-10-12 1.11.5Dev9 Remove extra dash dash labels=. from google upload. -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1087,7 +1088,7 @@
 		<rapc jdehome="${jde.home}" exepath="${wtk.home}/bin" srcdir="${comp.src}" destdir="${rim.bin}" output="${build.prefix}${project.name}-${FMIDLETVERSROOT}" defines="${prapc.reprocess.defines}" verbose="true" nodebug="true" >
 			<jdp type="midlet" title="${project.name}" vendor="${vendor}" version="${MIDLETVERS}" description="${project.description}" midletclass="${midlet.class}" icon="/${icons.dir}/${app-icon}" />
 		</rapc>
-		<alx destdir="${rim.bin.alx}" filename="${build.prefix}${project.name}-${FMIDLETVERSROOT}.alx" >
+		<alx destdir="${rim.bin.alx}" filename="${build.file.root}.alx" >
 			<application id="${midlet.package}" name="${midlet.name}" vendor="${vendor}" version="${MIDLETVERS}" description="${project.description}" >
 				<codset>
 					<fileset dir="${rim.bin}" includes="*.cod" />
@@ -1871,7 +1872,7 @@
 	<target name="googlecode.initialize" depends="prepare" >
 		<echo message="#!/bin/bash&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.src.zip} --summary=&quot;${stage.stable.text} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest source zip.&quot; --labels=Type-Source&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.expert.zip} --summary=&quot;${stage.stable.text} Expert (use ${project.file.prefix}-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) ${stage.stable.text} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest binaries for 4% of phones&quot; --labels=--labels=Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.expert.zip} --summary=&quot;${stage.stable.text} Expert (use ${project.file.prefix}-v${MIDLETVERSROOT}-bin.zip most people don't need expert version and expert is confusing) ${stage.stable.text} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest binaries for 4% of phones&quot; --labels=Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.smartphone.zip} --summary=&quot;${stage.stable.text} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest binaries for smartphones only (this uses up too much memory for non-smartphones.  also included in expert binaries)&quot; --labels=Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${dist.project.bin.zip} --summary=&quot;${stage.stable.text} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}latest binaries for 96% of phones (also included in expert binaries)&quot; --labels=${stage.featured}Type-Archive,OpSys-All&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 	</target>
