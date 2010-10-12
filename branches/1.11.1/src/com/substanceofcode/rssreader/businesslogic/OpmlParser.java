@@ -39,6 +39,7 @@
  * IB 2010-09-26 1.11.5Dev8 Allow export of feeds with non-smartphones.
  * IB 2010-09-27 1.11.5Dev9 Convert &,<,> in attributes to entities.
  * IB 2010-09-28 1.11.5Dev9 Have second body tag be an end tag.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define MIDP define
