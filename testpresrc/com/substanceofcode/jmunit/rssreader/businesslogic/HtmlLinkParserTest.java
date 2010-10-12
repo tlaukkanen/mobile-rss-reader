@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HtmlLinkParserTest.java
  *
@@ -24,6 +25,7 @@
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser HtmlLinkParserTest in small memory MIDP 1.0 to save space.
  * IB 2010-05-28 1.11.5RC2 Code cleanup.
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define memory size define
