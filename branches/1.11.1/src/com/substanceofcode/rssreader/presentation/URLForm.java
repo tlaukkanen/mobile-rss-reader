@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * URLForm.java
  *
@@ -24,6 +25,7 @@
  * IB 2010-09-26 1.11.5Dev8 Remove midlet which is now not used directly.
  * IB 2010-09-26 1.11.5Dev8 Repalce setCurrent with showMe.
  * IB 2010-09-26 1.11.5Dev8 Use loadingForm from FeatureMgr.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
