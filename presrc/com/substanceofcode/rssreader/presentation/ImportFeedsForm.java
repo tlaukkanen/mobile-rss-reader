@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * ImportFeedsForm.java
  *
@@ -40,6 +41,9 @@
  * IB 2010-09-26 1.11.5Dev8 Use getLoadingForm instead of initializeLoadingForm.
  * IB 2010-09-26 1.11.5Dev8 Allow non-smartphone to export the OPML if signed.
  * IB 2010-09-26 1.11.5Dev8 Have loading form display Write OPML or line by line.
+ * IB 2010-09-28 1.11.5Dev9 Combine statements with getItemFields into one statement.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Dev9 More logging.
 */
 // FIX check for blank url
 
@@ -279,8 +283,8 @@ implements
 				loadForm.getFeatureMgr().showMe();
 			} else {
 				loadForm.replaceRef(this, null);
-				Item[] items = getItemFields();
-				ImportFeedsForm.m_importSave = FeatureMgr.storeValues(items);
+				ImportFeedsForm.m_importSave = FeatureMgr.storeValues(
+						getItemFields());
 				featureMgr.getMidlet().showBookmarkList();
 				featureMgr.setBackground(false);
 			}
@@ -354,6 +358,9 @@ implements
 				}
 				// Line by line is URL followed by name
 				final int blen = m_bookmarkList.size();
+				//#ifdef DLOGGING
+				if (m_finestLoggable) {m_logger.finest("run Writing blen=" + blen);}
+				//#endif
 				for (int i = 0; i < blen; i++) {
 					final RssItunesFeed feed = (RssItunesFeed)m_rssFeeds.get(
 							m_bookmarkList.getString(i));
@@ -371,8 +378,8 @@ implements
 				if (m_finestLoggable) {m_logger.finest("Export sb=" + sb.toString());}
 				//#endif
 				osw.write(sb.toString());
-				Item[] items = getItemFields();
-				ImportFeedsForm.m_exportSave = FeatureMgr.storeValues(items);
+				ImportFeedsForm.m_exportSave = FeatureMgr.storeValues(
+						getItemFields());
 				featureMgr.getMidlet().showBookmarkList();
 				loadForm.recordFin();
 			} catch(IllegalArgumentException ex) {
