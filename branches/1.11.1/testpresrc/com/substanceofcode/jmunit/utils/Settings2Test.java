@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * Settings2Test.java
  *
@@ -24,6 +25,7 @@
  * IB 2010-07-29 1.11.5Dev8 For testSettings1, ITEMS_ENCODED defaults to given default of false.
  * IB 2010-07-29 1.11.5Dev8 For testSettings3, markUnreadItems defaults to true.
  * IB 2010-08-16 1.11.5Dev8 For small memory, don't test mark unread items as it is not used.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define memory size define
