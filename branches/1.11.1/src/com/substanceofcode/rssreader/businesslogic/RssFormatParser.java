@@ -1,6 +1,5 @@
+//--Need to modify--#preprocess
 /*
-   TODO remove extra spaces between description item 7 of imbed
-
  * RssFormatParser.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
@@ -30,6 +29,7 @@
  * IB 2010-07-28 1.11.5Dev8 Don't convert entities for skipped/unused items.
  * IB 2010-07-28 1.11.5Dev8 Set feed header fields if no items.
  * IB 2010-07-28 1.11.5Dev8 More logging.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define test define
