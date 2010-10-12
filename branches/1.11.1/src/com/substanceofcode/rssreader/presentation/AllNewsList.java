@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * AllNewsList.java
  *
@@ -32,6 +33,7 @@
  * IB 2010-08-15 1.11.5Dev8 Support loading form with FeatureMgr.
  * IB 2010-08-15 1.11.5Dev8 Use showMe for setCurrent(this).
  * IB 2010-09-27 1.11.5Dev8 Fix river of news/headers for MIDP 1.0 error.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define MIDP define
