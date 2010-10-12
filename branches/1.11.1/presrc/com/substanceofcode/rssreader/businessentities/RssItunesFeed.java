@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssItunesFeed.java
  *
@@ -22,6 +23,7 @@
  */
 /*
  * IB 2010-03-14 1.11.5RC2 Combine classes to save space.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 // Expand to define itunes define
 @DITUNESDEF@
