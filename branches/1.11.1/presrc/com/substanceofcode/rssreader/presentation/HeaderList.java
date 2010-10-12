@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HeaderList.java
  *
@@ -32,6 +33,7 @@
  * IB 2010-09-26 1.11.5Dev8 Have procBackPage create loading form.
  * IB 2010-09-27 1.11.5Dev8 Have "Loading detail form..." when going to the detail form.
  * IB 2010-09-27 1.11.5Dev8 Have update give updating feed loading form for MIDP 1.0.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define MIDP define
