@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssFeedParserSuite.java
  *
@@ -21,6 +22,7 @@
  */
 /*
  * IB 2010-03-14 1.11.5RC2 Test RSS feed parser.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define test define
