@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssFeedParser.java
  *
@@ -25,6 +26,8 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-05-30 1.11.5RC2 Use compatibility URLHandler.
  * IB 2010-06-29 1.11.5RC2 Use compatibility observer pattern.
+ * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define MIDP define
