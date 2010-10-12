@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * MiscUtil1Test.java
  *
@@ -23,6 +24,7 @@
  * IB 2010-03-07 1.11.4RC1 Don't use observer pattern for MIDP 1.0 as it increases size.
  * IB 2010-04-05 1.11.4RC1 Allow logging of characters for different expected tokens.
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define test define
