@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HTMLParser.java
  *
@@ -27,6 +28,7 @@
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser in small memory MIDP 1.0 to save space.
  * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
  * IB 2010-09-27 1.11.5Dev8 Have isHtml to return true for different HTML suffixes.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define memory size define
