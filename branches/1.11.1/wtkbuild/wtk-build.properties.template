@@ -25,6 +25,8 @@
 #-- IB 2010-10-11 1.11.5Dev9 Have option to use jar.jde.home for using Blackberry jar directly.
 #-- IB 2010-10-11 1.11.5Dev9 Have option to use bb.jde.home for using Blackberry ant tasks.
 #-- IB 2010-10-11 1.11.5Dev9 Use windows.os to tell if windows OS.
+#-- IB 2010-10-12 1.11.5Dev9 Use todos.cmd for to dos executable file.
+#-- IB 2010-10-12 1.11.5Dev9 Use windows.os to tell if windows OS so we can convert jad to dos with conv.dos and todos.comd if not windows.
 
 #windows.drive = C:
 windows.drive = 
@@ -61,6 +63,7 @@ antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 pmd.xsl = pmd-compile-reduced.xsl
 cat.cmd = cat${windows.ext}
 jarsigner.cmd = jarsigner${windows.ext}
+todos.cmd = todos${windows.ext}
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
 #
