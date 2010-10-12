@@ -83,6 +83,7 @@
     <!-- IB 2010-10-11 1.11.5Dev9 Use jsjar.fn for jar file name including suffix.  -->
     <!-- IB 2010-10-12 1.11.5Dev9 Remove extra dash dash labels=. from google upload. -->
     <!-- IB 2010-10-12 1.11.5Dev9 Use windows.os to tell if windows OS so we can convert jad to dos with conv.dos and todos.comd if not windows.-->
+    <!-- IB 2010-10-12 1.11.5Dev10 Must set mweb.jarfile for making jad file.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -884,6 +885,7 @@
 		<wtksign keystore="${tskeystore}" jadfile="${sjadfile}" jarfile="${sjarfile}" certalias="${tsalias}" storepass="${tsstorepass}" certpass="${tsstorepass}" />
 		<!-- Not needed
 		<antcall target="make.jad" inheritAll="true" >
+			<param name="mweb.jarfile" value="${jsjar.fn}" />
 			<param name="mjadfile" value="${sjadfile}" />
 			<param name="mmanifest" value="${bin}/manifest.mf" />
 			<param name="mjarfile" value="${sjarfile}" />
@@ -893,6 +895,7 @@
 	</target>
 
 	  <target name="conv.dos" depends="prepare" unless="${windows.os}" >
+		  <echo message="${todos.cmd} cjad.parm=${cjad.parm}" />
 		  <exec executable="${todos.cmd}" >
 			  <arg value="${cjad.parm}" />
 		  </exec>
@@ -914,6 +917,7 @@
 		<echo message="MIDLETVERS=${MIDLETVERS}" />
 
 		<antcall target="make.jad" inheritAll="true" >
+			<param name="mweb.jarfile" value="${build.file.root}.jar" />
 			<param name="mjadfile" value="${bin}/${project.name}.jad" />
 			<param name="mmanifest" value="${bin}/manifest.mf" />
 			<param name="mjarfile" value="${bin}/${project.name}.jar" />
@@ -970,6 +974,7 @@
 			<copy file="${bin}/${build.file.root}.jar" tofile="${bin}/${project.name}.jar" />
 
 			<antcall target="make.jad" inheritAll="true" >
+				<param name="mweb.jarfile" value="${build.file.root}.jar" />
 				<param name="mjadfile" value="${bin}/${project.name}.jad" />
 				<param name="mmanifest" value="${bin}/manifest.mf" />
 				<param name="mjarfile" value="${bin}/${project.name}.jar" />
@@ -987,6 +992,7 @@
 
 		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.file.root}.jar" />
 		<antcall target="make.jad" inheritAll="true" >
+			<param name="mweb.jarfile" value="${build.file.root}.jar" />
 			<param name="mjadfile" value="${bin}/${build.file.root}.jad" />
 			<param name="mmanifest" value="${bin}/manifest.mf" />
 			<param name="mjarfile" value="${bin}/${build.file.root}.jar" />
@@ -1045,6 +1051,7 @@
 	<target name="exec.create.rim.files" depends="prepare" if="rim.home" >
 		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${build.file.root}_cod_in.jar" />
 		<antcall target="make.jad" inheritAll="true" >
+			<param name="mweb.jarfile" value="${build.file.root}_cod_in.jar" />
 			<param name="mjadfile" value="${bin}/${build.file.root}_cod_in.jad" />
 			<param name="mmanifest" value="${bin}/manifest.mf" />
 			<param name="mjarfile" value="${bin}/${build.file.root}_cod_in.jar" />
@@ -1068,6 +1075,7 @@
 	    <echo message="${basedir}/${dist}/${build.file.root}.jar=${basedir}/${dist}/${build.file.root}.jar}" />
 		<copy file="${bin}/${project.name}.jar" tofile="${bin}/${project.name}_cod_in.jar" />
 		<antcall target="make.jad" inheritAll="true" >
+			<param name="mweb.jarfile" value="${build.file.root}_cod_in.jar" />
 			<param name="mjadfile" value="${bin}/${build.file.root}_cod_in.jad" />
 			<param name="mmanifest" value="${bin}/manifest.mf" />
 			<param name="mjarfile" value="${bin}/${build.file.root}_cod_in.jar" />
