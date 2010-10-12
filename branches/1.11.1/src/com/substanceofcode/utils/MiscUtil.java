@@ -33,6 +33,7 @@
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
  * IB 2010-07-04 1.11.5Dev6 Code cleanup.
  * IB 2010-08-15 1.11.5Dev8 Add runnable for thread class name to thread info.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
