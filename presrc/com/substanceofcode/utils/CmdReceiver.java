@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * CmdReceiver.java
  *
@@ -22,6 +23,7 @@
 /*
  * IB 2010-03-14 1.11.5RC2 Provide a command receiver to execute actions as part of the command pattern.
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define MIDP define
