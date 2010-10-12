@@ -82,6 +82,7 @@
     <!-- IB 2010-10-11 1.11.5Dev9 Use mweb.jarfile to use correct jar path in jad file.  -->
     <!-- IB 2010-10-11 1.11.5Dev9 Use jsjar.fn for jar file name including suffix.  -->
     <!-- IB 2010-10-12 1.11.5Dev9 Remove extra dash dash labels=. from google upload. -->
+    <!-- IB 2010-10-12 1.11.5Dev9 Use windows.os to tell if windows OS so we can convert jad to dos with conv.dos and todos.comd if not windows.-->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -891,6 +892,12 @@
 		-->
 	</target>
 
+	  <target name="conv.dos" depends="prepare" unless="${windows.os}" >
+		  <exec executable="${todos.cmd}" >
+			  <arg value="${cjad.parm}" />
+		  </exec>
+	  </target>
+
 	<target name="build" depends="prepare" >
 		<antcall target="display.props" />
 		<!-- Copy a JAD file from the WTK's demo applications.
@@ -1004,6 +1011,9 @@
 
 		<copy file="${bin}/${build.file.root}.jar" todir="${dist}" />
 		<copy file="${bin}/${build.file.root}.jad" todir="${dist}" />
+		<antcall target="conv.dos" inheritAll="true" >
+			<param name="cjad.parm" value="${dist}/${build.file.root}.jad" />
+		</antcall>
 		<copy file="${bin}/${project.name}.jar" tofile="${build}/${build.prefix}${build.jar}" />
 		<antcall target="create.prc" inheritAll="true" />
 		<!-- Manifest changes based on MIDP/JSR's so use prefixes to -->
