@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * FeedListParserSuite.java
  *
@@ -22,6 +23,7 @@
 /*
  * IB 2010-05-24 1.11.5RC2 Unit test FeedListParser and subclasses.
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser and HtmlLinkParserTest in small memory MIDP 1.0 to save space.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define memory size define
