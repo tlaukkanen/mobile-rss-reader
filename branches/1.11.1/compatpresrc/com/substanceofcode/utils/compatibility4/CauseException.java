@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * CauseException.java
  *
@@ -19,6 +20,8 @@
 /*
  * IB 2010-05-24 1.11.5RC2 Use CauseException in compatibility package for testing.
  * IB 2010-07-03 1.11.5RC2 Have different serialVersionUID.
+ * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 package com.substanceofcode.utils.compatibility4;
