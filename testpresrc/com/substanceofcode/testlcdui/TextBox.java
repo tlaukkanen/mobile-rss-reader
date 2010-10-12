@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * TextBox.java
  *
@@ -21,6 +22,7 @@
  */
 /*
  * IB 2010-07-05 1.11.5Dev6 Cosmetic code cleanup.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
