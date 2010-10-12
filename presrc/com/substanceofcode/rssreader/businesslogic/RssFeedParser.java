@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssFeedParser.java
  *
@@ -35,6 +36,7 @@
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
  * IB 2010-09-26 1.1.5Dev8 Don't use midlet directly.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define MIDP define
