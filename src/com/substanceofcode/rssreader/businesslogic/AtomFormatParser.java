@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * AtomParser.java
  *
@@ -24,6 +25,7 @@
  * IB 2010-07-19 1.11.5Dev8 Don't convert HTML for link.
  * IB 2010-07-19 1.11.5Dev8 Don't remove entities for link with CDATA.
  * IB 2010-07-19 1.11.5Dev8 For smartphone, set feed header fields if no items.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define test define
