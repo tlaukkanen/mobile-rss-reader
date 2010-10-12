@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssFeedStoreTest.java
  *
@@ -22,6 +23,7 @@
 /*
  * IB 2010-03-28 1.11.5RC2 Updated date defaults to "".
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define test define
