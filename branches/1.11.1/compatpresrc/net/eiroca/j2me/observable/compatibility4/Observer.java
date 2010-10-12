@@ -1,4 +1,6 @@
-/** GPL >= 2.0
+//--Need to modify--#preprocess
+/*
+ ** GPL >= 2.0
  *
  * Copyright (C) M. Serhat Cinar, http://graviton.de
  * Copyright (C) 2006-2008 eIrOcA (eNrIcO Croce & sImOnA Burzio)
@@ -21,7 +23,8 @@
  * This was modified no later than 2009-01-29
  */
 /*
-   IB 2010-03-07 1.11.4RC1 Use observer pattern for feed/OPML/list parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-03-07 1.11.4RC1 Use observer pattern for feed/OPML/list parsing to prevent hangs from spotty networks and bad URLs.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 // Expand to define MIDP define
 @DMIDPVERS@
