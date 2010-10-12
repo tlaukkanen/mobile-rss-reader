@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * FeedListParser.java
  *
@@ -33,6 +34,7 @@
  * IB 2010-07-04 1.11.5Dev6 Do not have feedNameFilter and feedUrlFilter as null.
  * IB 2010-07-04 1.11.5Dev6 Cosmetic code cleanup.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 // Expand to define MIDP define
 @DMIDPVERS@
