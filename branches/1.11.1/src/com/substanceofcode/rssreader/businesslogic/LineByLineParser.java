@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * LineByLineParser.java
  *
@@ -27,6 +28,7 @@
  * IB 2010-05-24 1.11.5RC2 Optionally use feed title for feed name.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
  * IB 2010-07-05 1.11.5Dev6 Do not have feedNameFilter and feedUrlFilter null.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define logging define
