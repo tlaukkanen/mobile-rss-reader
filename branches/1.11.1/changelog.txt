@@ -527,6 +527,7 @@ v1.11.5 Development 7 (dev7) (July 7th 2010)
 - Use no.individual.file to turn off copying jad/jar/cod files to google distribution.  This is done for dev releases.  For this release and other development releases, the jad/jar/cod will not be distributed as separate files.  Only the zip files will be distributed.
 
 v1.11.5 Development 9 (dev9) (Oct 12th 2010)
+- Remove extra --labels from google upload.
 - Add exception for setFont error to exception stack.
 - Add line feeds to diagnostics for loading display.
 - Add msg for setFont error.
