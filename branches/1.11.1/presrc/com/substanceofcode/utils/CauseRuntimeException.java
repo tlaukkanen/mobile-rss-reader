@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * CauseRuntimeException.java
  *
@@ -18,6 +19,7 @@
  */
 /*
  * IB 2010-06-01 1.11.5RC2 Have RuntimException with cause.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 // Expand to define logging define
 @DLOGDEF@
