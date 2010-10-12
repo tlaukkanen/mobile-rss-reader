@@ -1,3 +1,4 @@
+//--Need to Modify--#preprocess
 /*
  * ObservableHandler.java
  *
@@ -28,6 +29,8 @@
  * IB 2010-06-15 1.11.5Dev2 Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
  * IB 2010-06-15 1.11.5Dev2 Use version that can be distributed as GPL or LGPL.
  * IB 2010-07-05 1.11.5Dev7 Update source text to make distribution/redistribution license options clearer.
+ * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Dev8 Change --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
