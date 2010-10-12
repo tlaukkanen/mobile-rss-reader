@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * StringUtil.java
  *
@@ -21,6 +22,8 @@
  */
 /*
  * IB 2010-05-24 1.11.5RC2 Use StringUtil in compatibility package for testing.
+ * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define logging define
