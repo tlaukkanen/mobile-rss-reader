@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * XmlParser.java
  *
@@ -39,6 +40,9 @@
  * IB 2010-07-28 1.11.5Dev8 Don't convert entities if CDATA used or not forced.
  * IB 2010-09-27 1.11.5Dev8 Combine if statements.
  * IB 2010-09-27 1.11.5Dev8 Remove unneeded ;.
+ * IB 2010-09-29 1.11.5Dev9 Convert & in attributes to &amp;.
+ * IB 2010-09-29 1.11.5Dev9 Have convAttrData to convert &,<,> in attributes data to &amp;,&#60;,&#62;.
+ * IB 2010-09-29 1.11.5Dev9 Have convAttrUrlData to convert &,<,> in attributes data to &amp;,%3C,%3E.
 */
 
 // Expand to define testing define
@@ -837,6 +841,18 @@ public class XmlParser {
 			return null;
 		}
     }
+
+	static public String convAttrData(String attrData) {
+		return MiscUtil.replace(MiscUtil.replace(
+				MiscUtil.replace(attrData, "&", "&amp;"), "<", "&#60;"),
+				">", "&#62;");
+	}
+    
+	static public String convAttrUrlData(String attrData) {
+		return MiscUtil.replace(MiscUtil.replace(
+				MiscUtil.replace(attrData, "&", "&amp;"), "<", "%3C"),
+				">", "%3E");
+	}
     
   /**
    * Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
