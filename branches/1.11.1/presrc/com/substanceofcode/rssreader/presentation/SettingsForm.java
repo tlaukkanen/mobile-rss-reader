@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * SettingsForm.java
  *
@@ -28,6 +29,7 @@
  * IB 2010-08-21 1.11.5Dev8 Have loading form for updating settings.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
