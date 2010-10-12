@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * Settings.java
  *
@@ -58,6 +59,7 @@
  * IB 2010-07-05 1.11.5Dev6 Use null pattern using nullPtr.
  * IB 2010-07-29 1.11.5Dev8 If default set from get, set m_valuesChanged to true.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define CLDC define
