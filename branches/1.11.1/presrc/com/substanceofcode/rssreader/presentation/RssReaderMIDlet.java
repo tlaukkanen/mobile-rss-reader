@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssReaderMIDlet.java
  *
@@ -86,6 +87,7 @@
  * IB 2010-09-27 1.11.5Dev8 Use setCurrentFeature to go back to list before item form.
  * IB 2010-09-27 1.11.5Dev8 Have loadForm for procUpdHeader.
  * IB 2010-09-27 1.11.5Dev8 Have loadForm for procBackHeader.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define test define
