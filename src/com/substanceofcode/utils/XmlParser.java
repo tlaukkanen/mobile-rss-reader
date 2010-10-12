@@ -43,6 +43,7 @@
  * IB 2010-09-29 1.11.5Dev9 Convert & in attributes to &amp;.
  * IB 2010-09-29 1.11.5Dev9 Have convAttrData to convert &,<,> in attributes data to &amp;,&#60;,&#62;.
  * IB 2010-09-29 1.11.5Dev9 Have convAttrUrlData to convert &,<,> in attributes data to &amp;,%3C,%3E.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define testing define
