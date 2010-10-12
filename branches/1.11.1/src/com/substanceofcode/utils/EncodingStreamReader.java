@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * EncodingStreamReader.java
  *
@@ -21,6 +22,7 @@
  */
 /*
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define testing define
