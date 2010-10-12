@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * FeatureMgr.java
  *
@@ -51,6 +52,7 @@
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for initSettingsEnabled.
  * IB 2010-09-27 1.11.5Dev8 Use loadForm in FeatureMgr.
  * IB 2010-09-27 1.11.5Dev8 Need getCurrent for setCurrentItemMgr.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define MIDP define
