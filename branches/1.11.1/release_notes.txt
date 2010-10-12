@@ -345,6 +345,9 @@ v1.11.5 Development 9 (dev9) (Oct 12th 2010)
 - Allow open of feed link on details screen for smartphone version if not empty.
 - Allow details screen if not podcast for smartphone version if date or url not empty.  (Podcast still allows details screen).
 
+v1.11.5 Development 10 (dev10) (Oct 12th 2010)
+- Fix jad files by having correct Jar URL.
+
 Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
