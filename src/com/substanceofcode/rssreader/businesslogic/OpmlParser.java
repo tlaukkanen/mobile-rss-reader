@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * OpmlParser.java
  *
@@ -36,6 +37,8 @@
  * IB 2010-09-26 1.11.5Dev8 Put title= on a separate line.
  * IB 2010-09-26 1.11.5Dev8 Upshift utf-8.
  * IB 2010-09-26 1.11.5Dev8 Allow export of feeds with non-smartphones.
+ * IB 2010-09-27 1.11.5Dev9 Convert &,<,> in attributes to entities.
+ * IB 2010-09-28 1.11.5Dev9 Have second body tag be an end tag.
 */
 
 // Expand to define MIDP define
@@ -56,6 +59,7 @@ import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
 import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.XmlParser;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -213,18 +217,18 @@ public class OpmlParser extends FeedListParser {
 //@
 //@		static public String getOpmlLine(final RssItunesFeed feed) {
 //@			StringBuffer sb = new StringBuffer("    <outline text=\"").append(
-//@					feed.getName()).append("\"\ntitle=\"").append(feed.getName()).append(
+//@					XmlParser.convAttrData(feed.getName())).append("\"\ntitle=\"").append(XmlParser.convAttrData(feed.getName())).append(
 //@					"\" type=\"rss\"\n").append("xmlUrl=\"").append(
-//@						feed.getUrl()).append("\" ");
+//@						XmlParser.convAttrUrlData(feed.getUrl())).append("\" ");
 			//#ifdef DITUNES
-//@			sb.append("htmlUrl=\"").append(feed.getLink()).append("\"");
+//@			sb.append("htmlUrl=\"").append(XmlParser.convAttrUrlData(feed.getLink())).append("\"");
 			//#endif
 //@			sb.append("/>\n");
 //@			return sb.toString();
 //@		}
 //@
 //@		static public String getOpmlEnd() {
-//@					return "<body>\n</opml>\n";
+//@			return "</body>\n</opml>\n";
 //@		}
 		//#endif
 		//#endif
