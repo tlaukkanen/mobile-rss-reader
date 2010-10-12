@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssFeed.java
  *
@@ -29,6 +30,7 @@
  * IB 2010-05-25 1.11.5RC2 Don't deserialize items if not iTunesCapable.
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-07-29 1.11.5Dev8 Don't allocate space for m_date and m_link if not smartphone.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define logging define
