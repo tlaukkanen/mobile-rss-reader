@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * UtilitySuite.java
  *
@@ -22,6 +23,7 @@
 /*
  * IB 2010-05-24 1.11.5RC2 Unit test utility classes.
  * IB 2010-06-27 1.11.5Dev2 Test 1st and 2nd settings test classes.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define memory size define
