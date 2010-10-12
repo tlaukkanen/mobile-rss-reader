@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssFeedSuite.java
  *
@@ -21,6 +22,7 @@
  */
 /*
  * IB 2010-05-24 1.11.5RC2 Move compatibility tests to compatibility packages.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define test define
