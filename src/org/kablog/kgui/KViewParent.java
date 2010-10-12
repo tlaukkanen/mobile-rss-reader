@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
@@ -26,6 +27,7 @@
 /*
  * IB 2010-08-15 1.11.5Dev8 Remove unused reqSetVisible.
  * IB 2010-09-27 1.11.5Dev8 Remove unused import.
+ * IB 2010-10-12 1.11.5Dev8 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define DJSR75 define
