@@ -69,6 +69,18 @@
     <!-- IB 2010-07-10 1.11.5Dev8 Remove unused build directories.  -->
     <!-- IB 2010-07-29 1.11.5Dev8 Add stable/unstable to expert binary.  -->
     <!-- IB 2010-07-30 1.11.5Dev8 Use release.name for build file name for projects with multiple release files.  -->
+    <!-- IB 2010-10-06 1.11.5Dev9 Use directory of path containing preverify for rapc, not the path to preverify. -->
+    <!-- IB 2010-10-06 1.11.5Dev9 Use special alx directory to zip alx and cod files. -->
+    <!-- IB 2010-10-06 1.11.5Dev9 Log jde.home and rim.home in display.props. -->
+    <!-- IB 2010-10-06 1.11.5Dev9 Use ant blackberry build tools to optionally create blackberry jar, jad, cso, cod, and alx. -->
+    <!-- IB 2010-10-06 1.11.5Dev9 Create zip file for alx directory. -->
+    <!-- IB 2010-10-06 1.11.5Dev9 Fix MIDlet-Jar-URL to correct value. -->
+    <!-- IB 2010-10-06 1.11.5Dev9 Change RIM file creation directly using jar to set jde.home. -->
+    <!-- IB 2010-10-11 1.11.5Dev9 Use jde.home.path for path to jde.home so that we can set jde.home dynamically.  -->
+    <!-- IB 2010-10-11 1.11.5Dev9 Have option to use jar.jde.home for using Blackberry jar directly. -->
+    <!-- IB 2010-10-11 1.11.5Dev9 Use bb.jde.home for Blackberry ant tasks path to jde.home.  -->
+    <!-- IB 2010-10-11 1.11.5Dev9 Use mweb.jarfile to use correct jar path in jad file.  -->
+    <!-- IB 2010-10-11 1.11.5Dev9 Use jsjar.fn for jar file name including suffix.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -306,6 +318,8 @@
 		<property name="file.prefix.large" value="" />
 		<property name="file.prefix" value="${file.prefix.midp1.0}${file.prefix.midp2.0}${file.prefix.cldc1.0}${file.prefix.cldc1.1}${file.prefix.novice}${file.prefix.itunes}${file.prefix.signed}${file.prefix.jsr75}${file.prefix.jsr238}" />
 		<property name="bin" value="${target}/bin${file.prefix}" />
+		<property name="rim.bin" value="${target}/bin${file.prefix}_rim" />
+		<property name="rim.bin.alx" value="${target}/bin${file.prefix}_rim_alx" />
 		<property name="build.vers" value="${target}/build_${file.prefix}" />
 		<property name="dist.vers" value="${target}/dist_${file.prefix}" />
 		<property name="SUFFIXVERS.midp1.0" value="" />
@@ -435,6 +449,9 @@
 	<target name="display.props" >
 	    <echo message="project.name=${project.name}" />
 	    <echo message="wtk.home=${wtk.home}" />
+	    <echo message="jar.jde.home=${jar.jde.home}" />
+	    <echo message="bb.jde.home=${bb.jde.home}" />
+	    <echo message="rim.home=${rim.home}" />
 	    <echo message="PWD=${env.PWD}" />
 	    <echo message="lib.classpath=${lib.classpath}" />
 	    <echo message="build.compiler=${build.compiler}" />
@@ -485,6 +502,7 @@
 		<!-- Copy unpreprocessed source to compiled src dir -->
 		<antcall target="copy.unproc.comp" />
 		<delete dir="${tmppreprocess}" />
+		<!-- Check with defines in jdk.home rapc. -->
 		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DMEMSIZEDEF},${DITUNESDEF},${DSIGNEDDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
 		<echo message="preprocess.defines=${preprocess.defines}" />
 		<mkdir dir="${tmppreprocess}" />
@@ -558,7 +576,7 @@
 	</path>
 
 	<path id="jde.classpath">
-		<pathelement location="${jde.home}/bin/rapc.jar" />
+		<pathelement location="${jde.home.path}/bin/rapc.jar" />
 	</path>
 
 	<target name="compile" depends="prepare">
@@ -737,7 +755,7 @@
 			<attribute name="MIDlet-Description" value="${project.description}" />
 			<attribute name="MIDlet-Icon" value="/${icons.dir}/${app-icon}" />
 			<attribute name="MIDlet-Info-URL" value="${project.info.url}" />
-			<attribute name="MIDlet-Jar-URL" value="${mjarfile}" />
+			<attribute name="MIDlet-Jar-URL" value="${mweb.jarfile}" />
 			<attribute name="MicroEdition-Configuration" value="${JCLDCVERS}" />
 			<attribute name="MicroEdition-Profile" value="${JMIDPVERS}" />
 			<attribute name="MIDlet-Permissions-Opt" value="${PERMISSIONS}" />
@@ -807,6 +825,7 @@
 			<param name="mjadfile" value="${jsjad1.in}" />
 			<param name="mmanifest" value="${bin}/manifest.mf" />
 			<param name="mjarfile" value="${jsjar.in}" />
+			<param name="mweb.jarfile" value="${jsjar.fn}" />
 			<param name="update.parm" value="true" />
 		</antcall>
 		<delete file="${jsjad2.in}" />
@@ -908,8 +927,10 @@
 		<if>
 			<equals arg1="${keep.obfuscate}" arg2="true" />
 			<then>
+			<echo message="keep.obfuscate=${keep.obfuscate}" />
 			<delete file="${bin}/${build.file.root}.jar" />
 			<!-- Took out optimizationpasses="${nbr.optimization.passes} -->
+			<!-- -printmapping as argument with <argument value=... gives a partial file. -->
 			<wtkobfuscate jarfile="${bin}/${project.name}.jar" tojarfile="${bin}/${build.file.root}.jar" >
 				<preserve class="com.substanceofcode.utils.CauseRecStoreException" />
 			</wtkobfuscate>
@@ -973,6 +994,7 @@
 		<antcall target="tool.sign" inheritAll="true" >
 			<param name="jsadd.parm" value="-addcert" />
 			<param name="jsjar.in" value="${bin}/${build.file.root}.jar" />
+			<param name="jsjar.fn" value="${build.file.root}.jar" />
 			<param name="jsjad1.in" value="${bin}/${build.file.root}.jad" />
 			<param name="jsjad2.in" value="${bin}/${build.file.root}-in2.jad" />
 			<param name="jsjad3.in" value="${bin}/${build.file.root}-in3.jad" />
@@ -1029,7 +1051,7 @@
 		<move file="${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.debug" />
 	</target>
 
-	<target name="jar.create.rim.files" depends="prepare" if="jde.home" unless="signed" >
+	<target name="jar.create.rim.files" depends="prepare" if="jar.jde.home" unless="signed" >
 	    <echo message="basedir=${basedir}" />
 	    <echo message="jde.home=${jde.home}" />
 	    <echo message="${basedir}/${dist}/${build.file.root}.jar=${basedir}/${dist}/${build.file.root}.jar}" />
@@ -1040,8 +1062,9 @@
 			<param name="mjarfile" value="${bin}/${build.file.root}_cod_in.jar" />
 			<param name="update.parm" value="false" />
 		</antcall>
+		<mkdir dir="${rim.bin}" />
 		<java classpathref="jde.classpath" classname="net.rim.tools.compiler.Compiler" >
-			<arg value="import=${jde.home}/lib/net_rim_api.jar" />
+			<arg value="import=${jde.home.path}/lib/net_rim_api.jar" />
 			<arg value="codename=${project.name}" />
 			<arg value="-midlet" />
 			<arg value="jad=${basedir}/${bin}/${build.file.root}_cod_in.jad" />
@@ -1050,6 +1073,32 @@
 		<move file="../${project.name}.cso" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cso" />
 		<move file="../${project.name}.cod" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.cod" />
 		<move file="../${project.name}.debug" tofile="${dist}/${build.prefix}${project.name}-${FMIDLETVERSROOT}.debug" />
+	</target>
+
+	<target name="jde.create.rim.files" depends="prepare" if="bb.jde.home" unless="signed" >
+	    <echo message="basedir=${basedir}" />
+	    <echo message="jde.home=${jde.home}" />
+	    <echo message="${basedir}/${dist}/${build.file.root}.jar=${basedir}/${dist}/${build.file.root}.jar}" />
+	    <echo message="rim.bin=${rim.bin}" />
+		<!-- Check with defines in jdk.home rapc. -->
+		<property name="rapc.preprocess.defines" value="${DMIDPVERS};${DCLDCVERS};${DMEMSIZEDEF};${DITUNESDEF};${DSIGNEDDEF};${DJSR75};${DJSR238};${DTESTDEF};${DJMTESTDEF};${DLOGDEF};${DTESTUIDEF};${DCOMPATDEF}" />
+		<echo message="prapc.reprocess.defines=${prapc.reprocess.defines}" />
+		<mkdir dir="${rim.bin}" />
+		<rapc jdehome="${jde.home}" exepath="${wtk.home}/bin" srcdir="${comp.src}" destdir="${rim.bin}" output="${build.prefix}${project.name}-${FMIDLETVERSROOT}" defines="${prapc.reprocess.defines}" verbose="true" nodebug="true" >
+			<jdp type="midlet" title="${project.name}" vendor="${vendor}" version="${MIDLETVERS}" description="${project.description}" midletclass="${midlet.class}" icon="/${icons.dir}/${app-icon}" />
+		</rapc>
+		<alx destdir="${rim.bin.alx}" filename="${build.prefix}${project.name}-${FMIDLETVERSROOT}.alx" >
+			<application id="${midlet.package}" name="${midlet.name}" vendor="${vendor}" version="${MIDLETVERS}" description="${project.description}" >
+				<codset>
+					<fileset dir="${rim.bin}" includes="*.cod" />
+				</codset>
+			</application>
+		</alx>
+		<move file="${rim.bin}/${build.file.root}.cso" tofile="${dist}/${build.file.root}.cso" />
+		<move file="${rim.bin}/${build.file.root}.cod" tofile="${dist}/${build.file.root}.cod" />
+		<move file="${rim.bin.alx}/${build.file.root}.alx" tofile="${dist}/${build.file.root}.alx" />
+		<zip destfile="${rim.bin}/${build.file.root}.zip" basedir="${rim.bin.alx}" />
+		<move file="${rim.bin}/${build.file.root}.zip" tofile="${dist}/${build.file.root}.zip" />
 	</target>
 
 	<target name="svn.op.dist" if="${need.svn.preprocessed}" unless="skip.svn.op" >
@@ -1306,7 +1355,12 @@
 			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
 		</antcall>
 		<antcall target="exec.create.rim.files" inheritAll="true" />
-		<antcall target="jar.create.rim.files" inheritAll="true" />
+		<antcall target="jar.create.rim.files" inheritAll="true" >
+			<param name="jde.home" value="${jar.jde.home}" />
+		</antcall>
+		<antcall target="jde.create.rim.files" inheritAll="true" >
+			<param name="jde.home" value="${bb.jde.home}" />
+		</antcall>
 		<delete dir="${obfuscated}" />
 		<if>
 			<equals arg1="${make.build.files}" arg2="true" />
