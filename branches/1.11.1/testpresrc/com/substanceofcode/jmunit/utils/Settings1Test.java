@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * Settings1Test.java
  *
@@ -22,6 +23,7 @@
 /*
  * IB 2010-06-27 1.11.5Dev2 Have 1st settings test class.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
 */
 
 // Expand to define test define
