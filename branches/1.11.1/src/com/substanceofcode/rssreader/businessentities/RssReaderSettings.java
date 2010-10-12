@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssReaderSettings.java
  *
@@ -29,6 +30,7 @@
  * IB 2010-06-27 1.11.5RC2 If CLDC 1.1, use synchronized class statement vs static synchronized modifier.
  * IB 2010-06-27 1.11.5Dev2 Use volatile for instance vars.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
