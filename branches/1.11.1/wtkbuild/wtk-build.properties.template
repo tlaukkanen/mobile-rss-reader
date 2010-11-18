@@ -27,6 +27,12 @@
 #-- IB 2010-10-11 1.11.5Dev9 Use windows.os to tell if windows OS.
 #-- IB 2010-10-12 1.11.5Dev9 Use todos.cmd for to dos executable file.
 #-- IB 2010-10-12 1.11.5Dev9 Use windows.os to tell if windows OS so we can convert jad to dos with conv.dos and todos.comd if not windows.
+#-- IB 2010-11-14 1.11.5Dev14 Use CPD minimumtokencount.
+#-- IB 2010-11-14 1.11.5Dev14 Use Blackberry JDE 4.7.
+#-- IB 2010-11-14 1.11.5Dev14 Use Blackberry ant task rapc bb.jde.use.
+#-- IB 2010-11-14 1.11.5Dev14 Allow use of microemulator as applet.
+#-- IB 2010-11-14 1.11.5Dev14 Use substanceofcode for info url for signed.
+#-- IB 2010-11-16 1.11.5Dev14 Use PMD (use.pmd.task) and/or CPD (use.cpd.task).
 
 #windows.drive = C:
 windows.drive = 
@@ -61,6 +67,10 @@ antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 #pmd.home = ${opt.tools}/pmd/pmd-4.2.4
 #pmd.home = ${opt.tools}/pmd/pmd-4.2.5
 pmd.xsl = pmd-compile-reduced.xsl
+use.pmd.task = false
+use.cpd.task = false
+#pmd.xsl = pmd-compile.xsl
+pmd.minimumtokencount = 20
 cat.cmd = cat${windows.ext}
 jarsigner.cmd = jarsigner${windows.ext}
 todos.cmd = todos${windows.ext}
@@ -72,11 +82,13 @@ todos.cmd = todos${windows.ext}
 #rim.home = C:\\Program Files\\Research In Motion\\BlackBerry JDE 4.2.1
 #Comment out for linux
 #rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
-jde.home.path = ${opt.tools}/blackberry4.2.1
+#jde.home.path = ${opt.tools}/blackberry4.2.1
+jde.home.path = ${opt.tools}/Research_In_Motion/BlackBerry_JDE_4.7.0
 jar.jde.home = ${jde.home.path}
 #bb.jde.home = ${jde.home.path}
 bb.ant.tools.home = ${opt.tools}/bb-ant-tools/bb-ant-tools-1.2.8
 bb.ant.tools.jar = bb-ant-tools.jar
+bb.jde.use = false
 #wine = /usr/bin/wine
 #svn.path = C:\\cygwin\\bin\\
 svn.path = /usr/bin/
@@ -112,12 +124,17 @@ wtk.proguard.home = ${opt.tools}/proguard/proguard4.5beta3
 #For phoneMe Windows, if using ecj.jar and Kaffe
 #rt.jar = /usr/lib/kaffe/jre/lib/rt.jar
 rt.jar = ${java.home}/../jre/lib/rt.jar
-emulator.home = ${ext.drive}/mostdownloads/j2me/sourceforge/kobjects
-#emulator.home=C:/mostdownloads/j2me/sourceforge/MicroEmulator/microemulator-2.0.2
-emulator.jar=${emulator.home}/me4se-2.2.0.zip
-#emulator.jar=${emulator.home}/microemulator.jar
-emulator.class=org.me4se.MIDletRunner
-#emulator.class=org.microemu.app.Main
+emulator.version = 2.0.4
+fn.root.emulator.version = 2_0_4
+#emulator.home = ${ext.drive}/mostdownloads/j2me/sourceforge/kobjects
+#emulator.home=C:/mostdownloads/j2me/sourceforge/MicroEmulator/microemulator-${emulator.version}
+emulator.home=${opt.tools}/microemulator/microemulator-${emulator.version}
+#emulator.jar=${emulator.home}/me4se-2.2.0.zip
+emulator.root=microemulator
+emulator.jar=${emulator.root}.jar
+path.emulator.jar=${emulator.home}/${emulator.jar}
+#emulator.class=org.me4se.MIDletRunner
+emulator.class=org.microemu.app.Main
 wtk.encoding = UTF-8
 original.author = Tommi Laukkanen
 tommi.vendor = ${original.author}
@@ -128,7 +145,7 @@ midlet.class = ${midlet.package}.presentation.${midlet.name}
 logging.package = net.sf.jlogmicro.util.logging
 obfuscate.classes = ${midlet.class},${logging.package}.ConsoleHandler,${logging.package}.FormHandler,${logging.package}.RecStoreHandler,${logging.package}.SimpleFormatter
 tommi.project.info.url = http://www.substanceofcode.com
-yinlight.project.info.url = http://www.yinlight.net
+yinlight.project.info.url = ${tommi.project.info.url}
 yinlight.rootdir = html/mobile-rss-reader/downloads
 sourceforge.project = mobilerssreader
 sourceforge.project.first = m
