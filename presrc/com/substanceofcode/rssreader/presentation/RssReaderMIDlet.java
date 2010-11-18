@@ -88,6 +88,18 @@
  * IB 2010-09-27 1.11.5Dev8 Have loadForm for procUpdHeader.
  * IB 2010-09-27 1.11.5Dev8 Have loadForm for procBackHeader.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-30 1.11.5Dev12 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-15 1.11.5Dev14 Use getImage from FeatureMgr to get the images.
+ * IB 2010-11-15 1.11.5Dev14 If logging error, exit the constructor.
+ * IB 2010-11-15 1.11.5Dev14 If no m_bookmarkList, don't add/remove commands from it.
+ * IB 2010-11-15 1.11.5Dev14 If create m_bookmarkList is successful, add start command in case something goes wrong after creating the booklist.
+ * IB 2010-11-15 1.11.5Dev14 Cosmetic changes.
+ * IB 2010-11-15 1.11.5Dev14 Create initApp to initialize the app.
+ * IB 2010-11-15 1.11.5Dev14 Create getAboutInfo to return info for about to be used as alert from getAbout or form.
+ * IB 2010-11-15 1.11.5Dev14 Combine nested if statements.
+ * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty.
+ * IB 2010-11-16 1.11.5Dev14 Add default value for getSysProperty, getSysPermission, and getSysPropStarts.
+ * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
 */
 
 // Expand to define test define
@@ -208,9 +220,7 @@ implements
     private Settings    m_settings = null;         // The settings
     private RssReaderSettings m_appSettings = null;// The application settings
     private Hashtable   m_rssFeeds = new Hashtable(); // The bookmark URLs
-    final static public boolean JSR75_ENABLED =
-	          (System.getProperty(
-			"microedition.io.file.FileConnection.version") != null);
+    final public boolean JSR75_ENABLED;
 	//#ifdef DTEST
     private boolean     m_debugOutput = true; // Flag to write to output for test
 	//#endif
@@ -276,14 +286,14 @@ implements
 	//#endif
     
     // GUI items
-    private FeatureList  m_bookmarkList;     // The bookmark list
+    private FeatureList  m_bookmarkList = null; // The bookmark list
 	//#ifdef DTESTUI
     private HeaderList  m_headerTestList;       // The header list
     private AllNewsList m_allNewsTestList; // The test header list for unread items
 	//#endif
     private Displayable m_itemRtnList;      // The list to return from for item
     private ItemForm    m_itemForm;         // The item form
-    private LoadingForm m_loadForm;         // The "loading..." form
+    private LoadingForm m_loadForm = null;  // The "loading..." form
     private TextField   m_fileURL;          // The file URL field from a form
     private FeatureForm m_fileRtnForm;      // The form to return to for file
 	//#ifdef DTESTUI
@@ -360,6 +370,7 @@ implements
 						t);
 			}
 		}
+		boolean loggingErr = false;
 		try {
 			LogManager logManager = LogManager.getLogManager();
 			logManager.readConfiguration(this);
@@ -378,6 +389,7 @@ implements
 			m_debug = new LoggerRptForm(logManager, this,
 						this, "net.sf.jlogmicro.util.logging.FormHandler");
 		} catch (Throwable t) {
+			loggingErr = true;
 			m_loadForm.appendMsg("Error initiating logging " +
 					t.getClass().getName() + "," + t.getMessage());
 			String [] msgs = LogManager.getLogManager().getStartMsgs();
@@ -387,11 +399,16 @@ implements
 			}
 			System.out.println("Error initiating logging" + t);
 			t.printStackTrace();
-			return;
 		}
 		//#endif
 
 		try {
+
+			//#ifdef DLOGGING
+			if (loggingErr) {
+				return;
+			}
+			//#endif
 
 			if (m_loadForm == null) {
 				try {
@@ -422,49 +439,58 @@ implements
 
 			/** Initialize commands */
 			//#ifdef DTESTUI
-			m_testBMCmd         = new Command("Test bookmarks shown", Command.SCREEN, 9);
-			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 10);
+			m_testBMCmd         = new Command("Test bookmarks shown", Command.SCREEN, 10);
+			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 11);
 			//#endif
 			if (RssReaderMIDlet.m_backCommand == null) {
 				RssReaderMIDlet.m_backCommand = new Command("Back", Command.BACK, 1);
 			}
 			//#ifdef DMIDP20
 			if (RssReaderMIDlet.m_openLinkCmd == null) {
-				RssReaderMIDlet.m_openLinkCmd  = new Command("Open link", Command.SCREEN, 3);
+				RssReaderMIDlet.m_openLinkCmd  = new Command("Open link", Command.SCREEN, 5);
 			}
 			//#endif
 			initExit();
-			m_openBookmark      = new Command("Open feed", Command.SCREEN, 2);
-			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, 3);
-			m_readUnreadItems   = new Command("River of news", Command.SCREEN, 4);
-			m_editBookmark      = new Command("Edit feed", Command.SCREEN, 5);
-			m_delBookmark       = new Command("Delete feed", Command.SCREEN, 6);
-			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, 7);
+			m_openBookmark      = new Command("Open feed", Command.SCREEN, 5);
+			int priority = 7;
+			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, priority++);
+			m_readUnreadItems   = new Command("River of news", Command.SCREEN, priority++);
+			m_editBookmark      = new Command("Edit feed", Command.SCREEN, priority++);
+			m_delBookmark       = new Command("Delete feed", Command.SCREEN, priority++);
+			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, priority++);
+			int spriority = priority;
 			//#ifdef DSIGNED
 			//#ifdef DJSR75
-			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, 8);
+			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, priority++);
 			//#endif
 			//#endif
+			if (spriority == priority) {
+				priority++;
+			}
 			//#ifdef DTEST
-			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, 9);
+			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, priority++);
+			//#else
+			priority++;
 			//#endif
 			m_updateAllModCmd   = new Command("Update modified all",
-											  Command.SCREEN, 10);
-			m_updateAllCmd      = new Command("Update all", Command.SCREEN, 11);
+											  Command.SCREEN, priority++);
+			m_updateAllCmd      = new Command("Update all", Command.SCREEN, priority++);
 			//#ifdef DTEST
-			m_reloadDbCmd       = new Command("Reload DB", Command.SCREEN, 12);
+			m_reloadDbCmd       = new Command("Reload DB", Command.SCREEN, priority++);
+			//#else
+			priority++;
 			//#endif
-			m_settingsCmd       = new Command("Settings", Command.SCREEN, 13);
-			m_saveCommand       = new Command("Save without exit", Command.SCREEN, 14);
-			m_aboutCmd          = new Command("About", Command.SCREEN, 17);
+			m_settingsCmd       = new Command("Settings", Command.SCREEN, priority++);
+			m_saveCommand       = new Command("Save without exit", Command.SCREEN, priority++);
+			m_aboutCmd          = new Command("About", Command.SCREEN, priority++);
 			//#ifdef DTESTUI
-			m_testEncCmd        = new Command("Testing Form", Command.SCREEN, 4);
+			m_testEncCmd        = new Command("Testing Form", Command.SCREEN, priority++);
 			//#endif
 
 		//#ifdef DLOGGING
-			m_debugCmd          = new Command("Debug Log", Command.SCREEN, 4);
-			m_clearDebugCmd     = new Command("Clear", Command.SCREEN, 1);
-			m_backFrDebugCmd    = new Command("Back", Command.BACK, 2);
+			m_debugCmd          = new Command("Debug Log", Command.SCREEN, priority++);
+			m_clearDebugCmd     = new Command("Clear", Command.SCREEN, 7);
+			m_backFrDebugCmd    = new Command("Back", Command.BACK, 1);
 			//#endif
 			
 			m_getPage = false;
@@ -512,25 +538,7 @@ implements
 			//#endif
 
 			if ((m_appSettings != null) && m_appSettings.getMarkUnreadItems()) {
-				try {
-					try {
-						// createImage("/icons/unread.png") does not always work
-						// with the emulator.  so, I do an alternate which is
-						// effectively the same thing.
-						m_unreadImage = Image.createImage("/icons/unread.png");
-					} catch(IOException e) {
-						//#ifdef DMIDP20
-						InputStream is =
-								this.getClass().getResourceAsStream("/icons/unread.png");
-						m_unreadImage = Image.createImage(is);
-						is.close();
-						//#endif
-					}
-				} catch(Throwable e) {
-					ce = new CauseException("Error while getting mark image: " +
-							e.toString(), e);
-					System.err.println(ce.getMessage());
-				}
+				m_unreadImage = FeatureMgr.getImage("/icons/unread.png", m_loadForm);
 			}
 			
 			if (ce != null) {
@@ -548,23 +556,30 @@ implements
 				initializeLoadingForm("Loading items...", null);
 			}
             m_loadForm.addExc("Internal error starting applicaiton.", t);
+		} finally {
+			JSR75_ENABLED = 
+				(FeatureMgr.getSysProperty(
+				"microedition.io.file.FileConnection.version", null,
+					"Unable to get FileConnection",
+					(m_loadForm.hasExc()) ? m_loadForm : (LoadingForm)nullPtr)[0]
+				!= null);
 		}
     }
     
 	/* Create exit command based on if it's a standard exit. */
 	final public void initExit() {
 		boolean prevExit = (m_exitCommand != null);
-		if (prevExit) {
+		if (prevExit && (m_bookmarkList != null)) {
 			m_bookmarkList.removeCommand(m_exitCommand);
 		}
 		if (m_appSettings != null) {
 			m_exitCommand       = new Command("Exit",
 				(m_appSettings.getUseStandardExit() ? Command.EXIT
-				 : Command.SCREEN), 15);
+				 : Command.SCREEN), 30);
 		} else {
-			m_exitCommand       = new Command("Exit", Command.SCREEN, 15);
+			m_exitCommand       = new Command("Exit", Command.SCREEN, 30);
 		}
-		if (prevExit) {
+		if (prevExit && (m_bookmarkList != null)) {
 			m_bookmarkList.addPromptCommand(m_exitCommand,
 					"Are you sure you want to exit?");
 		}
@@ -766,6 +781,7 @@ implements
 				}
 			}
 			//#endif
+			m_loadForm.addStartCmd( m_bookmarkList );
 		} catch (Throwable t) {
 			procBookmarkExc("Error while initializing bookmark list", t,
 					m_loadForm
@@ -1399,10 +1415,6 @@ implements
 				/** Get RSS feed */
 				final int maxItemCount =
 					m_appSettings.getMaximumItemCountInFeed();
-				//#ifdef DTEST
-				System.gc();
-				long beginMem = Runtime.getRuntime().freeMemory();
-				//#endif
 				cbackGrParser.makeObserable(cgetModPage, maxItemCount);
 				loadForm.addPromptCommand(RssReaderMIDlet.m_backCommand,
 									"Are you sure that you want to go back? Parsing has not finished.");
@@ -1814,12 +1826,7 @@ implements
 		return sb.toString();
 	}
     
-    /**
-     * Start up the Hello MIDlet by creating the TextBox and associating
-     * the exit command and listener.
-     */
-    public void startApp()
-	throws MIDletStateChangeException {
+    public void initApp() {
 		// Initialize bookmarks here since it does some work.
 		if (m_bookmarkList == null) {
 			synchronized (this) {
@@ -1878,14 +1885,19 @@ implements
 			}
 		}
     }
-    
+
     /**
-	 * Create about alert.
-	 * @author  Irving Bunton
-	 * @version 1.0
-	 */
-	final private Alert getAbout() {
-		final Alert about = new Alert("About RssReader",
+     * Start up the Hello MIDlet by creating the TextBox and associating
+     * the exit command and listener.
+     */
+    public void startApp()
+	throws MIDletStateChangeException {
+		initApp();
+    }
+    
+	final private String[] getAboutInfo() {
+		return new String[] {
+				"About RssReader",
  "RssReader v" + super.getAppProperty("MIDlet-Version") + "-" +
  super.getAppProperty("Program-Version") +
  " Copyright (C) 2005-2006 Tommi Laukkanen, " +
@@ -1909,8 +1921,18 @@ implements
  "Boston, MA" +
  "02110-1301 USA" +
  "Using this software means that you accept this license and agree to" +
- "not use this program to break any laws.",
-  null, AlertType.INFO);
+ "not use this program to break any laws."};
+	}
+
+    /**
+	 * Create about alert.
+	 * @author  Irving Bunton
+	 * @version 1.0
+	 */
+	final private Alert getAbout() {
+		String[] aboutInfo = getAboutInfo();
+		final Alert about = new Alert(aboutInfo[0], aboutInfo[1], null,
+				AlertType.INFO);
 		about.setTimeout(Alert.FOREVER);
  
 		return about;
@@ -2397,14 +2419,12 @@ implements
 
 		//#ifdef DTESTUI
         /** Go back to last position */
-        if( c == m_testRtnCmd ) {
-			if (m_bookmarkLastIndex != 1) {
-				if (m_bookmarkList.getSelectedIndex() >= 0) {
-					m_bookmarkList.setSelectedIndex(
-							m_bookmarkList.getSelectedIndex(), false);
-				}
-				m_bookmarkList.setSelectedIndex( m_bookmarkLastIndex, true );
+        if(( c == m_testRtnCmd ) && (m_bookmarkLastIndex != 1)) {
+			if (m_bookmarkList.getSelectedIndex() >= 0) {
+				m_bookmarkList.setSelectedIndex(
+						m_bookmarkList.getSelectedIndex(), false);
 			}
+			m_bookmarkList.setSelectedIndex( m_bookmarkLastIndex, true );
 		}
 		//#endif
 
@@ -2625,12 +2645,12 @@ implements
 								   LoadingForm loadForm) {
 			super(title, loadForm);
 			m_platformReq = false;
-			m_nextItemCmd = new Command("Next Item", Command.SCREEN, 2);
+			m_nextItemCmd = new Command("Next Item", Command.SCREEN, 7);
 			//#ifdef DMIDP20
-			m_openEnclosureCmd  = new Command("Open enclosure", Command.SCREEN, 2);
+			m_openEnclosureCmd  = new Command("Open enclosure", Command.SCREEN, 8);
 			//#endif
-			m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 4);
-			m_copyEnclosureCmd  = new Command("Copy enclosure", Command.SCREEN, 5);
+			m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 9);
+			m_copyEnclosureCmd  = new Command("Copy enclosure", Command.SCREEN, 10);
 			super.addCommand( RssReaderMIDlet.m_backCommand );
 			final String sienclosure = item.getEnclosure();
 			final String desc = item.getDescription();
