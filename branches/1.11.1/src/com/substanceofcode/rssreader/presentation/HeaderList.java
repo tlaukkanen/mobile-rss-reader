@@ -34,6 +34,8 @@
  * IB 2010-09-27 1.11.5Dev8 Have "Loading detail form..." when going to the detail form.
  * IB 2010-09-27 1.11.5Dev8 Have update give updating feed loading form for MIDP 1.0.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-30 1.11.5Dev12 Need to set m_feed before we use it to log.
+ * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
 */
 
 // Expand to define MIDP define
@@ -110,25 +112,25 @@ implements
 			LoadingForm loadForm, final RssItunesFeed feed) {
 		super(feed.getName(), List.IMPLICIT,
 				selectedIx, 1, bookmarkList,
-				rssFeeds, unreadImage, loadForm, 6);
+				rssFeeds, unreadImage, loadForm, 10);
+		m_feed = feed;
 		//#ifdef DLOGGING
 //@		if (m_finestLoggable) {m_logger.finest("Constructor m_feed.getName(),m_feed.getItems().size(),selectedIx,itunesEnabled=" + m_feed.getName() + "," + m_feed.getItems().size() + "," + selectedIx + "," + itunesEnabled);}
 		//#ifdef DITUNES
 //@		if (m_finestLoggable) {m_logger.finest("Constructor feed.getName(),feed.getLink(),feed.getItems().size()=" + feed.getName() + "," + feed.getLink() + "," + feed.getItems().size());}
 		//#endif
 		//#endif
-		m_feed = feed;
 		this.m_itunesEnabled = itunesEnabled;
-		m_updateCmd         = new Command("Update feed", Command.SCREEN, 3);
+		m_updateCmd         = new Command("Update feed", Command.SCREEN, 7);
 		m_updateModCmd      = new Command("Update modified feed",
-										  Command.SCREEN, 4);
+										  Command.SCREEN, 8);
 		super.addCommand(m_updateCmd);
 		super.addCommand(m_updateModCmd);
 		//#ifdef DITUNES
 //@		if (m_itunesEnabled && (feed.isItunes() ||
 //@		   (feed.getLink().length() > 0) || (feed.getDate() != null))) { 
 //@			m_bookmarkDetailsCmd    = new Command("Show bookmark details",
-//@					Command.SCREEN, 5);
+//@					Command.SCREEN, 9);
 //@			super.addCommand(m_bookmarkDetailsCmd);
 //@		}
 		//#endif
