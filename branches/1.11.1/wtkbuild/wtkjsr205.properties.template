@@ -1,8 +1,10 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
 wtk.wma2.enabled = true
 DJSR205 = DJSR205
 file.prefix.jsr205 = jsr205_
-PERMISSIONS.jsr205 = ,javax.wireless.messaging.mms.receive,javax.wireless.messaging.mms.send
+PERMISSIONS_REQ.jsr205 =
+PERMISSIONS_OPT.jsr205 = ,javax.wireless.messaging.mms.receive,javax.wireless.messaging.mms.send
 SUFFIXVERS.jsr205 = -jsr205
 lib.jsr205 = :${wtk.home}/lib/wma11.jar
 nojsr205.res.excludes =
