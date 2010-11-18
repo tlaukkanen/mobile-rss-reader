@@ -29,8 +29,8 @@ midp20_jsr75_ programs .  For newer smart phones and usually with media (e.g. MP
 		if it says true, it supports jsr75 (this is different than progarm
 		jsr75 which shows the version of the progam not the phone).
 
-midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0 and JSR-75 Blackberry COD
-midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.cso - MIDP 2.0 and JSR-75 Blackberry CSO
+rim_midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0 and JSR-75 Blackberry COD
+rim_midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 Blackberry jar
 midp20_cldc11_smartphone_signed_jsr75@STAGEFILE@RSSReader.jad - MIDP 2.0 and JSR-75 jad
 midp20_cldc11_smartphone_signed_jsr75@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 jar
 
