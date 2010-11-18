@@ -1,8 +1,10 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
 wtk.miapi.enabled = true
 DJSR238 = DJSR238
 file.prefix.jsr238 = jsr238_
-PERMISSIONS.jsr238 = 
+PERMISSIONS_REQ.jsr238 = 
+PERMISSIONS_OPT.jsr238 = 
 SUFFIXVERS.jsr238 = -jsr238
 nojsr238.res.excludes =
 lib.jsr238 = :${wtk.home}/lib/jsr238.jar
