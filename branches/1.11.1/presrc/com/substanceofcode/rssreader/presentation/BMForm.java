@@ -26,6 +26,7 @@
  * IB 2010-08-15 1.11.5Dev8 Remove midlet which is now not used directly.
  * IB 2010-09-26 1.11.5Dev8 Support loadingForm with FeatureMgr.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  */
 
 // Expand to define MIDP define
@@ -101,7 +102,7 @@ final public class BMForm extends URLForm
 		this.m_bookmarkList = bookmarkList;
 		m_bmName = new TextField("Name", "", RssFeed.MAX_NAME_LEN, TextField.ANY);
 		super.append( m_bmName );
-		super.initAddUI("", "", "", false, null, 1, "Insert bookmark",
+		super.initAddUI("", "", "", false, null, 7, "Insert bookmark",
 						"Insert current bookmark",
 						"Add bookmark", "Add current bookmark",
 						"Append bookmark", "Append end bookmark");
