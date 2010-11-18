@@ -26,6 +26,7 @@
  * IB 2010-09-26 1.11.5Dev8 Repalce setCurrent with showMe.
  * IB 2010-09-26 1.11.5Dev8 Use loadingForm from FeatureMgr.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  */
 
 // Expand to define MIDP define
@@ -153,13 +154,13 @@ public class URLForm extends FeatureForm
 		super.append(m_url);
 		
 		Command cancelCmd = new Command("Cancel", Command.CANCEL,
-				initPriority++);
+				2);
 		if (hasOK) {
 			if (okPrompt != null) {
-				super.addPromptCommand(new Command("OK", Command.OK, initPriority++),
+				super.addPromptCommand(new Command("OK", Command.OK, 4),
 						okPrompt);
 			} else {
-				super.addCommand(new Command("OK", Command.OK, initPriority++));
+				super.addCommand(new Command("OK", Command.OK, 4));
 			}
 		}
 
