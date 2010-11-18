@@ -1,8 +1,10 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
 wtk.java3d.enabled = true
 DJSR184 = DJSR184
 file.prefix.jsr184 = jsr184_
-PERMISSIONS.jsr184 = 
+PERMISSIONS_REQ.jsr184 = 
+PERMISSIONS_OPT.jsr184 = 
 SUFFIXVERS.jsr184 = -jsr184
 lib.jsr184 = :${wtk.home}/lib/jsr184.jar
 nojsr184.res.excludes =
