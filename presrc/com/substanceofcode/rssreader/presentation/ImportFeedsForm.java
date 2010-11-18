@@ -44,6 +44,7 @@
  * IB 2010-09-28 1.11.5Dev9 Combine statements with getItemFields into one statement.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 More logging.
+ * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
 */
 // FIX check for blank url
 
@@ -180,7 +181,7 @@ implements
 
 		if (m_importFeeds) {
 			super.initAddUI(url, m_appSettings.getImportUrlUsername(),
-					m_appSettings.getImportUrlPassword(), false, null, 1,
+					m_appSettings.getImportUrlPassword(), false, null, 7,
 						"Insert import", "Insert current import",
 						"Add import", "Add current import",
 						"Append import", "Append end import");
@@ -195,7 +196,7 @@ implements
 		} else {
 			super.initUrlUI(url, true,
 					"Are you sure you want to export?  \r\n" +
-					"This can cause endless prompts on some phones.", 1);
+					"This can cause endless prompts on some phones.", 7);
 			formats = new String[] {"OPML", "line by line"};
 			//#endif
 			//#endif
@@ -235,7 +236,7 @@ implements
 			super.append(m_importOvrGroup);
 		
 			//#ifdef DTESTUI
-			m_testImportCmd     = new Command("Test bookmarks imported", Command.SCREEN, 9);
+			m_testImportCmd     = new Command("Test bookmarks imported", Command.SCREEN, 90);
 			super.addCommand( m_testImportCmd );
 			//#endif
 		}
