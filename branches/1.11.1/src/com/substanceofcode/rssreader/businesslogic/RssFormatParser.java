@@ -30,6 +30,9 @@
  * IB 2010-07-28 1.11.5Dev8 Set feed header fields if no items.
  * IB 2010-07-28 1.11.5Dev8 More logging.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-16 1.11.5Dev14 Add columnCount to parseStdDate exceptions.
+ * IB 2010-11-16 1.11.5Dev14 Remove stimeZones and GMT because this may change with phone config or upgrading phone.
+ * IB 2010-11-16 1.11.5Dev14 Have parseStdDateTZ return string time zone instead of index of time zone.
  */
 
 // Expand to define test define
@@ -59,17 +62,6 @@ import java.util.Vector;
  */
 public class RssFormatParser implements FeedFormatParser {
     
-	final static public String stimeZones;
-	final static public byte GMT;
-	static {
-		String[] timeZones = TimeZone.getAvailableIDs();
-		StringBuffer sb = new StringBuffer();
-		sb.append(MiscUtil.join(timeZones, ",", 0));
-		sb.insert(0, "UTC,");
-		stimeZones = sb.toString();
-		GMT = (byte)stimeZones.indexOf(",GMT,");
-	}
-
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssFormatParser");
 	//#endif
@@ -401,6 +393,7 @@ public class RssFormatParser implements FeedFormatParser {
 		//#ifdef DLOGGING
 //@		Logger logger = Logger.getLogger("RssFormatParser");
 		//#endif
+		int columnCount = -1;
         try {
             // Split date string to values
             // 0 = week day
@@ -422,7 +415,7 @@ public class RssFormatParser implements FeedFormatParser {
 			}
 
             String[] values = MiscUtil.split(dateString, " ");
-            int columnCount = values.length;
+            columnCount = values.length;
             if( columnCount==5 ) {
                 // Expected format:
                 // 09 Nov 2006 23:18:49 EST
@@ -439,14 +432,14 @@ public class RssFormatParser implements FeedFormatParser {
                 tzIndex = -1;
             } else if( columnCount<5 || columnCount>6 ) {
 				//#ifdef DLOGGING
-//@				logger.warning("Invalid date format: " + dateString);
+//@				logger.warning("Invalid columnCount,date format: " + columnCount + "," + dateString);
 				//#endif
 				//#ifdef DTEST
 //@				for (int ic = 0; ic < dateString.length(); ic++) {
 //@					System.out.println("date=" + ic + "," + dateString.charAt(ic) + "," + (int)dateString.charAt(ic));
 //@				}
 				//#endif
-                throw new Exception("Invalid date format: " + dateString);
+                throw new Exception("Invalid columnCount,date format: " + columnCount + "," + dateString);
             }
             
             // Day of month
@@ -485,27 +478,30 @@ public class RssFormatParser implements FeedFormatParser {
 				//#ifdef DLOGGING
 //@				logger.finest("parseStdDateTZ values.length,tzIndex,stz=" + values.length + "," + tzIndex + "," + stz);
 				//#endif
-				objs = new Object[] {pubDate, new Byte(
-						(byte)RssFormatParser.stimeZones.indexOf("," + stz + ","))};
+				objs = new Object[] {pubDate, stz};
 			}
             
         } catch(Exception ex) {
             // TODO: Add exception handling code
-            System.err.println("parseStdDate error while converting date string to object: " + 
-                    dateString + "," + ex.toString());
+            System.err.println("parseStdDate error while converting date string to object " + 
+				"columnCount,date format: " +
+
+                    columnCount + "," + dateString + "," + ex.toString());
 			//#ifdef DLOGGING
 //@			logger.severe("parseStdDateTZ   error while converting date " +
-//@						   "string to object: " +
-//@                    dateString, ex);
+//@						   "string to object columnCount,date format: " +
+//@						   columnCount + "," + dateString, ex);
 			//#endif
         } catch(Throwable t) {
             // TODO: Add exception handling code
-            System.err.println("parseStdDate error while converting date string to object: " + 
+            System.err.println("parseStdDate error while converting date string to object " + 
+					"columnCount,date format,throwable: " + columnCount + "," +
                     dateString + "," + t.toString());
 			//#ifdef DLOGGING
 //@			logger.severe("parseStdDateTZ   error while converting date " +
-//@						   "string to object: " +
-//@                    dateString, t);
+//@						   "string to object " +
+//@                    "columnCount,date format: " + columnCount + "," +
+//@					dateString, t);
 			//#endif
         }
         return objs;
