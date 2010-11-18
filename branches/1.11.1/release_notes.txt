@@ -348,6 +348,21 @@ v1.11.5 Development 9 (dev9) (Oct 12th 2010)
 v1.11.5 Development 10 (dev10) (Oct 12th 2010)
 - Fix jad files by having correct Jar URL.
 
+v1.11.5 Development 14 (dev14) (Nob 18th 2010)
+- Put full_ into executables to allow future demo or load applications.
+- Saving feeds now works on Sun WTK 2.5.2_01 emulator.
+- Most functions work with microemulator except find files. 
+- Allow start of using program with start menu item on first loading screen.
+- Prompts use Forms instead of Alerts.  This allows some emulators and some Sony Ericsons to work.
+- Create Thawte, Verisign, and Godaddy signed jars and cod files (not in all distributions).
+- Fixed using text box for copy/paste on supported devices.
+- Allow export with JSR-75 and signed file.
+- Create alx files.
+- Have stardard positions for standard items Back, Cancel, OK, Stop(future) with standard order in menus.
+- Have stardard positions for custom items open and select with standard order in menus.
+- Require file read access for JSR-75 files.  This may mean that JSR-75 files will not load if JSR-75 is not on the phone
+- Don't create preverified directory of class files.  The jars will remain preverified.
+
 Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
@@ -359,6 +374,7 @@ Program issues:
 
 TODO:
 
+- Fix problem with find files in Sun WTK emulator.
 - Optionally keep the back light on with desired intensity.
 - Optionally flash the backlight for a specific duration when update all is complete.
 - Check if need to set to itunes feed if not in header, but in items.
