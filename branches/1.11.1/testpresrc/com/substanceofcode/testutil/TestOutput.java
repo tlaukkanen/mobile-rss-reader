@@ -22,6 +22,9 @@
  */
 /*
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-30 1.11.5Dev14 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-16 1.11.5Dev14 Use getSysPropStarts to get system property and do startsWith.
+ * IB 2010-11-16 1.11.5Dev14 Add default value for getSysProperty, getSysPermission, and getSysPropStarts.
  */
 
 // Expand to define MIDP define
@@ -39,6 +42,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -83,9 +88,8 @@ public class TestOutput extends OutputStreamWriter {
 			System.out.println("Encoding error: " + e.getMessage());
 			*/
 			m_output = new TestOutput(out);
-			if (System.getProperty(
-					"microedition.encoding").toLowerCase().
-					startsWith("utf")) {
+			if (FeatureMgr.getSysPropStarts("microedition.encoding", null,
+						"Unable to get encoding.", null, "utf")) {
 				m_sglByte = false;
 			}
 		//UNDO }
