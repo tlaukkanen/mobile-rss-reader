@@ -33,6 +33,8 @@
  * IB 2010-08-16 1.11.5Dev8 Use featureMgr for super.getFeatureMgr().
  * IB 2010-08-16 1.11.5Dev8 Use already retrieved msg for getMessage().
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Dev9 Add m_loadStartCmd to allow going to start screen in this case bookmarks from loading screen.
+ * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  */
 
 // Expand to define MIDP define
@@ -85,6 +87,7 @@ final public class LoadingForm extends FeatureForm
 	private String      m_title;         // Store title.
 	//#endif
 	private boolean     m_loadFinished = false;  // Store loading finished.
+	private Command     m_loadStartCmd = null;  // The load form start to displayable command
 	private Command     m_loadMsgsCmd;   // The load form messages command
 	private Command     m_loadDiagCmd;   // The load form diagnostic command
 	private Command     m_loadErrCmd;    // The load form error command
@@ -97,7 +100,7 @@ final public class LoadingForm extends FeatureForm
 	//#else
 	private Object m_observable;
 	//#endif
-	private Displayable m_disp;
+	private volatile Displayable m_disp;
 	private Displayable m_mainDisp;
 
 	//#ifdef DLOGGING
@@ -120,9 +123,9 @@ final public class LoadingForm extends FeatureForm
 		this.m_title = title;
 		//#endif
 		this.m_observable = observable;
-		m_loadMsgsCmd       = new Command("Messages", Command.SCREEN, 2);
-		m_loadErrCmd        = new Command("Errors", Command.SCREEN, 3);
-		m_loadDiagCmd       = new Command("Diagnostics", Command.SCREEN, 4);
+		m_loadMsgsCmd       = new Command("Messages", Command.SCREEN, 7);
+		m_loadErrCmd        = new Command("Errors", Command.SCREEN, 8);
+		m_loadDiagCmd       = new Command("Diagnostics", Command.SCREEN, 9);
 		if (RssReaderMIDlet.m_backCommand == null) {
 			RssReaderMIDlet.m_backCommand   = new Command("Back", Command.BACK, 1);
 		}
@@ -167,6 +170,18 @@ final public class LoadingForm extends FeatureForm
 									   observable);
 	}
 
+	/* Add start command and where it goes when clicked.  */
+	public void addStartCmd(final Displayable disp) {
+		synchronized(this) {
+			m_disp = disp;
+		}
+		if (disp != null) {
+			/* Start */
+			m_loadStartCmd = new Command("Start", Command.SCREEN, 20);
+			super.addCommand( m_loadStartCmd );
+		}
+	}
+
 	/* Add quit command used for errors during exit. */
 	public void addQuit() {
 		/* Quit */
@@ -180,7 +195,7 @@ final public class LoadingForm extends FeatureForm
 	/** Respond to commands */
 	public void commandAction(Command c, Displayable s) {
 
-		if( c == RssReaderMIDlet.m_backCommand ){
+		if(( c == RssReaderMIDlet.m_backCommand ) || ( c == m_loadStartCmd )){
 			Displayable cdisp = null;
 			synchronized(this) {
 				cdisp = m_disp;
