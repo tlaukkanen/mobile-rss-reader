@@ -26,6 +26,8 @@
  * IB 2010-07-29 1.11.5Dev8 For testSettings3, markUnreadItems defaults to true.
  * IB 2010-08-16 1.11.5Dev8 For small memory, don't test mark unread items as it is not used.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-16 1.11.5Dev14 Don't have feed open property now that back will have consistent usage.
+ * IB 2010-11-16 1.11.5Dev14 Use bookmark name in news to replace feed open order.
 */
 
 // Expand to define memory size define
@@ -156,8 +158,8 @@ final public class Settings2Test extends BaseTestCase {
 
 	public void testSettings4() throws Throwable {
 		String mname = "testSettings4";
-		boolean getFeedListOpen = m_appSettings.getFeedListOpen();
-		appSettingsTestSub(mname, "getFeedListOpen", new Boolean(false), new Boolean(getFeedListOpen));
+		boolean getBookmarkNameNews = m_appSettings.getBookmarkNameNews();
+		appSettingsTestSub(mname, "getBookmarkNameNews", new Boolean(false), new Boolean(getBookmarkNameNews));
 		m_settings.save(0, false);
 	}
 
@@ -171,9 +173,9 @@ final public class Settings2Test extends BaseTestCase {
 
 	public void testSettings6() throws Throwable {
 		String mname = "testSettings6";
-		m_appSettings.setFeedListOpen(false);
-		boolean getFeedListOpen = m_appSettings.getFeedListOpen();
-		appSettingsTestSub(mname, "getFeedListOpen", new Boolean(false), new Boolean(getFeedListOpen));
+		m_appSettings.setBookmarkNameNews(false);
+		boolean getBookmarkNameNews = m_appSettings.getBookmarkNameNews();
+		appSettingsTestSub(mname, "getBookmarkNameNews", new Boolean(false), new Boolean(getBookmarkNameNews));
 		m_settings.save(0, false);
 	}
 
