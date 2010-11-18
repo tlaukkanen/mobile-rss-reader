@@ -18,9 +18,9 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE. 
- * 
- * 
+ * IN THE SOFTWARE.
+ *
+ *
  * This software was originally modified no later than Sept 25, 2007.
  */
 /*
@@ -36,6 +36,12 @@
  * IB 2010-08-15 1.11.5Dev8 Use featureMgr for super.getFeatureMgr().
  * IB 2010-09-27 1.11.5Dev8 Move title to construtor for KFileSelectorImpl.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-13 1.11.5Dev14 Use getImage from FeatureMgr to get the images.
+ * IB 2010-11-15 1.11.5Dev14 Use nullPtr for fileDataBlock.
+ * IB 2010-11-15 1.11.5Dev14 Do not use nullPtr to initialize variables.
+ * IB 2010-11-16 1.11.5Dev14 Use getSysProperty to get file seperator.
+ * IB 2010-11-16 1.11.5Dev14 Initialize FILE_SEPARATOR, openCommand, cancelCommand, and selectCommand in the constructor.
+ * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
 */
 
 // Expand to define MIDP define
@@ -69,6 +75,7 @@ import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Image;
 
 import com.substanceofcode.rssreader.presentation.FeatureList;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
 import com.substanceofcode.utils.MiscUtil;
 
@@ -78,7 +85,7 @@ import net.sf.jlogmicro.util.logging.LogManager;
 import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
-final public class KFileSelectorImpl 
+final public class KFileSelectorImpl
  extends FeatureList
   implements KFileSelector, CommandListener, FileSystemListener, Runnable {
 
@@ -87,26 +94,22 @@ final public class KFileSelectorImpl
 	protected   Image FOLDER_IMAGE;
 	protected   Image FILE_IMAGE;
 
-	protected static final String FILE_SEPARATOR = 
-		(System.getProperty("file.separator")!=null)?  System.getProperty("file.separator"): "/";
+	protected final String FILE_SEPARATOR;
 	protected static final String FILE_SEPARATOR_ALT = "/";
 
 	private final static String UP_DIR = "..";
 
-	private final Command openCommand =
-		new Command("Open", Command.ITEM, 1);    
+	private final Command openCommand;
 
-	private final Command cancelCommand =
-		new Command("Cancel", Command.CANCEL, 3);    
+	private final Command cancelCommand;
 
-	private final Command selectCommand =
-		new Command("Select", Command.ITEM, 2);    
+	private final Command selectCommand;
 
 	private Vector rootsList = new Vector();
 
 	// Stores the current root, if null we are showing all the roots
-	private FileConnection currentRoot = (FileConnection)nullPtr;
-	protected String[] filePatterns = (String[])nullPtr;
+	private FileConnection currentRoot = null;
+	protected String[] filePatterns = null;
 	protected byte[] fileDataBlock = null;
 	protected String selectedFile = null;
 	protected String selectedURL = null;
@@ -135,10 +138,15 @@ final public class KFileSelectorImpl
 	{
 		super(title, List.IMPLICIT, loadForm);
 
+		FILE_SEPARATOR = (String)FeatureMgr.getSysProperty(
+				"file.separator", "/", "Unable to get file.separator", null)[0];
+		cancelCommand = new Command("Cancel", Command.CANCEL, 2);
+		openCommand = new Command("Open", Command.ITEM, 4);
+		selectCommand = new Command("Select", Command.ITEM, 5);
 		//#ifdef DTEST
 		try {
 
-			if (bDebug) 
+			if (bDebug)
 			{
 				System.out.println("--- file sep: '" + FILE_SEPARATOR + "'");
 				System.out.println("--- file sep_alt: '" + FILE_SEPARATOR_ALT + "'");
@@ -159,53 +167,18 @@ final public class KFileSelectorImpl
 
 	} //constructor
 
-	/* Get image.  Need retry to handle sometimes failure. */
-	private Image getImage(String imagePath) {
-		Image rtnImage = null;
-
-		try {
-			try {
-				// createImage("/icons/(image)") does not always work
-				// with the emulator.  so, I do an alternate which is
-				// effectively the same thing.
-				rtnImage = Image.createImage(imagePath);
-			} catch(IOException e) {
-				//#ifdef DMIDP20
-				//#ifdef DLOGGING
-				logger.warning("createImage failed", e);
-				//#endif
-				InputStream is =
-						this.getClass().getResourceAsStream(imagePath);
-				rtnImage = Image.createImage(is);
-				is.close();
-				//#else
-				//#ifdef DLOGGING
-				logger.severe("--- icons ex: ", imgOpenEx);
-				//#endif
-				//#endif
-			}
-		} catch(Exception imgOpenEx) {
-			//#ifdef DTEST
-			if (bDebug) System.out.println("--- icons ex: " + imgOpenEx);
-			//#endif
-			//#ifdef DLOGGING
-			logger.severe("--- icons ex: ", imgOpenEx);
-			//#else
-			imgOpenEx.printStackTrace();
-			//#endif
-		}
-		return rtnImage;
-	}
-
 	/* Initialize.  Get images. */
 	public void init() {
 		//#ifdef DTEST
 		if (bDebug) System.out.println("MFS load images....");
 		//#endif
 		//ROOT_IMAGE = Image.createImage("root_icon.png");
-		FOLDER_IMAGE = getImage(iconDir + "/folder_icon.png");
-		FILE_IMAGE = getImage(iconDir + "/file_icon.png");
-		UPDIR_IMAGE =  getImage(iconDir + "/up_dir_icon.png");
+		FOLDER_IMAGE = FeatureMgr.getImage(iconDir + "/folder_icon.png",
+				featureMgr.getLoadForm());
+		FILE_IMAGE = FeatureMgr.getImage(iconDir + "/file_icon.png",
+				featureMgr.getLoadForm());
+		UPDIR_IMAGE =  FeatureMgr.getImage(iconDir + "/up_dir_icon.png",
+				featureMgr.getLoadForm());
 
 		//#ifdef DTEST
 		if (bDebug) System.out.println("MFS building cmds....");
@@ -246,7 +219,7 @@ final public class KFileSelectorImpl
 						openSelected(dirSelected);
 					} catch (Throwable t) {
 						Alert internalAlert = new Alert(
-								"Internal problem", 
+								"Internal problem",
 								"Internal error.  Unable to open.",
 								null,
 								AlertType.ERROR);
@@ -321,7 +294,7 @@ final public class KFileSelectorImpl
 		}
 
 		// Save memory.
-		fileDataBlock = null;
+		fileDataBlock = (byte[])nullPtr;
 
 	}//doCleanup
 
@@ -517,7 +490,7 @@ final public class KFileSelectorImpl
 						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
 						//#endif
 						Alert securityAlert = new Alert(
-								"Security problem", 
+								"Security problem",
 								"Security problem found either access " +
 								" denied or access refused by the user.",
 								null,
@@ -529,7 +502,7 @@ final public class KFileSelectorImpl
 					catch (IllegalArgumentException e)
 					{
 						Alert illegalAlert = new Alert(
-								"Security problem", 
+								"Security problem",
 								"Security problem found either access " +
 								" denied or access refused by the user.",
 								null,
@@ -766,7 +739,7 @@ final public class KFileSelectorImpl
 		if (null != fileType)
 		{
 			try {
-				byte[] datablock = getFileData(); 
+				byte[] datablock = getFileData();
 				thumbImage = Image.createImage(datablock,0,datablock.length);
 			}
 			catch (java.lang.OutOfMemoryError oom) {
@@ -908,7 +881,7 @@ final public class KFileSelectorImpl
 		//#ifdef DTEST
 		if (bDebug) {
 			//that's nice...
-			if (changeType == FileSystemListener.ROOT_ADDED) 
+			if (changeType == FileSystemListener.ROOT_ADDED)
 				System.out.println("=== FileSys: ROOT ADDED");		
 			else if (changeType == FileSystemListener.ROOT_REMOVED)
 				System.out.println("=== FileSys:ROOT_REMOVED");
