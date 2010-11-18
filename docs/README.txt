@@ -28,8 +28,9 @@ MIDP 1.0 phone versions.  These program versions will also run on other
 phones, but these program
 versions have less features as the language has improved since then.
 
-midp10_cldc10_@STAGEFILE@RSSReader.cod - MIDP 1.0 Blackberry COD
-midp10_cldc10_@STAGEFILE@RSSReader.cso - MIDP 1.0 Blackberry CSO
+rim_midp10_cldc10_@STAGEFILE@RSSReader.cod - MIDP 1.0 Blackberry COD
+rim_midp10_cldc10_@STAGEFILE@RSSReader.jar - MIDP 1.0 Blackberry JAR
+rim_midp10_cldc10_@STAGEFILE@RSSReader.cso - MIDP 1.0 Blackberry CSO
 midp10_cldc10_@STAGEFILE@RSSReader.jad - MIDP 1.0 jad
 midp10_cldc10_@STAGEFILE@RSSReader.jar - MIDP 1.0 jar
 
@@ -37,8 +38,9 @@ midp10_cldc10_@STAGEFILE@RSSReader.jar - MIDP 1.0 jar
 midp20_ programs/directories (without jsr75_) are for phones with MIDP 2.0.
 This should work for all recent phones.  
 
-midp20_cldc10_@STAGEFILE@RSSReader.cod - MIDP 2.0 Blackberry COD
-midp20_cldc10_@STAGEFILE@RSSReader.cso - MIDP 2.0 Blackberry CSO
+rim_midp20_cldc10_@STAGEFILE@RSSReader.cod - MIDP 2.0 Blackberry COD
+rim_midp20_cldc10_@STAGEFILE@RSSReader.jar - MIDP 2.0 Blackberry JAR
+rim_midp20_cldc10_@STAGEFILE@RSSReader.cso - MIDP 2.0 Blackberry CSO
 midp20_cldc10_@STAGEFILE@RSSReader.jad - MIDP 2.0 jad
 midp20_cldc10_@STAGEFILE@RSSReader.jar - MIDP 2.0 jar
 
@@ -53,8 +55,9 @@ midp20_jsr75_ programs .  For newer phones and usually with media (e.g. MP3)
 		if it says true, it supports jsr75 (this is different than progarm
 		jsr75 which shows the version of the progam not the phone).
 
-midp20_cldc10_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0 and JSR-75 Blackberry COD
-midp20_cldc10_jsr75_@STAGEFILE@RSSReader.cso - MIDP 2.0 and JSR-75 Blackberry CSO
+rim_midp20_cldc10_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0 and JSR-75 Blackberry COD
+rim_midp20_cldc10_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 Blackberry JAR
+rim_midp20_cldc10_jsr75_@STAGEFILE@RSSReader.cso - MIDP 2.0 and JSR-75 Blackberry CSO
 midp20_cldc10_jsr75_@STAGEFILE@RSSReader.jad - MIDP 2.0 and JSR-75 jad
 midp20_cldc10_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 jar
 
