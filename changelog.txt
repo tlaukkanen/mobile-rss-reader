@@ -669,6 +669,99 @@ v1.11.5 Development 9 (dev9) (Oct 12th 2010)
 v1.11.5 Development 10 (dev10) (Oct 12th 2010)
 - Fix jad files by having correct Jar URL.
 
+v1.11.5 Development 14 (dev14) (Nob 18th 2010)
+- Change to initialize static variables using a static method allows Sun WTK Emulator to save the database when using the reader.
+- Change to initialize static variables using a static method allows microemulator to read and parse OPML and RSS.
+- Add columnCount to parseStdDate exceptions.
+- Add convience method setCurrentObjMgr to set current using objects for item and display.
+- Add default value for getSysProperty, getSysPermission, and getSysPropStarts.
+- Add default value of null for getSysProperty, getSysPermission, and getSysPropStarts.
+- Add getImage to FeatureMgr to allow getting an image and adding error to LoadingForm.
+- Add getSysPermission to get if permission allowed, denied or undefined.  For non-MIDP 20, can only use getSysProperty if key != null.
+- Add getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+- Add getSysPropStarts to get system prorperties and see if it starts with a string.
+- Add m_loadStartCmd to allow going to start screen in this case bookmarks from loading screen.
+- Allow item in setCurrentItemMgr to be null for convience in FeatureMgr.
+- Allow StringBuffer to store data from text box in FeatureMgr.
+- Allow text box to be used as a prompt with accept/reject.
+- Allow use of microemulator as applet.
+- Change initializeURLBox to use return display and return object.
+- Change prompt to set StringItem if return object.
+- Combine nested if statements.
+- Copy signed files to distsigned.
+- Cosmetic changes.
+- Create Blackberry alx and zip with alx and cod.
+- Create getAboutInfo to return info for about to be used as alert from getAbout or form.
+- Create godaddy signed itunes, jsr-75, cldc 1.1 version.
+- Create initApp to initialize the app.
+- Do not create class variables for StringItem which do not change after initialization.
+- Do not use nullPtr to initialize variables.
+- Don't have feed open property now that back will have consistent usage.
+- Don't write third certification in jad file.
+- Fix http permission which was wrong before.
+- Fix using text box to allow data to be entered and copy or paste.
+- Have all Blackberry versions begin with rim_.
+- Have all Blackberry versions of jar files.
+- Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+- Have code duplication target for PMD.
+- Have convience FeatureMgr constructor without loading form.
+- Have file permissions be required to reduce endless ask to open file..
+- Have full version have seperate define name.
+- Have full version name with internet install link.
+- Have future internet install link version.  The full version has full in the name and is the default.
+- Have microemuapplet.html to run applet microemulator demo of application version.
+- Have microemu.sh to run microemulator demo of application version.
+- Have microemu(version).sh to run microemulator demo of application version.
+- Have no.jar.sign to skip creating jar signing.
+- Have no.rim.sign to skip creating rim cod signing.
+- Have package, preverify, and obfusication done in one step.
+- Have parseStdDateTZ return string time zone instead of index of time zone.
+- Have prepare for godaddy, thawte, and verisign signing be independent of each other.  Each must be used before "prepare" target is called.
+- Have prepare for verisign signing.
+- Have required and optional permissions.
+- Have separate required and optional permissions.
+- Have separate sign of rim file.
+- Have signed versions of microemulator jars to allow demo applets.
+- If create m_bookmarkList is successful, add start command in case something goes wrong after creating the booklist.
+- If logging error, exit the constructor.
+- If no m_bookmarkList, don't add/remove commands from it.
+- Initialize FILE_SEPARATOR, openCommand, cancelCommand, and selectCommand in the constructor.
+- More logging.
+- Need to set m_feed before we use it to log.
+- Remove cod files in wtkbuild.
+- Remove cso files.
+- Remove https permission.
+- Remove LogFile.txt file in wtkbuild.
+- Remove redundant new String of literal string.
+- Remove stimeZones and GMT because this may change with phone config or upgrading phone.
+- Stop creating preverified directory.
+- Treat Verisign as other signed files.
+- Use acceptCmd and optional rejectCmd for prompt form or alert.
+- Use Blackberry ant task rapc bb.jde.use.
+- Use Blackberry ant tools to sign cod file and create Blackberry target to create blackberry files.
+- Use Blackberry JDE 4.7.
+- Use bookmark name in news to replace feed open order.
+- Use choice instead of List for getPlaceIndex because choice is a interface for List.
+- Use CPD minimumtokencount.
+- Use form instead of alert as form is more reliable and works with micro emulator.
+- Use getImage from FeatureMgr to get the images.
+- Use getPromptDisp to handle a prompt with accept and reject.
+- Use getSysPermission to get get permission for JSR-75 and system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+- Use getSysProperty to get file seperator.
+- Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+- Use getSysPropStarts to get system property and do startsWith.
+- Use getSysPropStarts to get system prorperties and see if it starts with a string.  This can help with initialialization of static variables.
+- Use intlink to create file to go to internet links to install the program
+- Use m_backCommand from RssReaderMIDlet all the time.
+- Use nullPtr for fileDataBlock.
+- Use nullPtr instead of nullCmd.
+- Use null to compare instead of nullCmd in FeatureMgr.
+- Use null to initialize variables.
+- Use PMD (use.pmd.task) and/or CPD (use.cpd.task).
+- Use properties file for signed jar/jad files.
+- Use properties files based on full version.
+- Use substanceofcode for info url for signed.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
@@ -684,6 +777,13 @@ Issues:
 
 TODO:
 
+- Are alx files in zip files?
+- Use echo to add to readme?
+- Add full to file names.
+- Make static vars that use method initialization be instance vars of Singleton.
+- Create HTML index file of released ftp files.
+- Use prompt form to ask about license.
+- Create version to go to install links and allow full version to do it also.
 - RssFormatParser remove extra spaces between description item 7 of imbed
 - URLHandler document need super
 - Have the same order for OK, Back, Cancel, Exit, and Open.
