@@ -26,6 +26,7 @@
  * IB 2010-05-29 1.11.5RC2 Don't use HTML in small memory MIDP 1.0 to save space.
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-15 1.11.5Dev14 Remove redundant new String of literal string.
 */
 
 // Expand to define memory size define
@@ -182,11 +183,11 @@ final public class HtmlParserTest extends BaseTestCase
 		};
 		Vector expHtmlResults = new Vector();
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("html"));
+		expHtmlResults.addElement("html");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("head"));
+		expHtmlResults.addElement("head");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("title"));
+		expHtmlResults.addElement("title");
 		expHtmlResults.addElement(new String("Andere | Lander - Anderes Deutsch"));
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
 		expHtmlResults.addElement(new String("body"));
