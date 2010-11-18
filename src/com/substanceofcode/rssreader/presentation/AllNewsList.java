@@ -34,6 +34,10 @@
  * IB 2010-08-15 1.11.5Dev8 Use showMe for setCurrent(this).
  * IB 2010-09-27 1.11.5Dev8 Fix river of news/headers for MIDP 1.0 error.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, ok be 3, open be 4, and select be 5.
+ * IB 2010-11-16 1.11.5Dev14 Don't have feed open property now that back will have consistent usage.
+ * IB 2010-11-16 1.11.5Dev14 Use m_backCommand from RssReaderMIDlet all the time.
+ * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
 */
 
 // Expand to define MIDP define
@@ -112,7 +116,6 @@ public class AllNewsList extends FeatureList
     protected Hashtable m_rssFeeds;
     public final static String TITLE = "River of News";
 	protected Command     m_openHeaderCmd;    // The open header command
-	protected Command     m_backHeaderCmd;    // The back to bookmark list command
     protected Command     m_sortUnreadItemsCmd;  // The sort unread items by date command
     protected Command     m_sortReadItemsCmd;  // The sort read items by date command
     protected Command     m_sortUnreadFeedsCmd;  // The sort unread items by feed command
@@ -157,16 +160,9 @@ public class AllNewsList extends FeatureList
 		m_rssFeeds = rssFeeds;
 		m_unreadImage = unreadImage;
 		RssReaderMIDlet midlet = FeatureMgr.getMidlet();
-		final boolean open1st = midlet.getSettings().getFeedListOpen();
-		//#ifdef DLOGGING
-//@		if (m_fineLoggable) {m_logger.fine("AllNewsList open1st=" + open1st);}
-		//#endif
-		m_openHeaderCmd     = new Command("Open", Command.SCREEN,
-				(open1st ? 1 : 2));
-		m_backHeaderCmd     = open1st ? new Command("Back", Command.BACK, 2) : RssReaderMIDlet.m_backCommand;
-		priority++;
+		m_openHeaderCmd     = new Command("Open", Command.SCREEN, 5);
 		super.addCommand(m_openHeaderCmd);
-		super.addCommand(m_backHeaderCmd);
+		super.addCommand(RssReaderMIDlet.m_backCommand);
 		m_sortUnreadItemsCmd = new Command("Unread date sorted",
 										   Command.SCREEN, priority++);
 		m_sortReadItemsCmd = new Command("Read date sorted",
@@ -859,7 +855,7 @@ public class AllNewsList extends FeatureList
 					}
 				}
 			/** Get back to RSS feed bookmarks */
-			} else if( c == m_backHeaderCmd ){
+			} else if( c == RssReaderMIDlet.m_backCommand ){
 				//#ifdef DTESTUI
 //@				synchronized(this) {
 //@					m_testNews = false;
