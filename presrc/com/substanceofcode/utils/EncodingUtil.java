@@ -24,6 +24,8 @@
  * IB 2010-03-14 1.11.5RC2 Combine classes to save space.
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-15 1.11.5Dev14 Use getSysPropStarts to get system prorperties and see if it starts with a string.  This can help with initialialization of static variables.
+ * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty, getSysPermission, and getSysPropStarts.
 */
 
 // Expand to define test define
@@ -40,6 +42,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -53,18 +56,23 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 final public class EncodingUtil {
     
-	final static public boolean m_midpIso = (System.getProperty(
-			"microedition.encoding").toLowerCase().startsWith("iso-8859") ||
-	                                        System.getProperty(
-			"microedition.encoding").toLowerCase().startsWith("iso8859"));
+	final static public boolean m_midpIso = (FeatureMgr.getSysPropStarts(
+			"microedition.encoding", null, "Unable to get micro encoding.", null,
+			"iso-8859") ||
+	                                        FeatureMgr.getSysPropStarts(
+			"microedition.encoding", null, "Unable to get micro encoding.", null,
+			"iso8859"));
 	final static public String m_isoEncoding = initIsoEncoding();
-	final static public boolean m_midpWin = (System.getProperty(
-			"microedition.encoding").toLowerCase().startsWith("cp") ||
-	                                        System.getProperty(
-			"microedition.encoding").toLowerCase().startsWith("windows"));
+	final static public boolean m_midpWin = (FeatureMgr.getSysPropStarts(
+			"microedition.encoding", null, "Unable to get micro encoding.", null,
+			"cp") ||
+			FeatureMgr.getSysPropStarts(
+			"microedition.encoding", null, "Unable to get micro encoding.", null,
+			"windows"));
 	final static public String m_winEncoding = initWinEncoding();
-	final static public boolean m_midpUni = System.getProperty(
-			"microedition.encoding").toLowerCase().startsWith("utf-8");
+	final static public boolean m_midpUni = FeatureMgr.getSysPropStarts(
+			"microedition.encoding", null, "Unable to get micro encoding.", null,
+			"utf-8");
 	final static String[] m_isoCommonEntities =
 		{"iexcl", "cent", "pound", "curren", "yen",
 		"brvbar", "sect", "uml", "copy", "ordf",
