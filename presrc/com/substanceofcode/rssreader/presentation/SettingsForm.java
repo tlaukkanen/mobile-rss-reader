@@ -30,6 +30,14 @@
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-30 1.11.5Dev12 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-15 1.11.5Dev14 Use getSysPermission to get get permission for JSR-75 and system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-15 1.11.5Dev14 Do not create class variables for StringItem which do not change after initialization.
+ * IB 2010-11-15 1.11.5Dev14 Cosmetic changes.
+ * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty and getSysPermission.
+ * IB 2010-11-16 1.11.5Dev14 Don't have feed open property now that back will have consistent usage.
+ * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2010-11-17 1.11.5Dev14 Cosmetic change.
  */
 
 // Expand to define MIDP define
@@ -73,6 +81,8 @@ import com.substanceofcode.testlcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
 import com.substanceofcode.utils.Settings;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
+import com.substanceofcode.rssreader.presentation.FeatureForm;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -96,7 +106,6 @@ implements CommandListener {
     private ChoiceGroup m_useTextBox;
 	//#endif
     private ChoiceGroup m_useStandardExit;
-    private ChoiceGroup m_feedListOpen;
     private ChoiceGroup m_itunesEnabled;
 	//#ifdef DMIDP20
     private ChoiceGroup m_fontChoice;
@@ -104,13 +113,6 @@ implements CommandListener {
     private ChoiceGroup m_nameNews;
 	//#endif
     private TextField m_wordCountField;
-    private StringItem m_pgmMidpVers;
-    private StringItem m_pgCldVers;
-    private StringItem m_pgmJsr75;
-    private StringItem m_midpVers;
-    private StringItem m_cldcVers;
-    private StringItem m_platformVers;
-    private StringItem m_jsr75;
     private StringItem m_pgmMemUsedItem;
     private StringItem m_pgmMemAvailItem;
     private StringItem m_memUsedItem;
@@ -127,14 +129,13 @@ implements CommandListener {
     public SettingsForm(LoadingForm loadForm) {
         super("Settings", loadForm);
         
-        m_okCommand = new Command("OK", Command.OK, 1);
+        m_okCommand = new Command("OK", Command.OK, 4);
         super.addCommand( m_okCommand );
         
         m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
         super.addCommand( m_cancelCommand );
         
-        RssReaderSettings settings = featureMgr.getMidlet(
-				).getSettings();
+        RssReaderSettings settings = featureMgr.getMidlet().getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
         
         m_itemCountField = new TextField("Max item count in feed",
@@ -190,14 +191,6 @@ implements CommandListener {
 				"Put feed name in river of news", new String []
 				{"Don't show name", "Show name"});
 		//#endif
-		String [] feedBackChoices = {"Open item first", "Back first"};
-        m_feedListOpen = new ChoiceGroup("Choose feed list menu first item",
-				                            Choice.EXCLUSIVE, feedBackChoices,
-											null);
-		//#ifdef DMIDP20
-		m_feedListOpen.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( m_feedListOpen );
         int maxWordCount = settings.getMaxWordCountInDesc();
         m_wordCountField = new TextField("Max word count desc abbrev",
                 String.valueOf(maxWordCount), 3, TextField.NUMERIC);
@@ -205,68 +198,84 @@ implements CommandListener {
 		m_wordCountField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         super.append( m_wordCountField );
-        m_pgmMidpVers = new StringItem("Program MIDP version:",
+        StringItem pgmMidpVers = new StringItem("Program MIDP version:",
 		//#ifdef DMIDP20
 				"MIDP-2.0");
 		//#else
 				"MIDP-1.0");
 		//#endif
 		//#ifdef DMIDP20
-		m_pgmMidpVers.setLayout(Item.LAYOUT_BOTTOM);
+		pgmMidpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( m_pgmMidpVers );
-        m_pgCldVers = new StringItem("Program CLDC version:",
+        super.append( pgmMidpVers );
+        StringItem pgCldVers = new StringItem("Program CLDC version:",
 				//#ifdef DCLDCV11
 				"CLDC-1.1");
 				//#else
 				"CLDC-1.0");
 				//#endif
 		//#ifdef DMIDP20
-		m_pgCldVers.setLayout(Item.LAYOUT_BOTTOM);
+		pgCldVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( m_pgCldVers );
-        m_pgmJsr75 = new StringItem("Program JSR 75 available:",
+        super.append( pgCldVers );
+        StringItem pgmJsr75 = new StringItem("Program JSR 75 available:",
 		//#ifdef DJSR75
 				"true");
 		//#else
 				"false");
 		//#endif
 		//#ifdef DMIDP20
-		m_pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
+		pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( m_pgmJsr75 );
+        super.append( pgmJsr75 );
 		String mep = System.getProperty("microedition.profiles");
 		if (mep == null) {
 			mep = "N/A";
 		}
-        m_midpVers = new StringItem("Phone MIDP version:", mep);
+        StringItem midpVers = new StringItem("Phone MIDP version:", mep);
 		//#ifdef DMIDP20
-		m_midpVers.setLayout(Item.LAYOUT_BOTTOM);
+		midpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( m_midpVers );
-        m_cldcVers = new StringItem("Phone CLDC version:",
+        super.append( midpVers );
+        StringItem cldcVers = new StringItem("Phone CLDC version:",
 				System.getProperty("microedition.configuration"));
 		//#ifdef DMIDP20
-		m_cldcVers.setLayout(Item.LAYOUT_BOTTOM);
+		cldcVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( m_cldcVers );
-        m_jsr75 = new StringItem("Phone JSR 75 available:",
-				String.valueOf(System.getProperty(
-				"microedition.io.file.FileConnection.version")
-				!= null));
-		//#ifdef DMIDP20
-		m_jsr75.setLayout(Item.LAYOUT_BOTTOM);
+        super.append( cldcVers );
+		//#ifdef DMIDP10
+        super.append(new StringItem("Phone JSR 75 available:",
+				String.valueOf(FeatureMgr.getSysProperty(
+				"microedition.io.file.FileConnection.version", null,
+				"Unable to get JSR-75 FileConnection", featureMgr.getLoadForm())[0] != null)));
+		//#else
+		Object[] ojsr75 = 
+				FeatureMgr.getSysPermission(
+				"javax.microedition.io.Connector.file.read",
+				"microedition.io.file.FileConnection.version", null,
+				"Unable to get JSR-75 FileConnection", featureMgr.getLoadForm());
+		int ijsr75 = ((Integer)ojsr75[0]).intValue();
+		if (ijsr75 >= 0) {
+			super.append(new StringItem("Phone JSR 75 available:",
+					String.valueOf(ijsr75 == 1)));
+			super.append(new StringItem("Phone JSR 75 exists:",
+					String.valueOf(ijsr75 == 0)));
+		} else {
+			super.append(new StringItem("Phone JSR 75 available:",
+					String.valueOf(FeatureMgr.getSysProperty(
+					"microedition.io.file.FileConnection.version", null,
+					"Unable to get JSR-75 FileConnection", featureMgr.getLoadForm())[0] != null)));
+		}
 		//#endif
-        super.append( m_jsr75 );
 		String sprop = System.getProperty("microedition.platform");
 		if (sprop == null) {
 			sprop = "N/A";
 		}
-        m_platformVers = new StringItem("Phone Microedition platform:", sprop);
+        StringItem platformVers = new StringItem("Phone Microedition platform:", sprop);
 		//#ifdef DMIDP20
-		m_platformVers.setLayout(Item.LAYOUT_BOTTOM);
+		platformVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( m_platformVers );
+        super.append( platformVers );
 		sprop = System.getProperty("microedition.locale");
 		if (sprop == null) {
 			sprop = "N/A";
@@ -344,9 +353,6 @@ implements CommandListener {
         boolean nameNews = settings.getBookmarkNameNews();
 		m_nameNews.setSelectedFlags( new boolean[] {!nameNews, nameNews});
 		//#endif
-        boolean feedListOpen = settings.getFeedListOpen();
-		boolean [] boolFeedListOpen = {feedListOpen, !feedListOpen};
-		m_feedListOpen.setSelectedFlags( boolFeedListOpen );
 		int[] memInfo = null;
 		try {
 			Settings m_settings = Settings.getInstance();
@@ -412,8 +418,6 @@ implements CommandListener {
 				boolean nameNews = !m_nameNews.isSelected(0);
 				settings.setBookmarkNameNews( nameNews );
 				//#endif
-				boolean feedListOpen = m_feedListOpen.isSelected(0);
-				settings.setFeedListOpen( feedListOpen);
                 int maxWordCount = Integer.parseInt( m_wordCountField.getString() );
                 settings.setMaxWordCountInDesc( maxWordCount );
 				//#ifdef DLOGGING
