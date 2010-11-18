@@ -1,0 +1,17 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US">
+<head>
+<!-- IB 2010-11-17 1.11.5Dev14 Have microemuapplet.html to run applet microemulator demo of application version. -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Applet Emulator</title>
+</head>
+<body>
+<applet code="org.microemu.applet.Main.class" codebase="lib/"
+				archive="microemu-javase-applet@FILEVERSPREFIX@.jar,@BUILDFILEROOT@.jar,microemu-device-large@FILEVERSPREFIX@.jar,midpapi20@FILEVERSPREFIX@.jar,cldcapi11@FILEVERSPREFIX@.jar,microemu-jsr-75@FILEVERSPREFIX@.jar"
+                width="292" height="618" align="baseline" >
+        <param name="midlet" value="@MIDLETCLASS@" />
+		<param name="device" value="org/microemu/device/large/device.xml" />
+		Browser does not support applet.
+</applet>
+</body>
+</html>
