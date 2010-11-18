@@ -31,6 +31,8 @@
  * IB 2010-06-27 1.11.5Dev2 Use volatile for instance vars.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-16 1.11.5Dev14 Don't have feed open property now that back will have consistent usage.
+ * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  */
 
 // Expand to define MIDP define
@@ -76,7 +78,6 @@ final public class RssReaderSettings {
     private static final String IMPORT_USERNAME = "import-username";
     private static final String IMPORT_PASSWORD = "import-password";
     private static final String MARK_UNREAD_ITEMS = "mark-unread-items";
-    private static final String FEED_LIST_OPEN = "feed-list-open";
     private static final String ITUNES_ENABLED = "itunes-enabled";
 	//#ifdef DMIDP20
     private static final String FONT_CHOICE = "font-choice";
@@ -197,16 +198,6 @@ final public class RssReaderSettings {
     /** Set import URL password */
     public void setMarkUnreadItems(boolean markUnreadItems) {
         m_settings.setBooleanProperty( MARK_UNREAD_ITEMS, markUnreadItems);
-    }
-    
-    /** Get feed list back is first command */
-    public boolean getFeedListOpen() {
-        return m_settings.getBooleanProperty( FEED_LIST_OPEN, false);
-    }
-    
-    /** Set feed list back is first command */
-    public void setFeedListOpen(boolean feedListOpen) {
-        m_settings.setBooleanProperty( FEED_LIST_OPEN, feedListOpen);
     }
     
     /** Get itunes enabled */
