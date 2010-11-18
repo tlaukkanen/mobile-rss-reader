@@ -22,6 +22,8 @@
  */
 /*
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-30 1.11.5Dev12 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty.
  */
 
 // Expand to define MIDP define
@@ -56,6 +58,7 @@ import com.substanceofcode.testlcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import com.substanceofcode.utils.EncodingUtil;
 
 //#ifdef DLOGGING
@@ -115,7 +118,8 @@ public class EncodingList extends List implements CommandListener {
 		while (super.size() > 0) {super.delete(0);}
 
 		super.append("JavaME encoding=" +
-				System.getProperty("microedition.encoding"), null);
+				FeatureMgr.getSysProperty("microedition.encoding", null,
+					"Unable to get encoding.", null), null);
 		super.append("Get bytes encoding: " + bytesEnc, null);
 		super.append("String encoding: " + strEnc, null);
 		for (int ic = 0; ic < EncodingUtil.CONV_CHARS.length; ic++) {
