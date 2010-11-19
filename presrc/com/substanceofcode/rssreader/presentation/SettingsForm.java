@@ -38,6 +38,8 @@
  * IB 2010-11-16 1.11.5Dev14 Don't have feed open property now that back will have consistent usage.
  * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  * IB 2010-11-17 1.11.5Dev14 Cosmetic change.
+ * IB 2010-11-18 1.11.5Dev14 Change jsr-75 exists to give true for allowed and not allowed.
+ * IB 2010-11-18 1.11.5Dev14 If jsr-75 vers exists show the version string in case it changes later.
  */
 
 // Expand to define MIDP define
@@ -259,12 +261,14 @@ implements CommandListener {
 			super.append(new StringItem("Phone JSR 75 available:",
 					String.valueOf(ijsr75 == 1)));
 			super.append(new StringItem("Phone JSR 75 exists:",
-					String.valueOf(ijsr75 == 0)));
+					String.valueOf(ijsr75 >= 0)));
 		} else {
 			super.append(new StringItem("Phone JSR 75 available:",
-					String.valueOf(FeatureMgr.getSysProperty(
-					"microedition.io.file.FileConnection.version", null,
-					"Unable to get JSR-75 FileConnection", featureMgr.getLoadForm())[0] != null)));
+					String.valueOf(ojsr75[2] != null)));
+		}
+		if (ojsr75[2] != null) {
+			super.append(new StringItem("Phone JSR 75 version:",
+					(String)ojsr75[2]));
 		}
 		//#endif
 		String sprop = System.getProperty("microedition.platform");
