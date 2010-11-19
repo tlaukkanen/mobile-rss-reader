@@ -42,6 +42,12 @@
  * IB 2010-11-16 1.11.5Dev14 Use getSysProperty to get file seperator.
  * IB 2010-11-16 1.11.5Dev14 Initialize FILE_SEPARATOR, openCommand, cancelCommand, and selectCommand in the constructor.
  * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2010-11-17 1.11.5Dev14 Move endif to right place for DTEST.
+ * IB 2010-11-19 1.11.5Dev14 Have println in DTEST.
+ * IB 2010-11-19 1.11.5Dev14 Have debug conditional println use displayDbgMsg.
+ * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg and be in DTEST.
+ * IB 2010-11-19 1.11.5Dev14 Change debug log info.
+ * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg print the class name.
 */
 
 // Expand to define MIDP define
@@ -151,10 +157,10 @@
 //@				System.out.println("--- file sep: '" + FILE_SEPARATOR + "'");
 //@				System.out.println("--- file sep_alt: '" + FILE_SEPARATOR_ALT + "'");
 //@			}
-			//#endif
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("--- file sep: '" + FILE_SEPARATOR + "'");}
 //@			if (fineLoggable) {logger.fine("--- file sep_alt: '" + FILE_SEPARATOR_ALT + "'");}
+			//#endif
 //@		} catch (Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("KFileSelectorImpl constructor", t);
@@ -170,7 +176,7 @@
 //@	/* Initialize.  Get images. */
 //@	public void init() {
 		//#ifdef DTEST
-//@		if (bDebug) System.out.println("MFS load images....");
+//@		displayDbgMsg("MFS load images....", null);
 		//#endif
 //@		//ROOT_IMAGE = Image.createImage("root_icon.png");
 //@		FOLDER_IMAGE = FeatureMgr.getImage(iconDir + "/folder_icon.png",
@@ -181,7 +187,7 @@
 //@				featureMgr.getLoadForm());
 //@
 		//#ifdef DTEST
-//@		if (bDebug) System.out.println("MFS building cmds....");
+//@		displayDbgMsg("MFS building cmds....", null);
 		//#endif
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("MFS building cmds....");}
@@ -228,8 +234,10 @@
 						//#ifdef DLOGGING
 //@						logger.severe("KFileSelectorImpl openSelected ", t);
 						//#endif
+						//#ifdef DTEST
 //@						/** Error while executing constructor */
-//@						System.out.println("KFileSelectorImpl openSelected " + t.getMessage());
+//@						System.out.println("KFileSelectorImpl run openSelected " + t.getMessage());
+						//#endif
 //@						t.printStackTrace();
 //@					}
 //@				} else if (cancelCmd) {
@@ -253,8 +261,10 @@
 			//#ifdef DLOGGING
 //@			logger.severe("KFileSelectorImpl run ", t);
 			//#endif
+			//#ifdef DTEST
 //@			/** Error while executing constructor */
 //@			System.out.println("KFileSelectorImpl run " + t.getMessage());
+			//#endif
 //@			t.printStackTrace();
 //@		}
 //@	}
@@ -271,6 +281,15 @@
 //@		this.parent = aParent;	
 //@	}//setViewParent
 //@
+//@
+	//#ifdef DTEST
+//@    /** 
+//@     Display a debug message somehow
+//@     */
+//@    final public void displayDbgMsg(String msg, AlertType type) {
+//@         if (bDebug) System.out.println("KFileSelectorImpl dbgMsg: " + msg);
+//@	}
+	//#endif
 //@
 //@	/**
 //@	 * Cleanup any allocated resources immediately.
@@ -303,7 +322,7 @@
 //@
 //@		try {
 			//#ifdef DTEST
-//@			if (bDebug) System.out.println("cmd action: " + c);
+//@			displayDbgMsg("cmd action: " + c, null);
 			//#endif
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("disp,cmd=" + d.getTitle() + "," + c.getLabel());}
@@ -327,8 +346,10 @@
 			//#ifdef DLOGGING
 //@			logger.severe("KFileSelectorImpl commandAction ", t);
 			//#endif
+			//#ifdef DTEST
 //@			/** Error while executing constructor */
 //@			System.out.println("KFileSelectorImpl commandAction " + t.getMessage());
+			//#endif
 //@			t.printStackTrace();
 //@
 //@		}
@@ -340,7 +361,7 @@
 //@	public void resetRoots()
 //@	{
 		//#ifdef DTEST
-//@		if (bDebug) System.out.println("resetRoots...");
+//@		displayDbgMsg("resetRoots...", null);
 		//#endif
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("resetRoots...");}
@@ -351,7 +372,7 @@
 //@		if (defaultDir != null)
 //@		{
 			//#ifdef DTEST
-//@			if (bDebug) System.out.println("default.dir: " + defaultDir);
+//@			displayDbgMsg("default.dir: " + defaultDir, null);
 			//#endif
 //@			try
 //@			{
@@ -361,7 +382,7 @@
 //@			catch (Exception e)
 //@			{
 				//#ifdef DTEST
-//@				if (bDebug) System.out.println("### resetroot ex: " + e);
+//@				displayDbgMsg("### resetroot ex: " + e, null);
 				//#endif
 				//#ifdef DLOGGING
 //@				logger.severe("KFileSelectorImpl constructor ", e);
@@ -382,7 +403,7 @@
 //@	protected void displayAllRoots()
 //@	{
 		//#ifdef DTEST
-//@		if (bDebug) System.out.println("displayAllRoots...");
+//@		displayDbgMsg("displayAllRoots...", null);
 		//#endif
 //@
 //@		super.setTitle(title);
@@ -392,7 +413,7 @@
 //@		{
 //@			String root = (String) roots.nextElement();
 			//#ifdef DTEST
-//@			if (bDebug) System.out.println("root: " + root);
+//@			displayDbgMsg("root: " + root, null);
 			//#endif
 //@			super.append(root.substring(1), FOLDER_IMAGE);
 //@		}
@@ -409,7 +430,7 @@
 //@	protected void loadRoots()
 //@	{
 		//#ifdef DTEST
-//@		if (bDebug) System.out.println("loadRoots...");
+//@		displayDbgMsg("loadRoots...", null);
 		//#endif
 //@
 //@		bCurFolderIsARoot = true;
@@ -427,7 +448,7 @@
 //@			}
 //@		} catch (Throwable e) {
 			//#ifdef DTEST
-//@			if (bDebug) System.out.println("### load roots: " + e);
+//@			displayDbgMsg("### load roots: " + e, null);
 			//#else
 //@			e.printStackTrace();
 			//#endif
@@ -441,8 +462,8 @@
 //@
 //@		int selectedIndex = super.getSelectedIndex();
 		//#ifdef DTEST
-//@		if (bDebug) System.out.println("openSelected....");
-//@		if (bDebug) System.out.println("selectedIndex: " + selectedIndex);
+//@		displayDbgMsg("openSelected....", null);
+//@		displayDbgMsg("selectedIndex: " + selectedIndex, null);
 		//#endif
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("openSelected selectedIndex: " + selectedIndex);}
@@ -452,7 +473,7 @@
 //@		{
 //@			selectedFile = super.getString(selectedIndex);
 			//#ifdef DTEST
-//@			if (bDebug) System.out.println("selectedFile: " + selectedFile);
+//@			displayDbgMsg("selectedFile: " + selectedFile, null);
 			//#endif
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("openSelected selectedFile: " + selectedFile);}
@@ -467,14 +488,14 @@
 //@						if (null == currentRoot)
 //@						{
 							//#ifdef DTEST
-//@							if (bDebug) System.out.println("new currentRoot...");
+//@							displayDbgMsg("new currentRoot...", null);
 							//#endif
 //@							currentRoot = (FileConnection) Connector.open("file:///" + selectedFile, Connector.READ);
 //@						}
 //@						else
 //@						{
 							//#ifdef DTEST
-//@							if (bDebug) System.out.println("set cur root conn...");
+//@							displayDbgMsg("set cur root conn...", null);
 							//#endif
 //@							currentRoot.setFileConnection(selectedFile);
 //@						}
@@ -483,7 +504,7 @@
 //@					catch (SecurityException e)
 //@					{
 						//#ifdef DTEST
-//@						if (bDebug) System.out.println("### open file: " + e);
+//@						displayDbgMsg("### open file: " + e, null);
 						//#endif
 						//#ifdef DLOGGING
 //@						logger.severe("openSelected security exception selected:  " + selectedFile, e);
@@ -510,7 +531,7 @@
 //@						illegalAlert.setTimeout(Alert.FOREVER);
 //@						featureMgr.showMe( illegalAlert );
 						//#ifdef DTEST
-//@						if (bDebug) System.out.println("### open file: " + e);
+//@						displayDbgMsg("### open file: " + e, null);
 						//#endif
 						//#ifdef DLOGGING
 //@						logger.severe("openSelected illegal argument selected:  " + selectedFile, e);
@@ -521,7 +542,7 @@
 //@					catch (Exception e)
 //@					{
 						//#ifdef DTEST
-//@						if (bDebug) System.out.println("### open file: " + e);
+//@						displayDbgMsg("### open file: " + e, null);
 						//#endif
 						//#ifdef DLOGGING
 //@						logger.severe("openSelected exception selected:  " + selectedFile, e);
@@ -534,7 +555,7 @@
 //@				{
 //@					String curRootName = currentRoot.getPath()  + currentRoot.getName();
 					//#ifdef DTEST
-//@					if (bDebug) System.out.println("curRootName: " + curRootName);
+//@					displayDbgMsg("curRootName: " + curRootName, null);
 					//#endif
 //@					String curShortName = null;
 //@					if (curRootName.charAt(0) == '/') {
@@ -566,7 +587,7 @@
 //@							e.printStackTrace();
 							//#endif
 							//#ifdef DTEST
-//@							if (bDebug) System.out.println("### setfileConn: " + e);
+//@							displayDbgMsg("### setfileConn: " + e, null);
 							//#endif
 //@						}
 //@						catch (IllegalArgumentException e)
@@ -579,7 +600,7 @@
 //@				else
 //@				{
 					//#ifdef DTEST
-//@					if (bDebug) System.out.println("user selected: " + selectedFile);
+//@					displayDbgMsg("user selected: " + selectedFile, null);
 					//#endif
 //@
 //@					//the user has selected a particular file
@@ -598,7 +619,7 @@
 //@			}
 			//#ifdef DTEST
 //@			else {
-//@				if (bDebug) System.out.println("### no selected file???");
+//@				displayDbgMsg("### no selected file???", null);
 //@			}
 			//#endif
 //@		}
@@ -612,7 +633,7 @@
 //@		{
 //@			selectedURL = currentRoot.getURL() + selectedFile;	
 			//#ifdef DTEST
-//@			if (bDebug) System.out.println("=== Selected URL: " + selectedURL);
+//@			displayDbgMsg("=== Selected URL: " + selectedURL, null);
 			//#endif
 //@
 //@			try {currentRoot.close();}
@@ -632,7 +653,7 @@
 //@	protected void displayCurrentRoot()
 //@	{
 		//#ifdef DTEST
-//@		if (bDebug) System.out.println("displayCurrentRoot...");
+//@		displayDbgMsg("displayCurrentRoot...", null);
 		//#endif
 //@
 //@		try
@@ -697,7 +718,7 @@
 //@			e.printStackTrace();
 			//#endif
 			//#ifdef DTEST
-//@			if (bDebug) System.out.println("### displayRoot ex: " + e);
+//@			displayDbgMsg("### displayRoot ex: " + e, null);
 			//#endif
 //@		}
 //@
@@ -763,7 +784,7 @@
 //@		}
 //@
 		//#ifdef DTEST
-//@		if (bDebug) System.out.println("...getThumbnail");
+//@		displayDbgMsg("...getThumbnail", null);
 		//#endif
 //@
 //@		return thumbImage;
@@ -783,7 +804,7 @@
 //@					long availSize = 0;
 //@
 					//#ifdef DTEST
-//@					if (bDebug) System.out.println("selectedURL: " + selectedURL);
+//@					displayDbgMsg("selectedURL: " + selectedURL, null);
 					//#endif
 //@
 //@					currentRoot = (FileConnection) Connector.open(selectedURL);
@@ -791,11 +812,11 @@
 //@					//currentRoot.setFileConnection(selectedFile); //relative to current directory
 //@
 					//#ifdef DTEST
-//@					if (bDebug) System.out.println(" getting data...");
+//@					displayDbgMsg(" getting data...", null);
 					//#endif
 //@					availSize = currentRoot.fileSize();
 					//#ifdef DTEST
-//@					if (bDebug) System.out.println("file availSize: " + availSize);
+//@					displayDbgMsg("file availSize: " + availSize, null);
 					//#endif
 //@
 					//#ifdef DTEST
@@ -810,20 +831,20 @@
 //@							//DataInputStream is = currentRoot.openDataInputStream();
 //@							InputStream is = currentRoot.openInputStream();
 							//#ifdef DTEST
-//@							if (bDebug) System.out.println("Creating new file block [" + availSize + "]");
+//@							displayDbgMsg("Creating new file block [" + availSize + "]", null);
 							//#endif
 //@
 //@							System.gc();
 //@							fileDataBlock = new byte[(int)availSize];
 							//#ifdef DTEST
-//@							if (bDebug) System.out.println("Allocated: " + availSize);
+//@							displayDbgMsg("Allocated: " + availSize, null);
 							//#endif
 //@
 //@							is.read(fileDataBlock);
 //@							is.close();
 //@
 							//#ifdef DTEST
-//@							if (bDebug) System.out.println("...data read.");
+//@							displayDbgMsg("...data read.", null);
 							//#endif
 //@						}
 //@						catch (IOException ioEx)
@@ -850,13 +871,13 @@
 //@				catch (IOException ioEx)
 //@				{
 					//#ifdef DTEST
-//@					if (bDebug) System.out.println("### read file ioex: " + ioEx);
+//@					displayDbgMsg("### read file ioex: " + ioEx, null);
 					//#endif
 //@				}
 //@				catch (Exception ex)
 //@				{
 					//#ifdef DTEST
-//@					if (bDebug) System.out.println("### read file ex: " + ex);
+//@					displayDbgMsg("### read file ex: " + ex, null);
 					//#endif
 //@
 //@				}
@@ -865,7 +886,7 @@
 //@		else
 //@		{
 			//#ifdef DTEST
-//@			if (bDebug) System.out.println("Existing fileDataBlock [" + fileDataBlock.length + "]");
+//@			displayDbgMsg("Existing fileDataBlock [" + fileDataBlock.length + "]", null);
 			//#endif
 //@		}
 //@
@@ -881,10 +902,11 @@
 		//#ifdef DTEST
 //@		if (bDebug) {
 //@			//that's nice...
-//@			if (changeType == FileSystemListener.ROOT_ADDED)
+//@			if (changeType == FileSystemListener.ROOT_ADDED) {
 //@				System.out.println("=== FileSys: ROOT ADDED");		
-//@			else if (changeType == FileSystemListener.ROOT_REMOVED)
+//@			} else if (changeType == FileSystemListener.ROOT_REMOVED) {
 //@				System.out.println("=== FileSys:ROOT_REMOVED");
+//@			}
 //@
 //@			System.out.println("strArg: " + strArg);
 //@		}
