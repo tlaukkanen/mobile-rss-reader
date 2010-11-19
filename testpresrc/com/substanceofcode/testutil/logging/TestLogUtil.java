@@ -23,6 +23,7 @@
  * IB 2010-05-24 1.11.5RC2 Code cleanup.
  * IB 2010-05-24 1.11.5RC2 Better logging.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-18 1.11.5Dev14 Have fieldEquals with RssItemInfo only for JM Unit tests.
  */
 
 // Expand to define JMUnit test define
@@ -176,6 +177,7 @@ public class TestLogUtil {
 		return true;
 	}
 
+	//#ifdef DJMTEST
 	static public boolean fieldEquals(RssItemInfo parmValue,
 			RssItemInfo thisValue,
 			String thisLog,
@@ -218,6 +220,7 @@ public class TestLogUtil {
 		//#endif
 		return true;
 	}
+	//#endif
 
 	static public boolean fieldEquals(int parmValue, int thisValue,
 			String thisLog,
