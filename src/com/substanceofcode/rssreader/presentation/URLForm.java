@@ -27,6 +27,8 @@
  * IB 2010-09-26 1.11.5Dev8 Use loadingForm from FeatureMgr.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2010-11-18 1.11.5Dev14 Move find files call functionality to FeatureMgr.
+ * IB 2010-11-18 1.11.5Dev14 Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
  */
 
 // Expand to define MIDP define
@@ -74,6 +76,7 @@ import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
+import com.substanceofcode.rssreader.presentation.ImportFeedsForm;
 
 //#ifdef DJSR75
 //@import org.kablog.kgui.KFileSelectorMgr;
@@ -271,8 +274,17 @@ public class URLForm extends FeatureForm
 //@			try {
 //@				RssReaderMIDlet midlet = featureMgr.getMidlet();
 //@				if (midlet != null) {
-//@					midlet.reqFindFiles( m_selectDir, this, m_url);
-//@					midlet.getFile();
+//@					if (this instanceof ImportFeedsForm) {
+//@						featureMgr.getFindFiles(m_selectDir,
+//@								"Loading files to export from...",
+//@								"Loading files to import from...", 
+//@						(m_selectDir ? "Find export file" : "Find import file"),
+//@						 this, m_url);
+//@					} else {
+//@						featureMgr.getFindFiles(false,
+//@								"Loading files to read from...", null,
+//@								"Find feed file", this, m_url);
+//@					}
 //@				}
 //@			}catch(Throwable t) {
 				//#ifdef DLOGGING
