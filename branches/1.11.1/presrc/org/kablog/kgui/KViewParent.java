@@ -28,6 +28,7 @@
  * IB 2010-08-15 1.11.5Dev8 Remove unused reqSetVisible.
  * IB 2010-09-27 1.11.5Dev8 Remove unused import.
  * IB 2010-10-12 1.11.5Dev8 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg and be in DTEST.
  */
 
 // Expand to define DJSR75 define
@@ -64,10 +65,12 @@ public interface KViewParent {
 	*/
 	void addDeferredAction(Runnable runny);
     
+	//#ifdef DTEST
     /**
      * Display a debug message somehow
      */
      void displayDbgMsg(String msg, AlertType type);
+	//#endif
 
 }
 //#endif
