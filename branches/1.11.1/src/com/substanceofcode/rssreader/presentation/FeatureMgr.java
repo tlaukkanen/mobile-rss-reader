@@ -78,6 +78,13 @@
  * IB 2010-11-17 1.11.5Dev14 Change prompt to set StringItem if return object.
  * IB 2010-11-17 1.11.5Dev14 Cosmetic change.
  * IB 2010-11-17 1.11.5Dev14 More logging.
+ * IB 2010-11-18 1.11.5Dev14 Move find files call functionality to FeatureMgr.
+ * IB 2010-11-18 1.11.5Dev14 Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
+ * IB 2010-11-18 1.11.5Dev14 Create setTxtObj to set a text object of TextField, StringItem, or StringBuffer.
+ * IB 2010-11-18 1.11.5Dev14 Change getSysPermission to always retrieve system key.
+ * IB 2010-11-19 1.11.5Dev14 Simplify getSysPermission.
+ * IB 2010-11-19 1.11.5Dev14 Move find files call functionality to FeatureMgr.
+ * IB 2010-11-19 1.11.5Dev14 Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
 */
 
 // Expand to define MIDP define
@@ -136,6 +143,9 @@ import com.substanceofcode.utils.CmdReceiver;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
 import com.substanceofcode.utils.CauseException;
+//#ifdef DJSR75
+//@import org.kablog.kgui.KFileSelectorMgr;
+//#endif
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -342,36 +352,13 @@ public class FeatureMgr implements CommandListener,
 											/** Paste into URL field from previous form.  */
 											TextBox tbox = (TextBox)cdisp;
 											if (cmdType == Command.OK) {
-												if (crtnObj instanceof TextField) {
-													TextField tfld =
-														(TextField)crtnObj;
-													tfld.setString(
+												setTxtObj(crtnObj,
 														tbox.getString());
-													FeatureMgr.setCurrentItemMgr(
-															this, tfld,
-															crtnDisp);
-												} else if (crtnObj instanceof
-														StringItem) {
-													StringItem sfld =
-														(StringItem)crtnObj;
-													sfld.setText(
-														tbox.getString());
-													FeatureMgr.setCurrentItemMgr(
-															this, sfld,
-															crtnDisp);
-												} else if (crtnObj instanceof StringBuffer) {
-													StringBuffer sbrtn =
-														(StringBuffer)crtnObj;
-													sbrtn.setLength(0);
-													sbrtn.append(
-														tbox.getString());
-													FeatureMgr.setCurrentMgr(
-															this, null,
-															crtnDisp);
-												}
+											}
 
-											/** Cancel the box go back to the return form.  */
-											} else if (cmdType == Command.CANCEL) {
+											/** OK or Cancel the box go back to the return object(item)/form.  */
+											if ((cmdType == Command.OK) ||
+												(cmdType == Command.CANCEL)) {
 												FeatureMgr.setCurrentObjMgr(
 														this, crtnObj,
 														crtnDisp);
@@ -1049,7 +1036,7 @@ public class FeatureMgr implements CommandListener,
 		
 	}
 
-	//#ifdef DLOGGING
+	//#ifdef DTEST
 //@	static String logCmd(Command cmd) {
 //@	  return ((cmd == null) ? "null command" : (new StringBuffer(
 //@			cmd.getLabel()).append(",").append(cmd.getCommandType()).append(
@@ -1146,39 +1133,24 @@ public class FeatureMgr implements CommandListener,
 	static public Object[] getSysPermission(String permission, String key,
 										    String def,
 										    String msg, LoadingForm loadForm) {
-		Object[] res = null;
-		//#ifdef DMIDP20
 		CauseException ce = null;
+		Object[] rese = (key != null) ? getSysProperty(key, def, msg, loadForm) : new Object[] {null, null};
+		Object[] res = new Object[] {null, null, rese[0], rese[1]};
+		//#ifdef DMIDP20
 		try {
-			res = new Object[] {new Integer(midlet.checkPermission(
-						permission)), null, null, null};
+			res[0] = new Integer(midlet.checkPermission(permission));
 			//#ifdef DLOGGING
 //@			Logger.getLogger("FeatureMgr").finest("getSysPermission permission,key,def,res[0],[1],[2],[3]=" + permission + "," + key + "," + def + "," + res[0]  + "," + res[1]  + "," + res[2]+ "," + res[3]);
 			//#endif
-			if (((Integer)res[0]).intValue() != -1) {
-				if (key != null) {
-					Object[] rese = getSysProperty(key, def, msg, loadForm);
-					res[1] = rese[0];
-					res[2] = rese[1];
-				} else {
-					res[1] = null;
-					res[2] = null;
-				}
-				//#ifdef DLOGGING
-//@				Logger.getLogger("FeatureMgr").finest("getSysPermission permission,key,def,res[0],[1],[2],[3]=" + permission + "," + key + "," + def + "," + res[0]  + "," + res[1]  + "," + res[2]+ "," + res[3]);
-				//#endif
-				return res;
-			} else {
-				ce = new CauseException("Undefined permission " + msg);
-				res = new Object[] {new Integer(-1), ce.getMessage(), null,
-					null};
+			if (((Integer)res[0]).intValue() == -1) {
+				ce = new CauseException("Undefined permission may require user permission " + msg);
 			}
 		} catch (Throwable e) {
 			ce = new CauseException(msg, e);
-			res = new Object[] {new Integer(-2), ce.getMessage(), null,
-				null};
+			res[0] = new Integer(-2);
 		}
 		if (ce != null) {
+			res[1] = ce.getMessage();
 			if (loadForm == null) {
 				System.out.print(ce.getMessage());
 			} else {
@@ -1186,37 +1158,56 @@ public class FeatureMgr implements CommandListener,
 			}
 		}
 		//#else
-//@		res = new Object[] {new Integer(-3), null, null, null};
+//@		res[0] = new Integer(-3);
 		//#endif
-		if (key == null) {
-			return res;
-		}
-		Object[] resp = getSysProperty(key, def, msg, loadForm);
 		//#ifdef DLOGGING
-//@		Logger.getLogger("FeatureMgr").finest("getSysPermission 2 key,def,resp[0],[1]=" + key + "," + def + "," + resp[0] + "," + resp[1]);
+//@		Logger.getLogger("FeatureMgr").finest("getSysPermission 2 key,def,res[0],[1],[2],[3]=" + key + "," + def + "," + res[0] + "," + res[1] + "," + res[2] + "," + res[3]);
 		//#endif
-		if (resp[0] != null) {
+		return res;
+	}
+
+	//#ifdef DJSR75
+//@	/* Set flag to show find files list.
+//@	   fileRtnForm - Form to return to after file finished.
+//@	   fileURL - Text field that has URL to put file URL into as well
+//@	   			 as field to go back to if 2.0 is valid.
+//@	*/
+//@	final public void getFindFiles( final boolean selectDir,
+//@			String selectMsg, String noSelectMsg, String findTitle,
+//@			final Displayable fileRtnDisp, final Object fileRtnObj) {
+//@		LoadingForm cloadForm = null;
+//@		try {
+//@			cloadForm = LoadingForm.getLoadingForm(
+//@					(selectDir ? selectMsg :
+//@							((noSelectMsg == null) ? selectMsg : noSelectMsg)),
+//@						fileRtnDisp, null);
+//@			final KFileSelectorMgr fileSelectorMgr = new KFileSelectorMgr();
 			//#ifdef DLOGGING
-//@			Object[] resn = 
-			//#else
-			return
+//@			if (finestLoggable) {logger.finest("selectDir,selectMsg,noSelectMsg,fileRtnDisp,fileRtnObj=" + selectDir + "," + selectMsg  + "," + noSelectMsg + "," + fileRtnDisp + "," + fileRtnObj);}
 			//#endif
-				new Object[] {res[0], res[1], resp[1], null};
-			//#ifdef DLOGGING
-//@			Logger.getLogger("FeatureMgr").finest("getSysPermission 3 key,def,resn[0],resn[1],resn[0],[1]=" + key + "," + def + "," + resn[0] + "," + resn[1] + "," + resn[0] + "," + resn[1]);
-//@			return resn;
-			//#endif
-		} else {
-			//#ifdef DLOGGING
-//@			Object[] resn = 
-			//#else
-			return
-			//#endif
-				new Object[] {res[0], res[1], resp[1], resp[2]};
-			//#ifdef DLOGGING
-//@			Logger.getLogger("FeatureMgr").finest("getSysPermission 3 key,def,resn[0],[1],[2],[3]=" + key + "," + def + "," + resn[0] + "," + resn[1] + "," + resn[2] + "," + resn[2]);
-//@			return resn;
-			//#endif
+//@			fileSelectorMgr.doLaunchSelector(
+//@					selectDir, findTitle, fileRtnDisp, fileRtnObj, cloadForm);
+//@		} catch(OutOfMemoryError ex) {
+//@			cloadForm.recordExcForm("Out Of Memory Error getting " +
+//@					"file form.", ex);
+//@		} catch (Throwable t) {
+//@			cloadForm.recordExcForm("Internal error getting file " +
+//@					"form.", t);
+//@		}
+//@	}
+	//#endif
+
+	static public void setTxtObj(Object txtObj, String value) {
+		if (txtObj instanceof TextField) {
+			TextField tfld = (TextField)txtObj;
+			tfld.setString(value);
+		} else if (txtObj instanceof StringItem) {
+			StringItem sfld = (StringItem)txtObj;
+			sfld.setText(value);
+		} else if (txtObj instanceof StringBuffer) {
+			StringBuffer sbrtn = (StringBuffer)txtObj;
+			sbrtn.setLength(0);
+			sbrtn.append(value);
 		}
 	}
 
