@@ -100,6 +100,8 @@
  * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty.
  * IB 2010-11-16 1.11.5Dev14 Add default value for getSysProperty, getSysPermission, and getSysPropStarts.
  * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2010-11-17 1.11.5Dev14 More logging.
+ * IB 2010-11-19 1.11.5Dev14 Move find files call functionality to FeatureMgr.
 */
 
 // Expand to define test define
@@ -244,8 +246,6 @@ implements
 //@    private boolean     m_getExportForm;    // The noticy flag for going to Export Feed list
 	//#endif
 	//#endif
-    private boolean     m_getFile;          // The noticy flag for getting find files form
-    private boolean     m_selectDir;          // The noticy flag for selecting directories
     private boolean     m_runNews = false;  // Run AllNewsList form.
 	//#ifdef DTEST
 //@    // Get import form using URL from current bookmark
@@ -296,8 +296,6 @@ implements
     private ItemForm    m_itemForm;         // The item form
     private LoadingForm m_loadForm = null;  // The "loading..." form
 
-    private TextField   m_fileURL;          // The file URL field from a form
-    private FeatureForm m_fileRtnForm;      // The form to return to for file
 	//#ifdef DTESTUI
 //@    private TestingForm m_testingForm;    // The testing form
 	//#endif
@@ -514,8 +512,6 @@ implements
 //@			m_getExportForm = false;
 			//#endif
 			//#endif
-			m_getFile = false;
-			m_selectDir = false;
 			m_curBookmark = -1;
 			CauseException ce = null;
 			
@@ -565,6 +561,9 @@ implements
 					"Unable to get FileConnection",
 					(m_loadForm.hasExc()) ? m_loadForm : (LoadingForm)nullPtr)[0]
 				!= null);
+			//#ifdef DLOGGING
+//@			if ((logger != null) && fineLoggable) {logger.fine("JSR75_ENABLED=" + JSR75_ENABLED);}
+			//#endif
 		}
     }
     
@@ -1579,59 +1578,6 @@ implements
 		}
 	}
 
-  /**
-   * Get file in file system
-   * Constructor
-   * @author Irv Bunton
-   */
-	final public void getFile() {
-		//#ifdef DJSR75
-//@		/* Find files in the file system to get for bookmark or
-//@		   import from. */
-//@		boolean cgetFile = false;
-//@		boolean cselectDir = false;
-//@		FeatureForm cfileRtnForm = null;
-//@		TextField   cfileURL;
-//@		synchronized(this) {
-//@			cselectDir = m_selectDir;
-//@			cfileRtnForm = m_fileRtnForm;
-//@			cfileURL = m_fileURL;
-//@			cgetFile = m_getFile;
-//@		}
-//@		if( cgetFile ) {
-//@			LoadingForm loadForm = m_loadForm;
-//@			try {
-//@				if (cfileRtnForm instanceof ImportFeedsForm) {
-//@					loadForm = LoadingForm.getLoadingForm(
-//@							"Loading files to " + (cselectDir ? "import" :
-//@								"export") + " from...",
-//@							cfileRtnForm, null);
-//@				} else {
-//@					loadForm = LoadingForm.getLoadingForm(
-//@							"Loading files to bookmark from...",
-//@							cfileRtnForm, null);
-//@				}
-//@				final KFileSelectorMgr fileSelectorMgr = new KFileSelectorMgr();
-				//#ifdef DLOGGING
-//@				if (finestLoggable) {logger.finest("cselectDir,cfileRtnForm,cfileURL=" + cselectDir + "," + cfileRtnForm + "," + cfileURL);}
-				//#endif
-//@				fileSelectorMgr.doLaunchSelector(
-//@							cselectDir, cfileRtnForm, cfileURL, loadForm);
-//@			} catch(OutOfMemoryError ex) {
-//@				loadForm.recordExcForm("Out Of Memory Error getting " +
-//@						"file form.", ex);
-//@			} catch (Throwable t) {
-//@				loadForm.recordExcForm("Internal error getting file " +
-//@						"form.", t);
-//@			} finally {
-//@				synchronized(this) {
-//@					m_getFile = false;
-//@				}
-//@			}
-//@		}
-		//#endif
-	}
-
 	/** Save data and exit the application. This accesses the database,
 	    so it must not be called by commandAction as it may hang.  It must
 	    be called by a separate thread.  */
@@ -2072,23 +2018,6 @@ implements
 			t.printStackTrace();
         }
     }
-
-	//#ifdef DJSR75
-//@	/* Set flag to show find files list.
-//@	   fileRtnForm - Form to return to after file finished.
-//@	   fileURL - Text field that has URL to put file URL into as well
-//@	   			 as field to go back to if 2.0 is valid.
-//@	*/
-//@	final public void reqFindFiles( final boolean selectDir,
-//@			final FeatureForm fileRtnForm, final TextField fileURL) {
-//@		synchronized(this) {
-//@			m_fileRtnForm = fileRtnForm;
-//@			m_fileURL = fileURL;
-//@			m_getFile = true;
-//@			m_selectDir = selectDir;
-//@		}
-//@	}
-	//#endif
 
 	/* Save the current bookmarks and other properties.
 	   releaseMemory - true if memory used is to be released as the
