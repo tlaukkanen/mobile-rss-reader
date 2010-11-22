@@ -85,6 +85,12 @@
  * IB 2010-11-19 1.11.5Dev14 Simplify getSysPermission.
  * IB 2010-11-19 1.11.5Dev14 Move find files call functionality to FeatureMgr.
  * IB 2010-11-19 1.11.5Dev14 Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
+ * IB 2010-11-19 1.11.5Dev14 Move static var m_backCommand out of midlet class to FeatureMgr.
+ * IB 2010-11-19 1.11.5Dev14 Simplify getSysProperty and getSysPermission.
+ * IB 2010-11-22 1.11.5Dev14 Define log lcdui methods for DLOGGING, DTEST or DTESTUI.
+ * IB 2010-11-22 1.11.5Dev14 Add catch Throwable, logging, and printStackTrace to some methods.
+ * IB 2010-11-22 1.11.5Dev14 Use logDisp to log the display class and title(if present).
+ * IB 2010-11-22 1.11.5Dev14 Don't cast setCurrentFeature parameter to setCurrentAlt.
 */
 
 // Expand to define MIDP define
@@ -98,6 +104,13 @@
 // Expand to define logging define
 @DLOGDEF@
 
+//#ifdef DTESTUI
+//#define DTESTLOGMIN
+//#elifdef DTEST
+//#define DTESTLOGMIN
+//#elifdef DLOGGING
+//#define DTESTLOGMIN
+//#endif
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
@@ -179,6 +192,7 @@ public class FeatureMgr implements CommandListener,
 	protected Command exCmd = null;
 	private Displayable exDisp = null;
 	static protected RssReaderMIDlet midlet = null;
+    static public Command m_backCommand = null; // The back to header list command
     private Displayable rtnDisp = null; // The form to return to for text box
     private Object rtnObj = null; // The object (e.g. item or StringBuffer) to return to for text box
     volatile private boolean     background = false;  // Flag to continue looping
@@ -200,7 +214,7 @@ public class FeatureMgr implements CommandListener,
 		this.disp = disp;
 		this.dispLoadForm = loadForm;
 		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("Starting FeatureMgr " + disp.getClass().getName());}
+		if (fineLoggable) {logger.fine("Starting FeatureMgr " + logDisp(disp));}
 		//#endif
 	}
 
@@ -266,6 +280,7 @@ public class FeatureMgr implements CommandListener,
 	public Displayable getPromptDisp(String promptTitle, String promptMsg,
 									 Command acceptCmd,
 									 Command rejectCmd,
+									 String rejectLabel,
 									 Displayable rtnDisp,
 									 Object rtnObj ) {
 		// Due to a quirk on T637 (MIDP 1.0), we need to create a form
@@ -406,7 +421,7 @@ public class FeatureMgr implements CommandListener,
 									String promptMsg =
 										(String)cpromptCommands.get(ccmd);
 									getPromptDisp(ccmd.getLabel(), promptMsg,
-											ccmd, null, disp, null);
+											ccmd, null, null, disp, null);
 								} else if (cdisp.equals(disp)) {
 									//#ifdef DLOGGING
 									if (fineLoggable) {logger.fine("Equal cdisp,disp,cmdFeatureUser=" + logCmd(ccmd) + "," + cdisp + "," + disp + "," + cmdFeatureUser);}
@@ -422,6 +437,7 @@ public class FeatureMgr implements CommandListener,
 							logger.severe("run commandAction caught ", e);
 							//#endif
 							System.out.println("run commandAction caught " + e + " " + e.getMessage());
+							e.printStackTrace();
 						} finally {
 							synchronized(this) {
 								foundDisp = false;
@@ -677,32 +693,25 @@ public class FeatureMgr implements CommandListener,
 								        Displayable alert, Displayable disp) {
 
 		//#ifdef DTESTUI
-		String title = "";
-		if (disp instanceof Form) {
-			title = ((Form)disp).getTitle();
-		} else if (disp instanceof List) {
-			title = ((List)disp).getTitle();
-		}
-		String alertTitle;
-		if (alert instanceof Form) {
-			alertTitle = "," + ((Form)alert).getTitle();
-		} else if (alert instanceof List) {
-			alertTitle = "," + ((List)alert).getTitle();
-		} else {
-			alertTitle = "";
-		}
-		System.out.println("Test UI setCurrent " + disp.getClass().getName() + alertTitle +  "," + title);
+		System.out.println("Test UI setCurrentMgr " + logDisp(alert) + "," + logDisp(disp));
 		//#endif
-		if (display != null) {
-			if (alert != null) {
-				display.setCurrent((Alert)alert, disp);
-			} else {
-				display.setCurrent(disp);
+		try {
+			if (display != null) {
+				if (alert != null) {
+					display.setCurrent((Alert)alert, disp);
+				} else {
+					display.setCurrent(disp);
+				}
 			}
-		}
-		FeatureMgr wfeatureMgr = wakeupDisp(disp, 2);
-		if ((featureMgr != wfeatureMgr) && (featureMgr != null)) {
-			featureMgr.wakeup(2);
+			FeatureMgr wfeatureMgr = wakeupDisp(disp, 2);
+			if ((featureMgr != wfeatureMgr) && (featureMgr != null)) {
+				featureMgr.wakeup(2);
+			}
+		} catch (Throwable e) {
+			//#ifdef DLOGGING
+			Logger.getLogger("FeatureMgr").severe("setCurrentMgr caught ", e);
+			//#endif
+			e.printStackTrace();
 		}
 	}
 
@@ -711,36 +720,37 @@ public class FeatureMgr implements CommandListener,
 								        Item item, Displayable disp) {
 
 		//#ifdef DTESTUI
-		String title = "";
-		if (disp instanceof Form) {
-			title = ((Form)disp).getTitle();
-		} else if (disp instanceof List) {
-			title = ((List)disp).getTitle();
-		}
-		System.out.println("Test UI setCurrentItem " + disp.getClass().getName() + logItem(item) +  "," + title);
+		System.out.println("Test UI setCurrentItemMgr " + logItem(item) + "," + logDisp(disp));
 		//#endif
-		//#ifdef DMIDP20
-		// To prevent loading form from being displayed instead of the
-		// next form when that form has no items, show the load form
-		// again as a workaround.
-		if (featureMgr != null) {
-			LoadingForm loadForm = featureMgr.getLoadForm(); 
-			if ((loadForm != null) &&
-					(FeatureMgr.getCurrent() == loadForm)) {
-				display.setCurrent(loadForm);
+		try {
+			//#ifdef DMIDP20
+			// To prevent loading form from being displayed instead of the
+			// next form when that form has no items, show the load form
+			// again as a workaround.
+			if (featureMgr != null) {
+				LoadingForm loadForm = featureMgr.getLoadForm(); 
+				if ((loadForm != null) &&
+						(FeatureMgr.getCurrent() == loadForm)) {
+					display.setCurrent(loadForm);
+				}
 			}
-		}
-		if (item != null) {
-			display.setCurrentItem(item);
-		} else {
+			if (item != null) {
+				display.setCurrentItem(item);
+			} else {
+				display.setCurrent(disp);
+			}
+			//#else
 			display.setCurrent(disp);
-		}
-		//#else
-		display.setCurrent(disp);
-		//#endif
-		FeatureMgr wfeatureMgr = wakeupDisp(disp, 2);
-		if ((featureMgr != wfeatureMgr) && (featureMgr != null)) {
-			featureMgr.wakeup(2);
+			//#endif
+			FeatureMgr wfeatureMgr = wakeupDisp(disp, 2);
+			if ((featureMgr != wfeatureMgr) && (featureMgr != null)) {
+				featureMgr.wakeup(2);
+			}
+		} catch (Throwable e) {
+			//#ifdef DLOGGING
+			Logger.getLogger("FeatureMgr").severe("setCurrentItemMgr caught ", e);
+			//#endif
+			e.printStackTrace();
 		}
 	}
 
@@ -788,23 +798,33 @@ public class FeatureMgr implements CommandListener,
 	/* Set setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter if not null or cmainDisp if not null or disp.  */
 	final static public void setCurrentAlt(Displayable cmainDisp, Displayable fdisp, Displayable alert, Displayable disp) {
 
-		if (fdisp != null) {
-			setCurrentFeature(fdisp, alert, disp);
-			if (fdisp != disp) {
-				wakeupDisp(disp, 2);
-			}
-		} else if (cmainDisp != null) {
-			setCurrentFeature(cmainDisp, alert, disp);
-			if (cmainDisp != disp) {
-				wakeupDisp(disp, 2);
-			}
-		} else {
-			if ((disp instanceof FeatureForm) ||
-					(disp instanceof FeatureList)) {
-				setCurrentFeature((FeatureForm)disp, alert, disp);
+		//#ifdef DTESTUI
+		System.out.println("Test UI setCurrentAlt " + logDisp(alert) + "," + logDisp(disp));
+		//#endif
+		try {
+			if (fdisp != null) {
+				setCurrentFeature(fdisp, alert, disp);
+				if (fdisp != disp) {
+					wakeupDisp(disp, 2);
+				}
+			} else if (cmainDisp != null) {
+				setCurrentFeature(cmainDisp, alert, disp);
+				if (cmainDisp != disp) {
+					wakeupDisp(disp, 2);
+				}
 			} else {
-				FeatureMgr.setCurrentMgr(null, alert, disp);
+				if ((disp instanceof FeatureForm) ||
+						(disp instanceof FeatureList)) {
+					setCurrentFeature(disp, alert, disp);
+				} else {
+					FeatureMgr.setCurrentMgr(null, alert, disp);
+				}
 			}
+		} catch (Throwable e) {
+			//#ifdef DLOGGING
+			Logger.getLogger("FeatureMgr").severe("setCurrentAlt caught ", e);
+			//#endif
+			e.printStackTrace();
 		}
 	}
 
@@ -1036,7 +1056,7 @@ public class FeatureMgr implements CommandListener,
 		
 	}
 
-	//#ifdef DTEST
+	//#ifdef DTESTLOGMIN
 	static String logCmd(Command cmd) {
 	  return ((cmd == null) ? "null command" : (new StringBuffer(
 			cmd.getLabel()).append(",").append(cmd.getCommandType()).append(
@@ -1054,6 +1074,23 @@ public class FeatureMgr implements CommandListener,
 				sb.append(",").append(((TextField)citem).getString());
 			}
 			return sb.toString();
+		}
+	}
+
+	static String logDisp(Displayable cdisp) {
+		if (cdisp == null) {
+			return "null displyable";
+		} else {
+			StringBuffer sb = new StringBuffer(cdisp.getClass().getName());
+			String title;
+			if (cdisp instanceof Form) {
+				title = ((Form)cdisp).getTitle();
+			} else if (cdisp instanceof List) {
+				title = ((List)cdisp).getTitle();
+			} else {
+				title = "";
+			}
+			return sb.append("," + title).toString();
 		}
 	}
 
@@ -1100,15 +1137,15 @@ public class FeatureMgr implements CommandListener,
 
 	static public Object[] getSysProperty(String key, String def, String msg,
 										LoadingForm loadForm) {
+		Object[] res = new Object[] {null, null};
 		try {
-			Object[] res = new Object[] {System.getProperty(key), null};
+			res[0] = System.getProperty(key);
 			if (res[0] == null) {
 				res[0] = def;
 			}
 			//#ifdef DLOGGING
 			Logger.getLogger("FeatureMgr").finest("getSysProperty key,def,res[0],[1]=" + key + "," + def + "," + res[0] + "," + res[1]);
 			//#endif
-			return res;
 		} catch (Throwable e) {
 			CauseException ce = new CauseException(msg, e);
 			if (loadForm == null) {
@@ -1116,8 +1153,9 @@ public class FeatureMgr implements CommandListener,
 			} else {
 				loadForm.recordExcForm(msg, ce);
 			}
-			return new Object[] {null, ce.getMessage()};
+			res[1] = ce.getMessage();
 		}
+		return res;
 	}
 
 	static public boolean getSysPropStarts(String key, String def, String msg,
@@ -1134,10 +1172,12 @@ public class FeatureMgr implements CommandListener,
 										    String def,
 										    String msg, LoadingForm loadForm) {
 		CauseException ce = null;
-		Object[] rese = (key != null) ? getSysProperty(key, def, msg, loadForm) : new Object[] {null, null};
-		Object[] res = new Object[] {null, null, rese[0], rese[1]};
+		Object[] res = new Object[] {null, null, null, null};
 		//#ifdef DMIDP20
 		try {
+			Object[] rese = (key != null) ? getSysProperty(key, def, msg, loadForm) : new Object[] {null, null};
+			res[2] = rese[0];
+			res[3] = rese[1];
 			res[0] = new Integer(midlet.checkPermission(permission));
 			//#ifdef DLOGGING
 			Logger.getLogger("FeatureMgr").finest("getSysPermission permission,key,def,res[0],[1],[2],[3]=" + permission + "," + key + "," + def + "," + res[0]  + "," + res[1]  + "," + res[2]+ "," + res[3]);
