@@ -115,6 +115,7 @@
  * IB 2010-11-22 1.11.5Dev14 Make exit/saving vars volatile so that they should get set correctly.
  * IB 2010-11-22 1.11.5Dev14 Use showMeNotes after saving data.
  * IB 2010-11-22 1.11.5Dev14 Have getPromptDisp pass in "Quit Program" instead of cancel to promt for About license.
+ * IB 2010-11-22 1.11.5Dev14 Move setting of m_openLinkCmd to be initialized if no logging.
 */
 
 // Expand to define test define
@@ -379,9 +380,6 @@ implements
 			}
 		}
 		boolean loggingErr = false;
-		//#ifdef DMIDP20
-		m_openLinkCmd  = new Command("Open link", Command.SCREEN, 5);
-		//#endif
 		try {
 			LogManager logManager = LogManager.getLogManager();
 			logManager.readConfiguration(this);
@@ -413,6 +411,9 @@ implements
 		}
 		//#endif
 
+		//#ifdef DMIDP20
+		m_openLinkCmd  = new Command("Open link", Command.SCREEN, 5);
+		//#endif
 		try {
 
 			//#ifdef DLOGGING
