@@ -8,7 +8,7 @@ diff and cmt
 $F/l"ay$0jjjw/"apAk
 "Put source comment into j buffer.
 @y
-0WWWWW"jy$j0
+0WWWWW"jy$0j
 "Put quoted into l buffer.  Search for "a buffer.
 @u
 0f""ly$/"apn
