@@ -48,6 +48,7 @@
  * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg and be in DTEST.
  * IB 2010-11-19 1.11.5Dev14 Change debug log info.
  * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg print the class name.
+ * IB 2010-11-22 1.11.5Dev14 Replace Alert with loading form exception.
 */
 
 // Expand to define MIDP define
@@ -224,13 +225,6 @@
 //@					try {
 //@						openSelected(dirSelected);
 //@					} catch (Throwable t) {
-//@						Alert internalAlert = new Alert(
-//@								"Internal problem",
-//@								"Internal error.  Unable to open.",
-//@								null,
-//@								AlertType.ERROR);
-//@						internalAlert.setTimeout(Alert.FOREVER);
-//@						featureMgr.showMe( internalAlert );
 						//#ifdef DLOGGING
 //@						logger.severe("KFileSelectorImpl openSelected ", t);
 						//#endif
@@ -238,6 +232,8 @@
 //@						/** Error while executing constructor */
 //@						System.out.println("KFileSelectorImpl run openSelected " + t.getMessage());
 						//#endif
+//@						super.getFeatureMgr().getLoadForm().recordExcFormFin(
+//@								"Internal error.  Unable to open.", t);
 //@						t.printStackTrace();
 //@					}
 //@				} else if (cancelCmd) {
@@ -510,26 +506,14 @@
 //@						logger.severe("openSelected security exception selected:  " + selectedFile, e);
 //@						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
 						//#endif
-//@						Alert securityAlert = new Alert(
-//@								"Security problem",
+//@						super.getFeatureMgr().getLoadForm().recordExcFormFin(
 //@								"Security problem found either access " +
-//@								" denied or access refused by the user.",
-//@								null,
-//@								AlertType.ERROR);
-//@						securityAlert.setTimeout(Alert.FOREVER);
-//@						featureMgr.showMe( securityAlert );
+//@								" denied or access refused by the user.", e);
+//@						t.printStackTrace();
 //@						throw e;
 //@					}
 //@					catch (IllegalArgumentException e)
 //@					{
-//@						Alert illegalAlert = new Alert(
-//@								"Security problem",
-//@								"Security problem found either access " +
-//@								" denied or access refused by the user.",
-//@								null,
-//@								AlertType.ERROR);
-//@						illegalAlert.setTimeout(Alert.FOREVER);
-//@						featureMgr.showMe( illegalAlert );
 						//#ifdef DTEST
 //@						displayDbgMsg("### open file: " + e, null);
 						//#endif
@@ -537,6 +521,8 @@
 //@						logger.severe("openSelected illegal argument selected:  " + selectedFile, e);
 //@						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
 						//#endif
+//@						super.getFeatureMgr().getLoadForm().recordExcFormFin(
+//@								"Illegal argument with find files.", e);
 //@						throw e;
 //@					}
 //@					catch (Exception e)
