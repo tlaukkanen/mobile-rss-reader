@@ -29,6 +29,7 @@
  * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  * IB 2010-11-18 1.11.5Dev14 Move find files call functionality to FeatureMgr.
  * IB 2010-11-18 1.11.5Dev14 Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
+>  * IB 2010-11-22 1.11.5Dev14 Replace Alert with loading form exception.
  */
 
 // Expand to define MIDP define
@@ -262,13 +263,13 @@ public class URLForm extends FeatureForm
 		if (m_fileReq) {
 			m_fileReq = false;
 			if (!featureMgr.getMidlet().JSR75_ENABLED) {
-				Alert invalidAlert = new Alert(
-						"JSR-75 not enabled", 
-						"Find files (JSR-75) not enabled on the phone.",
-						null,
-						AlertType.WARNING);
-				invalidAlert.setTimeout(Alert.FOREVER);
-				featureMgr.showMe( invalidAlert );
+				CauseException ce = new CauseException(
+						"Find files (JSR-75) not enabled on the phone.");
+				LoadingForm loadForm = super.getFeatureMgr().getLoadForm();
+				if (loadForm != null) {
+					loadForm.recordExcFormFin(
+							"Find files (JSR-75) not enabled on the phone.", ce);
+				}
 				return;
 			}
 			try {
