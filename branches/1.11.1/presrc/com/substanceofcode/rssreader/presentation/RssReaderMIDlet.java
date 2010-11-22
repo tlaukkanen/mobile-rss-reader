@@ -2,7 +2,7 @@
 /*
  * RssReaderMIDlet.java
  *
- * Copyright (C) 2005-2006 Tommi Laukkanen
+ * Copyright (C) 2005-2007 Tommi Laukkanen
  * Copyright (C) 2007-2010 Irving Bunton, Jr
  * http://www.substanceofcode.com
  *
@@ -102,6 +102,18 @@
  * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  * IB 2010-11-17 1.11.5Dev14 More logging.
  * IB 2010-11-19 1.11.5Dev14 Move find files call functionality to FeatureMgr.
+ * IB 2010-11-19 1.11.5Dev14 Move static vars CFEED_SEPARATOR and OLD_FEED_SEPARATOR out of midlet class to Settings.
+ * IB 2010-11-19 1.11.5Dev14 Move static var m_backCommand out of midlet class to FeatureMgr.
+ * IB 2010-11-19 1.11.5Dev14 Make m_openLinkCmd not static to remove all static vars from midlet class.
+ * IB 2010-11-19 1.11.5Dev14 Use getSetLicensePrompt for getAbout.
+ * IB 2010-11-19 1.11.5Dev14 Fix open link and other static menu.
+ * IB 2010-11-22 1.11.5Dev14 Replace Alert with loading form exception.
+ * IB 2010-11-22 1.11.5Dev14 Fix exitApp to handle exit from open link correctly.
+ * IB 2010-11-22 1.11.5Dev14 Fix exitApp to not use synchronized for the processing of saving.
+ * IB 2010-11-22 1.11.5Dev14 Don't call exitApp while synchronized.
+ * IB 2010-11-22 1.11.5Dev14 More logging.
+ * IB 2010-11-22 1.11.5Dev14 Make exit/saving vars volatile so that they should get set correctly.
+ * IB 2010-11-22 1.11.5Dev14 Use showMeNotes after saving data.
 */
 
 // Expand to define test define
@@ -215,8 +227,6 @@ implements
 	Runnable {
     
 	final       Object nullPtr = null;
-    final static public char CFEED_SEPARATOR = (char)4;
-    final static public char OLD_FEED_SEPARATOR = '^';
     // Attributes
     private Displayable m_prevDisp;         // The displayable to return to
     private Settings    m_settings = null;         // The settings
@@ -228,10 +238,10 @@ implements
 	//#endif
     private boolean     m_getPage;          // The noticy flag for HTTP
     private boolean     m_openPage;         // Open the headers
-    private boolean     m_saveBookmarks;    // The save bookmarks flag
-    private boolean     m_exit;             // The exit application flag
-    private boolean     m_saving;           // The saving settings flag
-    private boolean     m_stored;           // The data stored flag
+    volatile private boolean m_saveBookmarks;    // The save bookmarks flag
+    volatile private boolean m_exit;             // The exit application flag
+    volatile private boolean m_saving;           // The saving settings flag
+    volatile private boolean m_stored;           // The data stored flag
     private boolean     m_about;            // The about flag
     private boolean     m_getModPage;       // The noticy flag for modified HTTP
     private boolean     m_getSettingsForm;  // Flag to get settings form
@@ -310,9 +320,8 @@ implements
     private Command     m_readUnreadItems;  // The read unread items command
     private Command     m_editBookmark;     // The edit bookmark command
     private Command     m_delBookmark;      // The delete bookmark command
-    static public Command m_backCommand = null; // The back to header list command
 	//#ifdef DMIDP20
-	static public Command m_openLinkCmd = null;// The open link command
+	final public Command m_openLinkCmd;// The open link command
 	//#endif
     private Command     m_importFeedListCmd;// The import feed list command
 	//#ifdef DSIGNED
@@ -369,6 +378,9 @@ implements
 			}
 		}
 		boolean loggingErr = false;
+		//#ifdef DMIDP20
+		m_openLinkCmd  = new Command("Open link", Command.SCREEN, 5);
+		//#endif
 		try {
 			LogManager logManager = LogManager.getLogManager();
 			logManager.readConfiguration(this);
@@ -440,14 +452,9 @@ implements
 			m_testBMCmd         = new Command("Test bookmarks shown", Command.SCREEN, 10);
 			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 11);
 			//#endif
-			if (RssReaderMIDlet.m_backCommand == null) {
-				RssReaderMIDlet.m_backCommand = new Command("Back", Command.BACK, 1);
+			if (FeatureMgr.m_backCommand == null) {
+				FeatureMgr.m_backCommand = new Command("Back", Command.BACK, 1);
 			}
-			//#ifdef DMIDP20
-			if (RssReaderMIDlet.m_openLinkCmd == null) {
-				RssReaderMIDlet.m_openLinkCmd  = new Command("Open link", Command.SCREEN, 5);
-			}
-			//#endif
 			initExit();
 			m_openBookmark      = new Command("Open feed", Command.SCREEN, 5);
 			int priority = 7;
@@ -630,8 +637,7 @@ implements
 					// If novice, show about later.
 					if (!m_novice) {
 						m_firstTime = false;
-						Alert m_about = getAbout();
-						setCurrentNotes( m_about, m_bookmarkList );
+						getSetLicensePrompt(false);
 					}
 				} catch(Exception e) {
 					System.err.println("Error while getting/updating settings: " + e.toString());
@@ -701,6 +707,7 @@ implements
             m_bookmarkList = new FeatureList("Bookmarks", List.IMPLICIT,
 											 m_loadForm);
             FeatureMgr.setMainDisp(m_bookmarkList);
+			m_loadForm.replaceRef(null, m_bookmarkList);
 			//#ifdef DMIDP20
 			// If font is wrong, it can cause an exception for some
 			// devices.  This leaves some of the data not loaded.
@@ -846,7 +853,7 @@ implements
 								Settings.STORE_DATE, 0L);
 							*/
 						final char feedSeparator =
-							encodingSettings ? CFEED_SEPARATOR : OLD_FEED_SEPARATOR;
+							encodingSettings ? Settings.CFEED_SEPARATOR : Settings.OLD_FEED_SEPARATOR;
 						//#ifdef DLOGGING
 						if (fineLoggable) {logger.fine("loadBookmarkList region,vers,firstSettings,itunesCapable,encodingSettings,modifiedSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + encodingSettings + "," + modifiedSettings);}
 						//#endif
@@ -1008,7 +1015,7 @@ implements
 				(m_headerIndex < m_headerTestList.size()) &&
 				(FeatureMgr.getCurrent() == m_itemForm )) {
 				m_itemNext = false;
-				m_itemForm.commandAction( RssReaderMIDlet.m_backCommand, m_itemForm );
+				m_itemForm.commandAction( FeatureMgr.m_backCommand, m_itemForm );
 				m_headerIndex++;
 				if (m_headerIndex >= m_headerTestList.size()) {
 					System.out.println("Test UI Test Rss items last");
@@ -1254,19 +1261,19 @@ implements
 
 			if ( m_about ) {
 				m_about = false;
-				final Alert aboutAlert = getAbout();
 				// Because of problems with alerts on T637, need to
 				// show a form before we show the alert, or it never
 				// appears.
-				initializeLoadingForm(aboutAlert.getString(),
+				initializeLoadingForm("Loading about...",
 						m_bookmarkList);
-				setCurrent( aboutAlert, m_bookmarkList );
+				getSetLicensePrompt(true);
 			}
 
-			synchronized(this) {
-				if ( m_exit || m_saveBookmarks ) {
-					exitApp();
-				}
+			if ( m_exit || m_saveBookmarks ) {
+				initializeLoadingForm(
+						(m_exit ?  "Exiting saving data..." :
+						 "Saving data..."), m_bookmarkList);
+				exitApp( m_loadForm );
 			}
 
 		} catch (Throwable t) {
@@ -1290,14 +1297,9 @@ implements
 				m_loadForm.addExc(ce.getMessage(), ce);
 				setCurrent( null, m_loadForm );
 			} catch (Throwable e) {
+				m_loadForm.recordExcFormFin(
+						"Internal error while processing", e);
 				e.printStackTrace();
-				final Alert internalAlert = new Alert(
-						"Internal error", 
-						"Internal error while processing",
-						null,
-						AlertType.WARNING);
-				internalAlert.setTimeout(Alert.FOREVER);
-				setCurrent( internalAlert, m_loadForm );
 			}
 		}
     }
@@ -1415,7 +1417,7 @@ implements
 				final int maxItemCount =
 					m_appSettings.getMaximumItemCountInFeed();
 				cbackGrParser.makeObserable(cgetModPage, maxItemCount);
-				loadForm.addPromptCommand(RssReaderMIDlet.m_backCommand,
+				loadForm.addPromptCommand(FeatureMgr.m_backCommand,
 									"Are you sure that you want to go back? Parsing has not finished.");
 				if (obs1 != null) {
 					cbackGrParser.getObservableHandler().addObserver(obs1);
@@ -1564,7 +1566,7 @@ implements
 		} finally {
 			synchronized(this) {
 				if (parser != null) {
-					loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
+					loadForm.removeCommandPrompt(FeatureMgr.m_backCommand);
 					//#ifdef DMIDP20
 					m_parseBackground = false;
 					//#ifdef DLOGGING
@@ -1579,58 +1581,68 @@ implements
 	/** Save data and exit the application. This accesses the database,
 	    so it must not be called by commandAction as it may hang.  It must
 	    be called by a separate thread.  */
-	final private void exitApp() {
+	final private void exitApp(LoadingForm loadForm ) {
+		boolean cexit = false;
+		boolean csaveBookmarks = false;
 		synchronized(this) {
 			if ( (m_exit || m_saveBookmarks) && !m_saving ) {
 				if (m_exit && m_stored) {
 					return;
 				}
-				try {
-					m_saving = true;
-					//#ifdef DLOGGING
-					if (fineLoggable) {logger.fine("m_exit,m_saveBookmarks=" + m_exit + "," + m_saveBookmarks);}
-					//#endif
-					if ( m_exit ) {
-						initializeLoadingForm("Exiting saving data...",
-								m_bookmarkList);
-						m_loadForm.addQuit();
-					} else if ( m_saveBookmarks ) {
-						initializeLoadingForm("Saving data...",
-								m_bookmarkList);
-					} else {
-						return;
-					}
-					saveBkMrkSettings("Saving items to database...",
-							System.currentTimeMillis(), m_firstTime, m_exit,
-							m_rssFeeds, m_bookmarkList, m_loadForm, m_settings
-							//#ifdef DLOGGING
-							,logger
-							,fineLoggable
-							//#endif
-							);
-					if (m_exit) {
-						try {
-							destroyApp(true);
-						} catch (MIDletStateChangeException e) {
-							//#ifdef DLOGGING
-							if (fineLoggable) {logger.fine("MIDletStateChangeException=" + e.getMessage());}
-							//#else
-							e.printStackTrace();
-							//#endif
-						}
-						super.notifyDestroyed();
-						m_exit = false;
-					} else {
-						m_loadForm.appendMsg(
-								"Finished saving.  Use back to return.");
-						showBookmarkList();
-					}
-				} finally {
-					m_stored = m_exit;
-					m_exit = false;
-					m_saveBookmarks = false;
-					m_saving = false;
+				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine("loadForm,m_exit,m_saveBookmarks,m_saving=" + loadForm + "," + m_exit + "," + m_saveBookmarks + "," + m_saving);}
+				//#endif
+				if ( !m_exit && !m_saveBookmarks ) {
+					return;
 				}
+				cexit = m_exit;
+				csaveBookmarks = m_saveBookmarks;
+			} else {
+				return;
+			}
+		}
+		if (cexit || csaveBookmarks) {
+			try {
+				synchronized(this) {
+					if (m_saving) {
+						return;
+					} else {
+						m_saving = true;
+					}
+				}
+				if (cexit) {
+					loadForm.addQuit();
+				}
+				saveBkMrkSettings("Saving items to database...",
+						System.currentTimeMillis(), m_firstTime, cexit,
+						m_rssFeeds, m_bookmarkList, loadForm, m_settings
+						//#ifdef DLOGGING
+						,logger
+						,fineLoggable
+						//#endif
+						);
+				if (cexit) {
+					try {
+						destroyApp(true);
+					} catch (MIDletStateChangeException e) {
+						//#ifdef DLOGGING
+						if (fineLoggable) {logger.fine("MIDletStateChangeException=" + e.getMessage());}
+						//#else
+						e.printStackTrace();
+						//#endif
+					}
+					super.notifyDestroyed();
+					m_exit = false;
+				} else {
+					loadForm.appendMsg(
+							"Finished saving.  Use back to return.");
+					showBookmarkList();
+				}
+			} finally {
+				m_stored = m_exit;
+				m_exit = false;
+				m_saveBookmarks = false;
+				m_saving = false;
 			}
 		}
 	}
@@ -1670,7 +1682,7 @@ implements
 		} else if (disp instanceof List) {
 			title = ((List)disp).getTitle();
 		}
-		System.out.println("Test UI setCurrentNotes " + disp.getClass().getName() + "," + title);
+		System.out.println("Test UI setCurrentNotes " + FeatureMgr.logDisp(disp));
 		//#endif
 		if (cloadForm == null) {
 			cloadForm = (disp instanceof LoadingForm) ? (LoadingForm)disp : m_loadForm;
@@ -1707,7 +1719,7 @@ implements
 	//#ifdef DTESTUI
 	/** Cause item form to go back to the prev form. */
     final public void backFrItemForm() {
-		m_itemForm.commandAction( RssReaderMIDlet.m_backCommand, m_itemForm );
+		m_itemForm.commandAction( FeatureMgr.m_backCommand, m_itemForm );
     }
     
     /** Show item form */
@@ -1820,11 +1832,7 @@ implements
 					}
 					if (m_firstTime) {
 						m_firstTime = false;
-						final Alert aboutAlert = getAbout();
-						setCurrent( aboutAlert, 
-								(m_loadForm.hasExc() ?
-								 (Displayable)m_loadForm :
-								 (Displayable)m_bookmarkList) );
+						getSetLicensePrompt(false);
 					}
 				}
 
@@ -1846,7 +1854,16 @@ implements
 				"About RssReader",
  "RssReader v" + super.getAppProperty("MIDlet-Version") + "-" +
  super.getAppProperty("Program-Version") +
- " Copyright (C) 2005-2006 Tommi Laukkanen, " +
+ " By using this program you agree with the license and disclaimer" +
+ " THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR " +
+ "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, " +
+ "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE " +
+ "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER " +
+ "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING " +
+ "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS " +
+ "IN THE SOFTWARE.  " +
+ " Copyright (C) 2005-2007 Tommi Laukkanen, " +
+ " Copyright (C) 2007-2010 Irving Bunton, Jr, " +
  " Copyright (c) 2001-2005 Todd C. Stellanova, rawthought, " +
  " (C)1999 Romain Guy, Osvaldo Pinali Doederlein, " +
  "http://code.google.com/p/mobile-rss-reader/.  " +
@@ -1866,8 +1883,7 @@ implements
  "51 Franklin Street, Fifth Floor" +
  "Boston, MA" +
  "02110-1301 USA" +
- "Using this software means that you accept this license and agree to" +
- "not use this program to break any laws."};
+ "Using this software means that you accept this license and disclaimer."};
 	}
 
     /**
@@ -1875,6 +1891,7 @@ implements
 	 * @author  Irving Bunton
 	 * @version 1.0
 	 */
+	/* Alerts can cause problems.  Do not even reference them.
 	final private Alert getAbout() {
 		String[] aboutInfo = getAboutInfo();
 		final Alert about = new Alert(aboutInfo[0], aboutInfo[1], null,
@@ -1882,6 +1899,30 @@ implements
 		about.setTimeout(Alert.FOREVER);
  
 		return about;
+	}
+	*/
+
+    /**
+	 * Create license prompt.
+	 * @author  Irving Bunton
+	 * @version 1.0
+	 */
+	final private Displayable getSetLicensePrompt(boolean isAbout) {
+		String[] aboutInfo = getAboutInfo();
+		if (isAbout) {
+			m_loadForm.addStartCmd( m_bookmarkList );
+			m_loadForm.addQuit();
+		}
+		Displayable disp = m_loadForm.getFeatureMgr().getPromptDisp(
+				"License and Disclaimer", aboutInfo[1],
+				((m_loadForm.hasExc() || m_loadForm.hasNotes()) ?
+											m_loadForm.m_loadMsgsCmd :
+											m_loadForm.m_loadStartCmd),
+				m_loadForm.m_loadQuitCmd, m_loadForm, null);
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine("disp=" + disp);}
+		//#endif
+		return disp;
 	}
 
     /**
@@ -1957,25 +1998,16 @@ implements
 						//#ifdef DTEST
 						storeTime += System.currentTimeMillis() - beginStore;
 						//#endif
-						bookmarks.append(CFEED_SEPARATOR);
+						bookmarks.append(Settings.CFEED_SEPARATOR);
 						if (releaseMemory) {
 							vstored.addElement( name );
 						}
 					}
 				}
 			} catch(OutOfMemoryError error) {
-	//#ifdef DLOGGING
-				logger.severe("saveBookmarks could not save.", error);
-	//#endif
-				System.out.println("Error saveBookmarks could not save.  " +
-						error + " " + error.getMessage());
-				final Alert memoryAlert = new Alert(
-						"Out of memory", 
-						"Saving bookmarks without updated news items.",
-						null,
-						AlertType.WARNING);
-				memoryAlert.setTimeout(Alert.FOREVER);
-				loadForm.getFeatureMgr().showMe( memoryAlert );
+				loadForm.recordExcForm(
+						"Out of memory while Saving bookmarks without " +
+						"updated news items.  Reducing memory.", error);
 				
 				/** Save feeds without items */
 				bookmarks.setLength(0);
@@ -1986,7 +2018,7 @@ implements
 					}
 					final RssItunesFeed rss = (RssItunesFeed)rssFeeds.get( name );
 					bookmarks.append(rss.getStoreString(false, true));
-					bookmarks.append(CFEED_SEPARATOR);
+					bookmarks.append(Settings.CFEED_SEPARATOR);
 					if (releaseMemory) {
 						vstored.addElement( name );
 					}
@@ -2079,6 +2111,7 @@ implements
 			if (pl >= 0) {
 				loadForm.delete(pl);
 			}
+			loadForm.showMeNotes(FeatureMgr.getMainDisp());
 		}
 	}
 
@@ -2408,7 +2441,7 @@ implements
 				m_parseBackground = false;
 				setPageInfo(false, false, false, m_prevDisp);
 				m_backGrParser.getObservableHandler().deleteObserver(this);
-				m_loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
+				m_loadForm.removeCommandPrompt(FeatureMgr.m_backCommand);
 			}
 		}
 		//#ifdef DLOGGING
@@ -2440,25 +2473,19 @@ implements
 			if (finestLoggable) {logger.finest("procPlatform platformURL=" + platformURL);}
 			//#endif
 			if( super.platformRequest(platformURL) ) {
-				loadForm = LoadingForm.getLoadingForm(
-						"Exiting saving data...", rtn, null);
-				featureMgr.setLoadForm(loadForm);
+				loadForm.appendMsg("Exiting saving data...");
 				synchronized(this) {
 					m_exit = true;
-					exitApp();
 				}
+				exitApp(loadForm);
 			} else {
 				setCurrent( null, rtn );
 			}
 		} catch (ConnectionNotFoundException e) {
-			//#ifdef DLOGGING
-			logger.severe("procPlatform Error opening link " + platformURL, e);
-			//#endif
-			final Alert badLink = new Alert("Could not connect to link",
-					"Bad link:  " + platformURL,
-					null, AlertType.ERROR);
-			badLink.setTimeout(Alert.FOREVER);
-			setCurrent( badLink, rtn );
+			/* Show exception and set form. */
+			loadForm.recordExcFormFin(
+					"Could not connect to bad link:" + platformURL,
+					e);
 		}
 	}
 	//#endif
@@ -2476,7 +2503,7 @@ implements
 			super(feed.getName(), loadForm);
 			this.m_rtn = rtn;
 			m_platformReq = false;
-			super.addCommand( RssReaderMIDlet.m_backCommand );
+			super.addCommand( FeatureMgr.m_backCommand );
 			m_platformURL = feed.getLink();
 			if (m_platformURL.length() > 0) {
 				super.addCommand( m_openLinkCmd );
@@ -2526,11 +2553,11 @@ implements
 
 		public void commandAction(Command c, Displayable s) {
 			/* Back from details form. */
-			if( c == RssReaderMIDlet.m_backCommand ){
+			if( c == FeatureMgr.m_backCommand ){
 				setCurrent( null, m_rtn );
 			}
 			/** Go to link and get back to RSS feed headers */
-			if( c == RssReaderMIDlet.m_openLinkCmd ){
+			if( c == m_openLinkCmd ){
 				synchronized(this) {
 					m_platformReq = true;
 				}
@@ -2580,7 +2607,7 @@ implements
 			//#endif
 			m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 9);
 			m_copyEnclosureCmd  = new Command("Copy enclosure", Command.SCREEN, 10);
-			super.addCommand( RssReaderMIDlet.m_backCommand );
+			super.addCommand( FeatureMgr.m_backCommand );
 			final String sienclosure = item.getEnclosure();
 			final String desc = item.getDescription();
 			if ((actTitle.length()>0) && (desc.length()>0)) {
@@ -2685,7 +2712,7 @@ implements
 
 		public void commandAction(Command c, Displayable s) {
 			/** Get back to RSS feed headers */
-			if( c == RssReaderMIDlet.m_backCommand ){
+			if( c == FeatureMgr.m_backCommand ){
 				if ((m_itemRtnList != null) &&
 					((m_itemRtnList instanceof HeaderList) ||
 					(m_itemRtnList instanceof AllNewsList))) {
