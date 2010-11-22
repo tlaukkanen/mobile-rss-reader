@@ -60,6 +60,7 @@
  * IB 2010-07-29 1.11.5Dev8 If default set from get, set m_valuesChanged to true.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-19 1.11.5Dev14 Move static vars CFEED_SEPARATOR and OLD_FEED_SEPARATOR out of midlet class to Settings.
  */
 
 // Expand to define CLDC define
@@ -112,6 +113,8 @@ final public class Settings {
     public static final int MAX_REGIONS = 15;
     public static final String SETTINGS_NAME = "RssReader-setttings-vers";
     public static final String BOOKMARKS_NAME = "bookmarks";
+    final static public char CFEED_SEPARATOR = (char)4;
+    final static public char OLD_FEED_SEPARATOR = '^';
 	// The first settings did not have a version, so it ends up being
 	// "" by default
     public static final String RECORD_STORE_NAME = "Store";
