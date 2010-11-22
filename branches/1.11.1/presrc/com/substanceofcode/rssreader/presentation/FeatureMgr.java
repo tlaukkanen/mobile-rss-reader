@@ -91,6 +91,7 @@
  * IB 2010-11-22 1.11.5Dev14 Add catch Throwable, logging, and printStackTrace to some methods.
  * IB 2010-11-22 1.11.5Dev14 Use logDisp to log the display class and title(if present).
  * IB 2010-11-22 1.11.5Dev14 Don't cast setCurrentFeature parameter to setCurrentAlt.
+ * IB 2010-11-22 1.11.5Dev14 Have getPromptDisp use optional rejectLabel for cancel label if present.
 */
 
 // Expand to define MIDP define
@@ -288,7 +289,8 @@ public class FeatureMgr implements CommandListener,
 		Form formAlert = new Form(promptTitle);
 		formAlert.append(promptMsg);
 		formAlert.addCommand(new Command("OK", Command.OK, 4));
-		formAlert.addCommand(new Command("Cancel", Command.CANCEL, 2));
+		formAlert.addCommand(new Command(((rejectLabel == null) ? "Cancel":
+						rejectLabel), Command.CANCEL, 2));
 		formAlert.setCommandListener(this);
 		/*
 		   Alert promptAlert = new Alert(ccmd.getLabel(),
