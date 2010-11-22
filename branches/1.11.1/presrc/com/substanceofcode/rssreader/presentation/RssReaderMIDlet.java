@@ -114,6 +114,7 @@
  * IB 2010-11-22 1.11.5Dev14 More logging.
  * IB 2010-11-22 1.11.5Dev14 Make exit/saving vars volatile so that they should get set correctly.
  * IB 2010-11-22 1.11.5Dev14 Use showMeNotes after saving data.
+ * IB 2010-11-22 1.11.5Dev14 Have getPromptDisp pass in "Quit Program" instead of cancel to promt for About license.
 */
 
 // Expand to define test define
@@ -1918,7 +1919,7 @@ implements
 				((m_loadForm.hasExc() || m_loadForm.hasNotes()) ?
 											m_loadForm.m_loadMsgsCmd :
 											m_loadForm.m_loadStartCmd),
-				m_loadForm.m_loadQuitCmd, m_loadForm, null);
+				m_loadForm.m_loadQuitCmd, "Quit Program", m_loadForm, null);
 		//#ifdef DLOGGING
 		if (fineLoggable) {logger.fine("disp=" + disp);}
 		//#endif
