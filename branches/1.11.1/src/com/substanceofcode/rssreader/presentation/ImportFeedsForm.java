@@ -45,6 +45,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 More logging.
  * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2010-11-19 1.11.5Dev14 Move static var m_backCommand out of midlet class to FeatureMgr.
 */
 // FIX check for blank url
 
@@ -306,7 +307,7 @@ implements
 				cfeedListParser.getObservableHandler().deleteObserver(this);
 			}
 			//#endif
-			loadForm.removeCommandPrompt(RssReaderMIDlet.m_backCommand);
+			loadForm.removeCommandPrompt(FeatureMgr.m_backCommand);
 			// Free memory.
 			//#ifdef DMIDP20
 			synchronized(this) {
@@ -492,7 +493,7 @@ implements
 					m_parseBackground = true;
 					loadForm.setObservable(m_backGrListParser);
 				}
-				loadForm.addPromptCommand(RssReaderMIDlet.m_backCommand,
+				loadForm.addPromptCommand(FeatureMgr.m_backCommand,
 									"Are you sure that you want to go back? Reading the list has not finished.");
 				//#endif
 				clistParser.startParsing();
