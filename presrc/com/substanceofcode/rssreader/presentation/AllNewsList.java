@@ -38,6 +38,7 @@
  * IB 2010-11-16 1.11.5Dev14 Don't have feed open property now that back will have consistent usage.
  * IB 2010-11-16 1.11.5Dev14 Use m_backCommand from RssReaderMIDlet all the time.
  * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2010-11-19 1.11.5Dev14 Move static var m_backCommand out of midlet class to FeatureMgr.
 */
 
 // Expand to define MIDP define
@@ -162,7 +163,7 @@ public class AllNewsList extends FeatureList
 		RssReaderMIDlet midlet = FeatureMgr.getMidlet();
 		m_openHeaderCmd     = new Command("Open", Command.SCREEN, 5);
 		super.addCommand(m_openHeaderCmd);
-		super.addCommand(RssReaderMIDlet.m_backCommand);
+		super.addCommand(FeatureMgr.m_backCommand);
 		m_sortUnreadItemsCmd = new Command("Unread date sorted",
 										   Command.SCREEN, priority++);
 		m_sortReadItemsCmd = new Command("Read date sorted",
@@ -855,7 +856,7 @@ public class AllNewsList extends FeatureList
 					}
 				}
 			/** Get back to RSS feed bookmarks */
-			} else if( c == RssReaderMIDlet.m_backCommand ){
+			} else if( c == FeatureMgr.m_backCommand ){
 				//#ifdef DTESTUI
 				synchronized(this) {
 					m_testNews = false;
