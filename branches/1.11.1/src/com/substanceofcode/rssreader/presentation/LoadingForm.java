@@ -35,6 +35,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Add m_loadStartCmd to allow going to start screen in this case bookmarks from loading screen.
  * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2010-11-22 1.11.5Dev14 New method showMeNotes to show notes if loadingform has notes/exceptions, else show display.
  */
 
 // Expand to define MIDP define
@@ -87,11 +88,11 @@ final public class LoadingForm extends FeatureForm
 //@	private String      m_title;         // Store title.
 	//#endif
 	private boolean     m_loadFinished = false;  // Store loading finished.
-	private Command     m_loadStartCmd = null;  // The load form start to displayable command
-	private Command     m_loadMsgsCmd;   // The load form messages command
+	public Command     m_loadStartCmd = null;  // The load form start to displayable command
+	public  Command     m_loadMsgsCmd;   // The load form messages command
 	private Command     m_loadDiagCmd;   // The load form diagnostic command
 	private Command     m_loadErrCmd;    // The load form error command
-	private Command     m_loadQuitCmd = null;   // The load form quit command
+	public Command     m_loadQuitCmd = null;   // The load form quit command
 	private Vector m_msgs = new Vector(); // Original messages
 	private Vector m_notes = new Vector(); // Notes
 	private Vector m_excs = new Vector(); // Only errors
@@ -126,8 +127,8 @@ final public class LoadingForm extends FeatureForm
 		m_loadMsgsCmd       = new Command("Messages", Command.SCREEN, 7);
 		m_loadErrCmd        = new Command("Errors", Command.SCREEN, 8);
 		m_loadDiagCmd       = new Command("Diagnostics", Command.SCREEN, 9);
-		if (RssReaderMIDlet.m_backCommand == null) {
-			RssReaderMIDlet.m_backCommand   = new Command("Back", Command.BACK, 1);
+		if (FeatureMgr.m_backCommand == null) {
+			FeatureMgr.m_backCommand   = new Command("Back", Command.BACK, 1);
 		}
 		super.addCommand( m_loadMsgsCmd );
 		super.addCommand( m_loadErrCmd );
@@ -135,7 +136,7 @@ final public class LoadingForm extends FeatureForm
 		m_mainDisp = mainDisp;
 		m_disp = disp;
 		if (disp != null) {
-			super.addCommand( RssReaderMIDlet.m_backCommand );
+			super.addCommand( FeatureMgr.m_backCommand );
 		}
 	}
 
@@ -154,6 +155,18 @@ final public class LoadingForm extends FeatureForm
 		loadForm.setCommandListener( loadForm, false );
 		loadForm.getFeatureMgr().showMe();
 		return loadForm;
+	}
+
+	public void showMeNotes(Displayable nextDisp) {
+		if (hasExc() || hasNotes()) {
+			replaceRef(null, nextDisp);
+			if (!isLoadFinished()) {
+				recordFin();
+			}
+			featureMgr.showMe();
+		} else {
+			featureMgr.setCurrentMgr(null, nextDisp);
+		}
 	}
 
 	static public LoadingForm getLoadingForm(final String desc,
@@ -195,7 +208,7 @@ final public class LoadingForm extends FeatureForm
 	/** Respond to commands */
 	public void commandAction(Command c, Displayable s) {
 
-		if(( c == RssReaderMIDlet.m_backCommand ) || ( c == m_loadStartCmd )){
+		if(( c == FeatureMgr.m_backCommand ) || ( c == m_loadStartCmd )){
 			Displayable cdisp = null;
 			synchronized(this) {
 				cdisp = m_disp;
@@ -383,7 +396,7 @@ final public class LoadingForm extends FeatureForm
 			}
 			m_disp = (newDisp == null) ? m_mainDisp : newDisp;
 			if ((odisp == null) && (m_disp != null)) {
-				super.addCommand( RssReaderMIDlet.m_backCommand);
+				super.addCommand( FeatureMgr.m_backCommand);
 			}
 		}
 		//#ifdef DLOGGING
