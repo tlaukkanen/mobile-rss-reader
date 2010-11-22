@@ -49,6 +49,7 @@
  * IB 2010-11-19 1.11.5Dev14 Change debug log info.
  * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg print the class name.
  * IB 2010-11-22 1.11.5Dev14 Replace Alert with loading form exception.
+ * IB 2010-11-22 1.11.5Dev14 Fix stack trace to use e instead of t.
 */
 
 // Expand to define MIDP define
@@ -509,7 +510,7 @@ final public class KFileSelectorImpl
 						super.getFeatureMgr().getLoadForm().recordExcFormFin(
 								"Security problem found either access " +
 								" denied or access refused by the user.", e);
-						t.printStackTrace();
+						e.printStackTrace();
 						throw e;
 					}
 					catch (IllegalArgumentException e)
