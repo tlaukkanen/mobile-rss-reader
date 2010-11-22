@@ -39,7 +39,7 @@
  * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  * IB 2010-11-17 1.11.5Dev14 Cosmetic change.
  * IB 2010-11-18 1.11.5Dev14 Change jsr-75 exists to give true for allowed and not allowed.
- * IB 2010-11-18 1.11.5Dev14 If jsr-75 vers exists show the version string in case it changes later.
+ * IB 2010-11-19 1.11.5Dev14 Use getSysProperty instead of getProperty for working with emulator and possibly other devices.
  */
 
 // Expand to define MIDP define
@@ -230,7 +230,10 @@ implements CommandListener {
 		pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         super.append( pgmJsr75 );
-		String mep = System.getProperty("microedition.profiles");
+		Object[] omep = FeatureMgr.getSysProperty("microedition.profiles", null,
+				"Unable to get microedition.profiles",
+				featureMgr.getLoadForm());
+		String mep = (String)omep[0];
 		if (mep == null) {
 			mep = "N/A";
 		}
@@ -239,8 +242,14 @@ implements CommandListener {
 		midpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         super.append( midpVers );
-        StringItem cldcVers = new StringItem("Phone CLDC version:",
-				System.getProperty("microedition.configuration"));
+		Object[] omec = FeatureMgr.getSysProperty("microedition.configuration",
+				null, "Unable to get microedition.configuration",
+				featureMgr.getLoadForm());
+		String mec = (String)omec[0];
+		if (mec == null) {
+			mec = "N/A";
+		}
+        StringItem cldcVers = new StringItem("Phone CLDC version:", mec);
 		//#ifdef DMIDP20
 		cldcVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
@@ -271,20 +280,27 @@ implements CommandListener {
 					(String)ojsr75[2]));
 		}
 		//#endif
-		String sprop = System.getProperty("microedition.platform");
-		if (sprop == null) {
-			sprop = "N/A";
+		Object[] omepl = FeatureMgr.getSysProperty("microedition.platform",
+				null, "Unable to get microedition.platform",
+				featureMgr.getLoadForm());
+		String mepl = (String)omepl[0];
+		if (mepl == null) {
+			mepl = "N/A";
 		}
-        StringItem platformVers = new StringItem("Phone Microedition platform:", sprop);
+        StringItem platformVers = new StringItem("Phone Microedition platform:",
+				mepl);
 		//#ifdef DMIDP20
 		platformVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         super.append( platformVers );
-		sprop = System.getProperty("microedition.locale");
-		if (sprop == null) {
-			sprop = "N/A";
+		Object[] omel = FeatureMgr.getSysProperty("microedition.locale",
+				null, "Unable to get microedition.locale",
+				featureMgr.getLoadForm());
+		String mel = (String)omel[0];
+		if (mel == null) {
+			mel = "N/A";
 		}
-        StringItem silocale = new StringItem("Phone Microedition locale:", sprop);
+        StringItem silocale = new StringItem("Phone Microedition locale:", mel);
 		//#ifdef DMIDP20
 		silocale.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
