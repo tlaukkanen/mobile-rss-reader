@@ -107,6 +107,12 @@
     <!-- IB 2010-11-17 1.11.5Dev14 Stop creating preverified directory. -->
     <!-- IB 2010-11-17 1.11.5Dev14 Remove cso files. -->
     <!-- IB 2010-11-18 1.11.5Dev14 Have full version have seperate define name. -->
+    <!-- IB 2010-11-18 1.11.5Dev14 Create presigned file for RIM signing in case failed signing to compare. -->
+    <!-- IB 2010-11-18 1.11.5Dev14 Copy signed cod to distsigned. -->
+    <!-- IB 2010-11-18 1.11.5Dev14 Move files and presereve the last modify date.  -->
+    <!-- IB 2010-11-18 1.11.5Dev14 Use a special rim bin for intermediate RIM files.  -->
+    <!-- IB 2010-11-18 1.11.5Dev14 Have special rim jad and jar file.  -->
+    <!-- IB 2010-11-18 1.11.5Dev14 Save temp cod file from signing to bin with -tmp.cod.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1071,14 +1077,24 @@
 	<target name="bb-ant.sign" depends="prepare" if="signed" unless="${no.rim.sign}" >
 	    <echo message="Signing ../${rim.build.file.root}.cod waiting 1 second." />
 		<sleep seconds="1" />
+		<copy file="../${rim.build.file.root}.cod" tofile="${bin}/${rim.build.file.root}-presign.cod" overwrite="true" />
 		<sigtool codfile="../${rim.build.file.root}.cod" password="${env.THAWTE_KEYSTORE_PASS}" />
-		<move file="../${rim.build.file.root}.signed" tofile="${rim.bin}/${rim.build.file.root}.signed" />
+		<move file="../${rim.build.file.root}.cod" tofile="${dist}/${rim.build.file.root}.cod"  preservelastmodified="true" />
+		<move file="../${rim.build.file.root}.signed" tofile="${dist}/${rim.build.file.root}.signed"  preservelastmodified="true" />
+		<copy file="${dist}/${rim.build.file.root}.cod" todir="${rim.bin}" overwrite="true" />
+		<copy file="${dist}/${rim.build.file.root}.signed" todir="${rim.bin}" overwrite="true" />
+		<copy file="${dist}/${rim.build.file.root}.cod" todir="${distsigned}" overwrite="true" />
+		<copy file="${dist}/${rim.build.file.root}.signed" todir="${distsigned}" overwrite="true" />
+		<move todir="${bin}" overwrite="true" >
+			<fileset dir="../wtkbuild" includes="**${rim.build.file.root}.cod" />
+			<globmapper from="*${rim.build.file.root}.cod" to="${rim.build.file.root}-tmp.cod" />
+		</move>
 	</target>
 
 	<target name="create.prc" depends="prepare" if="wtk.wme.home" >
 		<wtkmakeprc jarfile="${bin}/${project.name}.jar" name="${project.name}"  highres="true" creator="${prc.creater}" longname="${prc.longname}" />
 		<mkdir dir="${dist}/${build.prefix}prc" />
-		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc" />
+		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc"  preservelastmodified="true" />
 	</target>
 
 	<target name="exec.create.rim.files" depends="prepare" if="rim.home" >
@@ -1097,9 +1113,9 @@
 			<arg value="jad=${dist}/${build.file.root}_cod.jad" />
 			<arg value="${bin}/${build.file.root}_cod_in.jar" />
 		</exec>
-		<move file="${project.name}.cso" tofile="${dist}/${rim.build.file.root}.cso" />
-		<move file="${project.name}.cod" tofile="${dist}/${rim.build.file.root}.cod" />
-		<move file="${project.name}.debug" tofile="${dist}/${rim.build.file.root}.debug" />
+		<move file="${project.name}.cso" tofile="${dist}/${rim.build.file.root}.cso"  preservelastmodified="true" />
+		<move file="${project.name}.cod" tofile="${dist}/${rim.build.file.root}.cod"  preservelastmodified="true" />
+		<move file="${project.name}.debug" tofile="${dist}/${rim.build.file.root}.debug"  preservelastmodified="true" />
 	</target>
 
 	<target name="jar.create.rim.files" depends="prepare" if="jar.jde.home" unless="${bb.jde.use}" >
@@ -1123,8 +1139,9 @@
 			<arg value="${basedir}/${bin}/${rim.build.file.root}.jar" />
 		</java>
 		<mkdir dir="${rim.bin}" />
+		<copy file="../${rim.build.file.root}.cod" tofile="${dist}/${rim.build.file.root}.cod" />
+		<copy file="../${rim.build.file.root}.cod" tofile="${rim.bin}/${rim.build.file.root}.cod" />
 		<antcall target="bb-ant.sign" inheritAll="true" />
-		<move file="../${rim.build.file.root}.cod" tofile="${rim.bin}/${rim.build.file.root}.cod" />
 		<mkdir dir="${rim.bin.alx}" />
 		<alx destdir="${rim.bin.alx}" filename="${rim.build.file.root}.alx" >
 			<application id="${midlet.package}" name="${midlet.name}" vendor="${vendor}" version="${MIDLETVERS}" description="${project.description}" >
@@ -1135,16 +1152,14 @@
 			</application>
 		</alx>
 		<zip destfile="${dist}/${rim.build.file.root}.zip" basedir="${rim.bin.alx}" />
-		<move file="${rim.bin.alx}/${rim.build.file.root}.alx" tofile="${dist}/${rim.build.file.root}.alx" />
-		<move file="${rim.bin}/${rim.build.file.root}.cod" tofile="${dist}/${rim.build.file.root}.cod" />
+		<move file="${rim.bin.alx}/${rim.build.file.root}.alx" tofile="${dist}/${rim.build.file.root}.alx"  preservelastmodified="true" />
 		<move todir="${dist}" >
 			<fileset dir="${rim.bin}" includes="*.cod" />
 			<fileset dir="${rim.bin}" includes="*.signed" />
 		</move>
-		<move file="${bin}/${rim.build.file.root}.jad" tofile="${dist}/${rim.build.file.root}.jad" />
-		<move file="${bin}/${rim.build.file.root}.jar" tofile="${dist}/${rim.build.file.root}.jar" />
-		<move file="../${rim.build.file.root}.cso" tofile="${dist}/${rim.build.file.root}.cso" />
-		<move file="../${rim.build.file.root}.debug" tofile="${dist}/${rim.build.file.root}.debug" />
+		<move file="${bin}/${rim.build.file.root}.jad" tofile="${dist}/${rim.build.file.root}.jad"  preservelastmodified="true" />
+		<move file="../${rim.build.file.root}.cso" tofile="${dist}/${rim.build.file.root}.cso"  preservelastmodified="true" />
+		<move file="../${rim.build.file.root}.debug" tofile="${dist}/${rim.build.file.root}.debug"  preservelastmodified="true" />
 		<delete file="../${rim.build.file.root}.jar" />
 		<delete file="../${rim.build.file.root}-1.debug" />
 	</target>
@@ -1171,11 +1186,11 @@
 				</codset>
 			</application>
 		</alx>
-		<move file="${rim.bin}/${rim.build.file.root}.cso" tofile="${dist}/${rim.build.file.root}.cso" />
-		<move file="${rim.bin}/${rim.build.file.root}.cod" tofile="${dist}/${rim.build.file.root}.cod" />
+		<move file="${rim.bin}/${rim.build.file.root}.cso" tofile="${dist}/${rim.build.file.root}.cso"  preservelastmodified="true" />
+		<move file="${rim.bin}/${rim.build.file.root}.cod" tofile="${dist}/${rim.build.file.root}.cod"  preservelastmodified="true" />
 		<zip destfile="${rim.bin}/${rim.build.file.root}.zip" basedir="${rim.bin.alx}" />
-		<move file="${rim.bin.alx}/${rim.build.file.root}.alx" tofile="${dist}/${rim.build.file.root}.alx" />
-		<move file="${rim.bin}/${rim.build.file.root}.zip" tofile="${dist}/${rim.build.file.root}.zip" />
+		<move file="${rim.bin.alx}/${rim.build.file.root}.alx" tofile="${dist}/${rim.build.file.root}.alx"  preservelastmodified="true" />
+		<move file="${rim.bin}/${rim.build.file.root}.zip" tofile="${dist}/${rim.build.file.root}.zip"  preservelastmodified="true" />
 	</target>
 
 	<target name="svn.op.dist" if="${need.svn.preprocessed}" unless="skip.svn.op" >
