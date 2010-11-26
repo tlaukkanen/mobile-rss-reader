@@ -669,9 +669,7 @@ v1.11.5 Development 9 (dev9) (Oct 12th 2010)
 v1.11.5 Development 10 (dev10) (Oct 12th 2010)
 - Fix jad files by having correct Jar URL.
 
-v1.11.5 Development 14 (dev14) (Nob 18th 2010)
-- Change to initialize static variables using a static method allows Sun WTK Emulator to save the database when using the reader.
-- Change to initialize static variables using a static method allows microemulator to read and parse OPML and RSS.
+v1.11.5 Development 14 (dev14) (Nov 26th 2010)
 - Add columnCount to parseStdDate exceptions.
 - Add convience method setCurrentObjMgr to set current using objects for item and display.
 - Add default value for getSysProperty, getSysPermission, and getSysPropStarts.
@@ -681,19 +679,28 @@ v1.11.5 Development 14 (dev14) (Nob 18th 2010)
 - Add getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
 - Add getSysPropStarts to get system prorperties and see if it starts with a string.
 - Add m_loadStartCmd to allow going to start screen in this case bookmarks from loading screen.
+- Allow an object to be written to with the find files result using FeatureMgr.setTxtObj.
 - Allow item in setCurrentItemMgr to be null for convience in FeatureMgr.
+- Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
 - Allow StringBuffer to store data from text box in FeatureMgr.
 - Allow text box to be used as a prompt with accept/reject.
+- Allow title for find files as a parameter to allow more generic doLaunchSelector in KFileSelectorMgr.
 - Allow use of microemulator as applet.
+- Change debug log info.
+- Change getSysPermission to always retrieve system key.
 - Change initializeURLBox to use return display and return object.
+- Change jsr-75 exists to give true for allowed and not allowed.
 - Change prompt to set StringItem if return object.
 - Combine nested if statements.
+- Copy signed cod to distsigned.
 - Copy signed files to distsigned.
 - Cosmetic changes.
 - Create Blackberry alx and zip with alx and cod.
 - Create getAboutInfo to return info for about to be used as alert from getAbout or form.
 - Create godaddy signed itunes, jsr-75, cldc 1.1 version.
 - Create initApp to initialize the app.
+- Create presigned file for RIM signing in case failed signing to compare.
+- Create setTxtObj to set a text object of TextField, StringItem, or StringBuffer.
 - Do not create class variables for StringItem which do not change after initialization.
 - Do not use nullPtr to initialize variables.
 - Don't have feed open property now that back will have consistent usage.
@@ -705,6 +712,10 @@ v1.11.5 Development 14 (dev14) (Nob 18th 2010)
 - Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
 - Have code duplication target for PMD.
 - Have convience FeatureMgr constructor without loading form.
+- Have debug conditional println use displayDbgMsg.
+- Have displayDbgMsg and be in DTEST.
+- Have displayDbgMsg print the class name.
+- Have fieldEquals with RssItemInfo only for JM Unit tests.
 - Have file permissions be required to reduce endless ask to open file..
 - Have full version have seperate define name.
 - Have full version name with internet install link.
@@ -718,15 +729,21 @@ v1.11.5 Development 14 (dev14) (Nob 18th 2010)
 - Have parseStdDateTZ return string time zone instead of index of time zone.
 - Have prepare for godaddy, thawte, and verisign signing be independent of each other.  Each must be used before "prepare" target is called.
 - Have prepare for verisign signing.
+- Have println in DTEST.
 - Have required and optional permissions.
 - Have separate required and optional permissions.
 - Have separate sign of rim file.
 - Have signed versions of microemulator jars to allow demo applets.
+- Have special rim jad and jar file.
 - If create m_bookmarkList is successful, add start command in case something goes wrong after creating the booklist.
+- If jsr-75 vers exists show the version string in case it changes later.
 - If logging error, exit the constructor.
 - If no m_bookmarkList, don't add/remove commands from it.
 - Initialize FILE_SEPARATOR, openCommand, cancelCommand, and selectCommand in the constructor.
 - More logging.
+- Move endif to right place for DTEST.
+- Move files and presereve the last modify date.
+- Move find files call functionality to FeatureMgr.
 - Need to set m_feed before we use it to log.
 - Remove cod files in wtkbuild.
 - Remove cso files.
@@ -734,9 +751,12 @@ v1.11.5 Development 14 (dev14) (Nob 18th 2010)
 - Remove LogFile.txt file in wtkbuild.
 - Remove redundant new String of literal string.
 - Remove stimeZones and GMT because this may change with phone config or upgrading phone.
+- Save temp cod file from signing to bin with -tmp.cod.
+- Simplify getSysPermission.
 - Stop creating preverified directory.
 - Treat Verisign as other signed files.
 - Use acceptCmd and optional rejectCmd for prompt form or alert.
+- Use a special rim bin for intermediate RIM files.
 - Use Blackberry ant task rapc bb.jde.use.
 - Use Blackberry ant tools to sign cod file and create Blackberry target to create blackberry files.
 - Use Blackberry JDE 4.7.
@@ -777,6 +797,8 @@ Issues:
 
 TODO:
 
+- Selecting root directory in find files does not return the root directory.
+- Selecting .. for up directory, does not give error.  It goes up one directory.
 - Are alx files in zip files?
 - Use echo to add to readme?
 - Add full to file names.
