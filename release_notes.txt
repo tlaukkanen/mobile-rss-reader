@@ -216,7 +216,7 @@ v1.11.2 Beta 1 (beta1) (Dec 22th 2008)
 + Fix problem where if using "River of News" or Header sort of the number of items is 0, but a previous command displayed some results, there are items shown instead of 0 items.
 + Synchronize sort variables to prevent unintended results
 + Enhance to replace p, td, and br tags with a space.
-+ Have separate RIM (cod) jad file to prevent conversion of jar from corrupting the main jad file.
++ Have separate RIM (cod) jad and jar file to prevent conversion of jar from corrupting the main jad file.
 + Fix description problem introduced in previous Alpha release
 
 v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
@@ -348,9 +348,9 @@ v1.11.5 Development 9 (dev9) (Oct 12th 2010)
 v1.11.5 Development 10 (dev10) (Oct 12th 2010)
 - Fix jad files by having correct Jar URL.
 
-v1.11.5 Development 14 (dev14) (Nob 18th 2010)
+v1.11.5 Development 14 (dev14) (Nov 26th 2010)
+- Move build files using keep 
 - Put full_ into executables to allow future demo or load applications.
-- Saving feeds now works on Sun WTK 2.5.2_01 emulator.
 - Most functions work with microemulator except find files. 
 - Allow start of using program with start menu item on first loading screen.
 - Prompts use Forms instead of Alerts.  This allows some emulators and some Sony Ericsons to work.
@@ -362,6 +362,8 @@ v1.11.5 Development 14 (dev14) (Nob 18th 2010)
 - Have stardard positions for custom items open and select with standard order in menus.
 - Require file read access for JSR-75 files.  This may mean that JSR-75 files will not load if JSR-75 is not on the phone
 - Don't create preverified directory of class files.  The jars will remain preverified.
+- Copy signed files to distsigned directory.
+- If jsr-75 vers exists show the version string in case it changes later.
 
 Device notes:
 
