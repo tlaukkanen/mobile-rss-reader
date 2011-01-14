@@ -1,0 +1,22 @@
+MIDlet-1: RSSReader, /icons/rss.png, com.substanceofcode.rssreader.presentation.RssReaderMIDlet
+MIDlet-Jar-Size: 26843
+MIDlet-Info-URL: http://www.substanceofcode.com
+MIDlet-Jar-URL: @MIDLETURL@
+MIDlet-Name: RSSReader
+MIDlet-Vendor: Tommi Laukkanen
+MIDlet-Version: @MIDLETVERS@
+MIDlet-Permissions-Opt: javax.microedition.io.HttpConnection@PERMISSIONS@
+MIDlet-Data-Size: 3000
+MIDlet-Icon: /icons/rss.png
+MIDlet-Description: RSS Reader
+MicroEdition-Configuration: @JCLDCVERS@
+MicroEdition-Profile: @JMIDPVERS@
+english-add-new-feed: Add new feed
+english-back: Back
+jlomicro-handlers: FormHandler RecStoreHandler
+jlomicro-ConsoleHandler-formatter: SimpleFormatter
+jlomicro-FormHandler-limit: 1000
+jlomicro-FormHandler-formatter: SimpleFormatter
+jlomicro-RecStoreHandler-limit: 1000
+jlomicro-RecStoreHandler-formatter: SimpleFormatter
+jlogmicro-com-substanceofcode-utils-SortUtil-level: OFF

@@ -1,0 +1,13 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-09-28 1.11.5RC2 Allow versions with JSR-82.
+#-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
+lib.classpath = GASPBT.jar
+wtk.bluetooth.enabled = true
+DJSR82 = DJSR82
+file.prefix.jsr82 = jsr82_
+PERMISSIONS_REQ.jsr82 =
+PERMISSIONS_OPT.jsr82 = ,javax.bluetooth.RemoteDevice.authorize, javax.microedition.io.Connector.bluetooth.server, javax.microedition.io.Connector.bluetooth.client,javax.microedition.io.Connector.obex.client,javax.microedition.io.Connector.obex.server.tcp
+SUFFIXVERS.jsr82 = -jsr82
+lib.jsr82 = :${wtk.home}/lib/jsr82.jar
+nojsr82.res.excludes =
+jsr82 = JSR-82

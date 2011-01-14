@@ -1,0 +1,391 @@
+Mobile RSS Reader
+
+Copyright (c) 2006-2007 Tommi Laukkanen
+Copyright (c) 2007-2010 Irving Bunton, Jr
+http://www.substanceofcode.com
+
+Contributors:
+Irving Bunton
+
+Release Notes:
+
+v1.5 (July 23th 2007)
++ Open links in device browser
++ Allow long feed URLs
+
+v1.9 (August 14rd 2007)
++ Support ISO8859-1, windows-1252, UTF-8, UTF-16 (partial support 
++ Fixed import feeds replacing current feed and importing only 1 feed.
+
+v1.10 (August 23rd 2007)
++ Reduced memory overflows while saving
++ Fix '|' in header name and item 
++ Prompt to delete feed
++ Fix delete of feed and add with the same name
++ Full/fixed support for ISO8859-1, windows-1252, UTF-8, UTF-16
++ Support for some redirects
++ Optionally mark unread items in feed
++ Show memory usage
++ Prepare to allow saving of log level for test version.
++ Replace HTML entities and numeric entities from OPML title
++ Replace more HTML entities and hex numeric entities
++ Read all unread items in list
++ Update only modified feeds.
++ Use summary if no description in atoms.
++ Use dates in atoms.
++ Support more date formats.
++ Save if opening link closes the application
++ Save without exit
++ Show error for import feed parsing error
++ Show and open enclosure
++ Support more time formats
+
+v1.10.1 (August 24rd 2007)
++ Fixed about not being shown the first time of use
++ Fixed intermittent exit problem
+
+v1.10.2 (August 24rd 2007)
++ Fixed infinite loop in emulator on exit.
++ Take version from manifest file.
+
+v1.10.3 (August 28th 2007)
++ Fixed date formatting if it has '-' for RSS date.
++ Use alternate link for atoms of self and related are not present.
++ Rename New Items form to Unread Items form.
++ Remove unused test logging classes.
+
+v1.10.4 (September 4th 2007)
++ Fixed allowing pasting for some devices.  (Other devices may not have had
+  any problem.)
++ Fixed redirect problem with capitalized HTML tags.
++ Show used/available memory in addition to DB memory used/available.
++ Allow copy of enclosure.
++ Give alert for out of memory that is there until it is dismissed.
++ Fixed initial run problem with bookmarks shown before about screen.
++ Fixed intermittent start hang with MIDP 1.0 version.
++ Added more logging for test version.
++ Set focus when setting copy link/enclosure (Focus does not work
+on all devices including the emulator.)
+
+v1.10.5 (September 17th 2007)
++ Allow non utf-16 to be faster.
++ Allow windows single quote for attributes.
++ Fixed attributes not handling encoding.
++ Allow descending sort of unread items dates.
++ Don't give error if missing title.
++ Allow reading of missing titles from OPML.
++ Get redirection from URLs with redirection statuses.
++ More error messages for feed problems.
++ Test logging changes (not in released binaries.  In test only).
++ Fixed add new bookmark not showing previous user name/password.
++ Increased size of bookmarks that can be restored.
++ Logging changes (for test only).
+
+v1.10.6 (September 20th 2007)
++ Fix serious problem with import not working
+
+v1.10.7 (October 2nd 2007)
++ Give error for forbidden and not found
++ Allow optional prevention of redirect for bad HTML mime types
++ Allow files in memory for feed files and import files
++ Allow paste for MIDP-1.0 (dependent on device)
++ Show program and device MIDP, CLDC, JSR75 settings on settings form
+
+v1.11
++ New river of news options to sort by date and feed for all items, only unread,
+  or only read.
++ Mark item as read or unread on river of news
++ Fix install problem on some MIDP 1.0 phones
++ Allow import to insert, add to current or end.
++ Allow add bookmark to insert, add to current or end.
++ Use allow paste from regular command for MIDP 2.0 instead of item command
++ Create forms only when needed to reduce memory usage
++ Support metadata re-direct
++ Support HTML RSS/Atom autolinks
++ Minor performance enhancements
++ Fix prologue handling to fix style set handling
++ Podcast version for phones with lots of memory (high end smart phones).
+  This gets subtitle, summary, author, explicit, language, and duration
++ Support description and for date (name space other than dc) from Dublin Core
++ Support two namespaces if present only itunes and Dublin core are supported
++ Support link for feed.  Use link of feed if no link for item for
+  podcast version (to save on memory since podcast vers if for phones with
+  more memory)
++ Support future user defined category for feed.
++ Support accessing memory without JSR-75 if phone supports, but the
+  file path needs to be know as browser is not possible, so this may
+  not be very useful.  Memory URL must begin with file://
++ Support opening of files in the jar (jar:///) for future use of
+  files in the jar file
++ Do not add feeds from HTML links which have 0 length
++ Allow passwords to contain '|'
++ Fix problem where 'textinput' description is used instead of item description
++ Fix problem where update of redirected feed twice while on the bookmark/feed
+  caused an error.  (The previous workaround was to go back to bookmarks and
+  then open the book mark and update)
++ Fix problem with redirect not working for OPML files
++ Fix problem with some HTML imports not giving any values
++ Fix problem with some &nbsp; not being removed
++ Have error screen for errors during feed import.
++ Give error when importing and existing feed that it is not updated
+  (workaround is to delete and then re-import)
++ Support HTML links without quotes for href
++ Better error when redirect is a second time
++ Allow logging of input/output with TESTUI define for test version.
++ Allow testing of compatibility of the record store from previous versions
++ Allow change in order of back and open for headers/items list
++ Testing form to show encoding
++ Convert more entities.  Also, convert hex numeric entities
++ Support dates with non-breaking space
++ Prevent infinite loop when removing HTML which has unmatched '<'
++ Fix handling of out of memory while storing bookmarks
++ Stop thread when exiting
++ Memory not updated after first time viewed on settings.
++ Allow items without a title.  Use 1st 10 words (configurable in settings)
+  of the title for the item in headers list and title of item form
++ Give correct error message if JSR75 not supported on the phone
++ Don't have open/copy link command if no link
++ Give out of memory errors when applicable
++ Use standard J2ME menu items for OK, back and exit
++ Prompt for exit
++ Support phones with encoding aliases not documented in J2SE list
+  (e.g. ISO-8859-1 instead of ISO8859_1).
+
+v1.11.1 Release Candidate 5 (RC5) (July 28th 2008)
++ Fix bug introduced in release candidate with bad error handling for a bad URL for import.
++ Fixed introduced bug in a previous Release Candidate with import form
+
+v1.11.1 (August 2nd 2008)
++ Fix bug when opening feeds on Sony Ericsson emulators and possibly affecting Sony Ericsson devices
++ Fix bug with storing Itunes attributes
++ Workaround VM problems with synchronized methods that prevent update of settings
++ Allow choice to use standard exit or not in exit.  (Some phones the user may not know which key is the exit key).
++ Only remove new lines from title if there is a description.
++ If atom has summary, but no title or description, use the summary as the description
++ Support CLDC 1.1 versions all MIDP 2.0 versions.
++ Minor performance improvement for creating items, reading stored feeds.
++ Allow feeds with '^' in title, description, subtitle, summary, and author.
++ Workaround loading form not being shown on N95.  With the workaround the problem is fixed.
++ Show micro edition platform.
++ Workaround problem with some Sony Ericsson phones with dynamic retrieval of display.  Need to use setCurrent using original display for alerts.  This problem prevented exit/delete of feed, but is not fixed.
++ Update exit key of when change of standard exit enabling.
++ Allow feeds with '^' in title, description, subtitle, summary, and author.
++ Use gauge to show progress of saving/loading.
++ Fix dates in yyyy-mm-dd format
++ Fix standard dates with 2 or more consecutive spaces
++ Workaround Sony Ericsson T637 problem with Exit and Delete (Alerts on MIDP 1.0 device)
++ Handle Content module
++ Add to disclaimer
++ Allow '|' in feed name, password, and podcast attributes author, subtitle, summary.
++ Fix bugs in wtk-build.xml when properties suffixes not used.
++ Workaround for MicroEmulator
++ Optionally create PRC if present.
++ Put in correct URL for jad for jar midlets.
++ Put in optional midlet permissions
++ Allow build of novice version with dist.midp.2.0.novice.  Can take novice.txt from a different file using ant -Dnovice.txt=(full path) dist.midp.2.0.novice The novice version has novice property true in manifest disables add, edit, delete, and import and reads from /data/novice.txt line by line file.  The novice version is not the default, normally all functions are enabled.
++ Remove html from link for rss like from EBay.
++ Allow override in place of existing feeds that are also in the import file.  This means that the feed in the import file will be used instead of what was loaded earlier.  Override in place means that the duplicate feed will be in the same place as it was before.  This is different from the non-overrided feeds which will be added based on command used either insert, add, or append.
++ Support RSS Atoms without published tag (version 0.3, 1,0 e.g. from google) by using updated or modified for date if not published tag.  v1.11.2 Development 2 (dev2) (Dec 12th 2008)
++ Fix OPML with line feed/carriage return immediately after 'outline' tag.
++ Fix problems with hangs (not present on most devices).  Some methods are required to not spend much time.  As features are added to these methods, they become too long and cause a hang as J2ME has limited resources.  This change workaround this by doing operations in a separate thread.
++ Allow options to change font size for lists.
++ Turn on/off wraparound for lists
++ Need serial version id for serialized classes.
++ Fix river of news sort problem.
++ Allow ascending and descending for river of news.
++ Encode passwords
++ Fix handling passwords for feeds
++ Give error if having problem doing find files
++ Fix development 1 introduced problem with find files aborting (this problem is not in stable versions)
++ Allow bookmark/feed name at the beginning of river of news items.
+  
+v1.11.2 Development 3 (dev2) (Dec 22th 2008)
++ Allow export of files on devices with JSR-75.  This is not usable on most devices as they require that the user accept the write of each BYTE.  Yes, each byte so this takes forever to the point that I gave up.
++ Attempts to fix problem on some devices where River of News leaves cursor is put in the middle of the screen
++ Progress bars for large memory version (future)
++ Braces around optional feed names in River of News
++ Show device locale in settings
++ Fix problem of loss of data when going to link.  This fixes a possibly introduced defect into dev-2.
++ Fix turning on/off wraparound for lists
+
+v1.11.2 Beta 1 (beta1) (Dec 22th 2008)
++ Show language for podcast version
++ Allow sorting, etc from River of News for showing headers/items screen
++ Fixed problem where if sort yielded 0 items, the loading form is displayed without showing the list with 0 items.
++ Fix if CDATA and a tag is embedded in it, the text following the last tag is now displayed
++ Fix problem where if using "River of News" or Header sort of the number of items is 0, but a previous command displayed some results, there are items shown instead of 0 items.
++ Synchronize sort variables to prevent unintended results
++ Enhance to replace p, td, and br tags with a space.
++ Have separate RIM (cod) jad and jar file to prevent conversion of jar from corrupting the main jad file.
++ Fix description problem introduced in previous Alpha release
+
+v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
++ Allow optional font size for forms.  This only works for display only items and ChoiceGroups.
++ Allow export only for podcast version.
++ Separate saved items for export form.
++ Changed disclaimer to take from a standard one from modified BSD.
++ Include modified BSD license file with source/binary tar/zip.
+
+v1.11.2 Release Candidate 2 (rc2) (April 17th 2009)
++ Allow optional retrieval of previous (last) values used by the previous add bookmark and import feeds.
++ Do redirect to see other status from HTTP.
++ If the feed name is changed with edit feed, remove the previous one.
++ Redirect for HTTP other status.
++ Allow descending feed sorted for headers/river of news.
++ Put parsing of feed from bookmarks in separate thread to prevent hang if the internet is not accessible (or someone selected the wrong access point).
++ Conditional get with last-modified or ETag.
++ For MIDP 1.0 create GMT date string as JVM does not have to make toString give the date.  + Trim title, description, and link.
++ Allow 3 redirects for getting to a feed.
++ Allow name/title for bookmark/feed to be up to 100 bytes long.
++ Better error message if problem loading edit bookmark.
++ Log imported feed for import current with test.
++ Fix 1.11.2 not recognizing data from 1.11.1.
++ Put ascending/descending as last command.
+
+v1.11.3 Release Candidate 1 (rc1) (Sep 22st 2009)
++ Simplify distribution.
++ Handle Big5, BIG-HSCS, MS932, MS936, EUC_CN, SJIS, EUC_JP, EUC_JP_LINUX, ISO-2202-JP, MS949, MS950, ISCII91, EUC_TW, TIS-620, GBK, GB18030, and other encodings (only Big5 tested).
++ Have dist-private to have a release with the private directory.
++ Trim title for atoms if both title and description are present.
++ Export source without authorization as it is read only.
+
+v1.11.3 (Oct 2nd 2009)
++ This contains all previous changes (see above).
+
+v1.11.4 Release Candidate 2 (rc2) (Mar 9th 2010)
++ Prevent override message from causing hang on import feeds.
++ Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
++ Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.
++ Don't use observer pattern for MIDP 1.0 as it increases size.
++ Get feed titles for blank names in OPML in FeedListParser.
++ Have next item command on item display.
++ Fixed loop.
++ Create smart phone version with just MIDP 2.0
++ Use zip for src as the file paths are too long for non-GPL tar.
++ Use - in cod files before version instead of _.
++ Remove unneeded directories.
++ Fix properties for MIDP 2.0 podcast/itunes.
+
+v1.11.5 Release Candidate 1 (rc1) (Mar 9th 2010)
++ Add labels to all artifacts.
+
+v1.11.5 Development 2 (dev2) (July 3th 2010)
++ Use CLDC 1.1 for smart phone versions.
++ Move developer related fixes to changelog.txt to easier reading for end users.
++ Fixed problem with end tags not recognized if spaces are inside.
++ Fix problem with redirects not working if they have relative addressing.
++ Allow line by line parser import to recognise Byte Order Mark (BOM).
++ Fixed problem with conditional get.
++ Fix previous page for loading screen from bookmarks and from header list.
++ Minor stack save for smart phone version for html link for the feed.
++ Synchronize use of opening or updating the feed.
++ Remove classes to save memory.
++ Ignore comments to allow more XML to parse successfully.
++ Replace SortUtil with LGPL code to allow adding of LGPL license.
++ Better diagnostics.
++ Warn if 0 feeds in import.
++ Optionally use feed URL as feed name if not found in import file.
++ Ignore contents within block tag for podcast.
++ For line by line, remove control characters beginning and ending of text to prevent blank lines at beginning or end from being processed.  This prevents a line at the beginning or end which is what comes before/after the final line feed or carriage return.
++ Only do export of file if signed.
++ Optionally use feed title for feed name or feed link for line by line parser.
++ Skip blank lines in line by line parser.
++ Give error if run out of data before finding anything in import file.
++ Do export only for signed, Itunes and JSR-75.
++ Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
++ Give errors for load/store errors.
++ Keep better track of loading finished and display finished message.
++ Put signed into file names for signed artifacts.  The Blackberry artifacts are not signed.
++ Fix Thawte signing so that the signed jar gets distributed and that the jad gets signed with correct byte size.
++ Replace observer classes and interfaces with new GPL/LGPL code to allow adding of LGPL license for the whole project.
++ If we are finished loading or exiting, but there is no back screen, add quit.  Also allow quit if exiting with error.
++ Allow reporting of settings errors.
++ Recognize CDATA, style sheet, and DOCTYPE and treat properly.
++ Only initialize two records the first time that a store is opened.
++ Reduce the number of times the store is opened/closed on startup.
++ Check for html, htm, shtml, and shtm suffixes for HTML files.
+
+v1.11.5 Development 4 (dev4) (July 3th 2010)
+
+- Fix Thawte signing so that certificates are put into the jar file and add 3 certificates to the jad file.
+- Put release_notes-(current version w/underscores).txt into sftp download directory.
+
+v1.11.5 Development 5 (dev5) (July 4th 2010)
+- Use '.' before extension for .htaccess.
+- Add extensions for zip, gzip, bzip2, and compress.
+
+v1.11.5 Development 6 (dev6) (July 5th 2010)
+- Reduce startup time by having methods return arrays with method values.
+- Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.  This may be a slight performance improvement.
+- Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.
+- Fix creating signed JAD so that it copies the jad with overwrite.
+- Allow to create distribution with no signed files.  This helps if the certificate is pending.
+- Do not create any signed targets because the certificate is pending.
+
+v1.11.5 Development 7 (dev7) (July 7th 2010)
+- Create signed targets (and for now on) because the certificate was issued.
+- Put changelog-(current version w/underscores).txt into sftp download directory.
+- Put gpl.txt into sftp download directory.
+- Update source text to make distribution/redistribution license options clearer.
+- Include version number in gpl.txt as gpl-2.txt.
+- Include version 2.1 of the LGPL as lgpl-2_1.txt and distribute where gpl-2.txt is.
+- Allow turn off of distributing jad/jar/cod.  For this release and other development releases, the jad/jar/cod will not be distributed as separate files.  Only the zip files will be distributed.
+
+v1.11.5 Development 9 (dev9) (Oct 12th 2010)
+- Fix jad files by changing to dos had files if not using windows build.
+- Use only JSR-75 versions for smartphones.
+- Don't remove entities/HTML from links.  This allows parameters in links.
+- Allow open of feed link on details screen for smartphone version if not empty and no items are found.
+- Fixed MIDP 1.0 version update from river of news and headers to not repeat the same item if only one item is in the feed.
+- More diagnostics for font errors.
+- Add line feeds to diagnostics for readability.
+- Fix OPML exported for smart phone version.
+- OPML exported for smart phone version works on some phones including Nokia N86.
+- Have "Loading detail form..." when going to the detail form.
+- Allow open of feed link on details screen for smartphone version if not empty.
+- Allow details screen if not podcast for smartphone version if date or url not empty.  (Podcast still allows details screen).
+
+v1.11.5 Development 10 (dev10) (Oct 12th 2010)
+- Fix jad files by having correct Jar URL.
+
+v1.11.5 Development 14 (dev14) (Nov 26th 2010)
+- Move build files using keep 
+- Put full_ into executables to allow future demo or load applications.
+- Most functions work with microemulator except find files. 
+- Allow start of using program with start menu item on first loading screen.
+- Prompts use Forms instead of Alerts.  This allows some emulators and some Sony Ericsons to work.
+- Create Thawte, Verisign, and Godaddy signed jars and cod files (not in all distributions).
+- Fixed using text box for copy/paste on supported devices.
+- Allow export with JSR-75 and signed file.
+- Create alx files.
+- Have stardard positions for standard items Back, Cancel, OK, Stop(future) with standard order in menus.
+- Have stardard positions for custom items open and select with standard order in menus.
+- Require file read access for JSR-75 files.  This may mean that JSR-75 files will not load if JSR-75 is not on the phone
+- Don't create preverified directory of class files.  The jars will remain preverified.
+- Copy signed files to distsigned directory.
+- If jsr-75 vers exists show the version string in case it changes later.
+
+Device notes:
+
+- Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
+
+Program issues:
+
+- While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modified, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
+- Some devices and emulators are unable to store the feed data.  You can quickly test if this happens with your phone by opening the program and getting the about screen automatically displayed.  Add one feed with add feed:  Use a simple feed so that it is quick to do.  Or, you can import an OPML.  You do not need to open the resulting feeds as this is unnecessary to prove that this works.  Then, use the exit menu item to exit.  Respond OK to exit.  Then, open the program again.  If the about is not shown, then the program is saving data.  Also, the feeds that you added or imported should be there.
+
+TODO:
+
+- Fix problem with find files in Sun WTK emulator.
+- Optionally keep the back light on with desired intensity.
+- Optionally flash the backlight for a specific duration when update all is complete.
+- Check if need to set to itunes feed if not in header, but in items.
+- Add some media fields.
+- Use decorator patteren for media fields.
+- Minimizer for open link or use to show link in RSS Reader.
+- Methods for booleans for EncodingUtil.
+- Remove extra spaces between description item 7 of imbed.  This happens from removing of HTML which is replaced by spaces.
+- Handle content element with attribute type=html for HTML formating.
+- Add Twim to RSS.
+	- Use multiple links in atom for twitter.
+	- Use twim menu.

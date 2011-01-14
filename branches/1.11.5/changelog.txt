@@ -1,0 +1,829 @@
+Mobile RSS Reader
+
+Copyright (c) 2006-2007 Tommi Laukkanen
+Copyright (c) 2007-2010 Irving Bunton, Jr
+http://www.substanceofcode.com
+
+Contributors:
+Irving Bunton
+
+Detailed Change Log geared for developers:
+
+v1.5 (July 23th 2007)
+- Open links in device browser
+- Allow long feed URLs
+
+v1.9 (August 14rd 2007)
+- Support ISO8859-1, windows-1252, UTF-8, UTF-16 (partial support 
+- Fixed import feeds replacing current feed and importing only 1 feed.
+
+v1.10 (August 23rd 2007)
+- Reduced memory overflows while saving
+- Fix '|' in header name and item 
+- Prompt to delete feed
+- Fix delete of feed and add with the same name
+- Full/fixed support for ISO8859-1, windows-1252, UTF-8, UTF-16
+- Support for some redirects
+- Optionally mark unread items in feed
+- Show memory usage
+- Prepare to allow saving of log level for test version.
+- Replace HTML entities and numeric entities from OPML title
+- Replace more HTML entities and hex numeric entities
+- Read all unread items in list
+- Update only modified feeds.
+- Use summary if no description in atoms.
+- Use dates in atoms.
+- Support more date formats.
+- Save if opening link closes the application
+- Save without exit
+- Show error for import feed parsing error
+- Show and open enclosure
+- Support more time formats
+
+v1.10.1 (August 24rd 2007)
+- Fixed about not being shown the first time of use
+- Fixed intermittent exit problem
+
+v1.10.2 (August 24rd 2007)
+- Fixed infinite loop in emulator on exit.
+- Take version from manifest file.
+
+v1.10.3 (August 28th 2007)
+- Fixed date formatting if it has '-' for RSS date.
+- Use alternate link for atoms of self and related are not present.
+- Rename New Items form to Unread Items form.
+- Remove unused test logging classes.
+
+v1.10.4 (September 4th 2007)
+- Fixed allowing pasting for some devices.  (Other devices may not have had
+  any problem.)
+- Fixed redirect problem with capitalized HTML tags.
+- Show used/available memory in addition to DB memory used/available.
+- Allow copy of enclosure.
+- Give alert for out of memory that is there until it is dismissed.
+- Fixed initial run problem with bookmarks shown before about screen.
+- Fixed intermittent start hang with MIDP 1.0 version.
+- Added more logging for test version.
+- Set focus when setting copy link/enclosure (Focus does not work
+on all devices including the emulator.)
+
+v1.10.5 (September 17th 2007)
+- Allow non utf-16 to be faster.
+- Allow windows single quote for attributes.
+- Fixed attributes not handling encoding.
+- Allow descending sort of unread items dates.
+- Don't give error if missing title.
+- Allow reading of missing titles from OPML.
+- Get redirection from URLs with redirection statuses.
+- More error messages for feed problems.
+- Test logging changes (not in released binaries.  In test only).
+- Fixed add new bookmark not showing previous user name/password.
+- Increased size of bookmarks that can be restored.
+- Logging changes (for test only).
+
+v1.10.6 (September 20th 2007)
+- Fix serious problem with import not working
+
+v1.10.7 (October 2nd 2007)
+- Give error for forbidden and not found
+- Allow optional prevention of redirect for bad HTML mime types
+- Allow files in memory for feed files and import files
+- Allow paste for MIDP-1.0 (dependent on device)
+- Show program and device MIDP, CLDC, JSR75 settings on settings form
+
+v1.11
+- New river of news options to sort by date and feed for all items, only unread,
+  or only read.
+- Mark item as read or unread on river of news
+- Fix install problem on some MIDP 1.0 phones
+- Allow import to insert, add to current or end.
+- Allow add bookmark to insert, add to current or end.
+- Use allow paste from regular command for MIDP 2.0 instead of item command
+- Create forms only when needed to reduce memory usage
+- Support metadata re-direct
+- Support HTML RSS/Atom autolinks
+- Minor performance enhancements
+- Fix prologue handling to fix style set handling
+- Podcast version for phones with lots of memory (high end smart phones).
+  - This gets subtitle, summary, author, explicit, language, and duration
+- Support description and for date (name space other than dc) from Dublin Core
+- Support two namespaces if present only itunes and Dublin core are supported
+- Support link for feed.  Use link of feed if no link for item for
+  podcast version (to save on memory since podcast vers if for phones with
+  more memory)
+- Support future user defined category for feed.
+- Support accessing memory without JSR-75 if phone supports, but the
+  file path needs to be know as browser is not possible, so this may
+  not be very useful.  Memory URL must begin with file://
+- Support opening of files in the jar (jar:///) for future use of
+  files in the jar file
+- Do not add feeds from HTML links which have 0 length
+- Allow passwords to contain '|'
+- Fix problem where 'textinput' description is used instead of item description
+- Fix problem where update of redirected feed twice while on the bookmark/feed
+  caused an error.  (The previous workaround was to go back to bookmarks and
+  then open the book mark and update)
+- Fix problem with redirect not working for OPML files
+- Fix problem with some HTML imports not giving any values
+- Fix problem with some &nbsp; not being removed
+- Have error screen for errors during feed import.
+- Give error when importing and existing feed that it is not updated
+  (workaround is to delete and then re-import)
+- Support HTML links without quotes for href
+- Better error when redirect is a second time
+- Allow logging of input/output with TESTUI define for test version.
+- Allow testing of compatibility of the record store from previous versions
+- Allow change in order of back and open for headers/items list
+- Testing form to show encoding
+- Convert more entities.  Also, convert hex numeric entities
+- Support dates with non-breaking space
+- Prevent infinite loop when removing HTML which has unmatched '<'
+- Fix handling of out of memory while storing bookmarks
+- Stop thread when exiting
+- Memory not updated after first time viewed on settings.
+- Allow items without a title.  Use 1st 10 words (configurable in settings)
+  of the title for the item in headers list and title of item form
+- Give correct error message if JSR75 not supported on the phone
+- Don't have open/copy link command if no link
+- Give out of memory errors when applicable
+- Use standard J2ME menu items for OK, back and exit
+- Prompt for exit
+- Support phones with encoding aliases not documented in J2SE list
+  (e.g. ISO-8859-1 instead of ISO8859_1).
+
+v1.11.1 Release Candidate 5 (RC5) (July 28th 2008)
+- Fix bug introduced in release candidate with bad error handling for a bad URL for import.
+- Fixed introduced bug in a previous Release Candidate with import form
+
+v1.11.1 (August 2nd 2008)
+- Fix bug when opening feeds on Sony Ericsson emulators and possibly affecting Sony Ericsson devices
+- Fix bug with storing Itunes attributes
+- Workaround VM problems with synchronized methods that prevent update of settings
+- Allow choice to use standard exit or not in exit.  (Some phones the user may not know which key is the exit key).
+- Only remove new lines from title if there is a description.
+- If atom has summary, but no title or description, use the summary as the description
+- Support CLDC 1.1 versions all MIDP 2.0 versions.
+- Minor performance improvement for creating items, reading stored feeds.
+- Allow feeds with '^' in title, description, subtitle, summary, and author.
+- Workaround loading form not being shown on N95.  With the workaround the problem is fixed.
+- Prepare for future store of items without encoding
+- Show micro edition platform.
+- Workaround problem with some Sony Ericsson phones with dynamic retrieval of display.  Need to use setCurrent using original display for alerts.  This problem prevented exit/delete of feed, but is not fixed.
+- Update exit key of when change of standard exit enabling.
+- Allow feeds with '^' in title, description, subtitle, summary, and author.
+- Use gauge to show progress of saving/loading.
+- Fix dates in yyyy-mm-dd format
+- Fix standard dates with 2 or more consecutive spaces
+- Workaround Sony Ericsson T637 problem with Exit and Delete (Alerts on MIDP 1.0 device)
+- Handle Content module
+- Add to disclaimer
+- Include jadsrc and manifestsrc directories in source zip
+- Allow '|' in feed name, password, and podcast attributes author, subtitle, summary.
+- Fix bugs in wtk-build.xml when properties suffixes not used.
+- Allow creation of jar using Free software:  Phone ME, ECJ (Eclipse compiler), GNU Classpath, and JamVM or GNU JavaVM (gcj)
+- Workaround for MicroEmulator
+- Optionally create PRC if present.
+- Put in correct URL for jad for jar midlets.
+- Put in optional midlet permissions
+- Make creation of RIM optional
+- Put missing directories into released zip
+- Allow build of novice version with dist.midp.2.0.novice.  Can take novice.txt from a different file using ant -Dnovice.txt=(full path) dist.midp.2.0.novice The novice version has novice property true in manifest disables add, edit, delete, and import and reads from /data/novice.txt line by line file.  The novice version is not the default, normally all functions are enabled.
+- Only copy to device bin if midlet.home exists during build.  
+- Remove html from link for rss like from EBay.
+- Allow override in place of existing feeds that are also in the import file.  This means that the feed in the import file will be used instead of what was loaded earlier.  Override in place means that the duplicate feed will be in the same place as it was before.  This is different from the non-overrided feeds which will be added based on command used either insert, add, or append.
+- Support RSS Atoms without published tag (version 0.3, 1,0 e.g. from google) by using updated or modified for date if not published tag.  v1.11.2 Development 2 (dev2) (Dec 12th 2008)
+- Check in the rest of novice enhancement
+- Fix OPML with line feed/carriage return immediately after 'outline' tag.
+- Combine if statements
+- Changes from code analysis:  Remove unnecessary modifiers. Put stack trace into empty catch statements.  Combine if statements.  Remove unused equals.
+- Fix problems with hangs (not present on most devices).  Some methods are required to not spend much time.  As features are added to these methods, they become too long and cause a hang as J2ME has limited resources.  This change workaround this by doing operations in a separate thread.
+- Allow options to change font size for lists.
+- Turn on/off wraparound for lists
+- Need serial version id for serialized classes.
+- Fix river of news sort problem.
+- Allow ascending and descending for river of news.
+- Encode passwords
+- Fix handling passwords for feeds
+- Allow findbugs and PMD analyzers
+- Give error if having problem doing find files
+- Fix development 1 introduced problem with find files aborting (this problem is not in stable versions)
+- Allow bookmark/feed name at the beginning of river of news items.
+  
+v1.11.2 Development 3 (dev2) (Dec 22th 2008)
+- Allow export of files on devices with JSR-75.  This is not usable on most devices as they require that the user accept the write of each BYTE.  Yes, each byte so this takes forever to the point that I gave up.
+- Attempts to fix problem on some devices where River of News leaves cursor is put in the middle of the screen
+- Progress bars for large memory version (future)
+- Braces around optional feed names in River of News
+- Better handling of forms/lists wakeup for command and other events.
+- Show device locale in settings
+- Fix problem of loss of data when going to link.  This fixes a possibly introduced defect into dev-2.
+- Changes for next release of JLogMicro
+- Fix turning on/off wraparound for lists
+
+v1.11.2 Beta 1 (beta1) (Dec 22th 2008)
+- Show language for podcast version
+- Allow sorting, etc from River of News for showing headers/items screen
+- Have semi-automated tests go from the last item down to the first item
+- Fixed problem where if sort yielded 0 items, the loading form is displayed without showing the list with 0 items.
+- Fix if CDATA and a tag is embedded in it, the text following the last tag is now displayed
+- Fix problem where if using "River of News" or Header sort of the number of items is 0, but a previous command displayed some results, there are items shown instead of 0 items.
+- Synchronize sort variables to prevent unintended results
+- Enhance to replace p, td, and br tags with a space.
+- Fix test ui logging
+- Have separate RIM (cod) jad file to prevent conversion of jar from corrupting the main jad file.
+- Make building in windows and linux easier to switch between the two choices
+- Change load for to have it's own logging methods to allow future putting load of form in a separate thread
+- Combine classes for future enhancements.
+- Fix description problem introduced in previous Alpha release
+- Log command for testui for semi-automated tests
+- More logging
+
+v1.11.2 Release Candidate 1 (rc1) (March 11th 2009)
+- Allow optional font size for forms.  This only works for display only items and ChoiceGroups.
+- Allow export only for podcast version.
+- Separate saved items for export form.
+- Use method for getting fields to save/restore.
+- Changes for next release of JLogMicro.
+- Changed disclaimer to take from a standard one from modified BSD.
+- Include modified BSD license file with source/binary tar/zip.
+- Use export to get source instead of checkout.
+
+v1.11.2 Release Candidate 2 (rc2) (April 17th 2009)
+- Allow optional retrieval of previous (last) values used by the previous add bookmark and import feeds.
+- Do redirect for see other status from HTTP.
+- If the feed name is changed with edit feed, remove the previous one.
+- More logging.
+- Fix logging typeos.
+- Use less finals.
+- Use printStackTrace in catch.
+- Redirect for HTTP other status.
+- Combine nested if's.
+- Get file only in URLHandler.
+- Remove unused variables.
+- Allow descending feed sorted for headers/river of news.
+- Remove empty if statements.
+- Put parsing of feed from bookmarks in separate thread to prevent hang if the internet is not accessible (or someone selected the wrong access point).
+- Better logging form info.
+- Change final modifiers for methods/classes.
+- Conditional get with last-modified or ETag.
+- For MIDP 1.0 create GMT date string as JVM does not have to make toString give the date.  + Trim title, description, and link.
+- Allow 3 redirects for getting to a feed.
+- Allow name/title for bookmark/feed to be up to 100 bytes long.
+- Better error message if problem loading edit bookmark.
+- Log imported feed for import current with test.
+- Fix 1.11.2 not recognizing data from 1.11.1.
+- Better tests for equals to show more differences.
+- Allow compatibility testing for the previous rms version layout.
+- Put ascending/descending as last command.
+
+v1.11.3 Release Candidate 1 (rc1) (Sep 22st 2009)
+- Simplify distribution.
+- Remove unused fields.
+- Handle Big5, BIG-HSCS, MS932, MS936, EUC_CN, SJIS, EUC_JP, EUC_JP_LINUX, ISO-2202-JP, MS949, MS950, ISCII91, EUC_TW, TIS-620, GBK, GB18030, and other encodings (only Big5 tested).
+- Allow logging characters read for testing other encodings.
+- Use/write JMUnit tests.
+- Use interfaces for equals.
+- Simplify/fix compatibility tests.
+- Have dist-private to have a release with the private directory.
+- Simplify explicit.
+- Trim title for atoms if both title and description are present.
+- Allow using RIM building of cod file using jar files.
+- Export source without authorization as it is read only.
+
+v1.11.3 (Oct 2nd 2009)
+- Cosmetic source change.
+- This contains all previous changes (see above).
+
+v1.11.4 Release Candidate 2 (rc2) (Mar 9th 2010)
+- Use feed interface only for testing.
+- Use latest antenna 1.2.1 beta.
+- Use latest proguard 4.5 beta3.
+- Prevent override message from causing hang on import feeds.
+- Use NULL pattern.
+- Use observer pattern for feed parsing to prevent hangs from spotty networks and bad URLs.
+- Use observer pattern for OPML/list parsing to prevent hangs from spotty networks and bad URLs.
+- Don't use observer pattern for MIDP 1.0 as it increases size.
+- Get feed titles for blank names in OPML in FeedListParser.
+- Have next item command on item display.
+- Use antenna to create manifest and jad.
+- Remove unused methods.
+- Fixed loop.
+- Fix testing code of explicit.
+- Use googlecode_upload.pl to upload to Google Project Hosting.
+- Create smartphone version with just MIDP 2.0
+- Create archive files.  
+- Don't create empty version directory.  
+- Use zip for src as the file paths are too long for non-GPL tar.
+- Use - in cod files before version instead of _.
+- Make test distribution target with only MIDP 2.0 and MIDP 2.0 with JSR-75.
+- Remove unneeded directories.
+- Fix properties for MIDP 2.0 podcast/itunes.
+- Create itunes test target.
+
+v1.11.5 Release Candidate 1 (rc1) (Mar 9th 2010)
+- Add labels to all artifacts.
+
+v1.11.5 Development 2 (dev2) (July 3th 2010)
+- Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+- Use cldc10 for naming in CLDC 1.0 versions.
+- Use common build.vers and dist.vers properties.
+- Handle stage releases better.
+- Remove *.debug file from regular and smartphone bin files.
+- Use CLDC 1.1 for smartphone versions.
+- Fix concurrency problems with exploring memory.
+  - Use thread from FeatureMgr.
+- Combine classes to save space.
+- Fix line by line parser to recognise Byte Order Mark (BOM).
+- Convert M-dash to '-'.
+- Fixed problem with end tags not recognized if spaces are inside.
+- Fixed problem with conditional get.
+- Fix problem with redirects not working if they have relative addressing.
+  - Use absolute address for redirects.
+- Fix previous page for loading screen from bookmarks and from header list.
+- Cosmetic but not execution code changes.
+- Minor stack save for smart phone version for html link for the feed.
+- Synchronize use of opening or updating the feed.
+- Fix and add logging.
+- Remove KFileSelector to save memory.
+- Remove the little used Controller class.
+- Return doctype and stylesheet as parts of XML.
+- Ignore comments to allow more XML to parse successfully.
+  - Change REDIRECT_URL to be after the last XmlParser token.
+- Replace SortUtil with LGPL code to allow adding of LGPL license.
+- Fix and add logging.
+- Cosmetic but not execution code changes.
+- Use BaseTestCase to log start of test.
+- Test ParserSuite and UtilitySuite.
+- Move compatibility tests to compatibility packages.
+- New unit test results from XmlParser.
+- Unit test utility classes.
+- Unit test HTMLLinkParser class.
+- Unit test RssFeedParser class.
+- Unit test FeedListParser and subclasses.
+- Code cleanup.
+- Better logging.
+- Save threads for logging and stopping/starting/pausing.
+- Log thread info for diagnostics.
+- Recognize CDATA, style sheet, and DOCTYPE and treat properly.
+- Add modifyItunes and toString to interface.
+- Use convenience method for encoding/decoding.
+- Use fieldEquals to compare items.
+- Use interfaces to make compatibility testing easier.
+- Optionally use feed URL as feed name if not found in import file.
+- Ignore contents within block tag for podcast.
+- Provide a command receiver to execute actions as part of the command pattern.
+- Implement CmdReceiver interface to allow pause of thread.
+- Use null for null command pattern.
+- Pause based on loop time not being reached.
+- Convience method for logging UI command.
+- Convience method for logging UI item.
+- Give warning if no feeds found in import.
+- Fix showing diagnostics.
+- Create obfuscate map.
+- For line by line, remove control characters beginning and ending of text to prevent blank lines at beginning or end from being processed.  This prevents a line at the beginning or end which is what comes before/after the final line feed or carriage return.
+- Only do export of file if signed.
+- Log instead of out.println in OpmlParser.
+- Unit test additions and changes for better testing.
+- Better diagnostics.
+- Optionally use feed title for feed name or feed link for line by line parser.
+- Give error if run out of data before finding anything in import file.
+- Skip blank lines in line by line parser.
+- Have ImportFeedsForm export only if signed.
+- Have OpmlParser code to write to OPML file only if signed.
+- Allow creation of signed targets partial work.
+- Use proguard task.
+- Use wtkjad to create non-Blackberry JAD/manifest files.
+- Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
+- Need to define test define for tests.
+- When initializing the RMS, set record 0 and record 1 to their final initialization values instead of first setting them to null and then updating.  This allows the emulator to sometimes work.
+- Don't create null or empty records.
+- Move synchronized to have lesser scope to reduce proguard preverfy failures.
+- Remove compatibility code from non test code.
+- If updating record and the record does not exist, add instead.
+- Use constant for bookmarks.
+- Use RECORD_STORE_NAME for store to match 1.12Alpha1.
+- Use volatile for m_store and m_properties
+- Use volatile for m_firstTime in RssReaderMIDlet.
+- Use openRecStore to standardize openning of record store.  First open as existing if there are record stores.
+- Use closeStore to standardize closing of record store and giving error.
+- If we get a property that is not set, set it to default value in addition to returning the default value.
+- Have load return number of records in store.
+- Only read record if not null and length > 1.
+- If IOException when reading from store, make string without encoding.
+- Flush the save output buffer to make sure it's finished.
+- Change getSettingMemInfo to return int array to save memory and simplify.
+- Have deleteStore for testing deleting the store.
+- Have deleteSettings for testing deleting the settings to be used for reload.
+- Allow access to the initialization records.
+- Allow listRecordStores() for logging.
+- If loading, and the region is beyond existing records, set bookmarks to "".
+- Have getSettingsInstance to get the Settings instance.
+- Need to use logging define to set logging in RssReaderSettings.
+- Save error from loading settings.
+- If CLDC 1.1, use synchronized class statement vs static synchronized modifier.
+- Use volatile for instance vars in RssReaderSettings.
+- Have test reload db in RssReaderMIDlet.
+- Make sure m_loadForm is not null when used RssReaderMIDlet.
+- Have static methods to load/save settings and bookmarks for better testing.
+- Have set current allow displayable as alert to handle alert bugs in the future.
+- Have static loadBookmarkList load bookmarks from settings DB to help with testing.
+- Make sure m_appSettings is not null when using RssReaderMIDlet.
+- Change command priorities to be in the right order and have update mod ahead of udpate all.
+- Set gauge based on max value to be more flexible.
+- Have 1st and 2nd settings test classes.
+- Put in option for Proguard 4.4.
+- Put in option for using timestamp for Thawte (currently not supported for code signing certificates).
+- Put in option for using netbeans src directory.
+- Use signed.text to handle signed modifier in properties file.
+- Allow Thawte signing of jad/jar.
+- Partial fix for using findbugs.
+- Make input file for sftp for sites that allow upload with sftp, sourceforge.net and yinlight.net.
+- Put all resource files in src/main/resources.
+- Change order of uploads for zips so that regular bin zip is last so that it will be at the top of the list.
+- Partial fix for using findbugs.
+- Update OPML from links.html to get more tests.
+- Do comparison tests from OPML files since for MIDP 1.0 small memory, we don't have HTML based classes.
+- Don't use HTML in small memory MIDP 1.0 to save space.
+- Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+- Fix MIDP 1.0 parsing.
+- Check for html, htm, shtml, and shtm suffixes.
+- Do export only for signed, Itunes and JSR-75.
+- Add signed targets for MIDP 1.0, MIDP 2.0, MIDP 2.0 and JSR 75.  Targets are disabled normally.  They are for future use.
+- Taylor images in the jar for the right releases.  File images are only applicable to JSR-75.
+- Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
+- Give errors for load/store errors.
+- If ITEMS_ENCODED or STORE_DATE not set, set it.
+- Use constant for store name.
+- Move display of loading form before loading of settings to allow reporting of settings errors.
+- Keep better track of loading finished.
+- Change setCurrentNotes so that it will set loading finished if need be and use the current displayable if it's a LoadingForm or use a LoadingForm paramater.
+- Have RuntimException with cause.
+- Have record store exception with cause.
+- Use back from RssReaderMIDlet if priority matches for AllNewsList.
+- Have back be the default first command instead of open to be standard.
+- If we are finished loading or exiting, but there is no back screen, add quit.  Also allow quit if exiting with error.
+- New target compile for distribution for CLDC 1.1, itunes, and JSR-75.
+- Make LoadingForm an independent class to remove dependency on RssReaderMIDlet for better testing.
+- Make midlet and LoadingForm optional in FeatureForm and FeatureList.
+- Have convenience methods showme with/without alert.
+- Have static initSettingsEnabled to load app and general settings to help with testing.
+- Change getSettingMemInfo to return int array to save memory and simplify.
+- Have different serialVersionUID for CauseRecStoreException.
+- Use stage.stable.text to specify if this stage is stable or unstable.
+- Put signed into file names for signed targets.
+- Delete and then create the zip file to avoid problems from previous creation.
+- Allow parameters mjadfile and mjarfile to specify the jad/jar names for more flexibility.
+- Don't create RIM version if Thawte signed.
+- Use stage.featured to allow featured label to be changed.
+- Use wtkpreprocess and wtkobfuscate since proguard task does not work directly.
+- Don't have MIDP 1.0 signed or unsigned or MIDP 2.0 signed be featured.
+- Only use signed versions for smartphone version.
+
+v1.11.5 Development 3 (dev3) (July 3th 2010 9:31 PM)
+- Fix Thawte signing so that the signed jar gets distributed and that the jad gets signed with correct byte size.
+
+v1.11.5 Development 4 (dev4) (July 3th 2010)
+- Fix Thawte signing so that jarsigner and JadTool are used instead of wtksign.  This puts the certificates into the jar file and adds 3 certificates to the jad file instead of 1.
+- Put release_notes-(current version w/underscores).txt into sftp download directory.
+
+v1.11.5 Development 5 (dev5) (July 4th 2010)
+- Use '.' before extension for .htaccess.
+- Add extensions for zip, gzip, bzip2, and compress.
+
+v1.11.5 Development 6 (dev6) (July 5th 2010)
+- Use godaddy.sign to cause Godaddy certificate to be used.
+- Use null pattern for nulls to initialize and save memory.
+- Move test statement to be all in define to prevent unused code.
+- Return array from openRecStore to return record store and number of records.
+- Also return number of records from init.
+- Don't use toString for appending booleans and integers with StringBuffer as there is already an append method for this.
+- Catch CauseRecStoreException instead of RecordStoreException since RecordStoreException is not thrown.
+- Don't return from within a finally block.
+- Collapse nested if statements.
+- Cosmetic code cleanup.
+- Replace empty while with for.
+- Use null pattern for nulls to initialize and save memory.
+- Don't use m_ prefix for parameter definitions.
+- Do not have empty catch block.
+- Use "" when feedNameFilter and feedURLFilter are not used.
+- Use wtksign from antenna to sign the jar.
+- Don't make the zip files if we are skipping svn export.
+- Use '.' before extension for .htaccess.
+- Add extensions for zip, gzip, bzip2, and compress to .htaccess.
+- Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.
+- Fix creating signed JAD so that it copies the jad with overwrite.
+- Have dist.no.signed target to not sign any files.  This helps if the certificate is pending.
+- Do not create any signed targets because the certificate is pending.
+
+v1.11.5 Development 7 (dev7) (July 7th 2010)
+- Create signed targets (and for now on) because the certificate was issued.
+- Use new ant feature that allows you to use an expression that evaluates to true in the target attribute 'if'.
+- Put changelog-(current version w/underscores).txt into sftp download directory.
+- Put gpl.txt into sftp download directory.
+- Update source text to make distribution/redistribution license options clearer.
+- Update source text to make distribution/redistribution license options clearer.
+- Include version number in gpl.txt as gpl-2.txt.
+- Include version 2.1 of the LGPL as lgpl-2_1.txt and distribute where gpl-2.txt is.
+- Use no.individual.file to turn off copying jad/jar/cod files to google distribution.  This is done for dev releases.  For this release and other development releases, the jad/jar/cod will not be distributed as separate files.  Only the zip files will be distributed.
+
+v1.11.5 Development 9 (dev9) (Oct 12th 2010)
+- Must set mweb.jarfile for making jad file.
+- Use windows.os to tell if windows OS so we can convert jad to dos with conv.dos if not windows.
+- Remove extra --labels from google upload.
+- Add exception for setFont error to exception stack.
+- Add line feeds to diagnostics for loading display.
+- Add msg for setFont error.
+- Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+- Add //#preprocess for RIM preprocessor.
+- Add quote after title=.
+- Add runnable for thread class name to thread info.
+- Add setFont errors that are not ArrayIndexOutOfBoundsException to stack.
+- Add stable/unstable to expert binary.
+- Allow export of OPML/line by line if not the smartphone version.
+- Allow non-smartphone to export the OPML if signed.
+- Allow open of feed link on details screen for smartphone version if not empty.
+- Also, show details if feed date is not empty for smartphone version.
+- Change --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+- Change RIM file creation directly using jar to set jde.home.
+- Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+- Checks to make sure that the commandAction is for the item form for back.
+- Combine if statements.
+- Combine statements with getItemFields into one statement.
+- Convert entities for text if CDATA used.
+- Convert entities if CDATA used.
+- Convert & in attributes to &amp;.
+- Convert &,<,> in attributes to entities.
+- Create zip file for alx directory.
+- Don't access m_display directly since it's in FeatureMgr.
+- Don't allocate space for m_date and m_link if not smartphone version.
+- Don't convert entities for skipped/unused items.
+- Don't convert entities if CDATA used or not forced.
+- Don't convert HTML for link.
+- Don't need midlet for AllNewsList, BMForm, ImportFeedsForm, ItemForm HeaderList because it's used indirectly.
+- Don't remove entities for link with CDATA.
+- Don't remove HTML for link.
+- Don't use block if not logging.
+- Don't use jadsrc as the jad is generated by wtkjad.
+- Don't use manifestsrc as the manifest is generated by wtkjad.
+- Don't use midlet directly including for FileSelectorMgr, initSettingsEnabled, initSettingsEnabled, RssReaderSettings, Settings.
+- Don't use midlet for makeObserable.
+- Fix MIDlet-Jar-URL to correct value.
+- Fix order of commands for header list.
+- Fix river of news/headers for MIDP 1.0 error.
+- Fix testSettings1 and testSettings3 test cases.
+- For small memory, don't test mark unread items as it is not used.
+- For smartphone, set feed header fields if no items.
+- For testSettings1, ITEMS_ENCODED defaults to given default of false.
+- For testSettings3, markUnreadItems defaults to true.
+- Have callSerially in FeatureMgr.
+- Have callSerially to serialize threads.
+- Have convAttrData to convert &,<,> in attributes data to &amp;,&#60;,&#62;.
+- Have convAttrUrlData to convert &,<,> in attributes data to &amp;,%3C,%3E.
+- Have convenience method setCurrentAlt.
+- Have getCurrent in FeatureMgr.
+- Have getLoadingForm without main display which is defaulted to midlet main display.
+- Have initLoad to allow initialization of loading form.
+- Have isHtml to return true for different HTML suffixes.
+- Have loadForm for procBackHeader and procUpdHeader.
+- Have loadForm parm for procBackPage to use the current loadForm.
+- Have "Loading detail form..." when going to the detail form.
+- Have loading form display Write OPML or line by line.
+- Have loading form for updating settings.
+- Have main observer obsmain for procBackPage to use the main observer.
+- Have m_backCommand be static to be used for several forms.
+- Have m_fileRtnForm be a feature form.
+- Have midlet.package for bb-ant-tools Blackberry package.
+- Have m_openLinkCmd be static to use with detail form  and item form.
+- Have option to use bb.jde.home for using Blackberry ant tasks.
+- Have option to use jar.jde.home for using Blackberry jar directly.
+- Have procBackPage create loading form.
+- Have second body tag be an end tag.
+- Have setCurrentAlt to setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter if not null or cmainDisp if not null or disp.
+- Have setCurrent directly using display in FeatureMgr.
+- Have setCurrent done in getLoadingForm.
+- Have setCurrentFeature to setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter.
+- Have setCurrentItem done in FeatureMgr.
+- Have setCurrentItemFeature to setCurrent display item or display if MIDP 1.0 and wakeup the featureMgr for fdisp parameter.
+- Have setCurrentItemMgr to setCurrent display item or display if MIDP 1.0 and wakeup the featureMgr parameter.
+- Have setCurrentMgr to setCurrent display to alert and display and wakeup the featureMgr parameter.
+- Have setCurrent to setCurrent display to alert and display and wakeup the featureMgr for the disp parameter and the current featureMgr.
+- Have setCurrent to setCurrent display to display and wakeup the featureMgr for the disp parameter or the current featureMgr.
+- Have setMainCurrentAlt to setCurrent display to alert and display and wakeup the featureMgr for fdisp parameter if not null or mainDisp if not null or disp.
+- Have static display to keep display from midlet.
+- Have static mainDisp to keep main starting form.
+- Have static RssReaderMIDlet variable.
+- Have update give updating feed loading form for MIDP 1.0.
+- Have wakeupDisp wakeup the featureMgr for disp parameter with loop parameter.
+- If default set from get, set m_valuesChanged to true.
+- Log jde.home and rim.home in display.props.
+- Log setFont error as warning.
+- More logging.
+- Move title to construtor for KFileSelectorImpl.
+- Need getCurrent for setCurrentItemMgr.
+- Need LoadingForm for FeatureList.
+- Put title= on a separate line.
+- Remove apostrophe after htmlUrl=.
+- Remove midlet which is now not used directly.
+- Remove </outline> because the outline is already closed with />.
+- Remove unneeded ;.
+- Remove unused build directories.
+- Remove unused import.
+- Remove unused reqSetVisible.
+- Remove unused wtk.properties.
+- Repalce setCurrent with showMe.
+- Set feed header fields if smartphone version.
+- Show details if 0 items.
+- Support loadingForm with FeatureMgr.
+- Support setCurrentItem in FeatureMgr.
+- Upshift utf-8.
+- Use already retrieved msg for getMessage().
+- Use ant blackberry build tools to optionally create blackberry jar, jad, cso, cod, and alx.
+- Use bb.ant.tools.home and bb.ant.tools.jar for Blackberry ant tools.
+- Use bb.jde.home for Blackberry ant tasks path to jde.home.
+- Use directory of path containing preverify for rapc, not the path to preverify.
+- Use FeatureForm for txtFrm.
+- Use featureMgr for super.getFeatureMgr().
+- Use getLoadingForm instead of initializeLoadingForm.
+- Use jde.home.path for path to jde.home so that we can set jde.home dynamically.
+- Use jsjar.fn for jar file name including suffix.
+- Use loadForm in FeatureMgr.
+- Use loadingForm from FeatureMgr.
+- Use local midlet var to save time..
+- Use midlet from FeatureMgr.
+- Use mweb.jarfile to use correct jar path in jad file.
+- Use observer pattern for feed/OPML/list parsing to prevent hangs from spotty networks and bad URLs.
+- Use only JSR-75 versions for smartphones.
+- Use OpmlParser2Test only if not small memory.
+- Use procPlatform in DetailForm and ItemForm.
+- Use release.name for build file name for projects with multiple release files.
+- Use setCurrentFeature to go back to list before item form.
+- Use setCurrentItemFeature instead of setCurrentItemMgr.
+- Use setCurrentItemMgr for setCurrentItem/setCurrent.
+- Use setMainCurrentAlt for getDisplay.setCurrent.
+- Use showMe for getDisplay.setCurrent.
+- Use showMe for setCurrent.
+- Use special alx directory to zip alx and cod files.
+- Use static open link command to share with Item form and detail form.
+- Use windows.os to tell if windows OS.
+
+v1.11.5 Development 10 (dev10) (Oct 12th 2010)
+- Fix jad files by having correct Jar URL.
+
+v1.11.5 Development 14 (dev14) (Nov 26th 2010)
+- Add columnCount to parseStdDate exceptions.
+- Add convience method setCurrentObjMgr to set current using objects for item and display.
+- Add default value for getSysProperty, getSysPermission, and getSysPropStarts.
+- Add default value of null for getSysProperty, getSysPermission, and getSysPropStarts.
+- Add getImage to FeatureMgr to allow getting an image and adding error to LoadingForm.
+- Add getSysPermission to get if permission allowed, denied or undefined.  For non-MIDP 20, can only use getSysProperty if key != null.
+- Add getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+- Add getSysPropStarts to get system prorperties and see if it starts with a string.
+- Add m_loadStartCmd to allow going to start screen in this case bookmarks from loading screen.
+- Allow an object to be written to with the find files result using FeatureMgr.setTxtObj.
+- Allow item in setCurrentItemMgr to be null for convience in FeatureMgr.
+- Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
+- Allow StringBuffer to store data from text box in FeatureMgr.
+- Allow text box to be used as a prompt with accept/reject.
+- Allow title for find files as a parameter to allow more generic doLaunchSelector in KFileSelectorMgr.
+- Allow use of microemulator as applet.
+- Change debug log info.
+- Change getSysPermission to always retrieve system key.
+- Change initializeURLBox to use return display and return object.
+- Change jsr-75 exists to give true for allowed and not allowed.
+- Change prompt to set StringItem if return object.
+- Combine nested if statements.
+- Copy signed cod to distsigned.
+- Copy signed files to distsigned.
+- Cosmetic changes.
+- Create Blackberry alx and zip with alx and cod.
+- Create getAboutInfo to return info for about to be used as alert from getAbout or form.
+- Create godaddy signed itunes, jsr-75, cldc 1.1 version.
+- Create initApp to initialize the app.
+- Create presigned file for RIM signing in case failed signing to compare.
+- Create setTxtObj to set a text object of TextField, StringItem, or StringBuffer.
+- Do not create class variables for StringItem which do not change after initialization.
+- Do not use nullPtr to initialize variables.
+- Don't have feed open property now that back will have consistent usage.
+- Don't write third certification in jad file.
+- Fix http permission which was wrong before.
+- Fix using text box to allow data to be entered and copy or paste.
+- Have all Blackberry versions begin with rim_.
+- Have all Blackberry versions of jar files.
+- Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+- Have code duplication target for PMD.
+- Have convience FeatureMgr constructor without loading form.
+- Have debug conditional println use displayDbgMsg.
+- Have displayDbgMsg and be in DTEST.
+- Have displayDbgMsg print the class name.
+- Have fieldEquals with RssItemInfo only for JM Unit tests.
+- Have file permissions be required to reduce endless ask to open file..
+- Have full version have seperate define name.
+- Have full version name with internet install link.
+- Have future internet install link version.  The full version has full in the name and is the default.
+- Have microemuapplet.html to run applet microemulator demo of application version.
+- Have microemu.sh to run microemulator demo of application version.
+- Have microemu(version).sh to run microemulator demo of application version.
+- Have no.jar.sign to skip creating jar signing.
+- Have no.rim.sign to skip creating rim cod signing.
+- Have package, preverify, and obfusication done in one step.
+- Have parseStdDateTZ return string time zone instead of index of time zone.
+- Have prepare for godaddy, thawte, and verisign signing be independent of each other.  Each must be used before "prepare" target is called.
+- Have prepare for verisign signing.
+- Have println in DTEST.
+- Have required and optional permissions.
+- Have separate required and optional permissions.
+- Have separate sign of rim file.
+- Have signed versions of microemulator jars to allow demo applets.
+- Have special rim jad and jar file.
+- If create m_bookmarkList is successful, add start command in case something goes wrong after creating the booklist.
+- If jsr-75 vers exists show the version string in case it changes later.
+- If logging error, exit the constructor.
+- If no m_bookmarkList, don't add/remove commands from it.
+- Initialize FILE_SEPARATOR, openCommand, cancelCommand, and selectCommand in the constructor.
+- More logging.
+- Move endif to right place for DTEST.
+- Move files and presereve the last modify date.
+- Move find files call functionality to FeatureMgr.
+- Need to set m_feed before we use it to log.
+- Remove cod files in wtkbuild.
+- Remove cso files.
+- Remove https permission.
+- Remove LogFile.txt file in wtkbuild.
+- Remove redundant new String of literal string.
+- Remove stimeZones and GMT because this may change with phone config or upgrading phone.
+- Save temp cod file from signing to bin with -tmp.cod.
+- Simplify getSysPermission.
+- Stop creating preverified directory.
+- Treat Verisign as other signed files.
+- Use acceptCmd and optional rejectCmd for prompt form or alert.
+- Use a special rim bin for intermediate RIM files.
+- Use Blackberry ant task rapc bb.jde.use.
+- Use Blackberry ant tools to sign cod file and create Blackberry target to create blackberry files.
+- Use Blackberry JDE 4.7.
+- Use bookmark name in news to replace feed open order.
+- Use choice instead of List for getPlaceIndex because choice is a interface for List.
+- Use CPD minimumtokencount.
+- Use form instead of alert as form is more reliable and works with micro emulator.
+- Use getImage from FeatureMgr to get the images.
+- Use getPromptDisp to handle a prompt with accept and reject.
+- Use getSysPermission to get get permission for JSR-75 and system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+- Use getSysProperty to get file seperator.
+- Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+- Use getSysPropStarts to get system property and do startsWith.
+- Use getSysPropStarts to get system prorperties and see if it starts with a string.  This can help with initialialization of static variables.
+- Use intlink to create file to go to internet links to install the program
+- Use m_backCommand from RssReaderMIDlet all the time.
+- Use nullPtr for fileDataBlock.
+- Use nullPtr instead of nullCmd.
+- Use null to compare instead of nullCmd in FeatureMgr.
+- Use null to initialize variables.
+- Use PMD (use.pmd.task) and/or CPD (use.cpd.task).
+- Use properties file for signed jar/jad files.
+- Use properties files based on full version.
+- Use substanceofcode for info url for signed.
+
+Device issues:
+
+- Phone must support MP3 links, etc to play enclosures (many phones do not
+  allow an MP3 to be read from a URL, but play them from the file system)
+
+Program issues:
+
+- While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
+
+Issues:
+
+- For some emulators and devices, bookmarks are not saved.
+
+TODO:
+
+- Selecting root directory in find files does not return the root directory.
+- Selecting .. for up directory, does not give error.  It goes up one directory.
+- Are alx files in zip files?
+- Use echo to add to readme?
+- Add full to file names.
+- Make static vars that use method initialization be instance vars of Singleton.
+- Create HTML index file of released ftp files.
+- Use prompt form to ask about license.
+- Create version to go to install links and allow full version to do it also.
+- RssFormatParser remove extra spaces between description item 7 of imbed
+- URLHandler document need super
+- Have the same order for OK, Back, Cancel, Exit, and Open.
+- Share cancel command.
+- If setCommandListener again, just change user, restart thread, join
+- Handle storeDate.
+- Handle OutOfMemoryError.
+- Optionally keep the back light on with desired intensity.
+- Optionally flash the backlight for a specific duration when update all is complete.
+- Check if need to set to itunes feed if not in header, but in items.
+- Add some media fields.
+- Use decorator patteren for media fields.
+- Minimizer for open link or use to show link in RSS Reader.
+- Methods for booleans for EncodingUtil.
+- Fix new View.  Get prev pos. in PageMgr.
+- Fix removing command if change in PageMgr.
+- Remove extra spaces between description item 7 of imbed.  This happens from removing of HTML which is replaced by spaces.
+- Handle content element with attribute type=html for HTML formating.
+- Add Twim to RSS.
+	- Use multiple links in atom for twitter.
+	- Use twim menu.

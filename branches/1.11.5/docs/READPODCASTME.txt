@@ -1,0 +1,36 @@
+Program files for Mobile RSS Reader with source code located at 
+http://code.google.com/p/mobile-rss-reader/.
+
+Choosing a program file
+-----------------------
+
+NOTE:  All files ending in *.c* or *cod.jad, that is having a 'c' after the
+	   '.' are ONLY for Blackberry.  So, if you're not using a Blackberry, just
+	   ignore those.
+
+It is important to choose the right program file.  This is because unlike
+on the desktop, choosing a program file which uses features not available
+on the phone may cause the program to not run WITHOUT an error message.
+Phone makers are not required to give such a message, so many do not let
+the user know why the program is not allowed to run.  So, to avoid
+frustration, if you try to run one version of the program and you do not
+see anything to show that it was run, try a version with less features.
+There is a web site http://www.mobref.com/device/ which allows you to look
+up which features are supported on most phones.  If JSR75 available is true, you can use
+the versions in this file.  If it is not available, you must use the
+non-smart phone versions.
+
+midp20_jsr75_ programs .  For newer smart phones and usually with media (e.g. MP3)
+	    capabilities, use files prefixed with
+		midp20_jsr75_ if the phones have MIDP-2.0 and JSR-75 use midp20_jsr75_
+		version.  To
+		tell if you have a phone which supports JSR-75, you can use either
+		of the other versions and go to Settings and look at phone jsr75
+		if it says true, it supports jsr75 (this is different than progarm
+		jsr75 which shows the version of the progam not the phone).
+
+rim_midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.cod - MIDP 2.0 and JSR-75 Blackberry COD
+rim_midp20_cldc11_smartphone_jsr75_@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 Blackberry jar
+midp20_cldc11_smartphone_signed_jsr75@STAGEFILE@RSSReader.jad - MIDP 2.0 and JSR-75 jad
+midp20_cldc11_smartphone_signed_jsr75@STAGEFILE@RSSReader.jar - MIDP 2.0 and JSR-75 jar
+

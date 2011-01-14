@@ -1,0 +1,15 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-05-31 1.11.5RC2 Include the regular and file icons.
+#-- IB 2010-10-13 1.11.5Dev11 Remove https permission.
+#-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
+#-- IB 2010-10-13 1.11.5Dev11 Have file permissions be required to reduce endless ask to open file..
+wtk.optionalpda.enabled = true
+DJSR75 = DJSR75
+file.prefix.jsr75 = jsr75_
+PERMISSIONS_REQ.jsr75 = ,javax.microedition.io.Connector.file.read
+PERMISSIONS_OPT.jsr75 = ,javax.microedition.io.Connector.file.write
+SUFFIXVERS.jsr75 = -jsr75
+lib.jsr75 = :${wtk.home}/lib/jsr75.jar
+nojsr75.res.excludes =
+res.includes = up_dir_icon.png,unread.png,rss.png,folder_icon.png,file_icon.png
+jsr75 = JSR-75

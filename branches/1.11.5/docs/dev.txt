@@ -1,0 +1,20 @@
+vim macros
+diff and cmt
+"Find presrc.*va
+@m
+/presrc.*va$
+@n
+"Find source file name in window below usually whycmt.
+$F/l"ay$0jjjw/"apAk
+"Put source comment into j buffer.
+@y
+0WWWWW"jy$0j
+"Put quoted into l buffer.  Search for "a buffer.
+@u
+0f""ly$/"apn
+"Put properties template comment into j buffer.
+@i
+0f-WWWW"jy$j0w
+"Put XML comment into j buffer.
+@h
+0f-WWWW"jy$j0w
