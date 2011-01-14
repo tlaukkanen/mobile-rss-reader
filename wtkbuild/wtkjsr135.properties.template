@@ -1,0 +1,11 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
+wtk.mmapi.enabled = true
+DJSR135 = DJSR135
+file.prefix.jsr135 = jsr135_
+PERMISSIONS_REQ.jsr135 =
+PERMISSIONS_OPT.jsr135 = ,javax.microedition.media.control.RecordControl,javax.microedition.media.control.VideoControl.getSnapshot
+SUFFIXVERS.jsr135 = -jsr135
+lib.jsr135 = :${wtk.home}/lib/mmapi.jar
+nojsr135.res.excludes =
+jsr135 = JSR-135

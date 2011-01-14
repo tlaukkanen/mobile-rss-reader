@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * TestingForm.java
  *
@@ -18,6 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ */
+/*
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-30 1.11.5Dev12 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty.
  */
 
 // Expand to define logging define
@@ -55,6 +61,7 @@ import com.substanceofcode.testlcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.CauseException;
 
@@ -79,9 +86,6 @@ public class TestingForm extends Form implements CommandListener {
     
 	//#ifdef DLOGGING
     private Logger m_logger = Logger.getLogger("TestingForm");
-    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
-    private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
-    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of TestingForm */
@@ -106,7 +110,8 @@ public class TestingForm extends Form implements CommandListener {
 		super.append(new StringItem("isConvWinUni()=",
 					new Boolean(EncodingUtil.isConvWinUni()).toString()));
 		super.append(new StringItem("JavaME encoding=",
-				System.getProperty("microedition.encoding")));
+			(String)FeatureMgr.getSysProperty("microedition.encoding", null,
+						"Unable to get encoding.", null)[0]));
 		super.append(new StringItem("m_midpIso=",
 				new Boolean(EncodingUtil.m_midpIso).toString()));
 		super.append(new StringItem("getIsoEncoding()=",
@@ -118,17 +123,15 @@ public class TestingForm extends Form implements CommandListener {
 		super.append(new StringItem("m_midpUni=",
 				new Boolean(EncodingUtil.m_midpUni).toString()));
 		super.append(new StringItem("m_hasWinEncoding=",
-				new Boolean(EncodingUtil.m_hasWinEncoding).toString()));
+				new Boolean(EncodingUtil.hasWinEncoding()).toString()));
 		super.append(new StringItem("m_hasIso8859Encoding=",
-				new Boolean(EncodingUtil.m_hasIso8859Encoding).toString()));
+				new Boolean(EncodingUtil.hasIso8859Encoding()).toString()));
 		appendEntityAlphaTest("Test with no data.", "", "");
 		appendEntityAlphaTest("Test with one entity.", "&lt;", "<");
-		appendEntityAlphaTest("Test with one entity.",
-						      "&lt;&gt;&amp;&quot;&nbsp;&apos;",
+		appendEntityAlphaTest("Test with one entity.", "&lt;&gt;&amp;&quot;&nbsp;&apos;",
 						 "<>&\" '");
-		appendEntityAlphaTest("Test with one entity.",
-							  " &lt;&gt; &amp;&quot; &nbsp;",
-							 " <> &\"  ");
+		appendEntityAlphaTest("Test with one entity.", " &lt;&gt; &amp;&quot; &nbsp;",
+						 " <> &\"  ");
 		appendEntityAlphaTest("Test with one entity.", " &lt &gt; &amp;&quot; &nbsp;",
 						 " &lt > &\"  ");
 		appendEntityAlphaTest("Test with one amp replace.",
@@ -313,7 +316,7 @@ public class TestingForm extends Form implements CommandListener {
 	private void appendEntityAlphaTest(String tstName, String tst, String res) {
 		super.append(new StringItem(tstName, tst));
 		super.append(new StringItem("(" + tstName + ") Result:", "\n" + res));
-		String actres = EncodingUtil.replaceAlphaEntities(true, tst);
+		String actres = EncodingUtil.replaceAlphaEntities(tst);
 		super.append(new StringItem("(" + tstName + ") Act Result: ", "\n" + actres));
 		super.append("\n" + new Boolean(actres.equals(res)).toString());
 		super.append("-------");

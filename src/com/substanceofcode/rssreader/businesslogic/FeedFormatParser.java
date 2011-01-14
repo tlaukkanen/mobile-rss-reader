@@ -1,5 +1,5 @@
 /*
- * FeedParser.java
+ * FeedFormatParser.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
  * http://www.substanceofcode.com
@@ -27,7 +27,6 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import java.io.IOException;
 import java.util.Vector;
 
-import com.substanceofcode.utils.CauseException;
 
 /**
  * Interface contains methods for parsing general feed.
@@ -36,8 +35,7 @@ import com.substanceofcode.utils.CauseException;
  */
 public interface FeedFormatParser {
 
-    public RssItunesFeed parse(XmlParser parser, RssItunesFeed feed,
-			boolean convXmlEnts, int maxItemCount, boolean getTitleOnly)
-	throws IOException, CauseException;
+    RssItunesFeed parse(XmlParser parser, RssItunesFeed feed,
+			int maxItemCount, boolean getTitleOnly) throws IOException;
     
 }

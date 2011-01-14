@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * StringItem.java
  *
@@ -19,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ */
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -35,6 +39,8 @@ import javax.microedition.lcdui.Item;
 //#ifdef DMIDP20
 import javax.microedition.lcdui.ItemCommandListener;
 //#endif
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Image;
 
 import com.substanceofcode.testutil.TestOutput;
 
@@ -80,7 +86,6 @@ implements ItemCommandListener
 	public void setText(String text) {
 		super.setText(text);
 		TestOutput.println("Test UI String Item setString: [" + getLabel() + "]," + text);
-		return;
 	}
 
 	//#ifdef DMIDP20

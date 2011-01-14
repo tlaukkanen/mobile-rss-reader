@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * OpmlParser.java
  *
@@ -19,7 +20,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-12 1.11.5RC1 Use htmlUrl which is link tag in feed for OPML.
+ * IB 2010-03-07 1.11.4RC1 Better logging.
+ * IB 2010-05-25 1.11.5RC2 Log instead of out.println.
+ * IB 2010-05-25 1.11.4RC1 Recognize style sheet, and DOCTYPE and treat properly.
+ * IB 2010-05-25 1.11.4RC1 Only save htmlURL if it's not 0 length .
+ * IB 2010-05-27 1.11.5RC2 Put in code to write OPML file.
+ * IB 2010-05-27 1.11.5RC2 Have OpmlParser code to write to OPML file only if signed.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+ * IB 2010-05-30 1.11.5RC2 Do export only for signed, Itunes and JSR-75.
+ * IB 2010-07-04 1.11.5Dev6 Use "" when feedNameFilter and feedURLFilter are not used.
+ * IB 2010-09-26 1.11.5Dev8 Add quote after title=.
+ * IB 2010-09-26 1.11.5Dev8 Remove apostrophe after htmlUrl=.
+ * IB 2010-09-26 1.11.5Dev8 Remove </outline> because the outline is already closed with />.
+ * IB 2010-09-26 1.11.5Dev8 Put title= on a separate line.
+ * IB 2010-09-26 1.11.5Dev8 Upshift utf-8.
+ * IB 2010-09-26 1.11.5Dev8 Allow export of feeds with non-smartphones.
+ * IB 2010-09-27 1.11.5Dev9 Convert &,<,> in attributes to entities.
+ * IB 2010-09-28 1.11.5Dev9 Have second body tag be an end tag.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+*/
 
+// Expand to define MIDP define
+@DMIDPVERS@
+// Expand to define DJSR75 define
+@DJSR75@
+// Expand to define itunes define
+@DITUNESDEF@
+// Expand to define signed define
+@DSIGNEDDEF@
 // Expand to define logging define
 @DLOGDEF@
 package com.substanceofcode.rssreader.businesslogic;
@@ -30,8 +60,7 @@ import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
 import com.substanceofcode.utils.EncodingUtil;
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
+import com.substanceofcode.utils.XmlParser;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -52,20 +81,17 @@ public class OpmlParser extends FeedListParser {
 	private boolean opmlDirectory = false;
 
 	//#ifdef DLOGGING
-    private Logger m_logger = Logger.getLogger("OpmlParser");
-    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
-    private boolean m_finerLoggable = m_logger.isLoggable(Level.FINER);
-    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
+    private Logger logger = Logger.getLogger("OpmlParser");
+    private boolean warningLoggable = logger.isLoggable(Level.WARNING);
+    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 	//#endif
-
     /** Constructor with url, username and password parameters. */
     public OpmlParser(String url, String username, String password) {
         super(url, username, password);
     }
     
     /** Parse OPML list */
-    public RssItunesFeed[] parseFeeds(InputStream is)
-    throws IOException, CauseMemoryException, CauseException, Exception {
+    public RssItunesFeed[] parseFeeds(InputStream is) {
         /** Initialize item collection */
         Vector rssFeeds = new Vector();
         
@@ -74,11 +100,11 @@ public class OpmlParser extends FeedListParser {
         try {
             
 			// The first element is the main tag.
-            int elementType = parser.parse();
-			// If we found the prologue, get the next entry.
-			if( elementType == XmlParser.PROLOGUE ) {
-				elementType = parser.parse();
-			}
+			// If we found the PROLOGUE, DOCTYPE, or STYLESHEET get the next entry.
+			// If link followed by meta found, go to following XML.
+
+            int elementType = parser.parseXmlElement();
+
 			if (elementType == XmlParser.END_DOCUMENT ) {
 				return null;
 			}
@@ -90,14 +116,17 @@ public class OpmlParser extends FeedListParser {
 				String link = "";
 												
 				String tagName = parser.getName();
-				System.out.println("tagname: " + tagName);
+				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine("tagname: " + tagName);}
+				//#endif
 				if (tagName.equals("outline")) {
-					System.out.println("Parsing <outline> tag");
+					//#ifdef DLOGGING
+					if (fineLoggable) {logger.fine("Parsing <outline> tag");}
+					//#endif
 					
 					title = parser.getAttributeValue( "text" );
 					if (title != null) {
-						title = EncodingUtil.replaceAlphaEntities(true,
-								title);
+						title = EncodingUtil.replaceAlphaEntities(title);
 						// No need to convert from UTF-8 to Unicode using replace
 						// umlauts now because it is done with new String...,encoding.
 
@@ -117,71 +146,62 @@ public class OpmlParser extends FeedListParser {
 					 * instead of link attribute.
 					 */
 
-					if ((link = parser.getAttributeValue( "xmlUrl" )) == null) {
-						if (opmlDirectory) {
-							link = parser.getAttributeValue( "url" );
-						}
+					if (((link = parser.getAttributeValue( "xmlUrl" )) == null) &&
+						opmlDirectory) {
+						link = parser.getAttributeValue( "url" );
 					}
 					
+					//#ifdef DITUNES
+					/** 
+					 * For Google htmlURL is the link in the feed.
+					 */
+
+					String htmlUrl = parser.getAttributeValue( "htmlUrl" );
+					//#endif
+					
 					/** Debugging information */
-					System.out.println("Title:       " + title);
-					System.out.println("Link:        " + link);
+					//#ifdef DLOGGING
+					if (fineLoggable) {logger.fine("parseFeeds title,link=" + title + "," + link);}
+					//#endif
 					
 					if(( link == null ) || ( link.length() == 0 )) {
 						continue;
 					}
-					if (( m_feedNameFilter != null) &&
-						((title != null) &&
-						(title.toLowerCase().indexOf(m_feedNameFilter) < 0))) {
+					// Allow null title so that it can be retrieved from
+					// the feed title
+					if (( m_feedNameFilter.length() > 0) &&
+						(title != null) &&
+						(title.toLowerCase().indexOf(m_feedNameFilter) < 0)) {
 						continue;
 					}
-					if (( m_feedURLFilter != null) &&
+					if (( m_feedURLFilter.length() > 0) &&
 						( link.toLowerCase().indexOf(m_feedURLFilter) < 0)) {
 						continue;
 					}
+					//#ifdef DLOGGING
+					if (warningLoggable && (title == null)) {logger.warning("parseFeeds warning null title for link=" + link);}
+					//#endif
 					RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
+					//#ifdef DITUNES
+					if ((htmlUrl != null) && (htmlUrl.length() > 0)) {
+						feed.setLink(htmlUrl);
+					}
+					//#endif
+
 					rssFeeds.addElement( feed );
 				}
 				
 			}
             while( parser.parse() != XmlParser.END_DOCUMENT );
             
-        } catch (CauseMemoryException ex) {
-			rssFeeds = null;
-			CauseMemoryException cex = new CauseMemoryException(
-					"Out of memory error while parsing OPML feed " +
-					m_url, ex);
-			throw cex;
         } catch (Exception ex) {
             System.err.println("OpmlParser.parseFeeds(): Exception " + ex.toString());
 			ex.printStackTrace();
-			//#ifdef DLOGGING
-			m_logger.severe("FeedListParser.run(): Error while parsing " +
-					        "feeds: " + m_url, ex);
-			//#endif
-			CauseException cex = new CauseException(
-					"Error while parsing Opml feed " + m_url, ex);
-			throw cex;
-        } catch (OutOfMemoryError ex) {
-			rssFeeds = null;
-			CauseMemoryException cex = new CauseMemoryException(
-					"Out of memory error while parsing OPML feed " +
-					m_url, ex);
-			//#ifdef DLOGGING
-			m_logger.severe("FeedListParser.run(): Error while parsing " +
-					        "feeds: " + m_url, ex);
-			//#endif
-			throw cex;
+            return null;
         } catch (Throwable t) {
             System.err.println("OpmlParser.parseFeeds(): Exception " + t.toString());
 			t.printStackTrace();
-			CauseException ex = new CauseException(
-					"Error while parsing Opml feed " + m_url, t);
-			//#ifdef DLOGGING
-			m_logger.severe("FeedListParser.run(): Error while parsing " +
-					        "feeds: " + m_url, ex);
-			//#endif
-			throw ex;
+            return null;
         }
         
         /** Create array */
@@ -189,6 +209,29 @@ public class OpmlParser extends FeedListParser {
         rssFeeds.copyInto(feeds);
         return feeds;
     }
+
+		//#ifdef DSIGNED
+		//#ifdef DJSR75
+		static public String getOpmlBegin() {
+					return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<opml version=\"1.0\">\n<head>\n<title>Rss Reader subscriptions</title>\n</head>\n<body>\n";
+		}
+
+		static public String getOpmlLine(final RssItunesFeed feed) {
+			StringBuffer sb = new StringBuffer("    <outline text=\"").append(
+					XmlParser.convAttrData(feed.getName())).append("\"\ntitle=\"").append(XmlParser.convAttrData(feed.getName())).append(
+					"\" type=\"rss\"\n").append("xmlUrl=\"").append(
+						XmlParser.convAttrUrlData(feed.getUrl())).append("\" ");
+			//#ifdef DITUNES
+			sb.append("htmlUrl=\"").append(XmlParser.convAttrUrlData(feed.getLink())).append("\"");
+			//#endif
+			sb.append("/>\n");
+			return sb.toString();
+		}
+
+		static public String getOpmlEnd() {
+			return "</body>\n</opml>\n";
+		}
+		//#endif
+		//#endif
     
 }
-

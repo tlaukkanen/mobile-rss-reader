@@ -1,37 +1,87 @@
-#This is used to compile testui and test
-antenna.home = C:/mostdownloads/j2me/sourceforge/antenna
-antenna.jar = antenna-bin-1.0.0.jar
-antcontrib.home = C:/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
-wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
+#windows.drive = C:
+windows.drive = 
+wtk252 = _01
+#windows.ext = .exe
+windows.ext =
+#opt.tools = ${windows.drive}/opt/tools
+opt.tools = /home/irvbopt/opt/tools
+#antenna.home = ${ext.drive}/mostdownloads/j2me/sourceforge/antenna
+antenna.home = ${opt.tools}/antenna
+#antenna.jar = antenna-bin-0.9.15-beta.jar
+#antenna.jar = antenna-bin-1.0.0.jar
+#This version (1.0.2) has //#elif bug, don't use!!
+#antenna.jar = antenna-bin-1.0.2.jar
+#antenna.jar = antenna-bin-1.0.0.jar
+antenna.jar = antenna-bin-1.1.0-beta.jar
+#antcontrib.home = ${ext.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
+#antcontrib.home = ${windows.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
+antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
+#wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
+#Comment out if you do not want to run findbugs
+#findbugs.home = ${ext.drive}/opt/tools/findbugs-1.3.4
+#Comment out if you do not want to run PMD
+#pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
+pmd.xsl = pmd-compile-reduced.xsl
+cat.cmd = cat
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
-src = /cygwin/tmp/irvb/svn/mobile-rss-reader/src
-unproc.src = /cygwin/tmp/irvb/svn/mobile-rss-reader/src
-presrc = /cygwin/tmp/irvb/svn/mobile-rss-reader/presrc
+#src = /cygwin/tmp/irvb/svn/mobile-rss-reader/src
+#src = /mostdownloads/j2me/code.google.com/RSSReader/RSSReader/RSSReader-1_11/src
+#src = /mostdownloads/j2me/code.google.com/RSSReader/RSSReader/RSSReader-1_11/src
+#src = /opt/WTK2.5.1/apps/RSSReadero/mobile-rss-reader/1.11.1/src
+#src = /cygwin/tmp/irvb/old/mobile-rss-reader/src
+src = ../../../../RSSReaderold/mobile-rss-reader/src
+#unproc.src = /cygwin/tmp/irvb/svn/mobile-rss-reader/src
+#unproc.src = /cygwin/tmp/irvb/old/src
+#unproc.src = /opt/WTK2.5.1/apps/RSSReadero/mobile-rss-reader/1.11.1/src
+unproc.src = ../../../../RSSReaderold/mobile-rss-reader/src
+#presrc = /cygwin/tmp/irvb/svn/mobile-rss-reader/presrc
+#presrc = /mostdownloads/j2me/code.google.com/RSSReader/RSSReader/RSSReader-1_11/presrc
+#presrc = /cygwin/tmp/irvb/old/presrc
+#presrc = /opt/WTK2.5.1/apps/RSSReadero/mobile-rss-reader/1.11.1/presrc
+#presrc = /cygwin/tmp/irvb/old/mobile-rss-reader/RSSReader-1_11_1/presrc
+presrc = ../../../../RSSReaderold/mobile-rss-reader/presrc
 #Compile test ui
-testui.presrc = ../testpresrc
+#testui.presrc = ../testpresrc
+#testui.presrc = /opt/WTK2.5.1/apps/RSSReadero/mobile-rss-reader/1.11.1/testpresrc
+#testui.presrc = /cygwin/tmp/irvb/old/mobile-rss-reader/RSSReader-1_11_1/testpresrc
 DTESTDEF = DTEST
 DTESTUIDEF = DTESTUI
+DJMTESTDEF = DNOJMTEST
 DLOGDEF = DNOLOGGING
 svn.home = C:\\PROGRA~1\\COLLAB~1
 #svn.home = C:\\PROGRA~1\\TORTOI~1
 #rim.home = C:\\Program Files\\Research In Motion\\BlackBerry JDE 4.2.1
-rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
-wtk.home = C:/opt/WTK2.5.1
+#rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
+#wtk.home = C:/opt/WTK2.5.1
+#wtk.home = ${windows.drive}/WTK2.5.2_01
+#wtk.home = ${opt.tools}/WTK2.5.2${wtk252}
+wtk.home = ${windows.drive}/opt/WTK2.5.2
+#For Netbeans
+#wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
+#wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
+#wtk.proguard.home = ${windows.drive}/opt/tools/proguard/proguard4.2
+wtk.proguard.home = ${opt.tools}/proguard/proguard4.2
+#For phoneMe Windows
+phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
+#For phoneMe Linux x86
+#phoneme.home = /media/SEA_DISK/linux/src/RSSReader-1_11_1rc2/bin/linux_x86_fb_chameleon_mvm
+#For phoneMe Windows and Linux
+#wtk.midpapi = ${phoneme.home}/classes
 wtk.encoding = UTF-8
 #wtk.optionalpda.enabled = false
 midlet.name = RssReaderMIDlet
 midlet.class = com.substanceofcode.rssreader.presentation.${midlet.name}
 logging.package = net.sf.jlogmicro.util.logging
 obfuscate.classes = ${midlet.class},${logging.package}.ConsoleHandler,${logging.package}.FormHandler,${logging.package}.RecStoreHandler,${logging.package}.SimpleFormatter
-project.name = RSSReader
+project.name = RSSReadero
 midlet.home = ${wtk.home}/apps/${project.name}
 prc.creater = MRSS
 prc.longname = RSS/News/Blog Reader
-MIDLETVERSROOT = 1.10.8
+MIDLETVERSROOT = 1.11.1
 #Need vers with '_' to allow uploading to sites that get confused by to
 #many '.'
-FMIDLETVERSROOT = 1_10_8
+FMIDLETVERSROOT = 1_11_1
 #Location of manifest source
 manifestsrc = ../manifestsrc
 #? lib = lib
@@ -61,23 +111,27 @@ need.preprocess = true
 #src = ../src
 src.controlled.copy = true
 #Specify the WTK source directory to be replaced
-wtk.src = ../../../RSSReadero/src
-#wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReadero/src
+#wtk.src = ../../../RSSReadero/src
 #wtk.src = ${wtk.home}/apps/RSSReadero/src
+#wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReadero/src
+wtk.src = ${env.j2mewtk}/${project.name}/src
 zipdir = ../zipedsrc
 need.svn.preprocessed = true
-svn.home = C:\\PROGRA~1\\COLLAB~1
-svn.url =  https://mobile-rss-reader.googlecode.com/svn/trunk/
+#svn.home = C:\\PROGRA~1\\COLLAB~1
+#svn.url =  https://mobile-rss-reader.googlecode.com/svn/trunk/
+svn.url =  https://mobile-rss-reader.googlecode.com/svn/branches/1.11.1
 svn.src =  mobile-rss-reader
 svn.user =  ibuntonjr
 #Need ti distribute the SVN dirs
 need.dist.svn.dirs = true
 need.res = true
 res.dir = ../src/icons
+msg.dir = ../translations
 res.todir = icons
 #add.jars = true
 #copy.jar.src = true
 #jarsrc = ../../../JLogMicro/jlogmicro/src
+docs = ../docs
 jadsrc = ../jadsrc
 alxsrc = ../alxsrc
 debug = debug

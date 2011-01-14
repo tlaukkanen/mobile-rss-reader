@@ -1,0 +1,6 @@
+#-- IB 2010-11-12 1.11.5DEV14 Use properties files based on full version.
+DFULLVERSDEF = DFULLVERS
+file.prefix.full = full_
+SUFFIXVERS.full = -full
+intlink = Full 
+make.link= false

@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * SettingsForm.java
  *
@@ -19,6 +20,27 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.5RC1 Remove unneeded import.
+ * IB 2010-06-27 1.11.5Dev2 Change getSettingMemInfo to return int array to save memory and simplify.
+ * IB 2010-08-21 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-08-15 1.11.5Dev8 Support loading form with FeatureMgr.
+ * IB 2010-08-21 1.11.5Dev8 Use showMe for setCurrent.
+ * IB 2010-08-21 1.11.5Dev8 Have loading form for updating settings.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
+ * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-30 1.11.5Dev12 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-15 1.11.5Dev14 Use getSysPermission to get get permission for JSR-75 and system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-15 1.11.5Dev14 Do not create class variables for StringItem which do not change after initialization.
+ * IB 2010-11-15 1.11.5Dev14 Cosmetic changes.
+ * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty and getSysPermission.
+ * IB 2010-11-16 1.11.5Dev14 Don't have feed open property now that back will have consistent usage.
+ * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2010-11-17 1.11.5Dev14 Cosmetic change.
+ * IB 2010-11-18 1.11.5Dev14 Change jsr-75 exists to give true for allowed and not allowed.
+ * IB 2010-11-19 1.11.5Dev14 Use getSysProperty instead of getProperty for working with emulator and possibly other devices.
+ */
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -34,7 +56,6 @@
 package com.substanceofcode.rssreader.presentation;
 
 import java.lang.IllegalArgumentException;
-import java.io.IOException;
 import java.util.Hashtable;
 
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
@@ -61,15 +82,9 @@ import com.substanceofcode.testlcdui.StringItem;
 //#endif
 import javax.microedition.lcdui.Item;
 
-//#ifndef DSMALLMEM
-import com.substanceofcode.rssreader.presentation.HelpForm;
-//#endif
-
-//#ifdef DJSR75
-import org.kablog.kgui.KFileSelectorMgr;
-//#endif
 import com.substanceofcode.utils.Settings;
-import cz.cacek.ebook.util.ResourceProviderME;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
+import com.substanceofcode.rssreader.presentation.FeatureForm;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -81,30 +96,23 @@ import net.sf.jlogmicro.util.logging.Level;
  *
  * @author Tommi Laukkanen
  */
-public class SettingsForm extends Form implements CommandListener, Runnable {
+public class SettingsForm extends FeatureForm
+implements CommandListener {
     
-    private RssReaderMIDlet m_midlet;
-    private boolean m_getHelp = false;
-    private boolean m_upd = false;
     private Command m_okCommand;
     private Command m_cancelCommand;
-	//#ifndef DSMALLMEM
-    private Command m_helpCommand;
-	//#endif
     
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
-	//#ifndef DSMALLMEM
+	//#ifdef DMIDP20
     private ChoiceGroup m_useTextBox;
 	//#endif
     private ChoiceGroup m_useStandardExit;
-    private ChoiceGroup m_feedListOpen;
-	//#ifdef DITUNES
     private ChoiceGroup m_itunesEnabled;
-	//#endif
 	//#ifdef DMIDP20
-    private ChoiceGroup m_pageEnabled;
-    private ChoiceGroup m_fontSize;
+    private ChoiceGroup m_fontChoice;
+    private ChoiceGroup m_fitPolicy;
+    private ChoiceGroup m_nameNews;
 	//#endif
     private TextField m_wordCountField;
     private StringItem m_pgmMemUsedItem;
@@ -117,29 +125,19 @@ public class SettingsForm extends Form implements CommandListener, Runnable {
     private TextField m_logLevelField;
     private Logger logger = Logger.getLogger("SettingsForm");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
-    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of SettingsForm */
-    public SettingsForm(RssReaderMIDlet midlet) {
-        super("Settings");
-        m_midlet = midlet;
+    public SettingsForm(LoadingForm loadForm) {
+        super("Settings", loadForm);
         
-        m_okCommand = UiUtil.getCmdRsc("cmd.ok", Command.OK, 1);
-        this.addCommand( m_okCommand );
+        m_okCommand = new Command("OK", Command.OK, 4);
+        super.addCommand( m_okCommand );
         
-        m_cancelCommand = UiUtil.getCmdRsc("cmd.cancel", Command.CANCEL, 2);
-        this.addCommand( m_cancelCommand );
+        m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
+        super.addCommand( m_cancelCommand );
         
-		//#ifndef DSMALLMEM
-        m_helpCommand = UiUtil.getCmdRsc("cmd.help", Command.HELP, 3);
-        this.addCommand( m_helpCommand );
-		//#endif
-
-        this.setCommandListener( this );
-        
-        RssReaderSettings settings = m_midlet.getSettings();
+        RssReaderSettings settings = featureMgr.getMidlet().getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
         
         m_itemCountField = new TextField("Max item count in feed",
@@ -148,112 +146,165 @@ public class SettingsForm extends Form implements CommandListener, Runnable {
 		m_itemCountField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         super.append( m_itemCountField );
-
-        m_markUnreadItems = UiUtil.getAddChoiceGroup(this,
-				"Mark unread items", new String [] {"Mark", "No mark"});
-
-		//#ifndef DSMALLMEM
-        m_useTextBox = UiUtil.getAddChoiceGroup(this,
-				"Text entry items", new String [] {"Text (large) box",
-				"Text (line) field"});
-		//#endif
-
-        m_useStandardExit = UiUtil.getAddChoiceGroup(this,
-				"Exit key type", new String [] {"Use standard exit key",
-				"Use menu exit key"});
-
-		//#ifdef DITUNES
-        m_itunesEnabled = UiUtil.getAddChoiceGroup(this,
-				"Choose to use Itunes data", new String []
-				{"Don't show Itunes data", "Show Itunes data"});
-		//#endif
-
+		String [] choices = {"Mark", "No mark"};
+        m_markUnreadItems = new ChoiceGroup("Mark unread items",
+				                            Choice.EXCLUSIVE, choices, null);
 		//#ifdef DMIDP20
-        m_pageEnabled = UiUtil.getAddChoiceGroup(this,
-				"Choose to use keypad and/get HTML emphasis for item screen",
-				new String []
-				{"Use commands to go back to previous screen",
-				"Also use keypad to go back to previous screen",
-				"Also use keypad (as previous) and emphasize HTML"});
+		m_markUnreadItems.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        super.append( m_markUnreadItems );
+		//#ifdef DMIDP20
+		String [] txtChoices = {"Text (large) box", "Text (line) field"};
+        m_useTextBox = new ChoiceGroup("Text entry items",
+				                            Choice.EXCLUSIVE, txtChoices, null);
+		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
+        super.append( m_useTextBox );
+		//#endif
 
-        m_fontSize = UiUtil.getAddChoiceGroup(this,
-				"Choose font size",
+		String [] txtExit = {"Use standard exit key", "Use menu exit key"};
+        m_useStandardExit = new ChoiceGroup("Exit key type",
+				                            Choice.EXCLUSIVE, txtExit, null);
+		//#ifdef DMIDP20
+		m_useStandardExit.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        super.append( m_useStandardExit );
+		String [] itunesEnabledChoices = {"Don't show Itunes data",
+				"Show Itunes data"};
+        m_itunesEnabled = new ChoiceGroup("Choose to use Itunes data",
+				                            Choice.EXCLUSIVE,
+											itunesEnabledChoices,
+											null);
+		//#ifdef DMIDP20
+		m_itunesEnabled.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+		//#ifdef DITUNES
+        super.append( m_itunesEnabled );
+		//#endif
+		//#ifdef DMIDP20
+        m_fontChoice = FeatureMgr.getAddChoiceGroup(this,
+				"Choose list font size",
 				new String[] {"Default font size", "Small",
 				"Medium", "Large"});
+        m_fitPolicy = FeatureMgr.getAddChoiceGroup(this,
+				"Choose list wraparound",
+				new String[] {"Default wrap around", "Wraparound on",
+				"Wrap around off"});
+        m_nameNews = FeatureMgr.getAddChoiceGroup(this,
+				"Put feed name in river of news", new String []
+				{"Don't show name", "Show name"});
 		//#endif
-        m_feedListOpen = UiUtil.getAddChoiceGroup(this,
-				"Choose feed list menu first item", new String []
-				{"Open item first", "Back first"});
-
         int maxWordCount = settings.getMaxWordCountInDesc();
         m_wordCountField = new TextField("Max word count desc abbrev",
-                String.valueOf(maxCount), 3, TextField.NUMERIC);
+                String.valueOf(maxWordCount), 3, TextField.NUMERIC);
 		//#ifdef DMIDP20
 		m_wordCountField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
         super.append( m_wordCountField );
-		StringItem itemInfo = new StringItem("Program MIDP version:",
+        StringItem pgmMidpVers = new StringItem("Program MIDP version:",
 		//#ifdef DMIDP20
 				"MIDP-2.0");
 		//#else
 				"MIDP-1.0");
 		//#endif
 		//#ifdef DMIDP20
-		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
+		pgmMidpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( itemInfo );
-        itemInfo = new StringItem("Program CLDC version:",
+        super.append( pgmMidpVers );
+        StringItem pgCldVers = new StringItem("Program CLDC version:",
 				//#ifdef DCLDCV11
 				"CLDC-1.1");
 				//#else
 				"CLDC-1.0");
 				//#endif
 		//#ifdef DMIDP20
-		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
+		pgCldVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( itemInfo );
-        itemInfo = new StringItem("Program JSR 75 available:",
+        super.append( pgCldVers );
+        StringItem pgmJsr75 = new StringItem("Program JSR 75 available:",
 		//#ifdef DJSR75
 				"true");
 		//#else
 				"false");
 		//#endif
 		//#ifdef DMIDP20
-		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
+		pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( itemInfo );
-		String mep = System.getProperty("microedition.profiles");
+        super.append( pgmJsr75 );
+		Object[] omep = FeatureMgr.getSysProperty("microedition.profiles", null,
+				"Unable to get microedition.profiles",
+				featureMgr.getLoadForm());
+		String mep = (String)omep[0];
 		if (mep == null) {
 			mep = "N/A";
 		}
-        itemInfo = new StringItem("Phone MIDP version:", mep);
+        StringItem midpVers = new StringItem("Phone MIDP version:", mep);
 		//#ifdef DMIDP20
-		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
+		midpVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        super.append( itemInfo );
-        itemInfo = new StringItem("Phone CLDC version:",
-				System.getProperty("microedition.configuration"));
-		//#ifdef DMIDP20
-		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( itemInfo );
-        itemInfo = new StringItem("Phone JSR 75 available:",
-				new Boolean(System.getProperty(
-				"microedition.io.file.FileConnection.version")
-				!= null).toString());
-		//#ifdef DMIDP20
-		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( itemInfo );
-		String me = System.getProperty("microedition.platform");
-		if (me == null) {
-			me = "N/A";
+        super.append( midpVers );
+		Object[] omec = FeatureMgr.getSysProperty("microedition.configuration",
+				null, "Unable to get microedition.configuration",
+				featureMgr.getLoadForm());
+		String mec = (String)omec[0];
+		if (mec == null) {
+			mec = "N/A";
 		}
-        itemInfo = new StringItem("Phone Microedition platform:", me);
+        StringItem cldcVers = new StringItem("Phone CLDC version:", mec);
 		//#ifdef DMIDP20
-		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
+		cldcVers.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
-        this.append( itemInfo );
+        super.append( cldcVers );
+		//#ifdef DMIDP10
+        super.append(new StringItem("Phone JSR 75 available:",
+				String.valueOf(FeatureMgr.getSysProperty(
+				"microedition.io.file.FileConnection.version", null,
+				"Unable to get JSR-75 FileConnection", featureMgr.getLoadForm())[0] != null)));
+		//#else
+		Object[] ojsr75 = 
+				FeatureMgr.getSysPermission(
+				"javax.microedition.io.Connector.file.read",
+				"microedition.io.file.FileConnection.version", null,
+				"Unable to get JSR-75 FileConnection", featureMgr.getLoadForm());
+		int ijsr75 = ((Integer)ojsr75[0]).intValue();
+		if (ijsr75 >= 0) {
+			super.append(new StringItem("Phone JSR 75 available:",
+					String.valueOf(ijsr75 == 1)));
+			super.append(new StringItem("Phone JSR 75 exists:",
+					String.valueOf(ijsr75 >= 0)));
+		} else {
+			super.append(new StringItem("Phone JSR 75 available:",
+					String.valueOf(ojsr75[2] != null)));
+		}
+		if (ojsr75[2] != null) {
+			super.append(new StringItem("Phone JSR 75 version:",
+					(String)ojsr75[2]));
+		}
+		//#endif
+		Object[] omepl = FeatureMgr.getSysProperty("microedition.platform",
+				null, "Unable to get microedition.platform",
+				featureMgr.getLoadForm());
+		String mepl = (String)omepl[0];
+		if (mepl == null) {
+			mepl = "N/A";
+		}
+        StringItem platformVers = new StringItem("Phone Microedition platform:",
+				mepl);
+		//#ifdef DMIDP20
+		platformVers.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        super.append( platformVers );
+		Object[] omel = FeatureMgr.getSysProperty("microedition.locale",
+				null, "Unable to get microedition.locale",
+				featureMgr.getLoadForm());
+		String mel = (String)omel[0];
+		if (mel == null) {
+			mel = "N/A";
+		}
+        StringItem silocale = new StringItem("Phone Microedition locale:", mel);
+		//#ifdef DMIDP20
+		silocale.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        super.append( silocale );
 		//#ifdef DLOGGING
         m_logLevelField = new TextField("Logging level",
                 logger.getParent().getLevel().getName(), 20, TextField.ANY);
@@ -292,133 +343,101 @@ public class SettingsForm extends Form implements CommandListener, Runnable {
     
 	/* Update form items that change per run. */
 	public void updateForm() {
-        RssReaderSettings settings = m_midlet.getSettings();
+        RssReaderMIDlet midlet = featureMgr.getMidlet();
+        RssReaderSettings settings = midlet.getSettings();
         int maxCount = settings.getMaximumItemCountInFeed();
         m_itemCountField.setString(String.valueOf(maxCount));
         boolean markUnreadItems = settings.getMarkUnreadItems();
-		m_markUnreadItems.setSelectedFlags( new boolean[] {markUnreadItems,
-				!markUnreadItems} );
-		//#ifndef DSMALLMEM
+		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
+		m_markUnreadItems.setSelectedFlags( selectedItems );
+		//#ifdef DMIDP20
         boolean useTextBox = settings.getUseTextBox();
-		m_useTextBox.setSelectedFlags( new boolean[] {useTextBox, !useTextBox} );
+		boolean [] boolSelectedItems = {useTextBox, !useTextBox};
+		m_useTextBox.setSelectedFlags( boolSelectedItems );
 		//#endif
         boolean useStdExit = settings.getUseStandardExit();
         prevStdExit = useStdExit;
-		m_useStandardExit.setSelectedFlags( new boolean[] {useStdExit,
-				!useStdExit} );
-		//#ifdef DITUNES
+		boolean [] boolExitItems = {useStdExit, !useStdExit};
+		m_useStandardExit.setSelectedFlags( boolExitItems );
         boolean itunesEnabled = settings.getItunesEnabled();
-		m_itunesEnabled.setSelectedFlags( new boolean[] {!itunesEnabled,
-				itunesEnabled} );
-		//#endif
+		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
+		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
 		//#ifdef DMIDP20
-        boolean pageEnabled = settings.getPageEnabled();
-        boolean htmlEnabled = settings.getHtmlEnabled();
-		m_pageEnabled.setSelectedFlags( new boolean[] {!pageEnabled &&
-				!htmlEnabled, pageEnabled, htmlEnabled} );
-        int fontSize = settings.getFontSize();
-		boolean [] boolfontSize = {false, false, false, false};
-		m_fontSize.setSelectedFlags( new boolean[] {false, false, false,
+        int fontChoice = settings.getFontChoice();
+		m_fontChoice.setSelectedFlags( new boolean[] {false, false, false,
 				false} );
-		m_fontSize.setSelectedIndex( fontSize, true );
+		m_fontChoice.setSelectedIndex( fontChoice, true );
+        int fitPolicy = settings.getFitPolicy();
+		m_fitPolicy.setSelectedFlags( new boolean[] {false, false, false} );
+		m_fitPolicy.setSelectedIndex( fitPolicy, true );
+        boolean nameNews = settings.getBookmarkNameNews();
+		m_nameNews.setSelectedFlags( new boolean[] {!nameNews, nameNews});
 		//#endif
-        boolean feedListOpen = settings.getFeedListOpen();
-		m_feedListOpen.setSelectedFlags( new boolean[] {feedListOpen,
-				!feedListOpen} );
+		int[] memInfo = null;
+		try {
+			Settings m_settings = Settings.getInstance();
+			memInfo = m_settings.getSettingMemInfo();
+		} catch (Exception e) {
+			memInfo = new int[0];
+		}
 
-		long totalMem;
-		long freeMem;
 		System.gc();
-		totalMem = Runtime.getRuntime().totalMemory();
-		freeMem = Runtime.getRuntime().freeMemory();
+		long totalMem = Runtime.getRuntime().totalMemory();
+		long freeMem = Runtime.getRuntime().freeMemory();
 		m_pgmMemUsedItem.setText(((totalMem - freeMem)/1024L) + "kb");
 		m_pgmMemAvailItem.setText((freeMem/1024L) + "kb");
-		Hashtable memInfo;
-		try {
-			memInfo = settings.getSettingMemInfo();
-		} catch (Throwable e) {
-			m_midlet.recordExcFormFinRsc("exc.int.err", e);
-			memInfo = new Hashtable();
-		}
-        if (memInfo.size() == 0) {
+        if (memInfo.length == 0) {
 			m_memUsedItem.setText("0");
 			m_memAvailItem.setText("0");
 		} else {
-			m_memUsedItem.setText((String)memInfo.get("used"));
-			m_memAvailItem.setText((String)memInfo.get("available"));
+			m_memUsedItem.setText(Integer.toString(memInfo[0]));
+			m_memAvailItem.setText(Integer.toString(memInfo[1]));
 		}
 		m_threadsUsed.setText(Integer.toString(Thread.activeCount()));
 	}
 
     public void commandAction(Command command, Displayable displayable) {
-		//#ifdef DTESTUI
-		super.outputCmdAct(command, displayable);
-		//#endif
+        RssReaderMIDlet midlet = featureMgr.getMidlet();
         if(command==m_okCommand) {
-			m_upd = true;
-			try {
-				new Thread(this).start();
-            } catch(Throwable e) {
-				/* Internal error.:\n */
-				m_midlet.recordExcFormFinRsc("exc.int.err", e);
-            }
-        }
-        
-        if(command==m_cancelCommand) {
-            m_midlet.showBookmarkList();
-        }
-
-		//#ifndef DSMALLMEM
-        if(command==m_helpCommand) {
-			m_getHelp = true;
-			try {
-				new Thread(this).start();
-            } catch(Throwable e) {
-				/* Internal error.:\n */
-				m_midlet.recordExcFormFinRsc("exc.int.err", e);
-            }
-		}
-		//#endif
-
-    }
-    
-	public void run() {
-        if(m_upd) {
-			m_upd = false;
-			/* Loading data... */
-			m_midlet.initializeLoadingFormRsc("text.u.data", this);
             // Save settings
+            RssReaderSettings settings = midlet.getSettings();
+			LoadingForm loadForm = LoadingForm.getLoadingForm(
+						"Updating settings...", this, null);
+			featureMgr.setLoadForm(loadForm);
             try {
-				RssReaderSettings settings = m_midlet.getSettings();
                 int maxCount = Integer.parseInt( m_itemCountField.getString() );
                 settings.setMaximumItemCountInFeed( maxCount );
 				boolean markUnreadItems = m_markUnreadItems.isSelected(0);
                 settings.setMarkUnreadItems( markUnreadItems );
-				//#ifndef DSMALLMEM
+				//#ifdef DMIDP20
 				boolean useTextBox = m_useTextBox.isSelected(0);
 				settings.setUseTextBox(useTextBox);
 				//#endif
 				boolean useStdExit = m_useStandardExit.isSelected(0);
 				settings.setUseStandardExit(useStdExit);
 				if (useStdExit != prevStdExit) {
-					m_midlet.initExit();
+					midlet.initExit();
 				}
-				//#ifdef DITUNES
 				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
+				//#ifdef DITUNES
 				settings.setItunesEnabled( itunesEnabled );
 				//#else
 				settings.setItunesEnabled( false );
 				//#endif
 				//#ifdef DMIDP20
-				boolean pageEnabled = m_pageEnabled.isSelected(1);
-				settings.setPageEnabled( pageEnabled );
-				boolean htmlEnabled = m_pageEnabled.isSelected(2);
-				settings.setHtmlEnabled( htmlEnabled );
-				int fontSize = m_fontSize.getSelectedIndex();
-				settings.setFontSize( fontSize );
+				int fontChoice = m_fontChoice.getSelectedIndex();
+				settings.setFontChoice( fontChoice );
+				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine("fontChoice=" + fontChoice);}
 				//#endif
-				boolean feedListOpen = m_feedListOpen.isSelected(0);
-				settings.setFeedListOpen( feedListOpen);
+				int fitPolicy = m_fitPolicy.getSelectedIndex();
+				settings.setFitPolicy( fitPolicy );
+				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine("fitPolicy=" + fitPolicy);}
+				//#endif
+				boolean nameNews = !m_nameNews.isSelected(0);
+				settings.setBookmarkNameNews( nameNews );
+				//#endif
                 int maxWordCount = Integer.parseInt( m_wordCountField.getString() );
                 settings.setMaxWordCountInDesc( maxWordCount );
 				//#ifdef DLOGGING
@@ -434,41 +453,21 @@ public class SettingsForm extends Form implements CommandListener, Runnable {
 									null,
 									AlertType.ERROR);
 					invalidData.setTimeout(Alert.FOREVER);
-					Display.getDisplay(m_midlet).setCurrent(invalidData, this);
+					featureMgr.showMe(invalidData);
 					return;
 				}
 				//#endif
-				m_midlet.showBookmarkList();
-            } catch(Exception e) {
+			} catch(Throwable e) {
 				/* Internal error.:\n */
-				m_midlet.recordExcFormFinRsc("exc.int.err", e);
-            } catch(Throwable e) {
-				/* Internal error.:\n */
-				m_midlet.recordExcFormFinRsc("exc.int.err", e);
+				loadForm.recordExcFormFin("Internal error.", e);
             }
             
-		}
-
-		//#ifndef DSMALLMEM
-        if(m_getHelp) {
-			m_getHelp = false;
-			try {
-				/* Loading help... */
-				m_midlet.initializeLoadingFormRsc("text.l.h", this);
-				final HelpForm helpForm = new HelpForm(m_midlet, this);
-				helpForm.appendRsc("text.set.help");
-				helpForm.appendItemHelpRsc(m_useTextBox, "text.stxt.help");
-				//#ifdef DMIDP20
-				helpForm.appendItemHelpRsc(m_pageEnabled, "text.spg.help");
-				helpForm.appendItemHelpRsc(m_fontSize, "text.sfs.help");
-				//#endif
-				m_midlet.setCurrent(helpForm);
-            } catch(Throwable e) {
-				/* Internal error.:\n */
-				m_midlet.recordExcFormFinRsc("exc.int.err", e);
-            }
+            midlet.showBookmarkList();
         }
-		//#endif
+        
+        if(command==m_cancelCommand) {
+            midlet.showBookmarkList();
+        }
+    }
 
-	}
 }

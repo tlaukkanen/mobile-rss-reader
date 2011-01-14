@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * TextField.java
  *
@@ -18,6 +19,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ */
+/*
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
@@ -75,7 +79,6 @@ implements ItemCommandListener
 	public void setString(String text) {
 		super.setString(text);
 		TestOutput.println("Test UI Text Field setString: " + super.getLabel() + "," + text);
-		return;
 	}
 
 	//#ifdef DMIDP20

@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * TextBox.java
  *
@@ -18,6 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ */
+/*
+ * IB 2010-07-05 1.11.5Dev6 Cosmetic code cleanup.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
@@ -69,7 +74,6 @@ implements CommandListener {
 	public void setString(String text) {
 		super.setString(text);
 		TestOutput.println("Test UI List setString: " + m_title + "," + text);
-		return;
 	}
 
 	public void commandAction(Command cmd, Displayable disp) {
@@ -81,9 +85,9 @@ implements CommandListener {
 		m_cmdListener.commandAction(cmd, this);
 	}
 
-    public void setCommandListener(CommandListener m_cmdListener) {
+    public void setCommandListener(CommandListener cmdListener) {
 		super.setCommandListener(this);
-        this.m_cmdListener = m_cmdListener;
+        this.m_cmdListener = cmdListener;
     }
 
 }

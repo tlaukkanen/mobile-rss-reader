@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HTMLAutoLinkParser.java
  *
@@ -20,14 +21,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-03-07 1.11.4RC1 Recognize style sheet, and DOCTYPE and treat properly.
+ * IB 2010-05-26 1.11.5RC2 Use absolute address for redirects.
+ * IB 2010-05-26 1.11.5RC2 More logging.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser or HTMLAutoLinkParser in small memory MIDP 1.0 to save space.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+ * IB 2010-07-04 1.11.5Dev6 Do not have empty catch block.
+ * IB 2010-07-04 1.11.5Dev6 Do not have feedNameFilter and feedUrlFilter null.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+*/
 
 // Expand to define memory size define
 //#define DREGULARMEM
 // Expand to define logging define
 //#define DNOLOGGING
 
-/* This functionality adds to jar size, so don't do it for small memory */
-/* devices. */
 //#ifndef DSMALLMEM
 package com.substanceofcode.rssreader.businesslogic;
 
@@ -41,9 +51,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
-import com.substanceofcode.utils.StringUtil;
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
+import com.substanceofcode.utils.MiscUtil;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
@@ -73,8 +81,7 @@ public class HTMLAutoLinkParser extends FeedListParser {
         super(url, username, password);
     }
 
-    public RssItunesFeed[] parseFeeds(InputStream is)
-    throws IOException, CauseMemoryException, CauseException, Exception {
+    public RssItunesFeed[] parseFeeds(InputStream is) {
 		// Init in case we get a severe error.
 		try {
 			return HTMLAutoLinkParser.parseFeeds(new EncodingUtil(is),
@@ -90,16 +97,12 @@ public class HTMLAutoLinkParser extends FeedListParser {
 //@											,finestLoggable
 											//#endif
 											);
-        } catch (CauseException ex) {
-			throw ex;
 		} catch (Throwable t) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML auto link feed " + m_url, t);
 //#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
+//@			logger.severe("parseFeeds error.", t);
 //#endif
-			System.out.println(cex.getMessage() + " " + t + " " + t.getMessage());
-			throw cex;
+			System.out.println("parseFeeds error." + t + " " + t.getMessage());
+			return null;
 		}
 	}
         
@@ -116,27 +119,28 @@ public class HTMLAutoLinkParser extends FeedListParser {
 //@										 boolean finerLoggable,
 //@										 boolean finestLoggable
 										//#endif
-			                           )
-    throws IOException, CauseMemoryException, CauseException, Exception {
+			                           ) {
         /** Initialize item collection */
         Vector rssFeeds = new Vector();
         
         /** Initialize XML parser and parse OPML XML */
-        HTMLParser parser = new HTMLParser(encodingUtil);
+        HTMLParser parser = new HTMLParser(url, encodingUtil);
         try {
             
 			// The first element is the main tag.
-            int elementType = parser.parse();
-			// If we found the prologue, get the next entry.
-			if( elementType == XmlParser.PROLOGUE ) {
-				elementType = parser.parse();
-			}
+			// If we found the PROLOGUE, DOCTYPE, or STYLESHEET, get the next entry.
+			// If link followed by meta found, go to following XML.
+
+            int elementType = parser.parseXmlElement();
+
 			if (elementType == XmlParser.END_DOCUMENT ) {
 				return null;
 			}
             
+			/* FUTURE?
 			boolean windows = parser.isWindows();
 			boolean utf = parser.isUtf();
+			*/
 			boolean process = true;
 			boolean bodyFound = false;
             do {
@@ -155,10 +159,12 @@ public class HTMLAutoLinkParser extends FeedListParser {
 							continue;
 						}
 						bodyFound = parser.isBodyFound();
+						/* FUTURE?
 						if (bodyFound) {
-							windows = parser.isWindows();
-							utf = parser.isUtf();
+							   windows = parser.isWindows();
+							   utf = parser.isUtf();
 						}
+						 */
 						// If looking for OPML link, it is in header.
 						if ((!needRss || needFirstRss) && bodyFound) {
 							process = false;
@@ -191,28 +197,39 @@ public class HTMLAutoLinkParser extends FeedListParser {
 						// Allow null title so that the caller can
 						// check if it needs to get the title another way.
 						if (title != null) {
-							title = EncodingUtil.replaceAlphaEntities(true,
-									title);
+							title = EncodingUtil.replaceAlphaEntities(title);
 							title = EncodingUtil.replaceNumEntity(title);
 							// Replace special chars like left quote, etc.
 							// Since we have already converted to unicode, we want
 							// to replace with uni chars.
 							title = encodingUtil.replaceSpChars(title);
 
-							title = StringUtil.removeHtml(title);
+							title = MiscUtil.removeHtml(title);
 						}
-						if (((link = parser.getAttributeValue( "href" ))
-									== null) || ( link.length() == 0 )) {
+						if ((link = parser.getAttributeValue( "href" ))
+									== null) {
 							continue;
 						}
-						if (link.charAt(0) == '/') {
-							link = url + link;
+						link = link.trim();
+						if ( link.length() == 0 ) {
+							continue;
 						}
 						
+						try {
+							HTMLParser.getAbsoluteUrl(url, link);
+						} catch (IllegalArgumentException e) {
+							//#ifdef DLOGGING
+//@							if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
+							//#endif
+							e.printStackTrace();
+						}
+			
 						/** Debugging information */
-						System.out.println("Title:       " + title);
-						System.out.println("Link:        " + link);
-						
+						//#ifdef DLOGGING
+//@						if (finerLoggable) {logger.finer("Title:       " + title);}
+//@						if (finerLoggable) {logger.finer("Link:        " + link);}
+						//#endif
+
 						/** 
 						 * Create new RSS item and add it do RSS document's item
 						 * collection.  Account for wrong OPML which is an
@@ -220,20 +237,26 @@ public class HTMLAutoLinkParser extends FeedListParser {
 						 * instead of link attribute.
 						 */
 						if (!needRss || needFirstRss) {
+							//#ifdef DLOGGING
+//@							if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+							//#endif
 							RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 							rssFeeds.addElement( feed );
 							process = false;
 							break;
 						}
-						if (( feedURLFilter != null) &&
+						if ((feedURLFilter.length() > 0) &&
 							( link.toLowerCase().indexOf(feedURLFilter) < 0)) {
 							continue;
 						}
-						if (( feedNameFilter != null) &&
+						if ((feedNameFilter.length() > 0) &&
 							((title != null) &&
 							(title.toLowerCase().indexOf(feedNameFilter) < 0))) {
 							continue;
 						}
+						//#ifdef DLOGGING
+//@						if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+						//#endif
 						RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 						rssFeeds.addElement( feed );
 						break;
@@ -242,29 +265,14 @@ public class HTMLAutoLinkParser extends FeedListParser {
 			}
             while( process && (parser.parse() != XmlParser.END_DOCUMENT) );
             
-        } catch (CauseMemoryException ex) {
-			CauseMemoryException cex = new CauseMemoryException(
-					"Out of memory error while parsing HTML auto link feed " +
-					url, ex);
-			throw cex;
         } catch (Exception ex) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML auto link feed " + url, ex);
-//#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
-//#endif
-			System.err.println(cex.getMessage() + " " + ex + " " + ex.getMessage());
+            System.err.println("HTMLAutoLinkParser.parseFeeds(): Exception " + ex.toString());
 			ex.printStackTrace();
-			throw cex;
+            return null;
         } catch (Throwable t) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML auto link feed " + url, t);
-//#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
-//#endif
-			System.err.println(cex.getMessage() + " " + t + " " + t.getMessage());
+            System.err.println("HTMLAutoLinkParser.parseFeeds(): Exception " + t.toString());
 			t.printStackTrace();
-			throw cex;
+            return null;
         }
         
         /** Create array */

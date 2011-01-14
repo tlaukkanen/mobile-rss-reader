@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-06-01 1.11.5RC2 Have record store exception with cause.
+ * IB 2010-06-01 1.11.5RC2 Set serialVersionUID to 60L.
+ */
 
 package com.substanceofcode.utils;
 
@@ -26,6 +30,8 @@ package com.substanceofcode.utils;
  */
 public class CauseRecStoreException extends CauseException {
     
+    private static final long serialVersionUID = 60L;
+
     public CauseRecStoreException() {
 		super();
     }

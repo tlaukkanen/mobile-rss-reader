@@ -1,0 +1,12 @@
+# IB 2010-07-04 1.11.5Dev5 Use '.' before extension for .htaccess.
+# IB 2010-07-04 1.11.5Dev5 Add extensions for zip, gzip, bzip2, and compress.
+Options +Indexes
+IndexOptions +FancyIndexing
+AddType text/vnd.wap.wml .wml
+AddType text/vnd.sun.j2me.app-descriptor .jad
+AddType application/java-archive .jar
+AddType application/vnd.rim.cod .cod
+AddType application/zip .zip
+AddType application/x-gzip .gz .tgz
+AddType application/x-bzip2 .bz2
+AddType application/x-compress .Z

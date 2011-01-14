@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HTMLLinkParser.java
  *
@@ -19,20 +20,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-03-07 1.11.4RC1 Use absolute address for redirects.
+ * IB 2010-03-07 1.11.4RC1 Recognize style sheet, and DOCTYPE and treat properly.
+ * IB 2010-05-24 1.11.5RC2 Log instead of out.println.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser andd HTMLLinkParser in small memory MIDP 1.0 to save space.
+ * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
+ * IB 2010-07-04 1.11.5Dev6 Use "" when feedNameFilter and feedURLFilter are not used.
+ * IB 2010-07-04 1.11.5Dev6 Do not have empty catch block.
+ * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+*/
 
 // Expand to define memory size define
 //#define DREGULARMEM
 // Expand to define logging define
 //#define DNOLOGGING
 
-/* This functionality adds to jar size, so don't do it for small memory */
-/* devices. */
 //#ifndef DSMALLMEM
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.utils.EncodingStreamReader;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.HTMLParser;
 import com.substanceofcode.utils.XmlParser;
 import java.io.InputStream;
@@ -42,8 +53,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
 import com.substanceofcode.utils.EncodingUtil;
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.LogManager;
@@ -61,8 +70,6 @@ import com.substanceofcode.utils.CauseMemoryException;
  */
 public class HTMLLinkParser extends FeedListParser {
     
-    protected boolean m_acceptErrors = true;  // Allow some errors 
-
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("HTMLLinkParser");
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
@@ -75,18 +82,13 @@ public class HTMLLinkParser extends FeedListParser {
         super(url, username, password);
     }
 
-	/** Parse HTML hyper links '<a' and create feeds from them based on
-	   link name and url if specified.
-	  */
-    public RssItunesFeed[] parseFeeds(InputStream is)
-    throws IOException, CauseMemoryException, CauseException, Exception {
+    public RssItunesFeed[] parseFeeds(InputStream is) {
 		// Init in case we get a severe error.
 		try {
 			return HTMLLinkParser.parseFeeds(new EncodingUtil(is),
 											m_url,
 											m_feedNameFilter,
-											m_feedURLFilter,
-											m_acceptErrors
+											m_feedURLFilter
 											//#ifdef DLOGGING
 //@											,logger
 //@											,fineLoggable
@@ -94,48 +96,36 @@ public class HTMLLinkParser extends FeedListParser {
 //@											,finestLoggable
 											//#endif
 											);
-		} catch (CauseException e) {
-			throw e;
 		} catch (Throwable t) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML Link feed " + m_url, t);
 //#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
+//@			logger.severe("parseFeeds error.", t);
 //#endif
-			System.err.println(cex.getMessage() + " " + t + " " + t.getMessage());
-			throw cex;
+			System.out.println("parseFeeds error." + t + " " + t.getMessage());
+			return null;
 		}
 	}
         
-	/** Parse HTML hyper links '<a' and create feeds from them based on
-	   link name and url if specified.
-	  */
     static public RssItunesFeed[] parseFeeds(EncodingUtil encodingUtil,
 										String url,
 										String feedNameFilter,
-										String feedURLFilter,
-										boolean acceptErrors
+										String feedURLFilter
 										//#ifdef DLOGGING
 //@										,Logger logger,
 //@										 boolean fineLoggable,
 //@										 boolean finerLoggable,
 //@										 boolean finestLoggable
 										//#endif
-			                           )
-    throws IOException, CauseMemoryException, CauseException, Exception {
+			                           ) {
         /** Initialize item collection */
         Vector rssFeeds = new Vector();
         
         /** Initialize XML parser and parse OPML XML */
-        HTMLParser parser = new HTMLParser(encodingUtil);
+        HTMLParser parser = new HTMLParser(url, encodingUtil);
         try {
             
 			// The first element is the main tag.
-            int elementType = parser.parse();
-			// If we found the prologue, get the next entry.
-			if( elementType == XmlParser.PROLOGUE ) {
-				elementType = parser.parse();
-			}
+			// If we found the prologue, doctype, or STYLESHEET, get the next entry.
+            int elementType = parser.parseXmlElement();
 			if (elementType == XmlParser.END_DOCUMENT ) {
 				return null;
 			}
@@ -178,65 +168,48 @@ public class HTMLLinkParser extends FeedListParser {
 //@						if (finerLoggable) {logger.finer("Parsing <a> tag");}
 						//#endif
 						
-						title = parser.getText();
+						title = parser.getText(true);
 						// Title can be 0 as this is used also for
 						// getting 
 						title = title.trim();
-						title = StringUtil.removeHtml( title );
+						title = MiscUtil.removeHtml( title );
 
-						if (((link = parser.getAttributeValue( "href" ))
-									== null) || ( link.length() == 0 )) {
+						if ((link = parser.getAttributeValue( "href" ))
+									== null) {
 							continue;
 						}
 						link = link.trim();
 						if ( link.length() == 0 ) {
 							continue;
 						}
-						if (link.indexOf("://") >= 0) {
-							if (!link.startsWith("http:") &&
-								!link.startsWith("https:") &&
-								!link.startsWith("file:") &&
-								 !link.startsWith("jar:")) {
-								//#ifdef DLOGGING
-//@								if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
-								//#endif
-								continue;
-							}
-						} else {
-							if (link.charAt(0) == '/') {
-								int purl = url.indexOf("://");
-								if ((purl + 4) >= url.length()) {
-									//#ifdef DLOGGING
-//@									if (finerLoggable) {logger.finer("Url too short=" + url + "," + purl);}
-									//#endif
-									continue;
-								}
-								int pslash = url.indexOf("/", purl + 3);
-								String burl = url;
-								if (pslash >= 0) {
-									burl = url.substring(0, pslash);
-								}
-								link = burl + link;
-							} else {
-								link = url + "/" + link;
-							}
+						try {
+							HTMLParser.getAbsoluteUrl(url, link);
+						} catch (IllegalArgumentException e) {
+							//#ifdef DLOGGING
+//@							if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
+							//#endif
+							e.printStackTrace();
 						}
-						
+			
 						/** Debugging information */
 						//#ifdef DLOGGING
 //@						if (finerLoggable) {logger.finer("Title:       " + title);}
 //@						if (finerLoggable) {logger.finer("Link:        " + link);}
 						//#endif
-						if (( feedURLFilter != null) &&
+
+						if ((feedURLFilter.length() > 0) &&
 							( link.toLowerCase().indexOf(feedURLFilter) < 0)) {
 							continue;
 						}
 						
-						if (( feedNameFilter != null) &&
+						if ((feedNameFilter.length() > 0) &&
 							((title != null) &&
 							(title.toLowerCase().indexOf(feedNameFilter) < 0))) {
 							continue;
 						}
+						//#ifdef DLOGGING
+//@						if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+						//#endif
 						RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 						rssFeeds.addElement( feed );
 						break;
@@ -245,29 +218,14 @@ public class HTMLLinkParser extends FeedListParser {
             }
             while( (elementType = parser.parse()) != XmlParser.END_DOCUMENT );
             
-        } catch (CauseMemoryException ex) {
-			CauseMemoryException cex = new CauseMemoryException(
-					"Out of memory error while parsing HTML Link feed " + url,
-					ex);
-			throw cex;
         } catch (Exception ex) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML Link feed " + url, ex);
-            System.err.println(cex.getMessage() + " " + ex + " " + ex.toString());
+            System.err.println("HTMLLinkParser.parseFeeds(): Exception " + ex.toString());
 			ex.printStackTrace();
-//#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
-//#endif
-			throw cex;
+            return null;
         } catch (Throwable t) {
-			CauseException cex = new CauseException(
-					"Error while parsing HTML Link feed " + url, t);
-            System.err.println(cex.getMessage() + " " + t + " " + t.toString());
+            System.err.println("HTMLLinkParser.parseFeeds(): Exception " + t.toString());
 			t.printStackTrace();
-//#ifdef DLOGGING
-//@			logger.severe(cex.getMessage(), cex);
-//#endif
-			throw cex;
+            return null;
         }
         
         /** Create array */

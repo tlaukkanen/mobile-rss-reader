@@ -1,7 +1,7 @@
 /*
  * 20:25:20 20/05/99
  *
- * Taken from the Java Shell: Utilities with minor modifications.
+ * Taken from the Java Shell: Utilities (Utils.java) with minor modifications.
  * (C)1999 Romain Guy, Osvaldo Pinali Doederlein.
  *
  * LICENSE
@@ -43,6 +43,9 @@
  * Site #2: http://student.vub.ac.be/~opinalid/
  * Source found at
  * http://www.koders.com/java/fid123AC940B58E5ED6E60BAC5685D7FFC0E3484875.aspx?s=mailto%40osvaldo.visionnaire.com.br
+ * Which is file Utils.java
+ *
+ * This software was originally modified no later than Sept 10, 2007.
  */
 
 // Expand to define logging define
@@ -90,7 +93,7 @@ public class SortUtil {
 			int hi = hi0;
 			if (hi0 > lo0) {
 
-				mid = lngValues[indexes[(lo0 + hi0) / 2]];
+				mid = lngValues[indexes[(lo0 + hi0) >>> 1]];
 
 				while (lo <= hi) {
 

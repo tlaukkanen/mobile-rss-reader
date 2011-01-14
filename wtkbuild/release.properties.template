@@ -1,5 +1,9 @@
 #Used to turn D${RELEASE}TEST to DNOTEST
+# IB 2010-05-28 1.11.5RC2 Turn on obfuscate.
+# IB 2010-05-28 1.11.5RC2 Use 2 passes for optimization.
 RELEASE = NO
 EMULATOR = false
 obfuscate = yes
+keep.obfuscate = true
+nbr.optimization.passes = 2
 need.rim = true

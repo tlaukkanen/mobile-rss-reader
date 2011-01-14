@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * AtomParser.java
  *
@@ -19,6 +20,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-07-19 1.11.5Dev8 Don't convert HTML for link.
+ * IB 2010-07-19 1.11.5Dev8 Don't remove entities for link with CDATA.
+ * IB 2010-07-19 1.11.5Dev8 For smartphone, set feed header fields if no items.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+*/
 
 // Expand to define test define
 @DTESTDEF@
@@ -35,11 +43,8 @@ import net.sf.jlogmicro.util.logging.Level;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
-import com.substanceofcode.utils.StringUtil;
-import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.XmlParser;
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -56,11 +61,9 @@ public class AtomFormatParser implements FeedFormatParser {
 	//#endif
 	private boolean m_hasExt = false;
 	//#ifdef DLOGGING
-    private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 	/** Atom item properties */
-	private boolean m_convXmlEnts;
 	private String m_title = "";
 	private String m_language = "";
 	private String m_description = "";
@@ -72,23 +75,18 @@ public class AtomFormatParser implements FeedFormatParser {
 	private String m_altLink = "";
 	private String m_enclosure = "";
 	private String m_date = "";
-	private ExtParser m_extParser;
+	private String m_modified = "";
+	private String m_updated = "";
+	private ExtParser m_extParser = new ExtParser();
 
-    /** Creates a new instance of AtomParser */
-    public AtomFormatParser() {
-    }
-    
     /** Parse Atom feed */
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
-			            final boolean convXmlEnts, final int maxItemCount,
-						boolean getTitleOnly)
-	throws IOException, CauseMemoryException, CauseException {
+			            int maxItemCount, boolean getTitleOnly)
+	throws IOException {
         
         Vector items = new Vector();
-		m_extParser = new ExtParser(convXmlEnts);
 		m_extParser.parseNamespaces(parser);
 		m_language = parser.getAttributeValue("xml:lang");
-		m_convXmlEnts = convXmlEnts;
 		if (m_language == null) {
 			m_language = "";
 		}
@@ -99,61 +97,67 @@ public class AtomFormatParser implements FeedFormatParser {
 		RssItunesFeed feed = cfeed;
         feed.setItems(items);
         
-        /** Parse to first entry element */
-        while(!parser.getName().equals("entry")) {
-			//#ifdef DTEST
-			//#ifndef DTESTUI
-            System.out.println("Parsing to first entry");
-			//#endif
-			//#endif
-            switch (parser.parse()) {
-				case XmlParser.END_DOCUMENT:
-					System.out.println("No entries found.");
-					return feed;
-				case XmlParser.ELEMENT:
-					String elementName = parser.getName();
-					char elemChar = elementName.charAt(0);
-					if (parseCommon(parser, elemChar, elementName)) {
-						if ((elemChar == 't') && 
-								getTitleOnly && elementName.equals("title") ) {
+		//#ifdef DITUNES
+		try {
+		//#endif
+			/** Parse to first entry element */
+			while(!parser.getName().equals("entry")) {
+				//#ifdef DTEST
+				//#ifndef DTESTUI
+				System.out.println("Parsing to first entry");
+				//#endif
+				//#endif
+				switch (parser.parse()) {
+					case XmlParser.END_DOCUMENT:
+						System.out.println("No entries found.");
+						return feed;
+					case XmlParser.ELEMENT:
+						String elementName = parser.getName();
+						char elemChar = elementName.charAt(0);
+						if (parseCommon(parser, elemChar, elementName) &&
+							(elemChar == 't') && 
+									getTitleOnly && elementName.equals("title") ) {
 							feed.setName(m_title);
 							return feed;
 						}
-					}
-					if ((elemChar == 's') &&
-						elementName.equals("subtitle") ) {
-						m_description = parser.getText(m_convXmlEnts);
-						if (m_convXmlEnts) {
-							m_description = StringUtil.removeHtml(
-									m_description );
+						if ((elemChar == 's') &&
+							elementName.equals("subtitle") ) {
+							m_description = parser.getText(true);
+							m_description = MiscUtil.removeHtml(
+									m_description ).trim();
+							//#ifdef DLOGGING
+							if (finestLoggable) {logger.finest("m_description=" + m_description);}
+							//#endif
+							continue;
 						}
-						//#ifdef DLOGGING
-						if (finestLoggable) {logger.finest("m_description=" + m_description);}
-						//#endif
-						continue;
-					}
-					if (m_hasExt) {
-						m_extParser.parseExtItem(parser, elemChar,
-												 elementName);
-					}
-					break;
-				default:
-					break;
-            }
-        }
-
-		feed.setLink(m_link);
-		// Atom has not feed level date.
-		feed.setDate(null);
-		if (m_extParser.isItunes()) {
-			feed = m_extParser.getFeedInstance(feed, m_language,
-					m_title, m_description);
+						if (m_hasExt) {
+							m_extParser.parseExtItem(parser, elemChar,
+													 elementName);
+						}
+						break;
+					default:
+						break;
+				}
+			}
+		//#ifdef DITUNES
+		} finally {
+			feed.setLink(m_link);
+			// Atom has not feed level date.
+			feed.setDate(null);
+			if (m_extParser.isItunes()) {
+				feed = m_extParser.getFeedInstance(feed, m_language,
+						m_title, m_description);
+			}
 		}
+		//#endif
         
 		reset();
 
         int parsingResult;
         while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
+			if (parsingResult != XmlParser.ELEMENT) {
+				continue;
+			}
             String elementName = parser.getName();
             if (elementName.length() == 0) {
 				continue;
@@ -169,7 +173,7 @@ public class AtomFormatParser implements FeedFormatParser {
                     if(items.size()==maxItemCount) {
                         return feed;
                     }
-				}
+                }                
                 
                 /** New entry */
 				/** reset */
@@ -202,11 +206,7 @@ public class AtomFormatParser implements FeedFormatParser {
 			}
 			if (hasTitle && hasDesc) {
 				m_title = m_title.replace('\n', ' ');
-				if (!m_convXmlEnts) {
-					m_title = EncodingUtil.replaceAlphaEntities(
-							true, m_title );
-					m_title = StringUtil.removeHtml( m_title );
-				}
+				m_title = m_title.trim();
 			}
 			if (m_link.length() == 0) {
 				if (m_selfLink.length() != 0) {
@@ -217,9 +217,15 @@ public class AtomFormatParser implements FeedFormatParser {
 					m_link = m_altLink;
 				}
 			}
-			m_link = StringUtil.removeHtml( m_link );
 			Date pubDate = null;
 			// Check date in case we cannot find it.
+			if (m_date.length() == 0) {
+				if (m_updated.length() > 0) {
+					m_date = m_updated;
+				} else {
+					m_date = m_modified;
+				}
+			}
 			if ((m_date.length() == 0) && m_extParser.isHasExt()) {
 				m_date = m_extParser.getDate();
 			}
@@ -248,6 +254,8 @@ public class AtomFormatParser implements FeedFormatParser {
 		m_author = "";
 		m_link = "";
 		m_date = "";
+		m_updated = "";
+		m_modified = "";
 		m_enclosure = "";
 		m_summary = "";
 		m_relLink = "";
@@ -261,11 +269,12 @@ public class AtomFormatParser implements FeedFormatParser {
 	/* Parse the fields common to feed and item. */
 	private boolean parseCommon(XmlParser parser, char elemChar,
 			String elementName)
-	throws IOException, CauseMemoryException, CauseException {
+	throws IOException {
 		switch (elemChar) {
 			case 't':
 				if( elementName.equals("title") ) {
-					m_title = parser.getText(m_convXmlEnts);
+					m_title = parser.getText(true);
+					m_title = MiscUtil.removeHtml( m_title );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_title=" + m_title);}
 					//#endif
@@ -274,7 +283,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'l':
 				if( elementName.equals("link") ) {
-					String clink = parser.getText();
+					String clink = parser.getText(false).trim();
 					// Some atoms have href= attribute.
 					if (clink.length() == 0) {
 						String hlink = parser.getAttributeValue("href");
@@ -291,8 +300,7 @@ public class AtomFormatParser implements FeedFormatParser {
 							case 'e':
 								// Only get the first m_enclosure.  Atom's can have
 								// multiple enclosures for the same item.
-								if (rel.equals("enclosure") &&
-										(m_enclosure.length() == 0) ) {
+								if (rel.equals("enclosure") && m_enclosure.equals("")) {
 									 m_enclosure = clink;
 									 return true;
 								}
@@ -328,49 +336,57 @@ public class AtomFormatParser implements FeedFormatParser {
 
 	/* Parse the item to get it's fields */
 	void parseItem(XmlParser parser, char elemChar, String elementName)
-	throws IOException, CauseMemoryException, CauseException {
+	throws IOException {
 		switch (elemChar) {
 			case 'a':
 				if( m_hasExt && elementName.equals("author") ) {
-					// Remove HTML if needed in createItem.
-					m_author = parser.getText(m_convXmlEnts);
+					m_author = parser.getText(true);
+					m_author = MiscUtil.removeHtml( m_author );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_author=" + m_author);}
 					//#endif
-					return;
 				}
 				break;
 			case 'c':
 				if( elementName.equals("content")) {
-					m_description = parser.getText(m_convXmlEnts);
-					if (m_convXmlEnts) {
-						m_description = StringUtil.removeHtml( m_description );
-					}
+					m_description = parser.getText(true);
+					m_description = MiscUtil.removeHtml( m_description );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("content=m_description=" + m_description);}
 					//#endif
-					return;
 				}
 				break;
 			case 's':
 				if( elementName.equals("summary")) {
-					m_summary = parser.getText(m_convXmlEnts);
-					if (m_convXmlEnts) {
-						m_summary = StringUtil.removeHtml( m_summary );
-					}
+					m_summary = parser.getText(true);
+					m_summary = MiscUtil.removeHtml( m_summary );
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_summary=" + m_summary);}
 					//#endif
-					return;
-				};
+				}
 				break;
-			case 'p':
+			case 'u': // Updated for Atom 1.0
+				if( elementName.equals("updated")) {
+					m_updated = parser.getText(true);
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest("published=m_updated=" + m_updated);}
+					//#endif
+				}
+				break;
+			case 'm': // Modified for Atom 0.3
+				if( elementName.equals("modified")) {
+					m_modified = parser.getText(true);
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest("published=m_modified=" + m_modified);}
+					//#endif
+				}
+				break;
+			case 'p': // Published
 				if( elementName.equals("published")) {
-					m_date = parser.getText();
+					m_date = parser.getText(true);
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("published=m_date=" + m_date);}
 					//#endif
-					return;
 				}
 				break;
 			default:

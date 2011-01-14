@@ -1,7 +1,11 @@
 RELEASE = 
 DTESTDEF = D${RELEASE}TEST
+DJMTESTDEF = D${RELEASE}JMTEST
 DTESTUIDEF = D${RELEASE}TESTUI
 DLOGDEF = D${RELEASE}LOGGING
+#Use Feature Form for logging report form
+DFEATUREFORMDEF = D${RELEASE}FEATUREFORM
+DFEATUREFORMIMPORTDEF = import com.substanceofcode.rssreader.presentation.FeatureForm;
 #DLOGDEF = DNOLOGGING
 #add.jars = true
 #ext.jar = ../../../JLogMicro/bin/JLogMicro.jar
@@ -9,7 +13,10 @@ DLOGDEF = D${RELEASE}LOGGING
 testui.presrc = ../testpresrc
 #Copy from src copy.jar.src = true
 #Copy from src jarsrc = ../../../JLogMicro/src
-jar.presrc = ../../../JLogMicro/jlogmicro/presrc
+#jar.presrc = ../../../JLogMicro/jlogmicro/presrc
+#undo
+jar.presrc = ../../../../JLogMicro/jlogmicro/presrc
+jmunit.src = ../../../../JMUnit/jmunit/src_cldc10
 need.test.res = true
 res.test.dir = ../testdata
 res.test.todir = 

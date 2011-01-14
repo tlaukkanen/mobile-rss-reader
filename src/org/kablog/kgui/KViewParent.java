@@ -1,4 +1,6 @@
-/* Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
+//--Need to modify--#preprocess
+/*
+ * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,9 +22,13 @@
  * 
  *
  * Created on June 17, 2003, 12:23 PM
- *
  * This software was originally modified no later than Sept 25, 2007.
- * 
+ */
+/*
+ * IB 2010-08-15 1.11.5Dev8 Remove unused reqSetVisible.
+ * IB 2010-09-27 1.11.5Dev8 Remove unused import.
+ * IB 2010-10-12 1.11.5Dev8 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg and be in DTEST.
  */
 
 // Expand to define DJSR75 define
@@ -33,7 +39,6 @@
 //#ifdef DJSR75
 //@package org.kablog.kgui;
 //@
-//@import javax.microedition.midlet.*;
 //@import javax.microedition.lcdui.*;
 //@
 //@
@@ -47,28 +52,25 @@
 //@    /**
 //@     * @param view -- the view that has completed operation.
 //@     */
-//@    public void childFinished(KViewChild child);
+//@    void childFinished(KViewChild child);
 //@    
 //@    /**
 //@     * We've updated the child's status.
 //@     */
-//@    public void childStatusChanged(KViewChild child, int statusType, int status);
+//@    void childStatusChanged(KViewChild child, int statusType, int status);
 //@
-//@    
-//@    /**
-//@     * @param newView object to make visible, if possible.
-//@     */
-//@    public void reqSetVisible(Displayable newView);
 //@    
 //@    /**
 //@    * @param runny Object to run at a deferred time.
 //@	*/
-//@	public void addDeferredAction(Runnable runny);
+//@	void addDeferredAction(Runnable runny);
 //@    
+	//#ifdef DTEST
 //@    /**
 //@     * Display a debug message somehow
 //@     */
-//@     public void displayDbgMsg(String msg, AlertType type);
+//@     void displayDbgMsg(String msg, AlertType type);
+	//#endif
 //@
 //@}
 //#endif

@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * RssItunesItem.java
  *
@@ -20,25 +21,46 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-07 1.11.4RC1 Fix testing code of explicit.
+ * IB 2010-03-07 1.11.4RC1 Use convenience method for encoding/decoding.
+ * IB 2010-03-07 1.11.4RC1 Combine classes to save space.
+ * IB 2010-05-30 1.11.4RC2 Use RssItemInfo for equals.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+*/
 
 // Expand to define logging define
 //#define DNOLOGGING
 // Expand to define itunes define
 //#define DNOITUNES
+// Expand to define test define
+//#define DNOTEST
+// Expand to define test ui define
+//#define DNOTESTUI
+// Expand to define JMUnit test define
+//#define DNOJMTEST
+//#ifdef DTESTUI
+//#define HAS_EQUALS
+//#endif
+//#ifdef DLOGGING
+//#define HAS_EQUALS
+//#endif
 package com.substanceofcode.rssreader.businessentities;
 
-import com.substanceofcode.utils.Base64;
-import com.substanceofcode.utils.StringUtil;
+import com.substanceofcode.utils.MiscUtil;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Hashtable;
-
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
-
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
 //@import net.sf.jlogmicro.util.logging.Level;
+//#endif
+
+//#ifdef DLOGGING
+//@import com.substanceofcode.testutil.logging.TestLogUtil;
+//#elif DTESTUI
+//@import com.substanceofcode.testutil.console.TestLogUtil;
 //#endif
 
 /**
@@ -48,35 +70,39 @@ import com.substanceofcode.utils.CauseMemoryException;
  * @author  Tommi Laukkanen
  * @version 1.1
  */
-public class RssItunesItem extends RssItem {
+public class RssItunesItem extends RssItem
+//#ifdef DTEST
+//#ifdef DJMTEST
+//@implements RssItunesItemInfo
+//#endif
+//#endif
+{
     
 	// Make max summary same as max description (actual max is 50K)
     public static int MAX_SUMMARY = 500;
 	// Beginning of data that has 0 itunes info.
 	// Number of Itunes info
-    final private static int NBR_ITUNES_INFO = 6;
-    public static int ITITLE_OFFSET= NBR_ITUNES_INFO + TITLE_OFFSET;
-    public static int IUNREAD_ITEM = NBR_ITUNES_INFO + UNREAD_ITEM;
-    public static int IDATE_OFFSET = NBR_ITUNES_INFO + DATE_OFFSET;
-    public static int IDESC_OFFSET = NBR_ITUNES_INFO + DESC_OFFSET;
+    final protected static int NBR_ITUNES_INFO = 6;
     final protected static byte BNO_EXPLICIT = (byte)-1;
     final public static String UNSPECIFIED = "unspecified";
     // Value that shows that the first item (and those following may
 	// contain ITunes items (or all may not contain any, but they
 	// can later be modified to contain them).
-    final private static int INT_ITUNES_INDICATOR = NBR_ITUNES_INFO;
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("RssItunesItem");
-	//#endif
-	//#ifdef DLOGGING
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@	private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+	//#elif DTESTUI
+//@    private Object logger = null;
+//@    private boolean fineLoggable = true;
+//@    private boolean finestLoggable = true;
 	//#endif
     protected boolean m_itunes = false;
-    protected String m_author = "";   // The RSS item author
-    protected String m_subtitle = "";   // The RSS item subtitle
-    protected String m_summary = "";   // The RSS item summary
-	//TODO Max summary of 4K
+    protected String m_author = "";   // The RSS item description
+    protected String m_subtitle = "";   // The RSS item description
+    protected String m_summary = "";   // The RSS item description
+	//TODO 4 values for m_explicit.  Fix duration descriptions above.
+	//TODO duration use 60 radius.  Max summary of 4K
     protected byte m_explicit = BNO_EXPLICIT;   // The RSS item explicit
     protected String m_duration  = "";   // The RSS item duration
 
@@ -156,87 +182,34 @@ public class RssItunesItem extends RssItem {
 	}
 
     public String serialize() {
-        String preData = unencodedSerialize();
-        Base64 b64 = new Base64();
-        String encodedSerializedData = null;
-		try {
-			encodedSerializedData = b64.encode( preData.getBytes("UTF-8") );
-		} catch (UnsupportedEncodingException e) {
-			encodedSerializedData = b64.encode( preData.getBytes() );
-		}
+        String encodedSerializedData = MiscUtil.encodeStr(unencodedSerialize());
 		return encodedSerializedData;
 	}
 		
 	/** Deserialize the unencoded object */
-	public static RssItem unencodedDeserialize(String data)
-	throws CauseMemoryException, CauseException {
+	public static RssItem unencodedDeserialize(String data) {
 			
 		try {
-			boolean hasPipe = (data.indexOf(CONE) >= 0);
-			String[] nodes = StringUtil.split( data, '|');
+			boolean hasPipe = (data.indexOf((char)1) >= 0);
+			String[] nodes = MiscUtil.split( data, "|");
 			RssItunesItem item = new RssItunesItem();
 			item.init(hasPipe, nodes);
 			return item;
-        } catch(CauseException e) {
-			throw e;
         } catch(Exception e) {
-			CauseException ce = new CauseException(
-					"Internal error while RssItunesItem unencodedDeserialize ", e);
-			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("RssItem");
-//@			logger.severe(ce.getMessage(), e);
-			//#endif
-            System.err.println(ce.getMessage() + " " + e.toString());
+            System.err.println("Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
-			throw ce;
-        } catch(OutOfMemoryError e) {
-			CauseMemoryException ce = new CauseMemoryException(
-					"Out of memory error while RssItunesItem unencodedDeserialize ", e);
-			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("RssItunesItem");
-//@			logger.severe(ce.getMessage(), e);
-			//#endif
-            System.err.println(ce.getMessage() + " " + e.toString());
-			e.printStackTrace();
-			throw ce;
+			return null;
         }
 	}
 			
 	/** Deserialize the object */
-	public static RssItem deserialize(String data)
-	throws CauseMemoryException, CauseException {
+	public static RssItem deserialize(String data) {
 		try {
-			// Base64 decode
-			Base64 b64 = new Base64();
-			byte[] decodedData = b64.decode(data);
-			try {
-				data = new String( decodedData, "UTF-8" );
-			} catch (UnsupportedEncodingException e) {
-				data = new String( decodedData );
-			}
-			return unencodedDeserialize(data);
-        } catch(CauseException e) {
-			throw e;
+			return unencodedDeserialize(MiscUtil.decodeStr(data));
         } catch(Exception e) {
-			CauseException ce = new CauseException(
-					"Internal error while RssItunesItem deserialize ", e);
-			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("RssItunesItem");
-//@			logger.severe(ce.getMessage(), e);
-			//#endif
-            System.err.println(ce.getMessage() + " " + e.toString());
+            System.err.println("Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
-			throw ce;
-        } catch(OutOfMemoryError e) {
-			CauseMemoryException ce = new CauseMemoryException(
-					"Out of memory error while RssItunesItem deserialize ", e);
-			//#ifdef DLOGGING
-//@			Logger logger = Logger.getLogger("RssItunesItem");
-//@			logger.severe(ce.getMessage(), e);
-			//#endif
-            System.err.println(ce.getMessage() + " " + e.toString());
-			e.printStackTrace();
-			throw ce;
+			return null;
 		}
 			
 	}
@@ -246,8 +219,7 @@ public class RssItunesItem extends RssItem {
 	  hasPipe - True if the data has a pipe in at least one item
 	  nodes - (elements in an array).
 	  **/
-	protected void init(boolean hasPipe, String [] nodes)
-	throws CauseMemoryException, CauseException {
+	protected void init(boolean hasPipe, String [] nodes) {
 		try {
 			/* Node count should be 12:
 			 * author | subtitle | category | enclosure | summary | explicit
@@ -293,8 +265,6 @@ public class RssItunesItem extends RssItem {
 
 			super.init(NBR_ITUNES_INFO, true, hasPipe, nodes);
 
-        } catch(CauseException e) {
-			throw e;
         } catch(Exception e) {
             System.err.println("Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
@@ -302,30 +272,32 @@ public class RssItunesItem extends RssItem {
     }
 
     /** Write record as a string */
-    public String toString(){
-        String storeString = m_itunes + "|" + m_author + "|" + m_subtitle + "|" +
-			m_summary + "|" + + (int)m_explicit + super.toString();
-        return storeString;
-    }
+	//#ifdef DTEST
+//@    public String toString() {
+//@        String storeString = m_itunes + "|" + m_author + "|" + m_subtitle + "|" +
+//@			m_summary + "|" + + (int)m_explicit + super.toString();
+//@        return storeString;
+//@    }
+	//#endif
 
-    public void setAuthor(String m_author) {
-        this.m_author = m_author;
+    public void setAuthor(String author) {
+        this.m_author = author;
     }
 
     public String getAuthor() {
         return (m_author);
     }
 
-    public void setSubtitle(String m_subtitle) {
-        this.m_subtitle = m_subtitle;
+    public void setSubtitle(String subtitle) {
+        this.m_subtitle = subtitle;
     }
 
     public String getSubtitle() {
         return (m_subtitle);
     }
 
-    public void setSummary(String m_summary) {
-        this.m_summary = m_summary;
+    public void setSummary(String summary) {
+        this.m_summary = summary;
     }
 
     public String getSummary() {
@@ -336,21 +308,58 @@ public class RssItunesItem extends RssItem {
         this.m_explicit = (byte)explicit;
     }
 
-    public String getExplicit() {
-		switch (m_explicit) {
-			case (byte)0:
-				return "no";
-			case (byte)1:
-				return "clean";
-			case (byte)2:
-				return "yes";
+    static public String convExplicit(byte explicit) {
+		switch (explicit) {
+			case 0:
+				return "No";
+			case 1:
+				return "Clean";
+			case 2:
+				return "Yes";
 			default:
 				return UNSPECIFIED;
 		}
     }
 
-    public void setDuration(String m_duration) {
-        this.m_duration = m_duration;
+    public String getExplicit() {
+		return convExplicit(m_explicit);
+	}
+
+    static public byte convExplicit(String pexplicit) {
+		if ((pexplicit == null) || (pexplicit.length() == 0)) {
+			return BNO_EXPLICIT;
+		}
+		String explicit = pexplicit.toLowerCase();
+		switch (explicit.charAt(0)) {
+			case 'n':
+				if (explicit.equals("no")) {
+					return (byte)0;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			case 'c':
+				if (explicit.equals("clean")) {
+					return (byte)1;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			case 'y':
+				if (explicit.equals("yes")) {
+					return (byte)2;
+				} else {
+					return BNO_EXPLICIT;
+				}
+			default:
+				return BNO_EXPLICIT;
+		}
+    }
+
+    public void setExplicit(String explicit) {
+        this.m_explicit = convExplicit(explicit);
+    }
+
+    public void setDuration(String duration) {
+        this.m_duration = duration;
     }
 
     public String getDuration() {
@@ -358,44 +367,52 @@ public class RssItunesItem extends RssItem {
     }
     
 	/* Compare item. */
-	public boolean equals(RssItunesItem item) {
-		if (!super.equals(item)) {
-			return false;
-		}
-		if (!item.m_author.equals(m_author)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_author,this=" + item.m_author + "," + m_author);}
-			//#endif
-			return false;
-		}
-		if (!item.m_subtitle.equals(m_subtitle)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_subtitle,this=" + item.m_subtitle + "," + m_subtitle);}
-			//#endif
-			return false;
-		}
-		if (!item.m_summary.equals(m_summary)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_summary,this=" + item.m_summary + "," + m_summary);}
-			//#endif
-			return false;
-		}
-
-		if (item.m_explicit != m_explicit) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_explicit,this=" + item.m_explicit + "," + m_explicit);}
-			//#endif
-			return false;
-		}
-
-		if (!item.m_duration.equals(m_duration)) {
-			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("unequal item.m_duration,this=" + item.m_duration + "," + m_duration);}
-			//#endif
-			return false;
-		}
-		return true;
-	}
+	//#ifdef HAS_EQUALS
+	//#ifdef DJMTEST
+//@	public boolean equals(RssItemInfo pitem)
+	//#else
+//@	public boolean equals(RssItem pitem)
+	//#endif
+//@	{
+//@		boolean result = true;
+//@		if (!super.equals(pitem)) {
+//@			result = false;
+//@		}
+		//#ifdef DJMTEST
+//@		if (!(pitem instanceof RssItunesItemInfo)) {
+//@			return result;
+//@		}
+//@		RssItunesItemInfo item = (RssItunesItemInfo)pitem;
+		//#else
+//@		if (!(pitem instanceof RssItunesItem)) {
+//@			return result;
+//@		}
+//@		RssItunesItem item = (RssItunesItem)pitem;
+		//#endif
+//@		if (!TestLogUtil.fieldEquals(item.isItunes(), m_itunes,
+//@			"m_itunes", logger, fineLoggable)) {
+//@			result = false;
+//@		}
+//@		if (!TestLogUtil.fieldEquals(item.getAuthor(), m_author,
+//@			"m_author", logger, fineLoggable)) {
+//@			result = false;
+//@		}
+//@		if (!TestLogUtil.fieldEquals(item.getSubtitle(), m_subtitle,
+//@			"m_subtitle", logger, fineLoggable)) {
+//@			result = false;
+//@		}
+//@		if (!TestLogUtil.fieldEquals(item.getSummary(), m_summary,
+//@			"m_summary", logger, fineLoggable)) {
+//@			result = false;
+//@		}
+//@		if (!TestLogUtil.fieldEquals(item.getExplicit().toLowerCase(),
+//@					getExplicit().toLowerCase(),
+//@			"m_explicit", logger, fineLoggable)) {
+//@			result = false;
+//@		}
+//@		return result;
+//@	}
+	//#endif
 
     public void setItunes(boolean itunes) {
 		//#ifdef DITUNES

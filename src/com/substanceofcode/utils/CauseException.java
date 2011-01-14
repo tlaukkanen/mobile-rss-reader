@@ -16,9 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-04-30 1.11.5RC2 Track thread info.
+ * IB 2010-04-30 1.11.5RC2 Method to get the first cause.
+ */
 
-// Expand to define logging define
-//#define DNOLOGGING
 package com.substanceofcode.utils;
 
 /**
@@ -26,29 +28,28 @@ package com.substanceofcode.utils;
  *
  * @author Irving Bunton
  */
-public class CauseException extends
-//#ifdef DLOGGING
-//@net.sf.jlogmicro.util.exception.CauseException
-//#else
-Exception
-//#endif
-{
+public class CauseException extends Exception {
     
-    private int MAX_CAUSES = 50;
+    private static final long serialVersionUID = 50L;
+    final static protected int MAX_CAUSES = 50;
     private Throwable cause = null;
+    final private String threadInfo;
     private boolean causeSet = false;
 
     public CauseException() {
 		super();
+		threadInfo = MiscUtil.getThreadInfo(Thread.currentThread());
     }
 
     public CauseException(String message) {
 		super(message);
+		threadInfo = MiscUtil.getThreadInfo(Thread.currentThread());
 		causeSet = true;
     }
 
     public CauseException(String message, Throwable cause) {
 		super(message);
+		threadInfo = MiscUtil.getThreadInfo(Thread.currentThread());
 		this.cause = cause;
 		causeSet = true;
     }
@@ -63,6 +64,10 @@ Exception
         return (cause);
     }
 
+    public String getThreadInfo() {
+        return (threadInfo);
+    }
+
     public Throwable getFirstCause() {
 		Throwable e = getCause();
 		if (e == null) {
@@ -71,17 +76,19 @@ Exception
 		for (int ic = 0; ic < MAX_CAUSES; ic++) {
 			if (e instanceof CauseException) {
 				CauseException ce = (CauseException)e;
-				if (ce.getCause() == null) {
+				Throwable nce;
+				if ((nce = ce.getCause()) == null) {
 					return ce;
 				} else {
-					e = getCause();
+					e = nce;
 				}
 			} else if (e instanceof CauseRuntimeException) {
 				CauseRuntimeException ce = (CauseRuntimeException)e;
-				if (ce.getCause() == null) {
+				Throwable nce = ce.getCause();
+				if (nce == null) {
 					return ce;
 				} else {
-					e = getCause();
+					e = nce;
 				}
 			} else {
 				return e;

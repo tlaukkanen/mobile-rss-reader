@@ -1,5 +1,5 @@
+//--Need to modify--#preprocess
 /*
-   TODO document need super
  * URLHandler.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
@@ -21,6 +21,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-03-14 1.11.5RC2 Log m_same to help look at conditional get.
+ * IB 2010-03-14 1.11.4RC2 Use absolute address for redirects.
+ * IB 2010-03-14 1.11.5RC2 Use convenience method for encoding.
+ * IB 2010-05-27 1.11.5RC2 If write to jar file, give error.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser and HTMLLinkParser in small memory MIDP 1.0 to save space.
+ * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+*/
 
 // Expand to define MIDP define
 //#define DMIDP20
@@ -34,9 +43,11 @@
 //#define DNOLOGGING
 package com.substanceofcode.rssreader.businesslogic;
 
+import java.util.Date;
 import java.io.IOException;
 import javax.microedition.io.ConnectionNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 //#ifdef DMIDP20
@@ -53,30 +64,36 @@ import javax.microedition.io.InputConnection;
 //@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
-import com.substanceofcode.utils.Base64;
+import com.substanceofcode.utils.MiscUtil;
+//#ifndef DSMALLMEM
+import com.substanceofcode.utils.HTMLParser;
+//#endif
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.CauseException;
-import cz.cacek.ebook.util.ResourceProviderME;
 
 /**
  * Base class for HTML Handlers.
  *
  * @author Irving Bunton
  */
-public abstract class URLHandler {
+public class URLHandler {
     
-    protected boolean m_redirect = false;  // The URL is redirected
+    protected int MAX_REDIRECTS = 3;  // Max times URL is redirected
+    protected int m_redirects = 0;  // The URL is redirected
     protected String m_redirectUrl = "";  // The URL is redirected URL
     protected boolean m_needRedirect = false;  // The URL needs to be redirected
+    protected boolean m_same = false;  // The conditional get got the same results
     protected String m_location; // The URL location
-    protected long m_lastMod = 0L;  // Last modification
-    protected InputStream m_inputStream;  // Last modification
+    protected String m_lastMod = "";  // Last modification
+    protected String m_etag = "";  // Etag
+    protected InputStream m_inputStream;  // Input stream
+    protected OutputStream m_outputStream;  // Output stream
     protected HttpConnection m_hc = null;
     protected InputConnection m_ic = null;
 	//#ifdef DJSR75
 //@    protected FileConnection m_fc = null;
 	//#endif
-    protected String m_contentType = null;  // Last modification
+    protected String m_contentType = null;  // Content type
     
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("URLHandler");
@@ -85,22 +102,32 @@ public abstract class URLHandler {
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
-	public URLHandler() {
-	}
-
     /** Open file or URL.  Give error if there is a problem with the URL/file.*/
-    public void handleOpen(String url, String username, String password)
+    final public void handleOpen(String url, String username, String password,
+			boolean writePost, boolean saveBandwidth, String slastModified, String etag)
 	throws IOException, Exception {
         
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("handleOpen url,saveBandwidth,slastModified,etag=" + url + "," + saveBandwidth + "," + ((slastModified == null) ? "null" : slastModified) +
+//@				"," + etag);}
+		//#endif
         try {
 			if (url.startsWith("file://")) {
 				//#ifdef DJSR75
 //@				/*
 //@				 * Open an FileConnection with the file system 
 //@				 */
-//@				m_fc = (FileConnection) Connector.open( url, Connector.READ );
-//@				m_lastMod = m_fc.lastModified();
-//@				m_inputStream = m_fc.openInputStream();
+//@				m_fc = (FileConnection) Connector.open( url,
+//@						Connector.READ | (writePost ? Connector.WRITE : 0) );
+//@				m_lastMod = RssFormatParser.stdDate(new Date(m_fc.lastModified()), "GMT");
+//@				if (writePost) {
+//@					if (!m_fc.exists()) {
+//@						m_fc.create();
+//@					}
+//@					m_outputStream = m_fc.openOutputStream();
+//@				} else {
+//@					m_inputStream = m_fc.openInputStream();
+//@				}
 				//#else
 				/*
 				 * Open an InputConnection with the file system.
@@ -110,10 +137,13 @@ public abstract class URLHandler {
 				m_inputStream = m_ic.openInputStream();
 				//#endif
 			} else if (url.startsWith("jar://")) {
+				if (writePost) {
+					throw new IOException("Not allowed to write to jar file jar:  " + url);
+				}
 				// If testing, allow opening of files in the jar.
-				m_inputStream = this.getClass().getResourceAsStream( url.substring(6));
+				m_inputStream = super.getClass().getResourceAsStream( url.substring(6));
 				if (m_inputStream == null) {
-					new IOException("No file found in jar:  " + url);
+					throw new IOException("No file found in jar:  " + url);
 				}
 				int dotPos = url.lastIndexOf('.');
 				if (dotPos >= 0) {
@@ -141,6 +171,14 @@ public abstract class URLHandler {
 						"Profile/MIDP-1.0 Configuration/CLDC-1.0");
 				m_hc.setRequestProperty("Content-Length", "0");
 				m_hc.setRequestProperty("Connection", "close");
+				if (saveBandwidth && (slastModified != null) &&
+					(slastModified.length() > 0)) {
+					m_hc.setRequestProperty("If-Modified-Since",
+							slastModified);
+				}
+				if (saveBandwidth && (etag.length() > 0)) {
+					m_hc.setRequestProperty("If-None-Match", etag);
+				}
 
 				/** Add credentials if they are defined */
 				if( username.length()>0) {
@@ -150,26 +188,40 @@ public abstract class URLHandler {
 					 *     Authorization: Basic QWRtaW46Zm9vYmFy
 					 */
 					String userPass;
-					Base64 b64 = new Base64();
 					userPass = username + ":" + password;
-					userPass = b64.encode(userPass.getBytes());
+					userPass = MiscUtil.encodeStr(userPass);
 					m_hc.setRequestProperty("Authorization", "Basic " + userPass);
 				}            
 				int respCode = m_hc.getResponseCode();
 				m_inputStream = m_hc.openInputStream();
 				String respMsg = m_hc.getResponseMessage();
-				m_lastMod = m_hc.getLastModified();
+				m_lastMod = m_hc.getHeaderField("last-modified");
+				if ((m_lastMod == null) || (m_lastMod.length() == 0)) {
+					m_lastMod = m_hc.getHeaderField("Last-Modified");
+					if (m_lastMod == null) {
+						m_lastMod = "";
+					}
+				}
+				m_etag = m_hc.getHeaderField("ETag");
+				if ((m_etag == null) || (m_etag.length() == 0)) {
+					m_etag = m_hc.getHeaderField("etag");
+					if (m_etag == null) {
+						m_etag = "";
+					}
+				}
 				m_contentType = m_hc.getHeaderField("content-type");
 				m_location = m_hc.getHeaderField("location");
 				//#ifdef DLOGGING
-//@				if (fineLoggable) {logger.fine("responce code=" + respCode);}
-//@				if (fineLoggable) {logger.fine("responce message=" + respMsg);}
-//@				if (fineLoggable) {logger.fine("responce location=" + m_hc.getHeaderField("location"));}
+//@				if (fineLoggable) {logger.fine("handleOpen response code=" + respCode);}
+//@				if (fineLoggable) {logger.fine("handleOpen response message=" + respMsg);}
+//@				if (fineLoggable) {logger.fine("handleOpen response m_lastMod=" + m_lastMod);}
+//@				if (fineLoggable) {logger.fine("handleOpen response m_etag=" + m_etag);}
+//@				if (fineLoggable) {logger.fine("handleOpen response m_location=" + m_location);}
 //@				if (finestLoggable) {
 //@					for (int ic = 0; ic < 20; ic++) {
-//@						logger.finest("hk=" + ic + "," +
+//@						logger.finest("handleOpen hk=" + ic + "," +
 //@								m_hc.getHeaderFieldKey(ic));
-//@						logger.finest("hf=" + ic + "," +
+//@						logger.finest("handleOpen hf=" + ic + "," +
 //@								m_hc.getHeaderField(ic));
 //@					}
 //@				}
@@ -189,12 +241,24 @@ public abstract class URLHandler {
 					 ((respCode == HttpConnection.HTTP_OK) &&
 					  respMsg.equals("Moved Temporarily"))) && 
 					 (m_location != null)) {
+					//#ifndef DSMALLMEM
+					try {
+						m_location = HTMLParser.getAbsoluteUrl(url, m_location);
+					} catch (IllegalArgumentException e) {
+						throw new CauseException(
+								"Error while parsing RSS redirect data: " +
+								url, e);
+					}
+					//#endif
 					m_needRedirect = true;
 					return;
 				}
+				if (respCode == HttpConnection.HTTP_NOT_MODIFIED) {
+					m_same = true;
+				}
 			}
 			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("m_contentType=" + m_contentType);}
+//@			if (finestLoggable) {logger.finest("handleOpen m_contentType,m_same=" + m_contentType + "," + m_same);}
 			//#endif
             
         } catch(IllegalArgumentException e) {
@@ -205,9 +269,12 @@ public abstract class URLHandler {
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-
-            throw new CauseException("Error while parsing RSS data:  " +
-									  url, e);
+			if (writePost) {
+				throw e;
+			} else {
+				throw new CauseException("Error while parsing RSS data:  " +
+										  url, e);
+			}
         } catch(ConnectionNotFoundException e) {
 			//#ifdef DLOGGING
 //@			logger.severe("handleOpen connection error with " + url, e);
@@ -215,8 +282,12 @@ public abstract class URLHandler {
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Bad URL/File or protocol error while " +
-									 "opening: " + url, e);
+			if (writePost) {
+				throw e;
+			} else {
+				throw new CauseException("Bad URL/File or protocol error while " +
+										 "opening: " + url, e);
+			}
 		//#ifdef DMIDP20
         } catch(CertificateException e) {
 			//#ifdef DLOGGING
@@ -237,8 +308,12 @@ public abstract class URLHandler {
 			if ((url != null) && url.startsWith("file://")) {
 				System.err.println("Cannot process file.");
 			}
-            throw new CauseException("Security error while oening " +
-									 ": " + url, e);
+			if (writePost) {
+				throw e;
+			} else {
+				throw new CauseException("Security error while oening " +
+										 ": " + url, e);
+			}
         } catch(Exception e) {
 			//#ifdef DLOGGING
 //@			logger.severe("handleOpen internal error with " + url, e);
@@ -247,36 +322,35 @@ public abstract class URLHandler {
 				System.err.println("Cannot process file.");
 			}
             throw new CauseException("Internal error while parsing " +
-									 ": " + url, e);
+									 ": ", e);
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("handleOpen internal error with " + url, t);
 			//#endif
 			t.printStackTrace();
             throw new CauseException("Internal error while parsing RSS data " +
-								":l" + url, t);
+								"contact support: ", t);
         }
     }
     
+	//#ifndef DSMALLMEM
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	protected String parseHTMLRedirect(String url, InputStream is)
     throws IOException, Exception {
-		//#ifdef DSMALLMEM
-//@		throw new IOException("Error HTML not supported with this version.");
-		//#else
-		if (m_redirect) {
+		if (++m_redirects >= MAX_REDIRECTS) {
 			//#ifdef DLOGGING
-//@			logger.severe("Error 2nd redirect url:  " + url);
+//@			logger.severe("Error redirect url:  " + url);
 			//#endif
-			System.out.println("Error 2nd redirect url:  " + url);
+			System.out.println("Error redirect url:  " + url);
 			throw new IOException("Error url " + m_redirectUrl +
-					" to 2nd redirect url:  " + url);
+					" to redirect url:  " + url);
 		}
-		m_redirect = true;
 		m_redirectUrl = url;
 		com.substanceofcode.rssreader.businessentities.RssItunesFeed[] feeds =
 				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
-									url, null, null, true
+									url,
+									null,
+									null
 									//#ifdef DLOGGING
 //@									,logger,
 //@									fineLoggable,
@@ -285,44 +359,71 @@ public abstract class URLHandler {
 									//#endif
 									);
 		if ((feeds == null) || (feeds.length == 0)) {
-			/* Parsing HTML redirect cannot be processed. */
-			IOException ie = new IOException(ResourceProviderME.get("exc.ul.rdr"));
 			//#ifdef DLOGGING
-//@			logger.severe(ie.getMessage(), ie);
+//@			logger.severe("Parsing HTML redirect cannot be " +
+//@						  "processed.");
 			//#endif
-			System.out.println(ie.getMessage());
-			throw ie;
+			System.out.println(
+					"Parsing HTML redirect cannot be " +
+					"processed.");
+			throw new IOException("Parsing HTML redirect cannot be " +
+								  "processed.");
 		}
 		// Use last link as the site may have adds in the beginning.
 		return feeds[feeds.length - 1].getUrl();
-		//#endif
 	}
+	//#endif
 
-	public void handleClose() {
+	final public void handleClose() {
 		try {
 			if (m_inputStream != null) m_inputStream.close();
-		} catch (IOException e) { }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		try {
 			if (m_hc != null) m_hc.close();
 		} catch (IOException e) {
 			//#ifdef DLOGGING
 //@			logger.warning("handleOpen possible bad open url error with " +
 //@					m_hc.getURL(), e);
+			//#else
+			e.printStackTrace();
 			//#endif
 		}
 		//#ifdef DJSR75
 //@		try {
 //@			if (m_fc != null) m_fc.close();
-//@		} catch (IOException e) { }
+//@		} catch (IOException e) {
+//@			e.printStackTrace();
+//@		}
 		//#endif
 	}
 
-    public void setLastMod(long m_lastMod) {
-        this.m_lastMod = m_lastMod;
+    final public void setLastMod(String lastMod) {
+        this.m_lastMod = lastMod;
     }
 
-    public long getLastMod() {
+    final public String getLastMod() {
         return (m_lastMod);
     }
+
+    public void setEtag(String etag) {
+        this.m_etag = etag;
+    }
+
+    public String getEtag() {
+        return (m_etag);
+    }
+
+	//#ifdef DJSR75
+//@    public FileConnection getFc() {
+//@        return (m_fc);
+//@    }
+//@
+//@    public OutputStream getOutputStream() {
+//@        return (m_outputStream);
+//@    }
+//@
+	//#endif
 
 }

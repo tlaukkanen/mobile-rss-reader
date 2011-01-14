@@ -1,66 +1,178 @@
-antenna.home = C:/mostdownloads/j2me/sourceforge/antenna
+#-- IB 2010-03-08 1.11.4RC1 Use latest antenna 1.2.1 beta.
+#-- IB 2010-03-08 1.11.4RC1 Use latest proguard 4.5 beta3.
+#-- IB 2010-03-08 1.11.4RC1 Use project.file.prefix for project archives.
+#-- IB 2010-03-09 1.11.5RC1 Use 1.11.5 because RC version was released as main version.
+#-- IB 2010-03-12 1.11.5RC2 Use 4.2.5 version of PMD.
+#-- IB 2010-03-12 1.11.5RC2 Use WTK_HOME environment variable for wtk.home.
+#-- IB 2010-05-24 1.11.5RC2 Added app-icon for the application icon.
+#-- IB 2010-05-28 1.11.5RC2 Changes for findbugs for future.
+#-- IB 2010-05-28 1.11.5RC2 Make input file for sftp for sites that allow upload with sftp, sourceforge.net and yinlight.net.
+#-- IB 2010-05-28 1.11.5RC2 Put all resource files in src/main/resources.
+#-- IB 2010-05-31 1.11.5RC2 Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
+#-- IB 2010-05-31 1.11.5RC2 Fix introduced defect for one of the Release Candidates that the images were in the wrong place.
+#-- IB 2010-06-29 1.11.5RC2 Put in option for Proguard 4.4.
+#-- IB 2010-06-29 1.11.5RC2 Put in option for using timestamp for Thawte (currently not supported for code signing certificates).
+#-- IB 2010-06-29 1.11.5RC2 Put in option for using netbeans src directory.
+#-- IB 2010-07-03 1.11.5Dev4 Put in jarsigner executable, jarsigner.cmd.
+#-- IB 2010-07-05 1.11.5Dev6 Use Yinlight, LLC as vendor to be consistent with code signing.
+#-- IB 2010-07-05 1.11.5Dev6 Use http://www.yinlight.net as info URL to be consistent with code signing.
+#-- IB 2010-07-05 1.11.5Dev6 Use original.author to put in Tommi's name.
+#-- IB 2010-07-05 1.11.5Dev6 Use Yinlight, LLC for vendor and www.yinlight.net for info url, only if signed.  Otherwise, the app is treated as a different app.
+#-- IB 2010-07-30 1.11.5Dev8 Use release.name for build file name for projects with multiple release files.
+#-- IB 2010-08-14 1.11.5Dev8 Use bb.ant.tools.home and bb.ant.tools.jar for Blackberry ant tools.
+#-- IB 2010-07-11 1.11.5Dev8 Don't use manifestsrc as now wtkjad is used to create the JAD file.
+#-- IB 2010-10-11 1.11.5Dev9 Have midlet.package for bb-ant-tools Blackberry package.
+#-- IB 2010-10-11 1.11.5Dev9 Have option to use jar.jde.home for using Blackberry jar directly.
+#-- IB 2010-10-11 1.11.5Dev9 Have option to use bb.jde.home for using Blackberry ant tasks.
+#-- IB 2010-10-11 1.11.5Dev9 Use windows.os to tell if windows OS.
+#-- IB 2010-10-12 1.11.5Dev9 Use todos.cmd for to dos executable file.
+#-- IB 2010-10-12 1.11.5Dev9 Use windows.os to tell if windows OS so we can convert jad to dos with conv.dos and todos.comd if not windows.
+#-- IB 2010-11-14 1.11.5Dev14 Use CPD minimumtokencount.
+#-- IB 2010-11-14 1.11.5Dev14 Use Blackberry JDE 4.7.
+#-- IB 2010-11-14 1.11.5Dev14 Use Blackberry ant task rapc bb.jde.use.
+#-- IB 2010-11-14 1.11.5Dev14 Allow use of microemulator as applet.
+#-- IB 2010-11-14 1.11.5Dev14 Use substanceofcode for info url for signed.
+#-- IB 2010-11-16 1.11.5Dev14 Use PMD (use.pmd.task) and/or CPD (use.cpd.task).
+
+#windows.drive = C:
+windows.drive = 
+wtk252 = _01
+#windows.ext = .exe
+windows.ext =
+#Change for windows
+windows.os = false
+#opt.tools = ${windows.drive}/opt/tools
+opt.tools = /home/irvbopt/opt/tools
+#antenna.home = ${ext.drive}/mostdownloads/j2me/sourceforge/antenna
+antenna.home = ${opt.tools}/antenna
 #antenna.jar = antenna-bin-0.9.15-beta.jar
 #antenna.jar = antenna-bin-1.0.0.jar
-antenna.jar = antenna-bin-1.1.0-beta.jar
-antcontrib.home = C:/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
+#This version (1.0.2) has //#elif bug, don't use!!
+#antenna.jar = antenna-bin-1.0.2.jar
+#antenna.jar = antenna-bin-1.0.0.jar
+#antenna.jar = antenna-bin-1.1.0-beta.jar
+#antenna-bin-1.1.0-beta.jar
+antenna.jar = antenna-bin-1.2.1-beta.jar
+#antcontrib.home = ${ext.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
+#antcontrib.home = ${windows.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
+antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
 #Comment out for linux
-wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
+#wtk.wme.home = C:\\PROGRA~1\\IBM\\WEME\\571\\PalmOS50\\Tools
+#Comment out if you do not want to run findbugs
+#findbugs.home = ${ext.drive}/opt/tools/findbugs-1.3.4
+#findbugs.home = ${opt.tools}/findbugs-1.3.4
+#findbugs.home = ${opt.tools}/findbugs/findbugs-1.3.9
+#Comment out if you do not want to run PMD
+#pmd.home = ${ext.drive}/mostdownloads/gnu/sourceforge/pmd/pmd-4.2.4
+#pmd.home = ${opt.tools}/pmd/pmd-4.2.4
+#pmd.home = ${opt.tools}/pmd/pmd-4.2.5
+pmd.xsl = pmd-compile-reduced.xsl
+use.pmd.task = false
+use.cpd.task = false
+#pmd.xsl = pmd-compile.xsl
+pmd.minimumtokencount = 20
+cat.cmd = cat${windows.ext}
+jarsigner.cmd = jarsigner${windows.ext}
+todos.cmd = todos${windows.ext}
 #svnant.home = C:/mostdownloads/gnu/tigris.org/svnant/svnant-1.0.0/lib
 #svnant.home = C:/mostdownloads/gnu/sourceforge/antxtras/svn4ant_1.1-build68_bin_withdeps
 #
-svn.home = C:\\PROGRA~1\\COLLAB~1
+#svn.home = C:\\PROGRA~1\\COLLAB~1
 #svn.home = C:\\PROGRA~1\\TORTOI~1
 #rim.home = C:\\Program Files\\Research In Motion\\BlackBerry JDE 4.2.1
-rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
-svn.pgm = svn.exe
+#Comment out for linux
+#rim.home = C:\\PROGRA~1\\RESEAR~1\\BLACKB~1.1
+#jde.home.path = ${opt.tools}/blackberry4.2.1
+jde.home.path = ${opt.tools}/Research_In_Motion/BlackBerry_JDE_4.7.0
+jar.jde.home = ${jde.home.path}
+#bb.jde.home = ${jde.home.path}
+bb.ant.tools.home = ${opt.tools}/bb-ant-tools/bb-ant-tools-1.2.8
+bb.ant.tools.jar = bb-ant-tools.jar
+bb.jde.use = false
+#wine = /usr/bin/wine
+#svn.path = C:\\cygwin\\bin\\
+svn.path = /usr/bin/
+svn.pgm = ${svn.path}svn${windows.ext}
 #wtk.home = C:/opt/WTK2.5.1
-wtk.home = C:/opt/WTK2.5.2
-#For phoneMe Linux x86
-#wtk.home = /media/SEA_DISK/linux/src/RSSReader-1_11_1rc2/bin/linux_x86_fb_chameleon_mvm
+#wtk.home = ${windows.drive}/WTK2.5.2_01
+#wtk.home = ${opt.tools}/WTK2.5.2${wtk252}
+wtk.home = ${windows.drive}${env.WTK_HOME}
+#For Netbeans
+#wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
+#wtk.home = /usr/local/netbeans-6.7.1/mobility8/WTK2.5.2
+
+#wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
+#wtk.proguard.home = ${windows.drive}/opt/tools/proguard/proguard4.2
+#wtk.proguard.home = ${opt.tools}/proguard/proguard4.3
+#wtk.proguard.home = ${opt.tools}/proguard/proguard4.4
+wtk.proguard.home = ${opt.tools}/proguard/proguard4.5beta3
 #For phoneMe Windows
-#wtk.home = C:/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
+#phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_page.html/bin/win32_x86_javacall_mvm
+#For phoneMe Linux x86
+#phoneme.home = /media/SEA_DISK/linux/src/RSSReader-1_11_1rc2/bin/linux_x86_fb_chameleon_mvm
 #For phoneMe Windows and Linux
-#wtk.midpapi = ${wtk.home}/classes
-wtk.encoding = UTF-8
+#wtk.midpapi = ${phoneme.home}/classes
+#For findbugs
+#findbug.classes = ${phoneme.home}/classes
 #For phoneMe Windows and Linux proguard.jar, if cannot put into bin
-wtk.proguard.home = C:/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #For phoneMe, if not using ecj.jar
 #build.compiler = org.eclipse.jdt.core.JDTCompilerAdapter
 #For phoneMe, if using ecj.jar
-#ecj.jar = C:/mostdownloads/gnu/eclipse/ecj-3.4.jar
+#ecj.jar = ${ext.drive}/mostdownloads/gnu/eclipse/ecj-3.4.jar
 #For phoneMe Windows, if using ecj.jar and Sun JDK
 #rt.jar = C:/opt/bea91/jdk150_04/jre/lib/rt.jar
 #For phoneMe Windows, if using ecj.jar and Kaffe
 #rt.jar = /usr/lib/kaffe/jre/lib/rt.jar
-emulator.home=C:/mostdownloads/j2me/sourceforge/kobjects
-#emulator.home=C:/mostdownloads/j2me/sourceforge/MicroEmulator/microemulator-2.0.2
-emulator.jar=${emulator.home}/me4se-2.2.0.zip
-#emulator.jar=${emulator.home}/microemulator.jar
-emulator.class=org.me4se.MIDletRunner
-#emulator.class=org.microemu.app.Main
+rt.jar = ${java.home}/../jre/lib/rt.jar
+emulator.version = 2.0.4
+fn.root.emulator.version = 2_0_4
+#emulator.home = ${ext.drive}/mostdownloads/j2me/sourceforge/kobjects
+#emulator.home=C:/mostdownloads/j2me/sourceforge/MicroEmulator/microemulator-${emulator.version}
+emulator.home=${opt.tools}/microemulator/microemulator-${emulator.version}
+#emulator.jar=${emulator.home}/me4se-2.2.0.zip
+emulator.root=microemulator
+emulator.jar=${emulator.root}.jar
+path.emulator.jar=${emulator.home}/${emulator.jar}
+#emulator.class=org.me4se.MIDletRunner
+emulator.class=org.microemu.app.Main
+wtk.encoding = UTF-8
+original.author = Tommi Laukkanen
+tommi.vendor = ${original.author}
+yinlight.vendor = Yinlight, LLC
 midlet.name = RssReaderMIDlet
-midlet.class = com.substanceofcode.rssreader.presentation.${midlet.name}
+midlet.package = com.substanceofcode.rssreader
+midlet.class = ${midlet.package}.presentation.${midlet.name}
 logging.package = net.sf.jlogmicro.util.logging
 obfuscate.classes = ${midlet.class},${logging.package}.ConsoleHandler,${logging.package}.FormHandler,${logging.package}.RecStoreHandler,${logging.package}.SimpleFormatter
-project.test.url = http://mobilerssreader.sourceforge.net/testdata
+tommi.project.info.url = http://www.substanceofcode.com
+yinlight.project.info.url = ${tommi.project.info.url}
+yinlight.rootdir = html/mobile-rss-reader/downloads
+sourceforge.project = mobilerssreader
+sourceforge.project.first = m
+sourceforge.project.first2 = mo
+sourceforge.rootdir = /home/frs/project/${sourceforge.project.first}/${sourceforge.project.first2}/${sourceforge.project}/${sourceforge.project}
+project.test.url = http://${sourceforge.project}.sourceforge.net/testdata
 file.test.url = file:///root1/testdata
 project.name = RSSReader
-wtk.workspace.proj = /DOCUME~1/irvb/j2mewtk/2.5.2/apps
-midlet.home = ${wtk.workspace.proj}/apps/${project.name}
+release.name = ${project.name}
+project.file.prefix = rssreader
+midlet.home = ${wtk.home}/apps/${project.name}
 prc.creater = MRSS
-prc.longname = RSS/News/Blog Reader
+project.description = RSS/News/Blog Reader
+prc.longname = ${project.description}
 MIDLETURL_ROOT = http://mobile-rss-reader.googlecode.com/files
+thawte.tsa.url = http://tsa.starfieldtech.com/
 separator = /
-MIDLETVERSROOT = 1.12
+MIDLETVERSROOT = 1.11.5
 #Need vers with '_' to allow uploading to sites that get confused by to
 #many '.'
-FMIDLETVERSROOT = 1_12
+FMIDLETVERSROOT = 1_11_5
 #Location of manifest source
-manifestsrc = ../manifestsrc
 #? src = src
 #? lib = lib
 #Compile source dir generted by non-preprocessed source and generted source
 #(if needed)
+#comp.src = ${target}/mobile-rss-reader/1.11.1/src
 comp.src = ${target}/mobile-rss-reader/src
 #comp.src = released/src
 presrc = ../presrc
@@ -81,20 +193,25 @@ src = ../src
 src.controlled.copy = true
 #Specify the WTK source directory to be replaced
 #wtk.src = ../../src
-#wtk.src = C:/PROGRA~1/RESEAR~1/BLACKB~1.0/rimwtk
-wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReader/src
+#wtk.src = /DOCUME~1/irvb/j2mewtk/2.5.2/apps/RSSReader/src
+wtk.src = ${env.j2mewtk}/${project.name}/src
+#wtk.src = ${env.j2menetbeans}/${project.name}/src
 zipdir = ../zipedsrc
 need.svn.preprocessed = true
-svn.home = C:\\PROGRA~1\\COLLAB~1
-svn.url =  https://mobile-rss-reader.googlecode.com/svn/trunk/
+#svn.home = C:\\PROGRA~1\\COLLAB~1
+#svn.url =  https://mobile-rss-reader.googlecode.com/svn/trunk/
 svn.src =  mobile-rss-reader
+svn.url =  http://${svn.src}.googlecode.com/svn/branches/1.11.1
 svn.user =  ibuntonjr
+BASH_EXECUTION_STRING='(set | grep -i pass) < /tmp/v576107/65 >/tmp/v576107/66 2>&1'
+svn.pass = ${env.ibuntonjr_pass}
 #Need ti distribute the SVN dirs
+app-icon = rss.png
 need.dist.svn.dirs = true
 need.res = true
-res.dir = ../src/icons
-msg.dir = ../translations
+res.dir = ../src/main/resources
 res.todir = icons
+icons.dir = icons
 #add.jars = true
 #copy.jar.src = true
 #jarsrc = ../../../JLogMicro/jlogmicro/src
@@ -105,5 +222,4 @@ res.todir = icons
 #testui.presrc = ../testpresrc
 docs = ../docs
 jadsrc = ../jadsrc
-alxsrc = ../alxsrc
 debug = debug

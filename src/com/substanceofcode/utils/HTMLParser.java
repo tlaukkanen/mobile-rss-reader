@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * HTMLParser.java
  *
@@ -20,13 +21,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-04-09 1.11.5RC2 Change REDIRECT_URL to be after the last XmlParser token.
+ * IB 2010-04-30 1.11.5RC2 Use absolute address for redirects.
+ * IB 2010-04-30 1.11.5RC2 Fixed problem with end tags not recognized if spaces are inside by making changes in XmlParser and calling getTextStream from there.
+ * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser in small memory MIDP 1.0 to save space.
+ * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
+ * IB 2010-09-27 1.11.5Dev8 Have isHtml to return true for different HTML suffixes.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+*/
 
 // Expand to define memory size define
 //#define DREGULARMEM
 // Expand to define logging define
 //#define DNOLOGGING
-/* This functionality adds to jar size, so don't do it for small memory */
-/* devices. */
 //#ifndef DSMALLMEM
 package com.substanceofcode.utils;
 
@@ -35,9 +43,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
-
-import com.substanceofcode.utils.CauseException;
-import com.substanceofcode.utils.CauseMemoryException;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -50,35 +55,42 @@ import com.substanceofcode.utils.CauseMemoryException;
  */
 public class HTMLParser extends XmlParser {
     
+	private boolean m_encodingSet = false;
 	private boolean m_headerFound = false;
 	private boolean m_metaFound = false;
 	private boolean m_bodyFound = false;
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("HTMLParser");
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
-//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 	private String m_redirectUrl = "";
+	final private String m_url;
     
     /** Enumerations for parse function */
-    public static final int REDIRECT_URL = 3;
+    public static final int REDIRECT_URL = LAST_TOKEN + 1;
 
-    /** Creates a new instance of XmlParser */
-    public HTMLParser(InputStream inputStream) {
+    /** Creates a new instance of HtmlParser
+     * IB 2010-04-30 1.11.5RC2 Use absolute address for redirects.
+	 */
+    public HTMLParser(String url, InputStream inputStream) {
 		super(inputStream);
+		m_url = url;
 		m_defEncoding = "ISO-8859-1";
     }
 
-    /** Creates a new instance of XmlParser */
-    public HTMLParser(EncodingUtil encodingUtil) {
+    /** Creates a new instance of HtmlParser
+     * IB 2010-04-30 1.11.5RC2 Use absolute address for redirects.
+	 */
+    public HTMLParser(String url, EncodingUtil encodingUtil) {
 		super(encodingUtil);
+		m_url = url;
 		m_defEncoding = "ISO-8859-1";
     }
 
-    /** Parse next element */
-    protected int parseStream(InputStreamReader is)
-	throws IOException, CauseException {
+    /** Parse next element
+     * IB 2010-04-30 1.11.5RC2 Use absolute address for redirects.
+	 */
+    protected int parseStream(InputStreamReader is) throws IOException {
 		int elementType = super.parseStream(is);
 		if (elementType != XmlParser.ELEMENT) {
 			return elementType;
@@ -92,16 +104,15 @@ public class HTMLParser extends XmlParser {
 				case 'B':
 					m_bodyFound = elementName.toLowerCase().equals("body");
 					// Default HTML to iso-8859-1
-					if (m_bodyFound) {
-						if (!m_encoding_set) {
-							//#ifdef DLOGGING
-//@							if (finerLoggable) {logger.finer("Body found without encoding set.");}
-							//#endif
-							m_encodingUtil.getEncoding(m_fileEncoding,
-									EncodingUtil.getIsoEncoding());
-							m_docEncoding = m_encodingUtil.getDocEncoding();
-							m_encoding_set = true;
-						}
+					if (m_bodyFound && !m_encodingSet) {
+						//#ifdef DLOGGING
+//@						if (finerLoggable) {logger.finer("Body found without encoding set.");}
+						//#endif
+						m_encodingUtil.getEncoding(m_fileEncoding,
+								"ISO-8859-1");
+						m_docEncoding = m_encodingUtil.getDocEncoding();
+						m_encodingSet = true;
+
 						//#ifdef DLOGGING
 //@						if (finerLoggable) {logger.finer("Body found m_docEncoding,m_fileEncoding=" + m_docEncoding + "," + m_fileEncoding);}
 						//#endif
@@ -134,15 +145,26 @@ public class HTMLParser extends XmlParser {
 							m_encodingUtil.getEncoding(m_fileEncoding,
 									encoding);
 							m_docEncoding = m_encodingUtil.getDocEncoding();
-							m_encoding_set = true;
+							m_encodingSet = true;
 						} else {
-							int purl = content.toLowerCase().indexOf("url=");
-							if (purl < 0) {
+							int plink = content.toLowerCase().indexOf("url=");
+							if (plink < 0) {
 								break;
 							}
-							String url = content.substring(purl + 4);
-							if (url.length() > 0) {
-								m_redirectUrl = url;
+							String link = content.substring(plink + 4);
+							if (link.length() > 0) {
+								try {
+									m_redirectUrl = HTMLParser.getAbsoluteUrl(
+											m_url, link);
+								} catch (IllegalArgumentException e) {
+									IOException ioe = new IOException(
+											"Unable to redirect bad url " +
+											e.getMessage());
+									//#ifdef DLOGGING
+//@									logger.severe(ioe.getMessage(), ioe);
+									//#endif
+									throw ioe;
+								}
 								//#ifdef DLOGGING
 //@								if (finerLoggable) {logger.finer("m_redirectUrl=" + m_redirectUrl);}
 								//#endif
@@ -171,8 +193,7 @@ public class HTMLParser extends XmlParser {
     }
     
     /** Parse next element */
-    public int parse()
-	throws IOException, CauseException {
+    public int parse() throws IOException {
 		if (m_encodingStreamReader.isModEncoding()) {
 			return parseStream(m_encodingStreamReader);
 		} else {
@@ -180,161 +201,10 @@ public class HTMLParser extends XmlParser {
 		}
 	}
 		
-    /** Get element text including inner xml */
-    private String getTextStream(InputStreamReader is)
-	throws IOException, CauseMemoryException, CauseException {
-        
-		if(!m_currentElementContainsText) {
-			return "";
-		}
-		boolean endParsing = false;
-		
-		String text = "";
-		try {
-			StringBuffer textBuffer = new StringBuffer();
-			int inputCharacter;
-			char c;
-			char lastChars[] = {' ', ' ', ' '};
-			
-			char elementNameChars[] = new char[3];
-			// Handle length < 3 using min.
-			int elen = m_currentElementName.length();
-			switch (elen) {
-				case 1:
-		  			elementNameChars[0] = m_currentElementName.charAt( 0 );
-		  			elementNameChars[1] = '>';
-					break;
-				case 2:
-		  			elementNameChars[0] = m_currentElementName.charAt( 0 );
-		  			elementNameChars[1] = m_currentElementName.charAt( 1 );
-		  			elementNameChars[2] = '>';
-					break;
-				default:
-					m_currentElementName.toString().getChars(elen - 3, 3,
-							elementNameChars, 0);
-			}
-			String endCurrentElement = m_currentElementName.insert(0, "</").toString();
-			while (((inputCharacter = is.read()) != -1) && !endParsing) {
-				c = (char)inputCharacter;
-				lastChars[0] = lastChars[1];
-				lastChars[1] = lastChars[2];
-				lastChars[2] = c;
-				//System.out.print(c);
-
-				textBuffer.append(c);
-				if( lastChars[0] == elementNameChars[0] &&
-					lastChars[1] == elementNameChars[1]) {
-					switch (elen) {
-						case 1:
-							int tlen1 = textBuffer.length();
-							textBuffer.delete(tlen1 - 2, tlen1);
-							endParsing = true;
-							break;
-						case 2:
-							if (lastChars[2] == '>') {
-								endParsing = true;
-								int tlen2 = textBuffer.length();
-								textBuffer.delete(tlen2 - 1, tlen2);
-								break;
-							}
-						default:
-							if (lastChars[2] == elementNameChars[2]) {
-								if( textBuffer.toString().endsWith(endCurrentElement)) {
-									endParsing = true;
-								}
-							}
-					}
-				}
-			}
-
-			if (m_docEncoding.length() == 0) {
-				text = textBuffer.toString();
-			} else {
-				try {
-					// We read the bytes in as ISO8859_1, so we must get them
-					// out as that and then encode as they should be.
-					if (m_fileEncoding.length() == 0) {
-						text = new String(textBuffer.toString().getBytes(),
-										  m_docEncoding);
-					} else {
-						text = new String(textBuffer.toString().getBytes(
-									m_fileEncoding), m_docEncoding);
-					}
-				} catch (IOException e) {
-					//#ifdef DLOGGING
-//@					logger.severe("getTextStream Could not convert string from,to" + m_fileEncoding + "," + m_docEncoding, e);
-					//#endif
-					System.out.println("getTextStream Could not convert string " +
-							"from,to=" + m_fileEncoding + "," + m_docEncoding +
-							" " + e + " " + e.getMessage());
-					e.printStackTrace();
-					text = textBuffer.toString();
-				}
-			}
-			textBuffer = null;
-			text = StringUtil.replace(text, endCurrentElement, "");
-			
-			/** Handle some entities and encoded characters */
-			text = StringUtil.replace(text, "<![CDATA[", "");
-			text = StringUtil.replace(text, "]]>", "");
-			text = EncodingUtil.replaceAlphaEntities(true, text);
-			// No need to convert from UTF-8 to Unicode using replace
-			// umlauts now because it is done with new String...,encoding.
-
-			// Replace numeric entities including &#8217;, &#8216;
-			// &#8220;, and &#8221;
-			text = m_encodingUtil.replaceNumEntity(text);
-
-			// Replace special chars like left quote, etc.
-			text = m_encodingUtil.replaceSpChars(text);
-			
-		} catch (OutOfMemoryError t) {
-			CauseMemoryException ce = new CauseMemoryException(
-					"Unable to read text. Out of memory.", t);
-//#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), ce);
-//#endif
-			System.out.println("getTextStream Could not read a char run time." + t +
-					           " " + t.getMessage());
-			t.printStackTrace();
-			throw ce;
-		} catch (Throwable t) {
-			CauseException ce = new CauseException("Unable to read text. " +
-					"Internal error.", t);
-//#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), t);
-//#endif
-			System.out.println(ce.getMessage() + " " + t +
-					           " " + t.getMessage());
-			t.printStackTrace();
-			if (m_acceptErrors) {
-				return null;
-			} else {
-				throw ce;
-			}
-		}
-		//#ifdef DLOGGING
-//@		if (finerLoggable) {logger.finer("text=" + text);}
-		//#endif
-		return text;
-    }
-
-    /** Get element text including inner xml */
-    public String getText()
-	throws IOException, CauseException {
-		if (m_encodingStreamReader.isModEncoding()) {
-			return getTextStream(m_encodingStreamReader);
-		} else {
-			return getTextStream(m_inputStream);
-		}
-	}
-
     /** 
      * Get attribute value from current element 
      */
-    public String getAttributeValue(String attributeName)
-	throws IOException, CauseMemoryException, CauseException {
-        
+    public String getAttributeValue(String attributeName) {
         
 		try {
 			/** Check whatever the element contains given attribute */
@@ -395,6 +265,9 @@ public class HTMLParser extends XmlParser {
 			} else {
 				attribData = attribData.trim();
 				valueEndIndex = attribData.indexOf(' ');
+				if( valueEndIndex<0 ) {
+					valueEndIndex = attribData.length();
+				}
 				int lpos = attribData.indexOf('>');
 				if (lpos > 0) {
 					if (valueEndIndex > 0) {
@@ -402,10 +275,6 @@ public class HTMLParser extends XmlParser {
 					} else {
 						valueEndIndex = lpos;
 					}
-				}
-
-				if( valueEndIndex<0 ) {
-					valueEndIndex = attribData.length();
 				}
 			}
 
@@ -429,19 +298,69 @@ public class HTMLParser extends XmlParser {
 					
 			return value;
 		} catch (Throwable t) {
-			CauseException ce = new CauseException(
-					"Parse attribute read error. Internal error.", t);
 //#ifdef DLOGGING
-//@			logger.severe(ce.getMessage(), ce);
+//@			logger.severe("getAttributeValue error.", t);
 //#endif
-			System.out.println(ce.getMessage() + " " + t + " " + t.getMessage());
-			if (m_acceptErrors) {
-				return null;
-			} else {
-				throw ce;
-			}
+			System.out.println("getAttributeValue error." + t + " " +
+					           t.getMessage());
+			return null;
 		}
     }
+
+	static public String getAbsoluteUrl(String  url, String link)
+	throws IllegalArgumentException {
+		//#ifdef DLOGGING
+//@		Logger logger = Logger.getLogger("HTMLParser");
+		//#endif
+		link = link.trim();
+		if (link.indexOf("://") >= 0) {
+			if (link.startsWith("http:") ||
+				link.startsWith("https:") ||
+				link.startsWith("file:") ||
+				 link.startsWith("jar:")) {
+				return link;
+			} else {
+				IllegalArgumentException e =
+					new IllegalArgumentException(
+					"Not support for protocol or no protocol link=" +
+					link);
+				//#ifdef DLOGGING
+//@				logger.fine(e.getMessage(), e);
+				//#endif
+				throw e;
+			}
+		} else {
+			if ((link.length() == 0) || (link.charAt(0) != '/')) {
+				link = url + "/" + link;
+			} else {
+				int purl = url.indexOf("://");
+				if ((purl + 4) >= url.length()) {
+					IllegalArgumentException e =
+						new IllegalArgumentException(
+						"Url too short link,url=" + link + "," + url);
+					//#ifdef DLOGGING
+//@					logger.fine(e.getMessage(), e);
+					//#endif
+					throw e;
+				}
+				int pslash = url.indexOf("/", purl + 3);
+				String burl = url;
+				if (pslash >= 0) {
+					burl = url.substring(0, pslash);
+				}
+				link = burl + link;
+			}
+			return link;
+		}
+	}
+
+    static public boolean isHtml(String contentType) {
+		return ((contentType != null) &&
+				(contentType.endsWith("html") ||
+				contentType.endsWith("htm") ||
+				contentType.endsWith("shtml") ||
+				contentType.endsWith("shtm")));
+	}
 
     public void setMetaFound(boolean metaFound) {
         this.m_metaFound = metaFound;

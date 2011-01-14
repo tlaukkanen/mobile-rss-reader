@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * EncodingList.java
  *
@@ -19,6 +20,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-30 1.11.5Dev12 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
+ * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty.
+ */
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -27,7 +33,7 @@
 // Expand to define test ui define
 @DTESTUIDEF@
 
-//#ifdef DTESTUI
+//#ifdef DTESTUIUNDO
 
 package com.substanceofcode.testutil.presentation;
 
@@ -52,6 +58,7 @@ import com.substanceofcode.testlcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import com.substanceofcode.utils.EncodingUtil;
 
 //#ifdef DLOGGING
@@ -111,9 +118,45 @@ public class EncodingList extends List implements CommandListener {
 		while (super.size() > 0) {super.delete(0);}
 
 		super.append("JavaME encoding=" +
-				System.getProperty("microedition.encoding"), null);
+				FeatureMgr.getSysProperty("microedition.encoding", null,
+					"Unable to get encoding.", null), null);
 		super.append("Get bytes encoding: " + bytesEnc, null);
 		super.append("String encoding: " + strEnc, null);
+		for (int ic = 0; ic < EncodingUtil.CONV_CHARS.length; ic++) {
+			String wconv = "";
+			try {
+				byte [] bval = EncodingUtil.WCONV_CHARS[ic].getBytes();
+				if (bytesEnc.length() != 0) {
+					bval = EncodingUtil.WCONV_CHARS[ic].getBytes(bytesEnc);
+				}
+				if (strEnc.length() != 0) {
+					wconv = new String(bval, strEnc);
+				} else {
+					wconv = new String(bval);
+				}
+			} catch(Exception e) {
+				System.err.println("Error testing conversion: " + e.toString());
+				super.append("ic=" + ic + "Error testing conversion: " + e.toString(), null);
+				e.printStackTrace();
+				continue;
+			} catch(Throwable e) {
+				System.err.println("Error testing conversion: " + e.toString());
+				super.append("ic=" + ic + "Error testing conversion: " + e.toString(), null);
+				e.printStackTrace();
+				continue;
+			}
+			super.append("ic=" + ic, null);
+			for (int jc = 0; jc < wconv.length(); jc++) {
+				final char uchar = EncodingUtil.CONV_CHARS[ic].charAt(jc);
+				final char uwchar = wconv.charAt(jc);
+				final char wchar = EncodingUtil.WCONV_CHARS[ic].charAt(jc);
+				super.append("wc=" + jc + "," + uchar + "," + uwchar + "," + wchar, null);
+				super.append("wc=" + jc + "," + (int)uchar + "," + (int)uwchar + "," + (int)wchar, null);
+				if (uchar != uwchar) {
+					super.append("!= wc=" + jc + "," + uchar + "," + uwchar + "," + wchar, null);
+				}
+			}
+		}
 		super.setSelectedIndex(0, true);
 	}
 

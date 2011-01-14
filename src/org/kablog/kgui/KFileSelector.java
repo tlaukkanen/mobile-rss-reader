@@ -1,4 +1,6 @@
-/* Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
+//--Need to modify--#preprocess
+/*
+ * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,8 +20,11 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. 
  * 
- * This software was originally modified no later than Sept 25, 2007.
  * 
+ * This software was originally modified no later than Sept 25, 2007.
+ */
+/*
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define DJSR75 define
@@ -36,15 +41,17 @@
 //@  extends KViewChild
 //@{
 //@
-//@public  String getFileName();
+//@String getFileName();
 //@
-//@public  String getFileMimeType();
+//#ifdef DTEST
+//@String getFileMimeType();
 //@
-//@public  Image getThumbnail(int width, int height);
+//@Image getThumbnail(int width, int height);
 //@
-//@public  byte[] getFileData();
+//@byte[] getFileData();
+//#endif
 //@
-//@public String getSelectedURL();
+//@String getSelectedURL();
 //@
 //@
 //@} //interface KFileFileSelector

@@ -1,4 +1,6 @@
-/* Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
+//--Need to modify--#preprocess
+/*
+ * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -16,11 +18,32 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE. 
- * 
- * 
+ * IN THE SOFTWARE.
+ *
+ *
+ *
  * This software was originally modified no later than Sept 25, 2007.
  */
+/*
+ * IB 2010-03-21 1.11.5RC1 Remove KFileSelector to save memory.
+ * IB 2010-04-30 1.11.5RC2 Track threads used.
+ * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
+ * IB 2010-08-15 1.11.5Dev8 Remove unused reqSetVisible.
+ * IB 2010-08-15 1.11.5Dev8 Need LoadingForm for FeatureList.
+ * IB 2010-08-15 1.11.5Dev8 Use FeatureForm for txtFrm.
+ * IB 2010-08-15 1.11.5Dev8 Use setCurrentItemMgr for setCurrentItem/setCurrent.
+ * IB 2010-08-15 1.11.5Dev8 Use setMainCurrentAlt for getDisplay.setCurrent.
+ * IB 2010-08-15 1.11.5Dev8 Remove midlet which is now not used directly.
+ * IB 2010-09-26 1.11.5Dev8 Use setCurrentItemFeature instead of setCurrentItemMgr.
+ * IB 2010-09-27 1.11.5Dev8 Move title to construtor for KFileSelectorImpl.
+ * IB 2010-10-12 1.11.5Dev8 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-18 1.11.5Dev14 Allow an object to be written to with the find files result using FeatureMgr.setTxtObj.
+ * IB 2010-11-19 1.11.5Dev14 Allow title for find files as a parameter to allow more generic doLaunchSelector in KFileSelectorMgr.
+ * IB 2010-11-19 1.11.5Dev14 Have println in DTEST.
+ * IB 2010-11-19 1.11.5Dev14 Have debug conditional println use displayDbgMsg.
+ * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg and be in DTEST.
+ * IB 2010-11-19 1.11.5Dev14 Change debug log info.
+*/
 
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -33,9 +56,12 @@
 package org.kablog.kgui;
 
 import javax.microedition.lcdui.*;
-import javax.microedition.midlet.MIDlet;
 
-import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.ImportFeedsForm;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
+import com.substanceofcode.rssreader.presentation.FeatureForm;
+import com.substanceofcode.utils.MiscUtil;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -50,13 +76,13 @@ import net.sf.jlogmicro.util.logging.RecStoreHandler;
  * @author  Todd C. Stellanova
  */
 public class KFileSelectorMgr
-implements KViewParent 
+implements KViewParent
 {
 
-	protected RssReaderMIDlet midlet;
-	protected Form txtFrm;
-	protected TextField txtFld;
-	protected KFileSelector fileSelectorView; 
+	final       Object nullPtr = null;
+	protected Displayable txtDisp;
+	protected Object txtObj;
+	protected KFileSelectorImpl fileSelectorView;
     protected KViewParent viewParent;
     protected boolean ready = false;
     protected boolean bDebug;
@@ -71,47 +97,61 @@ implements KViewParent
      * When the we're is done capturing an XML or multi-media, it calls this
 	   method.
      */
-    final public void childFinished(KViewChild child) {   
+    final public void childFinished(KViewChild child) {
 		try {
 			if (fileSelectorView.getSelectedURL() != null) {
-				txtFld.setString(fileSelectorView.getSelectedURL());
+				FeatureMgr.setTxtObj(txtObj, fileSelectorView.getSelectedURL());
 			}
 			fileSelectorView.doCleanup();
-			fileSelectorView = null;
-			//#ifdef DMIDP20
-			midlet.setCurrentItem( txtFld );
-			//#else
-			midlet.setCurrent( txtFrm );
-			//#endif
+			FeatureMgr.setCurrentObjMgr( fileSelectorView.getFeatureMgr(),
+					txtObj, txtDisp);
+			// Save memory
+			fileSelectorView = (KFileSelectorImpl)nullPtr;
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
 			logger.severe("Sort dates error.", t);
 			//#endif
+			//#ifdef DTEST
 			System.out.println("Sort dates error." + t + " " +
 							   t.getMessage());
+			//#endif
 			t.printStackTrace();
 		}
 	}
-        
+
 	/* Start the file selector list. */
-	final public void doLaunchSelector(RssReaderMIDlet midlet, Form txtFrm, TextField txtFld) {
+	final public void doLaunchSelector(
+			boolean selectDir, String findTitle,
+			Displayable txtDisp, Object txtObj,
+			LoadingForm loadForm)
+	throws Throwable {
 
+		//#ifdef DTEST
 		System.out.println("doLaunchSelector...");
-		this.midlet = midlet;
-		this.txtFrm = txtFrm;
-		this.txtFld = txtFld;
+		//#endif
+		this.txtDisp = txtDisp;
+		this.txtObj = txtObj;
 
-		fileSelectorView = null;
+		fileSelectorView = (KFileSelectorImpl)nullPtr;
 
 		try {
-			fileSelectorView = KFileSelectorFactory.getInstance(
-					midlet, "Find import file", null, "/icons" );
+			fileSelectorView = new KFileSelectorImpl(findTitle, loadForm);
+			fileSelectorView.init(selectDir, null, "/icons" );
+			fileSelectorView.setCommandListener(fileSelectorView, true);
 			fileSelectorView.setViewParent(this);
-			Display.getDisplay(midlet).setCurrent((List)fileSelectorView);
+			fileSelectorView.getFeatureMgr().setMainCurrentAlt(null, null,
+					fileSelectorView);
 		}
-		catch (Exception ex)
+		catch (Throwable e)
 		{
-			if (bDebug) System.out.println("### selector fail: " + ex);
+			//#ifdef DTEST
+			displayDbgMsg("Go to find files fail: " + e, null);
+			//#endif
+			//#ifdef DLOGGING
+			logger.severe("Go to find files fail: ", e);
+			//#endif
+			e.printStackTrace();
+			throw e;
 		}
 
 	}//doLaunchSelector
@@ -119,31 +159,25 @@ implements KViewParent
 	/** We've updated the child's status.
 	 */
 	final public void childStatusChanged(KViewChild child, int statusType, int status) {
-		if (bDebug) System.out.println("Child status changed: " + status);
-	} 
+		//#ifdef DTEST
+		displayDbgMsg("Child status changed: " + status, null);
+		//#endif
+	}
 
-    /** @param newView object o make visible, if possible.
-     */
-    final public void reqSetVisible(Displayable newView) {
-    	if (viewParent != null) {
-			viewParent.reqSetVisible(newView);
-		} else {
-			Display.getDisplay(midlet).setCurrent(newView);
-		}
-    }
-    
     /** @param The callback client interested in receiving finished status.
      */
     final public void setViewParent(KViewParent parent) {
         this.viewParent = parent;
     }
-    
-    /** 
+
+	//#ifdef DTEST
+    /**
      Display a debug message somehow
      */
     final public void displayDbgMsg(String msg, AlertType type) {
          if (bDebug) System.out.println("dbgMsg: " + msg);
 	}
+	//#endif
 
 	/* Add a deferred action.  This is either passed on to our parent or
 	   run as a thread now. */
@@ -152,7 +186,7 @@ implements KViewParent
     	if (viewParent != null) {
 			viewParent.addDeferredAction(runny);
 		} else {
-			new Thread(runny).start();
+			MiscUtil.getThread(runny, "KFileSelectorMgr", this, "addDeferredAction").start();
 		}
     }
 

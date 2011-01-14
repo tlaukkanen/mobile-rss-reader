@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * Form.java
  *
@@ -18,6 +19,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ */
+/*
+ * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  */
 
 // Expand to define MIDP define
@@ -47,23 +51,21 @@ import com.substanceofcode.testutil.TestOutput;
  * @author  Irving Bunton
  * @version 1.0
  */
-public class Form extends javax.microedition.lcdui.Form {
+public class Form extends javax.microedition.lcdui.Form 
+implements LogActIntr {
 
-	private Form m_form;
 	//#ifdef DMIDP10
 	private String m_title;
 	//#endif
 
 	public Form(String title) {
 		super(title);
-		m_form = this;
 		TestOutput.println("Test UI Form Title: " + title);
 	}
 
 	// TODO log items
 	public Form(String title, Item[] items) {
 		super(title, items);
-		m_form = this;
 		//#ifdef DMIDP10
 		this.m_title = title;
 		//#endif
@@ -130,7 +132,6 @@ public class Form extends javax.microedition.lcdui.Form {
 					getTitle() + "]," + t.getMessage());
 			t.printStackTrace();
 		}
-		return;
 	}
 
 	public void delete(int elementnum) {
@@ -168,24 +169,8 @@ public class Form extends javax.microedition.lcdui.Form {
 	//#endif
 
     public void setCommandListener(CommandListener cmdListener) {
-		super.setCommandListener(new CmdHandler(cmdListener));
+		super.setCommandListener(new CmdHandler(this, cmdListener));
     }
-
-	private class CmdHandler implements CommandListener {
-		private CommandListener m_cmdListener;
-
-		private CmdHandler (CommandListener cmdListener) {
-			m_cmdListener = cmdListener;
-		}
-
-		/* Prompt if command is in prompt camands.  */
-		public void commandAction(Command cmd, Displayable disp) {
-			//#ifdef DTESTUI
-			m_form.outputCmdAct(cmd, disp);
-			//#endif
-			m_cmdListener.commandAction(cmd, disp);
-		}
-	}
 
 }
 

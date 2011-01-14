@@ -1,0 +1,7 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on full version.
+#-- IB 2010-11-12 1.11.5DEV14 Use intlink to create file to go to internet links to install the program
+DINTLINKDEF = DINTLINK
+file.prefix.intlink = intlink_
+SUFFIXVERS.intlink = -intlink
+intlink = Internet Install Link
+make.link= true

@@ -137,11 +137,36 @@
         </delete>
     </target>
    -->
-    <target name="pre-jar">
-		<echo message="Executing pre-jar" />
-		<mkdir dir="${buildsystem.baton}/data" />
-		<!-- This should be overrided by user's build.properties. -->
-		<property name="language.file" value="messages_en_US.xml" />
-		<xslt style="translations/props.xsl" in="translations/${language.file}" out="${buildsystem.baton}/data/lang.txt" />
+    <target name="do-preverify" if="cldc-platform.trigger">
+        <echo message="my code"/>
+        <fail unless="preverify.classes.dir">Must set preverify.classes.dir</fail>
+		<property name="ext.drive" value="e:"/>
+		<property file="./wtkbuild/wtk-build.properties.template" />
+		<property file="./wtkbuild/wtk2.0cldc1.1.itunes.jsr75.properties.template" />
+        <echo message="basedir=${basedir}"/>
+        <echo message="classpath=${platform.bootclasspath}:${extra.classpath}"/>
+        <echo message="platform.home=${platform.home}"/>
+        <echo message="antenna.home/antenna.jar=${antenna.home}/${antenna.jar}"/>
+        <delete dir="${preverify.sources.dir}"/>
+        <mkdir dir="${preverify.sources.dir}"/>
+        <copy todir="${preverify.sources.dir}">
+            <fileset dir="src" includes="**/*.java"/>
+        </copy>
+        <mkdir dir="${preverify.classes.dir}"/>
+		<taskdef resource="antenna.properties" >
+		  <classpath>
+			<pathelement location="${antenna.home}/${antenna.jar}" />
+		  </classpath>
+		</taskdef>
+		<wtkbuild srcdir="src" destdir="${preverify.classes.dir}" preverify="true"/>
     </target>
+		<!--
+
+        <nb-preverify srcdir="${preverify.sources.dir}" destdir="${preverify.classes.dir}" classpath="${platform.bootclasspath}:${extra.classpath}" configuration="${platform.configuration}" platformhome="${platform.home}" platformtype="${platform.type}" commandline="${platform.preverifycommandline}"/>
+        <copy todir="${preverify.classes.dir}">
+            <fileset dir="${buildsystem.baton}" defaultexcludes="${filter.use.standard}" excludes="${filter.excludes.evaluated},${build.classes.excludes}"/>
+        </copy>
+        <nb-overrideproperty name="buildsystem.baton" value="${preverify.classes.dir}"/>
+    </target>
+	-->
 </project>

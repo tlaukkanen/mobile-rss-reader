@@ -1,3 +1,4 @@
+//--Need to modify--#preprocess
 /*
  * CauseRuntimeException.java
  *
@@ -16,7 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-
+/*
+ * IB 2010-06-01 1.11.5RC2 Have RuntimException with cause.
+ * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ */
 // Expand to define logging define
 @DLOGDEF@
 package com.substanceofcode.utils;
@@ -53,10 +57,11 @@ RuntimeException
 		causeSet = true;
     }
 
-    public void initCause(Throwable cause) {
+    public Throwable initCause(Throwable cause) {
 		if (!causeSet) {
 			this.cause = cause;
 		}
+		return cause;
     }
 
     public Throwable getCause() {
