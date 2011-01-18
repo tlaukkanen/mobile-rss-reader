@@ -31,10 +31,15 @@
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-07-29 1.11.5Dev8 Don't allocate space for m_date and m_link if not smartphone.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev15 Use checkPresRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
+ * IB 2010-11-26 1.11.5Dev15 Use checkPresRead to set the username/password to the parameter's RssFeed.
+ * IB 2010-11-26 1.11.5Dev15 Use setItemDatesNull in compatibility testing to null the feed's date if the comparison feed's date is null.  This worksaround a fix where the new version takes the lastBuildDate if pubdate is null.
 */
 
 // Expand to define logging define
 @DLOGDEF@
+// Expand to define test define
+@DCOMPATDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define test ui define
@@ -56,7 +61,6 @@
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.MiscUtil;
-import com.substanceofcode.rssreader.businesslogic.RssFormatParser;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
@@ -513,6 +517,44 @@ public class RssFeed
 	}
 	//#endif
 
+	//#ifdef DCOMPATIBILITY
+	/** Compare feed to an existing feed.  **/
+	public boolean setItemDatesNull(RssItunesFeedInfo feed) {
+		boolean result = false;
+		//#ifdef DLOGGING
+		if (traceLoggable) {logger.trace("setItemDatesNull feed.getDate(),m_date=" + feed.getDate() + "," + m_date);}
+		//#endif
+		if ((feed.getDate() == null) && (m_date != null)) {
+			m_date = null;
+			result = true;
+		}
+		int ilen = m_items.size();
+		RssItem[] ritems = new RssItem[ilen];
+		if (ilen > 0) {
+			m_items.copyInto(ritems);
+		}
+		int flen = feed.getItems().size();
+		RssItemInfo [] fitems = new RssItemInfo[flen];
+		if (flen > 0) {
+			feed.getItems().copyInto(fitems);
+		}
+		for (int ic = 0; (ic < ilen) && (ic < flen); ic++) {
+			//#ifdef DLOGGING
+			if (traceLoggable) {logger.trace("setItemDatesNull ic,fitems[ic].getDate(),ritems[ic].m_date=" + ic + "," + fitems[ic].getDate() + "," + ritems[ic].m_date);}
+			//#endif
+			if ((fitems[ic].getDate() == null) &&
+				(ritems[ic].m_date != null)) {
+				ritems[ic].m_date = null;
+				result = true;
+			}
+		}
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("result=" + result);}
+		//#endif
+		return result;
+	}
+	//#endif
+
 	/** Return RSS feed items */
 	public Vector getItems() {
 		return m_items;
@@ -611,4 +653,33 @@ public class RssFeed
 		//#endif
 	}
 
+	public void checkPresRead(boolean modFeed, RssFeed feed) {
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("checkPresRead modFeed,feed=" + modFeed + "," + feed);}
+		if (finestLoggable) {logger.finest("checkPresRead this=" + this);}
+		//#endif
+		if (feed.getUsername().length() > 0) {
+			if (m_username.length() == 0) {
+				m_username = feed.getUsername();
+				m_password = feed.getPassword();
+			}
+		}
+		if (modFeed) {
+			Vector vitems = feed.m_items;
+			final int olen = vitems.size();
+			if (olen > 0) {
+				RssItunesItem[] ritems = new RssItunesItem[olen];
+				vitems.copyInto(ritems);
+				final int clen = m_items.size();
+				RssItunesItem[] citems = new RssItunesItem[clen];
+				m_items.copyInto(citems);
+				for (int ic = 0; ic < clen; ic++) {
+					RssItunesItem citem = citems[ic];
+					for (int jc = 0; jc < olen; jc++) {
+						citem.checkRead(ritems[jc]);
+					}
+				}
+			}
+		}
+	}
 }
