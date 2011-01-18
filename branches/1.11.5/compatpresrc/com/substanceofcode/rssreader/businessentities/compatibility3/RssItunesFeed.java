@@ -25,11 +25,14 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Alpha15 Have clone to help with future background updating of feeds.
  */
 // Expand to define itunes define
 @DITUNESDEF@
 // Expand to define logging define
 @DLOGDEF@
+// Expand to define test define
+@DTESTDEF@
 package com.substanceofcode.rssreader.businessentities.compatibility3;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
@@ -337,7 +340,7 @@ implements RssItunesFeedInfo
     }
 
     /** Write record as a string */
-    public String toString(){
+    public String toString() {
         String storeString = m_itunes + "|" + m_title + "|" +
 			m_description + "|" + m_language + "|" +
 			m_author + "|" + m_subtitle + "|" + m_summary + "|" +
@@ -420,5 +423,11 @@ implements RssItunesFeedInfo
     public String getTitle() {
         return (m_title);
     }
+
+	//#ifdef DTEST
+    public Object clone() {
+		return new RssItunesFeed(this);
+	}
+	//#endif
 
 }
