@@ -30,6 +30,11 @@
  * IB 2010-11-18 1.11.5Dev14 Move find files call functionality to FeatureMgr.
  * IB 2010-11-18 1.11.5Dev14 Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
 >  * IB 2010-11-22 1.11.5Dev14 Replace Alert with loading form exception.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-01-11 1.11.5Alpha15 Use super.featureMgr instead of featureMgr.
  */
 
 // Expand to define MIDP define
@@ -42,7 +47,10 @@
 @DLOGDEF@
 // Expand to define test ui define
 @DTESTUIDEF@
+// Expand to define full vers define
+@DFULLVERSDEF@
 
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
@@ -73,15 +81,13 @@ import javax.microedition.lcdui.Item;
 
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.presentation.ImportFeedsForm;
 
-//#ifdef DJSR75
-import org.kablog.kgui.KFileSelectorMgr;
-//#endif
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
 
@@ -121,7 +127,7 @@ public class URLForm extends FeatureForm
 	//#ifdef DMIDP20
 	protected Command     m_pasteURLCmd;// The paste command
 	//#endif
-	protected Hashtable m_rssFeeds;         // The bookmark URLs
+	protected RssFeedStore m_rssFeeds;         // The bookmark URLs
 	protected RssReaderSettings m_appSettings;// The application settings
 	// The loading form
 	protected Thread m_thread = null; // The thread
@@ -132,7 +138,7 @@ public class URLForm extends FeatureForm
 
 	/** Initialize import form */
 	public URLForm(String formName, boolean selectDir,
-			Hashtable rssFeeds,
+			RssFeedStore rssFeeds,
 			RssReaderSettings appSettings,
 			LoadingForm loadForm) {
 		super(formName, loadForm);
@@ -255,14 +261,14 @@ public class URLForm extends FeatureForm
 		}
 		if (m_cancel) {
 			m_cancel = false;
-			featureMgr.getLoadForm().replaceRef(this, null);
-			featureMgr.getMidlet().showBookmarkList();
+			super.featureMgr.getLoadForm().replaceRef(this, null);
+			super.featureMgr.getRssMidlet().showBookmarkList();
 		}
 
 		//#ifdef DJSR75
 		if (m_fileReq) {
 			m_fileReq = false;
-			if (!featureMgr.getMidlet().JSR75_ENABLED) {
+			if (!super.featureMgr.getRssMidlet().JSR75_ENABLED) {
 				CauseException ce = new CauseException(
 						"Find files (JSR-75) not enabled on the phone.");
 				LoadingForm loadForm = super.getFeatureMgr().getLoadForm();
@@ -273,16 +279,16 @@ public class URLForm extends FeatureForm
 				return;
 			}
 			try {
-				RssReaderMIDlet midlet = featureMgr.getMidlet();
+				RssReaderMIDlet midlet = featureMgr.getRssMidlet();
 				if (midlet != null) {
 					if (this instanceof ImportFeedsForm) {
-						featureMgr.getFindFiles(m_selectDir,
+						super.featureMgr.getFindFiles(m_selectDir,
 								"Loading files to export from...",
 								"Loading files to import from...", 
 						(m_selectDir ? "Find export file" : "Find import file"),
 						 this, m_url);
 					} else {
-						featureMgr.getFindFiles(false,
+						super.featureMgr.getFindFiles(false,
 								"Loading files to read from...", null,
 								"Find feed file", this, m_url);
 					}
@@ -340,3 +346,4 @@ public class URLForm extends FeatureForm
 	}
 
 }
+//#endif
