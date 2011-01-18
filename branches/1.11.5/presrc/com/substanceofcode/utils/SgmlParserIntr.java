@@ -24,13 +24,19 @@
  * IB 2010-03-14 1.11.5RC2 Use interface to make compatibility testing easier.
  * IB 2010-07-28 1.11.5Dev8 Convert entities if CDATA used.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define testing define
 @DTESTDEF@
 // Expand to define logging define
 @DLOGDEF@
 //#ifdef DTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.utils;
 
 import java.io.IOException;
@@ -102,7 +108,11 @@ public interface SgmlParserIntr {
     boolean isWindows();
     boolean isUtf();
 
+	//#ifdef DTEST
+    EncodingUtilIntr getEncodingUtil();
+	//#else
     EncodingUtil getEncodingUtil();
+	//#endif
 
 	//#ifdef DTEST
 	//#ifdef DLOGGING
@@ -110,4 +120,5 @@ public interface SgmlParserIntr {
 	//#endif
 	//#endif
 }
+//#endif
 //#endif
