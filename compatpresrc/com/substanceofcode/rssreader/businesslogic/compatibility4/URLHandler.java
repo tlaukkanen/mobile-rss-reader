@@ -23,6 +23,8 @@
  */
 /*
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of EncodingUtil and EncodingStreamReader.
+ * IB 2010-11-29 1.11.5Dev9 Allow using fixup (using true) to stop if tagName is empty.
  */
 
 // Expand to define MIDP define
@@ -53,7 +55,7 @@ import javax.microedition.io.file.FileConnection;
 
 import com.substanceofcode.utils.compatibility4.Base64;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
-import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.compatibility4.EncodingUtil;
 import com.substanceofcode.utils.compatibility4.CauseException;
 
 //#ifdef DLOGGING
@@ -328,7 +330,8 @@ public class URLHandler {
 				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
 									url,
 									null,
-									null
+									null,
+									true
 									//#ifdef DLOGGING
 									,logger,
 									fineLoggable,
