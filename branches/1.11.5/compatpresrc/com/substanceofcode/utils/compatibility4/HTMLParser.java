@@ -25,6 +25,7 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-10-12 1.11.5Alpha15 Use compatibility4 version of EncodingUtil.
  */
 
 // Expand to define logging define
@@ -37,7 +38,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 
-import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.compatibility4.EncodingUtil;
 import com.substanceofcode.utils.SgmlParserIntr;
 import com.substanceofcode.utils.MiscUtil;
 
