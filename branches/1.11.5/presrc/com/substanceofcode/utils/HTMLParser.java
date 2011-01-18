@@ -28,7 +28,10 @@
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser in small memory MIDP 1.0 to save space.
  * IB 2010-05-28 1.11.5RC2 Check for html, htm, shtml, and shtm suffixes.
  * IB 2010-09-27 1.11.5Dev8 Have isHtml to return true for different HTML suffixes.
- * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-01-01 1.11.5Dev15 Have html flag to tell XmlParser to only allow HTMLParser to set the encoding except for byte order mark (BOM).
+ * IB 2010-01-11 1.11.5Dev15 Use m_encodingStreamReader to parse.
+ * IB 2010-01-11 1.11.5Dev15 Use current encodingUtil for replace methods.
+ * IB 2010-01-11 1.11.5Dev15 Use singleton instead of some static vars for EncodingUtil.
 */
 
 // Expand to define memory size define
@@ -40,9 +43,10 @@ package com.substanceofcode.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
+
+import com.substanceofcode.utils.EncodingStreamReader;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -70,28 +74,27 @@ public class HTMLParser extends XmlParser {
     public static final int REDIRECT_URL = LAST_TOKEN + 1;
 
     /** Creates a new instance of HtmlParser
-     * IB 2010-04-30 1.11.5RC2 Use absolute address for redirects.
 	 */
     public HTMLParser(String url, InputStream inputStream) {
 		super(inputStream);
 		m_url = url;
-		m_defEncoding = "ISO-8859-1";
+		m_defEncoding = m_encodingInstance.getIsoEncoding();
+		super.setHtmlFile(true);
     }
 
     /** Creates a new instance of HtmlParser
-     * IB 2010-04-30 1.11.5RC2 Use absolute address for redirects.
 	 */
     public HTMLParser(String url, EncodingUtil encodingUtil) {
 		super(encodingUtil);
 		m_url = url;
-		m_defEncoding = "ISO-8859-1";
+		m_defEncoding = m_encodingInstance.getIsoEncoding();
+		super.setHtmlFile(true);
     }
 
     /** Parse next element
-     * IB 2010-04-30 1.11.5RC2 Use absolute address for redirects.
 	 */
-    protected int parseStream(InputStreamReader is) throws IOException {
-		int elementType = super.parseStream(is);
+    public int parse() throws IOException {
+		int elementType = super.parseStream(m_encodingStreamReader);
 		if (elementType != XmlParser.ELEMENT) {
 			return elementType;
 		}
@@ -109,7 +112,7 @@ public class HTMLParser extends XmlParser {
 						if (finerLoggable) {logger.finer("Body found without encoding set.");}
 						//#endif
 						m_encodingUtil.getEncoding(m_fileEncoding,
-								"ISO-8859-1");
+								m_encodingInstance.getIsoEncoding());
 						m_docEncoding = m_encodingUtil.getDocEncoding();
 						m_encodingSet = true;
 
@@ -192,15 +195,6 @@ public class HTMLParser extends XmlParser {
 		return elementType;
     }
     
-    /** Parse next element */
-    public int parse() throws IOException {
-		if (m_encodingStreamReader.isModEncoding()) {
-			return parseStream(m_encodingStreamReader);
-		} else {
-			return parseStream(m_inputStream);
-		}
-	}
-		
     /** 
      * Get attribute value from current element 
      */
@@ -208,8 +202,8 @@ public class HTMLParser extends XmlParser {
         
 		try {
 			/** Check whatever the element contains given attribute */
-			String ccurrentElementData = EncodingUtil.replaceSpChars(
-					EncodingUtil.replaceSpChars(
+			String ccurrentElementData = m_encodingUtil.replaceSpChars(
+					m_encodingUtil.replaceSpChars(
 						m_currentElementData.toString(), true, false),
 					false, false);
 			int attributeStartIndex = ccurrentElementData.toLowerCase().indexOf(
@@ -243,7 +237,7 @@ public class HTMLParser extends XmlParser {
 					break;
 				case EncodingUtil.CLEFT_SGL_QUOTE:
 					attribData = attribData.substring(1);
-					quote = EncodingUtil.RIGHT_SGL_QUOTE;
+					quote = m_encodingInstance.SGL_RIGHT_SGLE_QUOTE;
 					if (attribData.length() == 0) {
 						return null;
 					}
@@ -253,7 +247,7 @@ public class HTMLParser extends XmlParser {
 					if (attribData.length() == 0) {
 						return null;
 					}
-					quote = EncodingUtil.WRIGHT_SGL_QUOTE;
+					quote = m_encodingInstance.SGL_WRIGHT_SGLE_QUOTE;
 					break;
 				default:
 			}
