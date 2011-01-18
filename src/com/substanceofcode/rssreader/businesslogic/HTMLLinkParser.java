@@ -3,6 +3,7 @@
  * HTMLLinkParser.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
+ * Copyright (C) 2007-2011 Irving Bunton, Jr
  * http://www.substanceofcode.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,23 +32,36 @@
  * IB 2010-07-04 1.11.5Dev6 Do not have empty catch block.
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Pass in rss feed store.
+ * IB 2011-01-14 1.11.5Alpha15 Have character and parse logging for testing.
+ * IB 2011-01-14 1.11.5Alpha15 Fix getting the absolute URL from the relative URL.
+ * IB 2011-01-14 1.11.5Alpha15 Make sure we parse an element.  Not getting one is only a future possibilty.
+ * IB 2011-01-14 1.11.5Alpha15 Make sure the tag name length is > 0.
+ * IB 2011-01-14 1.11.5Alpha15 Make sure the anchor is not another tag starting with 'a'.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
 */
 
 // Expand to define memory size define
 //#define DREGULARMEM
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
 // Expand to define logging define
 //#define DNOLOGGING
 
 //#ifndef DSMALLMEM
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.EncodingStreamReader;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.HTMLParser;
 import com.substanceofcode.utils.XmlParser;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Vector;
@@ -78,14 +92,15 @@ public class HTMLLinkParser extends FeedListParser {
 	//#endif
 
     /** Creates a new instance of HTMLLinkParser */
-    public HTMLLinkParser(String url, String username, String password) {
-        super(url, username, password);
+    public HTMLLinkParser(String url, String username, String password,
+			RssFeedStore rssFeeds) {
+        super(url, username, password, rssFeeds);
     }
 
     public RssItunesFeed[] parseFeeds(InputStream is) {
 		// Init in case we get a severe error.
 		try {
-			return HTMLLinkParser.parseFeeds(new EncodingUtil(is),
+			return HTMLLinkParser.parseFeeds(EncodingUtil.getEncodingUtil(is),
 											m_url,
 											m_feedNameFilter,
 											m_feedURLFilter
@@ -94,6 +109,9 @@ public class HTMLLinkParser extends FeedListParser {
 //@											,fineLoggable
 //@											,finerLoggable
 //@											,finestLoggable
+//@											,m_logParseChar
+//@											,m_logRepeatChar
+//@											,m_logReadChar
 											//#endif
 											);
 		} catch (Throwable t) {
@@ -110,10 +128,13 @@ public class HTMLLinkParser extends FeedListParser {
 										String feedNameFilter,
 										String feedURLFilter
 										//#ifdef DLOGGING
-//@										,Logger logger,
-//@										 boolean fineLoggable,
-//@										 boolean finerLoggable,
-//@										 boolean finestLoggable
+//@										,Logger logger
+//@										,boolean fineLoggable
+//@										,boolean finerLoggable
+//@										,boolean finestLoggable
+//@										,boolean logParseChar
+//@										,boolean logRepeatChar
+//@										,boolean logReadChar
 										//#endif
 			                           ) {
         /** Initialize item collection */
@@ -121,6 +142,19 @@ public class HTMLLinkParser extends FeedListParser {
         
         /** Initialize XML parser and parse OPML XML */
         HTMLParser parser = new HTMLParser(url, encodingUtil);
+		//#ifdef DTEST
+		//#ifdef DLOGGING
+//@		if (logReadChar) {
+//@			parser.setLogReadChar(logReadChar);
+//@		}
+//@		if (logParseChar) {
+//@			parser.setLogChar(logParseChar);
+//@		}
+//@		if (logRepeatChar) {
+//@			parser.setLogRepeatChar(logRepeatChar);
+//@		}
+		//#endif
+		//#endif
         try {
             
 			// The first element is the main tag.
@@ -137,6 +171,8 @@ public class HTMLLinkParser extends FeedListParser {
 					feeds[0] = new RssItunesFeed("", parser.getRedirectUrl(),
 							"", "");
 					return feeds;
+				} else if (elementType != XmlParser.ELEMENT) {
+					continue;
 				}
 				/** RSS item properties */
 				String title = "";
@@ -144,9 +180,10 @@ public class HTMLLinkParser extends FeedListParser {
 												
 				String tagName = parser.getName();
 				//#ifdef DLOGGING
-//@				if (finerLoggable) {logger.finer("tagname: " + tagName);}
+//@				if (finerLoggable) {logger.finer("tagname: " + tagName);} ;
 				//#endif
-				if (tagName.length() == 0) {
+				int tagLen;
+				if ((tagLen = tagName.length()) == 0) {
 					continue;
 				}
 				switch (tagName.charAt(0)) {
@@ -164,8 +201,11 @@ public class HTMLLinkParser extends FeedListParser {
 						break;
 					case 'a':
 					case 'A':
+						if (tagLen != 1) {
+							break;
+						}
 						//#ifdef DLOGGING
-//@						if (finerLoggable) {logger.finer("Parsing <a> tag");}
+//@						if (finerLoggable) {logger.finer("Parsing <a> tag");} ;
 						//#endif
 						
 						title = parser.getText(true);
@@ -183,7 +223,7 @@ public class HTMLLinkParser extends FeedListParser {
 							continue;
 						}
 						try {
-							HTMLParser.getAbsoluteUrl(url, link);
+							link = HTMLParser.getAbsoluteUrl(url, link);
 						} catch (IllegalArgumentException e) {
 							//#ifdef DLOGGING
 //@							if (finerLoggable) {logger.finer("Not support for protocol or no protocol=" + link);}
@@ -193,8 +233,8 @@ public class HTMLLinkParser extends FeedListParser {
 			
 						/** Debugging information */
 						//#ifdef DLOGGING
-//@						if (finerLoggable) {logger.finer("Title:       " + title);}
-//@						if (finerLoggable) {logger.finer("Link:        " + link);}
+//@						if (finerLoggable) {logger.finer("Title:       " + title);} ;
+//@						if (finerLoggable) {logger.finer("Link:        " + link);} ;
 						//#endif
 
 						if ((feedURLFilter.length() > 0) &&
@@ -203,17 +243,18 @@ public class HTMLLinkParser extends FeedListParser {
 						}
 						
 						if ((feedNameFilter.length() > 0) &&
-							((title != null) &&
-							(title.toLowerCase().indexOf(feedNameFilter) < 0))) {
+							(title.length() != 0) &&
+							(title.toLowerCase().indexOf(feedNameFilter) < 0)) {
 							continue;
 						}
 						//#ifdef DLOGGING
-//@						if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+//@						if (title.length() == 0) {logger.warning("parseFeeds warning empty title for link=" + link);}
 						//#endif
 						RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 						rssFeeds.addElement( feed );
 						break;
 					default:
+						break;
 				}
             }
             while( (elementType = parser.parse()) != XmlParser.END_DOCUMENT );
@@ -231,8 +272,12 @@ public class HTMLLinkParser extends FeedListParser {
         /** Create array */
         RssItunesFeed[] feeds = new RssItunesFeed[ rssFeeds.size() ];
         rssFeeds.copyInto(feeds);
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("parseFeeds return url,feeds.length=" + url + "," + feeds.length);}
+		//#endif
         return feeds;
     }
     
 }
+//#endif
 //#endif
