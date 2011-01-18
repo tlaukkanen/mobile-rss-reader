@@ -21,17 +21,18 @@
  *
  */
 /*
- * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
- * IB 2010-07-29 1.11.5Dev8 Convert entities if CDATA used.
- * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
- * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-29 1.11.5Dev15 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-29 1.11.5Dev14 Change package and getlogging for compatibility4.
+ * IB 2010-11-29 1.11.5Dev9 Add setLogChar and isLogChar for SgmlParserIntr implementation to compatibility4 XmlParser.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of EncodingUtil and EncodingStreamReader.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of StringUtil.
+ * IB 2010-11-29 1.11.5Dev9 Allow test to get the EncodingUtilIntr interface.
  */
 
 // Expand to define testing define
 @DTESTDEF@
 // Expand to define logging define
 @DLOGDEF@
-//#ifdef DTEST
 package com.substanceofcode.utils.compatibility4;
 
 import java.io.IOException;
@@ -41,8 +42,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
 import com.substanceofcode.utils.SgmlParserIntr;
-import com.substanceofcode.utils.EncodingUtil;
-import com.substanceofcode.utils.EncodingStreamReader;
+import com.substanceofcode.utils.compatibility4.EncodingUtil;
+//#ifdef DTEST
+import com.substanceofcode.utils.EncodingUtilIntr;
+//#endif
+import com.substanceofcode.utils.compatibility4.EncodingStreamReader;
 import com.substanceofcode.utils.MiscUtil;
 
 //#ifdef DLOGGING
@@ -82,6 +86,8 @@ public class XmlParser implements SgmlParserIntr {
     final private boolean finestLoggable = logger.isLoggable(Level.FINEST);
     final private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
+    
+    /** Enumerations for parse function taken from SgmlParserIntr.  */
     
     /** Creates a new instance of XmlParser */
     public XmlParser(InputStream inputStream) {
@@ -383,11 +389,11 @@ public class XmlParser implements SgmlParserIntr {
 					text = textBuffer.toString();
 				}
 			}
-			text = MiscUtil.replace(text, endCurrentElement, "");
+			text = StringUtil.replace(text, endCurrentElement, "");
 			
 			/** Handle some entities and encoded characters */
-			text = MiscUtil.replace(text, "<![CDATA[", "");
-			text = MiscUtil.replace(text, "]]>", "");
+			text = StringUtil.replace(text, "<![CDATA[", "");
+			text = StringUtil.replace(text, "]]>", "");
 			text = m_encodingUtil.replaceAlphaEntities(text);
 			// No need to convert from UTF-8 to Unicode using replace
 			// umlauts now because it is done with new String...,encoding.
@@ -562,7 +568,12 @@ public class XmlParser implements SgmlParserIntr {
         return (m_encodingUtil.isUtf());
     }
 
-    public EncodingUtil getEncodingUtil() {
+	//#ifdef DTEST
+    public EncodingUtilIntr getEncodingUtil()
+	//#else
+    public EncodingUtil getEncodingUtil()
+	//#endif
+	{
         return (m_encodingUtil);
     }
 
@@ -577,4 +588,3 @@ public class XmlParser implements SgmlParserIntr {
 	//#endif
 
 }
-//#endif
