@@ -26,14 +26,22 @@
  * IB 2010-07-19 1.11.5Dev8 Don't remove entities for link with CDATA.
  * IB 2010-07-19 1.11.5Dev8 For smartphone, set feed header fields if no items.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev14 To help with minor performance, start vector with max items.
+ * IB 2010-11-26 1.11.5Dev14 To help with minor space, use trimToSize for items..
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
 */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
 // Expand to define test define
 //#define DNOTEST
 // Expand to define test ui define
 //#define DNOTESTUI
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 //#ifdef DLOGGING
@@ -84,7 +92,7 @@ public class AtomFormatParser implements FeedFormatParser {
 			            int maxItemCount, boolean getTitleOnly)
 	throws IOException {
         
-        Vector items = new Vector();
+        Vector items = new Vector(maxItemCount);
 		m_extParser.parseNamespaces(parser);
 		m_language = parser.getAttributeValue("xml:lang");
 		if (m_language == null) {
@@ -148,49 +156,54 @@ public class AtomFormatParser implements FeedFormatParser {
 //@				feed = m_extParser.getFeedInstance(feed, m_language,
 //@						m_title, m_description);
 //@			}
+//@			items.trimToSize();
 //@		}
 		//#endif
         
 		reset();
 
-        int parsingResult;
-        while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
-			if (parsingResult != XmlParser.ELEMENT) {
-				continue;
-			}
-            String elementName = parser.getName();
-            if (elementName.length() == 0) {
-				continue;
-			}
-            
-			char elemChar = elementName.charAt(0);
-            if( (elemChar == 'e') &&
-				 elementName.equals("entry") ) {
-                /** Save previous entry */
-				RssItunesItem item = createItem();
-				if ( item != null) {
-                    items.addElement( item );
-                    if(items.size()==maxItemCount) {
-                        return feed;
-                    }
-                }                
-                
-                /** New entry */
-				/** reset */
-				reset();
-            } else {
-				if (parseCommon(parser, elemChar, elementName)) {
+		try {
+			int parsingResult;
+			while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
+				if (parsingResult != XmlParser.ELEMENT) {
 					continue;
 				}
-				parseItem(parser, elemChar, elementName);
-			}
-		}
+				String elementName = parser.getName();
+				if (elementName.length() == 0) {
+					continue;
+				}
 				
-        /** Save previous entry */
-		RssItunesItem item = createItem();
-		if ( item != null) {
-            items.addElement( item );
-        }
+				char elemChar = elementName.charAt(0);
+				if( (elemChar == 'e') &&
+					 elementName.equals("entry") ) {
+					/** Save previous entry */
+					RssItunesItem item = createItem();
+					if ( item != null) {
+						items.addElement( item );
+						if(items.size()==maxItemCount) {
+							return feed;
+						}
+					}                
+					
+					/** New entry */
+					/** reset */
+					reset();
+				} else {
+					if (parseCommon(parser, elemChar, elementName)) {
+						continue;
+					}
+					parseItem(parser, elemChar, elementName);
+				}
+			}
+					
+			/** Save previous entry */
+			RssItunesItem item = createItem();
+			if ( item != null) {
+				items.addElement( item );
+			}
+		} finally {
+			items.trimToSize();
+		}
                         
         return feed;
     }
@@ -394,3 +407,4 @@ public class AtomFormatParser implements FeedFormatParser {
 	}
 
 }
+//#endif
