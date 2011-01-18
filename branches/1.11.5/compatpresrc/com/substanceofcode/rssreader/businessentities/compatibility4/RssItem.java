@@ -24,6 +24,7 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev15 Use itemEquals to compare each item for testing and logging.
  */
 
 // Expand to define logging define
@@ -70,16 +71,19 @@ public class RssItem implements RssItemInfo {
     protected String m_link  = "";   // The RSS item link
     protected String m_desc  = "";   // The RSS item description
     protected Date m_date = null;
+	protected String m_errDate = null;
     protected String m_enclosure  = "";   // The RSS item enclosure
     protected boolean m_unreadItem = false;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("compatibility4.RssItem");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#elif DTESTUI
     private Object logger = null;
     private boolean fineLoggable = true;
     private boolean finestLoggable = true;
+    private boolean traceLoggable = false;
 	//#endif
     
     /** Creates a new instance of RssItem.  Used by this class and
@@ -202,7 +206,7 @@ public class RssItem implements RssItemInfo {
 			 */
 			int TITLE = 0;
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + TITLE ]);}
+			if (finestLoggable) {logger.finest("startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + TITLE ]);} ;
 			//#endif
 			m_title = nodes[startIndex + TITLE];
 			if (hasPipe) {
@@ -291,28 +295,9 @@ public class RssItem implements RssItemInfo {
 	/* Compare item. */
 	public boolean equals(RssItemInfo item) {
 		boolean result = true;
-		if (!TestLogUtil.fieldEquals(item.getTitle(), m_title,
-			"m_title", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getLink(), m_link,
-			"m_link", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getDescription(), m_desc,
-			"m_desc", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getDate(), getDate(),
-			"m_date", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getEnclosure(), m_enclosure,
-			"m_enclosure", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.isUnreadItem(), m_unreadItem,
-			"m_unreadItem", logger, fineLoggable)) {
+		if (!TestLogUtil.itemEquals(this, item,
+			new boolean[] {true, true, true, true, true, true},
+			"compatibility4.RssItem", logger, fineLoggable, traceLoggable)) {
 			result = false;
 		}
 		return result;
@@ -341,5 +326,13 @@ public class RssItem implements RssItemInfo {
 		return (preData);
 	}
     
+    public void setErrDate(String m_errDate) {
+        this.m_errDate = m_errDate;
+    }
+
+    public String getErrDate() {
+        return (m_errDate);
+    }
+
 }
 //#endif
