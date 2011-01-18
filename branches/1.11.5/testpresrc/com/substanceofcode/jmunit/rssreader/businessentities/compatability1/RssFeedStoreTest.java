@@ -24,6 +24,7 @@
  * IB 2010-03-28 1.11.5RC2 Updated date defaults to "".
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
  */
 
 // Expand to define test define
@@ -41,8 +42,6 @@ package com.substanceofcode.jmunit.rssreader.businessentities.compatibility1;
 
 import java.util.Date;
 import java.util.Vector;
-
-import jmunit.framework.cldc10.TestCase;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
