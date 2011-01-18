@@ -23,12 +23,16 @@
 /*
  * IB 2010-05-24 1.11.5RC2 Use BaseTestCase to log start of test.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Use conditional preprocessed cldc11 code with modifications instead of cldc10 code.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
  */
 
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
 @DJMTESTDEF@
+// Expand to define JMTESTPLUS define
+@DJMTESTPLUSDEF@
 // Expand to define logging define
 @DLOGDEF@
 
@@ -37,7 +41,12 @@ package com.substanceofcode.jmunit.utilities;
 
 import java.util.Date;
 
-import jmunit.framework.cldc10.TestCase;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.Display;
+
+import jmunit.framework.cldc11.Test;
+
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 
 import com.substanceofcode.jmunit.logging.LoggingTestCase;
 
@@ -56,12 +65,39 @@ abstract public class BaseTestCase extends LoggingTestCase {
 		//#endif
 	}
 
+	public void test(int testNumber) throws Throwable {
+		switch (testNumber) {
+			default:
+				Exception e = new Exception(
+						"No such test testNumber=" + testNumber);
+				//#ifdef DLOGGING
+				logger.severe("test no switch case test case #" +
+						testNumber, e);
+				//#endif
+				throw e;
+		}
+	}
+
 	public void setUp() throws Throwable {
 		super.setUp();
 		//#ifdef DLOGGING
 		if (!started) {
 			started = true;
 			logger.info("Starting test case " + name);
+			if (FeatureMgr.getDisplay() == null) {
+				//#ifdef DJMTESTPLUS
+				FeatureMgr.setDisplay(Display.getDisplay(Test.getTestMidlet()));
+				//#else
+				FeatureMgr.setDisplay(Display.getDisplay(this));
+				//#endif
+			}
+			if (FeatureMgr.m_backCommand == null) {
+				FeatureMgr.m_backCommand = new Command("Back", Command.BACK, 1);
+			}
+			if (FeatureMgr.m_exitCommand == null) {
+				FeatureMgr.m_exitCommand = new Command("Exit",
+					 Command.EXIT, 30);
+			}
 		}
 		//#endif
 	}
