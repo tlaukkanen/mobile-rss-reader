@@ -40,8 +40,21 @@
  * IB 2010-09-27 1.11.5Dev9 Convert &,<,> in attributes to entities.
  * IB 2010-09-28 1.11.5Dev9 Have second body tag be an end tag.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Pass in rssFeeds.
+ * IB 2010-01-12 1.11.5Alpha15 Add ability to log for character, 
+ * IB 2010-01-12 1.11.5Alpha15 Have a constructor for existing feeds to handle future background reading of feeds.
+ * IB 2011-01-12 1.11.5Alpha15 Have replace... methods not be static.
+ * IB 2011-01-14 1.11.5Alpha15 Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
+ * IB 2011-01-14 1.11.5Alpha15 Use only EncodingStreamReader to read data instead of having a separate InputStreamReader to read with.
+ * IB 2011-01-14 1.11.5Alpha15 Have "" as empty title instead of null.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
 */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
 // Expand to define MIDP define
 //#define DMIDP20
 // Expand to define DJSR75 define
@@ -52,9 +65,11 @@
 //#define DNOSIGNED
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.XmlParser;
 import javax.microedition.io.*;
 import java.util.*;
@@ -86,8 +101,14 @@ public class OpmlParser extends FeedListParser {
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 	//#endif
     /** Constructor with url, username and password parameters. */
-    public OpmlParser(String url, String username, String password) {
-        super(url, username, password);
+    public OpmlParser(String url, String username, String password,
+			RssFeedStore rssFeeds) {
+        super(url, username, password, rssFeeds);
+    }
+    
+    /** Constructor with current feeds. */
+    public OpmlParser(RssItunesFeed[] feeds, RssFeedStore rssFeeds) {
+        super(feeds, rssFeeds);
     }
     
     /** Parse OPML list */
@@ -97,6 +118,19 @@ public class OpmlParser extends FeedListParser {
         
         /** Initialize XML parser and parse OPML XML */
         XmlParser  parser = new XmlParser(is);
+		//#ifdef DTEST
+		//#ifdef DLOGGING
+//@		if (m_logReadChar) {
+//@			parser.setLogReadChar(m_logReadChar);
+//@		}
+//@		if (m_logParseChar) {
+//@			parser.setLogChar(m_logParseChar);
+//@		}
+//@		if (m_logRepeatChar) {
+//@			parser.setLogRepeatChar(m_logRepeatChar);
+//@		}
+		//#endif
+		//#endif
         try {
             
 			// The first element is the main tag.
@@ -109,7 +143,7 @@ public class OpmlParser extends FeedListParser {
 				return null;
 			}
             
-			EncodingUtil encodingUtil = parser.getEncodingUtil();
+			EncodingUtil encodingUtil = (EncodingUtil)parser.getEncodingUtil();
             do {
 				/** RSS item properties */
 				String title = "";
@@ -126,18 +160,20 @@ public class OpmlParser extends FeedListParser {
 					
 					title = parser.getAttributeValue( "text" );
 					if (title != null) {
-						title = EncodingUtil.replaceAlphaEntities(title);
+						title = encodingUtil.replaceAlphaEntities(title);
 						// No need to convert from UTF-8 to Unicode using replace
 						// umlauts now because it is done with new String...,encoding.
 
 						// Replace numeric entities including &#8217;, &#8216;
 						// &#8220;, and &#8221;
-						title = EncodingUtil.replaceNumEntity(title);
+						title = encodingUtil.replaceNumEntity(title);
 
 						// Replace special chars like left quote, etc.
 						// Since we have already converted to unicode, we want
 						// to replace with uni chars.
 						title = encodingUtil.replaceSpChars(title);
+					} else {
+						title = "";
 					}
 					/** 
 					 * Create new RSS item and add it do RSS document's item
@@ -170,7 +206,7 @@ public class OpmlParser extends FeedListParser {
 					// Allow null title so that it can be retrieved from
 					// the feed title
 					if (( m_feedNameFilter.length() > 0) &&
-						(title != null) &&
+						(title.length() != 0) &&
 						(title.toLowerCase().indexOf(m_feedNameFilter) < 0)) {
 						continue;
 					}
@@ -179,7 +215,7 @@ public class OpmlParser extends FeedListParser {
 						continue;
 					}
 					//#ifdef DLOGGING
-//@					if (warningLoggable && (title == null)) {logger.warning("parseFeeds warning null title for link=" + link);}
+//@					if (warningLoggable && (title.length() == 0)) {logger.warning("parseFeeds warning null title for link=" + link);}
 					//#endif
 					RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 					//#ifdef DITUNES
@@ -235,3 +271,4 @@ public class OpmlParser extends FeedListParser {
 		//#endif
     
 }
+//#endif
