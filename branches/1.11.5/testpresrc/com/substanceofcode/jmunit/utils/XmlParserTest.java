@@ -26,8 +26,15 @@
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Allow logging of characters read once or repeatedly.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -36,6 +43,7 @@
 @DLOGDEF@
 
 //#ifdef DJMTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.jmunit.utils;
 
 import java.io.ByteArrayInputStream;
@@ -47,8 +55,6 @@ import com.substanceofcode.utils.SgmlParserIntr;
 import com.substanceofcode.rssreader.businesslogic.ExtParser;
 
 import com.substanceofcode.jmunit.utils.XmlRequest;
-import jmunit.framework.cldc10.TestCase;
-
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
 final public class XmlParserTest extends BaseTestCase
@@ -57,10 +63,12 @@ final public class XmlParserTest extends BaseTestCase
 	//#ifdef DTEST
 	//#ifdef DLOGGING
 	private boolean logParseChar = traceLoggable; // or traceLoggable
+	private boolean logReadChar = traceLoggable; // or traceLoggable
 	private boolean logParseXmlElemChar = traceLoggable; // or traceLoggable
 	private boolean logNameChar = false;
 	private boolean logTextChar = false;
 	private boolean logAttrChar = false;
+	private boolean logRepeatChar = traceLoggable; // or traceLoggable
 	//#endif
 	//#endif
 
@@ -90,9 +98,9 @@ final public class XmlParserTest extends BaseTestCase
 		}
 	}
 
-	public void testXmlParse1() throws Throwable {
-		String mname = "testXmlParse1";
-	String[] xmlStrings = {"<!DOCTYPE chapter PUBLIC \"-//OASIS//DTD DocBook XML//EN\"",
+	static public String[] getXmlParseData1() {
+		return new String[]
+		{"<!DOCTYPE chapter PUBLIC \"-//OASIS//DTD DocBook XML//EN\"",
           "\"../dtds/chapter.dtd\">",
 		"<?xml version=\"1.0\" encoding=\"utf-8\"?>",
 			"<?xml-stylesheet href=\"http://feeds.feedburner.com/~d/styles/rss2full.xsl\" type=\"text/xsl\" media=\"screen\"?>",
@@ -123,6 +131,12 @@ final public class XmlParserTest extends BaseTestCase
 			"</item>",
 			"</channel>",
 			"</rss>"};
+
+	}
+
+	public void testXmlParse1() throws Throwable {
+		String mname = "testXmlParse1";
+		String[] xmlStrings = getXmlParseData1();
 
 		Object [] xmlRequests = new Object[] {XmlRequest.IGET_PARSE, // doctype
 		XmlRequest.IGET_PARSE, // prologue
@@ -182,9 +196,9 @@ final public class XmlParserTest extends BaseTestCase
 				xmlResults);
 	}
 
-	public void testXmlParse2() throws Throwable {
-		String mname = "testXmlParse2";
-	String[] xmlStrings = {"<!DOCTYPE\nchapter PUBLIC \"-//OASIS//DTD DocBook XML//EN\"",
+	static public String[] getXmlParseData2() {
+		return new String[]
+			{"<!DOCTYPE\nchapter PUBLIC \"-//OASIS//DTD DocBook XML//EN\"",
           "\"../dtds/chapter.dtd\">",
 		"<?xml version=\"1.0\" encoding=\"utf-8\"?>",
 			"<?xml-stylesheet\nhref=\"http://feeds.feedburner.com/~d/styles/rss2full.xsl\" type=\"text/xsl\" media=\"screen\"?>",
@@ -215,6 +229,11 @@ final public class XmlParserTest extends BaseTestCase
 			"</item>",
 			"</channel>",
 			"</rss>"};
+	}
+
+	public void testXmlParse2() throws Throwable {
+		String mname = "testXmlParse2";
+		String[] xmlStrings = getXmlParseData2();
 
 		Object [] xmlRequests = new Object[] {XmlRequest.IGET_PARSE, // doctype
 		XmlRequest.IGET_PARSE, // prologue
@@ -274,9 +293,9 @@ final public class XmlParserTest extends BaseTestCase
 				xmlResults);
 	}
 
-	public void testXmlParse3() throws Throwable {
-		String mname = "testXmlParse3";
-	String[] xmlStrings = {"<link rel=\"canonical\" href=\"http://internet-nexus.blogspot.com/\" />",
+	static public String[] getXmlParseData3() {
+		return new String[]
+		{"<link rel=\"canonical\" href=\"http://internet-nexus.blogspot.com/\" />",
 		"<meta http-equiv=\"refresh\" content=\"30;url=http://internet-nexus.blogspot.com/\" />",
 		"<!DOCTYPE\nchapter PUBLIC \"-//OASIS//DTD DocBook XML//EN\"",
           "\"../dtds/chapter.dtd\">",
@@ -309,6 +328,11 @@ final public class XmlParserTest extends BaseTestCase
 			"</item>",
 			"</channel>",
 			"</rss>"};
+	}
+
+	public void testXmlParse3() throws Throwable {
+		String mname = "testXmlParse3";
+		String[] xmlStrings = getXmlParseData3();
 
 		Object [] xmlRequests = new Object[] {
 		XmlRequest.IGET_PARSE_XML_ELEMENT, XmlRequest.IGET_NAME, // rss
@@ -379,6 +403,19 @@ final public class XmlParserTest extends BaseTestCase
 			XmlParser parser = new XmlParser(
 						new ByteArrayInputStream(
 							xmlsb.toString().getBytes(enc)));
+			//#ifdef DTEST
+			//#ifdef DLOGGING
+			if (logReadChar) {
+				parser.setLogReadChar(logReadChar);
+			}
+			if (logParseChar) {
+				parser.setLogChar(logParseChar);
+			}
+			if (logRepeatChar) {
+				parser.setLogRepeatChar(logRepeatChar);
+			}
+			//#endif
+			//#endif
 			int i = 0;
 			int parseReq = ((Integer)xmlRequests[i]).intValue();
 			//#ifdef DTEST
@@ -399,11 +436,11 @@ final public class XmlParserTest extends BaseTestCase
 			//#ifdef DLOGGING
 			if (parseReq == XmlRequest.GET_PARSE) {
 				if (logParseChar) {
-					parser.setLogChar(false);
+					parser.setLogChar(logRepeatChar);
 				}
 			} else {
 				if (logParseXmlElemChar) {
-					parser.setLogChar(false);
+					parser.setLogChar(logRepeatChar);
 				}
 			}
 			//#endif
@@ -436,7 +473,7 @@ final public class XmlParserTest extends BaseTestCase
 						//#ifdef DTEST
 						//#ifdef DLOGGING
 						if (logParseChar) {
-							parser.setLogChar(false);
+							parser.setLogChar(logRepeatChar);
 						}
 						//#endif
 						//#endif
@@ -460,7 +497,7 @@ final public class XmlParserTest extends BaseTestCase
 						//#ifdef DTEST
 						//#ifdef DLOGGING
 						if (logParseChar) {
-							parser.setLogChar(false);
+							parser.setLogChar(logRepeatChar);
 						}
 						//#endif
 						//#endif
@@ -536,7 +573,7 @@ final public class XmlParserTest extends BaseTestCase
 						//#ifdef DTEST
 						//#ifdef DLOGGING
 						if (logAttrChar) {
-							parser.setLogChar(false);
+							parser.setLogChar(logRepeatChar);
 						}
 						//#endif
 						//#endif
@@ -559,7 +596,7 @@ final public class XmlParserTest extends BaseTestCase
 						//#ifdef DTEST
 						//#ifdef DLOGGING
 						if (logTextChar) {
-							parser.setLogChar(false);
+							parser.setLogChar(logRepeatChar);
 						}
 						//#endif
 						//#endif
@@ -582,7 +619,7 @@ final public class XmlParserTest extends BaseTestCase
 						//#ifdef DTEST
 						//#ifdef DLOGGING
 						if (logNameChar) {
-							parser.setLogChar(false);
+							parser.setLogChar(logRepeatChar);
 						}
 						//#endif
 						//#endif
@@ -606,4 +643,5 @@ final public class XmlParserTest extends BaseTestCase
 	}
 
 }
+//#endif
 //#endif
