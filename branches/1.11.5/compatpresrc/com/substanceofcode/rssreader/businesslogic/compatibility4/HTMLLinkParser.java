@@ -24,6 +24,8 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of EncodingUtil and EncodingStreamReader.
+ * IB 2010-11-29 1.11.5Dev9 Allow using fixup to stop if tagName is empty.
  */
 
 // Expand to define logging define
@@ -46,7 +48,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
-import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.compatibility4.EncodingUtil;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
 import net.sf.jlogmicro.util.logging.LogManager;
@@ -63,6 +65,8 @@ import net.sf.jlogmicro.util.logging.Level;
  * @author Irving Bunton
  */
 public class HTMLLinkParser extends FeedListParser {
+
+	private boolean fixup = false;
     
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("compatibility4.HTMLLinkParser");
@@ -82,7 +86,8 @@ public class HTMLLinkParser extends FeedListParser {
 			return HTMLLinkParser.parseFeeds(new EncodingUtil(is),
 											m_url,
 											m_feedNameFilter,
-											m_feedURLFilter
+											m_feedURLFilter,
+											fixup
 											//#ifdef DLOGGING
 											,logger
 											,fineLoggable
@@ -102,7 +107,8 @@ public class HTMLLinkParser extends FeedListParser {
     static public RssItunesFeedInfo[] parseFeeds(EncodingUtil encodingUtil,
 										String url,
 										String feedNameFilter,
-										String feedURLFilter
+										String feedURLFilter,
+										boolean fixup
 										//#ifdef DLOGGING
 										,Logger logger,
 										 boolean fineLoggable,
@@ -149,6 +155,9 @@ public class HTMLLinkParser extends FeedListParser {
 				String link = "";
 												
 				String tagName = parser.getName();
+				if (fixup && (tagName.length() == 0)) {
+					break;
+				}
 				//#ifdef DLOGGING
 				if (finerLoggable) {logger.finer("parseFeeds tagname: " + tagName);}
 				//#endif
