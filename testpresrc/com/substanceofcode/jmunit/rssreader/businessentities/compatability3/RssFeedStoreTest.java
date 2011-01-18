@@ -23,6 +23,8 @@
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-12 1.11.5Alpha15 Limit lenght of feed string logged to 80.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
  */
 
 // Expand to define test define
@@ -41,7 +43,7 @@ package com.substanceofcode.jmunit.rssreader.businessentities.compatibility3;
 import java.util.Date;
 import java.util.Vector;
 
-import jmunit.framework.cldc10.TestCase;
+import com.substanceofcode.utils.MiscUtil;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
@@ -380,7 +382,7 @@ final public class RssFeedStoreTest extends BaseTestCase {
 				com.substanceofcode.rssreader.businessentities.RssItunesFeed.deserialize(
 								modifyCapable, encoded, storeString);
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("storeStringTestSub " + mname + " nfeed=" + nfeed);}
+			if (finestLoggable) {logger.finest("storeStringTestSub " + mname + " nfeed=" + MiscUtil.toString(nfeed, false, 80));}
 			//#endif
 			assertEquals(mname + " new feed items = 0", 0,
 					nfeed.getItems().size());
