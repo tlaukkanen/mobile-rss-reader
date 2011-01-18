@@ -27,6 +27,7 @@
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-15 1.11.5Dev14 Remove redundant new String of literal string.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
 */
 
 // Expand to define memory size define
@@ -51,7 +52,6 @@ import com.substanceofcode.utils.SgmlParserIntr;
 import com.substanceofcode.rssreader.businesslogic.ExtParser;
 
 import com.substanceofcode.jmunit.utils.XmlRequest;
-import jmunit.framework.cldc10.TestCase;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
