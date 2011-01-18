@@ -26,10 +26,16 @@
  * IB 2010-05-28 1.11.5RC2 Code cleanup.
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
  */
 
 // Expand to define memory size define
 @DMEMSIZEDEF@
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -37,15 +43,15 @@
 // Expand to define logging define
 @DLOGDEF@
 
+//#ifdef DFULLVERS
 //#ifndef DSMALLMEM
 //#ifdef DJMTEST
 package com.substanceofcode.jmunit.rssreader.businesslogic;
 
 import java.util.Date;
 
-import jmunit.framework.cldc10.TestCase;
-
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 //#ifndef DSMALLMEM
 import com.substanceofcode.rssreader.businesslogic.HTMLLinkParser;
 //#endif
@@ -82,6 +88,9 @@ implements Observer
 	//#ifdef DMIDP20
 	public void changed(Observable observable, Object arg) {
 		ready = true;
+		synchronized(this) {
+			super.notifyAll();
+		}
 	}
 	//#endif
 
@@ -93,7 +102,7 @@ implements Observer
 	public void testHtmlLinkParse1() throws Throwable {
 		String mname = "testHtmlLinkParse1";
 		HTMLLinkParser htmlParser = new HTMLLinkParser(
-				"jar:///test-a-href-html.html", "", "");
+				"jar:///test-a-href-html.html", "", "", new RssFeedStore());
 		RssItunesFeed[] cmpRssFeeds = new RssItunesFeed[] {
 			new RssItunesFeed("Test 1 href link with img (closed) tag",
 					"jar:///link1.xml", "", ""),
@@ -129,10 +138,14 @@ implements Observer
 			//#ifdef DMIDP20
 			while (!isReady()) {
 				synchronized(this) {
-					wait(1000L);
+					wait(500L);
 				}
 			}
 			//#else
+			synchronized(this) {
+				Thread.yield;
+				Thread.sleep(5000L);
+			}
 			htmlParser.join();
 			//#endif
 			RssItunesFeed[] rssfeeds = htmlParser.getFeeds();
@@ -158,5 +171,6 @@ implements Observer
 	}
 
 }
+//#endif
 //#endif
 //#endif
