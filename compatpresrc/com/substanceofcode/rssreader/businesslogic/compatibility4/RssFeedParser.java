@@ -28,6 +28,8 @@
  * IB 2010-06-29 1.11.5RC2 Use compatibility observer pattern.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of EncodingUtil and EncodingStreamReader.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of CauseException and EncodingStreamReader.
 */
 
 // Expand to define MIDP define
@@ -54,9 +56,9 @@ import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
 
-import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.compatibility4.EncodingUtil;
 import com.substanceofcode.rssreader.businesslogic.SgmlFormatParser;
-import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.compatibility4.CauseException;
 //#ifdef DMIDP20
 import net.eiroca.j2me.observable.compatibility4.Observable;
 import net.eiroca.j2me.observable.compatibility4.ObserverManager;
