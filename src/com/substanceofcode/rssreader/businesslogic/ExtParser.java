@@ -27,12 +27,18 @@
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
  * IB 2010-07-28 1.11.5Dev8 Don't convert entities for skipped/unused items.
  * IB 2010-09-27 1.11.5Dev8 Don't use block if not logging.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
 // Expand to define itunes define
 //#define DNOITUNES
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import java.io.IOException;
@@ -423,3 +429,4 @@ final public class ExtParser {
     }
 
 }
+//#endif
