@@ -35,21 +35,38 @@
  * IB 2010-07-04 1.11.5Dev6 Cosmetic code cleanup.
  * IB 2010-07-04 1.11.5Dev6 Use null pattern using nullPtr.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this is it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Save the old rss feed names to know if updating or adding apps.
+ * IB 2011-01-14 1.11.5Alpha15 Have update/refresh all feeds for future background processing.
+ * IB 2011-01-14 1.11.5Alpha15 Have override flag for future background processing.
+ * IB 2011-01-14 1.11.5Alpha15 Handle updating existing feeds or parsing and updating/adding feeds.
+ * IB 2011-01-14 1.11.5Alpha15 Use procIoExc to process exception handling for IO and other exceptions including out of memory.
+ * IB 2011-01-14 1.11.5Alpha15 More logging.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-14 1.11.5Alpha15 Log change to m_feedURLFilter.
+ * IB 2011-01-14 1.11.5Alpha15 Cosmetic.
 */
 // Expand to define MIDP define
 @DMIDPVERS@
 // Expand to define memory size define
 @DMEMSIZEDEF@
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
 @DLOGDEF@
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 //#ifndef DSMALLMEM
 import com.substanceofcode.utils.HTMLParser;
 //#endif
@@ -73,7 +90,7 @@ import net.sf.jlogmicro.util.logging.Level;
  *
  * @author Tommi Laukkanen
  */
-public abstract class FeedListParser extends URLHandler
+public abstract class FeedListParser
 implements
 //#ifdef DMIDP20
 			Observable,
@@ -87,16 +104,23 @@ implements
 	protected String m_url;
 	protected String m_username;
 	protected String m_password;
+	protected URLHandler urlHandler;
+	RssFeedStore m_oldRssFeeds;
+	Hashtable m_oldRssNames;
 	protected String m_feedNameFilter = "";
 	protected String m_feedURLFilter = "";
 	protected boolean m_getFeedTitleList = false;
+	protected boolean m_getAllFeedList = false;
+	protected boolean m_getAllUpdFeedList = false;
 	protected boolean m_useFeedUrlList = false;
+	protected boolean m_override = false;  // The noticy flag for override
 	//#ifndef DSMALLMEM
 	protected boolean m_redirectHtml = false;
 	//#endif
 	protected RssItunesFeed[] m_feeds;
+    final private boolean m_needParse;
     private boolean m_successfull = false;
-    private CauseException m_ex = null;
+    private Exception m_ex = null;
     private boolean m_redirect = false;  // The RSS feed is redirected
 	//#ifdef DMIDP20
     private ObservableHandler observableHandler = null;
@@ -105,16 +129,43 @@ implements
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("FeedListParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    volatile protected boolean m_logChar    = false; // Log characters use traceLoggable
+    volatile protected boolean m_logParseChar = false; // Log characters use traceLoggable
+    volatile protected boolean m_logRepeatChar = false; // Log characters use traceLoggable
+    volatile protected boolean m_logReadChar = false; // Log characters use traceLoggable
 	//#endif
 
     /** Creates a new instance of FeedListParser */
-    public FeedListParser(String url, String username, String password) {
-		super();
+    public FeedListParser(String url, String username, String password,
+			RssFeedStore rssFeeds) {
+		urlHandler = new URLHandler();
+		m_needParse = true;
+		RssFeedStore[] arrFeeds = rssFeeds.copyFeeds();
+		m_oldRssFeeds = (RssFeedStore)arrFeeds[0];
+		m_oldRssNames = arrFeeds[1];
         m_parsingThread = MiscUtil.getThread(this, "FeedListParser", this,
 				"constructor");
 		m_url = url;
 		m_username = username;
 		m_password = password;
+		//#ifdef DMIDP20
+		observableHandler = new ObservableHandler();
+		//#endif
+    }
+    
+    /** Creates a new instance of FeedListParser */
+    public FeedListParser(RssItunesFeed[] feeds, RssFeedStore rssFeeds) {
+		urlHandler = null;
+		m_needParse = false;
+		RssFeedStore[] arrFeeds = rssFeeds.copyFeeds();
+		m_oldRssFeeds = (RssFeedStore)arrFeeds[0];
+		m_oldRssNames = arrFeeds[1];
+        m_parsingThread = MiscUtil.getThread(this, "FeedListParser", this,
+				"constructor");
+		m_url = null;
+		m_username = null;
+		m_password = null;
+		m_feeds = feeds;
 		//#ifdef DMIDP20
 		observableHandler = new ObservableHandler();
 		//#endif
@@ -145,84 +196,137 @@ implements
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("Thread running=" + MiscUtil.getThreadInfo(m_parsingThread));}
 			//#endif
-            if ((m_feeds = parseFeeds()) == null) {
+            if (m_needParse && (((m_feeds = parseFeeds()) == null) || (m_feeds.length == 0))) {
 				m_successfull = false;
 				m_ex = new CauseException("Invalid or empty import file " +
 						m_url);
 				return;
-			} else if (m_getFeedTitleList || m_useFeedUrlList) {
+			} else if (m_getFeedTitleList || m_getAllFeedList ||
+					m_getAllUpdFeedList || m_useFeedUrlList) {
 				for(int feedIndex=0; feedIndex<m_feeds.length; feedIndex++) {
-					String name = m_feeds[feedIndex].getName();
-					if ((name == null) || (name.length() == 0)) {
-						RssItunesFeed feed = m_feeds[feedIndex];
-						if (m_useFeedUrlList) {
-							feed.setName(feed.getUrl());
-						} else {
-							RssFeedParser fparser = new RssFeedParser( feed );
-							if (m_loadForm != null) {
-								m_loadForm.appendMsg("Loading title from " +
-											feed.getUrl());
+					RssItunesFeed feed = m_feeds[feedIndex];
+					String name = feed.getName();
+					String oldname;
+					if ((name.length() == 0) && m_useFeedUrlList) {
+						name = feed.getUrl();
+						feed.setName(name);
+					}
+					boolean hasNoName = (name.length() == 0);
+					if (hasNoName) {
+						oldname = (String)m_oldRssNames.get(feed.getUrl());
+						if (oldname == null) {
+							oldname = "";
+						} else if ((oldname.length() > 0)) {
+							name = oldname;
+							hasNoName = false;
+						}
+					} else {
+						oldname = name;
+					}
+					RssItunesFeed oldfeed = ((oldname.length() > 0) ?
+							m_oldRssFeeds.get(oldname) : null);
+					boolean pres = ((name.length() != 0) &&
+							oldname.equals(name) && (oldfeed != null));
+					if (pres && !m_getAllFeedList && !m_override) {
+						CauseException ce = new CauseException("Error:  Feed " +
+								"already exists with name " + name +
+								".  Existing feed not updated.  " +
+								"Use override in place to override an existing " +
+								"feed with an old feed with the same name.");
+						if (m_loadForm != null) {
+							m_loadForm.addExc(ce.getMessage(), ce);
+						}
+						//#ifdef DLOGGING
+						logger.severe("FeedListParser.run(): No override", ce);
+						//#endif
+						continue;
+					} else if (((name.length() == 0) && m_getFeedTitleList) ||
+								((name.length() != 0) && !pres) ||
+								(pres && (m_getAllFeedList || m_override))) {
+						if (pres && (m_loadForm != null)) {
+							m_loadForm.appendNote(
+									"Overriding existing feed with the one from " +
+									"import feed name " + name);
+						}
+						RssFeedParser fparser = new RssFeedParser( feed,
+								oldfeed, m_getAllUpdFeedList && pres);
+						if (m_loadForm != null) {
+							if (name.length() == 0) {
+								m_loadForm.appendMsg(
+										"Loading title for name from " +
+										feed.getUrl());
+							} else {
+								m_loadForm.appendMsg("Loading feed from " +
+										feed.getUrl());
 							}
-							//#ifdef DLOGGING
-							logger.finest("Getting title for url=" + feed.getUrl());
-							//#endif
-							fparser.setGetTitleOnly(true);
-							/** Get RSS feed */
-							try {
-								fparser.parseRssFeed( false, m_maxItemCount );
-								m_feeds[feedIndex] = fparser.getRssFeed();
+						}
+						//#ifdef DLOGGING
+						logger.finest((m_getFeedTitleList ?
+									"Getting title for url=" :
+									(m_getAllUpdFeedList ?
+									 "Updating feed for url=" :
+								"Getting feed for url=")) +
+								feed.getUrl());
+						//#endif
+						fparser.setGetTitleOnly(m_getFeedTitleList);
+						/** Get RSS feed */
+						try {
+							fparser.parseRssFeed( m_getAllUpdFeedList,
+									m_maxItemCount );
+							feed = fparser.getRssFeed();
+							if ((name.length() == 0) &&
+								(oldname.length() != 0) && 
+									feed.getName().equals(oldname)) {
 								if (m_loadForm != null) {
-									m_loadForm.appendMsg("ok\n");
+									m_loadForm.appendNote(
+										"Loaded title/name matches existing name, " +
+										name);
 								}
-							} catch(Exception ex) {
-								if (m_loadForm != null) {
-									m_loadForm.recordExcForm("Error loading title for feed " +
-											feed.getUrl(), ex);
+								if (!m_getAllFeedList && !m_override) {
+									CauseException ce = new CauseException(
+											"Error:  Feed " +
+											"already exists with name " + name +
+											".  Existing feed not updated.  " +
+											"Use override in place to override an existing " +
+											"feed with an old feed with the same name.");
+									if (m_loadForm != null) {
+										m_loadForm.addExc(ce.getMessage(), ce);
+									}
+									continue;
 								}
+								oldfeed = ((oldname != null) ?
+										m_oldRssFeeds.get(oldname) : null);
+								pres = true;
+							}
+							if (pres) {
+								feed.checkPresRead(m_getAllUpdFeedList,
+										oldfeed);
+							}
+							m_feeds[feedIndex] = feed;
+							if (m_loadForm != null) {
+								m_loadForm.appendMsg("ok\n");
+							}
+						} catch(Exception ex) {
+							if (m_loadForm != null) {
+								m_loadForm.recordExcForm(
+										"Error loading title for feed " +
+										feed.getUrl(), ex);
 							}
 						}
 					}
 				}
 			}
 			m_successfull = true;
-        } catch( IOException ex ) {
-			//#ifdef DLOGGING
-			logger.severe("FeedListParser.run(): Error while parsing " +
-					      "feeds: " + m_url, ex);
-			//#endif
-            // TODO: Add exception handling
-            System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
-			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
-        } catch( Exception ex ) {
-			//#ifdef DLOGGING
-			logger.severe("FeedListParser.run(): Error while parsing " +
-					      "feeds: " + m_url, ex);
-			//#endif
-            // TODO: Add exception handling
-            System.err.println("FeedListParser.run(): Error while parsing feeds: " + ex.toString());
-			m_ex = new CauseException("Error while parsing feed " + m_url, ex);
-        } catch( OutOfMemoryError t ) {
-			System.gc();
-			// Save memory by releasing it.
-			m_feeds = (RssItunesFeed[])nullPtr;
-			//#ifdef DLOGGING
-			logger.severe("FeedListParser.run(): Out Of Memory Error while " +
-					"parsing feeds: " + m_url, t);
-			//#endif
-            // TODO: Add exception handling
-            System.err.println("FeedListParser.run(): " +
-					"Out Of Memory Error while parsing feeds: " + t.toString());
-			m_ex = new CauseException("Out Of Memory Error while parsing " +
-					"feed " + m_url, t);
-        } catch( Throwable t ) {
-			//#ifdef DLOGGING
-			logger.severe("FeedListParser.run(): Error while parsing " +
-					      "feeds: " + m_url, t);
-			//#endif
-            // TODO: Add exception handling
-            System.err.println("FeedListParser.run(): Error while parsing feeds: " + t.toString());
-			m_ex = new CauseException("Internal error while parsing feed " +
-									  m_url, t);
+        } catch( Throwable e ) {
+			m_ex = URLHandler.procIoExc("Error while parsing import data ", e,
+					false, m_url,
+					"Out of memory error while parsing import data ",
+					"Internal error while parsing import data ",
+					"run()", m_loadForm
+					//#ifdef DLOGGING
+					,logger
+					//#endif
+					);
         } finally {
 			//#ifdef DMIDP20
 			MiscUtil.removeThread(m_parsingThread);
@@ -245,11 +349,14 @@ implements
     public RssItunesFeed[] parseFeeds() throws IOException, Exception {
         
 		try {
-			super.handleOpen(m_url, m_username, m_password, false, false, null,
-					"");
-			if (m_needRedirect) {
-				m_needRedirect = false;
-				m_feeds = parseHeaderRedirect(m_location);
+			urlHandler.handleOpen(m_url, m_username, m_password, false, false,
+					null, "",
+					"Error while parsing import data ",
+					"Out of memory error while parsing import data ",
+					"Internal error while parsing import data ");
+			if (urlHandler.m_needRedirect) {
+				urlHandler.m_needRedirect = false;
+				m_feeds = parseHeaderRedirect(urlHandler.m_location);
 				return m_feeds;
 			}
 
@@ -258,46 +365,27 @@ implements
 			if (fineLoggable) {logger.fine("m_redirectHtml=" + m_redirectHtml);}
 			//#endif
 			// If we find HTML, usually it is redirection
-			if (m_redirectHtml && HTMLParser.isHtml(m_contentType)) {
+			if (m_redirectHtml && HTMLParser.isHtml(urlHandler.m_contentType)) {
 				return parseHTMLRedirect();
 			} else {
 			//#endif
-				return parseFeeds(m_inputStream);
+				return parseFeeds(urlHandler.m_inputStream);
 			//#ifndef DSMALLMEM
 			}
 			//#endif
-        } catch(Exception e) {
-			//#ifdef DLOGGING
-			logger.severe("Import error with " + m_url, e);
-			//#endif
-			if ((m_url != null) && m_url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-            throw new CauseException("Error while parsing import data: " 
-                    + e.toString(), e);
-        } catch(OutOfMemoryError t) {
-			// Save memory by releasing it.
-			m_feeds = (RssItunesFeed[])nullPtr;
-			System.gc();
-			//#ifdef DLOGGING
-			logger.severe("Out Of Memory Error with " + m_url, t);
-			//#endif
-			if ((m_url != null) && m_url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-            throw new CauseException("Out Of Memory Error while parsing RSS " +
-					"data", t);
-        } catch(Throwable t) {
-			//#ifdef DLOGGING
-			logger.severe("parseFeeds error with " + m_url, t);
-			//#endif
-			if ((m_url != null) && m_url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-            throw new CauseException("Internal error while parsing RSS data",
-									 t);
+        } catch(Throwable e) {
+			Exception ex = URLHandler.procIoExc("Error while parsing import data ", e,
+					false, m_url,
+					"Out of memory error while parsing import data ",
+					"Internal error while parsing import data ",
+					"parseFeeds()", m_loadForm
+					//#ifdef DLOGGING
+					,logger
+					//#endif
+					);
+			throw ex;
         } finally {
-			super.handleClose();
+			urlHandler.handleClose();
 		}
     }
     
@@ -309,12 +397,12 @@ implements
 			logger.severe("Error 2nd header redirect url:  " + newUrl);
 			//#endif
 			System.out.println("Error 2nd header redirect url " +
-					m_redirectUrl + " to 2nd redirect " + newUrl);
+					urlHandler.m_redirectUrl + " to 2nd redirect " + newUrl);
 			throw new IOException("Error 2nd header redirect url " +
-					m_redirectUrl + " to 2nd redirect " + newUrl);
+					urlHandler.m_redirectUrl + " to 2nd redirect " + newUrl);
 		}
 		m_redirect = true;
-		m_redirectUrl = m_url;
+		urlHandler.m_redirectUrl = m_url;
 		m_url = newUrl;
 		try {
 			return parseFeeds();
@@ -328,7 +416,7 @@ implements
 	private RssItunesFeed[] parseHTMLRedirect()
     throws IOException, Exception {
 		String svUrl = m_url;
-		m_url = super.parseHTMLRedirect(m_url, m_inputStream);
+		m_url = urlHandler.parseHTMLRedirect(m_url, urlHandler.m_inputStream);
 		try {
 			return parseFeeds();
 		} finally {
@@ -345,19 +433,25 @@ implements
 		} else {
 			this.m_feedNameFilter = feedNameFilter.toLowerCase();
 		}
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine("setFeedNameFilter=" + feedNameFilter);}
+		//#endif
     }
 
     public String getFeedNameFilter() {
         return (m_feedNameFilter);
     }
 
-    public void setFeedURLFilter(String feedURLFilter) {
-        if (feedURLFilter == null) {
+	public void setFeedURLFilter(String feedURLFilter) {
+		if (feedURLFilter == null) {
 			this.m_feedURLFilter = "";
 		} else {
 			this.m_feedURLFilter = feedURLFilter.toLowerCase();
 		}
-    }
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine("setFeedURLFilter=" + feedURLFilter);}
+		//#endif
+	}
 
     public String getFeedURLFilter() {
         return (m_feedURLFilter);
@@ -377,7 +471,7 @@ implements
     }
 	//#endif
 
-    public CauseException getEx() {
+    public Exception getEx() {
         return (m_ex);
     }
 
@@ -405,4 +499,41 @@ implements
         this.m_maxItemCount = maxItemCount;
     }
 
+	//#ifdef DLOGGING
+	//#ifdef DTEST
+    public void setLogChar(boolean logChar) {
+        this.m_logChar = logChar;
+    }
+
+    public boolean isLogChar() {
+        return (m_logChar);
+    }
+    public void setLogReadChar(boolean logReadChar) {
+        this.m_logReadChar = logReadChar;
+    }
+
+    public boolean isLogReadChar() {
+        return (m_logReadChar);
+    }
+
+    public void setLogParseChar(boolean logParseChar) {
+        this.m_logParseChar = logParseChar;
+    }
+
+    public boolean isLogParseChar() {
+        return (m_logParseChar);
+    }
+
+    public void setLogRepeatChar(boolean logRepeatChar) {
+        this.m_logRepeatChar = logRepeatChar;
+    }
+
+    public boolean isLogRepeatChar() {
+        return (m_logRepeatChar);
+    }
+
+	//#endif
+	//#endif
+
 }
+//#endif
