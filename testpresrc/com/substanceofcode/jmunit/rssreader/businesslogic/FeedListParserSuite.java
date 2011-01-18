@@ -24,8 +24,14 @@
  * IB 2010-05-24 1.11.5RC2 Unit test FeedListParser and subclasses.
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser and HtmlLinkParserTest in small memory MIDP 1.0 to save space.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use conditional preprocessed cldc11 code with modifications instead of cldc10 code.
  */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define memory size define
 @DMEMSIZEDEF@
 // Expand to define test define
@@ -38,20 +44,22 @@
 @DLOGDEF@
 
 //#ifdef DJMTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.jmunit.rssreader.businesslogic;
 
-import jmunit.framework.cldc10.TestSuite;
+import jmunit.framework.cldc11.TestSuite;
 
 final public class FeedListParserSuite extends TestSuite {
 
 	public FeedListParserSuite() {
 		super("FeedListParserSuite");
-		//#ifndef DSMALLMEM
-		add(new HtmlLinkParserTest());
-		//#endif
 		//#ifdef DCOMPATIBILITY
 		add(new com.substanceofcode.jmunit.rssreader.businesslogic.compatibility4.FeedListParserSuite());
 		//#endif
+		//#ifndef DSMALLMEM
+		add(new HtmlLinkParserTest());
+		//#endif
 	}
 }
+//#endif
 //#endif
