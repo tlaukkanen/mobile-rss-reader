@@ -1,6 +1,6 @@
 //--Need to modify--#preprocess
 /*
- * RssItunesFeed.java
+ * RssItunesFeedInfo.java
  *
  * Copyright (C) 2007-2008 Tommi Laukkanen
  * Copyright (C) 2007-2008 Irving Bunton
@@ -25,6 +25,7 @@
  * IB 2010-05-24 1.11.5RC2 Code cleanup.
  * IB 2010-05-24 1.11.5RC2 Add modifyItunes and toString to interface.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Allow cloning of feeds to determine if they are equal to allow determining if two items are the same to preserve their read flags.  Also, allow future background updates.
  */
 // Expand to define itunes define
 //#define DNOITUNES
@@ -90,6 +91,8 @@
 //@    String getTitle();
 //@
 //@    String toString();
+//@
+//@    Object clone();
 //@
 //@}
 //#endif
