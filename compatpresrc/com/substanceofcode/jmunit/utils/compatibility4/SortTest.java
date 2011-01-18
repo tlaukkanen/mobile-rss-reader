@@ -25,6 +25,7 @@
  * IB 2010-04-26 1.11.5RC2 Set link to "" as it's not read by previous version.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
  */
 
 // Expand to define MIDP define
@@ -42,8 +43,6 @@
 package com.substanceofcode.jmunit.utils.compatibility4;
 
 import java.util.Date;
-
-import jmunit.framework.cldc10.TestCase;
 
 import com.substanceofcode.utils.compatibility4.SortUtil;
 import com.substanceofcode.utils.compatibility4.CauseException;
