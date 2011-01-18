@@ -1,11 +1,12 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
 #-- IB 2010-10-21 1.11.5Dev11 Have required and optional permissions.
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
 wtk.midp.version = 2.0
 file.nbr.midp2.0 = 20
 PERMISSIONS_REQ.midp2.0 = javax.microedition.io.Connector.http
 PERMISSIONS_OPT.midp2.0 = javax.microedition.io.Connector.https
 DMIDPVERS = DMIDP${file.nbr.midp2.0}
 JMIDPVERS = MIDP-2.0
-file.prefix.midp2.0 = midp${file.nbr.midp2.0}_
+file.prefix.midp2.0 = ${sfile.prefix.midp2.0}_
 bin.midp2.0 = bin${file.nbr.midp2.0}
 SUFFIXVERS.midp2.0 = midp2.0
