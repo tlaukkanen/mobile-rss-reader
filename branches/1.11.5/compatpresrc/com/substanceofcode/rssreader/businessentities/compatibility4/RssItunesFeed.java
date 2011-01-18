@@ -27,6 +27,7 @@
  * IB 2010-05-29 1.11.5RC2 Check explicit with toLowerCase().
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Alpha15 Have clone to help with future background updating of feeds.
  */
 
 // Expand to define itunes define
@@ -433,5 +434,11 @@ implements RssItunesFeedInfo
     public String getTitle() {
         return (m_title);
     }
+
+	//#ifdef DTEST
+    public Object clone() {
+		return new RssItunesFeed(this);
+	}
+	//#endif
 
 }
