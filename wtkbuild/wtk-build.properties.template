@@ -33,6 +33,10 @@
 #-- IB 2010-11-14 1.11.5Dev14 Allow use of microemulator as applet.
 #-- IB 2010-11-14 1.11.5Dev14 Use substanceofcode for info url for signed.
 #-- IB 2010-11-16 1.11.5Dev14 Use PMD (use.pmd.task) and/or CPD (use.cpd.task).
+#-- IB 2011-01-14 1.11.5Alpha15 Use OPT_TOOLS environment var for opt.tools.
+#-- IB 2011-01-14 1.11.5Alpha15 Add bean shell properties (not used).
+#-- IB 2011-01-14 1.11.5Alpha15 Add option to use Netbeans workspace env var for wtk.home property.
+#-- IB 2011-01-14 1.11.5Alpha15 Use properties to make build file more standard for any project.
 
 #windows.drive = C:
 windows.drive = 
@@ -42,7 +46,8 @@ windows.ext =
 #Change for windows
 windows.os = false
 #opt.tools = ${windows.drive}/opt/tools
-opt.tools = /home/irvbopt/opt/tools
+opt.tools = ${env.OPT_TOOLS}
+
 #antenna.home = ${ext.drive}/mostdownloads/j2me/sourceforge/antenna
 antenna.home = ${opt.tools}/antenna
 #antenna.jar = antenna-bin-0.9.15-beta.jar
@@ -53,6 +58,8 @@ antenna.home = ${opt.tools}/antenna
 #antenna.jar = antenna-bin-1.1.0-beta.jar
 #antenna-bin-1.1.0-beta.jar
 antenna.jar = antenna-bin-1.2.1-beta.jar
+beanshell.home = ${opt.tools}/bsh-2.0b4
+beanshell.jar = bsh-2.0b4.jar
 #antcontrib.home = ${ext.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
 #antcontrib.home = ${windows.drive}/mostdownloads/gnu/sourceforge/ant-contrib/ant-contrib
 antcontrib.home = ${opt.tools}/ant-contrib/ant-contrib
@@ -89,6 +96,7 @@ jar.jde.home = ${jde.home.path}
 bb.ant.tools.home = ${opt.tools}/bb-ant-tools/bb-ant-tools-1.2.8
 bb.ant.tools.jar = bb-ant-tools.jar
 bb.jde.use = false
+bb.sleep = 2
 #wine = /usr/bin/wine
 #svn.path = C:\\cygwin\\bin\\
 svn.path = /usr/bin/
@@ -96,10 +104,11 @@ svn.pgm = ${svn.path}svn${windows.ext}
 #wtk.home = C:/opt/WTK2.5.1
 #wtk.home = ${windows.drive}/WTK2.5.2_01
 #wtk.home = ${opt.tools}/WTK2.5.2${wtk252}
-wtk.home = ${windows.drive}${env.WTK_HOME}
+#wtk.home = ${windows.drive}${env.WTK_HOME}
 #For Netbeans
 #wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
 #wtk.home = /usr/local/netbeans-6.7.1/mobility8/WTK2.5.2
+wtk.home = ${env.NETBEANS_WTK_HOME}
 
 #wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #wtk.proguard.home = ${windows.drive}/opt/tools/proguard/proguard4.2
@@ -137,30 +146,31 @@ path.emulator.jar=${emulator.home}/${emulator.jar}
 emulator.class=org.microemu.app.Main
 wtk.encoding = UTF-8
 original.author = Tommi Laukkanen
-tommi.vendor = ${original.author}
+original.vendor = ${original.author}
 yinlight.vendor = Yinlight, LLC
 midlet.name = RssReaderMIDlet
 midlet.package = com.substanceofcode.rssreader
 midlet.class = ${midlet.package}.presentation.${midlet.name}
+src.module.name = mobile-rss-reader
+project.name = RSSReader
+release.name = ${project.name}
+project.file.prefix = rssreader
 logging.package = net.sf.jlogmicro.util.logging
 obfuscate.classes = ${midlet.class},${logging.package}.ConsoleHandler,${logging.package}.FormHandler,${logging.package}.RecStoreHandler,${logging.package}.SimpleFormatter
-tommi.project.info.url = http://www.substanceofcode.com
-yinlight.project.info.url = ${tommi.project.info.url}
-yinlight.rootdir = html/mobile-rss-reader/downloads
+original.project.info.url = http://www.substanceofcode.com
+yinlight.project.info.url = ${original.project.info.url}
+yinlight.rootdir = html/${src.module.name}/downloads
 sourceforge.project = mobilerssreader
 sourceforge.project.first = m
 sourceforge.project.first2 = mo
 sourceforge.rootdir = /home/frs/project/${sourceforge.project.first}/${sourceforge.project.first2}/${sourceforge.project}/${sourceforge.project}
 project.test.url = http://${sourceforge.project}.sourceforge.net/testdata
 file.test.url = file:///root1/testdata
-project.name = RSSReader
-release.name = ${project.name}
-project.file.prefix = rssreader
 midlet.home = ${wtk.home}/apps/${project.name}
 prc.creater = MRSS
 project.description = RSS/News/Blog Reader
 prc.longname = ${project.description}
-MIDLETURL_ROOT = http://mobile-rss-reader.googlecode.com/files
+MIDLETURL_ROOT = http://${src.module.name}.googlecode.com/files
 thawte.tsa.url = http://tsa.starfieldtech.com/
 separator = /
 MIDLETVERSROOT = 1.11.5
@@ -172,8 +182,9 @@ FMIDLETVERSROOT = 1_11_5
 #? lib = lib
 #Compile source dir generted by non-preprocessed source and generted source
 #(if needed)
-#comp.src = ${target}/mobile-rss-reader/1.11.1/src
-comp.src = ${target}/mobile-rss-reader/src
+#comp.src = ${target}/${src.module.name}/1.11.1/src
+comp.src = ${target}/${src.module.name}/src
+comp.src.file = ${target}/${src.module.name}/filesrc
 #comp.src = released/src
 presrc = ../presrc
 #Copy unpreprocessed source to compile src dir.
@@ -199,11 +210,10 @@ wtk.src = ${env.j2mewtk}/${project.name}/src
 zipdir = ../zipedsrc
 need.svn.preprocessed = true
 #svn.home = C:\\PROGRA~1\\COLLAB~1
-#svn.url =  https://mobile-rss-reader.googlecode.com/svn/trunk/
-svn.src =  mobile-rss-reader
+#svn.url =  https://${src.module.name}.googlecode.com/svn/trunk/
+svn.src =  ${src.module.name}
 svn.url =  http://${svn.src}.googlecode.com/svn/branches/1.11.1
 svn.user =  ibuntonjr
-BASH_EXECUTION_STRING='(set | grep -i pass) < /tmp/v576107/65 >/tmp/v576107/66 2>&1'
 svn.pass = ${env.ibuntonjr_pass}
 #Need ti distribute the SVN dirs
 app-icon = rss.png
