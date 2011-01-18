@@ -25,6 +25,7 @@
  * IB 2010-05-30 1.11.5RC2 Better logging.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Alpha15 Use RssItunesItemInfo for the item compares.
  */
 
 // Expand to define logging define
@@ -102,6 +103,7 @@ public class RssFeed implements RssFeedInfo {
 	protected Date m_upddate = null;
 	protected byte m_upddateTz = (byte)-1;
 	protected Date m_date = null;
+	protected String m_errDate = null;
 		protected String m_link = "";   // The RSS feed link
 	protected String m_etag = ""; // The RSS feed etag
 
@@ -478,14 +480,14 @@ public class RssFeed implements RssFeedInfo {
 				"m_items.size() ilen", logger, fineLoggable)) {
 				result = false;
 			}
-			RssItunesItem [] ritems = new RssItunesItem[ilen];
+			RssItunesItemInfo [] ritems = new RssItunesItemInfo[ilen];
 			if (ilen > 0) {
 				//#ifdef DLOGGING
 				if (fineLoggable) {logger.fine("equals ritems[0]=" + m_items.elementAt(0).getClass().getName());}  
 				//#endif
 				m_items.copyInto(ritems);
 			}
-			RssItemInfo [] fitems = new RssItemInfo[flen];
+			RssItunesItemInfo [] fitems = new RssItunesItemInfo[flen];
 			if (flen > 0) {
 				//#ifdef DLOGGING
 				if (fineLoggable) {logger.fine("equals fitems[0]=" + feed.getItems().elementAt(0).getClass().getName());}  
@@ -602,6 +604,14 @@ public class RssFeed implements RssFeedInfo {
 	public Date getDate() {
 		return (m_date);
 	}
+
+    public void setErrDate(String m_errDate) {
+        this.m_errDate = m_errDate;
+    }
+
+    public String getErrDate() {
+        return (m_errDate);
+    }
 
 }
 //#endif
