@@ -24,13 +24,19 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-10-30 1.11.5Dev12 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
  * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty.
+ * IB 2011-01-02 1.11.5Dev15 Remove references to formally static vars.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  */
 
 // Expand to define logging define
 @DLOGDEF@
 // Expand to define test ui define
 @DTESTUIDEF@
+// Expand to define full vers define
+@DFULLVERSDEF@
 
+//#ifdef UNDO
+//#ifdef DFULLVERS
 //#ifdef DTESTUI
 
 package com.substanceofcode.testutil.presentation;
@@ -107,25 +113,9 @@ public class TestingForm extends Form implements CommandListener {
 		while (super.size() > 0) {super.delete(0);}
 
 		// TODO put in expected results and test descr
-		super.append(new StringItem("isConvWinUni()=",
-					new Boolean(EncodingUtil.isConvWinUni()).toString()));
 		super.append(new StringItem("JavaME encoding=",
 			(String)FeatureMgr.getSysProperty("microedition.encoding", null,
 						"Unable to get encoding.", null)[0]));
-		super.append(new StringItem("m_midpIso=",
-				new Boolean(EncodingUtil.m_midpIso).toString()));
-		super.append(new StringItem("getIsoEncoding()=",
-				EncodingUtil.getIsoEncoding()));
-		super.append(new StringItem("m_midpWin=",
-				new Boolean(EncodingUtil.m_midpWin).toString()));
-		super.append(new StringItem("getWinEncoding()=",
-				EncodingUtil.getWinEncoding()));
-		super.append(new StringItem("m_midpUni=",
-				new Boolean(EncodingUtil.m_midpUni).toString()));
-		super.append(new StringItem("m_hasWinEncoding=",
-				new Boolean(EncodingUtil.hasWinEncoding()).toString()));
-		super.append(new StringItem("m_hasIso8859Encoding=",
-				new Boolean(EncodingUtil.hasIso8859Encoding()).toString()));
 		appendEntityAlphaTest("Test with no data.", "", "");
 		appendEntityAlphaTest("Test with one entity.", "&lt;", "<");
 		appendEntityAlphaTest("Test with one entity.", "&lt;&gt;&amp;&quot;&nbsp;&apos;",
@@ -166,16 +156,8 @@ public class TestingForm extends Form implements CommandListener {
 		super.append("converted cvControl,ncontrol=\n" + ncontrol.charAt(0) + "," + Integer.toHexString(ncontrol.charAt(0)));
 		StringBuffer sbTst = new StringBuffer();
 		StringBuffer sbRes = new StringBuffer();
-		appendHashTest("Iso entities", EncodingUtil.getConvIso88591(), sbTst, sbRes);
-		// Convert from ISO to iso
-		String cvRes = EncodingUtil.replaceSpChars(sbRes.toString(),
-				false, false, false, false);
 		StringBuffer sbwTst = new StringBuffer();
 		StringBuffer sbwRes = new StringBuffer();
-		appendHashTest("cp1252 entities", EncodingUtil.getConvCp1252(), sbwTst, sbwRes);
-		// Convert from windows to windows
-		String cvwRes = EncodingUtil.replaceSpChars(sbwRes.toString(),
-				true, false, true, false);
 		appendEntitySpTest("Test with iso conv to iso midp phone.",
 				sbRes.toString(), false, false, false, cvRes);
 		// Convert from windows to windows .  Given that windows uses
@@ -200,7 +182,6 @@ public class TestingForm extends Form implements CommandListener {
 		// the ISO characters, it should match other decoding too.
 		appendEntitySpTest("Test with iso sponly conv to windows midp phone.",
 				control, false, true, false, control);
-		String[] isoSp = EncodingUtil.getIsoSpecialEntities();
 		char[] isoSpVals =
 			{'-', // en dash 
 			'-', // em dash 
@@ -211,7 +192,6 @@ public class TestingForm extends Form implements CommandListener {
 			'\"', // right double quotation mark 
 			'\"'}; // double low-9 quotation mark 
 		Hashtable isoConv = new Hashtable();
-		EncodingUtil.initEntVals(isoConv, isoSp, isoSpVals);
 		StringBuffer sbSp = new StringBuffer();
 		StringBuffer sbSpRes = new StringBuffer();
 		appendHashTest("Iso special entities", isoConv, sbSp, sbSpRes);
@@ -266,7 +246,7 @@ public class TestingForm extends Form implements CommandListener {
 				final String expEncoding) {
 		String data = "ab";
 		ByteArrayInputStream bin = new ByteArrayInputStream( data.getBytes() );
-		EncodingUtil encUtl = new EncodingUtil(bin);
+		EncodingUtil encUtl = EncodingUtil.getEncodingUtil(bin);
 		super.append("----------");
 		super.append(new StringItem("hasIso8859Encoding=",
 					new Boolean(hasIso8859Encoding).toString()));
@@ -347,4 +327,6 @@ public class TestingForm extends Form implements CommandListener {
     }
     
 }
+//#endif
+//#endif
 //#endif
