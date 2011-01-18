@@ -24,6 +24,7 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev15 Use itemEquals to compare each item for testing and logging.
  */
 
 // Expand to define logging define
@@ -65,6 +66,7 @@ public class RssItem implements RssItemInfo {
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("compatibility2.RssItem");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
 
     /** Creates a new instance of RssItem */
@@ -257,28 +259,9 @@ public class RssItem implements RssItemInfo {
 	/* Compare item. */
 	public boolean equals(RssItemInfo item) {
 		boolean result = true;
-		if (!TestLogUtil.fieldEquals(item.getTitle(), m_title,
-			"m_title", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getLink(), m_link,
-			"m_link", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getDescription(), m_desc,
-			"m_desc", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getDate(), m_date,
-			"m_date", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getEnclosure(), m_enclosure,
-			"m_enclosure", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.isUnreadItem(), m_unreadItem,
-			"m_unreadItem", logger, fineLoggable)) {
+		if (!TestLogUtil.itemEquals(this, item,
+			new boolean[] {true, true, true, true, true, true},
+			"compatibility2.RssItem", logger, fineLoggable, traceLoggable)) {
 			result = false;
 		}
 		return result;
