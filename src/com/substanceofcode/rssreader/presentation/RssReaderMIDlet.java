@@ -3,7 +3,7 @@
  * RssReaderMIDlet.java
  *
  * Copyright (C) 2005-2007 Tommi Laukkanen
- * Copyright (C) 2007-2010 Irving Bunton, Jr
+ * Copyright (C) 2007-2011 Irving Bunton, Jr
  * http://www.substanceofcode.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -116,6 +116,21 @@
  * IB 2010-11-22 1.11.5Dev14 Use showMeNotes after saving data.
  * IB 2010-11-22 1.11.5Dev14 Have getPromptDisp pass in "Quit Program" instead of cancel to promt for About license.
  * IB 2010-11-22 1.11.5Dev14 Move setting of m_openLinkCmd to be initialized if no logging.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile some portions if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-14 1.11.5Alpha15 Set instance vars in constructor.
+ * IB 2011-01-14 1.11.5Alpha15 Create forms in constructor, but add items in the start of run method.
+ * IB 2011-01-14 1.11.5Alpha15 Have bookmarks list for the full version and SettingsForm for the internet link version.
+ * IB 2011-01-12 1.11.5Alpha15 If logging level is changed, use initLogVars to reset the logging vars in RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 Have exit code allow either full or internet link version.
+ * IB 2011-01-14 1.11.5Dev15 Change static fields to instance vars for the Settings singleton to reduce static memory used.
+ * IB 2011-01-12 1.11.5Alpha15 Have getCmdAdd to both create a command and add it to the displayable.  Return the command pointer.
+ * IB 2011-01-12 1.11.5Alpha15 Have getCmdAddPrompt to both create a prompt command and add it to the displayable.  Return the command pointer.
+ * IB 2011-01-22 1.11.5Alpha15 Use main display from FeatureMgr.
+ * IB 2011-01-22 1.11.5Alpha15 Have modUpdAllFeeds to allow future regression testing of background update/modify.
+ * IB 2011-01-14 1.11.5Dev15 Have optional backlight after update/refresh all.
+ * IB 2011-01-14 1.11.5Dev15 Have optional vibrate after update/refresh all.
+ * IB 2011-01-14 1.11.5Dev15 Have checkActive be checkRssActive so for future use of background processing.
 */
 
 // Expand to define test define
@@ -128,6 +143,14 @@
 //#define DNOJSR75
 // Expand to define itunes define
 //#define DNOITUNES
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
+// Expand to define test define
+//#define DNOTEST
+// Expand to define novice define
+//#define DNONOVICE
 // Expand to define memory size define
 //#define DREGULARMEM
 // Expand to define signed define
@@ -138,18 +161,20 @@
 package com.substanceofcode.rssreader.presentation;
 
 import java.lang.SecurityException;
-//#ifdef DJSR75
-//@import org.kablog.kgui.KFileSelectorMgr;
-//#endif
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
+//#ifdef DFULLVERS
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.RssFormatParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
+//#endif
+//#ifdef DFULLVERS
 import com.substanceofcode.rssreader.presentation.AllNewsList;
+//#endif
 import com.substanceofcode.utils.Settings;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.CauseException;
@@ -189,7 +214,6 @@ import javax.microedition.lcdui.StringItem;
 //@import com.substanceofcode.testlcdui.StringItem;
 //#endif
 //#ifdef DTESTUI
-//@import com.substanceofcode.testutil.presentation.TestingForm;
 //@import com.substanceofcode.testutil.TestOutput;
 //#endif
 
@@ -222,19 +246,21 @@ import net.yinlight.j2me.observable.Observable;
  */
 public class RssReaderMIDlet extends MIDlet
 implements 
-//#ifdef DMIDP20
+	//#ifdef DFULLVERS
+	//#ifdef DMIDP20
 			Observer,
-//#endif
+	//#endif
 	CommandListener,
+	//#endif
 	Runnable {
     
-	final       Object nullPtr = null;
+	final       Object nullPtr;
     // Attributes
     private Displayable m_prevDisp;         // The displayable to return to
-    private Settings    m_settings = null;         // The settings
-    private RssReaderSettings m_appSettings = null;// The application settings
+    private Settings    m_settings;         // The settings
+    private RssReaderSettings m_appSettings;// The application settings
 
-    private Hashtable   m_rssFeeds = new Hashtable(); // The bookmark URLs
+    private RssFeedStore m_rssFeeds; // The bookmark URLs
     final public boolean JSR75_ENABLED;
 	//#ifdef DTEST
 //@    private boolean     m_debugOutput = true; // Flag to write to output for test
@@ -258,7 +284,7 @@ implements
 //@    private boolean     m_getExportForm;    // The noticy flag for going to Export Feed list
 	//#endif
 	//#endif
-    private boolean     m_runNews = false;  // Run AllNewsList form.
+    private boolean     m_runNews;  // Run AllNewsList form.
 	//#ifdef DTEST
 //@    // Get import form using URL from current bookmark
 //@    private boolean     m_getTestImportForm = false; // Get import form 
@@ -277,11 +303,12 @@ implements
 	// Tells us if this is the first time program was used.  This is
 	// done by seeing if max item count is set.  We also set it after
 	// showing the about.
-    volatile private boolean m_firstTime = false;
-    private boolean     m_novice = false;
-    private boolean     m_itunesEnabled = false;
+    volatile private boolean m_firstTime;
+    volatile private boolean m_needFormInit;
+    private boolean     m_novice;
+    private boolean     m_itunesEnabled;
 	//#ifdef DMIDP20
-    private boolean     m_parseBackground = false;
+    private boolean     m_parseBackground;
 	//#endif
 	//#ifdef DLOGGING
 //@    private boolean fineLoggable;
@@ -290,34 +317,39 @@ implements
 	// This is a mark (icon) next to unread items (except on unread items
 	// screen).  Given that many screens are small, it is optional as 
 	// we don't want to reduce space for text.
-    private Image           m_unreadImage = null;
+	private Image           m_unreadImage;
     
     // Currently selected bookmark
     private int             m_curBookmark;  // The currently selected item
 	//#ifdef DMIDP20
-    private Observable      m_backGrParser = null; // The currently selected RSS in background
+    volatile private Observable m_backGrParser; // The currently selected RSS in background
+    volatile private Observable m_backGrFdlParser; // The currently selected RSS in background
 	//#endif
     
     // GUI items
-    private FeatureList  m_bookmarkList = null; // The bookmark list
+	//#ifdef DFULLVERS
+    private FeatureList  m_bookmarkList; // The bookmark list
+	//#else
+//@    private SettingsForm  m_settingsForm; // The bookmark list
+	//#endif
 	//#ifdef DTESTUI
+	//#ifdef DFULLVERS
 //@    private HeaderList  m_headerTestList;       // The header list
 //@    private AllNewsList m_allNewsTestList; // The test header list for unread items
 	//#endif
-    private Displayable m_itemRtnList;      // The list to return from for item
-    private ItemForm    m_itemForm;         // The item form
-    private LoadingForm m_loadForm = null;  // The "loading..." form
-
-	//#ifdef DTESTUI
-//@    private TestingForm m_testingForm;    // The testing form
 	//#endif
+    private Displayable m_itemRtnList;      // The list to return from for item
+	//#ifdef DFULLVERS
+    private ItemForm    m_itemForm;         // The item form
+	//#endif
+    private LoadingForm m_loadForm;  // The "loading..." form
+
     
     // Commands
 	//#ifdef DTESTUI
 //@	private Command     m_testBMCmd;        // Test UI bookmarks list command
 //@	private Command     m_testRtnCmd;       // Test UI return to prev command
 	//#endif
-    private Command     m_exitCommand = null;// The exit command
     private Command     m_saveCommand;      // The save without exit command
     private Command     m_addNewBookmark;   // The add new bookmark command
     private Command     m_openBookmark;     // The open bookmark command
@@ -354,11 +386,15 @@ implements
     private Command     m_updateAllCmd;     // The update all command
     private Command     m_updateAllModCmd;  // The update all modified command
     
-    private int citemLnkNbr = -1;
-    private int citemEnclNbr = -1;
-    private RssItunesItem citem = null;
+    private int citemLnkNbr;
+    private int citemEnclNbr;
+    private RssItunesItem citem;
 	//#ifdef DLOGGING
+	//#ifdef DFULLVERS
 //@    private LoggerRptForm m_debug;
+	//#endif
+//@    private boolean m_retryLog = false;
+//@    private Level m_retryLevel = Level.FINEST;
 //@    private Logger logger;
 	//#endif
     
@@ -366,7 +402,28 @@ implements
 	throws SecurityException {
 		FeatureMgr.setDisplay(Display.getDisplay(this));
 		FeatureMgr.setMidlet(this);
-        
+
+		nullPtr = null;
+		m_rssFeeds = new RssFeedStore();
+		m_runNews = false;
+		m_firstTime = false;
+		m_unreadImage = null;
+		//#ifdef DFULLVERS
+		m_bookmarkList = null;
+		//#else
+//@		m_settingsForm = null;
+		//#endif
+		m_loadForm = null;
+		citemLnkNbr = -1;
+		citemEnclNbr = -1;
+		citem = null;
+		m_needFormInit = true;
+		//#ifdef DMIDP20
+		m_parseBackground = false;
+		m_backGrParser = null; // The currently selected RSS in background
+		m_backGrFdlParser = null; // The currently selected RSS in background
+		//#endif
+
 		//#ifdef DTESTUI
 //@		TestOutput.init(System.out, "UTF-8");
 		//#endif
@@ -381,6 +438,7 @@ implements
 //@						t);
 //@			}
 //@		}
+//@
 //@		boolean loggingErr = false;
 //@		try {
 //@			LogManager logManager = LogManager.getLogManager();
@@ -396,9 +454,11 @@ implements
 //@			}
 //@			logger = Logger.getLogger("RssReaderMIDlet");
 //@			logger.info("RssReaderMIDlet started.");
+			//#ifdef DFULLVERS
 //@			logger.info("RssReaderMIDlet has form handler=" + (m_debug != null));
 //@			m_debug = new LoggerRptForm(logManager, this,
-//@						this, "net.sf.jlogmicro.util.logging.FormHandler");
+//@					this, "net.sf.jlogmicro.util.logging.FormHandler");
+			//#endif
 //@		} catch (Throwable t) {
 //@			loggingErr = true;
 //@			m_loadForm.appendMsg("Error initiating logging " +
@@ -441,7 +501,7 @@ implements
 //@			logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
 			//#endif
 			Object[] arrsettings = FeatureMgr.initSettingsEnabled(m_loadForm
-				    //#ifdef DLOGGING
+					//#ifdef DLOGGING
 //@					,logger
 //@					,fineLoggable
 					//#endif
@@ -452,56 +512,15 @@ implements
 			m_itunesEnabled = ((Boolean)arrsettings[3]).booleanValue();
 
 			/** Initialize commands */
-			//#ifdef DTESTUI
-//@			m_testBMCmd         = new Command("Test bookmarks shown", Command.SCREEN, 10);
-//@			m_testRtnCmd        = new Command("Test go back to last", Command.SCREEN, 11);
-			//#endif
 			if (FeatureMgr.m_backCommand == null) {
 				FeatureMgr.m_backCommand = new Command("Back", Command.BACK, 1);
 			}
-			initExit();
-			m_openBookmark      = new Command("Open feed", Command.SCREEN, 5);
-			int priority = 7;
-			m_addNewBookmark    = new Command("Add new feed", Command.SCREEN, priority++);
-			m_readUnreadItems   = new Command("River of news", Command.SCREEN, priority++);
-			m_editBookmark      = new Command("Edit feed", Command.SCREEN, priority++);
-			m_delBookmark       = new Command("Delete feed", Command.SCREEN, priority++);
-			m_importFeedListCmd = new Command("Import feeds", Command.SCREEN, priority++);
-			int spriority = priority;
-			//#ifdef DSIGNED
-			//#ifdef DJSR75
-//@			m_exportFeedListCmd = new Command("Export feeds", Command.SCREEN, priority++);
-			//#endif
-			//#endif
-			if (spriority == priority) {
-				priority++;
-			}
-			//#ifdef DTEST
-//@			m_importCurrFeedListCmd = new Command("Import current feeds", Command.SCREEN, priority++);
+			//#ifdef DFULLVERS
+			initExit(m_bookmarkList);
 			//#else
-			priority++;
-			//#endif
-			m_updateAllModCmd   = new Command("Update modified all",
-											  Command.SCREEN, priority++);
-			m_updateAllCmd      = new Command("Update all", Command.SCREEN, priority++);
-			//#ifdef DTEST
-//@			m_reloadDbCmd       = new Command("Reload DB", Command.SCREEN, priority++);
-			//#else
-			priority++;
-			//#endif
-			m_settingsCmd       = new Command("Settings", Command.SCREEN, priority++);
-			m_saveCommand       = new Command("Save without exit", Command.SCREEN, priority++);
-			m_aboutCmd          = new Command("About", Command.SCREEN, priority++);
-			//#ifdef DTESTUI
-//@			m_testEncCmd        = new Command("Testing Form", Command.SCREEN, priority++);
+//@			initExit(m_settingsForm);
 			//#endif
 
-		//#ifdef DLOGGING
-//@			m_debugCmd          = new Command("Debug Log", Command.SCREEN, priority++);
-//@			m_clearDebugCmd     = new Command("Clear", Command.SCREEN, 7);
-//@			m_backFrDebugCmd    = new Command("Back", Command.BACK, 1);
-			//#endif
-			
 			m_getPage = false;
 			m_exit = false;
 			m_stored = false;
@@ -523,7 +542,7 @@ implements
 			//#endif
 			m_curBookmark = -1;
 			CauseException ce = null;
-			
+
 			// To get proper initialization, need to 
 			//#ifdef DLOGGING
 //@			if (m_appSettings != null) {
@@ -532,27 +551,41 @@ implements
 //@							logger.getParent().getLevel().getName());
 //@				} else {
 //@					logger.getParent().setLevel(
-//@					Level.parse(m_appSettings.getLogLevel()));
+//@							Level.parse(m_appSettings.getLogLevel()));
 //@				}
 //@			}
 			//#endif
 
 			//#ifdef DLOGGING
-//@			fineLoggable = logger.isLoggable(Level.FINE);
-//@			logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
-//@			finestLoggable = logger.isLoggable(Level.FINEST);
-//@			logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+//@			initLogVars();
+			//#endif
+			//#ifdef DLOGGING
+//@			if (finestLoggable) {logger.finest("Constructor m_appSettings,m_settings,m_firstTime,m_itunesEnabled=" + m_appSettings + "," + m_settings + "," + m_firstTime + "," + m_itunesEnabled);}
 			//#endif
 
 			if ((m_appSettings != null) && m_appSettings.getMarkUnreadItems()) {
 				m_unreadImage = FeatureMgr.getImage("/icons/unread.png", m_loadForm);
 			}
-			
+
 			if (ce != null) {
 				m_loadForm.addExc(ce.getMessage(), ce);
 			}
+			// Need to create bookmark list to create it's thread which will
+			// finish initialization of the bookmark list.
+			//#ifdef DFULLVERS
+			m_bookmarkList = new FeatureList("Bookmarks", List.IMPLICIT,
+											 m_loadForm);
+			FeatureMgr.setMainDisp(m_bookmarkList);
+			m_bookmarkList.setCommandListener( this, true );
+			//#else
+//@			m_settingsForm = new SettingsForm(m_loadForm);
+//@			FeatureMgr.setMainDisp(m_settingsForm);
+//@			m_settingsForm.setCommandListener( m_settingsForm, true );
+			//#endif
 
 		} catch(Throwable t) {
+			m_settings = null;
+			m_appSettings = null;
 			//#ifdef DLOGGING
 //@			logger.severe("RssReaderMIDlet constructor ", t);
 			//#endif
@@ -562,58 +595,82 @@ implements
 			if (m_loadForm == null) {
 				initializeLoadingForm("Loading items...", null);
 			}
-            m_loadForm.addExc("Internal error starting applicaiton.", t);
+			m_loadForm.addExc("Internal error starting applicaiton.", t);
 		} finally {
+			// Get here so that bookmarklist knows to not use some commands
+			boolean hasApps;
+			m_novice = (hasApps = (m_appSettings != null)) &&
+				m_appSettings.getNovice();
+			m_itunesEnabled = hasApps && m_appSettings.getItunesEnabled();
 			JSR75_ENABLED = 
 				(FeatureMgr.getSysProperty(
-				"microedition.io.file.FileConnection.version", null,
-					"Unable to get FileConnection",
-					(m_loadForm.hasExc()) ? m_loadForm : (LoadingForm)nullPtr)[0]
-				!= null);
+										   "microedition.io.file.FileConnection.version", null,
+										   "Unable to get FileConnection",
+										   (m_loadForm.hasExc()) ? m_loadForm : (LoadingForm)nullPtr)[0]
+				 != null);
 			//#ifdef DLOGGING
 //@			if ((logger != null) && fineLoggable) {logger.fine("JSR75_ENABLED=" + JSR75_ENABLED);}
 			//#endif
 		}
-    }
+	}
     
+	//#ifdef DLOGGING
+//@	public void initLogVars() {
+//@		fineLoggable = logger.isLoggable(Level.FINE);
+//@		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+//@		finestLoggable = logger.isLoggable(Level.FINEST);
+//@		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+//@		m_retryLevel = Level.FINEST;
+//@		m_retryLog = false; // fineLoggable
+//@	}
+	//#endif
+
 	/* Create exit command based on if it's a standard exit. */
-	final public void initExit() {
-		boolean prevExit = (m_exitCommand != null);
-		if (prevExit && (m_bookmarkList != null)) {
-			m_bookmarkList.removeCommand(m_exitCommand);
+	final public void initExit(Displayable disp) {
+		boolean prevExit = (FeatureMgr.m_exitCommand != null);
+		if (prevExit && (disp != null)) {
+			disp.removeCommand(FeatureMgr.m_exitCommand);
 		}
 		if (m_appSettings != null) {
-			m_exitCommand       = new Command("Exit",
-				(m_appSettings.getUseStandardExit() ? Command.EXIT
-				 : Command.SCREEN), 30);
+			FeatureMgr.m_exitCommand = new Command("Exit",
+					(m_appSettings.getUseStandardExit() ? Command.EXIT
+					 : Command.SCREEN), 30);
 		} else {
-			m_exitCommand       = new Command("Exit", Command.SCREEN, 30);
+			FeatureMgr.m_exitCommand = new Command("Exit", Command.SCREEN, 30);
 		}
-		if (prevExit && (m_bookmarkList != null)) {
-			m_bookmarkList.addPromptCommand(m_exitCommand,
+		if (prevExit && (disp != null)) {
+			if (disp instanceof FeatureList) {
+			((FeatureList)disp).addPromptCommand(FeatureMgr.m_exitCommand,
 					"Are you sure you want to exit?");
+			} else if (disp instanceof FeatureForm) {
+				((FeatureForm)disp).addPromptCommand(FeatureMgr.m_exitCommand,
+						"Are you sure you want to exit?");
+			} else {
+				disp.addCommand(FeatureMgr.m_exitCommand);
+			}
 		}
 	}
 
 	/* Initialize the forms that are not dynamic. */
 	final private void initForms() {
 		try {
-			// Get here so that bookmarklist knows to not use some commands
-			m_novice = (m_appSettings != null) && m_appSettings.getNovice();
 			/** Initialize GUI items */
+			//#ifdef DFULLVERS
 			initializeBookmarkList();
+			//#else
+//@			m_settingsForm = initializeSettingsForm(true, m_loadForm);
+			//#endif
 			//initializeLoadingForm();
 			//#ifdef DLOGGING
+			//#ifdef DFULLVERS
 //@			if (m_debug != null) {
 //@				initializeDebugForm();
 //@			}
 			//#endif
+			//#endif
 			//#ifdef DTEST
 //@			System.gc();
 //@			long beginMem = Runtime.getRuntime().freeMemory();
-			//#endif
-			//#ifdef DTESTUI
-//@			m_testingForm = new TestingForm(this);
 			//#endif
 			//#ifdef DTEST
 //@			System.gc();
@@ -625,6 +682,7 @@ implements
 			//#endif
 			if( m_firstTime ) {
 				try {
+					//#ifdef DFULLVERS
 					// Set Max item count to default so that it is initialized.
 					if (m_appSettings != null) {
 						m_appSettings.setMaximumItemCountInFeed(
@@ -638,6 +696,7 @@ implements
 //@							,finestLoggable
 							//#endif
 							);
+					//#endif
 					// If novice, show about later.
 					if (!m_novice) {
 						m_firstTime = false;
@@ -645,7 +704,11 @@ implements
 					}
 				} catch(Exception e) {
 					System.err.println("Error while getting/updating settings: " + e.toString());
+					//#ifdef DFULLVERS
 					m_loadForm.replaceRef(null, m_bookmarkList);
+					//#else
+//@					m_loadForm.replaceRef(null, m_settingsForm);
+					//#endif
 					m_loadForm.recordExcForm("Internal error.  Unable to initialize forms",
 							e);
 				}
@@ -654,18 +717,26 @@ implements
 				// we only show novice if we have already loaded the
 				// novice bookmarks.
 				if (!m_novice) {
+					//#ifdef DFULLVERS
 					setCurrentNotes( m_bookmarkList );
+					//#else
+//@					setCurrentNotes( m_settingsForm );
+					//#endif
 				}
 			}
 
-		}catch(Throwable t) {
+		} catch(Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("initForms ", t);
 			//#endif
 			/** Error while initializing forms */
 			System.out.println("initForms " + t.getMessage());
 			t.printStackTrace();
+			//#ifdef DFULLVERS
 			m_loadForm.replaceRef(null, m_bookmarkList);
+			//#else
+//@			m_loadForm.replaceRef(null, m_settingsForm);
+			//#endif
 			m_loadForm.recordExcForm("Internal error.  Unable to initialize forms",
 					t);
 		}
@@ -680,6 +751,7 @@ implements
         return m_appSettings;
     }
     
+	//#ifdef DFULLVERS
     /** Show bookmark list */
     final public void showBookmarkList() {
 		//#ifdef DLOGGING
@@ -694,23 +766,30 @@ implements
 			setCurrentAlt( null, null, m_bookmarkList );
 		}
     }
+	//#endif
     
+	//#ifdef DFULLVERS
     /** Load bookmarks from record store */
     final private void initializeBookmarkList() {
 		//#ifdef DTEST
 //@		System.gc();
 //@		long beginMem = Runtime.getRuntime().freeMemory();
 		//#endif
-		int nbrRegions = m_firstTime ? (m_novice ? 2 : 1) : (Settings.MAX_REGIONS + 1);
+		int nbrRegions = m_firstTime ? (m_novice ? 2 : 1) : (m_settings.MAX_REGIONS + 1);
 		Gauge gauge = new Gauge("Initializing bookmarks...",
 				false, nbrRegions, 0);
 		//#ifdef DLOGGING
-//@		if (finestLoggable) {logger.finest("Settings.MAX_REGIONS,gauge.getMaxValue()=" + Settings.MAX_REGIONS + "," + gauge.getMaxValue());}
+//@		if (finestLoggable) {logger.finest("m_settings.MAX_REGIONS,gauge.getMaxValue()=" + m_settings.MAX_REGIONS + "," + gauge.getMaxValue());}
 		//#endif
         try {
-            m_bookmarkList = new FeatureList("Bookmarks", List.IMPLICIT,
-											 m_loadForm);
-            FeatureMgr.setMainDisp(m_bookmarkList);
+			if (m_bookmarkList == null) {
+				m_bookmarkList = new FeatureList("Bookmarks", List.IMPLICIT,
+						m_loadForm);
+				//#ifdef DLOGGING
+//@				logger.warning(
+//@						"Bookmarks should have been created in constructor");
+				//#endif
+			}
 			m_loadForm.replaceRef(null, m_bookmarkList);
 			//#ifdef DMIDP20
 			// If font is wrong, it can cause an exception for some
@@ -718,50 +797,61 @@ implements
 			// So, we'll update this later
             m_bookmarkList.setFont(null);
 			//#endif
+			int priority = 7;
 			if (!m_novice) {
-				m_bookmarkList.addCommand( m_addNewBookmark );
+				m_addNewBookmark = FeatureMgr.getCmdAdd(m_bookmarkList, "Add new feed", Command.SCREEN, priority++);
 			}
-            m_bookmarkList.addCommand( m_openBookmark );
-            m_bookmarkList.addCommand( m_readUnreadItems );
+			m_openBookmark = FeatureMgr.getCmdAdd(m_bookmarkList, "Open feed", Command.SCREEN, 5);
+			m_readUnreadItems = FeatureMgr.getCmdAdd(m_bookmarkList, "River of news", Command.SCREEN, priority++);
 			if (!m_novice) {
-				m_bookmarkList.addCommand( m_editBookmark );
-				m_bookmarkList.addPromptCommand( m_delBookmark,
-											 "Are you sure you want to delete?" );
-			}
-			if (!m_novice) {
-				m_bookmarkList.addCommand( m_importFeedListCmd );
+				m_editBookmark = FeatureMgr.getCmdAdd(m_bookmarkList, "Edit feed", Command.SCREEN, priority++);
+				m_delBookmark = FeatureMgr.getCmdAddPrompt(m_bookmarkList, "Delete feed", Command.SCREEN, priority++, "Are you sure you want to delete?" );
+				m_importFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Import feeds", Command.SCREEN, priority++);
+				int spriority = priority;
 				//#ifdef DSIGNED
 				//#ifdef DJSR75
-//@				m_bookmarkList.addCommand( m_exportFeedListCmd );
+//@				m_exportFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Export feeds", Command.SCREEN, priority++);
 				//#endif
 				//#endif
+				if (spriority == priority) {
+					priority++;
+				}
 				//#ifdef DTEST
-//@				m_bookmarkList.addCommand( m_importCurrFeedListCmd );
+//@				m_importCurrFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Import current feeds", Command.SCREEN, priority++);
+				//#else
+				priority++;
 				//#endif
 			}
-            m_bookmarkList.addCommand( m_updateAllModCmd );
-            m_bookmarkList.addCommand( m_updateAllCmd );
+			m_updateAllModCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Update modified all", Command.SCREEN, priority++);
+			m_updateAllCmd = FeatureMgr.getCmdAddPrompt(m_bookmarkList, "Update all", Command.SCREEN, priority++,
+					"Are you sure that you want to upgrade all?  " +
+					"Unlike update modified all, update all does not use " +
+					"conditional gets.  This can use more network " +
+					"resources.  Also, all read flags are reset.");
 			//#ifdef DTEST
-//@            m_bookmarkList.addCommand( m_reloadDbCmd );
+//@			m_reloadDbCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Reload DB", Command.SCREEN, priority++);
+			//#else
+			priority++;
 			//#endif
-            m_bookmarkList.addCommand( m_saveCommand );
-            m_bookmarkList.addCommand( m_settingsCmd );
-            m_bookmarkList.addPromptCommand( m_exitCommand,
+			m_settingsCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Settings", Command.SCREEN, priority++);
+			m_saveCommand = FeatureMgr.getCmdAdd(m_bookmarkList, "Save without exit", Command.SCREEN, priority++);
+            m_bookmarkList.addPromptCommand( FeatureMgr.m_exitCommand,
 					                         "Are you sure you want to exit?" );
-            m_bookmarkList.addCommand( m_aboutCmd );
+			m_aboutCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "About", Command.SCREEN, priority++);
 			//#ifdef DTESTUI
-//@            m_bookmarkList.addCommand( m_testBMCmd );
-//@            m_bookmarkList.addCommand( m_testRtnCmd );
+//@			m_testBMCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Test bookmarks shown", Command.SCREEN, 10);
+//@			m_testRtnCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Test go back to last", Command.SCREEN, 11);
 			//#endif
 			//#ifdef DTESTUI
-//@			m_bookmarkList.addCommand( m_testEncCmd );
+//@			m_testEncCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Testing Form", Command.SCREEN, priority++);
 			//#endif
-	//#ifdef DLOGGING
+			//#ifdef DLOGGING
+			//#ifdef DFULLVERS
 //@			if (m_debug != null) {
-//@				m_bookmarkList.addCommand( m_debugCmd );
+//@				m_debugCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Debug Log", Command.SCREEN, priority++);
 //@			}
-	//#endif
-            m_bookmarkList.setCommandListener( this, true );
+			//#endif
+			//#endif
 			//#ifdef DTEST
 //@			System.gc();
 //@			System.out.println("empty bookmarkList size=" + (beginMem - Runtime.getRuntime().freeMemory()));
@@ -782,7 +872,7 @@ implements
 			//#ifdef DMIDP20
 			if ((m_appSettings != null) &&
 					(m_appSettings.getFontChoice() !=
-					RssReaderSettings.DEFAULT_FONT_CHOICE)) {
+					m_appSettings.DEFAULT_FONT_CHOICE)) {
 				final int len = m_bookmarkList.size();
 				m_bookmarkList.initFont();
 				final Font font = m_bookmarkList.getFont();
@@ -801,10 +891,55 @@ implements
 					);
 		}
 	}
+	//#endif
+
+    /** Show settigs form.  */
+    final public SettingsForm initializeSettingsForm(boolean createForm,
+			LoadingForm loadForm) {
+		//#ifdef DTEST
+//@		System.gc();
+//@		long beginMem = Runtime.getRuntime().freeMemory();
+		//#endif
+		SettingsForm settingsForm = null;
+		//#ifdef DINTLINK
+//@		if (!createForm && (loadForm == null)) {
+//@			loadForm = m_loadForm;
+//@		}
+		//#endif
+
+		try {
+			if (createForm) {
+				settingsForm = new SettingsForm(m_loadForm);
+				settingsForm.setCommandListener( settingsForm, false );
+			//#ifdef DINTLINK
+//@			} else {
+//@				settingsForm = m_settingsForm;
+			//#endif
+			}
+			settingsForm.updateForm();
+			//#ifdef DTEST
+//@			System.gc();
+//@			System.out.println("SettingsForm size=" +
+//@					(beginMem - Runtime.getRuntime().freeMemory()));
+			//#endif
+			// If not full vers.
+			//#ifdef DINTLINK
+//@			loadForm.addStartCmd( settingsForm );
+			//#endif
+		} catch (Throwable t) {
+			procBookmarkExc("Error while initializing settings form", t,
+					loadForm
+						//#ifdef DLOGGING
+//@						,logger
+						//#endif
+					);
+		}
+		return settingsForm;
+	}
 
     /** Load bookmarks from record store */
     static final public void loadBookmarkList(Gauge gauge,
-			Hashtable rssFeeds, final Choice bookmarkList,
+			RssFeedStore rssFeeds, final Choice bookmarkList,
 			final LoadingForm loadForm,
 			final Settings settings,
 			final boolean firstTime
@@ -830,9 +965,9 @@ implements
 				pl = loadForm.append(gauge);
 			}
 			if (!firstTime) {
-				for (int ic = 1; ic < Settings.MAX_REGIONS; ic++) {
+				for (int ic = 1; ic < settings.MAX_REGIONS; ic++) {
 					boolean stop = false;
-					String bms = settings.getStringProperty(ic, Settings.BOOKMARKS_NAME, "");
+					String bms = settings.getStringProperty(ic, settings.BOOKMARKS_NAME, "");
 					//#ifdef DLOGGING
 //@					if (fineLoggable) {logger.fine("loadBookmarkList bms.length()=" + bms.length());}
 					//#endif
@@ -841,23 +976,23 @@ implements
 							continue;
 						}
 						final String vers = settings.getStringProperty(ic,
-								Settings.SETTINGS_NAME, "");
+								settings.SETTINGS_NAME, "");
 						final boolean firstSettings =
-							 vers.equals(Settings.FIRST_SETTINGS_VERS);
+							 vers.equals(settings.FIRST_SETTINGS_VERS);
 						final boolean itunesCapable = ((vers.length() > 0) &&
-							 (vers.compareTo(Settings.ITUNES_CAPABLE_VERS) >= 0));
+							 (vers.compareTo(settings.ITUNES_CAPABLE_VERS) >= 0));
 						final boolean encodingSettings = ((vers.length() > 0) &&
-							 (vers.compareTo(Settings.ENCODING_VERS) >= 0));
+							 (vers.compareTo(settings.ENCODING_VERS) >= 0));
 						final boolean modifiedSettings = vers.equals(
-								Settings.MODIFIED_VERS);
-						settings.getBooleanProperty(Settings.ITEMS_ENCODED,
+								settings.MODIFIED_VERS);
+						settings.getBooleanProperty(settings.ITEMS_ENCODED,
 									true);
 						/* FUTURE
 						final long storeDate = settings.getLongProperty(
-								Settings.STORE_DATE, 0L);
+								settings.STORE_DATE, 0L);
 							*/
 						final char feedSeparator =
-							encodingSettings ? Settings.CFEED_SEPARATOR : Settings.OLD_FEED_SEPARATOR;
+							encodingSettings ? settings.CFEED_SEPARATOR : settings.OLD_FEED_SEPARATOR;
 						//#ifdef DLOGGING
 //@						if (fineLoggable) {logger.fine("loadBookmarkList region,vers,firstSettings,itunesCapable,encodingSettings,modifiedSettings=" + ic + "," + vers + "," + firstSettings + "," + itunesCapable + "," + encodingSettings + "," + modifiedSettings);}
 						//#endif
@@ -866,9 +1001,9 @@ implements
 						//#endif
 						// Save memory by setting bookmarks to "" now that
 						// we will convert them to objects.
-						settings.setStringProperty(Settings.BOOKMARKS_NAME, "");
+						settings.setStringProperty(settings.BOOKMARKS_NAME, "");
 						
-						do{
+						do {
 							
 							String part = "";
 							int pos = bms.indexOf(feedSeparator);
@@ -887,7 +1022,7 @@ implements
 								}
 								if(bm.getName().length()>0){
 									bookmarkList.append(bm.getName(),null);
-									rssFeeds.put(bm.getName(), bm);
+									rssFeeds.put(bm.getName(), bm, null);
 								}
 							}
 							if( part.length()==0)
@@ -909,7 +1044,7 @@ implements
 				gauge.setValue(gauge.getMaxValue());
 			}
 			// Reset internal region to 0.
-			settings.getStringProperty(0, Settings.BOOKMARKS_NAME, "");
+			settings.getStringProperty(0, settings.BOOKMARKS_NAME, "");
 			//#ifdef DTEST
 //@			System.gc();
 //@			System.out.println("full bookmarkList size=" + (beginMem - Runtime.getRuntime().freeMemory()));
@@ -972,8 +1107,7 @@ implements
 									   //#endif
 			)
 					{
-		m_loadForm = LoadingForm.getLoadingForm(desc, disp, m_bookmarkList,
-				observable);
+		m_loadForm = LoadingForm.getLoadingForm(desc, disp, observable);
 		return m_loadForm;
     }
 
@@ -982,18 +1116,88 @@ implements
 		return initializeLoadingForm(desc, disp, null);
 	}
 
+	//#ifdef DFULLVERS
 	//#ifdef DLOGGING
 //@    final public void initializeDebugForm() {
-//@        m_debug.addCommand( m_backFrDebugCmd );
-//@        m_debug.addCommand( m_clearDebugCmd );
+//@		m_clearDebugCmd = FeatureMgr.getCmdAdd(m_debug, "Clear", Command.SCREEN, 7);
+//@		m_backFrDebugCmd = FeatureMgr.getCmdAdd(m_debug, "Back", Command.BACK, 1);
 //@        m_debug.setCommandListener(this);
 //@	}
 	//#endif
 
-    /** Run method is used to get RSS feed with HttpConnection, etc */
-    public void run(){
-		try {
+	static public boolean modUpdAllFeeds(int maxItemCount,
+					boolean refreshUpdFeeds,
+					RssFeedStore rssFeeds,
+					LoadingForm cloadForm
+					//#ifdef DLOGGING
+//@					,boolean retryLog
+//@					,Level retryLevel
+//@					,Logger logger
+					//#endif
+					) {
+		boolean errFound = false;
+		Enumeration feedEnum = rssFeeds.elements();
+		while(feedEnum.hasMoreElements()) {
+			RssItunesFeed feed = (RssItunesFeed)feedEnum.nextElement();
+			try{
+				if (cloadForm != null) {
+					cloadForm.appendMsg(feed.getName() + "...");
+				//#ifdef DLOGGING
+//@				} else {
+//@					logger.info(feed.getName() + "...");
+				//#endif
+				}
+				RssFeedParser parser = new RssFeedParser(
+						feed, feed, refreshUpdFeeds );
+				parser.parseModRssFeed(refreshUpdFeeds,
+						maxItemCount);
+				feed = parser.getRssFeed();
+				RssItunesFeed oldfeed = rssFeeds.get(
+						feed.getName());
+				if (oldfeed != null) {
+					feed.checkPresRead(true, feed);
+				}
+				rssFeeds.put(feed.getName(), feed, null);
+				if (cloadForm != null) {
+					cloadForm.appendMsg("ok\n");
+				//#ifdef DLOGGING
+//@				} else {
+//@					logger.info("ok\n");
+				//#endif
+				}
+			} catch(Exception ex) {
+				CauseException ce = new CauseException(
+						"Error parsing feed " + feed.getName(),
+						ex);
+				//#ifdef DLOGGING
+//@				logger.severe(ce.getMessage(), ex);
+				//#else
+				System.out.println(ce.getMessage());
+				ex.printStackTrace();
+				//#endif
+				if (cloadForm != null) {
+					cloadForm.addExc("Error\n", ce);
+				}
+				errFound = true;
+			}
+		}
+		return errFound;
+	}
+	//#endif
 
+    /** Run method is used to get RSS feed with HttpConnection, etc */
+    public void run() {
+		try {
+			//#ifdef DFULLVERS
+			if (m_needFormInit) {
+				Thread.sleep(1L);
+				Thread.yield();
+				initApp();
+				m_needFormInit = false;
+			}
+			//#endif
+			// Start full version.  This ends far down with matching comment.
+			//#ifdef DFULLVERS
 			//#ifdef DTESTUI
 //@			// If there are headers, and the header index is >= 0,
 //@			// open the header so that it's items can be listed
@@ -1032,28 +1236,13 @@ implements
 			if( m_getSettingsForm ) {
 				m_getSettingsForm = false;
 				initializeLoadingForm("Loading settings...", m_bookmarkList);
-				try{
-					//#ifdef DTEST
-//@					System.gc();
-//@					long beginMem = Runtime.getRuntime().freeMemory();
-					//#endif
-					final SettingsForm settingsForm = new SettingsForm(
-							m_loadForm);
-					settingsForm.setCommandListener( settingsForm, false );
-        
-					settingsForm.updateForm();
-					//#ifdef DTEST
-//@					System.gc();
-//@					System.out.println("SettingsForm size=" +
-//@							(beginMem - Runtime.getRuntime().freeMemory()));
-					//#endif
+				try {
+					final SettingsForm settingsForm = initializeSettingsForm(
+							true, m_loadForm);
 					setCurrent( null, settingsForm );
-				} catch(OutOfMemoryError t) {
-					m_loadForm.recordExcForm("\nOut Of Memory Error " +
-							"loading settings form", t);
 				} catch(Throwable t) {
-					m_loadForm.recordExcForm("\nInternal error loading settings " +
-							"form", t);
+					// Message already given.
+					t.printStackTrace();
 				}
 			}
 
@@ -1107,29 +1296,15 @@ implements
 						(m_refreshUpdFeeds ? "modified " : "") +
 						"feeds...", m_bookmarkList);
 				try{
-					boolean errFound = false;
 					final int maxItemCount = m_appSettings.getMaximumItemCountInFeed();
-					Enumeration feedEnum = m_rssFeeds.elements();
-					while(feedEnum.hasMoreElements()) {
-						RssItunesFeed feed = (RssItunesFeed)feedEnum.nextElement();
-						try{
-							cloadForm.appendMsg(feed.getName() + "...");
-							RssFeedParser parser = new RssFeedParser( feed );
-							parser.parseRssFeed( m_refreshUpdFeeds,
-									maxItemCount);
-							cloadForm.appendMsg("ok\n");
-						} catch(Exception ex) {
-							CauseException ce = new CauseException(
-									"Error parsing feed " + feed.getName(),
-									ex);
+					boolean errFound = modUpdAllFeeds(maxItemCount,
+							m_refreshUpdFeeds, m_rssFeeds, cloadForm
 							//#ifdef DLOGGING
-//@							logger.severe(ce.getMessage(), ex);
+//@							,m_retryLog
+//@							,m_retryLevel
+//@							,logger
 							//#endif
-							cloadForm.addExc("Error\n", ce);
-							System.out.println(ce.getMessage());
-							errFound = true;
-						}
-					}
+							);
 					if (errFound) {
 						cloadForm.setLoadingFinished(
 								"Finished with one or more exceptions " +
@@ -1153,6 +1328,23 @@ implements
 				} finally {
 					m_refreshAllFeeds = false;
 					m_refreshUpdFeeds = false;
+					//#ifdef DMIDP20
+					if (m_appSettings.getBacklightFlashSecs() > 0) {
+						FeatureMgr.getDisplay().flashBacklight(
+								1000 * m_appSettings.getBacklightFlashSecs());
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("run update m_appSettings.getBacklightFlashSecs()=" + m_appSettings.getBacklightFlashSecs());}
+						//#endif
+					}
+
+					if (m_appSettings.getVibrateSecs() > 0) {
+						FeatureMgr.getDisplay().vibrate(
+								1000 * m_appSettings.getVibrateSecs());
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("run update m_appSettings.getVibrateSecs()=" + m_appSettings.getVibrateSecs());}
+						//#endif
+					}
+					//#endif
 				}
 			}
 
@@ -1232,7 +1424,6 @@ implements
 //@					System.out.println("Test UI Test Rss feeds last");
 //@				}
 //@			}
-//@
 			//#endif
 
 
@@ -1262,6 +1453,8 @@ implements
 					m_runNews = false;
 				}
 			}
+			// End DFULLVERS
+			//#endif
 
 			if ( m_about ) {
 				m_about = false;
@@ -1269,14 +1462,14 @@ implements
 				// show a form before we show the alert, or it never
 				// appears.
 				initializeLoadingForm("Loading about...",
-						m_bookmarkList);
+						FeatureMgr.getMainDisp());
 				getSetLicensePrompt(true);
 			}
 
 			if ( m_exit || m_saveBookmarks ) {
 				initializeLoadingForm(
 						(m_exit ?  "Exiting saving data..." :
-						 "Saving data..."), m_bookmarkList);
+						 "Saving data..."), FeatureMgr.getMainDisp());
 				exitApp( m_loadForm );
 			}
 
@@ -1286,7 +1479,7 @@ implements
 					synchronized(this) {
 						if (m_loadForm == null) {
 							initializeLoadingForm("Processing...",
-									m_bookmarkList);
+									FeatureMgr.getMainDisp());
 						}
 					}
 				}
@@ -1316,9 +1509,13 @@ implements
 //@	}
 	//#endif
 
+	//#ifdef DFULLVERS
 	// Open existing bookmark and show headers (items).
 	final public void setPageInfo(boolean openPage, boolean getPage,
 		boolean getModPage, Displayable prevDisp) {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("setPageInfo openPage,getPage,prevDisp=" + openPage  + "," + getPage + "," + getModPage + "," + prevDisp);}
+		//#endif
 		synchronized(this) {
 			m_openPage = openPage;
 			m_getPage = getPage;
@@ -1364,6 +1561,8 @@ implements
 	//#ifdef DMIDP20
 	// Open existing bookmark and show headers (items).
 	final public RssFeedParser procBackPage(RssItunesFeed feed,
+										    boolean modfeed,
+										    boolean updfeed,
 										    Observer obsmain,
 										    boolean initLoad,
 											Observer obs1, LoadingForm loadForm) {
@@ -1371,7 +1570,8 @@ implements
 		if (obsmain == null) {
 			obsmain = this;
 		}
-		RssFeedParser cbackGrParser = new RssFeedParser(new RssItunesFeed(feed));
+		RssFeedParser cbackGrParser = new RssFeedParser(feed,
+				(modfeed ? feed : null), updfeed);
 		Displayable cprevDisp = null;
 		boolean     cgetPage = false;
 		boolean     cgetModPage = false;
@@ -1492,10 +1692,10 @@ implements
 	}
 
     //#ifdef DMIDP20
-	public RssFeedParser checkActive(Observable observable) {
+	public RssFeedParser checkRssActive(Observable observable) {
 		synchronized(this) {
-			observable = observable.getObservableHandler().checkActive(m_parseBackground,
-					m_backGrParser, observable);
+			observable = observable.getObservableHandler().checkActive(
+					m_parseBackground, m_backGrParser, observable);
 		}
 		if ((observable == null) || !(observable instanceof RssFeedParser)) {
 			return null;
@@ -1507,7 +1707,7 @@ implements
 	final public void procBackHeader(RssFeedParser cbackGrRssParser,
 			Observable observable, LoadingForm loadForm) {
 
-		cbackGrRssParser = checkActive(observable);
+		cbackGrRssParser = checkRssActive(observable);
 		if (cbackGrRssParser == null) {
 			return;
 		}
@@ -1581,14 +1781,21 @@ implements
 			}
 		}
 	}
+	// End DFULLVERS
+	//#endif
 
 	/** Save data and exit the application. This accesses the database,
 	    so it must not be called by commandAction as it may hang.  It must
 	    be called by a separate thread.  */
-	final private void exitApp(LoadingForm loadForm ) {
+	final public void exitApp(LoadingForm loadForm ) {
 		boolean cexit = false;
 		boolean csaveBookmarks = false;
 		synchronized(this) {
+			// This happens for internet link version as m_exit and
+			// m_saveBookmarks are not set.
+			if (!m_exit && !m_saveBookmarks) {
+				m_exit = true;
+			}
 			if ( (m_exit || m_saveBookmarks) && !m_saving ) {
 				if (m_exit && m_stored) {
 					return;
@@ -1617,6 +1824,7 @@ implements
 				if (cexit) {
 					loadForm.addQuit();
 				}
+				//#ifdef DFULLVERS
 				saveBkMrkSettings("Saving items to database...",
 						System.currentTimeMillis(), m_firstTime, cexit,
 						m_rssFeeds, m_bookmarkList, loadForm, m_settings
@@ -1625,6 +1833,7 @@ implements
 //@						,fineLoggable
 						//#endif
 						);
+				//#endif
 				if (cexit) {
 					try {
 						destroyApp(true);
@@ -1637,10 +1846,12 @@ implements
 					}
 					super.notifyDestroyed();
 					m_exit = false;
+				//#ifdef DFULLVERS
 				} else {
 					loadForm.appendMsg(
 							"Finished saving.  Use back to return.");
 					showBookmarkList();
+				//#endif
 				}
 			} finally {
 				m_stored = m_exit;
@@ -1654,9 +1865,15 @@ implements
 	/* Notify us that we are finished. */
 	final public void wakeup(int loop) {
     
+		//#ifdef DFULLVERS
 		if (m_bookmarkList != null) {
 			m_bookmarkList.getFeatureMgr().wakeup(loop);
 		}
+		//#else
+//@		if (m_settingsForm != null) {
+//@			m_settingsForm.getFeatureMgr().wakeup(loop);
+//@		}
+		//#endif
 	}
 
 	/* Set current displayable and wake up the thread. */
@@ -1715,6 +1932,7 @@ implements
 		FeatureMgr.setMainCurrentAlt(null, alert, disp);
 	}
 
+	//#ifdef DFULLVERS
     /** Show item form */
     final public void showItemForm() {
         setCurrent( null, m_itemForm );
@@ -1755,6 +1973,7 @@ implements
 		//#endif
 		setCurrent( null, m_itemForm );
     }
+	//#endif
 
 	//#ifdef DITUNES
 //@    /** Initialize RSS item form */
@@ -1788,11 +2007,12 @@ implements
 		return sb.toString();
 	}
     
+	//#ifdef DFULLVERS
     public void initApp() {
 		// Initialize bookmarks here since it does some work.
-		if (m_bookmarkList == null) {
+		if ((m_bookmarkList == null) || (m_bookmarkList.size() == 0)) {
 			synchronized (this) {
-				if (m_bookmarkList == null) {
+				if ((m_bookmarkList == null) || (m_bookmarkList.size() == 0)) {
 					initForms();
 				}
 				if (m_novice) {
@@ -1802,7 +2022,8 @@ implements
 						try {
 							FeedListParser listParser =
 								new LineByLineParser(
-									"jar:///data/novice.txt", "", "");
+									"jar:///data/novice.txt", "", "",
+									m_rssFeeds);
 							listParser.setGetFeedTitleList(true);
 							listParser.setFeedNameFilter(null);
 							listParser.setFeedURLFilter(null);
@@ -1813,8 +2034,8 @@ implements
 							ImportFeedsForm.addFeedLists(listParser,
 									0,
 									m_appSettings.getMaximumItemCountInFeed(),
-									true, m_rssFeeds, m_bookmarkList,
-									m_loadForm);
+									true, false, false, m_rssFeeds,
+									m_bookmarkList, m_loadForm);
 						}catch(Throwable e) {
 							m_loadForm.recordExcForm(
 									"\nError loading intial bookmarks\n", e);
@@ -1843,6 +2064,7 @@ implements
 			}
 		}
     }
+	//#endif
 
     /**
      * Start up the Hello MIDlet by creating the TextBox and associating
@@ -1850,7 +2072,6 @@ implements
      */
     public void startApp()
 	throws MIDletStateChangeException {
-		initApp();
     }
     
 	final private String[] getAboutInfo() {
@@ -1914,7 +2135,7 @@ implements
 	final private Displayable getSetLicensePrompt(boolean isAbout) {
 		String[] aboutInfo = getAboutInfo();
 		if (isAbout) {
-			m_loadForm.addStartCmd( m_bookmarkList );
+			m_loadForm.addStartCmd( FeatureMgr.getMainDisp() );
 			m_loadForm.addQuit();
 		}
 		Displayable disp = m_loadForm.getFeatureMgr().getPromptDisp(
@@ -1922,7 +2143,9 @@ implements
 				((m_loadForm.hasExc() || m_loadForm.hasNotes()) ?
 											m_loadForm.m_loadMsgsCmd :
 											m_loadForm.m_loadStartCmd),
-				m_loadForm.m_loadQuitCmd, "Quit Program", m_loadForm, null);
+				"Agree",
+				(isAbout ? FeatureMgr.m_exitCommand : m_loadForm.m_loadQuitCmd),
+				 "Disagree", m_loadForm, null);
 		//#ifdef DLOGGING
 //@		if (fineLoggable) {logger.fine("disp=" + disp);}
 		//#endif
@@ -1942,9 +2165,15 @@ implements
      */
     public void destroyApp(boolean unconditional)
 		throws MIDletStateChangeException {
+		//#ifdef DFULLVERS
     	if (unconditional && (m_bookmarkList != null)) {
 			m_bookmarkList.getFeatureMgr().setBackground(false);
 		}
+		//#else
+//@    	if (unconditional && (m_settingsForm != null)) {
+//@			m_settingsForm.getFeatureMgr().setBackground(false);
+//@		}
+		//#endif
     }
     
     /** Save bookmarks to record store
@@ -1953,7 +2182,7 @@ implements
 		having extra memory around.  */
     static final public void saveBookmarks(final long storeDate,
 			int region, boolean releaseMemory,
-			Hashtable rssFeeds, final Choice bookmarkList,
+			RssFeedStore rssFeeds, final Choice bookmarkList,
 			final LoadingForm loadForm,
 			final Settings settings
 			//#ifdef DLOGGING
@@ -1963,9 +2192,9 @@ implements
 			) {
 		System.gc();
 		StringBuffer bookmarks = new StringBuffer();
-		settings.setStringProperty(Settings.BOOKMARKS_NAME,
+		settings.setStringProperty(settings.BOOKMARKS_NAME,
 				bookmarks.toString());
-		settings.setLongProperty(Settings.STORE_DATE, storeDate);
+		settings.setLongProperty(settings.STORE_DATE, storeDate);
 		final int bsize = bookmarkList.size();
 		if (bsize == 0) {
 			return;
@@ -1974,7 +2203,7 @@ implements
 //@		int storeTime = 0;
 		//#endif
 		final int bookRegion = region - 1;
-		final int iparts = Settings.MAX_REGIONS - 1;
+		final int iparts = settings.MAX_REGIONS - 1;
 		final int firstIx = bookRegion * bsize / iparts;
 		final int endIx = (bookRegion + 1) * bsize / iparts - 1;
         try {
@@ -2002,7 +2231,7 @@ implements
 						//#ifdef DTEST
 //@						storeTime += System.currentTimeMillis() - beginStore;
 						//#endif
-						bookmarks.append(Settings.CFEED_SEPARATOR);
+						bookmarks.append(settings.CFEED_SEPARATOR);
 						if (releaseMemory) {
 							vstored.addElement( name );
 						}
@@ -2022,7 +2251,7 @@ implements
 					}
 					final RssItunesFeed rss = (RssItunesFeed)rssFeeds.get( name );
 					bookmarks.append(rss.getStoreString(false, true));
-					bookmarks.append(Settings.CFEED_SEPARATOR);
+					bookmarks.append(settings.CFEED_SEPARATOR);
 					if (releaseMemory) {
 						vstored.addElement( name );
 					}
@@ -2038,9 +2267,9 @@ implements
 			//#ifdef DTEST
 //@			System.out.println("storeTime=" + storeTime);
 			//#endif
-            settings.setStringProperty(Settings.BOOKMARKS_NAME, bookmarks.toString());
+            settings.setStringProperty(settings.BOOKMARKS_NAME, bookmarks.toString());
 		} catch (Throwable t) {
-            settings.setStringProperty(Settings.BOOKMARKS_NAME, bookmarks.toString());
+            settings.setStringProperty(settings.BOOKMARKS_NAME, bookmarks.toString());
 			//#ifdef DTEST
 //@			System.out.println("storeTime=" + storeTime);
 			//#endif
@@ -2061,7 +2290,7 @@ implements
 			final long storeDate,
 			final boolean firstTime,
 			final boolean releaseMemory,
-			Hashtable rssFeeds, final Choice bookmarkList,
+			RssFeedStore rssFeeds, final Choice bookmarkList,
 			final LoadingForm loadForm,
 			final Settings settings
 			//#ifdef DLOGGING
@@ -2069,18 +2298,18 @@ implements
 //@			,final boolean finestLoggable
 			//#endif
 			) {
-		int nbrRegions = firstTime ? 1 : Settings.MAX_REGIONS + 1;
+		int nbrRegions = firstTime ? 1 : settings.MAX_REGIONS + 1;
 		Gauge gauge = new Gauge(guageTxt, false, nbrRegions, 0);
 		int pl = loadForm.append(gauge);
 		loadForm.getFeatureMgr().showMe();
 		try {
 			if (!firstTime) {
-				settings.setLongProperty(Settings.STORE_DATE, storeDate);
+				settings.setLongProperty(settings.STORE_DATE, storeDate);
 				settings.save(0, false);
 			}
 			gauge.setValue(1);
 			if (!firstTime) {
-				for (int ic = 1; ic < Settings.MAX_REGIONS; ic++) {
+				for (int ic = 1; ic < settings.MAX_REGIONS; ic++) {
 					saveBookmarks(storeDate, ic, releaseMemory, rssFeeds,
 							bookmarkList, loadForm, settings
 							//#ifdef DLOGGING
@@ -2092,7 +2321,7 @@ implements
 					gauge.setValue(ic + 1);
 				}
 				// Set internal region back to 0.
-				settings.setStringProperty(Settings.BOOKMARKS_NAME, "");
+				settings.setStringProperty(settings.BOOKMARKS_NAME, "");
 				settings.save(0, false);
 			}
 			pl = -1;
@@ -2125,11 +2354,11 @@ implements
 		m_loadForm.replaceRef(disp, newDisp);
 	}
 
+	//#ifdef DFULLVERS
 	//#ifdef DMIDP20
 	public void changed(Observable observable, Object arg) {
 
-		RssFeedParser cbackGrRssParser = null;
-		cbackGrRssParser = checkActive(observable);
+		RssFeedParser cbackGrRssParser = checkRssActive(observable);
 		if (cbackGrRssParser == null) {
 			return;
 		}
@@ -2189,7 +2418,7 @@ implements
         }
         
         /** Exit from MIDlet and save bookmarks */
-        if( c == m_exitCommand ){
+        if( c == FeatureMgr.m_exitCommand ){
 			synchronized(this) {
 				m_exit = true;
 			}
@@ -2260,10 +2489,12 @@ implements
 					procPage(feed);
 				} else {
 					//#ifdef DMIDP20
-					procBackPage(feed, this, true, null, m_loadForm);
+					procBackPage(feed, false, false, this, true, null,
+							m_loadForm);
 					//#else
 //@					try {
-//@						RssFeedParser parser = new RssFeedParser( feed );
+//@						RssFeedParser parser = new RssFeedParser( feed, null,
+//@								false );
 //@						/* Updating feed... */
 //@						initializeLoadingForm(
 //@								"Updating feed..." , m_bookmarkList);
@@ -2404,19 +2635,8 @@ implements
 			m_about = true;
 		}
 
-		//#ifdef DTESTUI
-//@        /** Show encodings list */
-//@		if( c == m_testEncCmd ) {
-//@			try {
-//@				initializeLoadingForm("Loading test form...", m_bookmarkList);
-//@				setCurrent( null, m_testingForm );
-//@			} catch (Exception e) {
-//@				e.printStackTrace();
-//@			}
-//@		}
-		//#endif
-
-	//#ifdef DLOGGING
+		//#ifdef DLOGGING
+		//#ifdef DFULLVERS
 //@        /** Show about */
 //@		if( c == m_debugCmd ) {
 //@			setCurrent( null, m_debug );
@@ -2433,7 +2653,9 @@ implements
 //@		if( c == m_backFrDebugCmd ) {
 //@			showBookmarkList();
 //@		}
+		//#endif
 //@
+//@		// End DLOGGING
 		//#endif
 
     }
@@ -2452,6 +2674,8 @@ implements
 //@		if (finestLoggable) {logger.finest("m_parseBackground,cbackGrParser,m_backGrParser=" + m_parseBackground + "," + cbackGrParser + "," + m_backGrParser);}
 		//#endif
 	}
+	//#endif
+	// End DFULLVERS
 	//#endif
 
 	//#ifdef DTESTUI
@@ -2498,7 +2722,7 @@ implements
 //@	/* Form to look at item. */
 //@	final public class DetailForm extends FeatureForm
 //@		implements CommandListener {
-//@		private boolean     m_platformReq = false; // Flag to get platform req open link
+//@		private boolean     m_platformReq; // Flag to get platform req open link
 //@		private String m_platformURL;         // Platform request URL
 //@		private Displayable        m_rtn;
 //@
@@ -2587,6 +2811,7 @@ implements
 //@	}
 	//#endif
 
+	//#ifdef DFULLVERS
 	/* Form to look at item. */
 	final private class ItemForm extends FeatureForm
 		implements CommandListener {
@@ -2605,12 +2830,6 @@ implements
 								   LoadingForm loadForm) {
 			super(title, loadForm);
 			m_platformReq = false;
-			m_nextItemCmd = new Command("Next Item", Command.SCREEN, 7);
-			//#ifdef DMIDP20
-			m_openEnclosureCmd  = new Command("Open enclosure", Command.SCREEN, 8);
-			//#endif
-			m_copyLinkCmd       = new Command("Copy link", Command.SCREEN, 9);
-			m_copyEnclosureCmd  = new Command("Copy enclosure", Command.SCREEN, 10);
 			super.addCommand( FeatureMgr.m_backCommand );
 			final String sienclosure = item.getEnclosure();
 			final String desc = item.getDescription();
@@ -2697,19 +2916,19 @@ implements
 				super.append(new StringItem(dateLabel, sdate));
 			}
 
-			super.addCommand( m_nextItemCmd );
+			m_nextItemCmd = FeatureMgr.getCmdAdd(this, "Next Item", Command.SCREEN, 7);
 			if (link.length() > 0) {
-				super.addCommand( m_copyLinkCmd );
+				m_copyLinkCmd = FeatureMgr.getCmdAdd(this, "Copy link", Command.SCREEN, 9);
 			}
 			if (sienclosure.length() > 0) {
-				super.addCommand( m_copyEnclosureCmd );
+				m_copyEnclosureCmd = FeatureMgr.getCmdAdd(this, "Copy enclosure", Command.SCREEN, 10);
 			}
 			//#ifdef DMIDP20
 			if (link.length() > 0) {
 				super.addCommand( m_openLinkCmd );
 			}
 			if (sienclosure.length() > 0) {
-				super.addCommand( m_openEnclosureCmd );
+				m_openEnclosureCmd = FeatureMgr.getCmdAdd(this, "Open enclosure", Command.SCREEN, 8);
 			}
 			//#endif
 		}
@@ -2725,7 +2944,7 @@ implements
 				FeatureMgr.setCurrentFeature( m_itemRtnList, null,
 						m_itemRtnList );
 				//#ifdef DTESTUI
-//@				FeatureMgr.getMidlet().updHeaderNext();
+//@				FeatureMgr.getRssMidlet().updHeaderNext();
 				//#endif
 			}
 			
@@ -2734,7 +2953,7 @@ implements
 				String link = citem.getLink();
 				super.set(citemLnkNbr, new TextField("Link:", link,
 						link.length(), TextField.URL));
-				featureMgr.showMe(super.get(citemLnkNbr));
+				super.featureMgr.showMe(super.get(citemLnkNbr));
 			}
 			
 			/** Copy enclosure to clipboard.  */
@@ -2742,7 +2961,7 @@ implements
 				final String link = citem.getEnclosure();
 				super.set(citemEnclNbr, new TextField("Enclosure:",
 					link, link.length(), TextField.URL));
-				featureMgr.showMe(super.get(citemEnclNbr));
+				super.featureMgr.showMe(super.get(citemEnclNbr));
 			}
 			
 			//#ifdef DMIDP20
@@ -2790,9 +3009,6 @@ implements
 		}
 
 	}
-
-    public LoadingForm getLoadForm() {
-        return (m_loadForm);
-    }
+	//#endif
 
 }
