@@ -1,4 +1,8 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties file for signed jar/jad files.
-file.prefix.thawte = thawte_
-SUFFIXVERS.thawte = -thawte
-thawte.text = thawte 
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
+#-- IB 2011-01-14 1.11.5Alpha15 Have text to put signing authority name into description on project host.
+DTHAWTEDEF = DTHAWTE
+file.prefix.thawte = ${sfile.prefix.thawte}_
+SUFFIXVERS.thawte = -${sfile.prefix.thawte}
+signed.authority = thawte
+thawte.text = ${signed.authority} 
