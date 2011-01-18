@@ -28,6 +28,8 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-16 1.11.5Dev14 Don't have feed open property now that back will have consistent usage.
  * IB 2010-11-16 1.11.5Dev14 Use bookmark name in news to replace feed open order.
+ * IB 2011-01-14 1.11.5Alpha15 Do 3 fewer tests if small memory (MIDP 1.0) to account for removed classes/features.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
 */
 
 // Expand to define memory size define
@@ -42,8 +44,6 @@
 //#ifdef DJMTEST
 package com.substanceofcode.jmunit.utils;
 
-import jmunit.framework.cldc10.TestCase;
-
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.Settings;
@@ -57,10 +57,10 @@ final public class Settings2Test extends BaseTestCase {
 	final static String TEST_LONG = "test-long";
 
 	public Settings2Test() {
-		//#ifndef DSMALLMEM
-		super(13, "Settings2Test");
+		//#ifdef DSMALLMEM
+		super(10, "Settings2Test");
 		//#else
-		super(12, "Settings2Test");
+		super(13, "Settings2Test");
 		//#endif
 	}
 
@@ -73,38 +73,40 @@ final public class Settings2Test extends BaseTestCase {
 				testSettings2();
 				break;
 			case 2:
-				testSettings4();
-				break;
-			case 3:
-				testSettings5();
-				break;
-			case 4:
 				testSettings6();
 				break;
-			case 5:
+			case 3:
 				testSettings7();
 				break;
-			case 6:
+			case 4:
 				testSettings8();
 				break;
-			case 7:
+			case 5:
 				testSettings9();
 				break;
-			case 8:
+			case 6:
 				testSettings10();
 				break;
-			case 9:
+			case 7:
 				testSettings11();
 				break;
-			case 10:
+			case 8:
 				testSettings12();
 				break;
-			case 11:
+			case 9:
 				testSettings13();
 				break;
 			//#ifndef DSMALLMEM
-			case 12:
+			case 10:
 				testSettings3();
+				break;
+			//#endif
+			//#ifdef DMIDP20
+			case 11:
+				testSettings4();
+				break;
+			case 12:
+				testSettings5();
 				break;
 			//#endif
 			default:
@@ -132,17 +134,18 @@ final public class Settings2Test extends BaseTestCase {
 
 	public void testSettings1() throws Throwable {
 		String mname = "testSettings1";
-		boolean itemsEncoding = m_settings.getBooleanProperty(
-				Settings.ITEMS_ENCODED, false);
-		settingsTestSub(mname, 0, Settings.ITEMS_ENCODED, new Boolean(false),
-				new Boolean(itemsEncoding));
+		boolean bookmarkNameNews = m_settings.getBooleanProperty(
+				m_appSettings.USE_TEXT_BOX, false);
+		settingsTestSub(mname, 0, m_appSettings.USE_TEXT_BOX,
+				new Boolean(false),
+				new Boolean(bookmarkNameNews));
 		m_settings.save(0, false);
 	}
 
 	public void testSettings2() throws Throwable {
 		String mname = "testSettings2";
-		long storeDate = m_settings.getLongProperty(Settings.STORE_DATE, 64L);
-		settingsTestSub(mname, 0, Settings.STORE_DATE, new Long(storeDate),
+		long storeDate = m_settings.getLongProperty(m_settings.STORE_DATE, 64L);
+		settingsTestSub(mname, 0, m_settings.STORE_DATE, new Long(storeDate),
 				new Long(storeDate));
 		m_settings.save(0, false);
 	}
@@ -156,6 +159,7 @@ final public class Settings2Test extends BaseTestCase {
 	}
 	//#endif
 
+	//#ifdef DMIDP20
 	public void testSettings4() throws Throwable {
 		String mname = "testSettings4";
 		boolean getBookmarkNameNews = m_appSettings.getBookmarkNameNews();
@@ -165,19 +169,21 @@ final public class Settings2Test extends BaseTestCase {
 
 	public void testSettings5() throws Throwable {
 		String mname = "testSettings5";
+		m_appSettings.setBookmarkNameNews(false);
+		boolean getBookmarkNameNews = m_appSettings.getBookmarkNameNews();
+		appSettingsTestSub(mname, "getBookmarkNameNews", new Boolean(false), new Boolean(getBookmarkNameNews));
+		m_settings.save(0, false);
+	}
+	//#endif
+
+	public void testSettings6() throws Throwable {
+		String mname = "testSettings6";
 		m_appSettings.setUseStandardExit(true);
 		boolean useStandardExit = m_appSettings.getUseStandardExit();
 		appSettingsTestSub(mname, "useStandardExit", new Boolean(true), new Boolean(useStandardExit));
 		m_settings.save(0, false);
 	}
 
-	public void testSettings6() throws Throwable {
-		String mname = "testSettings6";
-		m_appSettings.setBookmarkNameNews(false);
-		boolean getBookmarkNameNews = m_appSettings.getBookmarkNameNews();
-		appSettingsTestSub(mname, "getBookmarkNameNews", new Boolean(false), new Boolean(getBookmarkNameNews));
-		m_settings.save(0, false);
-	}
 
 	public void testSettings7() throws Throwable {
 		String mname = "testSettings7";
