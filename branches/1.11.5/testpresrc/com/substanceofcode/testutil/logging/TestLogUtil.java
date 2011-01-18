@@ -24,6 +24,8 @@
  * IB 2010-05-24 1.11.5RC2 Better logging.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-18 1.11.5Dev14 Have fieldEquals with RssItemInfo only for JM Unit tests.
+ * IB 2011-01-06 1.11.5Dev15 Change equals message for both null so that it is done as an else vs due to the other conditions returning null.  This is a slight performance improvement.
+ * IB 2011-01-06 1.11.5Dev15 Use MiscUtil.toString to log null or the value of the equals parameter vs conditional logic.
  */
 
 // Expand to define JMUnit test define
@@ -104,10 +106,12 @@ public class TestLogUtil {
 			if (fineLoggable) {logger.fine("equals object unequal one is null " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + MiscUtil.toString(thisValue, true));}
 			//#endif
 			return false;
+			// else both are null and equal
+		} else {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
+			//#endif
 		}
-		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
-		//#endif
 		return true;
 	}
 
@@ -126,20 +130,32 @@ public class TestLogUtil {
 				//#endif
 				return true;
 			} else {
+				char[] parmChars = parmValue.toCharArray();
+				char[] thisChars = thisValue.toCharArray();
+				int parmLen = parmChars.length;
+				int thisLen = thisChars.length;
+				int i = 0;
+				for (; (i < parmLen) && (i < thisLen); i++) {
+					if (parmChars[i] != thisChars[i]) {
+						break;
+					}
+				}
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals String unequal " + thisLog + ",this=" + parmValue + "," + thisValue);}
+				if (fineLoggable) {logger.fine("equals String unequal " + thisLog + ",this,pos=" + parmValue + "," + thisValue + "," + i);}
 				//#endif
 				return false;
 			}
 		} else if ((parmValue != null) || (thisValue != null)) {
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("equals String unequal one is null " + thisLog + ",this=" + ((parmValue == null) ? "null" : parmValue) + "," + ((thisValue == null) ? "null" : thisValue));}
+			if (fineLoggable) {logger.fine("equals String unequal one is null " + thisLog + ",this=" + MiscUtil.toString(parmValue) + "," + MiscUtil.toString(thisValue));}
 			//#endif
 			return false;
+			// else both are null and equal
+		} else {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
+			//#endif
 		}
-		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
-		//#endif
 		return true;
 	}
 
@@ -167,13 +183,59 @@ public class TestLogUtil {
 			}
 		} else if ((parmValue != null) || (thisValue != null)) {
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + ((parmValue == null) ? "null" : parmValue.toString()) + "," + ((thisValue == null) ? "null" : thisValue.toString()));}
+			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + MiscUtil.toString(parmValue) + "," + MiscUtil.toString(thisValue));}
 			//#endif
 			return false;
+			// else both are null and equal
+		} else {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
+			//#endif
 		}
-		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
-		//#endif
+		return true;
+	}
+
+	static public boolean itemEquals(RssItemInfo parmValue,
+			RssItemInfo thisValue,
+			boolean[] fldPres,
+			String thisLog,
+			//#ifdef DLOGGING
+			Logger logger,
+			//#else
+			Object logger,
+			//#endif
+			boolean fineLoggable, boolean traceLoggable) {
+		boolean result = true;
+		if (fldPres[0] && !TestLogUtil.fieldEquals(parmValue.getTitle(),
+					thisValue.getTitle(),
+			"m_title", logger, fineLoggable)) {
+			result = false;
+		}
+		if (fldPres[1] && !TestLogUtil.fieldEquals(parmValue.getLink(),
+					thisValue.getLink(),
+			"m_link", logger, fineLoggable)) {
+			result = false;
+		}
+		if (fldPres[2] && !TestLogUtil.fieldEquals(parmValue.getDescription(),
+					thisValue.getDescription(),
+			"m_desc", logger, fineLoggable)) {
+			result = false;
+		}
+		if (fldPres[3] && !TestLogUtil.fieldEquals(parmValue.getDate(),
+					thisValue.getDate(),
+			"m_date", logger, fineLoggable)) {
+			result = false;
+		}
+		if (fldPres[4] && !TestLogUtil.fieldEquals(parmValue.getEnclosure(),
+					thisValue.getEnclosure(),
+			"m_enclosure", logger, fineLoggable)) {
+			result = false;
+		}
+		if (fldPres[5] && !TestLogUtil.fieldEquals(parmValue.isUnreadItem(),
+					thisValue.isUnreadItem(),
+			"m_unreadItem", logger, fineLoggable)) {
+			result = false;
+		}
 		return true;
 	}
 
@@ -202,7 +264,7 @@ public class TestLogUtil {
 				}
 			} else if (thisValue.equals(parmValue)) {
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals RssItemInfo equal " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + thisValue.toString());}
+				if (fineLoggable) {logger.fine("equals RssItemInfo equal " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + MiscUtil.toString(thisValue, true));}
 				//#endif
 				return true;
 			} else {
@@ -211,15 +273,18 @@ public class TestLogUtil {
 			}
 		} else if ((parmValue != null) || (thisValue != null)) {
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + ((parmValue == null) ? "null" : MiscUtil.toString(parmValue, true)) + "," + ((thisValue == null) ? "null" : thisValue.toString()));}
+			if (fineLoggable) {logger.fine("equals unequal " + thisLog + ",this=" + MiscUtil.toString(parmValue, true) + "," + MiscUtil.toString(thisValue, true));}
 			//#endif
 			return false;
+			// else both are null and equal
+		} else {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
+			//#endif
 		}
-		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine("equals equal " + thisLog + ",this=" + parmValue + "," + thisValue);}
-		//#endif
 		return true;
 	}
+
 	//#endif
 
 	static public boolean fieldEquals(int parmValue, int thisValue,
