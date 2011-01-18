@@ -4,7 +4,7 @@
 wtk.wma.enabled = true
 wtk.wma.version = 1.1
 DJSR120 = DJSR120
-file.prefix.jsr120 = jsr120_
+file.prefix.jsr120 = ${sfile.prefix.jsr120}_
 PERMISSIONS_REQ.jsr120 =
 PERMISSIONS_OPT.jsr120 = ,javax.microedition.io.Connector.sms,javax.wireless.messaging.sms.receive,javax.wireless.messaging.sms.send
 SUFFIXVERS.jsr120 = -jsr120
