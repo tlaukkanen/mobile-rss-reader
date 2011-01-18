@@ -38,8 +38,10 @@ import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
+import com.substanceofcode.rssreader.businessentities.compatibility4.RssFeed;
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesItem;
 import com.substanceofcode.rssreader.businessentities.RssItunesItemInfo;
+import com.substanceofcode.rssreader.businessentities.compatibility4.RssItem;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.SgmlParserIntr;
 import com.substanceofcode.rssreader.businesslogic.SgmlFormatParser;
@@ -149,7 +151,11 @@ public class RssFormatParser implements SgmlFormatParser {
 		feed.setLink(m_link);
 		if (m_date.length() > 0) {
 			Date pubDate = parseRssDate(m_date);
-			feed.setDate(pubDate);
+			if (pubDate == null) {
+				((RssFeed)feed).setErrDate(m_date);
+			} else {
+				feed.setDate(pubDate);
+			}
 		} else {
 			feed.setDate(null);
 		}
@@ -246,6 +252,9 @@ public class RssFormatParser implements SgmlFormatParser {
 				item = new RssItunesItem(m_title, m_link,
 						m_description, pubDate,
 						m_enclosure, true);
+			}
+			if ((pubDate == null) && (m_date.length() > 0)) {
+				((RssItem)item).setErrDate(m_date);
 			}
 			return item;
 		}
