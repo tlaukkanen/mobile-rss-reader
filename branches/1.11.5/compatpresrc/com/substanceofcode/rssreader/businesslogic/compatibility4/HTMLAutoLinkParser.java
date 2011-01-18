@@ -46,7 +46,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Vector;
 
-import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.compatibility4.EncodingUtil;
 import com.substanceofcode.utils.compatibility4.StringUtil;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
