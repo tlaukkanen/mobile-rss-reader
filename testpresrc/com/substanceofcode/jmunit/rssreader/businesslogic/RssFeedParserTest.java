@@ -27,8 +27,14 @@
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  * IB 2010-06-29 1.11.5RC2 Don't use midlet in makeObserable.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define MIDP define
 @DMIDPVERS@
 // Expand to define test define
@@ -39,11 +45,10 @@
 @DLOGDEF@
 
 //#ifdef DJMTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.jmunit.rssreader.businesslogic;
 
 import java.util.Date;
-
-import jmunit.framework.cldc10.TestCase;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
@@ -93,6 +98,9 @@ implements Observer
 	//#ifdef DMIDP20
 	public void changed(Observable observable, Object arg) {
 		ready = true;
+		synchronized(this) {
+			super.notifyAll();
+		}
 	}
 	//#endif
 
@@ -105,7 +113,7 @@ implements Observer
 		String mname = "testFeedParse1";
 		RssItunesFeed feed = new RssItunesFeed(
 			"test1", "jar:///rss-german-itunes-utf8.xml", "", "");
-		RssItunesFeed cmfeed = new RssItunesFeed(feed);
+		RssItunesFeed cmfeed = (RssItunesFeed)feed.clone();
 		cmfeed.modifyItunes(
 			true, "title1", "description1", "language1", "author1", "subtitle1",
 					"summary1", RssItunesItem.convExplicit("no"));
@@ -117,7 +125,7 @@ implements Observer
 		String mname = "testFeedParse2";
 		RssItunesFeed feed = new RssItunesFeed(
 			"test2", "http://mobilerssreader.sourceforge.net/testdata/rss2.xml", "", "");
-		RssItunesFeed cmfeed = new RssItunesFeed(feed);
+		RssItunesFeed cmfeed = (RssItunesFeed)feed.clone();
 		cmfeed.modifyItunes(
 			true, "title2", "description2", "language2", "author2", "subtitle2",
 					"summary2", RssItunesItem.convExplicit("yes"));
@@ -130,7 +138,7 @@ implements Observer
 		String mname = "testFeedParse3";
 		RssItunesFeed feed = new RssItunesFeed(
 			"test3", "jar:///rss-1252.xml", "", "");
-		RssItunesFeed cmfeed = new RssItunesFeed(feed);
+		RssItunesFeed cmfeed = (RssItunesFeed)feed.clone();
 		cmfeed.modifyItunes(
 			true, "title2", "description2", "language2", "author2", "subtitle2",
 					"summary2", RssItunesItem.convExplicit("clean"));
@@ -141,7 +149,7 @@ implements Observer
 	private void waitReady() throws Throwable {
 		while (!isReady()) {
 			synchronized(this) {
-				wait(1000L);
+				wait(500L);
 			}
 		}
 	}
@@ -156,7 +164,7 @@ implements Observer
 			if (finestLoggable) {logger.finest(mname + " feed=" + feed);}
 			if (finestLoggable) {logger.finest(mname + " updFeed,maxItemCount=" + updFeed + "," + maxItemCount);}
 			//#endif
-			RssFeedParser fparser = new RssFeedParser(new RssItunesFeed(feed));
+			RssFeedParser fparser = new RssFeedParser(feed, null, false);
 			//#ifdef DMIDP20
 			fparser.makeObserable(updFeed, maxItemCount);
 			fparser.getObservableHandler().addObserver(this);
@@ -190,4 +198,5 @@ implements Observer
 	}
 
 }
+//#endif
 //#endif
