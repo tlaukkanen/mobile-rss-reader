@@ -28,6 +28,8 @@
  * IB 2010-09-26 1.11.5Dev8 Support loadingForm with FeatureMgr.
  * IB 2010-09-27 1.11.5Dev8 Add exception for setFont error to exception stack.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 Don't use static vars for RssReaderSettings.
  */
 
 // Expand to define MIDP define
@@ -185,10 +187,10 @@ public class FeatureForm extends Form {
 				"Font not supported by device.  Reset to default or pick another font.");
 			loadForm.addExc("Error changing font.", ce);
 		}
-		RssReaderMIDlet midlet = featureMgr.getMidlet();
+		RssReaderMIDlet midlet = featureMgr.getRssMidlet();
 		if (midlet != null) {
 			midlet.getSettings().setFontChoice(
-				RssReaderSettings.DEFAULT_FONT_CHOICE);
+				midlet.getSettings().DEFAULT_FONT_CHOICE);
 		}
 		this.font = (Font)nullPtr;
 		final int flen = super.size();
