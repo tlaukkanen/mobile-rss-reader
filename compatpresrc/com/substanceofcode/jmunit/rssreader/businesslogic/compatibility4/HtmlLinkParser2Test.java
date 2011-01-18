@@ -31,6 +31,20 @@
  * IB 2010-05-30 1.11.5RC2 Skip result that shows fix of relative URLs.
  * IB 2010-06-29 1.11.5RC2 Use ObservableHandler, Observer, and Observable re-written to use observer pattern without GPL code.  This is dual licensed as GPL and LGPL.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-14 1.11.5Alpha15 Allow test using jar or http links if oneTestOnly is true.
+ * IB 2011-01-14 1.11.5Alpha15 Future calculate average time for http access/parsing for current and previous versions for performance testing.
+ * IB 2011-01-14 1.11.5Alpha15 Allow retrying the test case with http access if retryModHttp is true.
+ * IB 2011-01-14 1.11.5Alpha15 Increase number of tests to 10 to spread out the testing among more steps.  This also allows more tests to be run if one fails (not for errors).
+ * IB 2011-01-14 1.11.5Alpha15 If failure is for equals test, increase nextIx to allow the next test to try the next feed instead of retrying the failed feed over and over again.
+ * IB 2011-01-14 1.11.5Alpha15 Use convience methods updSvLogging and updPrevLogging from LoggingTestCase to alter/restore the logging level.
+ * IB 2011-01-14 1.11.5Alpha15 Use convience method cmpModLog from LoggingTestCase to see if feeds are unequal and change the logging level to retry using logging to make debugging equals failures easier.  Also, retry with modified previous version for bug fixes/enhancements made in the current version.
+ * IB 2011-01-14 1.11.5Alpha15 Start at second (index 1) feed to skip sourceforge home link.
+ * IB 2011-01-14 1.11.5Alpha15 Allow tracing for parsing or reading chars once or ongoing.
+ * IB 2011-01-14 1.11.5Alpha15 Better logging.
+ * IB 2011-01-14 1.11.5Alpha15 Use procThrowable from LoggingTestCase.
+ * IB 2011-01-17 1.11.5Alpha15 Handle search url with /feed.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
  */
 
 // Expand to define MIDP define
@@ -50,9 +64,8 @@ package com.substanceofcode.jmunit.rssreader.businesslogic.compatibility4;
 
 import java.util.Date;
 
-import jmunit.framework.cldc10.TestCase;
-
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.compatibility4.CauseException;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.RssFeedParser;
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFeed;
@@ -70,6 +83,7 @@ import net.eiroca.j2me.observable.compatibility4.Observable;
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Level;
+import net.sf.jlogmicro.util.logging.Logger;
 //#endif
 
   /**
@@ -86,19 +100,32 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	//#ifdef DMIDP20
 	private boolean ready = false;
 	//#endif
-	private int nextIx = 0;
+
+	private boolean oneTestOnly = true;
+	private boolean retryModHttp = false;
+	private String testUrl = (oneTestOnly ? "jar:///links2.html" :
+				"http://mobilerssreader.sourceforge.net/testdata/links2.html");
+	private long currTotalTime = 0L;
+	private long currTotalCount = 0L;
+	private long oldTotalTime = 0L;
+	private long oldTotalCount = 0L;
+	private int nextIx = 1; // Start at 1 to skip sourceforge home.
+	private int prevNextIx = 1; // Start at 1 to skip sourceforge home.
 	//#ifdef DLOGGING
-	private boolean alterLogLevel = false;
+	private boolean logParseChar = traceLoggable; // or traceLoggable
+	private boolean logReadChar = traceLoggable; // or traceLoggable
+	private boolean logRepeatChar = traceLoggable; // or traceLoggable
+	private boolean alterLogLevel = false; // or traceLoggable
 	private boolean endAlterLogLevel = false;
 	private boolean levelAltered = false;
-	private int alterix = 25;
-	private int endAlterix = 27;
+	private int alterix = 28;
+	private int endAlterix = 30;
 	private String newLogLevel = Level.FINEST.getName();
-	private Level svLogLevel = null;
+	private static final String CURRENT_CLASS = "compatibility4.HtmlLinkParser2Test";
 	//#endif
 
 	public HtmlLinkParser2Test() {
-		super(5, "compatibility4.HtmlLinkParser2Test");
+		super(10, CURRENT_CLASS);
 	}
 
 	public void test(int testNumber) throws Throwable {
@@ -118,6 +145,21 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			case 4:
 				testHtmlParse5();
 				break;
+			case 5:
+				testHtmlParse6();
+				break;
+			case 6:
+				testHtmlParse7();
+				break;
+			case 7:
+				testHtmlParse8();
+				break;
+			case 8:
+				testHtmlParse9();
+				break;
+			case 9:
+				testHtmlParse10();
+				break;
 			default:
 				fail("Bad number for switch testNumber=" + testNumber);
 				break;
@@ -127,10 +169,16 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	//#ifdef DMIDP20
 	public void changed(Observable observable) {
 		ready = true;
+		synchronized(this) {
+			super.notifyAll();
+		}
 	}
 
 	public void changed(net.yinlight.j2me.observable.Observable observable, Object arg) {
 		ready = true;
+		synchronized(this) {
+			super.notifyAll();
+		}
 	}
 
 	public boolean isReady() {
@@ -141,211 +189,273 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	/* Test parse HTML. */
 	public void testHtmlParse1() throws Throwable {
 		String mname = "testHtmlParse1";
-		compatibilityHtmlLinkParserTestSub(mname, "links2.html", "jar:///links2.html", false);
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, false);
 	}
 
 	/* Test parse HTML. */
 	public void testHtmlParse2() throws Throwable {
 		String mname = "testHtmlParse2";
-		compatibilityHtmlLinkParserTestSub(mname, "links2.html", "jar:///links2.html", false);
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, false);
 	}
 
 	/* Test parse HTML. */
 	public void testHtmlParse3() throws Throwable {
 		String mname = "testHtmlParse3";
-		compatibilityHtmlLinkParserTestSub(mname, "links2.html", "jar:///links2.html", false);
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, false);
 	}
 
 	/* Test parse HTML. */
 	public void testHtmlParse4() throws Throwable {
 		String mname = "testHtmlParse4";
-		compatibilityHtmlLinkParserTestSub(mname, "links2.html", "jar:///links2.html", false);
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, false);
 	}
 
 	/* Test parse HTML. */
 	public void testHtmlParse5() throws Throwable {
 		String mname = "testHtmlParse5";
-		compatibilityHtmlLinkParserTestSub(mname, "links2.html", "jar:///links2.html", true);
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, true);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse6() throws Throwable {
+		String mname = "testHtmlParse6";
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, true);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse7() throws Throwable {
+		String mname = "testHtmlParse7";
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, true);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse8() throws Throwable {
+		String mname = "testHtmlParse8";
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, true);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse9() throws Throwable {
+		String mname = "testHtmlParse9";
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, true);
+	}
+
+	/* Test parse HTML. */
+	public void testHtmlParse10() throws Throwable {
+		String mname = "testHtmlParse10";
+		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, true);
 	}
 
 	private RssItunesFeedInfo[] parseHtml(final String mname,
 			String name, String url)
-	throws com.substanceofcode.utils.CauseException, Throwable {
-		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine(mname + " entering parseHtml name,url=" + name + "," + url);}
-		//#endif
-		try {
-			com.substanceofcode.rssreader.businesslogic.FeedListParser feedListParser;
-			if (url.endsWith(".txt")) {
-				feedListParser =
-				new com.substanceofcode.rssreader.businesslogic.LineByLineParser(
-					url, "", "");
-			} else if (HTMLParser.isHtml(url)) {
-				if (name.indexOf("option=htmlautolink") >= 0) {
+		throws com.substanceofcode.utils.CauseException, Throwable {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine(mname + " entering parseHtml name,url=" + name + "," + url);}
+			//#endif
+			try {
+				com.substanceofcode.rssreader.businesslogic.FeedListParser feedListParser;
+				boolean hasAuto = (name.indexOf("option=htmlautolink") >= 0);
+				if (url.endsWith(".txt")) {
 					feedListParser =
-					new com.substanceofcode.rssreader.businesslogic.HTMLAutoLinkParser(
-					url, "", "");
+						new com.substanceofcode.rssreader.businesslogic.LineByLineParser(
+								url, "", "", new RssFeedStore());
+				} else if (HTMLParser.isHtml(url) || hasAuto) {
+					if (hasAuto) {
+						feedListParser =
+							new com.substanceofcode.rssreader.businesslogic.HTMLAutoLinkParser(
+									url, "", "", new RssFeedStore());
+					} else {
+						feedListParser =
+							new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+									url, "", "", new RssFeedStore());
+					}
 				} else {
 					feedListParser =
-					new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
-					url, "", "");
+						new com.substanceofcode.rssreader.businesslogic.OpmlParser(
+								url, "", "", new RssFeedStore());
 				}
-			} else {
-				feedListParser =
-				new com.substanceofcode.rssreader.businesslogic.OpmlParser(
-					url, "", "");
-			}
-			if (name.indexOf("option=missing title") >= 0) {
-				feedListParser.setGetFeedTitleList(true);
-			}
-			if (name.indexOf("linksearch=rss.xml") >= 0) {
-				feedListParser.setFeedURLFilter("rss.xml");
-			} else if (name.indexOf("linksearch=xml") >= 0) {
-				feedListParser.setFeedURLFilter("xml");
-			} else if (name.indexOf("linksearch=/rss") >= 0) {
-				feedListParser.setFeedURLFilter("/rss");
-			}
-			//#ifdef DMIDP20
-			ready = false;
-			feedListParser.getObservableHandler().addObserver(this);
-			//#endif
-			feedListParser.startParsing();
-			//#ifdef DMIDP20
-			while (!isReady()) {
-				synchronized(this) {
-					wait(1000L);
+				if (logParseChar) {
+					feedListParser.setLogChar(logParseChar);
 				}
+				if (logReadChar) {
+					feedListParser.setLogReadChar(logReadChar);
+					feedListParser.setLogRepeatChar(logRepeatChar);
+				}
+				if (name.indexOf("option=missing title") >= 0) {
+					feedListParser.setGetFeedTitleList(true);
+				}
+				if (name.indexOf("linksearchurl=rss.xml") >= 0) {
+					feedListParser.setFeedURLFilter("rss.xml");
+				} else if (name.indexOf("linksearchurl=xml") >= 0) {
+					feedListParser.setFeedURLFilter("xml");
+				} else if (name.indexOf("linksearchurl=/feed") >= 0) {
+					feedListParser.setFeedURLFilter("/feed");
+				} else if (name.indexOf("linksearchurl=index.rss") >= 0) {
+					feedListParser.setFeedURLFilter("index.rss");
+				} else if (name.indexOf("linksearchurl=?/rss=") >= 0) {
+					feedListParser.setFeedURLFilter("?/rss=");
+				} else if (name.indexOf("linksearchurl=/rss") >= 0) {
+					feedListParser.setFeedURLFilter("/rss");
+				}
+				//#ifdef DMIDP20
+				ready = false;
+				feedListParser.getObservableHandler().addObserver(this);
+				//#endif
+				feedListParser.startParsing();
+				//#ifdef DMIDP20
+				while (!isReady()) {
+					synchronized(this) {
+						wait(500L);
+					}
+				}
+				//#else
+				feedListParser.join();
+				//#endif
+				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine(mname + " feedListParser.isSuccessfull()=" + feedListParser.isSuccessfull());}
+				//#endif
+				if (!feedListParser.isSuccessfull()) {
+					throw feedListParser.getEx();
+				}
+				return feedListParser.getFeeds();
+			} catch (com.substanceofcode.utils.CauseException e) {
+				//#ifdef DLOGGING
+				logger.severe(mname + " CauseException failure ",e);
+				//#endif
+				e.printStackTrace();
+				throw e;
+			} catch (Throwable e) {
+				//#ifdef DLOGGING
+				logger.severe(mname + " failure ",e);
+				//#endif
+				e.printStackTrace();
+				throw e;
 			}
-			//#else
-			feedListParser.join();
-			//#endif
-			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine(mname + " feedListParser.isSuccessfull()=" + feedListParser.isSuccessfull());}
-			//#endif
-			if (!feedListParser.isSuccessfull()) {
-				throw feedListParser.getEx();
-			}
-			return feedListParser.getFeeds();
-		} catch (com.substanceofcode.utils.CauseException e) {
-			//#ifdef DLOGGING
-			logger.severe(mname + " CauseException failure ",e);
-			//#endif
-			e.printStackTrace();
-			throw e;
-		} catch (Throwable e) {
-			//#ifdef DLOGGING
-			logger.severe(mname + " failure ",e);
-			//#endif
-			e.printStackTrace();
-			throw e;
 		}
-	}
 
 	private RssItunesFeedInfo[] compatibilityParseHtml(final String mname,
 			String name, String url)
-	throws CauseException, Throwable {
-		//#ifdef DLOGGING
-		if (fineLoggable) {logger.fine(mname + " entering compatibilityParseHtml name,url=" + name + "," + url);}
-		//#endif
-		try {
-			FeedListParser compatibilityFeedListParser;
-			if (url.endsWith(".txt")) {
-				compatibilityFeedListParser = new LineByLineParser( url, "", "");
-			} else if (HTMLParser.isHtml(url)) {
-				if (name.indexOf("option=htmlautolink") >= 0) {
-					compatibilityFeedListParser =
-					new HTMLAutoLinkParser( url, "", "");
+		throws CauseException, Throwable {
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine(mname + " entering compatibilityParseHtml name,url=" + name + "," + url);}
+			//#endif
+			try {
+				FeedListParser compatibilityFeedListParser;
+				boolean hasAuto = (name.indexOf("option=htmlautolink") >= 0);
+				if (url.endsWith(".txt")) {
+					compatibilityFeedListParser = new LineByLineParser( url, "", "");
+				} else if (HTMLParser.isHtml(url) || hasAuto) {
+					if (name.indexOf("option=htmlautolink") >= 0) {
+						compatibilityFeedListParser =
+							new HTMLAutoLinkParser( url, "", "");
+					} else {
+						compatibilityFeedListParser = new HTMLLinkParser(
+								url, "", "");
+					}
 				} else {
-					compatibilityFeedListParser = new HTMLLinkParser(
-						url, "", "");
+					compatibilityFeedListParser = new OpmlParser( url, "", "");
 				}
-			} else {
-				compatibilityFeedListParser = new OpmlParser( url, "", "");
+				if (name.indexOf("option=missing title") >= 0) {
+					compatibilityFeedListParser.setGetFeedTitleList(true);
+				}
+				if (name.indexOf("linksearchurl=rss.xml") >= 0) {
+					compatibilityFeedListParser.setFeedURLFilter("rss.xml");
+				} else if (name.indexOf("linksearchurl=xml") >= 0) {
+					compatibilityFeedListParser.setFeedURLFilter("xml");
+				} else if (name.indexOf("linksearchurl=index.rss") >= 0) {
+					compatibilityFeedListParser.setFeedURLFilter("index.rss");
+				} else if (name.indexOf("linksearchurl=?/rss=") >= 0) {
+					compatibilityFeedListParser.setFeedURLFilter("?/rss=");
+				} else if (name.indexOf("linksearchurl=/rss") >= 0) {
+					compatibilityFeedListParser.setFeedURLFilter("/rss");
+				}
+				ready = false;
+				compatibilityFeedListParser.startParsing();
+				while (!compatibilityFeedListParser.isSuccessfull() &&
+						(compatibilityFeedListParser.getEx() == null)) {
+					synchronized(this) {
+						Thread.yield();
+						Thread.sleep(5000L);
+					}
+				}
+				compatibilityFeedListParser.join();
+				if (fineLoggable) {logger.fine(mname + " compatibilityFeedListParser.isSuccessfull()=" + compatibilityFeedListParser.isSuccessfull());}
+				if (!compatibilityFeedListParser.isSuccessfull()) {
+					throw compatibilityFeedListParser.getEx();
+				}
+				return compatibilityFeedListParser.getFeeds();
+			} catch (CauseException e) {
+				//#ifdef DLOGGING
+				logger.severe(mname + " CauseException failure ",e);
+				//#endif
+				e.printStackTrace();
+				throw e;
+			} catch (Throwable e) {
+				//#ifdef DLOGGING
+				logger.severe(mname + " failure ",e);
+				//#endif
+				e.printStackTrace();
+				throw e;
 			}
-			if (name.indexOf("option=missing title") >= 0) {
-				compatibilityFeedListParser.setGetFeedTitleList(true);
-			}
-			if (name.indexOf("linksearch=rss.xml") >= 0) {
-				compatibilityFeedListParser.setFeedURLFilter("rss.xml");
-			} else if (name.indexOf("linksearch=xml") >= 0) {
-				compatibilityFeedListParser.setFeedURLFilter("xml");
-			} else if (name.indexOf("linksearch=/rss") >= 0) {
-				compatibilityFeedListParser.setFeedURLFilter("/rss");
-			}
-			compatibilityFeedListParser.startParsing();
-			compatibilityFeedListParser.join();
-			if (fineLoggable) {logger.fine(mname + " compatibilityFeedListParser.isSuccessfull()=" + compatibilityFeedListParser.isSuccessfull());}
-			if (!compatibilityFeedListParser.isSuccessfull()) {
-				throw compatibilityFeedListParser.getEx();
-			}
-			return compatibilityFeedListParser.getFeeds();
-		} catch (CauseException e) {
-			//#ifdef DLOGGING
-			logger.severe(mname + " CauseException failure ",e);
-			//#endif
-			e.printStackTrace();
-			throw e;
-		} catch (Throwable e) {
-			//#ifdef DLOGGING
-			logger.severe(mname + " failure ",e);
-			//#endif
-			e.printStackTrace();
-			throw e;
 		}
-	}
 
 	private RssCompFeeds parseCompFeeds(final String mname,
 			final String logText,
 			final String assertTextExcEquals,
 			final String assertTextNotNull, String name,
 			String url)
-	throws Throwable {
-		//#ifdef DLOGGING
-		if (finerLoggable) {logger.finer(mname + " " + logText + " name,url=" + name + "," + url);}
-		//#endif
-		RssItunesFeedInfo[] rssfeeds = null;
-		com.substanceofcode.utils.CauseException exc = null;
-		try {
-			rssfeeds = parseHtml(mname, name, url);
-		} catch (com.substanceofcode.utils.CauseException e) {
-			exc = e;
-		}
-		CauseException compatibilityExc = null;
-		RssItunesFeedInfo[] cmpRssFeeds = null;
-		try {
-			cmpRssFeeds = compatibilityParseHtml(mname,
-					name, url);
-		} catch (CauseException e) {
-			compatibilityExc = e;
-		}
-		if (compatibilityExc != null) {
-			if (exc != null) {
-				assertEquals(assertTextExcEquals, compatibilityExc.getMessage(),
-						exc.getMessage());
-			} else {
-				assertEquals(assertTextExcEquals +
-						" compatibility not null exc is null",
-						compatibilityExc.getMessage(), "");
+		throws Throwable {
+			//#ifdef DLOGGING
+			if (finerLoggable) {logger.finer(mname + " " + logText + " name,url=" + name + "," + url);}
+			//#endif
+			RssItunesFeedInfo[] rssfeeds = null;
+			com.substanceofcode.utils.CauseException exc = null;
+			try {
+				rssfeeds = parseHtml(mname, name, url);
+			} catch (com.substanceofcode.utils.CauseException e) {
+				exc = e;
 			}
-			return null;
-		} else if (exc != null) {
-			assertEquals(assertTextExcEquals +
+			CauseException compatibilityExc = null;
+			RssItunesFeedInfo[] cmpRssFeeds = null;
+			try {
+				cmpRssFeeds = compatibilityParseHtml(mname,
+						name, url);
+			} catch (CauseException e) {
+				compatibilityExc = e;
+			}
+			if (compatibilityExc != null) {
+				if (exc != null) {
+					assertEquals(assertTextExcEquals, compatibilityExc.getMessage(),
+							exc.getMessage());
+				} else {
+					assertEquals(assertTextExcEquals +
+							" compatibility not null exc is null",
+							compatibilityExc.getMessage(), "");
+				}
+				return null;
+			} else if (exc != null) {
+				assertEquals(assertTextExcEquals +
 						" compatibility null exc is not null", "",
-					exc.getMessage());
-			return null;
+						exc.getMessage());
+				return null;
+			}
+			assertNotNull("Original " + assertTextNotNull, rssfeeds);
+			assertNotNull("Compatibility " + assertTextNotNull, cmpRssFeeds);
+			return new RssCompFeeds(rssfeeds, cmpRssFeeds);
 		}
-		assertNotNull("Original " + assertTextNotNull, rssfeeds);
-		assertNotNull("Compatibility " + assertTextNotNull, cmpRssFeeds);
-		return new RssCompFeeds(rssfeeds, cmpRssFeeds);
-	}
 
-    public void compatibilityHtmlLinkParserTestSub(final String mname,
+	public void compatibilityHtmlLinkParserTestSub(final String mname,
 			String name, String url, boolean endFeeds)
 	throws Throwable {
+		boolean httpFile = url.startsWith("http:");
+		boolean goNext = false;
 		try {
 			//#ifdef DLOGGING
-			logger.info("Started " + mname);
+			logger.info("Started " + mname + ",activeCount,freeMemory()=" + Thread.activeCount() + "," + Runtime.getRuntime().freeMemory());
 			//#endif
+			if (!httpFile) {
+				prevNextIx = nextIx;
+			}
 			RssCompFeeds feeds = parseCompFeeds(mname,
 					" compatibilityHtmlLinkParserTestSub",
 					"parse feeds exception must be equal",
@@ -359,7 +469,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					rssfeeds.length > 0);
 			assertTrue(mname + " cmpRssFeeds feed length should be > 0",
 					cmpRssFeeds.length > 0);
-			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / 5));
+			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / 10));
 
 			for (; (nextIx < endIx) && (nextIx < rssfeeds.length) && (nextIx < cmpRssFeeds.length);
 					nextIx++) {
@@ -367,56 +477,103 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					//#ifdef DLOGGING
 					if (alterLogLevel && (nextIx >= alterix) && (alterix >= 0)) {
 						endAlterLogLevel = true;
-						svLogLevel = logger.getParent().getLevel();
-						logger.getParent().setLevel(Level.parse(newLogLevel));
-						alterLogLevel = false;
+						svLogLevel = super.updSvLogging(newLogLevel);
 						logger.info(mname + " altering level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
+						alterLogLevel = false;
 					} else if (endAlterLogLevel && (nextIx >= endAlterix)) {
 						endAlterLogLevel = false;
-						logger.getParent().setLevel(svLogLevel);
+						super.updPrevLogging(svLogLevel);
 						logger.info(mname + " reverting level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
 					}
 					//#endif
 					RssItunesFeedInfo feed = rssfeeds[nextIx];
 					//#ifdef DLOGGING
-					if (fineLoggable && !finestLoggable) {logger.fine(mname + " nextIx,feed 1=" + nextIx + "," + feed.getName() + "," + feed.getUrl());}
+					if (!finestLoggable) {logger.info(mname + " nextIx,feed 1=" + nextIx + "," + feed.getName() + "," + feed.getUrl());}
 					//#endif
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest(mname + " nextIx,feed 1=" + nextIx + "," + feed.toString());}
 					//#endif
 					RssItunesFeedInfo cmpfeed = cmpRssFeeds[nextIx];
 					//#ifdef DLOGGING
-					if (fineLoggable && !finestLoggable) {logger.fine(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.getName() + "," + cmpfeed.getUrl());}
+					if (!finestLoggable) {logger.info(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.getName() + "," + cmpfeed.getUrl());}
 					//#endif
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.toString());}
 					//#endif
 					String assertInfo = new String("nextIx,name,url=" + nextIx + "," + feed.getName() + "," +  feed.getUrl());
-					assertTrue("Original feed must equal expected feed " + assertInfo, ((RssItunesFeed)cmpfeed).equals(feed));
+					// Workaround
+					goNext = true;
+					Object[] oret = super.cmpModLog(
+							"Original feed must equal expected feed " + assertInfo,
+							(RssItunesFeed)cmpfeed, feed);
+					if (oret[1] != null) {
+						throw (Throwable)oret[1];
+					}
+					goNext = false;
 					// Don't do bom 7.
 					if ((feed.getName().indexOf("BOM encoding7-utf8-txt.txt") >= 0) ||
-						(feed.getName().indexOf("29 HTML Der Spiegel search for ") >= 0) ||
-						(feed.getName().indexOf("feature=relative-url") >= 0) ||
-					   ((feed.getUrl().indexOf("http://") >= 0) &&
-					   ((feed.getName().indexOf("Russian") >= 0) ||
-					   (feed.getName().indexOf("Russian") >= 0) ||
-					   (feed.getName().indexOf("http://sourceforge.net") >= 0)))) {
+							(feed.getName().indexOf("28 HTML Der Spiegel search for ") >= 0) ||
+							(feed.getName().indexOf("feature=relative-url") >= 0) ||
+							((feed.getUrl().indexOf("http://") >= 0) &&
+							 ((feed.getName().indexOf("Russian") >= 0) ||
+							  (feed.getName().indexOf("Russian") >= 0) ||
+							  (feed.getName().indexOf("http://sourceforge.net") >= 0)))) {
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest(mname + " skipping http or gnu XML URL nextIx,feed.getUrl() 2=" + nextIx + "," + feed.getUrl());}
 						//#endif
 						continue;
 					}
-					RssItunesFeedInfo[] currRssfeeds = parseHtml(mname,
-							feed.getName(), feed.getUrl());
-					RssItunesFeedInfo[] currCmpRssfeeds = compatibilityParseHtml(
-							mname, feed.getName(), feed.getUrl());
-					assertNotNull("Original sub feeds must not be null " + assertInfo, currRssfeeds);
-					assertNotNull("Compatibility sub feeds must not be null " + assertInfo, currCmpRssfeeds);
+					com.substanceofcode.utils.CauseException currExc = null;
+					RssItunesFeedInfo[] currRssfeeds = null;
+					try {
+						currRssfeeds = parseHtml(mname, feed.getName(),
+								feed.getUrl());
+						//#ifdef DLOGGING
+						if (finestLoggable) {logger.finest(mname + " nextIx currRssfeeds.length=" + nextIx + "," + currRssfeeds.length);}
+						//#endif
+					} catch (com.substanceofcode.utils.CauseException e) {
+						currExc = e;
+					}
+					CauseException currCmpExc = null;
+					RssItunesFeedInfo[] currCmpRssfeeds = null;
+					try {
+						currCmpRssfeeds = compatibilityParseHtml(
+								mname, feed.getName(), feed.getUrl());
+						//#ifdef DLOGGING
+						if (finestLoggable) {logger.finest(mname + " nextIx currCmpRssfeeds.length=" + nextIx + "," + currCmpRssfeeds.length);}
+						//#endif
+					} catch (CauseException e) {
+						currCmpExc = e;
+					}
+					//#ifdef DLOGGING
+					if (fineLoggable && !finestLoggable) {logger.fine(mname + " nextIx,currCmpExc,currExc" + nextIx + "," + currCmpExc + "," + currExc);} ;
+					//#endif
+					if (currExc == null)  {
+						assertNotNull("Original sub feeds must not be null " + assertInfo, currRssfeeds);
+					}
+					if (currCmpExc == null) { 
+						assertNotNull("Compatibility sub feeds must not be null " + assertInfo, currCmpRssfeeds);
+					}
+					if ((currExc != null) && (currCmpExc == null) ||
+							((currExc == null) && (currCmpExc != null))) {
+						if ((currExc != null) && (currCmpExc == null) &&
+								(currCmpRssfeeds.length == 0)) {
+							// Workaround
+							//#ifdef DLOGGING
+							if (fineLoggable) {logger.fine(mname + " skipping 0 feeds nextIx,feed.getName()=" + nextIx + "," + feed.getName());} ;
+							//#endif
+							continue;
+						}
+						// Don't get hung up on the same error.
+						nextIx++;
+						assertTrue(mname +
+								" feed currExceptions should be for both compatibility and current " + assertInfo,
+								(currCmpExc != null) && (currExc != null));
+					}
 					for (int j = 0;
 							(j < currRssfeeds.length) && (j < currCmpRssfeeds.length);
 							j++) {
 						RssItunesFeedInfo subFeed = currRssfeeds[j];
-						String assertInfoSub = new String("nextIx,j,name,url=" + nextIx + "," + j + "," + feed.getName() + "," +  feed.getUrl() + "," + subFeed.getName() + "," +  subFeed.getUrl());
 						//#ifdef DLOGGING
 						if (fineLoggable && !finestLoggable) {logger.fine(mname + " j,subFeed 1=" + j + "," + subFeed.getName() + "," + subFeed.getUrl());}
 						//#endif
@@ -424,6 +581,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 						if (finestLoggable) {logger.finest(mname + " j,subFeed 1=" + j + "," + subFeed.toString());}
 						//#endif
 						RssItunesFeedInfo subCmpfeed = currCmpRssfeeds[j];
+						String assertInfoSub = new String("nextIx,j,name,url=" + nextIx + "," + j + "," + feed.getName() + "," +  feed.getUrl() + ",[" + subFeed.getName() + "," + subCmpfeed.getName() + "]," +  subFeed.getUrl());
 						assertNotNull("Compatibility sub feeds must not be null " + assertInfoSub, subCmpfeed);
 						//#ifdef DLOGGING
 						if (fineLoggable && !finestLoggable) {logger.fine(mname + " j,subCmpfeed 1=" + j + "," + subCmpfeed.getName() + "," + subCmpfeed.getUrl());}
@@ -439,7 +597,18 @@ implements Observer, net.yinlight.j2me.observable.Observer
 							//#endif
 							continue;
 						}
-						assertTrue("Original sub feed must equal expected sub feed " + assertInfo, ((RssItunesFeed)subCmpfeed).equals(subFeed));
+						// Fixed problem where name was null.  We NEVER want null.
+						if ((subFeed.getName().length() == 0) &&
+								(subCmpfeed.getName() == null)) {
+							// workaround
+							//#ifdef DLOGGING
+							if (fineLoggable) {logger.fine(mname + " fixing null name j,subCmpfeed.getName(),subFeed.getName()=" + j + "," + subCmpfeed.getName() + "," + subFeed.getName());} ;
+							//#endif
+							subCmpfeed.setName("");
+						}
+						goNext = true;
+						assertTrue("Original sub feed must equal expected sub feed " + assertInfoSub, ((RssItunesFeed)subCmpfeed).equals(subFeed));
+						goNext = false;
 					}
 				} finally {
 					// Free up memory.
@@ -451,17 +620,22 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			}
 			if (endFeeds) {
 				assertEquals(mname + " feed lengths should be equal",
-				cmpRssFeeds.length, rssfeeds.length);
+						cmpRssFeeds.length, rssfeeds.length);
+			}
+			if (!httpFile && oneTestOnly && retryModHttp) {
+				compatibilityHtmlLinkParserTestSub(mname, name,
+					"http://mobilerssreader.sourceforge.net/testdata/links2.html",
+						endFeeds);
+				nextIx = prevNextIx;
 			}
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine(mname + " finished.");}
 			//#endif
 		} catch (Throwable e) {
-			//#ifdef DLOGGING
-			logger.severe(mname + " failure ",e);
-			//#endif
-			e.printStackTrace();
-			throw e;
+			if (goNext) {
+				nextIx++;
+			}
+			super.procThrowable(mname, e);
 		}
 	}
 
