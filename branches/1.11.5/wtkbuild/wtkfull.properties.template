@@ -1,6 +1,7 @@
 #-- IB 2010-11-12 1.11.5DEV14 Use properties files based on full version.
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
 DFULLVERSDEF = DFULLVERS
-file.prefix.full = full_
+file.prefix.full = ${sfile.prefix.full}_
 SUFFIXVERS.full = -full
 intlink = Full 
 make.link= false
