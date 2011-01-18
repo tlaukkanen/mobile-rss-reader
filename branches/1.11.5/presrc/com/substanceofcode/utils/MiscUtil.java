@@ -34,10 +34,16 @@
  * IB 2010-07-04 1.11.5Dev6 Code cleanup.
  * IB 2010-08-15 1.11.5Dev8 Add runnable for thread class name to thread info.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-12 1.11.5Dev15 Have closeInputStream, closeOutputStream, and closeConnection to close input/output streams and a connection.
+ * IB 2011-01-14 1.11.5Alpha15 Use CmdReceiver interface to allow FeatureMgr to initialize KFileSelectorMgr without directly referencing it's class.  This allows for better use of optional APIs.
+ * IB 2011-01-14 1.11.5Alpha15 Compare dates as strings to determine if they are equal to allow determining if two items are the same to preserve their read flags.
+ * IB 2011-01-14 1.11.5Alpha15 Have methods to enable better logging.
  */
 
 // Expand to define MIDP define
 @DMIDPVERS@
+// Expand to define CLDC define
+@DCLDCVERS@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -45,13 +51,20 @@
 package com.substanceofcode.utils;
 
 //TODO test </a> html. test no http (or using base?)
+import java.util.Date;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import javax.microedition.io.Connection;
+import javax.microedition.io.HttpConnection;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+//#ifdef DJSR75
+import javax.microedition.io.file.FileConnection;
+//#endif
 
 //#ifdef DMIDP20
 import com.substanceofcode.utils.CmdReceiver;
@@ -81,7 +94,8 @@ public class MiscUtil {
             .toCharArray();
 
 	//#ifdef DMIDP20
-	public final static Short SPAUSE_APP = new Short((short)0);
+	public final static Short SINIT_OBJ = new Short((short)0);
+	public final static Short SPAUSE_APP = new Short((short)1);
 	static private final Hashtable cthreads = new Hashtable();
 	//#endif
     static private long threadNbr = 1L;
@@ -119,10 +133,10 @@ public class MiscUtil {
 			//#ifdef DMIDP20
 			cthreads.put(thread, new Object[] {cname, runnable});
 			//#endif
+			return thread;
 		//#ifdef DCLDCV11
 		}
 		//#endif
-		return thread;
 	}
 
 	static public Thread getThread(Runnable runnable, String name, Object obj,
@@ -190,7 +204,7 @@ public class MiscUtil {
 		//#endif
 	}
 
-	public static
+	static public
 	//#ifdef DCLDCV10
 	synchronized
 	//#endif
@@ -209,7 +223,6 @@ public class MiscUtil {
 			}
 		//#ifdef DCLDCV11
 		}
-		return cthread;
 		//#endif
 	}
 	//#endif
@@ -520,6 +533,12 @@ public class MiscUtil {
             return text;
         }
     }
+
+	static public boolean cmpDateStr(Date date1, Date date2) {
+		return (((date1 == null) && (date2 == null)) ||
+			 ((date1 != null) && (date2 != null) &&
+			 date1.toString().equals(date2.toString())));
+	}
     
 	static public String toString(Object obj, boolean showClass, int maxStrLen) {
 		if (obj == null) {
@@ -555,7 +574,126 @@ public class MiscUtil {
 					item.toString();
 		}
 	}
+
+	static public String toString(Date adate) {
+		if (adate == null) {
+			return "null";
+		} else {
+			return adate.toString();
+		}
+	}
+
+	static public String toString(String parm) {
+		if (parm == null) {
+			return "null";
+		} else {
+			return parm;
+		}
+	}
+
 	//#endif
+
+  /**
+   * Close the connection.  This allows us to save code space doing the same
+   * thing and allows logging of errors in case they are useful.  This  helps
+   * with some compilers that want you to close the stream using the super
+   * class instead of the subclass.
+   *
+   * @param conn
+   * @return    InputStream
+   * @author Irv Bunton
+   */
+	static public InputStream closeInputStream(InputStream conn) {
+
+		if (conn != null) {
+			try {((InputStream)conn).close();}
+			catch (IOException e) {
+				//#ifdef DLOGGING
+				Logger logger = Logger.getLogger("MiscUtil");
+				CauseException ce = new CauseException(
+						"Unable to close connection.", e);
+				logger.warning("Error closing connection.", ce);
+				//#endif
+				conn = (InputStream)nullPtr;
+			}
+		}
+		return conn;
+	}
+
+  /**
+   * Close the connection.  This allows us to save code space doing the same
+   * thing and allows logging of errors in case they are useful.  This  helps
+   * with some compilers that want you to close the stream using the super
+   * class instead of the subclass.
+   *
+   * @param conn
+   * @return    OutputStream
+   * @author Irv Bunton
+   */
+	static public OutputStream closeOutputStream(OutputStream conn) {
+
+		if (conn != null) {
+			try {((OutputStream)conn).close();}
+			catch (IOException e) {
+				//#ifdef DLOGGING
+				Logger logger = Logger.getLogger("MiscUtil");
+				CauseException ce = new CauseException(
+						"Unable to close connection.", e);
+				logger.warning("Error closing connection.", ce);
+				//#endif
+				conn = (OutputStream)nullPtr;
+			}
+		}
+		return conn;
+	}
+
+  /**
+   * Close the connection.  This allows us to save code space doing the same
+   * thing and allows logging of errors in case they are useful.  This  helps
+   * with some compilers that want you to close the stream using the super
+   * class instead of the subclass.
+   *
+   * @param conn
+   * @return    Connection
+   * @author Irv Bunton
+   */
+	static public Connection closeConnection(Connection conn) {
+
+		if (conn != null) {
+			try {
+				((Connection)conn).close();
+			}
+			catch (IOException e) {
+				//#ifdef DLOGGING
+				Logger logger = Logger.getLogger("MiscUtil");
+				//#endif
+				CauseException ce = null;
+				if (conn instanceof HttpConnection) {
+					try {
+						ce = new CauseException(
+								"Unable to close URL " +
+								((HttpConnection)conn).getURL(),e);
+					} catch (Throwable e2) {
+					}
+				//#ifdef DJSR75
+				} else if (conn instanceof FileConnection) {
+					ce = new CauseException(
+							"Unable to close URL " +
+							((FileConnection)conn).getURL(),e);
+				//#endif
+				}
+				if (ce == null) {
+					ce = new CauseException("Unable to close connection.", e);
+				}
+				//#ifdef DLOGGING
+				logger.warning("Error closing connection.", ce);
+				//#endif
+				e.printStackTrace();
+				conn = (Connection)nullPtr;
+			}
+		}
+		return conn;
+	}
 
 /*
  * Visit url for update: http://sourceforge.net/projects/jvftp
