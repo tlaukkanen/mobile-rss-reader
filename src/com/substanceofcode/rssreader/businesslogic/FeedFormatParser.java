@@ -19,7 +19,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.utils.XmlParser;
@@ -39,3 +47,4 @@ public interface FeedFormatParser {
 			int maxItemCount, boolean getTitleOnly) throws IOException;
     
 }
+//#endif
