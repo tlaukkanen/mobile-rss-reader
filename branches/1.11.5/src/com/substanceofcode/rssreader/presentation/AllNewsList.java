@@ -39,6 +39,14 @@
  * IB 2010-11-16 1.11.5Dev14 Use m_backCommand from RssReaderMIDlet all the time.
  * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  * IB 2010-11-19 1.11.5Dev14 Move static var m_backCommand out of midlet class to FeatureMgr.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 Save old feed pointer to use to update feed for future background processing only for MIDP 2.0.
+ * IB 2011-01-12 1.11.5Alpha15 After modifying the read field, use old feed pointer with new feed pointer to update the feed.  If the old pointer does not match the current pointer, do not update as it means that the future background processing has updated the feed already. 
+ * IB 2011-01-11 1.11.5Dev15 Use super.featureMgr instead of featureMgr.
+ * IB 2011-01-11 1.11.5Dev15 Have special reverseItems to change sort order.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-12 1.11.5Alpha15 Maintain only one vector for sorted items.
 */
 
 // Expand to define MIDP define
@@ -49,7 +57,10 @@
 //#define DNOLOGGING
 // Expand to define test ui define
 //#define DNOTESTUI
+// Expand to define full vers define
+//#define DFULLVERS
 
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Date;
@@ -78,6 +89,7 @@ import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.MiscUtil;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -114,7 +126,7 @@ public class AllNewsList extends FeatureList
 //@	protected int         m_newsIndex = -1; // Index in headers to auto test
 	//#endif
     protected FeatureList m_bookmarkList;
-    protected Hashtable m_rssFeeds;
+    protected RssFeedStore m_rssFeeds;
     public final static String TITLE = "River of News";
 	protected Command     m_openHeaderCmd;    // The open header command
     protected Command     m_sortUnreadItemsCmd;  // The sort unread items by date command
@@ -130,11 +142,13 @@ public class AllNewsList extends FeatureList
 //@	protected Command     m_testNewsCmd;       // Tet UI rss news command
 	//#endif
     protected Vector      m_itemFeeds = new Vector();
+	//#ifndef DMIDP10
+    protected Vector      m_itemOldFeeds = new Vector();
+	//#endif
     protected Vector      m_allItems = new Vector();
-    protected Vector      m_unreadItems = new Vector();
-    protected Vector      m_readItems = new Vector();
     protected RssItunesItem m_item;
-    protected RssItunesFeed m_feed;
+    volatile protected RssItunesFeed m_feed;
+	volatile protected RssItunesFeed m_oldFeed;          // True if Itunes is enabled
 
 	//#ifdef DLOGGING
 //@    private Logger m_logger = Logger.getLogger("AllNewsList");
@@ -147,7 +161,7 @@ public class AllNewsList extends FeatureList
 	public AllNewsList(String title,
 			int listType, int offset, int len,
 					   final FeatureList bookmarkList,
-					   final Hashtable rssFeeds,
+					   final RssFeedStore rssFeeds,
 					   Image unreadImage,
 					   LoadingForm loadForm, int priority) {
 		super(title, listType, loadForm);
@@ -160,7 +174,10 @@ public class AllNewsList extends FeatureList
 		m_bookmarkList = bookmarkList;
 		m_rssFeeds = rssFeeds;
 		m_unreadImage = unreadImage;
-		RssReaderMIDlet midlet = FeatureMgr.getMidlet();
+		RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
+		//#ifdef DMIDP10
+//@		m_oldFeed = null;
+		//#endif
 		m_openHeaderCmd     = new Command("Open", Command.SCREEN, 5);
 		super.addCommand(m_openHeaderCmd);
 		super.addCommand(FeatureMgr.m_backCommand);
@@ -209,7 +226,7 @@ public class AllNewsList extends FeatureList
 						     final boolean showUnread,
 						     final boolean sortByDate,
 							 final List bookmarkList,
-							 final Hashtable rssFeeds) {
+							 final RssFeedStore rssFeeds) {
 
 		//#ifdef DLOGGING
 //@		if (m_finestLoggable) {m_logger.finest("initNewsList showAll,showUnread,sortByDate=" + showAll + "," + showUnread + "," + sortByDate);}
@@ -242,10 +259,11 @@ public class AllNewsList extends FeatureList
 
 	/** Initialize item and feed name vectors. */
 	private void initVectors() {
-		m_unreadItems.removeAllElements();
-		m_readItems.removeAllElements();
 		m_allItems.removeAllElements();
 		m_itemFeeds.removeAllElements();
+		//#ifndef DMIDP10
+		m_itemOldFeeds.removeAllElements();
+		//#endif
 	}
 
     /** Fill RSS item vectors */
@@ -256,31 +274,20 @@ public class AllNewsList extends FeatureList
 		//#endif
 		RssItunesItem[] aitems = new RssItunesItem[itemLen];
 		vitems.copyInto(aitems);
-        for(int i=0; i < itemLen; i++){
-            final RssItunesItem r = aitems[i];
-			if (m_showAll) {
-				m_allItems.addElement(r);
-				m_itemFeeds.addElement(feed);
-			} else {
-				if (r.isUnreadItem()) {
-					if (m_showUnread) {
-						m_unreadItems.addElement(r);
-						m_itemFeeds.addElement(feed);
-					}
-				} else {
-					if (!m_showUnread) {
-						m_readItems.addElement(r);
-						m_itemFeeds.addElement(feed);
-					}
-				}
-			}
-        }
+		for(int i=0; i < itemLen; i++){
+			final RssItunesItem r = aitems[i];
+			m_allItems.addElement(r);
+			m_itemFeeds.addElement(feed);
+			//#ifndef DMIDP10
+			m_itemOldFeeds.addElement(feed);
+			//#endif
+		}
     }
     
 	/* Sort all items. */
 	final public void sortAllItems(final boolean sortByDate,
 							 final FeatureList bookmarkList,
-							 final Hashtable rssFeeds) {
+							 final RssFeedStore rssFeeds) {
 		initNewsList(m_offset, m_len, true, false, sortByDate, bookmarkList,
 				rssFeeds);
 		if (sortByDate) {
@@ -303,12 +310,12 @@ public class AllNewsList extends FeatureList
 //@		}
 		//#endif
 		final int slen = sortedItems.size();
-		RssItunesItem [] sitems = new RssItunesItem[slen];
+		RssItunesItem[] sitems = new RssItunesItem[slen];
 		sortedItems.copyInto(sitems);
-		RssReaderMIDlet midlet = FeatureMgr.getMidlet();
+		RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
 		//#ifdef DMIDP20
 		final boolean addName = midlet.getSettings().getBookmarkNameNews();
-		RssItunesFeed [] sfeeds = null;
+		RssItunesFeed[] sfeeds = null;
 		if (addName) {
 			sfeeds = new RssItunesFeed[slen];
 			m_itemFeeds.copyInto(sfeeds);
@@ -349,6 +356,9 @@ public class AllNewsList extends FeatureList
 		if (m_showAll) {
 			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
+			//#ifndef DMIDP10
+			m_oldFeed = (RssItunesFeed)m_itemOldFeeds.elementAt(selIdx);
+			//#endif
 			if (updateIt && (m_unreadImage != null) && m_item.isUnreadItem()) {
 				super.set(selIdx, super.getString(selIdx), null);
 			}
@@ -359,16 +369,25 @@ public class AllNewsList extends FeatureList
 			} else {
 				super.setSelectedIndex(0, true);
 			}
-			m_item = (RssItunesItem)m_unreadItems.elementAt(selIdx);
+			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
+			//#ifndef DMIDP10
+			m_oldFeed = (RssItunesFeed)m_itemOldFeeds.elementAt(selIdx);
+			//#endif
 			if (updateIt) {
-				m_unreadItems.removeElementAt(selIdx);
+				m_allItems.removeElementAt(selIdx);
 				m_itemFeeds.removeElementAt(selIdx);
+				//#ifndef DMIDP10
+				m_itemOldFeeds.removeElementAt(selIdx);
+				//#endif
 			}
 			updTitle();
 		} else {
-			m_item = (RssItunesItem)m_readItems.elementAt(selIdx);
+			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
+			//#ifndef DMIDP10
+			m_oldFeed = (RssItunesFeed)m_itemOldFeeds.elementAt(selIdx);
+			//#endif
 		}
 		/**
 		 * Show currently selected RSS item
@@ -376,6 +395,11 @@ public class AllNewsList extends FeatureList
 		 */
 		if (updateIt) {
 			m_item.setUnreadItem(false);
+			m_rssFeeds.put(m_feed, m_oldFeed);
+			//#ifndef DMIDP10
+			m_oldFeed = m_rssFeeds.get(m_feed);
+			m_itemOldFeeds.setElementAt(m_oldFeed, selIdx);
+			//#endif
 		}
 		//#ifdef DLOGGING
 //@		if (m_finestLoggable) {m_logger.finest("getUpdSel updateIt,selIdx=" + updateIt + "," + selIdx);}
@@ -399,6 +423,11 @@ public class AllNewsList extends FeatureList
 				}
 			}
 			m_item.setUnreadItem(markUnread);
+			m_rssFeeds.put(m_feed, m_oldFeed);
+			//#ifndef DMIDP10
+			m_oldFeed = m_rssFeeds.get(m_feed);
+			m_itemOldFeeds.setElementAt(m_oldFeed, selIdx);
+			//#endif
 		} else {
 			if ((m_showUnread && !markUnread) ||
 					(!m_showUnread && markUnread)) {
@@ -407,14 +436,20 @@ public class AllNewsList extends FeatureList
 					super.setSelectedIndex(selIdx - 1, true);
 				}
 				if (m_showUnread) {
-					m_item = (RssItunesItem)m_unreadItems.elementAt(selIdx);
-					m_unreadItems.removeElementAt(selIdx);
+					m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+					m_allItems.removeElementAt(selIdx);
 				} else {
-					m_item = (RssItunesItem)m_readItems.elementAt(selIdx);
-					m_readItems.removeElementAt(selIdx);
+					m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+					m_allItems.removeElementAt(selIdx);
 				}
 				m_item.setUnreadItem(markUnread);
 				m_itemFeeds.removeElementAt(selIdx);
+				//#ifndef DMIDP10
+				m_itemOldFeeds.removeElementAt(selIdx);
+				//#endif
+				m_rssFeeds.put(m_feed, m_oldFeed);
+				// Since we removed an element, we cannot update it.
+				m_oldFeed = m_rssFeeds.get(m_feed);
 			}
 			updTitle();
 		}
@@ -446,7 +481,7 @@ public class AllNewsList extends FeatureList
 				//#endif
 				LoadingForm loadForm = LoadingForm.getLoadingForm(
 							"Sorting items...", this, null);
-				featureMgr.setLoadForm(loadForm);
+				super.featureMgr.setLoadForm(loadForm);
 				if (m_showAll) {
 					sortAllItems( m_sortByDate, m_bookmarkList, m_rssFeeds );
 				} else if (m_showUnread) {
@@ -456,7 +491,7 @@ public class AllNewsList extends FeatureList
 				}
 				loadForm.setLoadingFinished("Sorting finished",
 						"Sorting finished use back to return.");
-				featureMgr.showMe();
+				super.featureMgr.showMe();
 			}
 
 			if ( m_openItem || m_nextItem ) {
@@ -471,10 +506,10 @@ public class AllNewsList extends FeatureList
 				if( selIdx >= 0){
 					LoadingForm loadForm = LoadingForm.getLoadingForm(
 							"Loading item...", this, null);
-					featureMgr.setLoadForm(loadForm);
+					super.featureMgr.setLoadForm(loadForm);
 					try {
 						getUpdSel(true);
-						FeatureMgr.getMidlet().initializeItemForm( m_feed,
+						FeatureMgr.getRssMidlet().initializeItemForm( m_feed,
 								m_item, this,
 								loadForm);
 						//#ifdef DTESTUI
@@ -508,7 +543,7 @@ public class AllNewsList extends FeatureList
 //@				// testui classes), simulate the back command
 //@				if (m_itemNext && (m_newsIndex >= 0) && m_testNews &&
 //@					(m_newsIndex < super.size())) {
-//@					RssReaderMIDlet midlet = FeatureMgr.getMidlet();
+//@					RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
 //@					if (midlet.isItemForm()) {
 //@						m_itemNext = false;
 //@						m_newsNext = true;
@@ -519,9 +554,9 @@ public class AllNewsList extends FeatureList
 			//#endif
 
 		}catch(OutOfMemoryError t) {
-			featureMgr.getLoadForm().recordExcForm("\nOut Of Memory Error sorting items", t);
+			super.featureMgr.getLoadForm().recordExcForm("\nOut Of Memory Error sorting items", t);
 		}catch(Throwable t) {
-			featureMgr.getLoadForm().recordExcForm("\nInternal error sorting items", t);
+			super.featureMgr.getLoadForm().recordExcForm("\nInternal error sorting items", t);
 		}
 
 		//#ifdef DLOGGING
@@ -576,26 +611,26 @@ public class AllNewsList extends FeatureList
 	/** Sort items unread. */
 	final public void sortUnreadItems(final boolean sortByDate,
 								final List bookmarkList,
-								final Hashtable rssFeeds) {
+								final RssFeedStore rssFeeds) {
 		initNewsList(m_offset, m_len, false, true, sortByDate, bookmarkList, rssFeeds);
 		if (sortByDate) {
-			sortItems(true, m_unreadItems);
+			sortItems(true, m_allItems);
 		} else if (m_sortDesc) {
-			reverseItems(m_unreadItems);
+			reverseItems(m_allItems);
 		}
-		fillItems( m_unreadItems);
+		fillItems( m_allItems);
 	}
 
 	/* Sort items read. */
 	final public void sortReadItems(boolean sortByDate,
-							  List bookmarkList, Hashtable rssFeeds) {
+							  List bookmarkList, RssFeedStore rssFeeds) {
 		initNewsList(m_offset, m_len, false, false, sortByDate, bookmarkList, rssFeeds);
 		if (sortByDate) {
-			sortItems(false, m_readItems);
+			sortItems(false, m_allItems);
 		} else if (m_sortDesc) {
-			reverseItems(m_readItems);
+			reverseItems(m_allItems);
 		}
-		fillItems( m_readItems);
+		fillItems( m_allItems);
 	}
 
 	/* Sort items read or unread vector and put into GUI list. */
@@ -613,16 +648,26 @@ public class AllNewsList extends FeatureList
 //@		loadForm.append(gauge);
 		//#endif
 		this.m_showUnread = showUnread;
-		int [] indexes = new int[unsortedItems.size()];
-		long [] ldates = new long[unsortedItems.size()];
+		int[] indexes = new int[unsortedItems.size()];
+		long[] ldates = new long[unsortedItems.size()];
 		Vector vsorted = new Vector(unsortedItems.size());
 		Vector vfeedSorted = new Vector(m_itemFeeds.size());
+		//#ifndef DMIDP10
+		Vector voldFeedSorted = new Vector(m_itemOldFeeds.size());
+		//#endif
 		Vector vunsorted = new Vector(unsortedItems.size());
 		Vector vfeedUnsorted = new Vector(m_itemFeeds.size());
-		RssItunesItem [] uitems = new RssItunesItem[unsortedItems.size()];
+		//#ifndef DMIDP10
+		Vector voldFeedUnsorted = new Vector(m_itemOldFeeds.size());
+		//#endif
+		RssItunesItem[] uitems = new RssItunesItem[unsortedItems.size()];
 		unsortedItems.copyInto(uitems);
-		RssItunesFeed [] ufeeds = new RssItunesFeed[m_itemFeeds.size()];
+		RssItunesFeed[] ufeeds = new RssItunesFeed[m_itemFeeds.size()];
 		m_itemFeeds.copyInto(ufeeds);
+		//#ifndef DMIDP10
+		RssItunesFeed[] uoldFeeds = new RssItunesFeed[m_itemOldFeeds.size()];
+		m_itemOldFeeds.copyInto(uoldFeeds);
+		//#endif
 		int kc = 0;
 		for (int ic = 0; ic < uitems.length; ic++) {
 			Date sortDate = uitems[ic].getDate();
@@ -635,16 +680,21 @@ public class AllNewsList extends FeatureList
 				//#endif
 //@			}
 			//#endif
-			if (sortDate == null)
-			{
+			if (sortDate == null) {
 				vsorted.addElement(uitems[ic]);
 				vfeedSorted.addElement(ufeeds[ic]);
+				//#ifndef DMIDP10
+				voldFeedSorted.addElement(uoldFeeds[ic]);
+				//#endif
 			} else {
 				indexes[kc] = kc;
 				ldates[kc++] = m_sortDesc ?
 					sortDate.getTime() : -sortDate.getTime();
 				vunsorted.addElement(uitems[ic]);
 				vfeedUnsorted.addElement(ufeeds[ic]);
+				//#ifndef DMIDP10
+				voldFeedUnsorted.addElement(uoldFeeds[ic]);
+				//#endif
 				//#ifdef DLOGGING
 //@				if (m_finestLoggable) {
 //@					if (m_sortDesc) {
@@ -664,6 +714,9 @@ public class AllNewsList extends FeatureList
 		// Save memory by making null
 		uitems = (RssItunesItem[])nullPtr;
 		ufeeds = (RssItunesFeed[])nullPtr;
+		//#ifndef DMIDP10
+		uoldFeeds = (RssItunesFeed[])nullPtr;
+		//#endif
 		//#ifdef DLARGEMEM
 		//#ifdef DMIDP20
 //@		gauge.setValue(diffDelta + 1);
@@ -691,12 +744,21 @@ public class AllNewsList extends FeatureList
 		vfeedUnsorted.copyInto(ufeeds);
 		// Save memory by making null
 		vfeedUnsorted = (Vector)nullPtr;
+		//#ifndef DMIDP10
+		uoldFeeds = new RssItunesFeed[kc];
+		voldFeedUnsorted.copyInto(uoldFeeds);
+		// Save memory by making null
+		voldFeedUnsorted = (Vector)nullPtr;
+		//#endif
 		for (int ic = 0; ic < kc ; ic++) {
 			//#ifdef DLOGGING
 //@			if (m_finestLoggable) {m_logger.finest("ic,index,date=" + ic + "," + indexes[ic] + "," + new Date(ldates[indexes[ic]]) + "," + uitems[indexes[ic]].getDate());}
 			//#endif
 			vsorted.insertElementAt(uitems[indexes[ic]], 0);
 			vfeedSorted.insertElementAt(ufeeds[indexes[ic]], 0);
+			//#ifndef DMIDP10
+			voldFeedSorted.insertElementAt(uoldFeeds[indexes[ic]], 0);
+			//#endif
 			//#ifdef DLARGEMEM
 //@			if ((ic & AND_VAL) == 0) {
 //@				gauge.setValue(gcnt++);
@@ -726,6 +788,9 @@ public class AllNewsList extends FeatureList
 		}
 		// Save memory by making null
 		ufeeds = (RssItunesFeed[])nullPtr;
+		//#ifndef DMIDP10
+		uoldFeeds = (RssItunesFeed[])nullPtr;
+		//#endif
 		//#ifdef DLARGEMEM
 //@		gauge.setValue(diffDelta + 1);
 //@		gauge = new Gauge("After sorting 3...", false, diffDelta + 1, 0);
@@ -736,9 +801,21 @@ public class AllNewsList extends FeatureList
 		vfeedSorted.copyInto(sfeeds);
 		// Save memory by making null
 		vfeedSorted = (Vector)nullPtr;
+		//#ifndef DMIDP10
+		RssItunesFeed[] soldFeeds = new RssItunesFeed[voldFeedSorted.size()];
+		voldFeedSorted.copyInto(soldFeeds);
+		// Save memory by making null
+		voldFeedSorted = (Vector)nullPtr;
+		//#endif
 		m_itemFeeds.removeAllElements();
+		//#ifndef DMIDP10
+		m_itemOldFeeds.removeAllElements();
+		//#endif
 		for( int ic = 0; ic < sitems.length; ic++){
 			m_itemFeeds.addElement(sfeeds[ic]);
+		//#ifndef DMIDP10
+			m_itemOldFeeds.addElement(sfeeds[ic]);
+		//#endif
 			//#ifdef DLARGEMEM
 //@			if ((ic & AND_VAL) == 0) {
 //@				gauge.setValue(gcnt++);
@@ -865,9 +942,9 @@ public class AllNewsList extends FeatureList
 //@					m_itemNext = false;
 //@				}
 				//#endif
-				featureMgr.setBackground(false);
-				RssReaderMIDlet midlet = FeatureMgr.getMidlet();
-				featureMgr.getLoadForm().replaceRef(this, null);
+				super.featureMgr.setBackground(false);
+				RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
+				super.featureMgr.getLoadForm().replaceRef(this, null);
 				midlet.showBookmarkList();
 
 				//#ifdef DTESTUI
@@ -892,7 +969,7 @@ public class AllNewsList extends FeatureList
 			//#endif
 			
 		}catch(Throwable t) {
-			featureMgr.getLoadForm().recordExcForm("Internal error", t);
+			super.featureMgr.getLoadForm().recordExcForm("Internal error", t);
 		}
 	}
 
@@ -917,13 +994,14 @@ public class AllNewsList extends FeatureList
 				synchronized(this) {
 					m_nextItem = true;
 				}
-				featureMgr.wakeup(2);
+				super.featureMgr.wakeup(2);
 			}
 		}
 		//#ifdef DLOGGING
 //@		if (m_finestLoggable) {m_logger.finest("nextItem nselected,asize,m_nextItem=" + nselected + "," + asize + "," + m_nextItem);}
 		//#endif
-		featureMgr.wakeup(2);
+		super.featureMgr.wakeup(2);
 	}
 
 }
+//#endif
