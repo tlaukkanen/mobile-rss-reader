@@ -1,6 +1,9 @@
 //--Need to modify--#preprocess
 /*
+ * KFileSelectorMgr.java
+ *
  * Copyright (c) 2001-2005 Todd C. Stellanova, rawthought
+ * Copyright (C) 2007-2011 Irving Bunton, Jr
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,12 +46,16 @@
  * IB 2010-11-19 1.11.5Dev14 Have debug conditional println use displayDbgMsg.
  * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg and be in DTEST.
  * IB 2010-11-19 1.11.5Dev14 Change debug log info.
+ * IB 2011-01-01 1.11.5Dev15 Need to define DTEST to use it.
+ * IB 2011-01-14 1.11.5Alpha15 Use CmdReceiver interface to allow FeatureMgr to initialize KFileSelectorMgr without directly referencing it's class.  This allows for better use of optional APIs.
 */
 
 // Expand to define MIDP define
 @DMIDPVERS@
 // Expand to define DJSR75 define
 @DJSR75@
+// Expand to define test define
+@DTESTDEF@
 // Expand to define logging define
 @DLOGDEF@
 //#ifdef DJSR75
@@ -62,6 +69,7 @@ import com.substanceofcode.rssreader.presentation.LoadingForm;
 import com.substanceofcode.rssreader.presentation.FeatureForm;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
+import com.substanceofcode.utils.CmdReceiver;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -76,7 +84,7 @@ import net.sf.jlogmicro.util.logging.RecStoreHandler;
  * @author  Todd C. Stellanova
  */
 public class KFileSelectorMgr
-implements KViewParent
+implements KViewParent, CmdReceiver
 {
 
 	final       Object nullPtr = null;
@@ -92,6 +100,10 @@ implements KViewParent
     private boolean finerLoggable = logger.isLoggable(Level.FINER);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
+
+	public KFileSelectorMgr() {
+		fileSelectorView = (KFileSelectorImpl)nullPtr;
+	}
 
     /**
      * When the we're is done capturing an XML or multi-media, it calls this
@@ -120,8 +132,7 @@ implements KViewParent
 	}
 
 	/* Start the file selector list. */
-	final public void doLaunchSelector(
-			boolean selectDir, String findTitle,
+	final public void doLaunchSelector(boolean selectDir, String findTitle,
 			Displayable txtDisp, Object txtObj,
 			LoadingForm loadForm)
 	throws Throwable {
@@ -190,5 +201,22 @@ implements KViewParent
 		}
     }
 
+	public Object[] action(Object[] reqs) {
+		if (reqs[0] == MiscUtil.SINIT_OBJ) {
+			try {
+				this.doLaunchSelector(
+						((Boolean)reqs[1]).booleanValue(),
+						(String)reqs[2], (Displayable)reqs[3], reqs[4],
+						(LoadingForm)reqs[5]);
+				return new Object[] {null, new Integer(1), fileSelectorView};
+			} catch (Throwable e) {
+				return new Object[] {e, new Integer(1), fileSelectorView};
+			}
+		} else {
+			return new Object[] {new IllegalArgumentException(
+					"Illegal argument " + reqs[0] +
+					".  Only SINIT_OBJ is a valid request."), null};
+		}
+	}
 }
 //#endif
