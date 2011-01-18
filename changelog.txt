@@ -782,7 +782,7 @@ v1.11.5 Development 14 (dev14) (Nov 26th 2010)
 - Use properties files based on full version.
 - Use substanceofcode for info url for signed.
 
-v1.11.5 Alpha 15 (Jan 17th 2011)
+v1.11.5 Development 15 (Jan 17th 2011)
 - Remove Controller and KFileSelectorFactory classes to reduce some size.
 Add ability to log for character or parsing.
 Add bean shell properties (not used).
