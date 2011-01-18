@@ -24,8 +24,14 @@
  * IB 2010-06-27 1.11.5Dev2 Have 1st settings test class.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Optionally only compile this if the code is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -35,8 +41,6 @@
 
 //#ifdef DJMTEST
 package com.substanceofcode.jmunit.utils;
-
-import jmunit.framework.cldc10.TestCase;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 import com.substanceofcode.utils.MiscUtil;
