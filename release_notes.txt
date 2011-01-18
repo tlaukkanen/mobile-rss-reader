@@ -365,7 +365,7 @@ v1.11.5 Development 14 (dev14) (Nov 26th 2010)
 - Copy signed files to distsigned directory.
 - If jsr-75 vers exists show the version string in case it changes later.
 
-v1.11.5 Alpha 15 (dev14) (Jan 17th 2011)
+v1.11.5 Development 15 (dev14) (Jan 17th 2011)
 - Have internet link version which shows only some phone/program properties and the preferred jad/jar based on the current capabilities of the phone.  This currently has a bug where the signing authority is not put into the preferred name.
 - Have full (non-internet) version (with full_ in it's file name) have preferred jad/jar above and have the full functionality of the reader.
 - Fixed problem that may have caused file read problems.
