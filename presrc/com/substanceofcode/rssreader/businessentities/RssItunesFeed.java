@@ -24,6 +24,8 @@
 /*
  * IB 2010-03-14 1.11.5RC2 Combine classes to save space.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Allow cloning of feeds to determine if they are equal to allow determining if two items are the same to preserve their read flags.  Also, allow future background updates.
+ * IB 2011-01-14 1.11.5Alpha15 Have checkPresRead to preserve the read flags of feeds.
 */
 // Expand to define itunes define
 @DITUNESDEF@
@@ -466,5 +468,17 @@ implements RssItunesFeedInfo
     public String getTitle() {
         return (m_title);
     }
+
+	public void checkPresRead(boolean modFeed, RssItunesFeed itfeed) {
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("checkPresRead modFeed,itfeed=" + modFeed + "," + itfeed);}
+		if (finestLoggable) {logger.finest("checkPresRead this=" + this);}
+		//#endif
+		super.checkPresRead(modFeed, itfeed);
+	}
+
+    public Object clone() {
+		return new RssItunesFeed(this);
+	}
 
 }
