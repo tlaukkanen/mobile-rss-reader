@@ -50,6 +50,13 @@
  * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg print the class name.
  * IB 2010-11-22 1.11.5Dev14 Replace Alert with loading form exception.
  * IB 2010-11-22 1.11.5Dev14 Fix stack trace to use e instead of t.
+ * IB 2011-01-01 1.11.5Dev15 Use procIoExc in URLHandler to handle the IO exception and other exceptions common with IO exception.
+ * IB 2010-01-01 1.11.5Dev15 If logging and necessary, write severe or other message.  If not logging, printStackTrace.
+ * IB 2010-01-01 1.11.5Dev15 Use closeConnection in MiscUtil to close a connection.
+ * IB 2010-01-01 1.11.5Dev15 Release memory for InputStream by closing it and making it null with closeConnection.
+ * IB 2010-01-01 1.11.5Dev15 Use nullPtr to decrease memory.
+ * IB 2010-01-01 1.11.5Dev15 Use featureMgr instead of getFeatureMgr().
+ * IB 2011-01-11 1.11.5Dev15 Use super.featureMgr instead of featureMgr.
 */
 
 // Expand to define MIDP define
@@ -85,6 +92,7 @@
 //@import com.substanceofcode.rssreader.presentation.FeatureList;
 //@import com.substanceofcode.rssreader.presentation.FeatureMgr;
 //@import com.substanceofcode.rssreader.presentation.LoadingForm;
+//@import com.substanceofcode.rssreader.businesslogic.URLHandler;
 //@import com.substanceofcode.utils.MiscUtil;
 //@
 //#ifdef DLOGGING
@@ -166,10 +174,9 @@
 //@		} catch (Throwable t) {
 			//#ifdef DLOGGING
 //@			logger.severe("KFileSelectorImpl constructor", t);
-			//#endif
-//@			/** Error while executing constructor */
-//@			System.out.println("KFileSelectorImpl constructor " + t.getMessage());
+			//#else
 //@			t.printStackTrace();
+			//#endif
 //@		}
 		//#endif
 //@
@@ -182,11 +189,11 @@
 		//#endif
 //@		//ROOT_IMAGE = Image.createImage("root_icon.png");
 //@		FOLDER_IMAGE = FeatureMgr.getImage(iconDir + "/folder_icon.png",
-//@				featureMgr.getLoadForm());
+//@				super.featureMgr.getLoadForm());
 //@		FILE_IMAGE = FeatureMgr.getImage(iconDir + "/file_icon.png",
-//@				featureMgr.getLoadForm());
+//@				super.featureMgr.getLoadForm());
 //@		UPDIR_IMAGE =  FeatureMgr.getImage(iconDir + "/up_dir_icon.png",
-//@				featureMgr.getLoadForm());
+//@				super.featureMgr.getLoadForm());
 //@
 		//#ifdef DTEST
 //@		displayDbgMsg("MFS building cmds....", null);
@@ -233,7 +240,7 @@
 //@						/** Error while executing constructor */
 //@						System.out.println("KFileSelectorImpl run openSelected " + t.getMessage());
 						//#endif
-//@						super.getFeatureMgr().getLoadForm().recordExcFormFin(
+//@						super.featureMgr.getLoadForm().recordExcFormFin(
 //@								"Internal error.  Unable to open.", t);
 //@						t.printStackTrace();
 //@					}
@@ -241,7 +248,7 @@
 //@					doCleanup();
 //@					parent.childFinished(this);
 //@					cancelCmd = false;
-//@					featureMgr.setBackground(false);
+//@					super.featureMgr.setBackground(false);
 //@				}
 //@			} catch (Exception e) {
 				//#ifdef DLOGGING
@@ -297,18 +304,7 @@
 //@		this.selectedFile = (String)nullPtr;
 //@		this.selectedURL = (String)nullPtr;
 //@
-//@		if (null != currentRoot) {
-//@			try {currentRoot.close();}
-//@			catch (IOException ioEx) {
-				//#ifdef DLOGGING
-//@				logger.severe("doCleanup ", ioEx);
-				//#endif
-//@				ioEx.printStackTrace();
-//@			}
-//@			// Save memory.
-//@			currentRoot = (FileConnection)nullPtr;
-//@		}
-//@
+//@		currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 //@		// Save memory.
 //@		fileDataBlock = (byte[])nullPtr;
 //@
@@ -373,6 +369,8 @@
 			//#endif
 //@			try
 //@			{
+//@				// Free memory before doing the open.
+//@				currentRoot = (FileConnection)nullPtr;
 //@				currentRoot = (FileConnection) Connector.open(  defaultDir,  Connector.READ);
 //@				displayCurrentRoot();
 //@			}
@@ -414,14 +412,8 @@
 			//#endif
 //@			super.append(root.substring(1), FOLDER_IMAGE);
 //@		}
-//@		// Save memory.
-//@		currentRoot = (FileConnection)nullPtr;
+//@		currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 //@	}//displayAllRoots
-//@
-//@
-//@
-//@
-//@
 //@
 //@	/* Load roots into rootsList array. */
 //@	protected void loadRoots()
@@ -498,44 +490,23 @@
 //@						}
 //@						displayCurrentRoot();
 //@					}
-//@					catch (SecurityException e)
+//@					catch (Throwable e)
 //@					{
 						//#ifdef DTEST
-//@						displayDbgMsg("### open file: " + e, null);
+//@						displayDbgMsg("### file Conn open: " + e, null);
 						//#endif
-						//#ifdef DLOGGING
-//@						logger.severe("openSelected security exception selected:  " + selectedFile, e);
-//@						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
-						//#endif
-//@						super.getFeatureMgr().getLoadForm().recordExcFormFin(
-//@								"Security problem found either access " +
-//@								" denied or access refused by the user.", e);
-//@						e.printStackTrace();
-//@						throw e;
-//@					}
-//@					catch (IllegalArgumentException e)
-//@					{
-						//#ifdef DTEST
-//@						displayDbgMsg("### open file: " + e, null);
-						//#endif
-						//#ifdef DLOGGING
-//@						logger.severe("openSelected illegal argument selected:  " + selectedFile, e);
-//@						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
-						//#endif
-//@						super.getFeatureMgr().getLoadForm().recordExcFormFin(
-//@								"Illegal argument with find files.", e);
-//@						throw e;
-//@					}
-//@					catch (Exception e)
-//@					{
-						//#ifdef DTEST
-//@						displayDbgMsg("### open file: " + e, null);
-						//#endif
-						//#ifdef DLOGGING
-//@						logger.severe("openSelected exception selected:  " + selectedFile, e);
-						//#else
-//@						e.printStackTrace();
-						//#endif
+//@						URLHandler.procIoExc(
+//@								"Error while accessing file at ", e,
+//@								(null == currentRoot),
+//@								"file:///" + selectedFile,
+//@								"Out of memory error while accessing file at dir",
+//@								"Internal error while accessing file at dir",
+//@								"openSelected",
+//@								super.featureMgr.getLoadForm()
+								//#ifdef DLOGGING
+//@								,logger
+								//#endif
+//@								);
 //@					}
 //@				}
 //@				else if (selectedFile.equals(UP_DIR))
@@ -566,21 +537,28 @@
 //@							currentRoot.setFileConnection(UP_DIR);
 //@							displayCurrentRoot();
 //@						}
-//@						catch (IOException e)
+//@						catch (Throwable e)
 //@						{
-							//#ifdef DLOGGING
-//@							logger.severe("KFileSelectorImpl openSelected at dir " + currentRoot.getPath() + "," + currentRoot.getName(), e);
-							//#else
-//@							e.printStackTrace();
-							//#endif
 							//#ifdef DTEST
 //@							displayDbgMsg("### setfileConn: " + e, null);
 							//#endif
-//@						}
-//@						catch (IllegalArgumentException e)
-//@						{
-//@							//there's something hosed with this path-- jump back to roots
-//@							displayAllRoots();
+//@							URLHandler.procIoExc(
+//@									"Error while accessing file at dir", e,
+//@									false,
+//@									UP_DIR,
+//@									"Out of memory error while accessing file at dir",
+//@									"Internal error while accessing file at dir",
+//@									"openSelected",
+//@									super.featureMgr.getLoadForm()
+									//#ifdef DLOGGING
+//@									,logger
+									//#endif
+//@									);
+//@							if (e instanceof IllegalArgumentException)
+//@							{
+//@								//there's something hosed with this path-- jump back to roots
+//@								displayAllRoots();
+//@							}
 //@						}
 //@					}
 //@				}
@@ -596,7 +574,7 @@
 //@					//parent.childFinished(this);
 //@
 //@					// Stop thread of FeatureMgr
-//@					featureMgr.setBackground(false);
+//@					super.featureMgr.setBackground(false);
 //@
 //@					// Clean up in separate thread.  This also saves
 //@					// the selectedURL and sends childFinished.
@@ -623,13 +601,9 @@
 //@			displayDbgMsg("=== Selected URL: " + selectedURL, null);
 			//#endif
 //@
-//@			try {currentRoot.close();}
-//@			catch(IOException ioEx) {
-//@				ioEx.printStackTrace();
-//@			}
 //@		}
 //@
-//@		currentRoot = (FileConnection)nullPtr; //reset it
+//@		currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 //@		//selectedFile = (String)nullPtr;
 //@
 //@		parent.childFinished(this);
@@ -794,6 +768,8 @@
 //@					displayDbgMsg("selectedURL: " + selectedURL, null);
 					//#endif
 //@
+//@					// Free memory before doing the open.
+//@					currentRoot = (FileConnection)nullPtr;
 //@					currentRoot = (FileConnection) Connector.open(selectedURL);
 //@
 //@					//currentRoot.setFileConnection(selectedFile); //relative to current directory
@@ -828,45 +804,45 @@
 							//#endif
 //@
 //@							is.read(fileDataBlock);
-//@							is.close();
+//@							is = (InputStream)MiscUtil.closeInputStream(is);
 //@
 							//#ifdef DTEST
 //@							displayDbgMsg("...data read.", null);
 							//#endif
 //@						}
-//@						catch (IOException ioEx)
+//@						catch (Throwable e)
 //@						{
-							//#ifdef DTEST
-//@							if (bDebug) {
-//@								System.err.println("### ioEx: " + ioEx);
-//@
-//@								ioEx.printStackTrace();
-//@							}
-							//#endif
-//@						}
-//@						catch (java.lang.OutOfMemoryError oom)
-//@						{
-							//#ifdef DTEST
-//@							if (bDebug) System.err.println("### OOM new fileDataBlock: "  + Runtime.getRuntime().freeMemory());
-							//#endif
+//@							URLHandler.procIoExc(
+//@									"Error while accessing file at dir", e,
+//@									currentRoot == null,
+//@									selectedURL,
+//@									"Out of memory error while accessing file at dir",
+//@									"Internal error while accessing file at dir",
+//@									"openSelected",
+//@									super.featureMgr.getLoadForm()
+									//#ifdef DLOGGING
+//@									,logger
+									//#endif
+//@									);
 //@						}
 //@					}
 //@
-//@					currentRoot.close(); //no longer needed
-//@					currentRoot = (FileConnection)nullPtr;
+//@					currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 //@				}
-//@				catch (IOException ioEx)
+//@				catch (Throwable e)
 //@				{
-					//#ifdef DTEST
-//@					displayDbgMsg("### read file ioex: " + ioEx, null);
-					//#endif
-//@				}
-//@				catch (Exception ex)
-//@				{
-					//#ifdef DTEST
-//@					displayDbgMsg("### read file ex: " + ex, null);
-					//#endif
-//@
+//@					URLHandler.procIoExc(
+//@							"Error while reading file at dir", e,
+//@							currentRoot == null,
+//@							selectedURL,
+//@							"Out of memory error while reading file at dir",
+//@							"Internal error while reading file at dir",
+//@							"openSelected",
+//@							super.featureMgr.getLoadForm()
+							//#ifdef DLOGGING
+//@							,logger
+							//#endif
+//@							);
 //@				}
 //@			}
 //@		}
