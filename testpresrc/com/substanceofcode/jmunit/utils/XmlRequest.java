@@ -24,14 +24,20 @@
  * IB 2010-03-14 1.11.5RC2 Test results from XmlParser.
  * IB 2010-05-29 1.11.5RC2 Return first non PROLOGUE, DOCTYPE, STYLESHEET, or ELEMENT which is not link followed by meta.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
 @DJMTESTDEF@
 
 //#ifdef DJMTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.jmunit.utils;
 
 public interface XmlRequest
@@ -55,4 +61,5 @@ public interface XmlRequest
 	static Integer IGET_TEXT = new Integer(GET_TEXT);
 	static Integer IGET_NAME = new Integer(GET_NAME);
 }
+//#endif
 //#endif
