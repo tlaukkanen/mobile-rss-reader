@@ -23,8 +23,14 @@
 /*
  * IB 2010-05-24 1.11.5RC2 Move compatibility tests to compatibility packages.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use conditional preprocessed cldc11 code with modifications instead of cldc10 code.
  */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define compatibility
@@ -35,10 +41,10 @@
 @DLOGDEF@
 
 //#ifdef DJMTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.jmunit.rssreader.businessentities;
 
-import jmunit.framework.cldc10.TestSuite;
-
+import jmunit.framework.cldc11.TestSuite;
 
 final public class RssFeedSuite extends TestSuite {
 
@@ -52,4 +58,5 @@ final public class RssFeedSuite extends TestSuite {
 		//#endif
 	}
 }
+//#endif
 //#endif
