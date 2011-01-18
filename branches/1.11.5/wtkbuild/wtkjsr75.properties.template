@@ -3,9 +3,10 @@
 #-- IB 2010-10-13 1.11.5Dev11 Remove https permission.
 #-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
 #-- IB 2010-10-13 1.11.5Dev11 Have file permissions be required to reduce endless ask to open file..
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
 wtk.optionalpda.enabled = true
 DJSR75 = DJSR75
-file.prefix.jsr75 = jsr75_
+file.prefix.jsr75 = ${sfile.prefix.jsr75}_
 PERMISSIONS_REQ.jsr75 = ,javax.microedition.io.Connector.file.read
 PERMISSIONS_OPT.jsr75 = ,javax.microedition.io.Connector.file.write
 SUFFIXVERS.jsr75 = -jsr75
