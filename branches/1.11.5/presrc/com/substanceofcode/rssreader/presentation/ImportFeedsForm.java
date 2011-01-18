@@ -46,6 +46,17 @@
  * IB 2010-10-12 1.11.5Dev9 More logging.
  * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  * IB 2010-11-19 1.11.5Dev14 Move static var m_backCommand out of midlet class to FeatureMgr.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-12 1.11.5Alpha15 Allow option (default) to preserve the username/password when importing and the feed is already present.
+ * IB 2011-01-12 1.11.5Alpha15 Allow option (default) to preserve the read state (flags) when importing and the feed is already present.
+ * IB 2011-01-12 1.11.5Alpha15 Have getAddChoiceGroup to both create a choice field which uses layout bottom (MIDP 2.0) and appends the field to the given form.
+ * IB 2011-01-11 1.11.5Alpha15 Use super.featureMgr instead of featureMgr.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 Pass error messages to log/display exceptions to handleOpen of URLHandler.
+ * IB 2011-01-14 1.11.5Alpha15 Use procIoExc from URLHandler to process exception handling for IO and other exceptions including out of memory.
+ * IB 2011-01-12 1.11.5Alpha15 Pass rssFeeds to FeedListParser.
+ * IB 2011-01-12 1.11.5Alpha15 After modifying/updating the feed, use old feed pointer with new feed pointer to update the feed.  If the old pointer does not match the current pointer, do not update as it means that the future background processing has updated the feed already. 
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
 */
 // FIX check for blank url
 
@@ -63,7 +74,10 @@
 @DLOGDEF@
 // Expand to define test ui define
 @DTESTUIDEF@
+// Expand to define full vers define
+@DFULLVERSDEF@
 
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.presentation;
 
 import java.io.IOException;
@@ -100,6 +114,7 @@ import com.substanceofcode.rssreader.presentation.LoadingForm;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 //#ifdef DJSR75
 import com.substanceofcode.rssreader.businesslogic.URLHandler;
@@ -141,6 +156,8 @@ implements
 	private boolean     m_getFeedList = false;      // The noticy flag for list parsing
 	// The noticy flag for override existing feeds
 	private boolean     m_override = false;  // The noticy flag for override
+	private boolean     m_keepUsPwd = true;  // The noticy flag for override
+	private boolean     m_keepModGroup = true;  // The noticy flag for override
 	//#ifdef DMIDP20
     private boolean     m_parseBackground = false;
     private Observable  m_backGrListParser = null; // The currently selected RSS in background
@@ -149,6 +166,8 @@ implements
 	private TextField   m_feedNameFilter;   // The feed name filter string
 	private TextField   m_feedURLFilter;    // The feed URL filter string
 	private ChoiceGroup m_importFormatGroup;// The import type choice group
+	private ChoiceGroup m_importUsPwdGroup; // The import preserve user/pass choice group
+	private ChoiceGroup m_importModGroup; // The import preserve read flags choice group
 	private ChoiceGroup m_importTitleGroup; // The import title choice group
 	//#ifndef DSMALLMEM
 	private ChoiceGroup m_importHTMLGroup;  // The import HTML redirect choice group
@@ -168,7 +187,7 @@ implements
     /** Initialize import form */
 	public ImportFeedsForm(
 			FeatureList bookmarkList, boolean importFeeds,
-			Hashtable rssFeeds,
+			RssFeedStore rssFeeds,
 			RssReaderSettings appSettings,
 			LoadingForm loadForm, String url) {
 		super((importFeeds ? "Import" : "Export") + " feeds",
@@ -202,9 +221,17 @@ implements
 			//#endif
 			//#endif
 		}
-		m_importFormatGroup = new ChoiceGroup("Format", ChoiceGroup.EXCLUSIVE, formats, null);
+        m_importFormatGroup = FeatureMgr.getAddChoiceGroup(this,
+				"Format",
+				(m_importFeeds ? 
+					new String[] {"OPML", "line by line"
+								//#ifndef DSMALLMEM
+								, "HTML OPML Auto link",
+								"HTML RSS Auto links", "HTML Links"
+								//#endif
+								} :
+						new String[] {"OPML", "line by line"}));
 
-		super.append(m_importFormatGroup);
 		if (m_importFeeds) {
 		
 			m_feedNameFilter = new TextField("Name filter string (optional)", "", 256, TextField.ANY);
@@ -212,29 +239,37 @@ implements
 			m_feedURLFilter = new TextField("URL filter string (optional)", "", 256, TextField.ANY);
 			super.append(m_feedURLFilter);
 			
-			String[] titleInfo =
+			m_importUsPwdGroup = FeatureMgr.getAddChoiceGroup(this,
+				"Save username/password",
+					new String[]
+					{"Save info",
+					 "Clear info"});
+
+			m_importModGroup = FeatureMgr.getAddChoiceGroup(this,
+				"Save read state",
+					new String[]
+					{"Keep info",
+					 "Reset info"});
+
+			m_importTitleGroup  = FeatureMgr.getAddChoiceGroup(this,
+				"Missing title (optionl)",
+				new String[]
 					{"Skip feed with missing title",
 					 "Get missing titles from feed",
-					 "Use link for missing title"};
-			m_importTitleGroup  = new ChoiceGroup("Missing title (optionl)",
-					ChoiceGroup.EXCLUSIVE, titleInfo, null);
-			super.append(m_importTitleGroup);
+					 "Use link for missing title"});
+
 			//#ifndef DSMALLMEM
-			String[] HTMLInfo =
+			m_importHTMLGroup = FeatureMgr.getAddChoiceGroup(this,
+				"Treat HTML mime type as valid import (optional)",
+					new String[]
 					{"Redirect if HTML (ignored for HTML link import)",
-					 "Treat HTML as import"};
-			m_importHTMLGroup  =
-				new ChoiceGroup("Treat HTML mime type as valid import (optional)",
-					ChoiceGroup.EXCLUSIVE, HTMLInfo, null);
-			super.append(m_importHTMLGroup);
+					 "Treat HTML as import"});
+
 			//#endif
-			m_importOvrGroup  = new ChoiceGroup(
+			m_importOvrGroup  = FeatureMgr.getAddChoiceGroup(this,
 					"Override existing feeds in place (optionl)",
-					ChoiceGroup.EXCLUSIVE,
 					new String[] {"Don't override existing feeds.",
-					 "Override (replace) existing feeds."},
-					null);
-			super.append(m_importOvrGroup);
+					 "Override (replace) existing feeds."});
 		
 			//#ifdef DTESTUI
 			m_testImportCmd     = new Command("Test bookmarks imported", Command.SCREEN, 90);
@@ -278,7 +313,7 @@ implements
 			addFeedLists(cfeedListParser,
 					m_addBkmrk,
 					m_appSettings.getMaximumItemCountInFeed(),
-					 m_override, m_rssFeeds,
+					 m_override, m_keepUsPwd, m_keepModGroup, m_rssFeeds,
 					 m_bookmarkList, loadForm);
 			if (loadForm.hasNotes() || loadForm.hasExc()) {
 				loadForm.recordFin();
@@ -287,8 +322,8 @@ implements
 				loadForm.replaceRef(this, null);
 				ImportFeedsForm.m_importSave = FeatureMgr.storeValues(
 						getItemFields());
-				featureMgr.getMidlet().showBookmarkList();
-				featureMgr.setBackground(false);
+				super.featureMgr.getRssMidlet().showBookmarkList();
+				super.featureMgr.setBackground(false);
 			}
 		} catch(Exception ex) {
 			loadForm.recordExcFormFin(
@@ -332,7 +367,7 @@ implements
 			LoadingForm loadForm = LoadingForm.getLoadingForm(
 					((selectedImportType == 0) ? "Writing OPML." : "Writing line by line."),
 					this, null);
-			featureMgr.setLoadForm(loadForm);
+			super.featureMgr.setLoadForm(loadForm);
 			final String url = m_url.getString().trim();
 			//#ifdef DLOGGING
 			if (m_finestLoggable) {m_logger.finest("Writing to url=" + url);}
@@ -340,7 +375,10 @@ implements
 			URLHandler uhandler = new URLHandler();
 			OutputStreamWriter osw = null;
 			try {
-				uhandler.handleOpen(url, null, null, true, false, null, "");
+				uhandler.handleOpen(url, null, null, true, false, null, "",
+					"Error while writing import data",
+					"Out of memory error while writing import data",
+					"Internal error while writing import data");
 				OutputStream os = uhandler.getOutputStream();
 				// On many devices, writing to a file gives a propmt for
 				// each write to the file which is very annoying, so
@@ -382,19 +420,21 @@ implements
 				osw.write(sb.toString());
 				ImportFeedsForm.m_exportSave = FeatureMgr.storeValues(
 						getItemFields());
-				featureMgr.getMidlet().showBookmarkList();
+				super.featureMgr.getRssMidlet().showBookmarkList();
 				loadForm.recordFin();
-			} catch(IllegalArgumentException ex) {
-				loadForm.recordExcForm("Invalid url:  " + url, ex);
-			} catch(ConnectionNotFoundException ex) {
-				loadForm.recordExcForm("Invalid connection or url:  " + url, ex);
-			} catch(IOException ex) {
-				loadForm.recordExcForm("Error exporting feeds to " + url, ex);
-			} catch(SecurityException ex) {
-				loadForm.recordExcForm("Security error exporting feeds to " + url, ex);
-			} catch(Throwable t) {
-				loadForm.recordExcForm("Internal error exporting feeds to " +
-						url, t);
+			} catch(Throwable e) {
+				URLHandler.procIoExc(
+						"Error while exporting feeds for", e,
+						osw == null,
+						url,
+						"Out of memory error while exporting feeds for",
+						"Internal error while exporting feeds for",
+						"openSelected",
+						super.featureMgr.getLoadForm()
+						//#ifdef DLOGGING
+						,m_logger
+						//#endif
+						);
 			} finally {
 				uhandler.handleClose();
 				if (osw != null) {
@@ -420,6 +460,7 @@ implements
 			LoadingForm loadForm = LoadingForm.getLoadingForm(
 						"Loading feeds from import...",
 						this, null);
+			super.featureMgr.setLoadForm(loadForm);
 			try {
 					
 				// 2. Import feeds
@@ -432,6 +473,8 @@ implements
 				boolean getFeedTitleList = m_importTitleGroup.isSelected(1);
 				boolean useFeedUrlList = m_importTitleGroup.isSelected(2);
 				m_override = m_importOvrGroup.isSelected(1);
+				m_keepUsPwd = m_importUsPwdGroup.getSelectedIndex() == 0;
+				m_keepModGroup = m_importModGroup.getSelectedIndex() == 0;
 				//#ifdef DLOGGING
 				if (m_finestLoggable) {m_logger.finest("getFeedTitleList,useFeedUrlList=" + getFeedTitleList + "," + useFeedUrlList);}
 				if (m_finestLoggable) {m_logger.finest("selectedImportType=" + selectedImportType);}
@@ -445,28 +488,33 @@ implements
 				switch (selectedImportType) {
 					case 1:
 						// Use line by line parser
-						clistParser = new LineByLineParser(url, username, password);
+						clistParser = new LineByLineParser(url, username,
+								password, m_rssFeeds);
 						break;
 					//#ifndef DSMALLMEM
 					case 2:
 						// Use line by HMTL OPML auto link parser
-						clistParser = new HTMLAutoLinkParser(url, username, password);
+						clistParser = new HTMLAutoLinkParser(url, username,
+								password, m_rssFeeds);
 						((HTMLAutoLinkParser)clistParser).setNeedRss(false);
 						break;
 					case 3:
 						// Use line by HMTL RSS auto link parser
-						clistParser = new HTMLAutoLinkParser(url, username, password);
+						clistParser = new HTMLAutoLinkParser(url, username,
+								password, m_rssFeeds);
 						((HTMLAutoLinkParser)clistParser).setNeedRss(true);
 						break;
 					case 4:
 						// Use line by HMTL link parser
-						clistParser = new HTMLLinkParser(url, username, password);
+						clistParser = new HTMLLinkParser(url, username,
+								password, m_rssFeeds);
 						break;
 					//#endif
 					case 0:
 					default:
 						// Use OPML parser
-						clistParser = new OpmlParser(url, username, password);
+						clistParser = new OpmlParser(url, username, password,
+								m_rssFeeds);
 						break;
 				}
 				clistParser.setGetFeedTitleList(getFeedTitleList);
@@ -547,7 +595,7 @@ implements
 				cparseBackground = m_parseBackground;
 			}
 			if (cparseBackground) {
-				featureMgr.getMidlet().getLoadForm().appendNote(
+				super.featureMgr.getLoadForm().appendNote(
 						"NOTE:  Import parsing has already started.  Please wait for it to finish.");
 			} else {
 				m_getFeedList = true;
@@ -576,7 +624,7 @@ implements
 		//#ifdef DTESTUI
 		/** Import list of feeds and auto edit bookmarks/feeds */
 		if( c == m_testImportCmd ) {
-			RssReaderMIDlet midlet = featureMgr.getMidlet();
+			RssReaderMIDlet midlet = featureMgr.getRssMidlet();
 			midlet.setBookmarkIndex(m_bookmarkList.size());
 			System.out.println("Test UI Test Rss feeds m_bookmarkIndex=" +
 					midlet.getBookmarkIndex());
@@ -589,7 +637,8 @@ implements
 	/** Add from feed list (from import). */
 	public static void addFeedLists(FeedListParser listParser,
 			int addBkmrk,
-			int maxItemCount, boolean override, Hashtable rssFeeds,
+			int maxItemCount, boolean override, boolean keepUsPwd,
+			boolean keepModGroup, RssFeedStore rssFeeds,
 			FeatureList bookmarkList, LoadingForm loadForm)
 	throws CauseException, Exception {
 		//#ifdef DLOGGING
@@ -617,12 +666,21 @@ implements
 			if((name != null) && (name.length()>0)) {
 				final boolean pres = rssFeeds.containsKey( name );
 				if(override || !pres) {
-					if(pres) {
+
+					RssItunesFeed oldfeed;
+					if (pres) {
 						loadForm.appendNote(
 								"Overriding existing feed with the one from " +
 								"import feed name " + name);
+						oldfeed = rssFeeds.get(name);
+						if ((oldfeed != null) && (keepUsPwd || keepModGroup)) {
+							feeds[ feedIndex ].checkPresRead(keepModGroup,
+								oldfeed);
+						}
+					} else {
+						oldfeed = null;
 					}
-					rssFeeds.put( name, feeds[feedIndex] );
+					rssFeeds.put( name, feeds[feedIndex], oldfeed );
 					if(!pres) {
 						bookmarkList.insert(addBkmrk++, name, null);
 					}
@@ -639,3 +697,4 @@ implements
 	}
 
 }
+//#endif
