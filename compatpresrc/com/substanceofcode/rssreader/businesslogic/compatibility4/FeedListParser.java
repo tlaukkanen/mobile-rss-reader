@@ -27,6 +27,7 @@
  * IB 2010-06-29 1.11.5RC2 Use compatibility observer pattern.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Log change to m_feedURLFilter.
 */
 
 // Expand to define MIDP define
@@ -323,14 +324,17 @@ implements
         return (m_feedNameFilter);
     }
 
-    public void setFeedURLFilter(String m_feedURLFilter) {
+    public void setFeedURLFilter(String feedURLFilter) {
         if (m_feedURLFilter == null) {
 			this.m_feedURLFilter = null;
 		} else if (m_feedURLFilter.length() == 0) {
 			this.m_feedURLFilter = null;
 		} else {
-			this.m_feedURLFilter = m_feedURLFilter.toLowerCase();
+			this.m_feedURLFilter = feedURLFilter.toLowerCase();
 		}
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine("setFeedURLFilter=" + feedURLFilter);}
+		//#endif
     }
 
     public String getFeedURLFilter() {
