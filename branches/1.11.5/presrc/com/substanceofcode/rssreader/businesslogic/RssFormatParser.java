@@ -33,12 +33,20 @@
  * IB 2010-11-16 1.11.5Dev14 Add columnCount to parseStdDate exceptions.
  * IB 2010-11-16 1.11.5Dev14 Remove stimeZones and GMT because this may change with phone config or upgrading phone.
  * IB 2010-11-16 1.11.5Dev14 Have parseStdDateTZ return string time zone instead of index of time zone.
+ * IB 2010-11-26 1.11.5Dev14 To help with minor performance, start vector with max items.
+ * IB 2010-11-26 1.11.5Dev14 To help with minor space, use trimToSize for items..
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
 @DLOGDEF@
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -77,6 +85,7 @@ public class RssFormatParser implements FeedFormatParser {
 	private String m_link = "";
 	private String m_language = "";
 	private String m_date = "";
+	private String m_lastBuildDate = "";
 	private String m_enclosure = "";
 	private ExtParser m_extParser = new ExtParser();
 
@@ -87,7 +96,7 @@ public class RssFormatParser implements FeedFormatParser {
 		//#ifdef DLOGGING
 		if (finestLoggable) {logger.finest("parse cfeed.getName(),maxItemCount,getTitleOnly=" + cfeed.getName() + "," + + maxItemCount + "," + getTitleOnly);}
 		//#endif
-        Vector items = new Vector();
+        Vector items = new Vector(maxItemCount);
 		m_extParser.parseNamespaces(parser);
 		m_hasExt = m_extParser.isHasExt();
 		RssItunesFeed feed = cfeed;
@@ -118,7 +127,13 @@ public class RssFormatParser implements FeedFormatParser {
 						}
 						switch (elemChar) {
 							case 'l':
-								 if (elementName.equals("language")) {
+								 if (elementName.equals("lastBuildDate")) {
+									 m_lastBuildDate = parser.getText(true);
+									 //#ifdef DLOGGING
+									 if (finestLoggable) {logger.finest("m_lastBuildDate=" + m_lastBuildDate);}
+									 //#endif
+									 continue;
+								 } else if (elementName.equals("language")) {
 									 m_language = parser.getText(true);
 									 //#ifdef DLOGGING
 									 if (finestLoggable) {logger.finest("m_language=" + m_language);}
@@ -154,6 +169,9 @@ public class RssFormatParser implements FeedFormatParser {
 			if (m_date.length() > 0) {
 				Date pubDate = parseRssDate(m_date);
 				feed.setDate(pubDate);
+			} else if (m_lastBuildDate.length() > 0) {
+				Date pubDate = parseRssDate(m_lastBuildDate);
+				feed.setDate(pubDate);
 			} else {
 				feed.setDate(null);
 			}
@@ -161,63 +179,68 @@ public class RssFormatParser implements FeedFormatParser {
 				feed = m_extParser.getFeedInstance(feed, m_language, m_title,
 						m_description);
 			}
+			items.trimToSize();
 		}
 		//#endif
         
 		reset();
 
-		/** Parse next element */            
-        int parsingResult;
-        while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
-			if (parsingResult != XmlParser.ELEMENT) {
-				continue;
-			}
-            String elementName = parser.getName();
-            if (elementName.length() == 0) {
-				continue;
-			}
-            
-			char elemChar = elementName.charAt(0);
-            switch (elemChar) {
-				case 'i':
-					if (elementName.equals("item") ) {
-						/** Save previous entry */
-						RssItunesItem item = createItem();
-						if ( item != null) {
-							items.addElement( item );
-							if(items.size()==maxItemCount) {
-								return feed;
-							}
-						}                
+		try {
+			/** Parse next element */            
+			int parsingResult;
+			while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
+				if (parsingResult != XmlParser.ELEMENT) {
+					continue;
+				}
+				String elementName = parser.getName();
+				if (elementName.length() == 0) {
+					continue;
+				}
+				
+				char elemChar = elementName.charAt(0);
+				switch (elemChar) {
+					case 'i':
+						if (elementName.equals("item") ) {
+							/** Save previous entry */
+							RssItunesItem item = createItem();
+							if ( item != null) {
+								items.addElement( item );
+								if(items.size()==maxItemCount) {
+									return feed;
+								}
+							}                
 
-						/** New entry */
-						/** reset */
-						reset();
-						continue;
-					}
-					break;
-				case 't':
-					// Textinput has required sub element description.
-					// We don't want the overriding description.
-					if (elementName.equals("textinput") ) {
-						parser.getText(false);
-						//#ifdef DLOGGING
-						if (finestLoggable) {logger.finest("skipping textinput data");}
-						//#endif
-						continue;
-					}
-					break;
-				default:
+							/** New entry */
+							/** reset */
+							reset();
+							continue;
+						}
+						break;
+					case 't':
+						// Textinput has required sub element description.
+						// We don't want the overriding description.
+						if (elementName.equals("textinput") ) {
+							parser.getText(false);
+							//#ifdef DLOGGING
+							if (finestLoggable) {logger.finest("skipping textinput data");}
+							//#endif
+							continue;
+						}
+						break;
+					default:
+				}
+				parseItem(parser, elemChar, elementName);
+				
 			}
-			parseItem(parser, elemChar, elementName);
-            
-        }
 
-        /** Save previous entry */
-		RssItunesItem item = createItem();
-		if ( item != null) {
-            items.addElement( item );
-        }        
+			/** Save previous entry */
+			RssItunesItem item = createItem();
+			if ( item != null) {
+				items.addElement( item );
+			}        
+		} finally {
+			items.trimToSize();
+		}
                         
 		return feed;
     }
@@ -582,7 +605,7 @@ public class RssFormatParser implements FeedFormatParser {
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 			Logger logger = Logger.getLogger("RssFormatParser");
-			logger.severe("parseStdDateTZ  error while converting date " +
+			logger.severe("parseDcDate error while converting date " +
 						   "string to object: " +
                     dateString, t);
 			//#endif
@@ -642,3 +665,4 @@ public class RssFormatParser implements FeedFormatParser {
 	}
 
 }
+//#endif
