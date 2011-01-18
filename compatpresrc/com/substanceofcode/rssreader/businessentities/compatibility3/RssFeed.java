@@ -480,7 +480,7 @@ public class RssFeed implements RssFeedInfo {
     }
 
     /** Write record as a string */
-    public String toString(){
+    public String toString() {
         StringBuffer serializedItems = new StringBuffer();
 		int ilen = m_items.size();
 		RssItunesItem [] ritems = new RssItunesItem[ilen];
