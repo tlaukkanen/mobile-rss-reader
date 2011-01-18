@@ -1,5 +1,8 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-12-26 1.11.5Dev15 Use DNOVICEDEF to reduce code size for novice version.
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
+DNOVICEDEF = DNOVICE
 NOVICE = true
-file.prefix.novice = novice_
+file.prefix.novice = ${sfile.prefix.novice}
 SUFFIXVERS.novice = -novice
 novice = novice
