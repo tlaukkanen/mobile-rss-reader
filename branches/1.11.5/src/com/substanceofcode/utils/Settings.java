@@ -61,10 +61,20 @@
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for Settings.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-19 1.11.5Dev14 Move static vars CFEED_SEPARATOR and OLD_FEED_SEPARATOR out of midlet class to Settings.
+ * IB 2011-01-01 1.11.5Dev15 Change static vars to instance vars to reduce RMS save problems.
+ * IB 2011-01-01 1.11.5Dev15 Make some globally used vars volatile.
+ * IB 2011-01-01 1.11.5Dev15 Add trace logging.
+ * IB 2011-01-01 1.11.5Dev15 Create loadRec to make loading more independent.
+ * IB 2011-01-01 1.11.5Dev15 Future have loadRec return true if read/conversion error for value.
+ * IB 2011-01-01 1.11.5Dev15 Future use return from saveRec which returns true if read/conversion error for value.
+ * IB 2011-01-11 1.11.5Dev15 Make BOOKMARKS_NAME blank if record 2 (region 1) or greater.
+ * IB 2011-01-11 1.11.5Dev15 Add RecordStoreException code to loadRec if cannot get a record.
+ * IB 2011-01-11 1.11.5Dev15 Change logging of load value to trace.
+ * IB 2011-01-11 1.11.5Dev15 Have deleteStore create settings if it does not exist since the vars are no longer static, need to use settings instance to access instance vars to delete store.
  */
 
 // Expand to define CLDC define
-//#define DCLDC10
+//#define DCLDCV10
 // Expand to define test define
 //#define DNOTEST
 // Expand to define logging define
@@ -108,34 +118,35 @@ import com.substanceofcode.rssreader.presentation.FeatureMgr;
  */
 final public class Settings {
     
-	final       Object nullPtr = null;
-    public static final int OLD_MAX_REGIONS = 1;
-    public static final int MAX_REGIONS = 15;
-    public static final String SETTINGS_NAME = "RssReader-setttings-vers";
-    public static final String BOOKMARKS_NAME = "bookmarks";
-    final static public char CFEED_SEPARATOR = (char)4;
-    final static public char OLD_FEED_SEPARATOR = '^';
+	final Object nullPtr = null;
+    public final int OLD_MAX_REGIONS = 1;
+    public final int MAX_REGIONS = 15;
+    public final String SETTINGS_NAME = "RssReader-setttings-vers";
+    public final String BOOKMARKS_NAME = "bookmarks";
+    final public char CFEED_SEPARATOR = (char)4;
+    final public char OLD_FEED_SEPARATOR = '^';
 	// The first settings did not have a version, so it ends up being
 	// "" by default
-    public static final String RECORD_STORE_NAME = "Store";
-    public static final String FIRST_SETTINGS_VERS = "";
-    public static final String ITUNES_CAPABLE_VERS = "3";
-    public static final String ENCODING_VERS = "4";
-    public static final String MODIFIED_VERS = "5";
-    public static final String ITEMS_ENCODED = "items-encoded";
-    public static final String STORE_DATE = "store-date";
-    public static final String SETTINGS_VERS = MODIFIED_VERS;
+    public final String RECORD_STORE_NAME = "Store";
+    public final String FIRST_SETTINGS_VERS = "";
+    public final String ITUNES_CAPABLE_VERS = "3";
+    public final String ENCODING_VERS = "4";
+    public final String MODIFIED_VERS = "5";
+    public final String ITEMS_ENCODED = "items-encoded";
+    public final String STORE_DATE = "store-date";
+    public final String SETTINGS_VERS = MODIFIED_VERS;
     volatile private static Settings m_store;
-    private boolean         m_valuesChanged = false;
-    private boolean         m_initialized = true;
-    private int             m_initRecs = 0;
-    private boolean         m_firstLoad = true;
+    volatile private boolean         m_valuesChanged = false;
+    volatile private boolean         m_initialized = true;
+    volatile private int             m_initRecs = 0;
+    volatile private boolean         m_firstLoad = true;
     private Hashtable       m_properties = new Hashtable();
-    private int             m_region;
+    volatile private int             m_region;
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("Settings");
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
     
     /**
@@ -410,8 +421,6 @@ final public class Settings {
 		int numRecs = 0;
 		RecordStore rs = null;
 		synchronized(this) {
-			ByteArrayInputStream bin = null;
-			DataInputStream din = null;
 			
 			m_valuesChanged = false;
 			m_properties.clear();
@@ -449,112 +458,14 @@ final public class Settings {
 					//#ifdef DLOGGING
 //@					if (fineLoggable) {logger.fine("load currentSettings=" + currentSettings);}
 					//#endif
-					byte[] data = null;
 					if (region >= numRecs) {
 						m_properties.put(BOOKMARKS_NAME, "");
 					} else {
-						try {
-							data = rs.getRecord( region + 1 );
-						} catch (InvalidRecordIDException irie) {
-							//#ifdef DLOGGING
-//@							logger.warning("load cannot get record region=" + region, irie);
-							//#endif
-							if (region >= 2) {
-								m_properties.put(BOOKMARKS_NAME, "");
-							}
-							irie.printStackTrace();
-						}
-					}
-					if( (data != null) && (data.length > 1) ) {
-						bin = new ByteArrayInputStream( data );
-						din = new DataInputStream( bin );
-						int num = din.readInt();
-						while( num-- > 0 ) {
-							String name = din.readUTF();
-							//#ifdef DLOGGING
-//@							if (finestLoggable) {logger.finest("load name=" + name);}
-							//#endif
-							String value;
-							if (currentSettings) {
-								final int blen = din.readInt();
-								//#ifdef DLOGGING
-//@								if (finestLoggable) {logger.finest("load blen=" + blen);}
-								//#endif
-								if (blen == 0) {
-									value = "";
-								} else {
-									byte [] bvalue = new byte[blen];
-									final int bvlen = din.read(bvalue);
-									try {
-										value = new String(bvalue, 0, bvlen, "UTF-8");
-									} catch (UnsupportedEncodingException e) {
-										//#ifdef DLOGGING
-//@										logger.severe("load cannot convert load name=" + name, e);
-										//#endif
-										/** Error while executing constructor */
-										System.out.println("load cannot convert load name=" +
-												name + e.getMessage());
-										e.printStackTrace();
-										value = new String(bvalue, 0, bvlen);
-									} catch (IOException e) {
-										//#ifdef DLOGGING
-//@										logger.severe("load cannot convert load name=" + name, e);
-										//#endif
-										/** Error while executing constructor */
-										System.out.println("load cannot convert load name=" +
-												name + e.getMessage());
-										e.printStackTrace();
-										value = new String(bvalue, 0, bvlen);
-									}
-								}
-							} else {
-								value = din.readUTF();
-							}
-							//#ifdef DLOGGING
-//@							if (finestLoggable) {logger.finest("load value=" + value);}
-							//#endif
-							m_properties.put( name, value );
-						}
-					}
-				}
-				m_region = region;
-			} catch (RecordStoreException e) {
-				//#ifdef DLOGGING
-//@				logger.severe("load ", e);
-				//#endif
-				/** Error while executing constructor */
-				System.out.println("load " + e.getMessage());
-				e.printStackTrace();
-				throw new CauseRecStoreException(
-						"RecordStoreException while loading region=" +
-						region, e);
-			} catch (Exception e) {
-				//#ifdef DLOGGING
-//@				logger.severe("load ", e);
-				//#endif
-				/** Error while executing constructor */
-				System.out.println("load " + e.getMessage());
-				e.printStackTrace();
-				throw new CauseException("Internal error while loading region=" +
-						region, e);
-			} catch (Throwable e) {
-				//#ifdef DLOGGING
-//@				logger.severe("load throwable ", e);
-				//#endif
-				/** Error while executing constructor */
-				System.out.println("load throwable " + e.getMessage());
-				e.printStackTrace();
-				throw new CauseException("Internal error while loading " +
-						"region=" + region, e);
-			} finally {
-				if( din != null ) {
-					/* Workaround for MicroEmulator. */
-					try { ((InputStream)din).close();
-					} catch( Exception e ){
-						e.printStackTrace();
+						loadRec( rs, region, currentSettings, m_properties );
 					}
 				}
 				
+			} finally {
 				//#ifdef DLOGGING
 //@				if (fineLoggable) {logger.fine("load rs,rs.info=" + rs + "," + getStoreInfo(rs));}
 				//#endif
@@ -590,6 +501,118 @@ final public class Settings {
 		}
     }
     
+	// todo change "load"
+    public boolean loadRec(RecordStore rs, int region, boolean currentSettings,
+			Hashtable properties  )
+    throws IOException, CauseRecStoreException, CauseException {
+		synchronized(this) {
+			byte[] data = null;
+			try {
+				data = rs.getRecord( region + 1 );
+			} catch (InvalidRecordIDException irie) {
+				//#ifdef DLOGGING
+//@				logger.warning("load cannot get record region=" + region, irie);
+				//#endif
+				if (region >= 1) {
+					properties.put(BOOKMARKS_NAME, "");
+				}
+				irie.printStackTrace();
+			} catch (RecordStoreException e) {
+				//#ifdef DLOGGING
+//@				logger.severe("load ", e);
+				//#endif
+				/** Error while executing constructor */
+				System.out.println("load " + e.getMessage());
+				e.printStackTrace();
+				throw new CauseRecStoreException(
+						"RecordStoreException while loading region=" +
+						region, e);
+			}
+			ByteArrayInputStream bin = null;
+			DataInputStream din = null;
+			boolean readError = false;
+			boolean convError = false;
+			try {
+				if( (data != null) && (data.length > 1) ) {
+					bin = new ByteArrayInputStream( data );
+					din = new DataInputStream( bin );
+					int num = din.readInt();
+					while( num-- > 0 ) {
+						String name = din.readUTF();
+						//#ifdef DLOGGING
+//@						if (finestLoggable) {logger.finest("load name=" + name);}
+						//#endif
+						String value;
+						if (currentSettings) {
+							final int blen = din.readInt();
+							//#ifdef DLOGGING
+//@							if (finestLoggable) {logger.finest("load blen=" + blen);}
+							//#endif
+							if (blen == 0) {
+								value = "";
+							} else {
+								byte [] bvalue = new byte[blen];
+								final int bvlen = din.read(bvalue);
+								try {
+									value = new String(bvalue, 0, bvlen, "UTF-8");
+								} catch (UnsupportedEncodingException e) {
+									//#ifdef DLOGGING
+//@									logger.severe("load cannot convert load name=" + name, e);
+									//#endif
+									/** Error while executing constructor */
+									System.out.println("load cannot convert load name=" +
+											name + e.getMessage());
+									e.printStackTrace();
+									value = new String(bvalue, 0, bvlen);
+								} catch (IOException e) {
+									//#ifdef DLOGGING
+//@									logger.severe("load cannot convert load name=" + name, e);
+									//#endif
+									/** Error while executing constructor */
+									System.out.println("load cannot convert load name=" +
+											name + e.getMessage());
+									e.printStackTrace();
+									value = new String(bvalue, 0, bvlen);
+								}
+							}
+						} else {
+							value = din.readUTF();
+						}
+						//#ifdef DLOGGING
+//@						if (traceLoggable) {logger.trace("load value=" + value);}
+						//#endif
+						properties.put( name, value );
+					}
+				}
+				m_region = region;
+			} catch (Exception e) {
+				//#ifdef DLOGGING
+//@				logger.severe("load ", e);
+				//#endif
+				/** Error while executing constructor */
+				System.out.println("load " + e.getMessage());
+				e.printStackTrace();
+				throw new CauseException("Internal error while loading region=" +
+						region, e);
+			} catch (Throwable e) {
+				//#ifdef DLOGGING
+//@				logger.severe("load throwable ", e);
+				//#endif
+				/** Error while executing constructor */
+				System.out.println("load throwable " + e.getMessage());
+				e.printStackTrace();
+				throw new CauseException("Internal error while loading " +
+						"region=" + region, e);
+			} finally {
+				/* Workaround for MicroEmulator. */
+				din = (DataInputStream)MiscUtil.closeInputStream(din);
+				/* Workaround for MicroEmulator. */
+				bin = (ByteArrayInputStream)MiscUtil.closeInputStream(bin);
+			}
+			return readError || convError;
+		}
+	}
+
     /** Save property Hashtable to record store.
         Use MAX_REGIONS records in store to help with running out of memory.  */
     public void save( int region, boolean force )
@@ -612,19 +635,18 @@ final public class Settings {
 		}
 	}
 
-    public void saveRec(RecordStore rs, int region, boolean force )
+    public boolean saveRec(RecordStore rs, int region, boolean force )
 	throws IOException, CauseRecStoreException, CauseException {
 		//#ifdef DLOGGING
 //@		if (finestLoggable) {logger.finest("saveRec rs,rs.info,region,force,m_valuesChanged=" + rs + "," + getStoreInfo(rs) + "," + region + "," + force + "," + m_valuesChanged);}
 		//#endif
 
 		synchronized(this) {
-			if( !m_valuesChanged && !force ) return;
+			if( !m_valuesChanged && !force ) return false;
 			
-			ByteArrayOutputStream bout = new
-					ByteArrayOutputStream();
-			DataOutputStream dout = new
-					DataOutputStream( bout );
+			boolean convError = false;
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			DataOutputStream dout = new DataOutputStream( bout );
 			
 			try {
 				String vers = (String)m_properties.get(SETTINGS_NAME);
@@ -704,6 +726,9 @@ final public class Settings {
 						//#ifdef DLOGGING
 //@						logger.severe("save cannot convert save name=" + name, ioe);
 						//#endif
+						if (!convError) {
+							convError = true;
+						}
 						/** Error while executing constructor */
 						System.out.println("save cannot convert save name=" +
 								name + ioe.getMessage());
@@ -774,24 +799,12 @@ final public class Settings {
 				e.printStackTrace();
 				throw ce;
 			} finally {
-
-				if (dout != null) {
-					try {
-						dout.close();
-						dout = (DataOutputStream)nullPtr;
-					} catch( Exception e ){
-						e.printStackTrace();
-					}
-				}
-				if (bout != null) {
-					try {
-						bout.close();
-						bout = (ByteArrayOutputStream)nullPtr;
-					} catch( Exception e ){
-						e.printStackTrace();
-					}
-				}
+				/* Workaround for MicroEmulator. */
+				dout = (DataOutputStream)MiscUtil.closeOutputStream(dout);
+				/* Workaround for MicroEmulator. */
+				bout = (ByteArrayOutputStream)MiscUtil.closeOutputStream(bout);
 			}
+			return convError;
 		}
     }
     
@@ -868,23 +881,34 @@ final public class Settings {
 
 	//#ifdef DTEST
 //@	final static public void deleteStore() {
+//@		Settings csettings;
+//@		if (m_store != null) {
+//@			csettings = m_store;
+//@		} else {
+//@			try {
+//@				csettings = new Settings();
+//@			} catch (Throwable e) {
+//@				e.printStackTrace();
+//@				return;
+//@			}
+//@		}
 //@		try {
 			//#ifdef DLOGGING
 //@			Logger.getLogger("Settings").trace("deleteStore deleting " +
-//@					RECORD_STORE_NAME);
+//@					csettings.RECORD_STORE_NAME);
 			//#endif
-//@			RecordStore.deleteRecordStore( RECORD_STORE_NAME );
+//@			RecordStore.deleteRecordStore( csettings.RECORD_STORE_NAME );
 //@		} catch (RecordStoreNotFoundException e) {
 			//#ifdef DLOGGING
 //@			Logger logger = Logger.getLogger("Settings");
 //@			logger.warning("Cannot deleteRecordStore " +
-//@					"RecordStoreNotFound " + RECORD_STORE_NAME);
+//@					"RecordStoreNotFound " + csettings.RECORD_STORE_NAME);
 			//#endif
 //@		} catch (RecordStoreException e) {
 			//#ifdef DLOGGING
 //@			Logger logger = Logger.getLogger("Settings");
 //@			logger.severe("Cannot deleteRecordStore RecordStoreException " +
-//@					RECORD_STORE_NAME, e);
+//@					csettings.RECORD_STORE_NAME, e);
 			//#endif
 //@		}
 //@	}
