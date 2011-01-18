@@ -29,10 +29,22 @@
  * IB 2010-05-28 1.11.5RC2 Don't use HTMLParser and HTMLLinkParser in small memory MIDP 1.0 to save space.
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-01 1.11.5Dev15 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-01-01 1.11.5Dev15 Use closeConnection in MiscUtil to close connections.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use procIoExc to process exception handling for IO and other exceptions including out of memory.
+ * IB 2011-01-14 1.11.5Alpha15 Change user agent to use the program's MIDP/CLDC combination vs alwasy MIDP/CLDC 1.0.
+ * IB 2010-01-12 1.11.5Alpha15 Add ability to log for character or parsing.
 */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
 // Expand to define MIDP define
 //#define DMIDP20
+// Expand to define CLDC define
+//#define DCLDCV10
 // Expand to define DJSR75 define
 //#define DNOJSR75
 // Expand to define memory size define
@@ -41,6 +53,7 @@
 //#define DNOTEST
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import java.util.Date;
@@ -70,6 +83,7 @@ import com.substanceofcode.utils.HTMLParser;
 //#endif
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 /**
  * Base class for HTML Handlers.
@@ -100,12 +114,15 @@ public class URLHandler {
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finerLoggable = logger.isLoggable(Level.FINER);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#endif
 
     /** Open file or URL.  Give error if there is a problem with the URL/file.*/
     final public void handleOpen(String url, String username, String password,
-			boolean writePost, boolean saveBandwidth, String slastModified, String etag)
-	throws IOException, Exception {
+			boolean writePost, boolean saveBandwidth, String slastModified,
+			String etag, String generalMsg, String outOfMemMsg,
+			String internalMsg)
+	throws IOException, CauseException, Exception {
         
 		//#ifdef DLOGGING
 //@		if (finestLoggable) {logger.finest("handleOpen url,saveBandwidth,slastModified,etag=" + url + "," + saveBandwidth + "," + ((slastModified == null) ? "null" : slastModified) +
@@ -168,7 +185,19 @@ public class URLHandler {
 				m_hc.setRequestMethod(HttpConnection.GET);
 				/** Some web servers requires these properties */
 				m_hc.setRequestProperty("User-Agent", 
-						"Profile/MIDP-1.0 Configuration/CLDC-1.0");
+						"Profile/" +
+						//#ifdef DMIDP10
+//@						"MIDP-1.0" +
+						//#else
+						"MIDP-2.0" +
+						//#endif
+						"Configuration/" +
+						//#ifdef DCLDCV10
+						"CLDC-1.0"
+						//#else
+//@						"CLDC-1.1"
+						//#endif
+						);
 				m_hc.setRequestProperty("Content-Length", "0");
 				m_hc.setRequestProperty("Connection", "close");
 				if (saveBandwidth && (slastModified != null) &&
@@ -225,6 +254,7 @@ public class URLHandler {
 //@								m_hc.getHeaderField(ic));
 //@					}
 //@				}
+//@				logger.finest("handleOpen getEncoding=" + m_hc.getEncoding());
 				//#endif
 				// Don't do HTML redirect as wa may want to process an HTML.
 				if ((respCode == HttpConnection.HTTP_NOT_FOUND) ||
@@ -261,78 +291,85 @@ public class URLHandler {
 //@			if (finestLoggable) {logger.finest("handleOpen m_contentType,m_same=" + m_contentType + "," + m_same);}
 			//#endif
             
-        } catch(IllegalArgumentException e) {
-			//#ifdef DLOGGING
-//@			logger.severe("handleOpen possible bad url error with " + url,
-//@						  e);
-			//#endif
-			if ((url != null) && url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-			if (writePost) {
-				throw e;
-			} else {
-				throw new CauseException("Error while parsing RSS data:  " +
-										  url, e);
-			}
-        } catch(ConnectionNotFoundException e) {
-			//#ifdef DLOGGING
-//@			logger.severe("handleOpen connection error with " + url, e);
-			//#endif
-			if ((url != null) && url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-			if (writePost) {
-				throw e;
-			} else {
-				throw new CauseException("Bad URL/File or protocol error while " +
-										 "opening: " + url, e);
-			}
-		//#ifdef DMIDP20
-        } catch(CertificateException e) {
-			//#ifdef DLOGGING
-//@			logger.severe("handleOpen https security error with " + url, e);
-			//#endif
-			if ((url != null) && url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-            throw new CauseException("Bad URL/File or protocol error or " +
-					"certifacate error while opening: " + url, e);
-		//#endif
-        } catch(IOException e) {
-			throw e;
-        } catch(SecurityException e) {
-			//#ifdef DLOGGING
-//@			logger.severe("handleOpen security error with " + url, e);
-			//#endif
-			if ((url != null) && url.startsWith("file://")) {
-				System.err.println("Cannot process file.");
-			}
-			if (writePost) {
-				throw e;
-			} else {
-				throw new CauseException("Security error while oening " +
-										 ": " + url, e);
-			}
-        } catch(Exception e) {
-			//#ifdef DLOGGING
-//@			logger.severe("handleOpen internal error with " + url, e);
-			//#endif
-			if ((url != null) && (url.startsWith("file://"))) {
-				System.err.println("Cannot process file.");
-			}
-            throw new CauseException("Internal error while parsing " +
-									 ": ", e);
-        } catch(Throwable t) {
-			//#ifdef DLOGGING
-//@			logger.severe("handleOpen internal error with " + url, t);
-			//#endif
-			t.printStackTrace();
-            throw new CauseException("Internal error while parsing RSS data " +
-								"contact support: ", t);
+        } catch (Throwable e) {
+			Exception ne = procIoExc(generalMsg, e,
+					((m_ic == null) &&
+					 //#ifdef DJSR75
+//@					 (m_fc == null) &&
+					 //#endif
+					 (m_hc == null)), url, outOfMemMsg,
+					internalMsg, "handleOpen", null
+					//#ifdef DLOGGING
+//@					,logger
+					//#endif
+					);
+			handleClose();
+			throw ne;
         }
     }
     
+	static public Exception procIoExc(String generalMsg, Throwable e,
+								  boolean procOpen,
+								  String url,
+								  String outOfMemMsg,
+								  String internalMsg,
+								  String methodName,
+								  final LoadingForm loadForm
+								  //#ifdef DLOGGING
+//@								  ,Logger logger
+								  //#endif
+			) {
+		boolean connExc = false;
+		Exception ertn = null;
+		Throwable ce = null;
+		if (e instanceof IllegalArgumentException) {
+			connExc = true;
+		} else if (e instanceof ConnectionNotFoundException) {
+			connExc = true;
+		//#ifdef DMIDP20
+		} else if (e instanceof CertificateException) {
+			connExc = true;
+		//#endif
+		} else if (e instanceof IOException) {
+			ertn = (IOException)e;
+			ce = new CauseException(
+					"I/O error while processing " + url, e);
+		} else if (e instanceof SecurityException) {
+			connExc = true;
+		} else if (e instanceof OutOfMemoryError) {
+			ce = new CauseException(outOfMemMsg + " " + url + ",free memory=" +
+					Runtime.getRuntime().freeMemory(), e);
+			generalMsg = outOfMemMsg;
+		} else if ((e instanceof Exception) ||
+					(e instanceof Throwable)) {
+			ce = new CauseException(internalMsg + " " + url, e);
+		}
+		if (connExc) {
+            ce = new CauseException("Bad URL/File or protocol error or " +
+					"certifacate/security error while " +
+					(procOpen ? ("opening url:  " + url) :
+								("accessing url:  " + url)), e);
+		} else {
+			ce = e;
+		}
+		ce = new CauseException(
+				(procOpen ? ("Error while opening url:  " + url) :
+							("Error while accessing url:  " + url)), ce);
+		ce = new CauseException(generalMsg + " " + url, ce);
+		//#ifdef DLOGGING
+//@		logger.severe(methodName + " " + ce.getMessage(), ce);
+		//#endif
+		e.printStackTrace();
+		if (loadForm != null) {
+			loadForm.recordExcForm(generalMsg + " " + url, ce);
+		}
+		if (ertn != null) {
+			return ertn;
+		} else {
+			return (Exception)ce;
+		}
+	}
+
 	//#ifndef DSMALLMEM
 	/** Read HTML and if it has links, redirect and parse the XML. */
 	protected String parseHTMLRedirect(String url, InputStream is)
@@ -347,15 +384,18 @@ public class URLHandler {
 		}
 		m_redirectUrl = url;
 		com.substanceofcode.rssreader.businessentities.RssItunesFeed[] feeds =
-				HTMLLinkParser.parseFeeds(new EncodingUtil(is),
+				HTMLLinkParser.parseFeeds(EncodingUtil.getEncodingUtil(is),
 									url,
-									null,
-									null
+									"",
+									""
 									//#ifdef DLOGGING
-//@									,logger,
-//@									fineLoggable,
-//@									finerLoggable,
-//@									finestLoggable
+//@									,logger
+//@									,fineLoggable
+//@									,finerLoggable
+//@									,finestLoggable
+//@									,traceLoggable
+//@									,traceLoggable
+//@									,traceLoggable
 									//#endif
 									);
 		if ((feeds == null) || (feeds.length == 0)) {
@@ -380,22 +420,9 @@ public class URLHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		try {
-			if (m_hc != null) m_hc.close();
-		} catch (IOException e) {
-			//#ifdef DLOGGING
-//@			logger.warning("handleOpen possible bad open url error with " +
-//@					m_hc.getURL(), e);
-			//#else
-			e.printStackTrace();
-			//#endif
-		}
+		m_hc = (HttpConnection)MiscUtil.closeConnection(m_hc);
 		//#ifdef DJSR75
-//@		try {
-//@			if (m_fc != null) m_fc.close();
-//@		} catch (IOException e) {
-//@			e.printStackTrace();
-//@		}
+//@		m_fc = (FileConnection)MiscUtil.closeConnection(m_fc);
 		//#endif
 	}
 
@@ -427,3 +454,4 @@ public class URLHandler {
 	//#endif
 
 }
+//#endif
