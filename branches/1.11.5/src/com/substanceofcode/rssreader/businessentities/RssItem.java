@@ -25,6 +25,8 @@
  * IB 2010-04-30 1.11.5RC2 Use method to encode/decode.
  * IB 2010-07-04 1.11.5Dev6 Code cleanup.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev15 Use checkRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
+ * IB 2010-11-26 1.11.5Dev15 Use itemEquals to compare each item for testing and logging.
  */
 
 // Expand to define logging define
@@ -86,6 +88,7 @@ public class RssItem
 //@    private Logger logger = Logger.getLogger("RssItem");
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
 //@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#elif DTESTUI
 //@    private Object logger = null;
 //@    private boolean fineLoggable = true;
@@ -205,7 +208,7 @@ public class RssItem
 			 */
 			int TITLE = 0;
 			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + TITLE ]);}
+//@			if (finestLoggable) {logger.finest("currCmpRssfeeds startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + TITLE ]);} ;
 			//#endif
 			m_title = nodes[startIndex + TITLE];
 			if (hasPipe) {
@@ -282,6 +285,23 @@ public class RssItem
         return item;
 	}
 
+	public void checkRead(RssItem item) {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("checkRead item=" + item);}
+//@		if (finestLoggable) {logger.finest("checkRead this=" + this);}
+		//#endif
+		if (m_title.equals(item.m_title) &&
+			m_link.equals(item.m_link) &&
+			m_desc.equals(item.m_desc) &&
+			MiscUtil.cmpDateStr(m_date, item.m_date) ||
+			m_enclosure.equals(item.m_enclosure)) {
+			//#ifdef DLOGGING
+//@			if (finestLoggable) {logger.finest("checkRead m_title,m_unreadItem,item.m_unreadItem=" + m_title + "," + m_unreadItem + "," + item.m_unreadItem);}
+			//#endif
+			m_unreadItem = item.m_unreadItem;
+		}
+	}
+
 	/* Compare item. */
 	//#ifdef HAS_EQUALS
 	//#ifdef DJMTEST
@@ -291,28 +311,9 @@ public class RssItem
 	//#endif
 //@	{
 //@		boolean result = true;
-//@		if (!TestLogUtil.fieldEquals(item.getTitle(), m_title,
-//@			"m_title", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(item.getLink(), m_link,
-//@			"m_link", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(item.getDescription(), m_desc,
-//@			"m_desc", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(item.getDate(), m_date,
-//@			"m_date", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(item.getEnclosure(), m_enclosure,
-//@			"m_enclosure", logger, fineLoggable)) {
-//@			result = false;
-//@		}
-//@		if (!TestLogUtil.fieldEquals(item.isUnreadItem(), m_unreadItem,
-//@			"m_unreadItem", logger, fineLoggable)) {
+//@		if (!TestLogUtil.itemEquals(this, item,
+//@			new boolean[] {true, true, true, true, true, true},
+//@			"RssItem", logger, fineLoggable, traceLoggable)) {
 //@			result = false;
 //@		}
 //@		return result;
