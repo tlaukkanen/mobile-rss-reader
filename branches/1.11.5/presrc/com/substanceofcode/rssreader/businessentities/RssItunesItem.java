@@ -28,6 +28,9 @@
  * IB 2010-05-30 1.11.4RC2 Use RssItemInfo for equals.
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev14 Need to add m_duration to equals.
+ * IB 2010-11-26 1.11.5Dev15 Use checkRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
+ * IB 2010-11-26 1.11.5Dev15 Fix toString used by testing to separate explicit from the first field in the item.
 */
 
 // Expand to define logging define
@@ -196,7 +199,7 @@ implements RssItunesItemInfo
 			item.init(hasPipe, nodes);
 			return item;
         } catch(Exception e) {
-            System.err.println("Error while RssItunesItem deserialize : " + e.toString());
+            System.err.println("unencodedDeserialize Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
 			return null;
         }
@@ -227,7 +230,7 @@ implements RssItunesItemInfo
 			 * title | link | date | enclosure | unreadItem | desc
 			 */
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("nodes.length=" + nodes.length);}
+			if (finestLoggable) {logger.finest("init nodes.length=" + nodes.length);}
 			//#endif
 			//#ifdef DITUNES
 			int ITUNES = 0;
@@ -275,7 +278,7 @@ implements RssItunesItemInfo
 	//#ifdef DTEST
     public String toString() {
         String storeString = m_itunes + "|" + m_author + "|" + m_subtitle + "|" +
-			m_summary + "|" + + (int)m_explicit + super.toString();
+			m_summary + "|" + (int)m_explicit + "|" + super.toString();
         return storeString;
     }
 	//#endif
@@ -366,6 +369,21 @@ implements RssItunesItemInfo
         return (m_duration);
     }
     
+	public void checkRead(RssItunesItem pititem) {
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("checkRead pititem=" + pititem);}
+		if (finestLoggable) {logger.finest("checkRead this=" + this);}
+		//#endif
+		if ((m_itunes == pititem.m_itunes) &&
+			 m_author.equals(pititem.m_author) &&
+			 m_subtitle.equals(pititem.m_subtitle) &&
+			 m_summary.equals(pititem.m_subtitle) &&
+			 (m_explicit == pititem.m_explicit) &&
+			 m_duration.equals(pititem.m_duration)) {
+			 super.checkRead(pititem);
+		}
+	}
+
 	/* Compare item. */
 	//#ifdef HAS_EQUALS
 	//#ifdef DJMTEST
@@ -408,6 +426,10 @@ implements RssItunesItemInfo
 		if (!TestLogUtil.fieldEquals(item.getExplicit().toLowerCase(),
 					getExplicit().toLowerCase(),
 			"m_explicit", logger, fineLoggable)) {
+			result = false;
+		}
+		if (!TestLogUtil.fieldEquals(item.getDuration(), m_duration,
+			"m_duration", logger, fineLoggable)) {
 			result = false;
 		}
 		return result;
