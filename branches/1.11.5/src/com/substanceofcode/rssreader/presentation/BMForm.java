@@ -27,6 +27,10 @@
  * IB 2010-09-26 1.11.5Dev8 Support loadingForm with FeatureMgr.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-17 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-12 1.11.5Alpha15 After modifying/updating the feed, use old feed pointer with new feed pointer to update the feed.  If the old pointer does not match the current pointer, do not update as it means that the future background processing has updated the feed already. 
+  * IB 2011-01-11 1.11.5Dev15 Use super.featureMgr instead of featureMgr.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
  */
 
 // Expand to define MIDP define
@@ -39,7 +43,10 @@
 //#define DNOLOGGING
 // Expand to define test ui define
 //#define DNOTESTUI
+// Expand to define full vers define
+//#define DFULLVERS
 
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
@@ -68,6 +75,7 @@ import javax.microedition.lcdui.Item;
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
@@ -87,13 +95,13 @@ import com.substanceofcode.rssreader.presentation.LoadingForm;
 final public class BMForm extends URLForm
 	implements CommandListener {
     static byte[]      m_addBMSave = null; // Add bookmark form save
-	private String      m_oldName;
+	private RssItunesFeed m_oldFeed;
 	private boolean     m_addForm;          // Flag to indicate is add form
 	private TextField   m_bmName;           // The RSS feed name field
 	private FeatureList m_bookmarkList;
 
 	/* Constructor */
-	public BMForm(Hashtable rssFeeds,
+	public BMForm(RssFeedStore rssFeeds,
 			RssReaderSettings appSettings,
 			FeatureList bookmarkList,
 			LoadingForm loadForm) {
@@ -108,7 +116,7 @@ final public class BMForm extends URLForm
 						"Append bookmark", "Append end bookmark");
 	}
 
-	public BMForm(Hashtable rssFeeds,
+	public BMForm(RssFeedStore rssFeeds,
 			RssReaderSettings appSettings,
 			FeatureList bookmarkList,
 			LoadingForm loadForm,
@@ -117,9 +125,10 @@ final public class BMForm extends URLForm
 				loadForm);
 		this.m_addForm = false;
 		this.m_bookmarkList = bookmarkList;
-		this.m_oldName = bm.getName();
-		m_bmName = new TextField("Name", m_oldName,
-				Math.max(m_oldName.length() + 10, RssFeed.MAX_NAME_LEN),
+		this.m_oldFeed = bm;
+		String oldName = bm.getName();
+		m_bmName = new TextField("Name", oldName,
+				Math.max(oldName.length() + 10, RssFeed.MAX_NAME_LEN),
 				TextField.ANY);
 		super.append( m_bmName );
 		int initPriority = 1;
@@ -140,18 +149,13 @@ final public class BMForm extends URLForm
 		
 		final RssItunesFeed bm = new RssItunesFeed(name, url, username, password);
 		
-		/* If name changed, need to remove the previous name. */
-		if (!m_addForm && !name.equals(m_oldName)) {
-			m_rssFeeds.remove(m_oldName);
-		}
-		
 		if (m_addForm) {
 			m_bookmarkList.insert(m_addBkmrk, bm.getName(), null);
 		} else {
 			m_bookmarkList.set(m_bookmarkList.getSelectedIndex(),
 					bm.getName(), null);
 		}
-		m_rssFeeds.put(bm.getName(), bm);
+		m_rssFeeds.put(bm.getName(), bm, m_oldFeed);
 	}
 	
 	/** Respond to commands */
@@ -168,11 +172,11 @@ final public class BMForm extends URLForm
 
 			if( m_addBkmrk >= 0 ) {
 				saveBookmark();
-				featureMgr.getLoadForm().replaceRef(this, null);
+				super.featureMgr.getLoadForm().replaceRef(this, null);
 				Item[] items = {m_bmName, m_url,
 					m_UrlUsername, m_UrlPassword};
 				BMForm.m_addBMSave = FeatureMgr.storeValues(items);
-				FeatureMgr.getMidlet().showBookmarkList();
+				FeatureMgr.getRssMidlet().showBookmarkList();
 			}
 		}
 
@@ -180,8 +184,8 @@ final public class BMForm extends URLForm
 		if( m_ok ){
 			m_ok = false;
 			saveBookmark();
-			featureMgr.getLoadForm().replaceRef(this, null);
-			FeatureMgr.getMidlet().showBookmarkList();
+			super.featureMgr.getLoadForm().replaceRef(this, null);
+			FeatureMgr.getRssMidlet().showBookmarkList();
 		}
 
 		/** Clear data. */
@@ -203,3 +207,4 @@ final public class BMForm extends URLForm
 	}
 
 }
+//#endif
