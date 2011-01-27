@@ -30,6 +30,7 @@
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of EncodingUtil and EncodingStreamReader.
  * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of CauseException and EncodingStreamReader.
+ * IB 2011-01-22 1.11.5Dev16 If m_maxItemCount has not been set, take it from the RssReaderSettings either via midlet or directly from getInstance.
 */
 
 // Expand to define MIDP define
@@ -52,6 +53,7 @@ import com.substanceofcode.utils.compatibility4.XmlParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.URLHandler;
 import com.substanceofcode.utils.SgmlParserIntr;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
@@ -105,7 +107,7 @@ implements
     public RssFeedParser(RssItunesFeedInfo rssFeed) {
         m_rssFeed = rssFeed;
 		m_updFeed = true;
-		m_maxItemCount = RssReaderSettings.INIT_MAX_ITEM_COUNT;
+		m_maxItemCount = -2;
     }
     
 	//#ifdef DMIDP20
@@ -305,6 +307,10 @@ implements
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("Thread running=" + this);}
 			//#endif
+			if (m_maxItemCount == -2) {
+				RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
+				m_maxItemCount = (midlet != null) ? midlet.getSettings().INIT_MAX_ITEM_COUNT : RssReaderSettings.getInstance().INIT_MAX_ITEM_COUNT;
+			}
 			parseRssFeed(m_updFeed, m_maxItemCount);
         } catch( IOException ex ) {
 			//#ifdef DLOGGING
