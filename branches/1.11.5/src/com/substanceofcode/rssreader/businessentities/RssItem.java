@@ -27,8 +27,11 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-26 1.11.5Dev15 Use checkRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
  * IB 2010-11-26 1.11.5Dev15 Use itemEquals to compare each item for testing and logging.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
  */
 
+// Expand to define itunes define
+//#define DFULLVERS
 // Expand to define logging define
 //#define DNOLOGGING
 // Expand to define test define
@@ -43,6 +46,7 @@
 //#ifdef DLOGGING
 //#define HAS_EQUALS
 //#endif
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.MiscUtil;
@@ -93,6 +97,7 @@ public class RssItem
 //@    private Object logger = null;
 //@    private boolean fineLoggable = true;
 //@    private boolean finestLoggable = true;
+//@    private boolean traceLoggable = true;
 	//#endif
     
     /** Creates a new instance of RssItem.  Used by this class and
@@ -346,3 +351,4 @@ public class RssItem
 	//#endif
     
 }
+//#endif
