@@ -45,6 +45,7 @@
  * IB 2011-01-14 1.11.5Alpha15 Use procThrowable from LoggingTestCase.
  * IB 2011-01-17 1.11.5Alpha15 Handle search url with /feed.
  * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
+ * IB 2011-01-24 1.11.5Dev16 Fix conditional compile of DLOGGING code.
  */
 
 // Expand to define MIDP define
@@ -121,8 +122,8 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	private int alterix = 28;
 	private int endAlterix = 30;
 	private String newLogLevel = Level.FINEST.getName();
-	private static final String CURRENT_CLASS = "compatibility4.HtmlLinkParser2Test";
 	//#endif
+	private static final String CURRENT_CLASS = "compatibility4.HtmlLinkParser2Test";
 
 	public HtmlLinkParser2Test() {
 		super(10, CURRENT_CLASS);
@@ -274,6 +275,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 						new com.substanceofcode.rssreader.businesslogic.OpmlParser(
 								url, "", "", new RssFeedStore());
 				}
+				//#ifdef DLOGGING
 				if (logParseChar) {
 					feedListParser.setLogChar(logParseChar);
 				}
@@ -281,6 +283,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					feedListParser.setLogReadChar(logReadChar);
 					feedListParser.setLogRepeatChar(logRepeatChar);
 				}
+				//#endif
 				if (name.indexOf("option=missing title") >= 0) {
 					feedListParser.setGetFeedTitleList(true);
 				}
