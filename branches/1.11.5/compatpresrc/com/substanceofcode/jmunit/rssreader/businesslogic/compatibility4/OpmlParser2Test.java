@@ -34,6 +34,7 @@
  * IB 2011-01-14 1.11.5Alpha15 Workaround problem where old name becomes null.
  * IB 2011-01-14 1.11.5Alpha15 If failure is for equals test, increase nextIx to allow the next test to try the next feed instead of retrying the failed feed over and over again.
  * IB 2011-01-14 1.11.5Alpha15 If old gives 0 feeds and new gives error (has no feeds assumed), treat as equal.
+ * IB 2011-01-24 1.11.5Dev16 Fix conditional compile of DLOGGING code.
  */
 
 // Expand to define MIDP define
@@ -312,7 +313,9 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			}
 			compatibilityFeedListParser.startParsing();
 			compatibilityFeedListParser.join();
+			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine(mname + " compatibilityFeedListParser.isSuccessfull()=" + compatibilityFeedListParser.isSuccessfull());} ;
+			//#endif
 			if (!compatibilityFeedListParser.isSuccessfull()) {
 				throw compatibilityFeedListParser.getEx();
 			}
