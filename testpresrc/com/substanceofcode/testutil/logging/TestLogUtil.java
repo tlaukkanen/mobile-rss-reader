@@ -26,8 +26,12 @@
  * IB 2010-11-18 1.11.5Dev14 Have fieldEquals with RssItemInfo only for JM Unit tests.
  * IB 2011-01-06 1.11.5Dev15 Change equals message for both null so that it is done as an else vs due to the other conditions returning null.  This is a slight performance improvement.
  * IB 2011-01-06 1.11.5Dev15 Use MiscUtil.toString to log null or the value of the equals parameter vs conditional logic.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile some code for internet link version.
+ * IB 2011-01-24 1.11.5Dev16 Fix println statement.
  */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
 // Expand to define JMUnit test define
 @DJMTESTDEF@
 // Expand to define logging define
@@ -61,11 +65,12 @@ import com.substanceofcode.testlcdui.TextField;
 import com.substanceofcode.testlcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
+//#ifdef DFULLVERS
 //#ifdef DJMTEST
 import com.substanceofcode.rssreader.businessentities.RssItemInfo;
 import com.substanceofcode.rssreader.businessentities.RssItunesItemInfo;
 //#endif
-import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+//#endif
 import com.substanceofcode.testutil.TestOutput;
 
 //#ifdef DLOGGING
@@ -195,6 +200,7 @@ public class TestLogUtil {
 		return true;
 	}
 
+	//#ifdef DFULLVERS
 	static public boolean itemEquals(RssItemInfo parmValue,
 			RssItemInfo thisValue,
 			boolean[] fldPres,
@@ -284,7 +290,7 @@ public class TestLogUtil {
 		}
 		return true;
 	}
-
+	//#endif
 	//#endif
 
 	static public boolean fieldEquals(int parmValue, int thisValue,
