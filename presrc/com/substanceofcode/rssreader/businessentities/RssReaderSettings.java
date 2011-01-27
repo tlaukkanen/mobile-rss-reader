@@ -38,12 +38,17 @@
  * IB 2011-01-14 1.11.5Dev15 Have some public static keys for int options to allow shorter coding in SettingsForm.
  * IB 2011-01-14 1.11.5Dev15 Allow use text box option to be public when testing to test using it.
  * IB 2011-01-14 1.11.5Dev15 Change static fields to instance vars for the singleton to reduce static memory used.
+ * IB 2011-01-24 1.11.5Dev16 Change more static fields to instance vars for the singleton to reduce static memory used.
+ * IB 2011-01-24 1.11.5Dev16 New property ACCEPT_LICENSE to indicate that someone accepted the license.
+ * IB 2011-01-24 1.11.5Dev16 For internet link version, create only one instance of Settings using the constructor.
  */
 
 // Expand to define MIDP define
 @DMIDPVERS@
 // Expand to define CLDC define
 @DCLDCVERS@
+// Expand to define DFULLVERS define
+@DFULLVERSDEF@
 // Expand to define itunes define
 @DITUNESDEF@
 // Expand to define test define
@@ -98,13 +103,19 @@ final public class RssReaderSettings {
 	//#else
     private
 	//#endif
-		static final String USE_TEXT_BOX = "use-text-box";
-    private static final String USE_STANDARD_EXIT = "use-standard-exit";
-    private static final String NOVICE = "novice";
-    public static final int INIT_MAX_ITEM_COUNT = 10;
+	final String ACCEPT_LICENSE = "accept-license";
+	//#ifdef DJMTEST
+    public
+	//#else
+    private
+	//#endif
+	final String USE_TEXT_BOX = "use-text-box";
+    private final String USE_STANDARD_EXIT = "use-standard-exit";
+    private final String NOVICE = "novice";
+    public final int INIT_MAX_ITEM_COUNT = 10;
     private Throwable m_loadExc = null;
 	//#ifdef DLOGGING
-    private static final String LOG_LEVEL = "log-level";
+    private final String LOG_LEVEL = "log-level";
 	//#endif
     
     /** Creates a new instance of RssReaderSettings */
@@ -114,7 +125,11 @@ final public class RssReaderSettings {
 			Logger.getLogger("RssReaderSettings").info("Constructor midlet=" +
 					FeatureMgr.getMidlet());
 			//#endif
+			//#ifdef DFULLVERS
             m_settings = Settings.getInstance();
+			//#else
+            m_settings = new Settings();
+			//#endif
         } catch (Throwable e) {
 			m_loadExc = e;
             e.printStackTrace();
@@ -228,6 +243,16 @@ final public class RssReaderSettings {
         m_settings.setBooleanProperty(m_singleton.ITUNES_ENABLED, itunesEnabled);
     }
     
+    /** Get accept license */
+    public boolean getAcceptLicense() {
+        return m_settings.getBooleanProperty(m_singleton.ACCEPT_LICENSE, false);
+    }
+    
+    /** Set accept license */
+    public void setAcceptLicense(boolean acceptLicense) {
+        m_settings.setBooleanProperty(m_singleton.ACCEPT_LICENSE, acceptLicense);
+    }
+
 	//#ifdef DMIDP20
     /** Get font choice */
     public int getFontChoice() {
