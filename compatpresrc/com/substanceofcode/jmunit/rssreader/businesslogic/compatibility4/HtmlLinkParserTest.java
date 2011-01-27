@@ -41,6 +41,10 @@
  * IB 2011-01-14 1.11.5Alpha15 Start at second (index 1) feed to skip sourceforge home link.
  * IB 2011-01-14 1.11.5Alpha15 Allow tracing for parsing or reading chars once or ongoing.
  * IB 2011-01-14 1.11.5Alpha15 Better logging.
+ * IB 2011-01-22 1.11.5Dev16 Only retry if we are doing oneTestOnly.
+ * IB 2011-01-22 1.11.5Dev16 Start with first link for sourceforge which while invalid, will cause prompt for internet access.  When taking http stats, don't count the first (sourceforge) link so that time to answer prompt is not counted as access time.
+ * IB 2011-01-22 1.11.5Dev16 Only take stats if both parsers are successful at parsing.  This prevents bad protocol (e.g. not http) links from giving bad stats.
+ * IB 2011-01-22 1.11.5Dev16 If not logging, use stdout to list stats.
  */
 
 // Expand to define MIDP define
@@ -89,15 +93,15 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	//#endif
 
 	private boolean oneTestOnly = false;
-	private boolean retryModHttp = false;
+	private boolean retryModHttp = oneTestOnly && false;
 	private String testUrl = (oneTestOnly ? "jar:///links.html" :
 				"http://mobilerssreader.sourceforge.net/testdata/links.html");
 	private long currTotalTime = 0L;
 	private long currTotalCount = 0L;
 	private long oldTotalTime = 0L;
 	private long oldTotalCount = 0L;
-	private int nextIx = 1; // Start at 1 to skip sourceforge home.
-	private int prevNextIx = 1; // Start at 1 to skip sourceforge home.
+	private int nextIx = 0; // Start at 0 to get interenet prompt for sourceforge home to skip it's stats.
+	private int prevNextIx = 0; // Start at 0 to get interenet prompt for sourceforge home to skip it's stats.
 	//#ifdef DLOGGING
 	private boolean alterLogLevel = fineLoggable; // traceLoggable;
 	private boolean endAlterLogLevel = false;
@@ -295,7 +299,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			//#ifdef DLOGGING
 			logger.info("Started " + mname + ",activeCount,freeMemory()=" + Thread.activeCount() + "," + Runtime.getRuntime().freeMemory());
 			if (finestLoggable) {logger.finest(mname + " compatibilityHtmlLinkParserTestSub htmlParser=" + htmlParser);} ;
-			if (httpFile) {
+			if (httpFile && (nextIx >= 1)) {
 				//#ifdef DLOGGING
 				logger.info(mname + " nextIx,currTotalTime,currTotalCount(prev)=" + nextIx + "," + currTotalTime + "," + currTotalCount);
 				if (currTotalCount > 0) {
@@ -311,7 +315,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			}
 			//#endif
 			long startTime = 0L;
-			if (httpFile) {
+			if (httpFile && (nextIx >= 1)) {
 				System.gc();
 				startTime = System.currentTimeMillis();
 			}
@@ -328,7 +332,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			//#else
 			htmlParser.run();
 			//#endif
-			if (httpFile && htmlParser.isSuccessfull()) {
+			if (httpFile && (nextIx >= 1) && htmlParser.isSuccessfull()) {
 				currTotalTime += (System.currentTimeMillis() - startTime);
 				currTotalCount++;
 				System.gc();
@@ -338,18 +342,21 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			if (fineLoggable) {logger.fine(mname + " htmlParser.isSuccessfull()=" + htmlParser.isSuccessfull());} ;
 			//#endif
 			RssItunesFeedInfo[] rssfeeds = htmlParser.getFeeds();
-			if (httpFile) {
+			if (httpFile && (nextIx >= 1)) {
 				System.gc();
 				startTime = System.currentTimeMillis();
 			}
 			compatibilityHtmlParser.startParsing();
 			compatibilityHtmlParser.join();
-			if (httpFile && compatibilityHtmlParser.isSuccessfull()) {
+			if (httpFile && (nextIx >= 1) && htmlParser.isSuccessfull() &&
+					compatibilityHtmlParser.isSuccessfull()) {
 				oldTotalTime += (System.currentTimeMillis() - startTime);
 				oldTotalCount++;
 				System.gc();
 			}
+			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine(mname + " compatibilityHtmlParser.isSuccessfull()=" + compatibilityHtmlParser.isSuccessfull());} ;
+			//#endif
 			RssItunesFeed[] cmpRssFeeds =
 				(RssItunesFeed[])compatibilityHtmlParser.getFeeds();
 			if (htmlParser.isSuccessfull()) {
@@ -540,14 +547,26 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			if (httpFile) {
 				//#ifdef DLOGGING
 				logger.info(mname + " nextIx,currTotalTime,currTotalCount=" + nextIx + "," + currTotalTime + "," + currTotalCount);
-				if (currTotalCount > 0) {
-					logger.info(mname + " currTotalTime/currTotalCount=" + currTotalTime/currTotalCount);
-				}
-				logger.info(mname + " nextIx,oldTotalTime,oldTotalCount=" + nextIx + "," + oldTotalTime + "," + oldTotalCount);
-				if (oldTotalCount > 0) {
-					logger.info(mname + " oldTotalTime/oldTotalCount=" + oldTotalTime/oldTotalCount);
-				}
 				//#endif
+				if (currTotalCount > 0) {
+					//#ifdef DLOGGING
+					logger.info
+					//#else
+					System.out.println
+					//#endif
+						(mname + " currTotalTime/currTotalCount=" + currTotalTime/currTotalCount);
+				}
+				//#ifdef DLOGGING
+				logger.info(mname + " nextIx,oldTotalTime,oldTotalCount=" + nextIx + "," + oldTotalTime + "," + oldTotalCount);
+				//#endif
+				if (oldTotalCount > 0) {
+					//#ifdef DLOGGING
+					logger.info
+					//#else
+					System.out.println
+					//#endif
+						(mname + " oldTotalTime/oldTotalCount=" + oldTotalTime/oldTotalCount);
+				}
 			}
 		}
 	}
