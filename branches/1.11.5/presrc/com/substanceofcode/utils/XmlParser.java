@@ -49,6 +49,7 @@
  * IB 2011-01-01 1.11.5Dev15 Handle BOM for UTF-8.
  * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  * IB 2011-01-14 1.11.5Alpha15 Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
+ * IB 2011-01-24 1.11.5Dev16 Put in comment out future code to use both local and global vars for buffering.
 */
 
 // Expand to define full vers define
@@ -195,6 +196,10 @@ public class XmlParser {
 	}
 
     protected int readBuf() throws IOException {
+		/* Future
+		m_offread = offread;
+		m_lenRead = lenRead;
+		*/
 		if (m_getPrologue) {
 			if (m_eof) {
 				//#ifdef DLOGGING
@@ -250,13 +255,23 @@ public class XmlParser {
 		boolean parsingElementData = false;
 				
         char c;
-        int inputCharacter = ((m_offread < m_lenRead) ? m_cbuf[m_offread++] : readBuf());
+        int inputCharacter = ((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+				readBuf());
 		//#ifdef DLOGGING
-		if (m_logReadChar && traceLoggable) {logger.trace("parseStream m_lenRead,m_readLen,m_cbuf[m_offread]=" + m_lenRead + "," + m_readLen + "," + EncodingStreamReader.logcarr(m_cbuf, m_offread, m_lenRead));}
+		if (m_logReadChar && traceLoggable) {logger.trace("parseStream 1 m_lenRead,m_readLen,m_cbuf[m_offread]=" + m_lenRead + "," + m_readLen + "," + EncodingStreamReader.logcarr(m_cbuf, m_offread, m_lenRead));}
 		//#endif
+		int offread = m_offread;
+		int lenRead = m_lenRead;
 		try {
 			if (inputCharacter != -1) {
 				do {
+					//#ifdef DLOGGING
+					if (m_logChar && traceLoggable) {logger.trace("parseStream 2 offread,lenRead,m_offread,m_lenRead,m_currentElementName.length(),m_currentElementData.length()=" + offread + "," + lenRead  + "," + m_offread + "," + m_lenRead + "," + m_currentElementName.length() + "," + m_currentElementData.length());}
+					//#endif
+					if (offread == lenRead) {
+						offread = m_offread;
+						lenRead = m_lenRead;
+					}
 					c = (char)inputCharacter;
 					//#ifdef DLOGGING
 					boolean loggedChar = false;
@@ -272,7 +287,7 @@ public class XmlParser {
 								elementStart = false;
 								parsingElementName = false;
 								parsingElementData = false;
-								if ((parseResult = parseBeginEntity(is, false, c,
+								parseResult = parseBeginEntity(is, false, c,
 													m_currentElementData
 													//#ifdef DLOGGING
 													,
@@ -280,7 +295,10 @@ public class XmlParser {
 													traceLoggable,
 													m_logChar
 													//#endif
-													)) == CLOSE_TAG) {
+										);
+								offread = m_offread;
+								lenRead = m_lenRead;
+								if (parseResult == CLOSE_TAG) {
 									//#ifdef DLOGGING
 									if (m_logChar && traceLoggable) {logger.trace("parseStream / m_currentElementData,c=" + m_currentElementData + "," + c);}
 									//#endif
@@ -297,14 +315,16 @@ public class XmlParser {
 									parsingElementName = false;
 									parsingElementData = false;
 									parseResult = parseBeginEntity(is, false, c,
-														m_currentElementData
-														//#ifdef DLOGGING
-														,
-														logger,
-														traceLoggable,
-														m_logChar
-														//#endif
-														);
+											m_currentElementData
+											//#ifdef DLOGGING
+											,
+											logger,
+											traceLoggable,
+											m_logChar
+											//#endif
+											);
+									offread = m_offread;
+									lenRead = m_lenRead;
 									switch (parseResult) {
 										case CDATA:
 										case COMMENT:
@@ -467,6 +487,13 @@ public class XmlParser {
 			System.out.println("parse read error " + e + " " + e.getMessage());
 			e.printStackTrace();
 			throw e;
+			/*
+		} finally {
+			if (inputCharacter != -1) {
+				m_offread = offread;
+				m_lenRead = lenRead;
+			}
+			*/
 		}
 		if( inputCharacter == -1 ) {
 			//#ifdef DLOGGING
@@ -485,81 +512,118 @@ public class XmlParser {
 			int eblock, boolean startsBlock, boolean endsSep,
 			boolean reqEnd, String begin_block, String end_block)
 	throws IOException {
-        int inputCharacter;
 		boolean beginFound = false;
 		boolean beginChecked = false;
 		char c;
 		//#ifdef DLOGGING
 		int irtn = UNKNOWN_ELEMENT;
-		try {
 		//#endif
-			while ((inputCharacter =
-						((m_offread < m_lenRead) ? m_cbuf[m_offread++] : readBuf()))
-					!= -1) {
-				c = (char)inputCharacter;
-				sb.append(c);
-				if (c != '>') {
-					continue;
-				} else {
-					if (!beginChecked) {
-						beginChecked = true;
-						int pos;
-						if (startsBlock) {
-							beginFound = sb.toString().startsWith(begin_block);
-							pos = 0;
-						} else {
-							pos = sb.toString().indexOf(begin_block);
-							beginFound = (pos >= 0);
-						}
-						if (beginFound && endsSep) {
-							int epos;
-							if ((epos = (begin_block.length() + pos)) <
-									sb.length()) {
-								switch (sb.charAt(epos)) {
-									case '\n':
-									case '\r':
-									case ' ':
-										break;
-									default:
-										beginFound = false;
+        int inputCharacter = ((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+				readBuf());
+		/* Future
+		int offread = m_offread;
+		int lenRead = m_lenRead;
+		try {
+		*/
+			if (inputCharacter != -1) {
+				do {
+					/* Future
+					//#ifdef DLOGGING
+					if (m_logChar && traceLoggable) {logger.trace("parseBlock 1 offread,lenRead,m_offread,m_lenRead=" + offread + "," + lenRead  + "," + m_offread + "," + m_lenRead);}
+					//#endif
+					if (offread == lenRead) {
+						offread = m_offread;
+						lenRead = m_lenRead;
+					}
+					*/
+					/* Future
+					//#ifdef DLOGGING
+					//if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE1 m_offread,offread", m_offread, offread);}
+					//undo if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE1 m_lenRead,lenRead", m_lenRead, lenRead);}
+					//#endif
+					*/
+					c = (char)inputCharacter;
+					sb.append(c);
+					if (c != '>') {
+						/* Future
+						//#ifdef DLOGGING
+						if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE2 m_offread,offread", m_offread, offread);}
+						if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE2 m_lenRead,lenread", m_lenRead, lenRead);}
+						if (m_logReadChar && traceLoggable && (m_offread < m_lenRead)) {logger.assertLog("parseBlock NEC2 m_cbuf[m_offread],m_cbuf[offread]", m_cbuf[m_offread], m_cbuf[offread]);}
+						//#endif
+						*/
+						continue;
+					} else {
+						if (!beginChecked) {
+							beginChecked = true;
+							int pos;
+							if (startsBlock) {
+								beginFound = sb.toString().startsWith(begin_block);
+								pos = 0;
+							} else {
+								pos = sb.toString().indexOf(begin_block);
+								beginFound = (pos >= 0);
+							}
+							if (beginFound && endsSep) {
+								int epos;
+								if ((epos = (begin_block.length() + pos)) <
+										sb.length()) {
+									switch (sb.charAt(epos)) {
+										case '\n':
+										case '\r':
+										case ' ':
+											break;
+										default:
+											beginFound = false;
+									}
 								}
 							}
 						}
-					}
-					if (sb.toString().endsWith(end_block)) {
-						if (beginFound) {
-							//#ifdef DLOGGING
-							irtn =
-							//#else
-							return
-							//#endif
-								eblock;
-							//#ifdef DLOGGING
-							return irtn;
-							//#endif
-						} else {
-							//#ifdef DLOGGING
-							irtn =
-							//#else
-							return
-							//#endif
-								UNKNOWN_ELEMENT;
-							//#ifdef DLOGGING
-							return irtn;
-							//#endif
+						if (sb.toString().endsWith(end_block)) {
+							if (beginFound) {
+								//#ifdef DLOGGING
+								irtn =
+									//#else
+									return
+									//#endif
+									eblock;
+								//#ifdef DLOGGING
+								return irtn;
+								//#endif
+							} else {
+								//#ifdef DLOGGING
+								irtn =
+									//#else
+									return
+									//#endif
+									UNKNOWN_ELEMENT;
+								//#ifdef DLOGGING
+								return irtn;
+								//#endif
+							}
+						}
+						if (!beginFound || !reqEnd) {
+							break;
 						}
 					}
-					if (!beginFound || !reqEnd) {
-						break;
-					}
+					/* Future
+					//#ifdef DLOGGING
+					if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE2 m_offread,offread", m_offread, offread);}
+					if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE2 m_lenRead,lenread", m_lenRead, lenRead);}
+					if (m_logReadChar && traceLoggable && (m_offread < m_readLen)) {logger.assertLog("parseBlock NEC2 m_cbuf[m_offread],m_cbuf[offread]", m_cbuf[m_offread], m_cbuf[offread]);}
+					//#endif
+					*/
 				}
+				while ((inputCharacter =
+							((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+							 readBuf())) != -1);
 			}
 			if (inputCharacter == -1) {
 				//#ifdef DLOGGING
 				irtn =
-				//#else
-				return
-				//#endif
+					//#else
+					return
+					//#endif
 					END_DOCUMENT;
 				//#ifdef DLOGGING
 				return irtn;
@@ -567,18 +631,28 @@ public class XmlParser {
 			}
 			//#ifdef DLOGGING
 			irtn =
-			//#else
-			return
-			//#endif
+				//#else
+				return
+				//#endif
 				UNKNOWN_ELEMENT;
 			//#ifdef DLOGGING
 			return irtn;
 			//#endif
-		//#ifdef DLOGGING
+			/* Future
 		} finally {
+			//#ifdef DLOGGING
 			if (m_logReadChar && traceLoggable) {logger.trace("parseBlock irtn=" + irtn);}
+			if (m_logChar && traceLoggable) {logger.trace("parseBlock 3 offread,lenRead,m_offread,m_lenRead=" + offread + "," + lenRead  + "," + m_offread + "," + m_lenRead);}
+			//#endif
+			if (offread != lenRead) {
+				//#ifdef DLOGGING
+				if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE3 m_offread,m_offread", m_offread, offread);}
+				if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE3 m_lenRead,m_offread", m_lenRead, lenRead);}
+				//#endif
+			   m_offread = offread;
+			}
 		}
-		//#endif
+		*/
 	}
 
 	public Character skipBlanks(EncodingStreamReader is)
@@ -766,8 +840,8 @@ public class XmlParser {
 		}
 		
 		String text = "";
+		int inputCharacter;
 		try {
-			int inputCharacter;
 			char c;
 			char lastChars[] = {' ', ' ', ' '};
 			
@@ -808,53 +882,102 @@ public class XmlParser {
 						readBuf())) == -1) {
 				return "";
 			}
-			do {
-				c = (char)inputCharacter;
-				//#ifdef DLOGGING
-				if (m_logChar && traceLoggable) {logger.trace("getTextStream c,textBuffer=" + c + "," + textBuffer.toString());}
-				//#endif
-				if (c == '<') {
-					int parseResult;
-					if ((parseResult = parseBeginEntity(is, true, c,
-										textBuffer
-										//#ifdef DLOGGING
-										,
-										logger,
-										traceLoggable,
-										m_logChar
-										//#endif
-										)) == CLOSE_TAG) {
-						final int tlen = textBuffer.length();
-						c = textBuffer.charAt(tlen - 1);
-						textBuffer.setLength(tlen - 1);
-						textBuffer.getChars(tlen - 4, tlen - 1, lastChars, 0);
-						//#ifdef DLOGGING
-						if (m_logChar && traceLoggable) {logger.trace("getTextStream CLOSE_TAG c,lastChars=" + c + "," + new String(lastChars));}
-						if (m_logChar && traceLoggable) {logger.trace("getTextStream CLOSE_TAG c,textBuffer=" + c + "," + textBuffer.toString());}
-						//#endif
-					} else if (parseResult == END_DOCUMENT) {
-						break;
-					} else {
-						continue;
+			/* Future
+			int offread = m_offread;
+			int lenRead = m_lenRead;
+			try {
+			*/
+				do {
+					/* Future
+					if (offread == lenRead) {
+						offread = m_offread;
+						lenRead = m_lenRead;
 					}
-				}
-				//System.out.print(c);
+					//#ifdef DLOGGING
+					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE1 m_offread,m_offread", m_offread, offread);}
+					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE1 m_lenRead,m_offread", m_lenRead, lenRead);}
+					//#endif
+					*/
+					c = (char)inputCharacter;
+					//#ifdef DLOGGING
+					if (m_logChar && traceLoggable) {logger.trace("getTextStream c,textBuffer=" + c + "," + textBuffer.toString());}
+					//#endif
+					if (c == '<') {
+						/*
+						m_offread = offread;
+						m_lenRead = lenRead;
+						//#ifdef DLOGGING
+						if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE m_offread,m_offread", m_offread, offread);}
+						if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE m_lenRead,m_offread", m_lenRead, lenRead);}
+						//#endif
+						*/
+						int parseResult = parseBeginEntity(is, true, c,
+								textBuffer
+								//#ifdef DLOGGING
+								,
+								logger,
+								traceLoggable,
+								m_logChar
+								//#endif
+								);
+						/* Future
+						offread = m_offread;
+						lenRead = m_lenRead;
+						*/
+						if (parseResult == CLOSE_TAG) {
+							final int tlen = textBuffer.length();
+							c = textBuffer.charAt(tlen - 1);
+							textBuffer.setLength(tlen - 1);
+							textBuffer.getChars(tlen - 4, tlen - 1, lastChars, 0);
+							//#ifdef DLOGGING
+							if (m_logChar && traceLoggable) {logger.trace("getTextStream CLOSE_TAG c,lastChars=" + c + "," + new String(lastChars));}
+							if (m_logChar && traceLoggable) {logger.trace("getTextStream CLOSE_TAG c,textBuffer=" + c + "," + textBuffer.toString());}
+							//#endif
+						} else if (parseResult == END_DOCUMENT) {
+							break;
+						} else {
+							continue;
+						}
+					}
+					//System.out.print(c);
 
-				if( (c == '>') &&
-				    (lastChars[0] == elementNameChars[0]) &&
-					(lastChars[1] == elementNameChars[1]) &&
-						(lastChars[2] == elementNameChars[2]) &&
-					textBuffer.toString().endsWith(endCurrentElement)) {
-					break;
+					if( (c == '>') &&
+							(lastChars[0] == elementNameChars[0]) &&
+							(lastChars[1] == elementNameChars[1]) &&
+							(lastChars[2] == elementNameChars[2]) &&
+							textBuffer.toString().endsWith(endCurrentElement)) {
+						break;
+					}
+					lastChars[0] = lastChars[1];
+					lastChars[1] = lastChars[2];
+					lastChars[2] = c;
+					textBuffer.append(c);
+					/* Future
+					//#ifdef DLOGGING
+					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE2 m_offread,m_offread", m_offread, offread);}
+					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE2 m_lenRead,m_offread", m_lenRead, lenRead);}
+					if (m_logReadChar && traceLoggable && (m_lenRead < m_offread)) {logger.assertLog("getTextStream NEC m_cbuf[m_offread],m_cbuf[offread++]", m_cbuf[m_offread], m_cbuf[offread]);}
+					//#endif
+					if (m_lenRead < m_offread) {
+						offread++;
+					}
+					*/
 				}
-				lastChars[0] = lastChars[1];
-				lastChars[1] = lastChars[2];
-				lastChars[2] = c;
-				textBuffer.append(c);
+				while ((inputCharacter =
+							((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+							 readBuf())) != -1);
+				/* Future
+			} finally {
+				if (inputCharacter != -1) {
+					//#ifdef DLOGGING
+					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE3 m_offread,m_offread", m_offread, offread);}
+					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE3 m_lenRead,m_offread", m_lenRead, lenRead);}
+					//#endif
+					m_offread = offread;
+					m_lenRead = lenRead;
+				}
 			}
-			while ((inputCharacter =
-						((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
-							readBuf())) != -1);
+			*/
 
 			if (m_docEncoding.length() == 0) {
 				text = textBuffer.toString();
