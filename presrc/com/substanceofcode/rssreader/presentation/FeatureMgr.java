@@ -103,6 +103,11 @@
  * IB 2011-01-12 1.11.5Alpha15 Don't use static vars for RssReaderSettings.
  * IB 2011-01-12 1.11.5Alpha15 More logging.
  * IB 2011-01-14 1.11.5Alpha15 Use CmdReceiver interface to allow FeatureMgr to initialize KFileSelectorMgr without directly referencing it's class.  This allows for better use of optional APIs.  It is still necessary to install the correct version on the right device, however.
+ * IB 2011-01-24 1.11.5Dev16 Have m_aboutCmd in FeatureMgr since it should be common for all apps.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile some code for internet link version.
+ * IB 2011-01-24 1.11.5Dev16 Fix println statement.
+ * IB 2011-01-24 1.11.5Dev16 Have jsr75Avail to determine if JSR-75 is available for MIDlet, applet or standalone.  Also, return if exists or the version number.
+ * IB 2010-11-22 1.11.5Dev14 For CLDC 1.0, use this.getClass() to get the class instance to use to load KFileSelectorMgr.
 */
 
 // Expand to define MIDP define
@@ -111,6 +116,8 @@
 @DCLDCVERS@
 // Expand to define DJSR75 define
 @DJSR75@
+// Expand to define full vers define
+@DFULLVERSDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define test ui define
@@ -205,6 +212,7 @@ public class FeatureMgr implements CommandListener,
 	static protected MIDlet midlet = null;
     static public Command m_backCommand = null; // The back to header list command
     static public Command m_exitCommand = null;// The exit command
+    static public Command m_aboutCmd = null;// The about command
     private Displayable rtnDisp = null; // The form to return to for text box
     private Object rtnObj = null; // The object (e.g. item or StringBuffer) to return to for text box
     volatile private boolean     background = false;  // Flag to continue looping
@@ -923,6 +931,7 @@ public class FeatureMgr implements CommandListener,
 	}
 	//#endif
 
+	//#ifdef DFULLVERS
 	/* Restore previous values. */
 	final static public void restorePrevValues(Item[] items, byte[] bdata) {
 		//#ifdef DLOGGING
@@ -979,6 +988,7 @@ public class FeatureMgr implements CommandListener,
 			}
 		}
 	}
+	//#endif
 
 	//#ifdef DMIDP20
 	public Object[] action(Object[] reqs) {
@@ -1005,6 +1015,7 @@ public class FeatureMgr implements CommandListener,
         return (dispLoadForm);
     }
 
+	//#ifdef DFULLVERS
 	/* Store current values. */
 	final static public byte[] storeValues(Item[] items) {
 		//#ifdef DLOGGING
@@ -1062,6 +1073,7 @@ public class FeatureMgr implements CommandListener,
 		}
 		return bout.toByteArray();
 	}
+	//#endif
 
   /**
    * Create a new command using the resource key and standard parms
@@ -1109,6 +1121,7 @@ public class FeatureMgr implements CommandListener,
 		return ncmd;
 	}
 
+	//#ifdef DFULLVERS
   /**
    * Get the image for the image path.
    *
@@ -1171,6 +1184,7 @@ public class FeatureMgr implements CommandListener,
 		return image;
 		
 	}
+	//#endif
 
 	//#ifdef DTESTLOGMIN
 	static String logCmd(Command cmd) {
@@ -1322,6 +1336,47 @@ public class FeatureMgr implements CommandListener,
 		return res;
 	}
 
+	public Object[] jsr75Avail() {
+		boolean hasjsr75 = false;
+		Object[] ojsr75Avail = new Object[] {null, null, null};
+		//#ifdef DMIDP10
+		Object[] ojsr75 = FeatureMgr.getSysProperty(
+				"microedition.io.file.FileConnection.version", null,
+				"Unable to get JSR-75 FileConnection", null);
+		ojsr75Avail[2] = ojsr75[0];
+		//#else
+		Object[] ojsr75 = 
+				FeatureMgr.getSysPermission(
+				"javax.microedition.io.Connector.file.read",
+				"microedition.io.file.FileConnection.version", null,
+				"Unable to get JSR-75 FileConnection", null);
+		int ijsr75 = ((Integer)ojsr75[0]).intValue();
+		if (ijsr75 >= 0) {
+			hasjsr75 = ijsr75 == 1;
+			ojsr75Avail[1] = new Boolean(ijsr75 >= 0);
+		} else {
+		}
+		ojsr75Avail[2] = ojsr75[2];
+		//#endif
+		if (!hasjsr75) {
+			hasjsr75 = (ojsr75Avail[2] != null);
+		}
+		if (!hasjsr75) {
+			try {
+				//#ifdef DCLDCV10
+				this.getClass().
+				//#else
+				Class.
+				//#endif
+					forName("javax.microedition.io.file.FileConnection");
+				hasjsr75 = true;
+			} catch (Throwable e) {
+			}
+		}
+		ojsr75Avail[0] = new Boolean(hasjsr75);
+		return ojsr75Avail;
+	}
+
 	//#ifdef DJSR75
 	/* Set flag to show find files list.
 	   fileRtnForm - Form to return to after file finished.
@@ -1338,8 +1393,13 @@ public class FeatureMgr implements CommandListener,
 							((noSelectMsg == null) ? selectMsg : noSelectMsg)),
 						fileRtnDisp, null);
 
-			final Class fileSelectorMgrClass = Class.forName(
-					"org.kablog.kgui.KFileSelectorMgr");
+			final Class fileSelectorMgrClass =
+				//#ifdef DCLDCV10
+				this.getClass().
+				//#else
+				Class.
+				//#endif
+					forName("org.kablog.kgui.KFileSelectorMgr");
 			final CmdReceiver fileSelectorMgr =
 				(CmdReceiver)fileSelectorMgrClass.newInstance();
 			//#ifdef DLOGGING
