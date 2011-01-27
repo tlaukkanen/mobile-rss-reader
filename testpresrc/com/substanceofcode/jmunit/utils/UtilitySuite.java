@@ -26,6 +26,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-14 1.11.5Alpha15 Only doing EncodingUtilTest if this is the full version.
  * IB 2011-01-14 1.11.5Alpha15 Use conditional preprocessed cldc11 code (with modifications) instead of cldc10 code.
+ * IB 2011-01-24 1.11.5Dev16  Don't compile code not present if small memory.
  */
 
 // Expand to define full vers define
@@ -55,7 +56,9 @@ final public class UtilitySuite extends TestSuite {
 		add(new Settings1Test());
 		add(new Settings2Test());
 		//#ifdef DFULLVERS
+		//#ifndef DSMALLMEM
 		add(new EncodingUtilTest());
+		//#endif
 		add(new XmlParserTest());
 		//#ifndef DSMALLMEM
 		add(new HtmlParserTest());
