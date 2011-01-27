@@ -150,6 +150,10 @@
 	<!-- IB 2011-01-26 1.11.5Dev16 Use base URL for index file pointing to the version files directory.  This allows the file to work in any directory as everything is fully qualified.  -->
 	<!-- IB 2011-01-26 1.11.5Dev16 Use -optimizationpasses to specify more than one (using 3 for this release) optimization passes. -->
 	<!-- IB 2011-01-26 1.11.5Dev16 Use -allowaccessmodification allow ProGuard optimization to make some methods public to use inline or other optimizations.  -->
+	<!-- IB 2011-01-27 1.11.5Dev16 Add novice compile target.  -->
+	<!-- IB 2011-01-27 1.11.5Dev16 Remove parameter setting which prevents performing novice target.  -->
+	<!-- IB 2011-01-27 1.11.5Dev16 Don't put novice binary into the distribution.  Only the source code will be present.  -->
+	<!-- IB 2011-01-27 1.11.5Dev16 Fix location of novice.txt file.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -214,7 +218,6 @@
 	<property name="sfile.prefix.large" value="large" />
 	<property name="sfile.prefix.midp1.0" value="midp10" />
 	<property name="sfile.prefix.midp2.0" value="midp20" />
-	<property name="sfile.prefix.novice" value="novice" />
 	<property name="sfile.prefix.signed" value="signed" />
 	<property name="sfile.prefix.thawte" value="thawte" />
 	<property name="sfile.prefix.verisign" value="verisign" />
@@ -443,6 +446,7 @@
 		<echo message="tmp.presrc.subdir=${tmp.presrc.subdir}" />
 		<property name="res.includes" value="**/unread.png,**/rss.png" />
 		<property name="one.target" value="false" />
+		<property name="novice" value="false" />
 		<property name="signed" value="false" />
 
 		<property name="PERMISSIONS_REQ.midp1.0" value="" />
@@ -1000,7 +1004,7 @@
 	<target name="copy.novice" if="${novice}" >
 		<mkdir dir="${tmpres}/data" />
 		<copy tofile="${tmpres}/data/novice.txt" >
-			<fileset file="${novice.txt}" />
+			<fileset file="${novice.txt.file}" />
 		</copy>
 	</target>
 
@@ -1805,6 +1809,14 @@
 		</antcall>
 	</target>
 
+	<!-- Compile full version using WTK with MIDP-2.0, test, and novice -->
+	<target name="compile.2.0.novice" depends="prepare.midp2.0,prepare.cldc1.0,prepare.novice">
+		<antcall target="compile" >
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
 	<!-- Compile internet install link version WTK with MIDP-2.0 and test -->
 	<target name="compile.2.0.intlink" depends="prepare.midp2.0,prepare.cldc1.0,prepare.intlink">
 		<antcall target="compile" >
@@ -2415,7 +2427,7 @@
 		<property name="distdir" value="${distjardir}/RSSReader-${FMIDLETVERSROOT}${dist.stage.file}" />
 		<mkdir dir="${distdir}" />
 		<copy todir="${distdir}/dist" overwrite="true" >
-			<fileset dir="${dist}" excludes="**/RE*.txt" />
+			<fileset dir="${dist}" excludes="**/RE*.txt,**/**novice**" />
 		</copy>
 		<copy file="${distall}/READMEAll.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
 		<zip destfile="${distproject}/${dist.project.expert.zip}" basedir="${distjardir}" />
@@ -2610,7 +2622,6 @@
 			<param name="no.2.0.cldc.1.1" value="true" />
 			<param name="no.2.0.cldc.1.1.itunes" value="true" />
 			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
-			<param name="no.2.0.novice" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
 		</antcall>
 	</target>
