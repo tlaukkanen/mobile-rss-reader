@@ -1,0 +1,6 @@
+#-- IB 2011-01-20 1.11.5Dev16 Use wtkbeta.properties to more easily set beta properties used for the build.
+stage = beta16
+ustage = BETA16
+stage.stable.text = unstable
+stage.phase.text = beta
+stage.featured = 
