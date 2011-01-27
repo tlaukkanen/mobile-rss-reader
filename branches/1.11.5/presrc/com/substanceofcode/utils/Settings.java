@@ -71,10 +71,15 @@
  * IB 2011-01-11 1.11.5Dev15 Add RecordStoreException code to loadRec if cannot get a record.
  * IB 2011-01-11 1.11.5Dev15 Change logging of load value to trace.
  * IB 2011-01-11 1.11.5Dev15 Have deleteStore create settings if it does not exist since the vars are no longer static, need to use settings instance to access instance vars to delete store.
+ * IB 2011-01-24 1.11.5Dev16 For internet link version, settings is used only by SettingsForm.  Don't have it be a singleton to reduce static methods.
  */
 
 // Expand to define CLDC define
 @DCLDCVERS@
+// Expand to define DFULLVERS define
+@DFULLVERSDEF@
+// Expand to define DINTLINK define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -156,8 +161,19 @@ final public class Settings {
 	//#ifdef DCLDCV11
     public static Settings getInstance()
 	//#else
+	//#ifdef DFULLVERS
     public static synchronized Settings getInstance()
+	//#else
+	//#ifdef DINTLINK
+	// For internet link version, we only call this once.  We don't need
+	// synchronized which might have some problems in some KVMs.
+    public Settings getInstance()
 	//#endif
+	// End DINTLINK
+	//#endif
+	// End DFULLVERS
+	//#endif
+	// End DCLDCV11
     throws IOException, CauseRecStoreException, CauseException {
 		//#ifdef DCLDCV11
 		synchronized(Settings.class) {
@@ -172,7 +188,11 @@ final public class Settings {
     }
 
     /** Constructor */
+	//#ifdef DFULLVERS
     private Settings()
+	//#else
+    public Settings()
+	//#endif
     throws IOException, CauseRecStoreException, CauseException {
         load(0);
     }
