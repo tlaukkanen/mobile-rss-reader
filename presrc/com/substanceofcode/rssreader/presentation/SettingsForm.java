@@ -57,9 +57,16 @@
  * IB 2011-01-12 1.11.5Alpha15 If unable to get microedition.locale, get file.encoding for applet/standalone emulator.
  * IB 2011-01-12 1.11.5Alpha15 Use setSettingNbr to allow easy setting of int RssReaderSettings settings using key names.
  * IB 2011-01-12 1.11.5Alpha15 If logging level is changed, use initLogVars to reset the logging vars in RssReaderMIDlet.
- * IB 2011-01-22 1.11.5Alpha15 Use main display from FeatureMgr.
- * IB 2011-01-22 1.11.5Alpha15 If internet link version, have thread to initialize the settings form and then show the form.
- * IB 2011-01-22 1.11.5Alpha15 If internet link version, don't show optional items except standard exit.
+ * IB 2011-01-12 1.11.5Alpha15 Use main display from FeatureMgr.
+ * IB 2011-01-12 1.11.5Alpha15 If internet link version, have thread to initialize the settings form and then show the form.
+ * IB 2011-01-12 1.11.5Alpha15 If internet link version, don't show optional items except standard exit.
+ * IB 2011-01-18 1.11.5Alpha15 Give db avail./size in kb.
+ * IB 2011-01-18 1.11.5Dev16 Use jsr75avail from FeatureMgr to determine availabilit of JSR-75.
+ * IB 2011-01-18 1.11.5Dev16 Have about menu item to show the about/license info.
+ * IB 2011-01-18 1.11.5Dev16 Give db used and available in Kbs.
+ * IB 2011-01-18 1.11.5Dev16 Use initForm (singular) to initialize the settings form's vars/form.  
+ * IB 2011-01-18 1.11.5Dev16 Use initForms (plural in RssReaderMIDlet) to initialize the settings form.  This will handle showing of about/license.
+ * IB 2011-01-18 1.11.5Dev16 Use getCmdAdd to create and add a command.
  */
 
 // Expand to define MIDP define
@@ -197,14 +204,15 @@ implements CommandListener
     /** Creates a new instance of SettingsForm */
     public SettingsForm(LoadingForm loadForm) {
         super("Settings", loadForm);
+	}
         
-        m_okCommand = new Command("OK", Command.OK, 4);
-        super.addCommand( m_okCommand );
-        
+ 	public void initForm() {
+        m_okCommand = FeatureMgr.getCmdAdd(this, "OK", Command.OK, 4);
+
 		//#ifdef DFULLVERS
-        m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
-        super.addCommand( m_cancelCommand );
+        m_cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", Command.CANCEL, 2);
 		//#else
+		FeatureMgr.m_aboutCmd = FeatureMgr.getCmdAdd(this, "About", Command.SCREEN, 100);
 		FeatureMgr.getRssMidlet().initExit(this);
 		//#endif
         
@@ -335,39 +343,18 @@ implements CommandListener
 
 		sysOptions.put(MiscUtil.replace(MiscUtil.replace(mec, "-", ""),
 					".", "").toLowerCase(), new Boolean(true));
-		//#ifdef DMIDP10
-		boolean hasjsr75 = FeatureMgr.getSysProperty(
-				"microedition.io.file.FileConnection.version", null,
-				"Unable to get JSR-75 FileConnection",
-				super.featureMgr.getLoadForm())[0] != null;
-        super.append(new StringItem("Phone JSR 75 available:",
-				String.valueOf(FeatureMgr.getSysProperty(
-				"microedition.io.file.FileConnection.version", null,
-				"Unable to get JSR-75 FileConnection", super.featureMgr.getLoadForm())[0] != null)));
-		//#else
-		Object[] ojsr75 = 
-				FeatureMgr.getSysPermission(
-				"javax.microedition.io.Connector.file.read",
-				"microedition.io.file.FileConnection.version", null,
-				"Unable to get JSR-75 FileConnection", super.featureMgr.getLoadForm());
-		int ijsr75 = ((Integer)ojsr75[0]).intValue();
-		boolean hasjsr75;
-		if (ijsr75 >= 0) {
-			hasjsr75 = ijsr75 == 1;
-			FeatureMgr.getAddStringItem(this, "Phone JSR 75 available:",
-					String.valueOf(ijsr75 == 1));
+		Object[] ojsr75Avail = super.featureMgr.jsr75Avail();
+		boolean hasjsr75 = ((Boolean)ojsr75Avail[0]).booleanValue();
+        FeatureMgr.getAddStringItem(this, "Phone JSR 75 available:",
+				((Boolean)ojsr75Avail[0]).toString());
+		if (ojsr75Avail[1] != null) {
 			FeatureMgr.getAddStringItem(this, "Phone JSR 75 exists:",
-					String.valueOf(ijsr75 >= 0));
-		} else {
-			hasjsr75 = ojsr75[2] != null;
-			FeatureMgr.getAddStringItem(this, "Phone JSR 75 available:",
-					String.valueOf(ojsr75[2] != null));
+					((Boolean)ojsr75Avail[1]).toString());
 		}
-		if (ojsr75[2] != null) {
+		if (ojsr75Avail[2] != null) {
 			FeatureMgr.getAddStringItem(this, "Phone JSR 75 version:",
-					String.valueOf(ojsr75[2]));
+					(String)ojsr75Avail[2]);
 		}
-		//#endif
 		sysOptions.put("jsr75", new Boolean(hasjsr75));
 		//#ifdef DLOGGING
 		if (m_fineLoggable) {m_logger.fine("Constructor sysOptions=" + sysOptions);}
@@ -491,7 +478,8 @@ implements CommandListener
 				m_preffJarTx.setLabel("Preferred jar (current):");
 			}
 		} catch (Throwable e) {
-			loadForm.recordExcForm("Internal error unable to get preferred jad/jar.", e);
+			super.featureMgr.getLoadForm().recordExcForm(
+					"Internal error unable to get preferred jad/jar.", e);
 		}
 
 		Object[] omel = FeatureMgr.getSysProperty("microedition.locale",
@@ -567,8 +555,8 @@ implements CommandListener
 		// end DFULLVERS
 		int[] memInfo = null;
 		try {
-			Settings m_settings = Settings.getInstance();
-			memInfo = m_settings.getSettingMemInfo();
+			Settings csettings = settings.getSettingsInstance();
+			memInfo = csettings.getSettingMemInfo();
 		} catch (Exception e) {
 			memInfo = new int[0];
 		}
@@ -579,11 +567,11 @@ implements CommandListener
 		m_pgmMemUsedItem.setText(((totalMem - freeMem)/1024L) + "kb");
 		m_pgmMemAvailItem.setText((freeMem/1024L) + "kb");
         if (memInfo.length == 0) {
-			m_memUsedItem.setText("0");
-			m_memAvailItem.setText("0");
+			m_memUsedItem.setText("0kb");
+			m_memAvailItem.setText("0kb");
 		} else {
-			m_memUsedItem.setText(Integer.toString(memInfo[0]));
-			m_memAvailItem.setText(Integer.toString(memInfo[1]));
+			m_memUsedItem.setText((memInfo[0]/1024L) + "kb");
+			m_memAvailItem.setText((memInfo[1]/1024L) + "kb");
 		}
 		m_threadsUsed.setText(Integer.toString(Thread.activeCount()));
 	}
@@ -703,6 +691,11 @@ implements CommandListener
 			//#endif
         }
         
+        /** Show about */
+		if(command == FeatureMgr.m_aboutCmd) {
+			midlet.initializeAboutForm();
+		}
+
 		//#ifdef DFULLVERS
         if(command==m_cancelCommand) {
             midlet.showBookmarkList();
@@ -712,7 +705,7 @@ implements CommandListener
 			LoadingForm loadForm = LoadingForm.getLoadingForm(
 					"Exiting...", this, null);
 			super.featureMgr.setLoadForm(loadForm);
-			super.featureMgr.getRssMidlet().exitApp( loadForm );
+			super.featureMgr.getRssMidlet().exitApp( true, loadForm );
 		}
 		//#endif
     }
@@ -729,8 +722,7 @@ implements CommandListener
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		super.featureMgr.getRssMidlet().initializeSettingsForm(false, null);
-		super.featureMgr.getLoadForm().showMeNotes(this);
+		super.featureMgr.getRssMidlet().initForms();
 		super.featureMgr.setBackground(false);
 	}
 	//#endif
