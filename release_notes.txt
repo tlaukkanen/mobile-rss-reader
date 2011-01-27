@@ -365,7 +365,7 @@ v1.11.5 Development 14 (dev14) (Nov 26th 2010)
 - Copy signed files to distsigned directory.
 - If jsr-75 vers exists show the version string in case it changes later.
 
-v1.11.5 Development 15 (dev14) (Jan 17th 2011)
+v1.11.5 Alpha 15 (dev14) (Jan 17th 2011)
 - Have internet link version which shows only some phone/program properties and the preferred jad/jar based on the current capabilities of the phone.  This currently has a bug where the signing authority is not put into the preferred name.
 - Have full (non-internet) version (with full_ in it's file name) have preferred jad/jar above and have the full functionality of the reader.
 - Fixed problem that may have caused file read problems.
@@ -378,6 +378,11 @@ v1.11.5 Development 15 (dev14) (Jan 17th 2011)
 - Added unused gzip handling code to smartphone version.
 - Have optional (default none) vibrate and flash backlight set on Settings form.  The vibrate and/or flashing back light is done after update/modify all feeds ONLY if the phone supports it and ONLY if the reader is in the foreground (this is a J2ME limitation).
 - Modify use of optional JSR-75 (phone memory access) to allow it to be loaded only if used.  This may save memory if it is not used during a session.
+
+v1.11.5 Dev 16 (Dev16) (Jan 27th 2011)
+- Use 3 optimization passes instead of just one for ProGuard optimizer.  This makes somewhat smaller code.  Performance effect:  unknown.
+- Allow access modification to allow ProGuard optimizer greater flexibility to optimize.  Performance effect:  unknown.
+- Minor performance and code reduction improvements.
 
 Device notes:
 
