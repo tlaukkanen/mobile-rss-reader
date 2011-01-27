@@ -31,6 +31,8 @@
  * IB 2011-01-14 1.11.5Alpha15 Only compile code/features present only in the full version if this compile is for the full version.
  * IB 2011-01-14 1.11.5Alpha15 Use notifyAll to avoid waiting with wait.
  * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
+ * IB 2011-01-24 1.11.5Dev16 Fix code placement for using JMUnit on a device.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
 */
 
 // Expand to define full vers define
@@ -47,6 +49,7 @@
 @DLOGDEF@
 
 //#ifdef DJMTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.jmunit.rssreader.businessentities;
 
 import java.util.Date;
@@ -56,19 +59,15 @@ import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
-//#ifdef DFULLVERS
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 //#ifdef DMIDP20
 import net.yinlight.j2me.observable.Observer;
 import net.yinlight.j2me.observable.Observable;
 //#endif
-//#endif
 
 final public class RssFeedStoreStrTest extends BaseTestCase
-//#ifdef DFULLVERS
 //#ifdef DMIDP20
 implements Observer
-//#endif
 //#endif
 {
 
@@ -77,11 +76,7 @@ implements Observer
 	//#endif
 
 	public RssFeedStoreStrTest() {
-		//#ifdef DFULLVERS
 		super(7, "RssFeedStoreStrTest");
-		//#else
-		super(6, "RssFeedStoreStrTest");
-		//#endif
 	}
 
 	public void test(int testNumber) throws Throwable {
@@ -104,11 +99,9 @@ implements Observer
 			case 5:
 				testFeedStoreStr5();
 				break;
-				//#ifdef DFULLVERS
 			case 6:
 				testFeedStoreStr6();
 				break;
-				//#endif
 			default:
 				Exception e = new Exception(
 						"No such test testNumber=" + testNumber);
@@ -120,7 +113,6 @@ implements Observer
 		}
 	}
 
-	//#ifdef DFULLVERS
 	//#ifdef DMIDP20
 	public void changed(Observable observable, Object arg) {
 		ready = true;
@@ -128,7 +120,6 @@ implements Observer
 			super.notifyAll();
 		}
 	}
-	//#endif
 
 	public boolean isReady() {
 		return ready;
@@ -346,7 +337,6 @@ implements Observer
 		}
 	}
 
-	//#ifdef DFULLVERS
 	public void testFeedStoreStr6() throws Throwable {
 		String mname = "testFeedStoreStr6";
 		try {
@@ -388,7 +378,6 @@ implements Observer
 			throw e;
 		}
 	}
-	//#endif
 
 	public void storeStringTestSub(final String mname, final boolean saveHdr,
 			final boolean serializeItems, final boolean encoded,
@@ -396,9 +385,9 @@ implements Observer
 			RssItunesFeed feed,
 			String storeString) throws Throwable {
 		try {
+			boolean genFeed = storeString != null;
 			//#ifdef DLOGGING
 			logger.info("storeStringTestSub Started " + mname);
-			boolean genFeed = storeString != null;
 			if (finestLoggable) {logger.finest("storeStringTestSub  " + mname + " saveHdr,serializeItems,encoded,modifyCapable,genFeed=" + saveHdr + "," + serializeItems + "," + encoded + "," + modifyCapable + "," + genFeed);}
 			//#endif
 			if (!genFeed) {
@@ -434,4 +423,5 @@ implements Observer
 	}
 
 }
+//#endif
 //#endif
