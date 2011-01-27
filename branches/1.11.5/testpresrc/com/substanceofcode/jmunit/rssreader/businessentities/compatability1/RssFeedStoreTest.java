@@ -25,6 +25,7 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
+ * IB 2011-01-24 1.11.5Dev16 Fix code placement for using JMUnit on a device.
  */
 
 // Expand to define test define
@@ -330,9 +331,9 @@ final public class RssFeedStoreTest extends BaseTestCase {
 			RssFeed infoFeed,
 			String storeString) throws Throwable {
 		try {
+			boolean genFeed = storeString != null;
 			//#ifdef DLOGGING
 			logger.info("storeStringTestSub Started " + mname);
-			boolean genFeed = storeString != null;
 			if (finestLoggable) {logger.finest("storeStringTestSub  " + mname + " serializeItems,encoded,genFeed=" + serializeItems + "," + encoded + "," + genFeed);}
 			//#endif
 			if (!genFeed) {
