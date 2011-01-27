@@ -32,6 +32,7 @@
  * IB 2011-01-14 1.11.5Alpha15 Use notifyAll to avoid waiting with wait.
  * IB 2011-01-14 1.11.5Alpha15 If failure is for equals test, increase nextIx to allow the next test to try the next feed instead of retrying the failed feed over and over again.
  * IB 2011-01-14 1.11.5Alpha15 Use convience method cmpModLog from LoggingTestCase to see if feeds are unequal and change the logging level to retry using logging to make debugging equals failures easier.  Also, retry with modified previous version for bug fixes/enhancements made in the current version.
+ * IB 2011-01-24 1.11.5Dev16 Fix conditional compile of DLOGGING code.
  */
 
 // Expand to define MIDP define
@@ -221,7 +222,9 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			RssItunesFeedInfo[] rssfeeds = OpmlParser.getFeeds();
 			compatibilityOpmlParser.startParsing();
 			compatibilityOpmlParser.join();
+			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine(mname + " compatibilityOpmlParser.isSuccessfull()=" + compatibilityOpmlParser.isSuccessfull());}
+			//#endif
 			RssItunesFeed[] cmpRssFeeds =
 				(RssItunesFeed[])compatibilityOpmlParser.getFeeds();
 			assertTrue(mname + " rssfeeds feed length should be > 0",
