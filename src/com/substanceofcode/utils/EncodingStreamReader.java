@@ -36,12 +36,15 @@
  * IB 2010-01-01 1.11.5Dev15 Have html flag to tell XmlParser and EncodingStreamReader to only allow HTMLParser to set the encoding except for byte order mark (BOM).
  * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  * IB 2011-01-14 1.11.5Alpha15 Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
+ * IB 2011-01-24 1.11.5Dev16 Only compile Byte Order Mark code for MIDP 2.0 (i.e. not smaller memory).
  */
 
 // Expand to define full vers define
 //#define DFULLVERS
 // Expand to define full vers define
 //#define DNOINTLINK
+// Expand to define memory size define
+//#define DREGULARMEM
 // Expand to define testing define
 //#define DNOTEST
 // Expand to define JMUnit test define
@@ -87,7 +90,9 @@ public class EncodingStreamReader extends InputStreamReader {
 
     volatile private boolean m_docBigEndian = true;  // Doc big endian
     volatile private boolean m_getPrologue = true;
+	//#ifndef DSMALLMEM
     volatile private boolean m_getBom = true;    // Get the Byte Order Mark
+	//#endif
     volatile private boolean m_firstChar = true; // 1st of a possible 2 byte character
     volatile private boolean m_secondChar = false; // 2nd of a possible 2 byte character
     private final int        MAX_READ_BUF = 10; // 2nd of a possible 2 byte character
@@ -418,6 +423,7 @@ public class EncodingStreamReader extends InputStreamReader {
 		}
 	}
 
+	//#ifndef DSMALLMEM
 	static public boolean cmpSubstr2c(char[] carr, int coff, int clen,
 			char[] cmparr
 			//#ifdef DLOGGING
@@ -443,6 +449,7 @@ public class EncodingStreamReader extends InputStreamReader {
 		//#endif
 		return res;
 	}
+	//#endif
 
 	public int read(char [] cbuf, int off, int len) throws IOException {
 		int n = 0;
@@ -458,8 +465,12 @@ public class EncodingStreamReader extends InputStreamReader {
 				try {
 					while (len > 0) {
 						int[] nres;
-						inputCharacter = (nres = readSave(m_getBom ?
-									(2 * MAX_READ_BUF) : MAX_READ_BUF))[0];
+						inputCharacter = (nres = readSave(
+									//#ifndef DSMALLMEM
+									m_getBom ?
+									(2 * MAX_READ_BUF) :
+									//#endif
+									MAX_READ_BUF))[0];
 						int nextCharacter = nres[1];
 						int tlen = m_rdlen;
 						boolean readNext = false;
@@ -514,6 +525,7 @@ public class EncodingStreamReader extends InputStreamReader {
 								m_secondChar = false;
 							}
 							if (m_firstChar) {
+								//#ifndef DSMALLMEM
 								if (m_getBom) {
 									m_getBom = false;
 									//#ifdef DLOGGING
@@ -721,6 +733,7 @@ public class EncodingStreamReader extends InputStreamReader {
 									// all character.
 									m_secondChar = !m_utfDoc;
 								}
+								//#endif
 								boolean procNext = true;
 								if (!m_modBit16o32 && !m_utfDoc &&
 										m_getPrologue) {
