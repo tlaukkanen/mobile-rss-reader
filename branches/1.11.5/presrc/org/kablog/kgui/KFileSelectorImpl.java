@@ -57,6 +57,7 @@
  * IB 2010-01-01 1.11.5Dev15 Use nullPtr to decrease memory.
  * IB 2010-01-01 1.11.5Dev15 Use featureMgr instead of getFeatureMgr().
  * IB 2011-01-11 1.11.5Dev15 Use super.featureMgr instead of featureMgr.
+ * IB 2011-01-26 1.11.5Dev16 Use FeatureMgr.getCmdAdd to create a command and add command at the same time.
 */
 
 // Expand to define MIDP define
@@ -119,7 +120,7 @@ final public class KFileSelectorImpl
 
 	private final Command cancelCommand;
 
-	private final Command selectCommand;
+	private Command selectCommand;
 
 	private Vector rootsList = new Vector();
 
@@ -156,9 +157,9 @@ final public class KFileSelectorImpl
 
 		FILE_SEPARATOR = (String)FeatureMgr.getSysProperty(
 				"file.separator", "/", "Unable to get file.separator", null)[0];
-		cancelCommand = new Command("Cancel", Command.CANCEL, 2);
-		openCommand = new Command("Open", Command.ITEM, 4);
-		selectCommand = new Command("Select", Command.ITEM, 5);
+		cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", Command.CANCEL, 2);
+		openCommand = FeatureMgr.getCmdAdd(this, "Open", Command.ITEM, 4);
+		selectCommand = null;
 		//#ifdef DTEST
 		try {
 
@@ -202,11 +203,10 @@ final public class KFileSelectorImpl
 		if (fineLoggable) {logger.fine("MFS building cmds....");}
 		//#endif
 
-		super.addCommand(openCommand);
 		if (selectDir) {
-			super.addCommand(selectCommand);
+			selectCommand = FeatureMgr.getCmdAdd(this, "Select", Command.ITEM,
+					5);
 		}
-		super.addCommand(cancelCommand);
 		super.setSelectCommand(openCommand);
 
 	}
