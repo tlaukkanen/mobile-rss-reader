@@ -26,6 +26,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  * IB 2011-01-14 1.11.5Alpha15 Provide common methods and vars to test EncodingStreamReader.
+ * IB 2011-01-24 1.11.5Dev16 Increase code not compiled for internet link version.
 */
 
 // Expand to define full vers define
@@ -363,8 +364,8 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 			inputCharacter;
 		//#ifdef DLOGGING
 		if (logCmpChar && traceLoggable) {logger.trace(mname + " cr32beint barrix,rtn=" + barrix + "," + EncodingStreamReader.logInpChar(rtn));}
-		//#endif
 		return rtn;
+		//#endif
 	}
 
 	int cr32leint(String mname, byte[] barr, int barrix) {
@@ -385,8 +386,8 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 			inputCharacter;
 		//#ifdef DLOGGING
 		if (logCmpChar && traceLoggable) {logger.trace(mname + " cr32leint barrix,rtn=" + barrix + "," + EncodingStreamReader.logInpChar(rtn));}
-		//#endif
 		return rtn;
+		//#endif
 	}
 
 	int cr16beint(String mname, byte[] barr, int barrix) {
@@ -402,8 +403,8 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 			((int)barr[barrix + 1] & 0xff));
 		//#ifdef DLOGGING
 		if (logCmpChar && traceLoggable) {logger.trace(mname + " cr16beint barrix,rtn=" + barrix + "," + EncodingStreamReader.logInpChar(rtn));}
-		//#endif
 		return rtn;
+		//#endif
 	}
 
 	int cr16leint(String mname, byte[] barr, int barrix) {
