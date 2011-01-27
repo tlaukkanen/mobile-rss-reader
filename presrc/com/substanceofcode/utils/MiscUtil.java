@@ -38,12 +38,16 @@
  * IB 2011-01-14 1.11.5Alpha15 Use CmdReceiver interface to allow FeatureMgr to initialize KFileSelectorMgr without directly referencing it's class.  This allows for better use of optional APIs.
  * IB 2011-01-14 1.11.5Alpha15 Compare dates as strings to determine if they are equal to allow determining if two items are the same to preserve their read flags.
  * IB 2011-01-14 1.11.5Alpha15 Have methods to enable better logging.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile some code for internet link version.
+ * IB 2011-01-24 1.11.5Dev16 Have future action request to end the app.
  */
 
 // Expand to define MIDP define
 @DMIDPVERS@
 // Expand to define CLDC define
 @DCLDCVERS@
+// Expand to define itunes define
+@DFULLVERSDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -96,6 +100,7 @@ public class MiscUtil {
 	//#ifdef DMIDP20
 	public final static Short SINIT_OBJ = new Short((short)0);
 	public final static Short SPAUSE_APP = new Short((short)1);
+	public final static Short SEXIT_APP = new Short((short)2);
 	static private final Hashtable cthreads = new Hashtable();
 	//#endif
     static private long threadNbr = 1L;
@@ -453,6 +458,7 @@ public class MiscUtil {
         return s;
     }
     
+	//#ifdef DFULLVERS
     /** 
      * Method removes HTML tags from given string.
      * 
@@ -533,6 +539,7 @@ public class MiscUtil {
             return text;
         }
     }
+	//#endif
 
 	static public boolean cmpDateStr(Date date1, Date date2) {
 		return (((date1 == null) && (date2 == null)) ||
@@ -647,6 +654,7 @@ public class MiscUtil {
 		return conn;
 	}
 
+	//#ifdef DFULLVERS
   /**
    * Close the connection.  This allows us to save code space doing the same
    * thing and allows logging of errors in case they are useful.  This  helps
@@ -796,5 +804,6 @@ public class MiscUtil {
 		}
 		longQuickSort(a, indexes, 0, aend);
 	}
+	//#endif
 
 }
