@@ -39,6 +39,7 @@
 #-- IB 2011-01-14 1.11.5Alpha15 Use properties to make build file more standard for any project.
 #-- IB 2011-01-26 1.11.5Dev16 Use base URL for index file pointing to the version files directory.  This allows the file to work in any directory as everything is fully qualified.
 #-- IB 2011-01-26 1.11.5Dev16 Use -optimizationpasses to specify more than one (using 3 for this release) optimization passes.
+#-- IB 2011-01-27 1.11.5Dev16 Fix location of novice.txt file.
 #-- IB 2011-01-27 1.11.5Dev16 Changed branch to reflect 1.11.5.
 
 #windows.drive = C:
@@ -238,4 +239,5 @@ icons.dir = icons
 #testui.presrc = ../testpresrc
 docs = ../docs
 jadsrc = ../jadsrc
+novice.txt.file = ../src/data/novice.txt
 debug = debug
