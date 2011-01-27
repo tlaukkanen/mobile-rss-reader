@@ -138,6 +138,18 @@
     <!-- IB 2011-01-17 1.11.5Alpha15 Use inheritAll to reduce dependencies on the "prepare" target.  -->
 	<!-- IB 2011-01-14 1.11.5Alpha15 Have properties to show the preferred jar/jad based on current MIDP/JSR settings and the current jar/jad names for internet link/full code to display the text "current" if the preferred jar/jad name matches the current one.  In the future, the MIDP 2.0 version will download the preferred version on user request. -->
 	<!-- IB 2011-01-14 1.11.5Alpha15 Have signed compile use verisign compile to help test preferred jad.  -->
+	<!-- IB 2011-01-18 1.11.5Alpha15 Copy/put RIM jar file to ftp site.  -->
+	<!-- IB 2011-01-18 1.11.5Alpha15 Put rim_ prefix on googlecode RIM files.  -->
+	<!-- IB 2011-01-23 1.11.5Dev16 Have targets prepare.devopment/beta/alpha/production to make setting the properties for these stages easy. -->
+	<!-- IB 2011-01-23 1.11.5Dev16 Separate out obfuscate from wtkpackage.  This allows Netebeans WTK home to obfuscate (hopefully).  Need wtkpreverify because wtkobfuscate does not preverify the result.  -->
+	<!-- IB 2011-01-23 1.11.5Dev16 Need to preserve org.kablog.kgui.KFileSelectorMgr to allow loading with class.forName for optional JSR-75 code. -->
+	<!-- IB 2011-01-23 1.11.5Dev16 Put file descriptions in a property to allow creation of more descriptive file index file. -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Put ftp device install files into device-install directory to get them to come up first in sourceforge.-->
+	<!-- IB 2011-01-26 1.11.5Dev16 Have title and heading with version info in index file.  -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Build MIDP 2.0, CLDC 1.0, novice target. -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Use base URL for index file pointing to the version files directory.  This allows the file to work in any directory as everything is fully qualified.  -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Use -optimizationpasses to specify more than one (using 3 for this release) optimization passes. -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Use -allowaccessmodification allow ProGuard optimization to make some methods public to use inline or other optimizations.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -283,6 +295,22 @@
 		<property file="${basedir}/staging.properties" />
 	</target>
 
+	<target name="prepare.development" if="${dev}" >
+		<property file="${basedir}/wtkdevelopment.properties${build.template}" />
+	</target>
+
+	<target name="prepare.beta" if="${beta}" >
+		<property file="${basedir}/wtkbeta.properties${build.template}" />
+	</target>
+
+	<target name="prepare.rc" if="${rc}" >
+		<property file="${basedir}/wtkrc.properties${build.template}" />
+	</target>
+
+	<target name="prepare.production" if="${production}" >
+		<property file="${basedir}/wtkproduction.properties${build.template}" />
+	</target>
+
 	<target name="prepare.smallmem" >
 		<property file="${basedir}/wtksmallmem.properties${build.template}" />
 	</target>
@@ -361,6 +389,8 @@
 		<property name="ustage.txt" value="${ustage} " />
 		<echo message="ustage.txt=${ustage.txt}" />
 		<property name="stage.featured" value="Featured," />
+		<property name="ftp.ustage.url.txt" value="${ustage}%20" />
+		<property name="ftp.ustage.desc.txt" value="${ustage} " />
 		<property name="ftp.ustage.txt" value="${ustage}\ " />
 		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
 		<property name="no.individual.file" value="false" />
@@ -392,6 +422,8 @@
 		<property name="ustage.txt" value="" />
 		<echo message="ustage.txt=${ustage.txt}" />
 		<property name="stage.featured" value="Featured," />
+		<property name="ftp.ustage.url.txt" value="" />
+		<property name="ftp.ustage.desc.txt" value="" />
 		<property name="ftp.ustage.txt" value="" />
 		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
 		<property name="no.individual.file" value="false" />
@@ -693,6 +725,7 @@
 	</target>
 
 	<target name="init.act.presrc" depends="prepare" if="presrc.file" >
+		<property name="copy.all.once" value="true" />
 		<property name="act.presrc" value="${tmp.presrc.mdir}" />
 		<property name="act.comp.src" value="${comp.src.file}" />
 		<delete dir="${act.comp.src}" />
@@ -711,7 +744,7 @@
 	<target name="preprocess" depends="init.act.presrc,init.preprocess.presrc.file,init.preprocess" if="presrc" >
 		<antcall target="display.props" inheritAll="true" />
 		<!-- Check with defines in jdk.home rapc. -->
-		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DMEMSIZEDEF},${DITUNESDEF},${DSMARTPHONEDEF},${DNOVICEDEF},${DINTLINKDEF},${DFULLVERSDEF},${DSIGNEDDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DJMTESTPLUSDEF},${DJMTESTFREEDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
+		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DMEMSIZEDEF},${DITUNESDEF},${DSMARTPHONEDEF},${DNOVICEDEF},${DFEATUREMGRDEF},${DFEATUREFORMDEF},${DINTLINKDEF},${DFULLVERSDEF},${DSIGNEDDEF},${DVERISIGNDEF},${DTHAWTEDEF},${DGODADDYDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DJMTESTPLUSDEF},${DJMTESTFREEDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
 		<echo message="preprocess.defines=${preprocess.defines}" />
 		<property name="act.presrc" value="${presrc}" />
 		<echo message="act.presrc=${act.presrc}" />
@@ -733,8 +766,6 @@
 		<antcall target="delete.test.src" inheritAll="true" >
 			<param name="dsrc" value="${act.comp.src}" />
 		</antcall>
-		<antcall target="wtk.src.copy" />
-		<antcall target="wtk.src.copy.file" />
 		<antcall target="zip.src" inheritAll="true" />
 	</target>
 
@@ -799,20 +830,18 @@
 		<pathelement location="${jde.home.path}/bin/rapc.jar" />
 	</path>
 
-	<target name="compile" depends="prepare,init.act.presrc" >
+	<target name="compile" depends="prepare,init.act.presrc,preprocess" >
 
-		<!-- Copy a JAD file from the WTK's demo applications.
-             Caution: Ant only copies this the first time. Also
-             make a directory to compile into. -->
+		<!-- Make a directory to compile into. -->
 
-		<antcall target="preprocess" inheritAll="true" />
 		<!-- Compile everything, but don't preverify (yet). -->
 		<antcall target="display.props" />
 
 		<echo message="add.jars=${add.jars}" />
 		<antcall target="add.jars" />
 		<antcall target="copy.jar.src" />
-		<antcall target="wtk.src.copy" />
+		<antcall target="wtk.src.copy" inheritAll="true" />
+		<antcall target="wtk.src.copy.file" inheritAll="true" />
 		<echo message="comp.src=${comp.src}" />
 		<property name="act.comp.src" value="${comp.src}" />
 		<echo message="act.comp.src=${act.comp.src}" />
@@ -1046,7 +1075,7 @@
 
 	<target name="package.obfuscate.preverify" depends="prepare" >
 	    <echo message="keep.obfuscate=${keep.obfuscate}" />
-		<wtkpackage jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" manifest="${bin}/manifest.mf" cldc="${JCLDCVERS}" profile="${JMIDPVERS}" preverify="true" obfuscate="${keep.obfuscate}" verbose="true" >
+		<wtkpackage jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" manifest="${bin}/manifest.mf" cldc="${JCLDCVERS}" profile="${JMIDPVERS}" preverify="true" obfuscate="false" verbose="true" >
 
 			<!-- Package our newly compiled classes and the
                  resources from the WTK's demo application. -->
@@ -1054,9 +1083,14 @@
 			<fileset dir="${classes}" />
 			<fileset dir="${tmpres}" />
 
-			<preserve class="org.kablog.kgui.KFileSelectorMgr" />
-
 		</wtkpackage>
+		<wtkobfuscate jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" verbose="true" if="keep.obfuscate" >
+			<preserve class="org.kablog.kgui.KFileSelectorMgr" />
+			<argument value="-optimizationpasses" />
+			<argument value="${proguard.passes}" />
+			<argument value="-allowaccessmodification" />
+		</wtkobfuscate>
+		<wtkpreverify jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" if="keep.obfuscate" />
 
 	</target>
 
@@ -1340,7 +1374,7 @@
 	    <echo message="${basedir}/${dist}/${rim.build.file.root}.jar=${basedir}/${dist}/${rim.build.file.root}.jar}" />
 	    <echo message="rim.bin=${rim.bin}" />
 		<!-- Check with defines in jdk.home rapc. -->
-		<property name="rapc.preprocess.defines" value="${DMIDPVERS};${DCLDCVERS};${DMEMSIZEDEF};${DITUNESDEF};${DSMARTPHONEDEF};${DINTLINKDEF};${DFULLVERSDEF};${DSIGNEDDEF};${DJSR75};${DJSR238};${DTESTDEF};${DJMTESTDEF};${DJMTESTPLUSDEF};${DJMTESTFREEDEF};${DLOGDEF};${DTESTUIDEF};${DCOMPATDEF}" />
+		<property name="rapc.preprocess.defines" value="${DMIDPVERS};${DCLDCVERS};${DMEMSIZEDEF};${DITUNESDEF};${DSMARTPHONEDEF};${DINTLINKDEF};${DFULLVERSDEF};${DSIGNEDDEF};${DFEATUREMGRDEF};${DFEATUREFORMDEF};${DNOVICEDEF};${DTHAWTEDEF};${DGODADDYDEF};${DVERISIGNDEF};${DJSR75};${DJSR238};${DTESTDEF};${DJMTESTDEF};${DJMTESTPLUSDEF};${DJMTESTFREEDEF};${DLOGDEF};${DTESTUIDEF};${DCOMPATDEF}" />
 		<echo message="prapc.reprocess.defines=${prapc.reprocess.defines}" />
 		<mkdir dir="${rim.bin}" />
 		<rapc jdehome="${jde.home}" exepath="${wtk.home}/bin" srcdir="${comp.src}" destdir="${rim.bin}" output="${rim.build.file.root}" defines="${prapc.reprocess.defines}" verbose="true" nodebug="true" >
@@ -1448,35 +1482,41 @@
 		</antcall>
 	</target>
 
-	<target name="google.upload.line.append" depends="prepare" if="upload.to.google">
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${file.name} --summary=&quot;${stage.stable.text} ${signed.text}${verisign.text}${thawte.text}${godaddy.text}${device.type} MIDP ${wtk.midp.version} ${intlink} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}${latest.binary.desc}&quot; ${append.google.labels}&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+	<target name="google.upload.line.append" if="upload.to.google">
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${file.name} --summary=&quot;${file.summary}&quot; ${append.google.labels}&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 	</target>
 
-	<target name="google.upload.line.append.file" depends="prepare" unless="${no.individual.file}" >
+	<target name="set.file.summary" depends="prepare" unless="${no.individual.file}" >
+		<property name="latest.binary.desc" value="latest ${stage.phase.text} binary for direct phone install this is included in binary zip.  See documentation for which program to use." />
+		<property name="file.summary" value="${stage.stable.text} ${signed.text}${verisign.text}${thawte.text}${godaddy.text}${device.type} MIDP ${wtk.midp.version} ${intlink} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}${latest.binary.desc}" />
+	</target>
+
+	<target name="google.upload.line.append.file" depends="set.file.summary" unless="${no.individual.file}" >
 		<antcall target="google.upload.line.append" inheritAll="true" >
-			<param name="file.name" value="${build.file.root}${fext.suffix}.${fext}" />
+			<param name="file.name" value="${fprefix}${build.file.root}${fext.suffix}.${fext}" />
 		</antcall>
 	</target>
 
-	<target name="google.upload.append" depends="prepare" if="upload.to.google">
-		<property name="jsr" value="" />
+	<target name="google.upload.append" if="upload.to.google">
 		<property name="google.labels" value="" />
-		<property name="latest.binary.desc" value="latest ${stage.phase.text} binary for direct phone install this is included in binary zip.  See documentation for which program to use." />
 		<echo message="cd */RSS*/dist&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="" />
 			<param name="fext" value="jad" />
 			<param name="fext.suffix" value="" />
 			<param name="append.google.labels" value="Deprecated,Type-Package" />
 			<param name="device.type" value="(not Blackberry)" />
 		</antcall>
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="rim_" />
 			<param name="fext" value="cod" />
 			<param name="fext.suffix" value="" />
 			<param name="append.google.labels" value="${google.labels}" />
 			<param name="device.type" value="Blackberry" />
 		</antcall>
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="" />
 			<param name="fext" value="jar" />
 			<param name="fext.suffix" value="" />
 			<param name="append.google.labels" value="${google.labels}" />
@@ -1486,15 +1526,17 @@
 		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 	</target>
 
-	<target name="sftp.index.line.append" depends="prepare" if="upload.to.sftp">
-		<echo message="&lt;li&gt;&lt;a href=&quot;${file.name}&quot;&gt;${file.name}&lt;/a&gt;&lt;/li&gt;&#10;" file="${sftp.index.file}" append="true" />
+	<target name="sftp.index.line.append" depends="set.file.summary" if="upload.to.sftp">
+		<echo message="&lt;li&gt;&lt;a href=&quot;device-install-files/${file.name}&quot;&gt;${file.name} ${file.summary}&lt;/a&gt;&lt;/li&gt;&#10;" file="${sftp.index.file}" append="true" />
 	</target>
 
-	<target name="sftp.upload.line.append" depends="prepare" if="upload.to.sftp">
-		<echo message="put ${file.name}&#10;" file="${sftp.in.file}" append="true" />
+	<target name="sftp.upload.line.append" if="upload.to.sftp">
+		<echo message="put ${file.name} device-install-files&#10;" file="${sftp.in.file}" append="true" />
 	</target>
 
 	<target name="sftp.upload.line.append.sun.file" depends="prepare" >
+		<property name="device.type" value="(not Blackberry)" />
+		<property name="file.name" value="${rim.build.file.root}${fext.suffix}.${fext}" />
 		<antcall target="sftp.upload.line.append" inheritAll="true" >
 			<param name="file.name" value="${build.file.root}${fext.suffix}.${fext}" />
 		</antcall>
@@ -1504,6 +1546,7 @@
 	</target>
 
 	<target name="sftp.upload.line.append.rim.file" depends="prepare" >
+		<property name="device.type" value="Blackberry" />
 		<antcall target="sftp.upload.line.append" inheritAll="true" >
 			<param name="file.name" value="${rim.build.file.root}${fext.suffix}.${fext}" />
 		</antcall>
@@ -1526,19 +1569,15 @@
 
 	<target name="sftp.upload.append.rim" depends="prepare" if="${upload.to.sftp}" >
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
-			<param name="fext" value="cso" />
-			<param name="fext.suffix" value="" />
-		</antcall>
-		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="jad" />
 			<param name="fext.suffix" value="" />
 		</antcall>
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
-			<param name="fext" value="cod" />
+			<param name="fext" value="jar" />
 			<param name="fext.suffix" value="" />
 		</antcall>
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
-			<param name="fext" value="signed" />
+			<param name="fext" value="cod" />
 			<param name="fext.suffix" value="" />
 		</antcall>
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
@@ -1628,27 +1667,38 @@
 		<echo message="cd ${sftp.root.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
 		<property name="ftp.vers.dir" value="Version\ ${MIDLETVERSROOT}\ ${ftp.ustage.txt}Source\ and\ Binaries" />
+		<property name="ftp.vers.url" value="Version%20${MIDLETVERSROOT}%20${ftp.ustage.url.txt}Source%20and%20Binaries" />
+		<property name="ftp.vers.desc" value="Version ${MIDLETVERSROOT} ${ftp.ustage.desc.txt}Source and Binaries" />
 		<echo message="-mkdir ${ftp.vers.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="cd ${ftp.vers.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="-mkdir device-install-files&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${ftpdist.name}/apache.htaccess .htaccess&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/changelog.txt changelog-${FMIDLETVERSROOT}${dist.stage.file}.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/gpl-2.txt gpl-2.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/lgpl-2_1.txt lgpl-2_1.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/release_notes.txt release_notes-${FMIDLETVERSROOT}${dist.stage.file}.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/changelog.txt changelog-${FMIDLETVERSROOT}${dist.stage.file}.txt&#10;" file="${sftp.in.file}" append="true" />
-		<echo message="&lt;html&gt;&#10;&lt;head&gt;&#10;&lt;title&gt;&lt;/title&gt;&#10;&lt;/head&gt;&#10;&lt;body&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; dir=&quot;ltr&quot; lang=&quot;en&quot;&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;head&gt;&#10;&lt;title&gt;${ftp.vers.desc}&lt;/title&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;base href=&quot;${sftp.base.url}/${ftp.vers.url}/&quot; /&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;/head&gt;&#10;&lt;body&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;h2&gt;${ftp.vers.desc}&lt;/h2&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;ul&gt;&#10;" file="${sftp.index.file}" append="true" />
 		<antcall target="sftp.upload.archives" inheritAll="true" />
 	</target>
 
 	<target name="sftp.upload.finish" depends="prepare" if="upload.to.sftp">
-		<echo message="&lt;/body&gt;&#10;&lt;/html&gt;&#10;" file="${sftp.index.file}" append="true" />
-		<echo message="mput ../${ftp.in.dir.name}/*htm ." file="${sftp.in.file}" append="true" />
+		<echo message="Adding to file ${sftp.in.file}" />
+		<echo message="&lt;/ul&gt;&lt;/body&gt;&#10;&lt;/html&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="mput ../${ftp.in.dir.name}/*htm " file="${sftp.in.file}" append="true" />
 	</target>
 
 	<target name="sourceforge.initialize" if="upload.to.sftp">
 		<antcall target="sftp.upload.initialize" inheritAll="true" >
 			<param name="ftp.in.dir" value="${distsourceforge}" />
+			<param name="ftp.in.base" value="${distsourceforge}" />
 			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
 			<param name="sftp.index.file" value="${sourceforge.ftp.index.file}" />
 			<param name="sftp.root.dir" value="${sourceforge.rootdir}" />
@@ -1661,6 +1711,7 @@
 			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
 			<param name="sftp.index.file" value="${yinlight.ftp.index.file}" />
 			<param name="sftp.root.dir" value="${yinlight.rootdir}" />
+			<param name="sftp.base.url" value="${yinlight.base.url}" />
 		</antcall>
 	</target>
 
@@ -1671,6 +1722,7 @@
 			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
 			<param name="sftp.index.file" value="${sourceforge.ftp.index.file}" />
 			<param name="sftp.root.dir" value="${sourceforge.rootdir}" />
+			<param name="sftp.base.url" value="${sourceforge.base.url}" />
 		</antcall>
 	</target>
 
@@ -1681,6 +1733,7 @@
 			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
 			<param name="sftp.index.file" value="${yinlight.ftp.index.file}" />
 			<param name="sftp.root.dir" value="${yinlight.rootdir}" />
+			<param name="sftp.base.url" value="${yinlight.base.url}" />
 		</antcall>
 	</target>
 
@@ -2435,6 +2488,10 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		<antcall target="dist.midp.2.0.novice" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
 		<antcall target="dist.midp.2.0.jsr75" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
@@ -2515,10 +2572,10 @@
 		</antcall>
 		<chmod file="${distgooglecode}/googleupload.sh" perm="744" />
 		<antcall target="sourceforge.finish" inheritAll="true" >
-			<param name="finish.upload.to.sftp" value="true" />
+			<param name="upload.to.sftp" value="true" />
 		</antcall>
 		<antcall target="yinlight.finish" inheritAll="true" >
-			<param name="finish.upload.to.sftp" value="true" />
+			<param name="upload.to.sftp" value="true" />
 		</antcall>
 		<antcall target="make.zip.files" inheritAll="true" />
 		<delete failonerror="false" includeemptydirs="true">
@@ -2531,7 +2588,7 @@
 		</delete>
 	</target>
 
-	<target name="dist.all" >
+	<target name="dist.all" depends="prepare.development,prepare.beta,prepare.rc,prepare.production" >
 		<antcall target="dist.dev.status" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
