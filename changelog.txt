@@ -1008,14 +1008,19 @@ v1.11.5 Alpha 15 (Jan 17th 2011)
 - Workaround problem where old name becomes null.
 
 v1.11.5 Dev 16 (Dev16) (Jan 27th 2011)
+- Add novice compile target.
 - Build MIDP 2.0, CLDC 1.0, novice target.
 - Change more static fields to instance vars for the singleton to reduce static memory used.
 - Copy/put RIM jar file to ftp site.
 - Don't compile code not present if small memory.
 - Don't compile unneeded code for internet link version.
+- Don't put novice binary into the distribution.  Only the source code will be present.
 - Fix code placement for using JMUnit on a device.
 - Fix conditional compile of DLOGGING code.
 - Fix declaration of djmtestfree define.
+- Fix location of novice.txt file.  
+- Fix novice prefix by adding _ at the end.
+- Fix novice property by making it true.
 - Fix println statement.
 - For CLDC 1.0, use this.getClass() to get the class instance to use to load KFileSelectorMgr.
 - For internet link version, create only one instance of Settings using the constructor.
@@ -1045,6 +1050,7 @@ v1.11.5 Dev 16 (Dev16) (Jan 27th 2011)
 - Put ftp device install files into device-install directory to get them to come up first in sourceforge.
 - Put in comment out future code to use both local and global vars for buffering.
 - Put rim_ prefix on googlecode RIM files.
+- Remove parameter setting which prevents performing novice target.
 - Separate out obfuscate from wtkpackage.  This allows Netebeans WTK home to obfuscate (hopefully).  Need wtkpreverify because wtkobfuscate does not preverify the result.
 - Start with first link for sourceforge which while invalid, will cause prompt for internet access.  When taking http stats, don't count the first (sourceforge) link so that time to answer prompt is not counted as access time.
 - Use -allowaccessmodification allow ProGuard optimization to make some methods public to use inline or other optimizations.
