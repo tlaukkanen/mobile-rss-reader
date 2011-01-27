@@ -42,6 +42,7 @@
  * IB 2011-01-14 1.11.5Alpha15 Save the pointer to the old feed and make a copy to modify so that it will allow future background processing.
  * IB 2011-01-14 1.11.5Alpha15 Use procIoExc from URLHandler process exception handling for IO and other exceptions including out of memory.
  * IB 2011-01-14 1.11.5Alpha15 Use getRssMidlet from FeatureMgr to get the Rss Midlet.
+ * IB 2011-01-22 1.11.5Dev16 If m_maxItemCount has not been set, take it from the RssReaderSettings either via midlet or directly from getInstance.
 */
 
 // Expand to define full vers define
@@ -70,6 +71,7 @@ import com.substanceofcode.utils.XmlParser;
 import com.substanceofcode.utils.HTMLParser;
 //#endif
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
+import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
@@ -130,7 +132,7 @@ implements
 			m_rssFeed = (updFeed && (oldRssFeed != null)) ?
 					(RssItunesFeed)oldRssFeed.clone() : rssFeed;
 		}
-		m_maxItemCount = RssReaderSettings.INIT_MAX_ITEM_COUNT;
+		m_maxItemCount = -2;
     }
     
 	//#ifdef DMIDP20
@@ -369,6 +371,10 @@ implements
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("Thread running=" + MiscUtil.getThreadInfo(m_parsingThread));}
 			//#endif
+			if (m_maxItemCount == -2) {
+				RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
+				m_maxItemCount = (midlet != null) ? midlet.getSettings().INIT_MAX_ITEM_COUNT : RssReaderSettings.getInstance().INIT_MAX_ITEM_COUNT;
+			}
 			parseModRssFeed(m_updFeed, m_maxItemCount);
         } catch( Throwable e ) {
 			m_ex = URLHandler.procIoExc("Error while parsing feed ", e,
