@@ -34,8 +34,11 @@
  * IB 2010-11-26 1.11.5Dev15 Use checkPresRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
  * IB 2010-11-26 1.11.5Dev15 Use checkPresRead to set the username/password to the parameter's RssFeed.
  * IB 2010-11-26 1.11.5Dev15 Use setItemDatesNull in compatibility testing to null the feed's date if the comparison feed's date is null.  This worksaround a fix where the new version takes the lastBuildDate if pubdate is null.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
 */
 
+// Expand to define itunes define
+@DFULLVERSDEF@
 // Expand to define logging define
 @DLOGDEF@
 // Expand to define test define
@@ -58,6 +61,7 @@
 //#ifdef DLOGGING
 //#define HAS_EQUALS
 //#endif
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.MiscUtil;
@@ -683,3 +687,4 @@ public class RssFeed
 		}
 	}
 }
+//#endif
