@@ -19,12 +19,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
+/*
+ * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
+ */
 
 // Expand to define MIDP define
 //#define DMIDP20
+// Expand to define itunes define
+//#define DFULLVERS
 // Expand to define logging define
 //#define DNOLOGGING
-// Expand to define itunes define
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businessentities;
 
 import java.util.Enumeration;
@@ -205,3 +210,4 @@ final public class RssFeedStore extends Hashtable {
 	}
 
 }
+//#endif
