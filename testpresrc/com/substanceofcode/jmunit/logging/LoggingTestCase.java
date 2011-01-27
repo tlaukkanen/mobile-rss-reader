@@ -28,8 +28,12 @@
  * IB 2011-01-14 1.11.5Alpha15 Use convience methods updSvLogging and updPrevLogging from LoggingTestCase to alter/restore the logging level.
  * IB 2011-01-14 1.11.5Alpha15 For JMUnit Plus using midlets, take midlet from the single midlet vs the current test which is part of multiple midlets used as tests.
  * IB 2011-01-14 1.11.5Alpha15 Use procThrowable from LoggingTestCase.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile some code for internet link version.
+ * IB 2011-01-24 1.11.5Dev16 Fix println statement.
 */
 
+// Expand to define itunes define
+@DFULLVERSDEF@
 // Expand to define test define
 @DCOMPATDEF@
 // Expand to define test define
@@ -50,8 +54,10 @@ import jmunit.framework.cldc11.Test;
 import jmunit.framework.cldc11.TestCase;
 import jmunit.framework.cldc11.AssertionFailedException;
 
+//#ifdef DFULLVERS
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+//#endif
 import com.substanceofcode.utils.CauseException;
 
 import java.util.Enumeration;
@@ -83,8 +89,8 @@ abstract public class LoggingTestCase extends TestCase {
 	protected Level svLogLevel = null;
 	protected Level svCmpLogLevel = null;
     protected LoggerRptForm debugForm = null;
-	//#endif
 	protected String scompLevel = Level.INFO.getName(); // Change to more stringent
+	//#endif
 
 	public LoggingTestCase(int nbr, String name) {
 		super(nbr, name);
@@ -160,6 +166,7 @@ abstract public class LoggingTestCase extends TestCase {
 	}
 	//#endif
 
+	//#ifdef DFULLVERS
 	public Object[] cmpModLog(String cmpMsg,
 			RssItunesFeedInfo ncmpfeed,
 			RssItunesFeedInfo nfeed) {
@@ -195,6 +202,7 @@ abstract public class LoggingTestCase extends TestCase {
 		}
 		return new Object[] {new Boolean(feq), ae};
 	}
+	//#endif
 
 	public void procThrowable(String mname, Throwable e)
 	throws Throwable {
@@ -222,7 +230,7 @@ abstract public class LoggingTestCase extends TestCase {
 		//#ifdef DLOGGING
 		logger.severe(ce.getMessage(), ce);
 		//#else
-		System.println(ce.getMessage());
+		System.out.println(ce.getMessage());
 		e.printStackTrace();
 		//#endif
 		throw e;
