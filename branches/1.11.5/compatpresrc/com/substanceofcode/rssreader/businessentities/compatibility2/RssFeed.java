@@ -24,6 +24,7 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-24 1.11.5Dev16 Have logger object, finestLoggable, and traceLoggable for using JMUnit on a device.
  */
 
 // Expand to define test define
@@ -68,6 +69,9 @@ public class RssFeed implements RssFeedInfo {
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
     private boolean traceLoggable = logger.isLoggable(Level.TRACE);
+	//#else
+    private Object logger = null;
+    private boolean fineLoggable = true;
 	//#endif
 
     /** Creates a new instance of RSSBookmark */
