@@ -25,6 +25,7 @@
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-26 1.11.5Dev15 Use itemEquals to compare each item for testing and logging.
+ * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS items.
  */
 
 // Expand to define logging define
@@ -71,7 +72,7 @@ public class RssItem implements RssItemInfo {
     protected String m_link  = "";   // The RSS item link
     protected String m_desc  = "";   // The RSS item description
     protected Date m_date = null;
-	protected String m_errDate = null;
+	protected String m_errDate = "";
     protected String m_enclosure  = "";   // The RSS item enclosure
     protected boolean m_unreadItem = false;
 	//#ifdef DLOGGING
@@ -105,6 +106,9 @@ public class RssItem implements RssItemInfo {
     public RssItem(RssItemInfo item) {
 		this(item.getTitle(), item.getLink(), item.getDescription(),
 				item.getDate(), item.getEnclosure(), item.isUnreadItem());
+		if (item instanceof RssItem) {
+			m_errDate = ((RssItem)item).m_errDate;
+		}
 	}
 
     /** Get RSS item title */
@@ -326,13 +330,17 @@ public class RssItem implements RssItemInfo {
 		return (preData);
 	}
     
-    public void setErrDate(String m_errDate) {
-        this.m_errDate = m_errDate;
+    public void setErrDate(String errDate) {
+        this.m_errDate = errDate;
     }
 
     public String getErrDate() {
         return (m_errDate);
     }
+
+    public Object clone() {
+		return new RssItem(this);
+	}
 
 }
 //#endif
