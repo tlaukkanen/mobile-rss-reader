@@ -76,7 +76,6 @@ import net.sf.jlogmicro.util.logging.RecStoreHandler;
 
 abstract public class LoggingTestCase extends TestCase {
 
-
 	//#ifdef DLOGGING
 	/*
 	protected Vector svLogLevel = null;
@@ -89,7 +88,7 @@ abstract public class LoggingTestCase extends TestCase {
 	protected Level svLogLevel = null;
 	protected Level svCmpLogLevel = null;
     protected LoggerRptForm debugForm = null;
-	protected String scompLevel = Level.INFO.getName(); // Change to more stringent
+	protected String scompLevel = null; // Level.FINE.getName(); // UNDO Change to more stringent
 	//#endif
 
 	public LoggingTestCase(int nbr, String name) {
@@ -143,7 +142,7 @@ abstract public class LoggingTestCase extends TestCase {
 		*/
 		Level cLogLevel = logger.getParent().getLevel();
 		String strsvLogLevel = cLogLevel.getName();
-		if (!strsvLogLevel.equals(newLogLevel)) {
+		if ((newLogLevel != null) && !strsvLogLevel.equals(newLogLevel)) {
 			Level nlogLevel;
 			logger.getParent().setLevel(nlogLevel = Level.parse(newLogLevel));
 			//logger = Logger.getLogger(CURRENT_CLASS);
@@ -168,34 +167,48 @@ abstract public class LoggingTestCase extends TestCase {
 
 	//#ifdef DFULLVERS
 	public Object[] cmpModLog(String cmpMsg,
-			RssItunesFeedInfo ncmpfeed,
-			RssItunesFeedInfo nfeed) {
+			RssItunesFeedInfo ncmpfeed, RssItunesFeedInfo nfeed,
+			Object[] objs) {
 		boolean feq = ncmpfeed.equals(nfeed);
 		if (!feq) {
 			//#ifdef DLOGGING
 			logger.warning("Feeds not equal nfeed.getName()=" + nfeed.getName());
-			svCmpLogLevel = updSvLogging(scompLevel);
 			//#endif
 			RssItunesFeedInfo mcmpfeed = (RssItunesFeedInfo)ncmpfeed.clone();
 			RssItunesFeedInfo mnfeed = (RssItunesFeedInfo)nfeed.clone();
-			feq = mcmpfeed.equals(mnfeed);
-			if (!feq) {
-				//#ifdef DCOMPATIBILITY
-				if (((RssItunesFeed)mnfeed).setItemDatesNull(mcmpfeed)) {
+			boolean nfeq;
+			if (!(nfeq = mcmpfeed.equals(mnfeed))) {
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest("cmpModLog mnfeed.getClass().getName(),mcmpfeed.getClass().getName()=" + mnfeed.getClass().getName() + "," + mcmpfeed.getClass().getName());}
 				//#endif
+				//#ifdef DCOMPATIBILITY
+				((RssItunesFeed)mnfeed).setItemDatesNull(mcmpfeed);
+				 mcmpfeed.adjustFields();
+				//#endif
+				mcmpfeed.setUpddate("");
+				mcmpfeed.setEtag("");
+				mnfeed.setUpddate("");
+				mnfeed.setEtag("");
+				feq = mcmpfeed.equals(mnfeed);
+				if (!feq) {
+					//#ifdef DLOGGING
+					svCmpLogLevel = updSvLogging(scompLevel);
+					//#endif
+					mcmpfeed = (RssItunesFeedInfo)mcmpfeed.clone();
+					mnfeed = (RssItunesFeedInfo)mnfeed.clone();
 					feq = mcmpfeed.equals(mnfeed);
-				//#ifdef DCOMPATIBILITY
+					//#ifdef DLOGGING
+					updPrevLogging(svCmpLogLevel);
+					//#endif
 				}
-				//#endif
 			}
-			//#ifdef DLOGGING
-			updPrevLogging(svCmpLogLevel);
-			//#endif
 		}
 		Throwable ae = null;
 		if (!feq) {
 			try {
-				assertTrue(cmpMsg, ncmpfeed.equals(nfeed));
+				assertTrue(((objs == null) ? "" : ("{" +
+								objs[0] + "," + objs[1] + "},")) +
+								cmpMsg, ncmpfeed.equals(nfeed));
 			} catch (Throwable e) {
 				ae = e;
 			}
