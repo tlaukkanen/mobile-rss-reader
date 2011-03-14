@@ -32,6 +32,9 @@
  * IB 2010-01-11 1.11.5Dev15 Use m_encodingStreamReader to parse.
  * IB 2010-01-11 1.11.5Dev15 Use current encodingUtil for replace methods.
  * IB 2010-01-11 1.11.5Dev15 Use singleton instead of some static vars for EncodingUtil.
+ * IB 2011-01-27 1.11.5Dev17 Use base tag to set the base for relative URL's.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
+ * IB 2011-03-10 1.11.5Dev17 Don't do script tags because we cannot process them.
 */
 
 // Expand to define memory size define
@@ -69,6 +72,7 @@ public class HTMLParser extends XmlParser {
 	//#endif
 	private String m_redirectUrl = "";
 	final private String m_url;
+	private String m_base_url;
     
     /** Enumerations for parse function */
     public static final int REDIRECT_URL = LAST_TOKEN + 1;
@@ -78,6 +82,7 @@ public class HTMLParser extends XmlParser {
     public HTMLParser(String url, InputStream inputStream) {
 		super(inputStream);
 		m_url = url;
+		m_base_url = url;
 		m_defEncoding = m_encodingInstance.getIsoEncoding();
 		super.setHtmlFile(true);
     }
@@ -105,20 +110,28 @@ public class HTMLParser extends XmlParser {
 			switch (elementName.charAt(0)) {
 				case 'b':
 				case 'B':
-					m_bodyFound = elementName.toLowerCase().equals("body");
-					// Default HTML to iso-8859-1
-					if (m_bodyFound && !m_encodingSet) {
-						//#ifdef DLOGGING
-						if (finerLoggable) {logger.finer("Body found without encoding set.");}
-						//#endif
-						m_encodingUtil.getEncoding(m_fileEncoding,
-								m_encodingInstance.getIsoEncoding());
-						m_docEncoding = m_encodingUtil.getDocEncoding();
-						m_encodingSet = true;
+					if (m_bodyFound = elementName.toLowerCase().equals(
+								"body")) {
+						// Default HTML to iso-8859-1
+						if (m_bodyFound && !m_encodingSet) {
+							//#ifdef DLOGGING
+							if (finerLoggable) {logger.finer("Body found without encoding set.");}
+							//#endif
+							m_encodingUtil.getEncoding(m_fileEncoding,
+									m_encodingInstance.getIsoEncoding());
+							m_docEncoding = m_encodingUtil.getDocEncoding();
+							m_encodingSet = true;
 
-						//#ifdef DLOGGING
-						if (finerLoggable) {logger.finer("Body found m_docEncoding,m_fileEncoding=" + m_docEncoding + "," + m_fileEncoding);}
-						//#endif
+							//#ifdef DLOGGING
+							if (finerLoggable) {logger.finer("Body found m_docEncoding,m_fileEncoding=" + m_docEncoding + "," + m_fileEncoding);}
+							//#endif
+						}
+					} else if (elementName.toLowerCase().equals("base")) {
+						String base_url;
+						if (((base_url = getAttributeValue("href")) != null) &&
+							(base_url.length() > 0)) {
+							m_base_url = base_url;
+						}
 					}
 					break;
 				case 'm':
@@ -158,7 +171,7 @@ public class HTMLParser extends XmlParser {
 							if (link.length() > 0) {
 								try {
 									m_redirectUrl = HTMLParser.getAbsoluteUrl(
-											m_url, link);
+											m_base_url, link);
 								} catch (IllegalArgumentException e) {
 									IOException ioe = new IOException(
 											"Unable to redirect bad url " +
@@ -174,6 +187,12 @@ public class HTMLParser extends XmlParser {
 								return REDIRECT_URL;
 							}
 						}
+					}
+					break;
+				case 's':
+				case 'S':
+					if (elementName.toLowerCase().equals("script")) {
+						super.getText(false);
 					}
 					break;
 				default:
