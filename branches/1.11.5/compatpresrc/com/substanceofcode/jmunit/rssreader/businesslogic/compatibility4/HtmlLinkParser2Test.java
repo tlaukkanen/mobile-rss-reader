@@ -65,6 +65,7 @@ package com.substanceofcode.jmunit.rssreader.businesslogic.compatibility4;
 
 import java.util.Date;
 
+import com.substanceofcode.jmunit.rssreader.businesslogic.RssCompFeeds;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
 import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.compatibility4.CauseException;
@@ -77,8 +78,8 @@ import com.substanceofcode.rssreader.businesslogic.compatibility4.FeedListParser
 import com.substanceofcode.rssreader.businesslogic.compatibility4.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.LineByLineParser;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.compatibility4.Observer;
-import net.eiroca.j2me.observable.compatibility4.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -94,7 +95,7 @@ import net.sf.jlogmicro.util.logging.Logger;
    */
 final public class HtmlLinkParser2Test extends BaseTestCase
 //#ifdef DMIDP20
-implements Observer, net.yinlight.j2me.observable.Observer
+implements Observer
 //#endif
 {
 
@@ -110,23 +111,24 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	private long currTotalCount = 0L;
 	private long oldTotalTime = 0L;
 	private long oldTotalCount = 0L;
+	static private int nbrTests = 10;
 	private int nextIx = 1; // Start at 1 to skip sourceforge home.
-	private int prevNextIx = 1; // Start at 1 to skip sourceforge home.
+	private int prevNextIx = nextIx; // Start at 1 to skip sourceforge home.
 	//#ifdef DLOGGING
 	private boolean logParseChar = traceLoggable; // or traceLoggable
 	private boolean logReadChar = traceLoggable; // or traceLoggable
 	private boolean logRepeatChar = traceLoggable; // or traceLoggable
-	private boolean alterLogLevel = false; // or traceLoggable
+	private boolean alterLogLevel = false; // undo or traceLoggable
 	private boolean endAlterLogLevel = false;
 	private boolean levelAltered = false;
-	private int alterix = 28;
-	private int endAlterix = 30;
+	private int alterix = 23;
+	private int endAlterix = 24;
 	private String newLogLevel = Level.FINEST.getName();
 	//#endif
 	private static final String CURRENT_CLASS = "compatibility4.HtmlLinkParser2Test";
 
 	public HtmlLinkParser2Test() {
-		super(10, CURRENT_CLASS);
+		super(nbrTests, CURRENT_CLASS);
 	}
 
 	public void test(int testNumber) throws Throwable {
@@ -168,14 +170,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
-		ready = true;
-		synchronized(this) {
-			super.notifyAll();
-		}
-	}
-
-	public void changed(net.yinlight.j2me.observable.Observable observable, Object arg) {
+	public void changed(Observable observable, Object arg) {
 		ready = true;
 		synchronized(this) {
 			super.notifyAll();
@@ -247,7 +242,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 		compatibilityHtmlLinkParserTestSub(mname, "links2.html", testUrl, true);
 	}
 
-	private RssItunesFeedInfo[] parseHtml(final String mname,
+	private Object[] parseHtml(final String mname,
 			String name, String url)
 		throws com.substanceofcode.utils.CauseException, Throwable {
 			//#ifdef DLOGGING
@@ -285,7 +280,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				}
 				//#endif
 				if (name.indexOf("option=missing title") >= 0) {
-					feedListParser.setGetFeedTitleList(true);
+					feedListParser.setGetTitleOnly(true);
 				}
 				if (name.indexOf("linksearchurl=rss.xml") >= 0) {
 					feedListParser.setFeedURLFilter("rss.xml");
@@ -293,6 +288,10 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					feedListParser.setFeedURLFilter("xml");
 				} else if (name.indexOf("linksearchurl=/feed") >= 0) {
 					feedListParser.setFeedURLFilter("/feed");
+				} else if (name.indexOf("linksearchurl=/xml/rss/nyt/") >= 0) {
+					feedListParser.setFeedURLFilter("/xml/rss/nyt/");
+				} else if (name.indexOf("linksearchurl=/xml/rss/") >= 0) {
+					feedListParser.setFeedURLFilter("/xml/rss/");
 				} else if (name.indexOf("linksearchurl=index.rss") >= 0) {
 					feedListParser.setFeedURLFilter("index.rss");
 				} else if (name.indexOf("linksearchurl=?/rss=") >= 0) {
@@ -320,7 +319,10 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				if (!feedListParser.isSuccessfull()) {
 					throw feedListParser.getEx();
 				}
-				return feedListParser.getFeeds();
+				//#ifdef DLOGGING
+				if (fineLoggable) {logger.fine(mname + " parseHtml feedListParser=" + feedListParser);}
+				//#endif
+				return new Object[] {feedListParser.getFeeds(), feedListParser};
 			} catch (com.substanceofcode.utils.CauseException e) {
 				//#ifdef DLOGGING
 				logger.severe(mname + " CauseException failure ",e);
@@ -336,71 +338,83 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			}
 		}
 
-	private RssItunesFeedInfo[] compatibilityParseHtml(final String mname,
+	private Object[] compatibilityParseHtml(final String mname,
 			String name, String url)
-		throws CauseException, Throwable {
-			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine(mname + " entering compatibilityParseHtml name,url=" + name + "," + url);}
-			//#endif
-			try {
-				FeedListParser compatibilityFeedListParser;
-				boolean hasAuto = (name.indexOf("option=htmlautolink") >= 0);
-				if (url.endsWith(".txt")) {
-					compatibilityFeedListParser = new LineByLineParser( url, "", "");
-				} else if (HTMLParser.isHtml(url) || hasAuto) {
-					if (name.indexOf("option=htmlautolink") >= 0) {
-						compatibilityFeedListParser =
-							new HTMLAutoLinkParser( url, "", "");
-					} else {
-						compatibilityFeedListParser = new HTMLLinkParser(
-								url, "", "");
-					}
+	throws CauseException, Throwable {
+		//#ifdef DLOGGING
+		if (fineLoggable) {logger.fine(mname + " entering compatibilityParseHtml name,url=" + name + "," + url);}
+		//#endif
+		try {
+			FeedListParser compatibilityFeedListParser;
+			boolean hasAuto = (name.indexOf("option=htmlautolink") >= 0);
+			if (url.endsWith(".txt")) {
+				compatibilityFeedListParser = new LineByLineParser( url, "", "");
+			} else if (HTMLParser.isHtml(url) || hasAuto) {
+				if (name.indexOf("option=htmlautolink") >= 0) {
+					compatibilityFeedListParser =
+						new HTMLAutoLinkParser( url, "", "");
 				} else {
-					compatibilityFeedListParser = new OpmlParser( url, "", "");
+					compatibilityFeedListParser = new HTMLLinkParser(
+							url, "", "");
 				}
-				if (name.indexOf("option=missing title") >= 0) {
-					compatibilityFeedListParser.setGetFeedTitleList(true);
-				}
-				if (name.indexOf("linksearchurl=rss.xml") >= 0) {
-					compatibilityFeedListParser.setFeedURLFilter("rss.xml");
-				} else if (name.indexOf("linksearchurl=xml") >= 0) {
-					compatibilityFeedListParser.setFeedURLFilter("xml");
-				} else if (name.indexOf("linksearchurl=index.rss") >= 0) {
-					compatibilityFeedListParser.setFeedURLFilter("index.rss");
-				} else if (name.indexOf("linksearchurl=?/rss=") >= 0) {
-					compatibilityFeedListParser.setFeedURLFilter("?/rss=");
-				} else if (name.indexOf("linksearchurl=/rss") >= 0) {
-					compatibilityFeedListParser.setFeedURLFilter("/rss");
-				}
-				ready = false;
-				compatibilityFeedListParser.startParsing();
-				while (!compatibilityFeedListParser.isSuccessfull() &&
-						(compatibilityFeedListParser.getEx() == null)) {
-					synchronized(this) {
-						Thread.yield();
-						Thread.sleep(5000L);
-					}
-				}
-				compatibilityFeedListParser.join();
-				if (fineLoggable) {logger.fine(mname + " compatibilityFeedListParser.isSuccessfull()=" + compatibilityFeedListParser.isSuccessfull());}
-				if (!compatibilityFeedListParser.isSuccessfull()) {
-					throw compatibilityFeedListParser.getEx();
-				}
-				return compatibilityFeedListParser.getFeeds();
-			} catch (CauseException e) {
-				//#ifdef DLOGGING
-				logger.severe(mname + " CauseException failure ",e);
-				//#endif
-				e.printStackTrace();
-				throw e;
-			} catch (Throwable e) {
-				//#ifdef DLOGGING
-				logger.severe(mname + " failure ",e);
-				//#endif
-				e.printStackTrace();
-				throw e;
+			} else {
+				compatibilityFeedListParser = new OpmlParser( url, "", "");
 			}
+			if (name.indexOf("option=missing title") >= 0) {
+				compatibilityFeedListParser.setGetFeedTitleList(true);
+			}
+			if (name.indexOf("linksearchurl=rss.xml") >= 0) {
+				compatibilityFeedListParser.setFeedURLFilter("rss.xml");
+			} else if (name.indexOf("linksearchurl=xml") >= 0) {
+				compatibilityFeedListParser.setFeedURLFilter("xml");
+			} else if (name.indexOf("linksearchurl=index.rss") >= 0) {
+				compatibilityFeedListParser.setFeedURLFilter("index.rss");
+			} else if (name.indexOf("linksearchurl=/xml/rss/nyt/") >= 0) {
+				compatibilityFeedListParser.setFeedURLFilter("/xml/rss/nyt/");
+			} else if (name.indexOf("linksearchurl=/xml/rss/") >= 0) {
+				compatibilityFeedListParser.setFeedURLFilter("/xml/rss/");
+			} else if (name.indexOf("linksearchurl=?/rss=") >= 0) {
+				compatibilityFeedListParser.setFeedURLFilter("?/rss=");
+			} else if (name.indexOf("linksearchurl=/rss") >= 0) {
+				compatibilityFeedListParser.setFeedURLFilter("/rss");
+			}
+			//#ifdef DMIDP20
+			ready = false;
+			compatibilityFeedListParser.getObservableHandler().addObserver(this);
+			//#endif
+			compatibilityFeedListParser.startParsing();
+			//#ifdef DMIDP20
+			while (!isReady()) {
+				synchronized(this) {
+					wait(500L);
+				}
+			}
+			//#else
+			compatibilityFeedListParser.join();
+			//#endif
+			if (fineLoggable) {logger.fine(mname + " compatibilityFeedListParser.isSuccessfull()=" + compatibilityFeedListParser.isSuccessfull());}
+			if (!compatibilityFeedListParser.isSuccessfull()) {
+				throw compatibilityFeedListParser.getEx();
+			}
+			//#ifdef DLOGGING
+			if (fineLoggable) {logger.fine(mname + " entering compatibilityParseHtml compatibilityFeedListParser=" + compatibilityFeedListParser);}
+			//#endif
+			return new Object[] {compatibilityFeedListParser.getFeeds(),
+				compatibilityFeedListParser};
+		} catch (CauseException e) {
+			//#ifdef DLOGGING
+			logger.severe(mname + " CauseException failure ",e);
+			//#endif
+			e.printStackTrace();
+			throw e;
+		} catch (Throwable e) {
+			//#ifdef DLOGGING
+			logger.severe(mname + " failure ",e);
+			//#endif
+			e.printStackTrace();
+			throw e;
 		}
+	}
 
 	private RssCompFeeds parseCompFeeds(final String mname,
 			final String logText,
@@ -413,16 +427,20 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			//#endif
 			RssItunesFeedInfo[] rssfeeds = null;
 			com.substanceofcode.utils.CauseException exc = null;
+			Object[] ret = null;
 			try {
-				rssfeeds = parseHtml(mname, name, url);
+				ret = parseHtml(mname, name, url);
+				rssfeeds = (RssItunesFeedInfo[])ret[0];
 			} catch (com.substanceofcode.utils.CauseException e) {
 				exc = e;
 			}
 			CauseException compatibilityExc = null;
 			RssItunesFeedInfo[] cmpRssFeeds = null;
+			Object[] cmpRet = null;
 			try {
-				cmpRssFeeds = compatibilityParseHtml(mname,
+				cmpRet = compatibilityParseHtml(mname,
 						name, url);
+				cmpRssFeeds = (RssItunesFeedInfo[])cmpRet[0];
 			} catch (CauseException e) {
 				compatibilityExc = e;
 			}
@@ -472,7 +490,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					rssfeeds.length > 0);
 			assertTrue(mname + " cmpRssFeeds feed length should be > 0",
 					cmpRssFeeds.length > 0);
-			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / 10));
+			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / nbrTests));
 
 			for (; (nextIx < endIx) && (nextIx < rssfeeds.length) && (nextIx < cmpRssFeeds.length);
 					nextIx++) {
@@ -483,7 +501,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 						svLogLevel = super.updSvLogging(newLogLevel);
 						logger.info(mname + " altering level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
 						alterLogLevel = false;
-					} else if (endAlterLogLevel && (nextIx >= endAlterix)) {
+					} else if (endAlterLogLevel && (nextIx > endAlterix)) {
 						endAlterLogLevel = false;
 						super.updPrevLogging(svLogLevel);
 						logger.info(mname + " reverting level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
@@ -494,6 +512,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					if (!finestLoggable) {logger.info(mname + " nextIx,feed 1=" + nextIx + "," + feed.getName() + "," + feed.getUrl());}
 					//#endif
 					//#ifdef DLOGGING
+					if (!finestLoggable && fineLoggable) {logger.fine(mname + " nextIx,feed 1=" + nextIx + "," + feed.getName() + "," + feed.getItems().length);}
 					if (finestLoggable) {logger.finest(mname + " nextIx,feed 1=" + nextIx + "," + feed.toString());}
 					//#endif
 					RssItunesFeedInfo cmpfeed = cmpRssFeeds[nextIx];
@@ -501,6 +520,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					if (!finestLoggable) {logger.info(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.getName() + "," + cmpfeed.getUrl());}
 					//#endif
 					//#ifdef DLOGGING
+					if (!finestLoggable && fineLoggable) {logger.fine(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.getName() + "," + cmpfeed.getVecItems().size());}
 					if (finestLoggable) {logger.finest(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.toString());}
 					//#endif
 					String assertInfo = new String("nextIx,name,url=" + nextIx + "," + feed.getName() + "," +  feed.getUrl());
@@ -508,7 +528,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					goNext = true;
 					Object[] oret = super.cmpModLog(
 							"Original feed must equal expected feed " + assertInfo,
-							(RssItunesFeed)cmpfeed, feed);
+							(RssItunesFeed)cmpfeed, feed, null);
 					if (oret[1] != null) {
 						throw (Throwable)oret[1];
 					}
@@ -528,9 +548,11 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					}
 					com.substanceofcode.utils.CauseException currExc = null;
 					RssItunesFeedInfo[] currRssfeeds = null;
+					Object[] currRet = null;
 					try {
-						currRssfeeds = parseHtml(mname, feed.getName(),
+						currRet = parseHtml(mname, feed.getName(),
 								feed.getUrl());
+						currRssfeeds = (RssItunesFeedInfo[])currRet[0];
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest(mname + " nextIx currRssfeeds.length=" + nextIx + "," + currRssfeeds.length);}
 						//#endif
@@ -539,9 +561,11 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					}
 					CauseException currCmpExc = null;
 					RssItunesFeedInfo[] currCmpRssfeeds = null;
+					Object[] currCmpRet = null;
 					try {
-						currCmpRssfeeds = compatibilityParseHtml(
+						currCmpRet = compatibilityParseHtml(
 								mname, feed.getName(), feed.getUrl());
+						currCmpRssfeeds = (RssItunesFeedInfo[])currCmpRet[0];
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest(mname + " nextIx currCmpRssfeeds.length=" + nextIx + "," + currCmpRssfeeds.length);}
 						//#endif
@@ -578,7 +602,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 							j++) {
 						RssItunesFeedInfo subFeed = currRssfeeds[j];
 						//#ifdef DLOGGING
-						if (fineLoggable && !finestLoggable) {logger.fine(mname + " j,subFeed 1=" + j + "," + subFeed.getName() + "," + subFeed.getUrl());}
+						if (fineLoggable && !finestLoggable) {logger.fine(mname + " j,subFeed 1=" + j + "," + subFeed.getName() + "," + subFeed.getUrl() + "," + subFeed.getItems().length);}
 						//#endif
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest(mname + " j,subFeed 1=" + j + "," + subFeed.toString());}
@@ -587,7 +611,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 						String assertInfoSub = new String("nextIx,j,name,url=" + nextIx + "," + j + "," + feed.getName() + "," +  feed.getUrl() + ",[" + subFeed.getName() + "," + subCmpfeed.getName() + "]," +  subFeed.getUrl());
 						assertNotNull("Compatibility sub feeds must not be null " + assertInfoSub, subCmpfeed);
 						//#ifdef DLOGGING
-						if (fineLoggable && !finestLoggable) {logger.fine(mname + " j,subCmpfeed 1=" + j + "," + subCmpfeed.getName() + "," + subCmpfeed.getUrl());}
+						if (fineLoggable && !finestLoggable) {logger.fine(mname + " j,subCmpfeed 1=" + j + "," + subCmpfeed.getName() + "," + subCmpfeed.getUrl() + "," + subCmpfeed.getVecItems().size());}
 						//#endif
 						//#ifdef DLOGGING
 						if (finestLoggable) {logger.finest(mname + " j,subCmpfeed 1=" + j + "," + subCmpfeed.toString());}
@@ -610,7 +634,13 @@ implements Observer, net.yinlight.j2me.observable.Observer
 							subCmpfeed.setName("");
 						}
 						goNext = true;
-						assertTrue("Original sub feed must equal expected sub feed " + assertInfoSub, ((RssItunesFeed)subCmpfeed).equals(subFeed));
+						Object[] oret2 = super.cmpModLog(
+								"Original sub feed must equal expected sub feed " + assertInfoSub,
+								(RssItunesFeed)subCmpfeed, subFeed,
+							new Object[] {currCmpRet, currRet});
+						if (oret2[1] != null) {
+							throw (Throwable)oret2[1];
+						}
 						goNext = false;
 					}
 				} finally {
