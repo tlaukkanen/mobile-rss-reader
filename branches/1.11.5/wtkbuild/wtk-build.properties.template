@@ -41,6 +41,11 @@
 #-- IB 2011-01-26 1.11.5Dev16 Use -optimizationpasses to specify more than one (using 3 for this release) optimization passes.
 #-- IB 2011-01-27 1.11.5Dev16 Fix location of novice.txt file.
 #-- IB 2011-01-27 1.11.5Dev16 Changed branch to reflect 1.11.5.
+#-- IB 2011-03-07 1.11.5Dev17 Have tmp release in tmp directory/domain for testing.
+#-- IB 2011-03-07 1.11.5Dev17 Allow optional temporary distribution with temporary subdomain and directory path using wtktemporary.properties.template with yinlight.tmp.subdir, yinlight.tmp.subpath, and yinlight.subdomain.
+#-- IB 2011-03-12 1.11.5Dev17 Allow sourceforge project name to be somewhat more generic.
+#-- IB 2011-03-12 1.11.5Dev17 Use Netbeans WTK home.
+#-- IB 2011-03-13 1.11.5Dev17 Allow override of branch version.
 
 #windows.drive = C:
 windows.drive = 
@@ -108,11 +113,11 @@ svn.pgm = ${svn.path}svn${windows.ext}
 #wtk.home = C:/opt/WTK2.5.1
 #wtk.home = ${windows.drive}/WTK2.5.2_01
 #wtk.home = ${opt.tools}/WTK2.5.2${wtk252}
-wtk.home = ${windows.drive}${env.WTK_HOME}
+#wtk.home = ${windows.drive}${env.WTK_HOME}
 #For Netbeans
 #wtk.home = C:/opt/NETBEA~1.1/mobility8/WTK2.5.2
 #wtk.home = /usr/local/netbeans-6.7.1/mobility8/WTK2.5.2
-#wtk.home = ${env.NETBEANS_WTK_HOME}
+wtk.home = ${env.NETBEANS_WTK_HOME}
 
 #wtk.proguard.home = ${ext.drive}/mostdownloads/j2me/sourceforge/proguard/proguard4.2
 #wtk.proguard.home = ${windows.drive}/opt/tools/proguard/proguard4.2
@@ -164,11 +169,10 @@ logging.package = net.sf.jlogmicro.util.logging
 obfuscate.classes = ${midlet.class},${logging.package}.ConsoleHandler,${logging.package}.FormHandler,${logging.package}.RecStoreHandler,${logging.package}.SimpleFormatter
 original.project.info.url = http://www.substanceofcode.com
 yinlight.project.info.url = ${original.project.info.url}
-yinlight.rootdir = html/${src.module.name}/downloads
-yinlight.base.url = http://${src.module.name}.yinlight.net/downloads
-sourceforge.project = mobilerssreader
 sourceforge.project.first = m
-sourceforge.project.first2 = mo
+sourceforge.project.second = o
+sourceforge.project.first2 = ${sourceforge.project.first}${sourceforge.project.second}
+sourceforge.project = ${sourceforge.project.first2}bilerssreader
 sourceforge.rootdir = /home/frs/project/${sourceforge.project.first}/${sourceforge.project.first2}/${sourceforge.project}/${sourceforge.project}
 sourceforge.base.url = http://sourceforge.net/projects/${sourceforge.project}/files/${sourceforge.project}
 project.test.url = http://${sourceforge.project}.sourceforge.net/testdata
@@ -219,7 +223,8 @@ need.svn.preprocessed = true
 #svn.home = C:\\PROGRA~1\\COLLAB~1
 #svn.url =  https://${src.module.name}.googlecode.com/svn/trunk/
 svn.src =  ${src.module.name}
-svn.url =  http://${svn.src}.googlecode.com/svn/branches/1.11.5
+svn.branch.vers = 1.11.5
+svn.url =  http://${svn.src}.googlecode.com/svn/branches/${svn.branch.vers}
 svn.user =  ibuntonjr
 svn.pass = ${env.ibuntonjr_pass}
 #Need ti distribute the SVN dirs
