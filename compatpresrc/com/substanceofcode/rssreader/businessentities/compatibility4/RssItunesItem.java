@@ -43,6 +43,7 @@
 package com.substanceofcode.rssreader.businessentities.compatibility4;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesItemInfo;
+import com.substanceofcode.rssreader.businessentities.RssItunesInfo;
 import com.substanceofcode.rssreader.businessentities.RssItemInfo;
 import com.substanceofcode.utils.compatibility4.Base64;
 import com.substanceofcode.utils.MiscUtil;
@@ -68,7 +69,7 @@ import com.substanceofcode.testutil.console.TestLogUtil;
  * @version 1.1
  */
 public class RssItunesItem extends RssItem
-implements RssItunesItemInfo
+implements RssItunesItemInfo, RssItunesInfo
 {
     
 	// Make max summary same as max description (actual max is 50K)
@@ -382,10 +383,13 @@ implements RssItunesItemInfo
 			return result;
 		}
 		RssItunesItemInfo item = (RssItunesItemInfo)pitem;
-		if (!TestLogUtil.fieldEquals(item.isItunes(), m_itunes,
-			"m_itunes", logger, fineLoggable)) {
+
+		if ((item instanceof RssItunesInfo) &&
+			!TestLogUtil.fieldEquals(((RssItunesInfo)item).isItunes(),
+			m_itunes, "m_itunes", logger, fineLoggable)) {
 			result = false;
 		}
+
 		if (!TestLogUtil.fieldEquals(item.getAuthor(), m_author,
 			"m_author", logger, fineLoggable)) {
 			result = false;
