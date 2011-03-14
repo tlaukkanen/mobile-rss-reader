@@ -25,6 +25,7 @@
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-26 1.11.5Dev15 Use itemEquals to compare each item for testing and logging.
+ * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS items.
  */
 
 // Expand to define logging define
@@ -206,6 +207,10 @@ public class RssItem implements RssItemInfo {
 		return result;
 	}
 	//#endif
+
+    public Object clone() {
+		return new RssItem(this);
+	}
 
 }
 //#endif
