@@ -62,4 +62,16 @@ public class CauseException extends Exception {
         return (cause);
     }
 
+	public boolean equals(Exception exc) {
+		if (exc == null) {
+			return false;
+		} else if ((super.getMessage() != null) && (exc.getMessage() != null)) {
+			return super.getMessage().equals(exc.getMessage());
+		} else if ((super.getMessage() == null) && (exc.getMessage() == null)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 }
