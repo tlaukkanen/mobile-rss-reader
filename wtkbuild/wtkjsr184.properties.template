@@ -1,7 +1,8 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
 #-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
 #-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
-wtk.java3d.enabled = true
+#-- IB 2011-03-06 1.11.5Dev17 Use enabled .value to use smartlink.
+wtk.java3d.enabled.value = true
 DJSR184 = DJSR184
 file.prefix.jsr184 = ${sfile.prefix.jsr184}_
 PERMISSIONS_REQ.jsr184 = 
