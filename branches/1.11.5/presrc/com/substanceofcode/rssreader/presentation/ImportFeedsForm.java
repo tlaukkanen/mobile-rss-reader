@@ -57,6 +57,8 @@
  * IB 2011-01-12 1.11.5Alpha15 Pass rssFeeds to FeedListParser.
  * IB 2011-01-12 1.11.5Alpha15 After modifying/updating the feed, use old feed pointer with new feed pointer to update the feed.  If the old pointer does not match the current pointer, do not update as it means that the future background processing has updated the feed already. 
  * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-03-13 1.11.5Dev17 Parse and store feeds from FeedListParser in ImportFeedsForm.  Put new feeds into the booklist in the form code.
+ * IB 2011-03-13 1.11.5Dev17 Allow optional complete loading of feeds with ImportFeedsForm using FeedListParser.
 */
 // FIX check for blank url
 
@@ -154,10 +156,6 @@ implements
     static private byte[] m_importSave = null; // Import form save
     static private byte[] m_exportSave = null; // Export form save
 	private boolean     m_getFeedList = false;      // The noticy flag for list parsing
-	// The noticy flag for override existing feeds
-	private boolean     m_override = false;  // The noticy flag for override
-	private boolean     m_keepUsPwd = true;  // The noticy flag for override
-	private boolean     m_keepModGroup = true;  // The noticy flag for override
 	//#ifdef DMIDP20
     private boolean     m_parseBackground = false;
     private Observable  m_backGrListParser = null; // The currently selected RSS in background
@@ -173,6 +171,7 @@ implements
 	private ChoiceGroup m_importHTMLGroup;  // The import HTML redirect choice group
 	//#endif
 	private ChoiceGroup m_importOvrGroup; // The import override choice group
+	private ChoiceGroup m_importLoadGroup; // The import load choice group
 	//#ifdef DTESTUI
 	private Command     m_testImportCmd;      // Tet UI rss opml command
 	//#endif
@@ -271,6 +270,11 @@ implements
 					new String[] {"Don't override existing feeds.",
 					 "Override (replace) existing feeds."});
 		
+			m_importLoadGroup  = FeatureMgr.getAddChoiceGroup(this,
+					"Load feeds (optionl)",
+					new String[] {"Don't load feeds.", "Load modified feeds.",
+					 "Load all feeds."});
+		
 			//#ifdef DTESTUI
 			m_testImportCmd     = new Command("Test bookmarks imported", Command.SCREEN, 90);
 			super.addCommand( m_testImportCmd );
@@ -310,11 +314,7 @@ implements
 
 		LoadingForm loadForm = featureMgr.getLoadForm();
 		try {
-			addFeedLists(cfeedListParser,
-					m_addBkmrk,
-					m_appSettings.getMaximumItemCountInFeed(),
-					 m_override, m_keepUsPwd, m_keepModGroup, m_rssFeeds,
-					 m_bookmarkList, loadForm);
+			addFeedLists(cfeedListParser, m_addBkmrk, m_bookmarkList, loadForm);
 			if (loadForm.hasNotes() || loadForm.hasExc()) {
 				loadForm.recordFin();
 				loadForm.getFeatureMgr().showMe();
@@ -472,9 +472,11 @@ implements
 				String password = m_UrlPassword.getString();
 				boolean getFeedTitleList = m_importTitleGroup.isSelected(1);
 				boolean useFeedUrlList = m_importTitleGroup.isSelected(2);
-				m_override = m_importOvrGroup.isSelected(1);
-				m_keepUsPwd = m_importUsPwdGroup.getSelectedIndex() == 0;
-				m_keepModGroup = m_importModGroup.getSelectedIndex() == 0;
+				boolean override = m_importOvrGroup.isSelected(1);
+				boolean getAllUpdFeedList = m_importLoadGroup.isSelected(1);
+				boolean getAllFeedList = m_importLoadGroup.isSelected(2);
+				boolean keepUsPwd = m_importUsPwdGroup.getSelectedIndex() == 0;
+				boolean keepModGroup = m_importModGroup.getSelectedIndex() == 0;
 				//#ifdef DLOGGING
 				if (m_finestLoggable) {m_logger.finest("getFeedTitleList,useFeedUrlList=" + getFeedTitleList + "," + useFeedUrlList);}
 				if (m_finestLoggable) {m_logger.finest("selectedImportType=" + selectedImportType);}
@@ -517,8 +519,22 @@ implements
 								m_rssFeeds);
 						break;
 				}
+				boolean getTitleOnly;
+				if (getAllUpdFeedList || getAllFeedList) {
+					getTitleOnly = false;
+				} else {
+					getTitleOnly = getFeedTitleList;
+					getFeedTitleList = false;
+				}
+
+				clistParser.setKeepUsPwd(keepUsPwd);
+				clistParser.setKeepModGroup(keepModGroup);
+				clistParser.setGetTitleOnly(getTitleOnly);
 				clistParser.setGetFeedTitleList(getFeedTitleList);
 				clistParser.setUseFeedUrlList(useFeedUrlList);
+				clistParser.setGetAllFeedList(getAllFeedList);
+				clistParser.setGetAllUpdFeedList(getAllUpdFeedList);
+				clistParser.setOverride(override);
 				clistParser.setLoadForm(loadForm);
 				clistParser.setMaxItemCount(
 						m_appSettings.getMaximumItemCountInFeed());
@@ -636,21 +652,21 @@ implements
 
 	/** Add from feed list (from import). */
 	public static void addFeedLists(FeedListParser listParser,
-			int addBkmrk,
-			int maxItemCount, boolean override, boolean keepUsPwd,
-			boolean keepModGroup, RssFeedStore rssFeeds,
-			FeatureList bookmarkList, LoadingForm loadForm)
+			int addBkmrk, FeatureList bookmarkList, LoadingForm loadForm)
 	throws CauseException, Exception {
 		//#ifdef DLOGGING
 		Logger logger = Logger.getLogger("ImportFeedsForm");
 		// Feed list parsing is ready
-		logger.info("Feed list parsing is ready");
-		logger.finest("addFeedLists rssFeeds=" + rssFeeds);
+		logger.info("addFeedLists Feed list parsing is ready");
 		//#endif
 		if(!listParser.isSuccessfull()) {
 			throw listParser.getEx();
 		}
 		RssItunesFeed[] feeds = listParser.getFeeds();
+		boolean[] pres = listParser.getPres();
+		//#ifdef DLOGGING
+		logger.finest("addFeedLists feeds,pres=" + feeds + "," + pres);
+		//#endif
 		if (feeds.length == 0) {
 			loadForm.appendNote(
 					"No feeds found in file or file does not match requested " +
@@ -660,38 +676,11 @@ implements
 			String name = feeds[feedIndex].getName();
 			//#ifdef DTEST
 			//#ifdef DLOGGING
-			logger.info("Adding: " + name);
+			logger.info("addFeedLists Adding: " + name);
 			//#endif
 			//#endif
-			if((name != null) && (name.length()>0)) {
-				final boolean pres = rssFeeds.containsKey( name );
-				if(override || !pres) {
-
-					RssItunesFeed oldfeed;
-					if (pres) {
-						loadForm.appendNote(
-								"Overriding existing feed with the one from " +
-								"import feed name " + name);
-						oldfeed = rssFeeds.get(name);
-						if ((oldfeed != null) && (keepUsPwd || keepModGroup)) {
-							feeds[ feedIndex ].checkPresRead(keepModGroup,
-								oldfeed);
-						}
-					} else {
-						oldfeed = null;
-					}
-					rssFeeds.put( name, feeds[feedIndex], oldfeed );
-					if(!pres) {
-						bookmarkList.insert(addBkmrk++, name, null);
-					}
-				} else {
-					CauseException ce = new CauseException("Error:  Feed " +
-							"already exists with name " + name +
-							".  Existing feed not updated.  " +
-							"Use override in place to override an existing " +
-							"feed with an old feed with the same name.");
-					loadForm.addExc(ce.getMessage(), ce);
-				}
+			if((pres == null) || !pres[feedIndex]) {
+				bookmarkList.insert(addBkmrk++, name, null);
 			}
 		}
 	}
