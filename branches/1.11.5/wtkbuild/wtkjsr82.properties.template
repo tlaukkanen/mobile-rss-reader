@@ -2,8 +2,9 @@
 #-- IB 2010-09-28 1.11.5RC2 Allow versions with JSR-82.
 #-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
 #-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
+#-- IB 2011-03-06 1.11.5Dev17 Use enabled .value to use smartlink.
 lib.classpath = GASPBT.jar
-wtk.bluetooth.enabled = true
+wtk.bluetooth.enabled.value = true
 DJSR82 = DJSR82
 file.prefix.jsr82 = ${sfile.prefix.jsr82}_
 PERMISSIONS_REQ.jsr82 =
