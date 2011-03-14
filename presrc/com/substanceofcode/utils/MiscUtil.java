@@ -40,6 +40,12 @@
  * IB 2011-01-14 1.11.5Alpha15 Have methods to enable better logging.
  * IB 2011-01-24 1.11.5Dev16 Don't compile some code for internet link version.
  * IB 2011-01-24 1.11.5Dev16 Have future action request to end the app.
+ * IB 2011-02-01 1.11.5Dev17 Have split with character separator character.
+ * IB 2011-03-06 1.11.5Dev17 Have convVec to use for testing to convert from an object array to a Vector.
+ * IB 2011-03-06 1.11.5Dev17 Allow thread methods for non small memory releases.
+ * IB 2011-03-06 1.11.5Dev17 Have methods to convert from a vector to either a RssItem or RssItunesFeed array.
+ * IB 2011-03-06 1.11.5Dev17 Have mobility choice for open with method urlEncode.
+ * IB 2011-03-11 1.11.5Dev17 Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
  */
 
 // Expand to define MIDP define
@@ -48,6 +54,8 @@
 @DCLDCVERS@
 // Expand to define itunes define
 @DFULLVERSDEF@
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -70,8 +78,12 @@ import java.io.UnsupportedEncodingException;
 import javax.microedition.io.file.FileConnection;
 //#endif
 
-//#ifdef DMIDP20
+//#ifndef DSMALLMEM
 import com.substanceofcode.utils.CmdReceiver;
+//#endif
+//#ifdef DFULLVERS
+import com.substanceofcode.rssreader.businessentities.RssItem;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 //#endif
 //#ifdef DTEST
 import com.substanceofcode.rssreader.businessentities.RssItemInfo;
@@ -97,7 +109,7 @@ public class MiscUtil {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
             .toCharArray();
 
-	//#ifdef DMIDP20
+	//#ifndef DSMALLMEM
 	public final static Short SINIT_OBJ = new Short((short)0);
 	public final static Short SPAUSE_APP = new Short((short)1);
 	public final static Short SEXIT_APP = new Short((short)2);
@@ -135,7 +147,7 @@ public class MiscUtil {
 			//#else
 			Thread thread = new Thread(runnable);
 			//#endif
-			//#ifdef DMIDP20
+			//#ifndef DSMALLMEM
 			cthreads.put(thread, new Object[] {cname, runnable});
 			//#endif
 			return thread;
@@ -162,7 +174,7 @@ public class MiscUtil {
 		synchronized(MiscUtil.class) {
 		//#endif
 			StringBuffer tsb = new StringBuffer("Thread ");
-			//#ifdef DMIDP10
+			//#ifdef DSMALLMEM
 			return tsb.append(thread.hashCode()).append(",").append(
 					thread.toString()).toString();
 			//#else
@@ -188,7 +200,7 @@ public class MiscUtil {
 		//#endif
 	}
 
-	//#ifdef DMIDP20
+	//#ifndef DSMALLMEM
 	static public
 	//#ifdef DCLDCV10
 	synchronized
@@ -421,6 +433,34 @@ public class MiscUtil {
     }
     
     /**
+     * Split string into multiple strings
+     * @param original      Original string
+     * @param separator     Separator character in original string
+     * @return              Splitted string array
+     */
+    public static String[] split(String original, char separator) {
+        Vector nodes = new Vector();
+        
+        // Parse nodes into vector
+        int index = original.indexOf(separator);
+        while(index>=0) {
+            nodes.addElement( original.substring(0, index) );
+            original = original.substring(index+1);
+            index = original.indexOf(separator);
+        }
+        // Get the last node
+        nodes.addElement( original );
+        
+        // Create splitted string array
+		int nsize = nodes.size();
+        String[] result = new String[ nsize ];
+        if( nsize >0 ) {
+			nodes.copyInto(result);
+        }
+        return result;
+    }
+    
+    /**
      * Join strings into one string
      * @param originals      Original strings
      * @param joinStr        Join string
@@ -540,6 +580,78 @@ public class MiscUtil {
         }
     }
 	//#endif
+
+	/**
+	 * URL encode a string
+	 * Copyright 2006 Nokia Corporation
+	 * Created by: Ferenc Dosa Racz
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 *
+	 *     http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
+	 *
+	 */
+	/*
+	 * This code was first modified 01/27/2011
+	 */
+	//#ifdef DMIDP20
+	/**
+	 * Very simple url encoder - improve as need arises.
+	 * e.g. from 
+	 * "+plus &ampersand ,comma :colon =equal"
+	 * to 
+	 * "%2Bplus+%26ampersand+%2Ccomma+%3Acolon+%3Dequal"
+	 */
+	public static String urlEncode(String url) {
+		String rv = null;
+
+		if (url != null) {
+			StringBuffer sb = new StringBuffer();
+			char[] curl = url.toCharArray();
+
+			for (int i = 0; i < url.length(); ++i) {
+				int
+					c = curl[i];
+
+				if ((0x30 <= c && c <= 0x39) ||  // '0'-'9'
+						(0x41 <= c && c <= 0x5A) ||  // 'A'-'Z'
+						(0x61 <= c && c <= 0x7A)) {  // 'a'-'z'
+					sb.append((char)c);
+				} else if (c == 0x20) { // ' '
+					sb.append('+');
+				} else {
+					String
+						hex = Integer.toHexString(c);
+
+					if (hex.length() == 1) {
+						sb.append("%0");
+					} else {
+						sb.append('%');
+					}
+
+					sb.append(hex);
+				}
+			}
+
+			rv = sb.toString();
+		}
+
+		return rv;
+	} //
+
+	//#endif
+
+	static public String getSgmlUrl(String url) {
+		return MiscUtil.replace(url, "&amp;", "&");
+	}
 
 	static public boolean cmpDateStr(Date date1, Date date2) {
 		return (((date1 == null) && (date2 == null)) ||
@@ -804,6 +916,46 @@ public class MiscUtil {
 		}
 		longQuickSort(a, indexes, 0, aend);
 	}
+	//#endif
+
+	//#ifdef DTEST
+	static public Vector convVec(Object[] oelems) {
+		int olen = oelems.length;
+		Vector velems = new Vector(olen);
+		for (int i = 0;i < olen; i++) {
+			velems.addElement(oelems[i]);
+		}
+		return velems;
+	}
+
+	static public RssItemInfo[] getVecrItemf(final Vector vobjs) {
+		int vlen;
+		RssItemInfo[] objs = new RssItemInfo[vlen = vobjs.size()];
+		if (vlen > 0) {
+			vobjs.copyInto(objs);
+		}
+        return objs;
+    }
+	//#endif
+
+	//#ifdef DFULLVERS
+	static public RssItem[] getVecrItem(final Vector vobjs) {
+		int vlen;
+		RssItem[] objs = new RssItem[vlen = vobjs.size()];
+		if (vlen > 0) {
+			vobjs.copyInto(objs);
+		}
+        return objs;
+    }
+
+	static public RssItunesFeed[] getVecrFeed(final Vector vobjs) {
+		int vlen;
+		RssItunesFeed[] objs = new RssItunesFeed[vlen = vobjs.size()];
+		if (vlen > 0) {
+			vobjs.copyInto(objs);
+		}
+        return objs;
+    }
 	//#endif
 
 }
