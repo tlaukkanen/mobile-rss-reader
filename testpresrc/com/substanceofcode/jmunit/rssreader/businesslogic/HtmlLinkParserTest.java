@@ -28,6 +28,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
+ * IB 2011-03-07 1.11.5Dev17 Need () after Thread.yield.
  */
 
 // Expand to define memory size define
@@ -143,7 +144,7 @@ implements Observer
 			}
 			//#else
 			synchronized(this) {
-				Thread.yield;
+				Thread.yield();
 				Thread.sleep(5000L);
 			}
 			htmlParser.join();
