@@ -47,6 +47,14 @@
  * IB 2011-01-11 1.11.5Dev15 Have special reverseItems to change sort order.
  * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
  * IB 2011-01-12 1.11.5Alpha15 Maintain only one vector for sorted items.
+ * IB 2011-01-31 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-02-05 1.11.5Dev17 Allow regular and up memory devices to use bookmark name in title.  
+ * IB 2011-03-06 1.11.5Dev17 Use RssItem instead of RssItunesItem to allow future difference in the two.
+ * IB 2011-02-07 1.11.5Dev17 More logging.
+ * IB 2011-03-07 1.11.5Dev17 Use getCmdAdd to have long labels for the commands.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
+ * IB 2011-03-06 1.11.5Dev17 Use utility methods to convert from Vector to arrays.
+ * IB 2011-03-06 1.11.5Dev17 Make sure midlet is not null for tests and future combination with other programs.
 */
 
 // Expand to define MIDP define
@@ -55,6 +63,8 @@
 //#define DNOITUNES
 // Expand to define logging define
 //#define DNOLOGGING
+// Expand to define test define
+//#define DNOTEST
 // Expand to define test ui define
 //#define DNOTESTUI
 // Expand to define full vers define
@@ -88,7 +98,7 @@ import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
-import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+import com.substanceofcode.rssreader.businessentities.RssItem;
 import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.MiscUtil;
 //#ifdef DLOGGING
@@ -146,7 +156,7 @@ public class AllNewsList extends FeatureList
     protected Vector      m_itemOldFeeds = new Vector();
 	//#endif
     protected Vector      m_allItems = new Vector();
-    protected RssItunesItem m_item;
+    protected RssItem m_item;
     volatile protected RssItunesFeed m_feed;
 	volatile protected RssItunesFeed m_oldFeed;          // True if Itunes is enabled
 
@@ -174,47 +184,38 @@ public class AllNewsList extends FeatureList
 		m_bookmarkList = bookmarkList;
 		m_rssFeeds = rssFeeds;
 		m_unreadImage = unreadImage;
-		RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
 		//#ifdef DMIDP10
 //@		m_oldFeed = null;
 		//#endif
-		m_openHeaderCmd     = new Command("Open", Command.SCREEN, 5);
-		super.addCommand(m_openHeaderCmd);
+		m_openHeaderCmd     = FeatureMgr.getCmdAdd(this, "Open", null,
+				Command.SCREEN, 5);
 		super.addCommand(FeatureMgr.m_backCommand);
-		m_sortUnreadItemsCmd = new Command("Unread date sorted",
-										   Command.SCREEN, priority++);
-		m_sortReadItemsCmd = new Command("Read date sorted",
-										   Command.SCREEN, priority++);
-		m_sortUnreadFeedsCmd = new Command("Unread feed sorted",
-										   Command.SCREEN, priority++);
-		m_sortReadFeedsCmd = new Command("Read feed sorted",
-										   Command.SCREEN, priority++);
-		m_sortAllDateCmd = new Command("All date sorted",
-										   Command.SCREEN, priority++);
-		m_sortAllFeedsCmd = new Command("All feed sorted",
-										   Command.SCREEN, priority++);
-		m_markReadCmd = new Command("Mark read", Command.SCREEN, priority++);
-		m_markUnReadCmd = new Command("Mark unread", Command.SCREEN, priority++);
+		m_sortUnreadItemsCmd = FeatureMgr.getCmdAdd(this, "Unread date",
+				"Unread date sorted", Command.SCREEN, priority++);
+		m_sortReadItemsCmd = FeatureMgr.getCmdAdd(this, "Read date",
+				"Read date sorted", Command.SCREEN, priority++);
+		m_sortUnreadFeedsCmd = FeatureMgr.getCmdAdd(this, "Unread feed",
+				"Unread feed sorted", Command.SCREEN, priority++);
+		m_sortReadFeedsCmd = FeatureMgr.getCmdAdd(this, "Read feed",
+				"Read feed sorted", Command.SCREEN, priority++);
+		m_sortAllDateCmd = FeatureMgr.getCmdAdd(this, "All date",
+				"All date sorted", Command.SCREEN, priority++);
+		m_sortAllFeedsCmd = FeatureMgr.getCmdAdd(this, "All feed",
+				"All feed sorted", Command.SCREEN, priority++);
+		m_markReadCmd = FeatureMgr.getCmdAdd(this, "Mark read",
+				null, Command.SCREEN, priority++);
+		m_markUnReadCmd = FeatureMgr.getCmdAdd(this, "Mark unread",
+				null, Command.SCREEN, priority++);
 		m_sortDesc  = !(this instanceof HeaderList);
-		m_directionCmd = new Command(
+		m_directionCmd = FeatureMgr.getCmdAdd(this, 
+				m_sortDesc ? "Ascending" : "Descending",
 				m_sortDesc ? "Sort ascending" : "Sort descending", Command.SCREEN, 100);
 		//#ifdef DLOGGING
 //@		if (m_finestLoggable) {m_logger.finest("Constructor m_sortDesc,m_directionCmd=" + m_sortDesc + "," + FeatureMgr.logCmd(m_directionCmd));}
 		//#endif
-        super.addCommand(m_sortUnreadItemsCmd);
-        super.addCommand(m_sortReadItemsCmd);
-        super.addCommand(m_sortUnreadFeedsCmd);
-        super.addCommand(m_sortReadFeedsCmd);
-        super.addCommand(m_sortAllDateCmd);
-        super.addCommand(m_sortAllFeedsCmd);
-        super.addCommand(m_markReadCmd);
-        super.addCommand(m_markUnReadCmd);
-        super.addCommand(m_directionCmd);
 		//#ifdef DTESTUI
-//@		m_testNewsCmd        = new Command("Test news/items", Command.SCREEN, 11);
-		//#endif
-		//#ifdef DTESTUI
-//@        super.addCommand(m_testNewsCmd);
+//@		m_testNewsCmd        = FeatureMgr.getCmdAdd(this, "Test news/items", null,
+//@				Command.SCREEN, 11);
 		//#endif
 	}
 	
@@ -245,13 +246,21 @@ public class AllNewsList extends FeatureList
 			
 				final RssItunesFeed feed = (RssItunesFeed)rssFeeds.get(
 						bookmarkList.getString(ic));
-				final Vector vitems = feed.getItems();
-				if( vitems.size()>0 ) {
+				//#ifdef DTEST
+//@				final RssItem[] gitems = (RssItem[])feed.getItems();
+				//#else
+				final RssItem[] gitems = feed.getItems();
+				//#endif
+				final int ilen = gitems.length;
+				//#ifdef DLOGGING
+//@				if (m_finestLoggable) {m_logger.finest("ic,feed.getName(),ilen=" + ic + "," + feed.getName() + "," + ilen);}
+				//#endif
+				if (ilen > 0) {
 					/**
 					 * Show currently selected RSS feed
 					 * headers without updating them
 					 */
-					fillVectors( feed, vitems );
+					fillVectors( feed, gitems );
 				}
 			}
 		}
@@ -267,15 +276,14 @@ public class AllNewsList extends FeatureList
 	}
 
     /** Fill RSS item vectors */
-    private void fillVectors( final RssItunesFeed feed, final Vector vitems ) {
-        final int itemLen = vitems.size();
+    private void fillVectors( final RssItunesFeed feed, RssItem[] aitems) {
+        final int itemLen = aitems.length;
 		//#ifdef DLOGGING
 //@		if (m_finestLoggable) {m_logger.finest("fillVectors itemLen=" + itemLen);}
 		//#endif
-		RssItunesItem[] aitems = new RssItunesItem[itemLen];
-		vitems.copyInto(aitems);
-		for(int i=0; i < itemLen; i++){
-			final RssItunesItem r = aitems[i];
+
+		for(int i = 0; i < itemLen; i++){
+			final RssItem r = aitems[i];
 			m_allItems.addElement(r);
 			m_itemFeeds.addElement(feed);
 			//#ifndef DMIDP10
@@ -310,23 +318,23 @@ public class AllNewsList extends FeatureList
 //@		}
 		//#endif
 		final int slen = sortedItems.size();
-		RssItunesItem[] sitems = new RssItunesItem[slen];
+		RssItem[] sitems = new RssItem[slen];
 		sortedItems.copyInto(sitems);
 		RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
-		//#ifdef DMIDP20
-		final boolean addName = midlet.getSettings().getBookmarkNameNews();
+		//#ifndef DSMALLMEM
+		final boolean addName = (midlet != null) &&
+			midlet.getSettings().getBookmarkNameNews();
 		RssItunesFeed[] sfeeds = null;
 		if (addName) {
-			sfeeds = new RssItunesFeed[slen];
-			m_itemFeeds.copyInto(sfeeds);
+			sfeeds = MiscUtil.getVecrFeed(m_itemFeeds);
 		}
 		//#endif
 		for( int ic = 0; ic < slen; ic++){
 			String text = sitems[ic].getTitle();
-			if (text.length() == 0) {
+			if ((text.length() == 0) && (midlet != null)) {
 				text = midlet.getItemDescription(sitems[ic]);
 			}
-			//#ifdef DMIDP20
+			//#ifndef DSMALLMEM
 			if (addName) {
 				text = "[" + sfeeds[ic].getName() + "] " + text;
 			}
@@ -354,7 +362,7 @@ public class AllNewsList extends FeatureList
 			selIdx = 0;
 		}
 		if (m_showAll) {
-			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+			m_item = (RssItem)m_allItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
 			//#ifndef DMIDP10
 			m_oldFeed = (RssItunesFeed)m_itemOldFeeds.elementAt(selIdx);
@@ -369,7 +377,7 @@ public class AllNewsList extends FeatureList
 			} else {
 				super.setSelectedIndex(0, true);
 			}
-			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+			m_item = (RssItem)m_allItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
 			//#ifndef DMIDP10
 			m_oldFeed = (RssItunesFeed)m_itemOldFeeds.elementAt(selIdx);
@@ -383,7 +391,7 @@ public class AllNewsList extends FeatureList
 			}
 			updTitle();
 		} else {
-			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+			m_item = (RssItem)m_allItems.elementAt(selIdx);
 			m_feed = (RssItunesFeed)m_itemFeeds.elementAt(selIdx);
 			//#ifndef DMIDP10
 			m_oldFeed = (RssItunesFeed)m_itemOldFeeds.elementAt(selIdx);
@@ -414,7 +422,7 @@ public class AllNewsList extends FeatureList
 			selIdx = 0;
 		}
 		if (m_showAll) {
-			m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+			m_item = (RssItem)m_allItems.elementAt(selIdx);
 			if (m_unreadImage != null) {
 				if (!markUnread && m_item.isUnreadItem()) {
 					super.set(selIdx, super.getString(selIdx), null);
@@ -436,10 +444,10 @@ public class AllNewsList extends FeatureList
 					super.setSelectedIndex(selIdx - 1, true);
 				}
 				if (m_showUnread) {
-					m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+					m_item = (RssItem)m_allItems.elementAt(selIdx);
 					m_allItems.removeElementAt(selIdx);
 				} else {
-					m_item = (RssItunesItem)m_allItems.elementAt(selIdx);
+					m_item = (RssItem)m_allItems.elementAt(selIdx);
 					m_allItems.removeElementAt(selIdx);
 				}
 				m_item.setUnreadItem(markUnread);
@@ -544,7 +552,7 @@ public class AllNewsList extends FeatureList
 //@				if (m_itemNext && (m_newsIndex >= 0) && m_testNews &&
 //@					(m_newsIndex < super.size())) {
 //@					RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
-//@					if (midlet.isItemForm()) {
+//@					if ((midlet != null) && midlet.isItemForm()) {
 //@						m_itemNext = false;
 //@						m_newsNext = true;
 //@						midlet.backFrItemForm();
@@ -660,10 +668,8 @@ public class AllNewsList extends FeatureList
 		//#ifndef DMIDP10
 		Vector voldFeedUnsorted = new Vector(m_itemOldFeeds.size());
 		//#endif
-		RssItunesItem[] uitems = new RssItunesItem[unsortedItems.size()];
-		unsortedItems.copyInto(uitems);
-		RssItunesFeed[] ufeeds = new RssItunesFeed[m_itemFeeds.size()];
-		m_itemFeeds.copyInto(ufeeds);
+		RssItem[] uitems = MiscUtil.getVecrItem(unsortedItems);
+		RssItunesFeed[] ufeeds = MiscUtil.getVecrFeed(m_itemFeeds);
 		//#ifndef DMIDP10
 		RssItunesFeed[] uoldFeeds = new RssItunesFeed[m_itemOldFeeds.size()];
 		m_itemOldFeeds.copyInto(uoldFeeds);
@@ -712,7 +718,7 @@ public class AllNewsList extends FeatureList
 			//#endif
 		}
 		// Save memory by making null
-		uitems = (RssItunesItem[])nullPtr;
+		uitems = (RssItem[])nullPtr;
 		ufeeds = (RssItunesFeed[])nullPtr;
 		//#ifndef DMIDP10
 		uoldFeeds = (RssItunesFeed[])nullPtr;
@@ -736,7 +742,7 @@ public class AllNewsList extends FeatureList
 //@		loadForm.append(gauge);
 //@		gcnt = 0;
 		//#endif
-		uitems = new RssItunesItem[kc];
+		uitems = new RssItem[kc];
 		vunsorted.copyInto(uitems);
 		// Save memory by making null
 		vunsorted = (Vector)nullPtr;
@@ -766,15 +772,14 @@ public class AllNewsList extends FeatureList
 			//#endif
 		}
 		// Save memory by making null
-		uitems = (RssItunesItem[])nullPtr;
+		uitems = (RssItem[])nullPtr;
 		//#ifdef DLARGEMEM
 //@		gauge.setValue(diffDelta + 1);
 //@		gauge = new Gauge("After sorting 2...", false, diffDelta + 1, 0);
 //@		loadForm.append(gauge);
 //@		gcnt = 0;
 		//#endif
-		RssItunesItem[] sitems = new RssItunesItem[vsorted.size()];
-		vsorted.copyInto(sitems);
+		RssItem[] sitems = MiscUtil.getVecrItem(vsorted);
 		// Save memory by making null
 		vsorted = (Vector)nullPtr;
 		unsortedItems.removeAllElements();
@@ -797,13 +802,11 @@ public class AllNewsList extends FeatureList
 //@		loadForm.append(gauge);
 //@		gcnt = 0;
 		//#endif
-		RssItunesFeed[] sfeeds = new RssItunesFeed[vfeedSorted.size()];
-		vfeedSorted.copyInto(sfeeds);
+		RssItunesFeed[] sfeeds = MiscUtil.getVecrFeed(vfeedSorted);
 		// Save memory by making null
 		vfeedSorted = (Vector)nullPtr;
 		//#ifndef DMIDP10
-		RssItunesFeed[] soldFeeds = new RssItunesFeed[voldFeedSorted.size()];
-		voldFeedSorted.copyInto(soldFeeds);
+		RssItunesFeed[] soldFeeds = MiscUtil.getVecrFeed(voldFeedSorted);
 		// Save memory by making null
 		voldFeedSorted = (Vector)nullPtr;
 		//#endif
@@ -831,7 +834,7 @@ public class AllNewsList extends FeatureList
 	private void reverseItems(final Vector unsortedItems) {
 		final int ulen = unsortedItems.size();
 		final int flen = m_itemFeeds.size();
-		RssItunesItem[] items = new RssItunesItem[ulen];
+		RssItem[] items = new RssItem[ulen];
 		unsortedItems.copyInto(items);
 		RssItunesFeed[] feeds = new RssItunesFeed[flen];
 		m_itemFeeds.copyInto(feeds);
@@ -920,16 +923,18 @@ public class AllNewsList extends FeatureList
 						super.removeCommand(m_directionCmd);
 						if (m_sortDesc) {
 							m_sortDesc = false;
-							m_directionCmd = new Command("Sort descending", Command.SCREEN, 100);
+							m_directionCmd = FeatureMgr.getCmdAdd(this,
+									"Descending", "Sort descending",
+									Command.SCREEN, 100);
 						} else {
 							m_sortDesc = true;
-							m_directionCmd = new Command("Sort ascending", Command.SCREEN, 100);
+							m_directionCmd = FeatureMgr.getCmdAdd(this,
+									"Ascending", "Sort ascending", Command.SCREEN, 100);
 						}
 						m_sort = true;
 						//#ifdef DLOGGING
 //@						if (m_finestLoggable) {m_logger.finest("Constructor m_sort,m_sortDesc,m_directionCmd=" + m_sort + "," + m_sortDesc + "," + FeatureMgr.logCmd(m_directionCmd));}
 						//#endif
-						super.addCommand(m_directionCmd);
 					}
 				}
 			/** Get back to RSS feed bookmarks */
@@ -943,9 +948,11 @@ public class AllNewsList extends FeatureList
 //@				}
 				//#endif
 				super.featureMgr.setBackground(false);
-				RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
 				super.featureMgr.getLoadForm().replaceRef(this, null);
-				midlet.showBookmarkList();
+				RssReaderMIDlet midlet;
+				if ((midlet = FeatureMgr.getRssMidlet()) != null) {
+					midlet.showBookmarkList();
+				}
 
 				//#ifdef DTESTUI
 //@				/** Indicate that we want to test the headers/items.  */
