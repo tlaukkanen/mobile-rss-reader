@@ -27,10 +27,16 @@
  * IB 2010-03-14 1.11.5RC2 Code cleanup.
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-31 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-01-31 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
+ * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS feeds.
+ * IB 2011-03-13 1.11.5Dev17 Have adjustFields for compatibility to change fields that are time sensitive to get compatibility compares to match.
 */
 
 // Expand to define test define
 //#define DNOTEST
+// Expand to define compatibility
+//#define DNOCOMPAT
 //#ifdef DTEST
 //@package com.substanceofcode.rssreader.businessentities;
 //@
@@ -78,17 +84,30 @@
 //@
 //@    /** Return record store string for feed only.  This excludes items which
 //@	    are put into store string by RssItunesFeed.  */
-//@    String getStoreString(boolean serializeItems, boolean encoded);
+//@    public String getStoreString(final boolean saveHdr,
+//@			final boolean serializeItems, final boolean encoded);
 //@
 //@	/** Compare feed to an existing feed.  **/
 //@	boolean equals(RssFeedInfo feed);
 //@    
 //@    /** Return RSS feed items */
-//@    Vector getItems();
+	//#ifdef DTEST
+//@	public RssItemInfo[] getItems();
+	//#else
+//@	public RssItem[] getItems();
+	//#endif
 //@    
 //@    /** Set items */
-//@    void setItems(Vector items);
+	//#ifdef DTEST
+//@	public void setItems(RssItemInfo[] items);
+	//#else
+//@	public void setItems(RssItem[] items);
+	//#endif
 //@    
+//@	public Vector getVecItems();
+//@
+//@	public void setVecItems(Vector vtems);
+//@
 //@    String getLink();
 //@
 //@    void setLink(String link);
@@ -98,6 +117,12 @@
 //@    Date getDate();
 //@
 //@    String toString();
+//@
+//@    Object clone();
+//@
+	//#ifdef DCOMPATIBILITY
+//@	boolean adjustFields();
+	//#endif
 //@
 //@}
 //#endif
