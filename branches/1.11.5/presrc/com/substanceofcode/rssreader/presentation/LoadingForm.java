@@ -39,6 +39,7 @@
  * IB 2011-01-22 1.11.5Alpha15 Use main display from FeatureMgr; thus, it is not needed as a parameter.
  * IB 2011-01-11 1.11.5Dev15 Use super.featureMgr instead of featureMgr.
  * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-03-06 1.11.5Dev17 Only use thread utils if not small memory.
  */
 
 // Expand to define MIDP define
@@ -323,7 +324,7 @@ final public class LoadingForm extends FeatureForm
 				}
 			}
 			if (!showErrsOnly) {
-				//#ifdef DMIDP20
+				//#ifndef DSMALLMEM
 				super.append("Current threads:\n");
 				String[] threadInfo = MiscUtil.getDispThreads();
 				for (int ic = 0; ic < threadInfo.length; ic++) {
