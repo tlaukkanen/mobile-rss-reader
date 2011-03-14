@@ -69,7 +69,6 @@ phoneme.home = ${ext.drive}/mostdownloads/j2me/phoneme.dev.java.net__downloads_p
 #For phoneMe Windows and Linux
 #wtk.midpapi = ${phoneme.home}/classes
 wtk.encoding = UTF-8
-#wtk.optionalpda.enabled = false
 midlet.name = RssReaderMIDlet
 midlet.class = com.substanceofcode.rssreader.presentation.${midlet.name}
 logging.package = net.sf.jlogmicro.util.logging
