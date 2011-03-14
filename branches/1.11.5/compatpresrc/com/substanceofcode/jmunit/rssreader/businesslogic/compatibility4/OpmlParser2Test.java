@@ -55,6 +55,7 @@ import java.util.Date;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
 import com.substanceofcode.rssreader.businessentities.RssFeedStore;
+import com.substanceofcode.jmunit.rssreader.businesslogic.RssCompFeeds;
 import com.substanceofcode.utils.compatibility4.CauseException;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.RssFeedParser;
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFeed;
@@ -69,8 +70,8 @@ import com.substanceofcode.rssreader.businesslogic.compatibility4.HTMLAutoLinkPa
 import com.substanceofcode.rssreader.businesslogic.compatibility4.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.LineByLineParser;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.compatibility4.Observer;
-import net.eiroca.j2me.observable.compatibility4.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -86,7 +87,7 @@ import net.sf.jlogmicro.util.logging.Level;
    */
 final public class OpmlParser2Test extends BaseTestCase
 //#ifdef DMIDP20
-implements Observer, net.yinlight.j2me.observable.Observer
+implements Observer
 //#endif
 {
 
@@ -132,15 +133,11 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 		ready = true;
 		synchronized(this) {
 			super.notifyAll();
 		}
-	}
-
-	public void changed(net.yinlight.j2me.observable.Observable observable, Object arg) {
-		ready = true;
 	}
 
 	public boolean isReady() {
@@ -438,7 +435,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					// Workaround
 					Object[] oret = super.cmpModLog(
 							"Original feed must equal expected feed " + assertInfo,
-							(RssItunesFeed)cmpfeed, feed);
+							(RssItunesFeed)cmpfeed, feed, null);
 					if (oret[1] != null) {
 						throw (Throwable)oret[1];
 					}
@@ -546,7 +543,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 						Object[] oret2 = super.cmpModLog(
 								"Original sub feed must equal expected sub " +
 								"feed " + assertInfoSub,
-								subCmpfeed, subFeed);
+								subCmpfeed, subFeed, null);
 						if (oret[1] != null) {
 							throw (Throwable)oret[1];
 						}
