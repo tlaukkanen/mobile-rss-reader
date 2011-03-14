@@ -58,6 +58,8 @@
  * IB 2010-01-01 1.11.5Dev15 Use featureMgr instead of getFeatureMgr().
  * IB 2011-01-11 1.11.5Dev15 Use super.featureMgr instead of featureMgr.
  * IB 2011-01-26 1.11.5Dev16 Use FeatureMgr.getCmdAdd to create a command and add command at the same time.
+ * IB 2011-03-06 1.11.5Dev17 Only use thread utils if MIDP 2.0.
+ * IB 2011-03-07 1.11.5Dev17 Optionally use long command label.
 */
 
 // Expand to define MIDP define
@@ -157,8 +159,8 @@ final public class KFileSelectorImpl
 
 		FILE_SEPARATOR = (String)FeatureMgr.getSysProperty(
 				"file.separator", "/", "Unable to get file.separator", null)[0];
-		cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", Command.CANCEL, 2);
-		openCommand = FeatureMgr.getCmdAdd(this, "Open", Command.ITEM, 4);
+		cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", null, Command.CANCEL, 2);
+		openCommand = FeatureMgr.getCmdAdd(this, "Open", null, Command.ITEM, 4);
 		selectCommand = null;
 		//#ifdef DTEST
 		try {
@@ -204,8 +206,8 @@ final public class KFileSelectorImpl
 		//#endif
 
 		if (selectDir) {
-			selectCommand = FeatureMgr.getCmdAdd(this, "Select", Command.ITEM,
-					5);
+			selectCommand = FeatureMgr.getCmdAdd(this, "Select", "Select dir/file",
+					Command.ITEM, 5);
 		}
 		super.setSelectCommand(openCommand);
 
@@ -910,7 +912,9 @@ implements Runnable
 	/* Complete the Op when we run if we have a target.  */
 	public void run() {
 		
+		//#ifdef DMIDP20
 		try {
+		//#endif
 			if (null != target) {
 				
 				target.doNotifyOpComplete();
