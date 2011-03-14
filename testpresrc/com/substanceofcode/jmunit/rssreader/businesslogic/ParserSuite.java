@@ -50,9 +50,6 @@ final public class ParserSuite extends TestSuite {
 
 	public ParserSuite() {
 		super("ParserSuite");
-		//#ifdef DCOMPATIBILITY
-		add(new com.substanceofcode.jmunit.rssreader.businesslogic.FeedListParserSuite());
-		//#endif
 		add(new RssFeedParserSuite());
 		add(new FeedListParserSuite());
 	}
