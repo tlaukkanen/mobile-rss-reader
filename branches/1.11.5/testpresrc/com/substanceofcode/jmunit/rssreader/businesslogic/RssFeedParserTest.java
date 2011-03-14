@@ -70,12 +70,12 @@ implements Observer
 	private boolean ready = false;
 
 	public RssFeedParserTest() {
-		super(3, "RssFeedParserTest");
+		super(4, "RssFeedParserTest");
 	}
 
 	public void test(int testNumber) throws Throwable {
 		switch (testNumber) {
-			case 0:
+			case 3: //undo 0:
 				testFeedParse1();
 				break;
 			case 1:
@@ -83,6 +83,9 @@ implements Observer
 				break;
 			case 2:
 				testFeedParse3();
+				break;
+			case 0: // UNDO 3:
+				testFeedParse4();
 				break;
 			default:
 				Exception e = new Exception(
@@ -138,6 +141,19 @@ implements Observer
 		String mname = "testFeedParse3";
 		RssItunesFeed feed = new RssItunesFeed(
 			"test3", "jar:///rss-1252.xml", "", "");
+		RssItunesFeed cmfeed = (RssItunesFeed)feed.clone();
+		cmfeed.modifyItunes(
+			true, "title2", "description2", "language2", "author2", "subtitle2",
+					"summary2", RssItunesItem.convExplicit("clean"));
+		feedParserTestSub(mname, feed, cmfeed, false, 20);
+		feedParserTestSub(mname, feed, cmfeed, true, 20);
+	}
+
+	/* Test parse Itunes atom. */
+	public void testFeedParse4() throws Throwable {
+		String mname = "testFeedParse4";
+		RssItunesFeed feed = new RssItunesFeed(
+			"test4", "jar:///atom-itunes1.xml", "", "");
 		RssItunesFeed cmfeed = (RssItunesFeed)feed.clone();
 		cmfeed.modifyItunes(
 			true, "title2", "description2", "language2", "author2", "subtitle2",
