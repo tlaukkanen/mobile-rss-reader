@@ -24,6 +24,7 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-03-17 1.11.5Dev17 If item date has an error, save the string value ass errDate.
  */
 
 // Expand to define test define
@@ -80,6 +81,7 @@ public class RssFormatParser implements SgmlFormatParser {
 	private String m_title = "";
 	private String m_author = "";
 	private String m_description = "";
+	private String m_firstLink = "";
 	private String m_link = "";
 	private String m_language = "";
 	private String m_date = "";
@@ -90,11 +92,14 @@ public class RssFormatParser implements SgmlFormatParser {
 			            int maxItemCount, boolean getTitleOnly)
 	throws IOException {
         
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("parse cfeed.getName(),cfeed.getUrl(),maxItemCount,getTitleOnly=" + cfeed.getName() + "," + cfeed.getUrl() + "," + + maxItemCount + "," + getTitleOnly);}
+		//#endif
         Vector items = new Vector();
 		m_extParser.parseNamespaces(parser);
 		m_hasExt = m_extParser.isHasExt();
 		RssItunesFeedInfo feed = cfeed;
-        feed.setItems(items);
+        feed.setVecItems(items);
         
         /** Parse to first entry element */
         while(!parser.getName().equals("item")) {
@@ -149,6 +154,9 @@ public class RssFormatParser implements SgmlFormatParser {
             }
         }
 		feed.setLink(m_link);
+		if (m_firstLink.length() > 0) {
+			((RssFeed)feed).setFirstLink(m_firstLink);
+		}
 		if (m_date.length() > 0) {
 			Date pubDate = parseRssDate(m_date);
 			if (pubDate == null) {
@@ -265,6 +273,7 @@ public class RssFormatParser implements SgmlFormatParser {
 		m_title = "";
 		m_author = "";
 		m_description = "";
+		m_firstLink = "";
 		m_link = "";
 		m_language = "";
 		m_date = "";
@@ -312,6 +321,9 @@ public class RssFormatParser implements SgmlFormatParser {
 				if( elementName.equals("link") ) {
 					m_link = parser.getText();
 					m_link = MiscUtil.removeHtml( m_link );
+					if ((m_link.length() > 0) && (m_firstLink.length() == 0)) {
+						m_firstLink = m_link;
+					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("m_link=" + m_link);}
 					//#endif
