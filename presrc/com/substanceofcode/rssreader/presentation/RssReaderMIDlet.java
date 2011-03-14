@@ -140,6 +140,15 @@
  * IB 2011-01-18 1.11.5Dev16 Use initForms (plural in RssReaderMIDlet) to initialize the settings form.  This will handle showing of about/license.
  * IB 2011-01-24 1.11.5Dev16 Use setSelectedIndex after initializing bookmarks to make sure selection is at the top of the list.
  * IB 2011-01-24 1.11.5Dev16 If unconditional=false is used for destroyApp, throw MIDletStateChangeException and start or continue saving.
+ * IB 2010-11-22 1.11.5Dev14 Have open mobilizer and no pic mobilizer for item and bookmark details forms.
+ * IB 2011-01-31 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-02-02 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
+ * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
+ * IB 2011-03-06 1.11.5Dev17 Use RssItem instead of RssItunesItem to allow future difference in the two.
+ * IB 2011-03-06 1.11.5Dev17 Standardize var names.
+ * IB 2011-03-06 1.11.5Dev17 Have long command name option for some commands.
+ * IB 2011-03-06 1.11.5Dev17 Synchronize access to m_platformURL.
+ * IB 2011-03-13 1.11.5Dev17 Parse and store feeds from FeedListParser in ImportFeedsForm.  Put new feeds into the booklist in the form code.
 */
 
 // Expand to define test define
@@ -151,7 +160,7 @@
 // Expand to define DJSR75 define
 @DJSR75@
 // Expand to define itunes define
-@DITUNESDEF@
+@DSMARTPHONEDEF@
 // Expand to define full vers define
 @DFULLVERSDEF@
 // Expand to define full vers define
@@ -175,6 +184,7 @@ import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssFeed;
 import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+import com.substanceofcode.rssreader.businessentities.RssItem;
 //#endif
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 //#ifdef DFULLVERS
@@ -190,12 +200,15 @@ import com.substanceofcode.utils.Settings;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.utils.CauseRecStoreException;
-import java.util.*;
+import java.util.Date;
+import java.util.Vector;
+import java.util.Enumeration;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.microedition.midlet.*;
+import javax.microedition.midlet.MIDlet;
+import javax.microedition.midlet.MIDletStateChangeException;
 import javax.microedition.io.ConnectionNotFoundException;
-import javax.microedition.rms.*;
+import javax.microedition.rms.RecordStoreFullException;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
@@ -275,6 +288,11 @@ implements
     private RssFeedStore m_rssFeeds; // The bookmark URLs
 	//#endif
     final public boolean JSR75_ENABLED;
+	//#ifdef DMIDP20
+    final public String GOOGLE_MOBILITY;
+    final public String GOOGLE_NO_IMAGES;
+    final public String SKWEEZER_MOBILITY;
+	//#endif
 	//#ifdef DTEST
     private boolean     m_debugOutput = true; // Flag to write to output for test
 	//#endif
@@ -398,10 +416,10 @@ implements
     private Command     m_updateAllCmd;     // The update all command
     private Command     m_updateAllModCmd;  // The update all modified command
     
-    private int citemLnkNbr;
-    private int citemEnclNbr;
+    private int m_citemLnkNbr;
+    private int m_citemEnclNbr;
 	//#ifdef DFULLVERS
-    private RssItunesItem citem;
+    private RssItem m_citem;
 	//#endif
 	//#ifdef DLOGGING
 	//#ifdef DFULLVERS
@@ -424,15 +442,18 @@ implements
 		m_unreadImage = null;
 		//#ifdef DFULLVERS
 		m_bookmarkList = null;
-		citem = null;
+		m_citem = null;
 		//#else
 		m_settingsForm = null;
 		//#endif
 		m_loadForm = null;
-		citemLnkNbr = -1;
-		citemEnclNbr = -1;
+		m_citemLnkNbr = -1;
+		m_citemEnclNbr = -1;
 		m_needFormInit = true;
 		//#ifdef DMIDP20
+		GOOGLE_MOBILITY = "http://www.google.com/gwt/n?u=";
+		GOOGLE_NO_IMAGES = "&_gwt_noimg=1";
+		SKWEEZER_MOBILITY = "http://www.skweezer.com/s.aspx?q=";
 		m_parseBackground = false;
 		m_backGrParser = null; // The currently selected RSS in background
 		m_backGrFdlParser = null; // The currently selected RSS in background
@@ -592,12 +613,10 @@ implements
 			m_bookmarkList = new FeatureList("Bookmarks", List.IMPLICIT,
 											 m_loadForm);
 			FeatureMgr.setMainDisp(m_bookmarkList);
-			m_bookmarkList.setCommandListener( this, true );
 			//#else
 			m_unreadImage = null;
 			m_settingsForm = new SettingsForm(m_loadForm);
 			FeatureMgr.setMainDisp(m_settingsForm);
-			m_settingsForm.setCommandListener( m_settingsForm, true );
 			//#endif
 
 		} catch(Throwable t) {
@@ -630,6 +649,15 @@ implements
 			//#endif
 			//#ifdef DLOGGING
 			if ((logger != null) && fineLoggable) {logger.fine("JSR75_ENABLED=" + JSR75_ENABLED);}
+			//#endif
+			//#ifdef DFULLVERS
+			if (m_bookmarkList != null) {
+				m_bookmarkList.setCommandListener( this, true );
+			}
+			//#else
+			if (m_settingsForm != null) {
+				m_settingsForm.setCommandListener( m_settingsForm, true );
+			}
 			//#endif
 		}
 	}
@@ -826,55 +854,72 @@ implements
 			//#endif
 			int priority = 7;
 			if (!m_novice) {
-				m_addNewBookmark = FeatureMgr.getCmdAdd(m_bookmarkList, "Add new feed", Command.SCREEN, priority++);
+				m_addNewBookmark = FeatureMgr.getCmdAdd(m_bookmarkList,
+						"Add", "Add new feed", Command.SCREEN, priority++);
 			}
-			m_openBookmark = FeatureMgr.getCmdAdd(m_bookmarkList, "Open feed", Command.SCREEN, 5);
-			m_readUnreadItems = FeatureMgr.getCmdAdd(m_bookmarkList, "River of news", Command.SCREEN, priority++);
+			m_openBookmark = FeatureMgr.getCmdAdd(m_bookmarkList,
+					"Open", "Open feed", Command.SCREEN, 5);
+			m_readUnreadItems = FeatureMgr.getCmdAdd(m_bookmarkList,
+					"River", "River of news", Command.SCREEN, priority++);
 			if (!m_novice) {
-				m_editBookmark = FeatureMgr.getCmdAdd(m_bookmarkList, "Edit feed", Command.SCREEN, priority++);
-				m_delBookmark = FeatureMgr.getCmdAddPrompt(m_bookmarkList, "Delete feed", Command.SCREEN, priority++, "Are you sure you want to delete?" );
-				m_importFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Import feeds", Command.SCREEN, priority++);
+				m_editBookmark = FeatureMgr.getCmdAdd(m_bookmarkList, "Edit",
+						"Edit feed", Command.SCREEN, priority++);
+				m_delBookmark = FeatureMgr.getCmdAddPrompt(m_bookmarkList,
+						"Delete", "Delete feed", Command.SCREEN, priority++, "Are you sure you want to delete?" );
+				m_importFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList,
+						"Import", "Import feeds", Command.SCREEN, priority++);
 				int spriority = priority;
 				//#ifdef DSIGNED
 				//#ifdef DJSR75
-				m_exportFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Export feeds", Command.SCREEN, priority++);
+				m_exportFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList,
+						"Export", "Export feeds", Command.SCREEN, priority++);
 				//#endif
 				//#endif
 				if (spriority == priority) {
 					priority++;
 				}
 				//#ifdef DTEST
-				m_importCurrFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Import current feeds", Command.SCREEN, priority++);
+				m_importCurrFeedListCmd = FeatureMgr.getCmdAdd(m_bookmarkList,
+						"Import current", "Import current feed", Command.SCREEN, priority++);
 				//#else
 				priority++;
 				//#endif
 			}
-			m_updateAllModCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Update modified all", Command.SCREEN, priority++);
-			m_updateAllCmd = FeatureMgr.getCmdAddPrompt(m_bookmarkList, "Update all", Command.SCREEN, priority++,
+			m_updateAllModCmd = FeatureMgr.getCmdAdd(m_bookmarkList,
+					"Update mod", "Update modified all", Command.SCREEN, priority++);
+			m_updateAllCmd = FeatureMgr.getCmdAddPrompt(m_bookmarkList,
+					"Update all", null, Command.SCREEN, priority++,
 					"Are you sure that you want to upgrade all?  " +
 					"Unlike update modified all, update all does not use " +
 					"conditional gets.  This can use more network " +
 					"resources.  Also, all read flags are reset.");
 			//#ifdef DTEST
-			m_reloadDbCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Reload DB", Command.SCREEN, priority++);
+			m_reloadDbCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Reload DB",
+					null, Command.SCREEN, priority++);
 			//#else
 			priority++;
 			//#endif
-			m_settingsCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Settings", Command.SCREEN, priority++);
-			m_saveCommand = FeatureMgr.getCmdAdd(m_bookmarkList, "Save without exit", Command.SCREEN, priority++);
+			m_settingsCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Settings",
+					null, Command.SCREEN, priority++);
+			m_saveCommand = FeatureMgr.getCmdAdd(m_bookmarkList,
+					"Save only", "Save without exit", Command.SCREEN,
+					priority++);
             m_bookmarkList.addPromptCommand( FeatureMgr.m_exitCommand,
 					                         "Are you sure you want to exit?" );
-			FeatureMgr.m_aboutCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "About", Command.SCREEN, priority++);
+			FeatureMgr.m_aboutCmd = FeatureMgr.getCmdAdd(m_bookmarkList,
+					"About", null, Command.SCREEN, priority++);
 			//#ifdef DTESTUI
-			m_testBMCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Test bookmarks shown", Command.SCREEN, 10);
-			m_testRtnCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Test go back to last", Command.SCREEN, 11);
+			m_testBMCmd = FeatureMgr.getCmdAdd(m_bookmarkList,
+					"Test bookmarks shown", null, Command.SCREEN, 10);
+			m_testRtnCmd = FeatureMgr.getCmdAdd(m_bookmarkList,
+					"Test go back to last", null, Command.SCREEN, 11);
 			//#endif
 			//#ifdef DTESTUI
-			m_testEncCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Testing Form", Command.SCREEN, priority++);
+			m_testEncCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Testing Form", null, Command.SCREEN, priority++);
 			//#endif
 			//#ifdef DLOGGING
 			if (m_debug != null) {
-				m_debugCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Debug Log", Command.SCREEN, priority++);
+				m_debugCmd = FeatureMgr.getCmdAdd(m_bookmarkList, "Debug Log", null, Command.SCREEN, priority++);
 			}
 			//#endif
 			//#ifdef DTEST
@@ -1152,8 +1197,8 @@ implements
 	//#ifdef DFULLVERS
 	//#ifdef DLOGGING
     final public void initializeDebugForm() {
-		m_clearDebugCmd = FeatureMgr.getCmdAdd(m_debug, "Clear", Command.SCREEN, 7);
-		m_backFrDebugCmd = FeatureMgr.getCmdAdd(m_debug, "Back", Command.BACK, 1);
+		m_clearDebugCmd = FeatureMgr.getCmdAdd(m_debug, "Clear", null, Command.SCREEN, 7);
+		m_backFrDebugCmd = FeatureMgr.getCmdAdd(m_debug, "Back", null, Command.BACK, 1);
         m_debug.setCommandListener(this);
 	}
 	//#endif
@@ -1986,7 +2031,7 @@ implements
     
     /** Initialize RSS item form */
     final public void initializeItemForm(final RssItunesFeed feed,
-								   final RssItunesItem item,
+								   final RssItem item,
 								   List prevList, LoadingForm loadForm) {
         System.out.println("Create new item form");
 		//#ifdef DTEST
@@ -2010,7 +2055,7 @@ implements
 	//#endif
 
 	//#ifdef DFULLVERS
-	//#ifdef DITUNES
+	//#ifdef DSMARTPHONE
     /** Initialize RSS item form */
     final public void initializeDetailForm(final RssItunesFeed feed,
 								   FeatureList prevList, LoadingForm loadForm) {
@@ -2028,7 +2073,7 @@ implements
 	//#endif
 
 	/** Get the max words configured from the descritption. */
-	final public String getItemDescription( final RssItunesItem item ) {
+	final public String getItemDescription( final RssItem item ) {
 		final String [] parts = MiscUtil.split(item.getDescription(), " ");
 		StringBuffer sb = new StringBuffer();
         final int wordCount = Math.min(parts.length,
@@ -2059,17 +2104,17 @@ implements
 									"jar:///data/novice.txt", "", "",
 									m_rssFeeds);
 							listParser.setGetFeedTitleList(true);
-							listParser.setFeedNameFilter(null);
-							listParser.setFeedURLFilter(null);
+							listParser.setFeedNameFilter("");
+							listParser.setFeedURLFilter("");
+							listParser.setOverride(true);
+							listParser.setMaxItemCount(
+									m_appSettings.getMaximumItemCountInFeed());
 							//#ifndef DSMALLMEM
 							listParser.setRedirectHtml(false);
 							//#endif
 							listParser.run();
 							ImportFeedsForm.addFeedLists(listParser,
-									0,
-									m_appSettings.getMaximumItemCountInFeed(),
-									true, false, false, m_rssFeeds,
-									m_bookmarkList, m_loadForm);
+									0, m_bookmarkList, m_loadForm);
 						}catch(Throwable e) {
 							m_loadForm.recordExcForm(
 									"\nError loading intial bookmarks\n", e);
@@ -2282,7 +2327,7 @@ implements
 						//#ifdef DTEST
 						long beginStore = System.currentTimeMillis();
 						//#endif
-						bookmarks.append(rss.getStoreString(true, true));
+						bookmarks.append(rss.getStoreString(true, true, true));
 						//#ifdef DTEST
 						storeTime += System.currentTimeMillis() - beginStore;
 						//#endif
@@ -2305,7 +2350,7 @@ implements
 						continue;
 					}
 					final RssItunesFeed rss = (RssItunesFeed)rssFeeds.get( name );
-					bookmarks.append(rss.getStoreString(false, true));
+					bookmarks.append(rss.getStoreString(false, false, true));
 					bookmarks.append(settings.CFEED_SEPARATOR);
 					if (releaseMemory) {
 						vstored.addElement( name );
@@ -2443,7 +2488,7 @@ implements
 				//#ifdef DLOGGING
 				logger.severe("Out of memory for feed setting to 0 items:" + feed.getName());
 				//#endif
-				feed.setItems(new Vector());
+				feed.setItems(new RssItem[0]);
 			}
 			m_loadForm.recordExcFormFin(
 					/* Out of memory loading/parsing feed on:\n */
@@ -2531,7 +2576,7 @@ implements
 					if (feed == null) {
 						return;
 					}
-					copenPage = ( feed.getItems().size() > 0 );
+					copenPage = ( feed.getItems().length > 0 );
 				} catch (Throwable e) {
 					procPageExc(feed, copenPage, e);
 					return;
@@ -2774,7 +2819,7 @@ implements
 	}
 	//#endif
 
-	//#ifdef DITUNES
+	//#ifdef DSMARTPHONE
 	/* Form to look at item. */
 	final public class DetailForm extends FeatureForm
 		implements CommandListener {
@@ -2788,10 +2833,12 @@ implements
 			this.m_rtn = rtn;
 			m_platformReq = false;
 			super.addCommand( FeatureMgr.m_backCommand );
+			//#ifdef DMIDP20
 			m_platformURL = feed.getLink();
 			if (m_platformURL.length() > 0) {
 				super.addCommand( m_openLinkCmd );
 			}
+			//#endif
 			if (m_itunesEnabled && feed.isItunes()) {
 				final String language = feed.getLanguage();
 				if (language.length() > 0) {
@@ -2840,12 +2887,14 @@ implements
 			if( c == FeatureMgr.m_backCommand ){
 				setCurrent( null, m_rtn );
 			}
+			//#ifdef DMIDP20
 			/** Go to link and get back to RSS feed headers */
 			if( c == m_openLinkCmd ){
 				synchronized(this) {
 					m_platformReq = true;
 				}
 			}
+			//#endif
 
 			execute();
 
@@ -2853,6 +2902,7 @@ implements
 			
 		public void execute() {
 
+			//#ifdef DMIDP20
 			/* Handle going to link (platform request.). */
 			if ( m_platformReq ) {
 				try {
@@ -2861,6 +2911,7 @@ implements
 					m_platformReq = false;
 				}
 			}
+			//#endif
 
 		}
 
@@ -2874,6 +2925,8 @@ implements
 		private boolean     m_platformReq;    // Flag to get platform req open link
 		private String m_platformURL;         // Platform request URL
 		//#ifdef DMIDP20
+		private Command     m_openPicLinkCmd; // The open minimized link command
+		private Command     m_openMobLinkCmd; // The open minimized link command
 		private Command     m_openEnclosureCmd; // The open enclosure command
 		//#endif
 		private Command     m_nextItemCmd;      // The next item
@@ -2882,10 +2935,14 @@ implements
 
 		private ItemForm(final String title, final String actTitle,
 								final RssItunesFeed feed,
-								   final RssItunesItem item,
+								   final RssItem item,
 								   LoadingForm loadForm) {
 			super(title, loadForm);
 			m_platformReq = false;
+			//#ifdef DMIDP20
+			int mc = m_appSettings.getMobilizerChoice();
+			boolean hasMobilizer = (mc > 0);
+			//#endif
 			super.addCommand( FeatureMgr.m_backCommand );
 			final String sienclosure = item.getEnclosure();
 			final String desc = item.getDescription();
@@ -2896,26 +2953,28 @@ implements
 			} else {
 				super.append(new StringItem("Description\n", desc));
 			}
-			citem = item;
-			if (m_itunesEnabled && (item.isItunes() || feed.isItunes())) {
-				final String author = item.getAuthor();
+			m_citem = item;
+			if (m_itunesEnabled && (item instanceof RssItunesItem) &&
+				(((RssItunesItem)item).isItunes())) {
+				RssItunesItem ititem = (RssItunesItem)item;
+				final String author = ititem.getAuthor();
 				if (author.length() > 0) {
 					super.append(new StringItem("Author:", author));
 				}
-				final String subtitle = item.getSubtitle();
+				final String subtitle = ititem.getSubtitle();
 				if (subtitle.length() > 0) {
 					super.append(new StringItem("Subtitle:", subtitle));
 				}
-				final String summary = item.getSummary();
+				final String summary = ititem.getSummary();
 				if (summary.length() > 0) {
 					super.append(new StringItem("Summary:", summary));
 				}
-				final String duration = item.getDuration();
+				final String duration = ititem.getDuration();
 				if (duration.length() > 0) {
 					super.append(new StringItem("Duration:", duration));
 				}
 				String expLabel = "Explicit:";
-				String explicit = item.getExplicit();
+				String explicit = ititem.getExplicit();
 				if (explicit.equals(RssItunesItem.UNSPECIFIED)) {
 					expLabel = "Feed explicit:";
 					explicit = feed.getExplicit();
@@ -2924,7 +2983,7 @@ implements
 			}
 			String linkLabel = "Link:";
 			String link = item.getLink();
-			//#ifdef DITUNES
+			//#ifdef DSMARTPHONE
 			if (link.length() == 0) {
 				link = feed.getLink();
 				linkLabel = "Feed link:";
@@ -2936,26 +2995,46 @@ implements
 				//#else
 				StringItem slink = new StringItem(linkLabel, link);
 				//#endif
-				citemLnkNbr  = super.append(slink);
+				m_citemLnkNbr  = super.append(slink);
 			} else {
-				citemLnkNbr  = -1;
+				m_citemLnkNbr  = -1;
 			}
 			if (sienclosure.length() > 0) {
 				//#ifdef DMIDP20
 				StringItem senclosure = new StringItem("Enclosure:", sienclosure,
-														  Item.HYPERLINK);
+						Item.HYPERLINK);
 				//#else
 				StringItem senclosure = new StringItem("Enclosure:", sienclosure);
 				//#endif
-				citemEnclNbr = super.append(senclosure);
+				m_citemEnclNbr = super.append(senclosure);
 			} else {
-				citemEnclNbr  = -1;
+				m_citemEnclNbr  = -1;
 			}
-			
+			//#ifdef DMIDP20
+			if (hasMobilizer && (link.length() > 0)) {
+				/* Open Mobilizer */
+				m_openMobLinkCmd    = FeatureMgr.getCmdAdd(this,
+						"Mobile Open", "Mobilizer Open", Command.SCREEN, 8);
+				if (mc == m_appSettings.GOOGLE_MOBILIZER_CHOICE) {
+					/* Open Mobilizer no pics.  */
+					m_openPicLinkCmd = FeatureMgr.getCmdAdd(this,
+							"No Pic Mobile", "No Pic Mobilizer Open", Command.SCREEN, 9);
+				} else {
+					m_openPicLinkCmd = null;
+				}
+			} else {
+				m_openPicLinkCmd = null;
+				m_openMobLinkCmd = null;
+			}
+			if (link.length() > 0) {
+				super.addCommand( m_openLinkCmd );
+			}
+			//#endif
+
 			// Add item's date if it is available
 			String dateLabel = "Date:";
 			Date itemDate = item.getDate();
-			//#ifdef DITUNES
+			//#ifdef DSMARTPHONE
 			if(itemDate==null) {
 				itemDate = feed.getDate();
 				dateLabel = "Feed date:";
@@ -2972,19 +3051,20 @@ implements
 				super.append(new StringItem(dateLabel, sdate));
 			}
 
-			m_nextItemCmd = FeatureMgr.getCmdAdd(this, "Next Item", Command.SCREEN, 7);
+			m_nextItemCmd = FeatureMgr.getCmdAdd(this, "Next", "Next Item",
+					Command.SCREEN, 7);
 			if (link.length() > 0) {
-				m_copyLinkCmd = FeatureMgr.getCmdAdd(this, "Copy link", Command.SCREEN, 9);
+				m_copyLinkCmd = FeatureMgr.getCmdAdd(this, "Copy link", null, Command.SCREEN, 9);
 			}
 			if (sienclosure.length() > 0) {
-				m_copyEnclosureCmd = FeatureMgr.getCmdAdd(this, "Copy enclosure", Command.SCREEN, 10);
+				m_copyEnclosureCmd = FeatureMgr.getCmdAdd(this, "Copy enclosure", null, Command.SCREEN, 10);
 			}
 			//#ifdef DMIDP20
 			if (link.length() > 0) {
 				super.addCommand( m_openLinkCmd );
 			}
 			if (sienclosure.length() > 0) {
-				m_openEnclosureCmd = FeatureMgr.getCmdAdd(this, "Open enclosure", Command.SCREEN, 8);
+				m_openEnclosureCmd = FeatureMgr.getCmdAdd(this, "Open enclosure", null, Command.SCREEN, 8);
 			}
 			//#endif
 		}
@@ -3006,27 +3086,48 @@ implements
 			
 			/** Copy link to clipboard.  */
 			if( c == m_copyLinkCmd ){
-				String link = citem.getLink();
-				super.set(citemLnkNbr, new TextField("Link:", link,
+				String link = m_citem.getLink();
+				super.set(m_citemLnkNbr, new TextField("Link:", link,
 						link.length(), TextField.URL));
-				super.featureMgr.showMe(super.get(citemLnkNbr));
+				super.featureMgr.showMe(super.get(m_citemLnkNbr));
 			}
 			
 			/** Copy enclosure to clipboard.  */
 			if( c == m_copyEnclosureCmd ){
-				final String link = citem.getEnclosure();
-				super.set(citemEnclNbr, new TextField("Enclosure:",
+				final String link = m_citem.getEnclosure();
+				super.set(m_citemEnclNbr, new TextField("Enclosure:",
 					link, link.length(), TextField.URL));
-				super.featureMgr.showMe(super.get(citemEnclNbr));
+				super.featureMgr.showMe(super.get(m_citemEnclNbr));
 			}
 			
 			//#ifdef DMIDP20
 			/** Go to link and get back to RSS feed headers */
-			if( c == m_openLinkCmd ){
+			if( ( c == m_openLinkCmd ) || ( c == m_openMobLinkCmd ) ||
+					( c == m_openPicLinkCmd )) {
+				String link;
 				synchronized(this) {
-					final String link = citem.getLink();
-					m_platformURL = link;
-					m_platformReq = true;
+					link = m_citem.getLink();
+				}
+				if ((link != null) && (link.length() > 0)) {
+					if( (c == m_openMobLinkCmd) || (c == m_openPicLinkCmd) ) {
+						String urllink = MiscUtil.urlEncode(link);
+						if (m_appSettings.getMobilizerChoice() == 1) {
+							link = GOOGLE_MOBILITY + urllink;
+							if( c != m_openPicLinkCmd ) {
+								link += GOOGLE_NO_IMAGES;
+							}
+						} else {
+							link = SKWEEZER_MOBILITY + urllink;
+						}
+						//#ifdef DLOGGING
+						if (finestLoggable) {logger.finest("commandAction mobility URL link,urllink=" + link + "," + urllink);}
+						//#endif
+					}
+
+					synchronized(this) {
+						m_platformURL = link;
+						m_platformReq = true;
+					}
 				}
 			}
 			//#endif
@@ -3034,8 +3135,10 @@ implements
 			//#ifdef DMIDP20
 			/** Go to link and get back to RSS feed headers */
 			if( c == m_openEnclosureCmd ){
-				m_platformURL = citem.getEnclosure();
-				m_platformReq = true;
+				synchronized(this) {
+					m_platformURL = m_citem.getEnclosure();
+					m_platformReq = true;
+				}
 			}
 			//#endif
 			
