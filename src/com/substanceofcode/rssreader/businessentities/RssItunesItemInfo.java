@@ -26,6 +26,7 @@
  * IB 2010-03-14 1.11.5RC2 Add toString to interface.
  * IB 2010-03-14 1.11.5RC2 Code cleanup.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS items.
 */
 
 // Expand to define logging define
@@ -81,6 +82,8 @@
 //@    boolean isItunes();
 //@
 //@    String toString();
+//@
+//@	Object clone();
 //@
 //@}
 //#endif
