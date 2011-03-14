@@ -60,8 +60,8 @@ import com.substanceofcode.rssreader.businesslogic.compatibility4.RssFeedParser;
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFeed;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.OpmlParser;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.compatibility4.Observer;
-import net.eiroca.j2me.observable.compatibility4.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -72,7 +72,7 @@ import net.sf.jlogmicro.util.logging.Level;
 
 final public class OpmlParserTest extends BaseTestCase
 //#ifdef DMIDP20
-implements Observer, net.yinlight.j2me.observable.Observer
+implements Observer
 //#endif
 {
 
@@ -116,15 +116,11 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 		ready = true;
 		synchronized(this) {
 			super.notifyAll();
 		}
-	}
-
-	public void changed(net.yinlight.j2me.observable.Observable observable, Object arg) {
-		ready = true;
 	}
 
 	public boolean isReady() {
@@ -227,9 +223,9 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			//#endif
 			RssItunesFeed[] cmpRssFeeds =
 				(RssItunesFeed[])compatibilityOpmlParser.getFeeds();
-			assertTrue(mname + " rssfeeds feed length should be > 0",
+			assertTrue(mname + "compatibilityOpmlParserTestSub rssfeeds feed length should be > 0",
 					rssfeeds.length > 0);
-			assertTrue(mname + " cmpRssFeeds feed length should be > 0",
+			assertTrue(mname + "compatibilityOpmlParserTestSub cmpRssFeeds feed length should be > 0",
 					cmpRssFeeds.length > 0);
 			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / 5));
 			for (; (nextIx < endIx) && (nextIx < rssfeeds.length) && (nextIx < cmpRssFeeds.length);
@@ -254,10 +250,10 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.toString());}
 				//#endif
-				String assertInfo = new String("nextIx,name,url=" + nextIx + "," + feed.getName() + "," +  feed.getUrl());
+				String assertInfo = "nextIx,name,url=" + nextIx + "," + feed.getName() + "," +  feed.getUrl();
 				Object[] oret = super.cmpModLog(
-						"Original feed must equal expected feed " + assertInfo,
-						(RssItunesFeed)cmpfeed, feed);
+						"compatibilityOpmlParserTestSub Original feed must equal expected feed " + assertInfo,
+						(RssItunesFeed)cmpfeed, feed, null);
 				if (oret[1] != null) {
 					throw (Throwable)oret[1];
 				}
@@ -307,7 +303,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				//#ifdef DMIDP20
 				cmpFparser.makeObserable(null, true, 10);
 				ready = false;
-				cmpFparser.getObserverManager().addObserver(this);
+				cmpFparser.getObservableHandler().addObserver(this);
 				cmpFparser.getParsingThread().start();
 				while (!isReady()) {
 					synchronized(this) {
@@ -333,7 +329,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					//#endif
 					continue;
 				}
-				assertEquals("compatibilityOpmlParserTestSub successful must equal nextIx=" + nextIx, cmpSuccessful, successful);
+				assertEquals("compatibilityOpmlParserTestSub successful must equal " + assertInfo, cmpSuccessful, successful);
 				if (!cmpSuccessful) {
 					//#ifdef DLOGGING
 					if (fineLoggable) {logger.fine(mname + " compatibilityOpmlParserTestSub not successful nextIx,feed.getName(),fexc,cmpFexc=" + nextIx + "," + feed.getName() + "," + fexc + "," + cmpFexc, fexc);}
@@ -351,8 +347,8 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				// Workaround
 				goNext = true;
 				Object[] ocmpret = super.cmpModLog(
-						"Original feed must equal expected feed " + assertInfo,
-						(RssItunesFeed)ncmpfeed, nfeed);
+						"compatibilityOpmlParserTestSub Original feed must equal expected feed " + assertInfo,
+						(RssItunesFeed)ncmpfeed, nfeed, null);
 				if (ocmpret[1] != null) {
 					throw (Throwable)ocmpret[1];
 				}
