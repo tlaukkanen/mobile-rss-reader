@@ -154,6 +154,19 @@
 	<!-- IB 2011-01-27 1.11.5Dev16 Remove parameter setting which prevents performing novice target.  -->
 	<!-- IB 2011-01-27 1.11.5Dev16 Don't put novice binary into the distribution.  Only the source code will be present.  -->
 	<!-- IB 2011-01-27 1.11.5Dev16 Fix location of novice.txt file.  -->
+	<!-- IB 2011-01-28 1.11.5Dev17 For RIM, send zip file.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Have keep.smartlink to use smartlink for MIDP 1.0 and internet link.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Use enabled .value to use smartlink.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Have regularmem option for MIDP 1.0.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Prevent ${act.comp.src} directory from being created.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Don't preserve org.kablog.kgui.KFileSelectorMgr if it is not present.  This prevents errors.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Only upload RIM zip file as others are not usable.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Don't upload internet link version to google code.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Don't have signed MIDP 1.0 as it is not supported.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Add more targets to not make for dist.test.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Add more targets to not make for dist.smartphone.test.  -->
+	<!-- IB 2011-03-07 1.11.5Dev17 Allow optional temporary distribution with temporary subdomain and directory path using wtktemporary.properties.template with yinlight.tmp.subdir, yinlight.tmp.subpath, and yinlight.subdomain.  -->
+	<!-- IB 2011-03-07 1.11.5Dev17 Add MIDP 1.0 "regular" memory compile and build target which is skippped for distribution.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -206,6 +219,7 @@
 	<property name="sfile.prefix.full" value="full" />
 	<property name="sfile.prefix.intlink" value="intlink" />
 	<property name="sfile.prefix.smartphone" value="smartphone" />
+	<property name="sfile.prefix.regsize.midp10" value="moderate" />
 	<property name="sfile.prefix.novice" value="novice" />
 	<property name="sfile.prefix.jsr75" value="jsr75" />
 	<property name="sfile.prefix.jsr82" value="jsr82" />
@@ -295,10 +309,20 @@
 	    <echo message="Using release staging properties" />
 		<property name="no.test" value="true" />
 		<property name="no.release" value="true" />
-		<property file="${basedir}/staging.properties" />
+		<property name="staging.template" value="" />
+		<property file="${basedir}/staging.properties${staging.template}" />
+	</target>
+
+	<target name="prepare.temporary" if="${temp}" >
+	    <echo message="Using prepare.temporary." />
+		<property file="${basedir}/wtktemporary.properties${build.template}" />
+	    <echo message="yinlight.tmp.subdir=${yinlight.tmp.subdir}" />
+	    <echo message="yinlight.tmp.subpath=${yinlight.tmp.subpath}" />
+	    <echo message="yinlight.subdomain=${yinlight.subdomain}" />
 	</target>
 
 	<target name="prepare.development" if="${dev}" >
+	    <echo message="Using prepare.development." />
 		<property file="${basedir}/wtkdevelopment.properties${build.template}" />
 	</target>
 
@@ -316,6 +340,10 @@
 
 	<target name="prepare.smallmem" >
 		<property file="${basedir}/wtksmallmem.properties${build.template}" />
+	</target>
+
+	<target name="prepare.regularmem" >
+		<property file="${basedir}/wtkregularmem.properties${build.template}" />
 	</target>
 
 	<target name="prepare.midp1.0" depends="prepare.smallmem" >
@@ -475,12 +503,14 @@
 		<property name="DJMTESTPLUSDEF" value="DNOJMTESTPLUS" />
 		<property name="DJMTESTFREEDEF" value="DNOJMTESTFREE" />
 		<property name="nojsr75.res.excludes" value="**/file_icon.png,**/folder.png,**/up_dir_icon.png,**/folder_icon.png" />
-		<property name="wtk.optionalpda.enabled" value="false" />
-		<property name="wtk.bluetooth.enabled" value="false" />
-		<property name="wtk.wma.enabled" value="false" />
-		<property name="wtk.mmapi.enabled" value="false" />
-		<property name="wtk.miapi.enabled" value="false" />
-		<property name="wtk.wma2.enabled" value="false" />
+		<property name="wtk.optionalpda.enabled.value" value="false" />
+		<property name="wtk.bluetooth.enabled.value" value="false" />
+		<property name="wtk.wma.enabled.value" value="false" />
+		<property name="wtk.mmapi.enabled.value" value="false" />
+		<property name="wtk.miapi.enabled.value" value="false" />
+		<property name="wtk.java3d.enabled.value" value="false" />
+		<property name="wtk.wma2.enabled.value" value="false" />
+		<property name="wtk.contenthandler.enabled.value" value="false" />
 		<property name="file.nbr.midp1.0" value="" />
 		<property name="file.nbr.midp2.0" value="" />
 		<property name="file.nbr.midp" value="${file.nbr.midp1.0}${file.nbr.midp2.0}" />
@@ -493,6 +523,7 @@
 		<property name="file.prefix.cldc1.1" value="" />
 		<property name="file.prefix.novice" value="" />
 		<property name="file.prefix.smartphone" value="" />
+		<property name="file.prefix.memorysize" value="" />
 		<property name="file.prefix.full" value="" />
 		<property name="file.prefix.intlink" value="" />
 		<property name="file.prefix.signed" value="" />
@@ -508,7 +539,7 @@
 		<property name="file.prefix.jsr205" value="" />
 		<property name="file.prefix.jsr238" value="" />
 		<property name="file.prefix.large" value="" />
-		<property name="html.file.prefix" value="${file.prefix.smartphone}${file.prefix.full}${file.prefix.intlink}${file.prefix.signed}${file.prefix.verisign}${file.prefix.thawte}${file.prefix.godaddy}${file.prefix.jsr75}${file.prefix.jsr238}" />
+		<property name="html.file.prefix" value="${file.prefix.smartphone}${file.prefix.memorysize}${file.prefix.full}${file.prefix.intlink}${file.prefix.signed}${file.prefix.verisign}${file.prefix.thawte}${file.prefix.godaddy}${file.prefix.jsr75}${file.prefix.jsr238}" />
 		<property name="file.prefix" value="${file.prefix.midp1.0}${file.prefix.midp2.0}${file.prefix.cldc1.0}${file.prefix.cldc1.1}${file.prefix.novice}${file.prefix.large}${html.file.prefix}" />
 		<property name="bin" value="${target}/bin${file.prefix}" />
 		<property name="rim.bin" value="${target}/bin${file.prefix}_rim" />
@@ -521,6 +552,7 @@
 		<property name="SUFFIXVERS.cldc1.1" value="" />
 		<property name="SUFFIXVERS.novice" value="" />
 		<property name="SUFFIXVERS.smartphone" value="" />
+		<property name="SUFFIXVERS.memorysize" value="" />
 		<property name="SUFFIXVERS.full" value="" />
 		<property name="SUFFIXVERS.intlink" value="" />
 		<property name="SUFFIXVERS.signed" value="" />
@@ -534,7 +566,7 @@
 		<property name="SUFFIXVERS.jsr184" value="" />
 		<property name="SUFFIXVERS.jsr238" value="" />
 		<property name="SUFFIXVERS.large" value="" />
-		<property name="SUFFIXVERS" value="${SUFFIXVERS.midp1.0}${SUFFIXVERS.midp2.0}${SUFFIXVERS.cldc1.0}${SUFFIXVERS.cldc1.1}${SUFFIXVERS.novice}${SUFFIXVERS.smartphone}${SUFFIXVERS.full}${SUFFIXVERS.intlink}${SUFFIXVERS.signed}${SUFFIXVERS.verisign}${SUFFIXVERS.thawte}${SUFFIXVERS.godaddy}${SUFFIXVERS.jsr75}${SUFFIXVERS.jsr82}${SUFFIXVERS.jsr120}${SUFFIXVERS.jsr135}${SUFFIXVERS.jsr184}${SUFFIXVERS.jsr238}${SUFFIXVERS.large}" />
+		<property name="SUFFIXVERS" value="${SUFFIXVERS.midp1.0}${SUFFIXVERS.midp2.0}${SUFFIXVERS.cldc1.0}${SUFFIXVERS.cldc1.1}${SUFFIXVERS.novice}${SUFFIXVERS.smartphone}${SUFFIXVERS.memorysize}${SUFFIXVERS.full}${SUFFIXVERS.intlink}${SUFFIXVERS.signed}${SUFFIXVERS.verisign}${SUFFIXVERS.thawte}${SUFFIXVERS.godaddy}${SUFFIXVERS.jsr75}${SUFFIXVERS.jsr82}${SUFFIXVERS.jsr120}${SUFFIXVERS.jsr135}${SUFFIXVERS.jsr184}${SUFFIXVERS.jsr238}${SUFFIXVERS.large}" />
 		<property name="lib.jsr75" value="" />
 		<property name="lib.jsr82" value="" />
 		<property name="lib.jsr120" value="" />
@@ -707,7 +739,7 @@
 	    <echo message="DJMTESTFREEDEF=${DJMTESTFREEDEF}" />
 	    <echo message="DTESTUIDEF=${DTESTUIDEF}" />
 	    <echo message="DCOMPATDEF=${DCOMPATDEF}" />
-	    <echo message="wtk.optionalpda.enabled=${wtk.optionalpda.enabled}" />
+	    <echo message="wtk.optionalpda.enabled.value=${wtk.optionalpda.enabled.value}" />
 	    <echo message="DLOGDEF=${DLOGDEF}" />
 	    <echo message="no.test=${no.test}" />
 	    <echo message="no.staging=${no.staging}" />
@@ -720,6 +752,7 @@
 	<target name="init.preprocess" depends="prepare" unless="presrc.file" >
 		<!-- Delete directory to compile so that we start fresh for cases -->
 		<!-- when we delete a file. -->
+		<property name="act.comp.src" value="${comp.src}" />
 		<delete dir="${act.comp.src}" />
 		<mkdir dir="${act.comp.src}" />
 		<!-- Copy unpreprocessed source to compiled src dir -->
@@ -849,6 +882,14 @@
 		<echo message="comp.src=${comp.src}" />
 		<property name="act.comp.src" value="${comp.src}" />
 		<echo message="act.comp.src=${act.comp.src}" />
+		<property name="wtk.optionalpda.enabled" value="${wtk.optionalpda.enabled.value}" />
+		<property name="wtk.bluetooth.enabled" value="${wtk.bluetooth.enabled.value}" />
+		<property name="wtk.wma.enabled" value="${wtk.wma.enabled.value}" />
+		<property name="wtk.mmapi.enabled" value="${wtk.mmapi.enabled.value}" />
+		<property name="wtk.miapi.enabled" value="${wtk.miapi.enabled.value}" />
+		<property name="wtk.java3d.enabled" value="${wtk.java3d.enabled.value}" />
+		<property name="wtk.wma2.enabled" value="${wtk.wma2.enabled.value}" />
+		<property name="wtk.contenthandler.enabled" value="${wtk.contenthandler.enabled.value}" />
 		<wtkbuild srcdir="${act.comp.src}" destdir="${classes}" preverify="false" includeantruntime="false" unless="ecj.jar" />
 		<antcall target="ecj.compile" inheritAll="true" />
 		<antcall target="findbugs" inheritAll="true" />
@@ -1015,7 +1056,7 @@
 	</target>
 
 	<target name="make.jad" depends="prepare" >
-		<property name="shtml.file.prefix" value="file.prefix.smartphone,file.prefix.full,file.prefix.intlink,file.prefix.signed,file.prefix.verisign,file.prefix.thawte,file.prefix.godaddy,file.prefix.jsr75,file.prefix.jsr238" />
+		<property name="shtml.file.prefix" value="file.prefix.smartphone,file.prefix.memorysize,file.prefix.full,file.prefix.intlink,file.prefix.signed,file.prefix.verisign,file.prefix.thawte,file.prefix.godaddy,file.prefix.jsr75,file.prefix.jsr238" />
 		<property name="sfile.prefix" value="file.prefix.midp1.0,file.prefix.midp2.0,file.prefix.cldc1.0,file.prefix.cldc1.1,file.prefix.novice,file.prefix.large,${shtml.file.prefix}" />
 		<property name="sbuild.prefix" value="${sfile.prefix},sstage.file" />
 		<property name="sbuild.file.root" value="${sbuild.prefix},release.name,-,FMIDLETVERSROOT" />
@@ -1047,6 +1088,7 @@
 			<attribute name="file-prefix-full" value="${sfile.prefix.full}_" />
 			<attribute name="file-prefix-intlink" value="${sfile.prefix.intlink}_" />
 			<attribute name="file-prefix-smartphone" value="${sfile.prefix.smartphone}_" />
+			<attribute name="sfile-prefix-memorysize" value="${sfile.prefix.memorysize}_" />
 			<attribute name="file-prefix-novice" value="${sfile.prefix.novice}_" />
 			<attribute name="file-prefix-jsr75" value="${sfile.prefix.jsr75}_" />
 			<attribute name="file-prefix-jsr82" value="${sfile.prefix.jsr82}_" />
@@ -1079,6 +1121,14 @@
 
 	<target name="package.obfuscate.preverify" depends="prepare" >
 	    <echo message="keep.obfuscate=${keep.obfuscate}" />
+		<property name="wtk.optionalpda.enabled" value="${wtk.optionalpda.enabled.value}" />
+		<property name="wtk.bluetooth.enabled" value="${wtk.bluetooth.enabled.value}" />
+		<property name="wtk.wma.enabled" value="${wtk.wma.enabled.value}" />
+		<property name="wtk.mmapi.enabled" value="${wtk.mmapi.enabled.value}" />
+		<property name="wtk.miapi.enabled" value="${wtk.miapi.enabled.value}" />
+		<property name="wtk.java3d.enabled" value="${wtk.java3d.enabled.value}" />
+		<property name="wtk.wma2.enabled" value="${wtk.wma2.enabled.value}" />
+		<property name="wtk.contenthandler.enabled" value="${wtk.contenthandler.enabled.value}" />
 		<wtkpackage jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" manifest="${bin}/manifest.mf" cldc="${JCLDCVERS}" profile="${JMIDPVERS}" preverify="true" obfuscate="false" verbose="true" >
 
 			<!-- Package our newly compiled classes and the
@@ -1088,8 +1138,14 @@
 			<fileset dir="${tmpres}" />
 
 		</wtkpackage>
+		<copy file="${bin}/${build.file.root}.jad" tofile="${bin}/pre-smartlink-${build.file.root}.jad" />
+		<copy file="${bin}/${build.file.root}.jar" tofile="${bin}/pre-smartlink-${build.file.root}.jar" />
+		<property name="wtk.all.enabled" value="true" />
+		<wtksmartlink jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" verbose="true" if="keep.smartlink" unless="skip.smartlink" >
+			<preserve class="org.kablog.kgui.KFileSelectorMgr" if="jsr75.present" />
+		</wtksmartlink>
 		<wtkobfuscate jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" verbose="true" if="keep.obfuscate" >
-			<preserve class="org.kablog.kgui.KFileSelectorMgr" />
+			<preserve class="org.kablog.kgui.KFileSelectorMgr" if="jsr75.present" />
 			<argument value="-optimizationpasses" />
 			<argument value="${proguard.passes}" />
 			<argument value="-allowaccessmodification" />
@@ -1512,6 +1568,7 @@
 			<param name="append.google.labels" value="Deprecated,Type-Package" />
 			<param name="device.type" value="(not Blackberry)" />
 		</antcall>
+		<!-- Only upload RIM zip file as others are not usable.
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
 			<param name="fprefix" value="rim_" />
 			<param name="fext" value="cod" />
@@ -1519,12 +1576,20 @@
 			<param name="append.google.labels" value="${google.labels}" />
 			<param name="device.type" value="Blackberry" />
 		</antcall>
+		-->
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
 			<param name="fprefix" value="" />
 			<param name="fext" value="jar" />
 			<param name="fext.suffix" value="" />
 			<param name="append.google.labels" value="${google.labels}" />
 			<param name="device.type" value="(not Blackberry)" />
+		</antcall>
+		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="rim_" />
+			<param name="fext" value="zip" />
+			<param name="fext.suffix" value="" />
+			<param name="append.google.labels" value="${google.labels}" />
+			<param name="device.type" value="Blackberry only zip with alx and cod," />
 		</antcall>
 		<echo message="cd ../../..&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
@@ -1666,7 +1731,7 @@
 		<echo message="put ../${dist.name}/${build.file.root}.jar signedlib&#10;" file="${sftp.in.file}" append="true" />
 	</target>
 
-	<target name="sftp.upload.initialize" depends="prepare" if="upload.to.sftp">
+	<target name="sftp.upload.initialize" if="upload.to.sftp">
 		<mkdir dir="${ftp.in.dir}" />
 		<echo message="cd ${sftp.root.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
@@ -1699,7 +1764,7 @@
 		<echo message="mput ../${ftp.in.dir.name}/*htm " file="${sftp.in.file}" append="true" />
 	</target>
 
-	<target name="sourceforge.initialize" if="upload.to.sftp">
+	<target name="sourceforge.initialize" depends="prepare.temporary,prepare.development,prepare.beta,prepare.rc,prepare.production,prepare" if="upload.to.sftp">
 		<antcall target="sftp.upload.initialize" inheritAll="true" >
 			<param name="ftp.in.dir" value="${distsourceforge}" />
 			<param name="ftp.in.base" value="${distsourceforge}" />
@@ -1709,7 +1774,13 @@
 		</antcall>
 	</target>
 
-	<target name="yinlight.initialize" if="upload.to.sftp">
+	<target name="yinlight.initialize" depends="prepare.temporary,prepare.development,prepare.beta,prepare.rc,prepare.production,prepare" if="upload.to.sftp">
+		<property name="yinlight.subdomain" value="${src.module.name}" />
+		<echo message="yinlight.subdomain=${yinlight.subdomain}" />
+		<property name="yinlight.rootdir" value="html/${yinlight.tmp.subdir}${src.module.name}/downloads" />
+		<echo message="yinlight.rootdir=${yinlight.rootdir}" />
+		<property name="yinlight.base.url" value="http://${yinlight.subdomain}.yinlight.net/${yinlight.tmp.subpath}downloads" />
+		<echo message="yinlight.base.url=${yinlight.base.url}" />
 		<antcall target="sftp.upload.initialize" inheritAll="true" >
 			<param name="ftp.in.dir" value="${distyinlight}" />
 			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
@@ -1787,6 +1858,22 @@
 
 	<!-- Compile full version WTK with MIDP-1.0 and test -->
 	<target name="compile.1.0" depends="prepare.midp1.0,prepare.cldc1.0">
+		<antcall target="compile" >
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile full version WTK with MIDP-1.0, regular memory, and test -->
+	<target name="compile.1.0.reg" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0">
+		<antcall target="compile" >
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile full version WTK with MIDP-1.0, regular memory, smartphone, and test -->
+	<target name="compile.1.0.reg.smartphone" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0,prepare.smartphone">
 		<antcall target="compile" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
@@ -2029,6 +2116,22 @@
 		</antcall>
 	</target>
 
+	<!-- Compile distriubuted full version for MIDP 1.0, regular memory, as a release (no test) -->
+	<target name="dist.compile.1.0.reg" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0" >
+		<antcall target="compile" >
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile distriubuted full version for MIDP 1.0, regular memory, as a release (no test) -->
+	<target name="dist.compile.1.0.reg.smartphone" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0,prepare.smartphone" >
+		<antcall target="compile" >
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
 	<!-- Compile distriubuted internet install link version for MIDP 1.0 as a release (no test) -->
 	<target name="dist.compile.1.0.intlink" depends="prepare.midp1.0,prepare.cldc1.0,prepare.intlink" >
 		<antcall target="compile" >
@@ -2090,11 +2193,8 @@
 		</antcall>
 	</target>
 
-	<target name="dist.compile.2.0.jsr238" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr238" > 
-		<antcall target="compile" >
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
+	<target name="dist.compile.2.0.jsr238" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr238,prepare.release" > 
+		<antcall target="compile" />
 	</target>
 
 	<!-- Compile all. -->
@@ -2146,25 +2246,25 @@
 	<!-- These are do create release internet install link version for MIDP-1.0 -->
 	<target name="dist.midp.1.0.intlink" depends="prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage,prepare.intlink,prepare.release" unless="no.1.0.intlink" >
 		<antcall target="dist.version" inheritAll="yes" >
-			<param name="upload.to.google" value="true" />
+			<param name="upload.to.google" value="false" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="upload.to.sftp" value="true" />
 			<param name="make.build.files" value="true" />
 		</antcall>
 	</target>
 
-	<target name="dist.midp.1.0.signed.verisign" depends="prepare.midp1.0,prepare.cldc1.0,prepare.signed,prepare.verisign,prepare.release" unless="no.1.0.signed.verisign" >
+	<target name="dist.midp.1.0.reg" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage,prepare.release" unless="no.1.0.reg" >
 		<antcall target="dist.version" inheritAll="yes" >
-			<param name="upload.to.google" value="true" />
+			<param name="upload.to.google" value="false" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="upload.to.sftp" value="true" />
 			<param name="make.build.files" value="true" />
 		</antcall>
 	</target>
 
-	<target name="dist.midp.1.0.signed.thawte" depends="prepare.midp1.0,prepare.cldc1.0,prepare.signed,prepare.thawte,prepare.release" unless="no.1.0.signed.thawte" >
+	<target name="dist.midp.1.0.reg.smartphone" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage,prepare.release,prepare.smartphone" unless="${no.1.0.reg.smartphone}" >
 		<antcall target="dist.version" inheritAll="yes" >
-			<param name="upload.to.google" value="true" />
+			<param name="upload.to.google" value="false" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="upload.to.sftp" value="true" />
 			<param name="make.build.files" value="true" />
@@ -2184,7 +2284,7 @@
 
 	<target name="dist.midp.2.0.intlink" depends="prepare.midp2.0,prepare.cldc1.0,prepare.intlink" unless="no.2.0.intlink" >
 		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
+			<param name="upload.to.google" value="false" />
 			<param name="google.labels" value="--labels=${stage.featured}Type-Executable,OpSys-All" />
 			<param name="upload.to.sftp" value="true" />
 			<param name="make.build.files" value="false" />
@@ -2475,28 +2575,30 @@
 		<property name="dist.project.smartphone.zip" value="${dist.project.prefix}-smartphone-bin.zip" />
 		<property name="dist.project.bin.zip" value="${dist.project.prefix}-bin.zip" />
 		<property name="dist.project.src.zip" value="${dist.project.prefix}-src.zip" />
-		<antcall target="googlecode.initialize" inheritAll="true" />
 		<mkdir dir="${ftpdist.dir}" />
 		<copy file="${res.dir}/apache.htaccess" todir="${ftpdist.dir}" overwrite="true" />
+		<property name="yinlight.tmp.subdir" value="" />
+		<property name="yinlight.tmp.subpath" value="" />
 		<antcall target="sourceforge.initialize" inheritAll="true" >
 			<param name="upload.to.sftp" value="true" />
 		</antcall>
 		<antcall target="yinlight.initialize" inheritAll="true" >
 			<param name="upload.to.sftp" value="true" />
 		</antcall>
+		<antcall target="googlecode.initialize" inheritAll="true" />
 		<antcall target="dist.midp.1.0" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
+		<antcall target="dist.midp.1.0.reg" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.1.0.reg.smartphone" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
 		<antcall target="dist.midp.1.0.intlink" >
-			<param name="build.number" value="${build.number}" />
-			<param name="release.buildno" value="true" />
-		</antcall>
-		<antcall target="dist.midp.1.0.signed.verisign" >
-			<param name="build.number" value="${build.number}" />
-			<param name="release.buildno" value="true" />
-		</antcall>
-		<antcall target="dist.midp.1.0.signed.thawte" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
@@ -2600,7 +2702,7 @@
 		</delete>
 	</target>
 
-	<target name="dist.all" depends="prepare.development,prepare.beta,prepare.rc,prepare.production" >
+	<target name="dist.all" depends="prepare.temporary,prepare.development,prepare.beta,prepare.rc,prepare.production" >
 		<antcall target="dist.dev.status" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -2609,8 +2711,8 @@
 
 	<target name="dist" >
 		<antcall target="dist.all" inheritAll="true" >
-			<param name="no.1.0.signed.verisign" value="true" />
-			<param name="no.1.0.signed.thawte" value="true" />
+			<param name="no.1.0.reg" value="true" />
+			<param name="no.1.0.reg.smartphone" value="true" />
 			<param name="no.2.0.signed.verisign" value="true" />
 			<param name="no.2.0.signed.thawte" value="true" />
 			<param name="no.2.0.jsr75.signed.verisign" value="true" />
@@ -2628,6 +2730,7 @@
 
 	<target name="dist.no.signed" >
 		<antcall target="dist" inheritAll="true" >
+			<param name="no.1.0.reg" value="true" />
 			<param name="no.2.0.cldc.1.1.itunes.signed.verisign" value="true" />
 			<param name="no.2.0.cldc.1.1.itunes.signed.thawte" value="true" />
 			<param name="no.2.0.cldc.1.1.itunes.signed.verisign.jsr75" value="true" />
@@ -2637,31 +2740,44 @@
 
 	<target name="dist.test" >
 		<antcall target="dist.all" inheritAll="true" >
-			<param name="stage" value="test_" />
 			<param name="no.1.0" value="true" />
-			<param name="no.1.0.signed.verisign" value="true" />
-			<param name="no.1.0.signed.thawte" value="true" />
-			<param name="no.2.0" value="true" />
-			<param name="no.2.0.novice" value="true" />
-			<param name="no.2.0.itunes" value="true" />
-			<param name="no.2.0.itunes.jsr75" value="true" />
-			<param name="no.2.0.cldc.1.1" value="true" />
-			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
-			<param name="no.2.0.cldc.1.1.itunes" value="true" />
+			<param name="no.1.0.reg" value="true" />
 			<param name="no.2.0.cldc.1.1.itunes.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.itunes" value="true" />
+			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1" value="true" />
+			<param name="no.2.0.itunes.jsr75" value="true" />
+			<param name="no.2.0.itunes" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
+			<param name="no.2.0.novice" value="true" />
+			<param name="no.2.0" value="true" />
 		</antcall>
 	</target>
 
 	<target name="dist.smartphone.test" >
 		<antcall target="dist.all" inheritAll="true" >
-			<param name="no.2.0.novice" value="true" />
+			<param name="no.1.0.intlink" value="true" />
+			<param name="no.1.0.reg" value="true" />
 			<param name="no.1.0" value="true" />
-			<param name="no.2.0" value="true" />
-			<param name="no.2.0.cldc.1.1" value="true" />
-			<param name="no.2.0.jsr75" value="true" />
 			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.godaddy.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.godaddy" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.thawte.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.thawte" value="true" />
+			<param name="no.2.0.cldc.1.1" value="true" />
+			<param name="no.2.0.intlink" value="true" />
+			<param name="no.2.0.itunes.jsr75" value="true" />
+			<param name="no.2.0.itunes" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
+			<param name="no.2.0.jsr75.signed.thawte" value="true" />
+			<param name="no.2.0.jsr75.signed.verisign" value="true" />
+			<param name="no.2.0.jsr75" value="true" />
+			<param name="no.2.0.novice" value="true" />
+			<param name="no.2.0.signed.thawte" value="true" />
+			<param name="no.2.0.signed.verisign" value="true" />
+			<param name="no.2.0.smartphone.jsr75" value="true" />
+			<param name="no.2.0.smartphone" value="true" />
+			<param name="no.2.0" value="true" />
 		</antcall>
 	</target>
 
