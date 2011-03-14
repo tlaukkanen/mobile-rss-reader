@@ -41,6 +41,10 @@
  * IB 2011-01-24 1.11.5Dev16 Change more static fields to instance vars for the singleton to reduce static memory used.
  * IB 2011-01-24 1.11.5Dev16 New property ACCEPT_LICENSE to indicate that someone accepted the license.
  * IB 2011-01-24 1.11.5Dev16 For internet link version, create only one instance of Settings using the constructor.
+ * IB 2011-03-06 1.11.5Dev17 Have open mobilizer and no pic mobilizer for item.
+ * IB 2011-03-06 1.11.5Dev17 Have bookmark details forms for non small memory.
+ * IB 2011-03-06 1.11.5Dev17 Allow use of bookmark name in River of News for non small memory.
+ * IB 2011-03-06 1.11.5Dev17 Have mark unread items default to false for non-small memory.
  */
 
 // Expand to define MIDP define
@@ -51,6 +55,8 @@
 @DFULLVERSDEF@
 // Expand to define itunes define
 @DITUNESDEF@
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -92,9 +98,15 @@ final public class RssReaderSettings {
     private final String MARK_UNREAD_ITEMS = "mark-unread-items";
     private final String ITUNES_ENABLED = "itunes-enabled";
 	//#ifdef DMIDP20
+    public static final int GOOGLE_MOBILIZER_CHOICE = 1;
+    private static final String MOBILIZER_CHOICE = "mobilizer-choice";
+	//#endif
+	//#ifndef DSMALLMEM
+    private final String BOOKMARK_NAME_NEWS = "bookmark-name-news";
+	//#endif
+	//#ifdef DMIDP20
     private final String FONT_CHOICE = "font-choice";
     private final String FIT_POLICY = "fit-policy";
-    private final String BOOKMARK_NAME_NEWS = "bookmark-name-news";
     public final String BACKLIGHT_FLASH_SECS = "backlight-flash-secs";
     public final String VIBRATE_SECS = "vibrate-secs";
 	//#endif
@@ -217,10 +229,10 @@ final public class RssReaderSettings {
     
     /** Get mark unread items */
     public boolean getMarkUnreadItems() {
-		//#ifdef DMIDP20
-        return m_settings.getBooleanProperty(m_singleton.MARK_UNREAD_ITEMS, true);
-		//#else
+		//#ifdef DSMALLMEM
         return m_settings.getBooleanProperty(m_singleton.MARK_UNREAD_ITEMS, false);
+		//#else
+        return m_settings.getBooleanProperty(m_singleton.MARK_UNREAD_ITEMS, true);
 		//#endif
     }
     
@@ -252,6 +264,46 @@ final public class RssReaderSettings {
     public void setAcceptLicense(boolean acceptLicense) {
         m_settings.setBooleanProperty(m_singleton.ACCEPT_LICENSE, acceptLicense);
     }
+
+	//#ifdef DMIDP20
+    /** Get mobilizer. */
+    public int getMobilizerChoice() {
+		try {
+			return m_settings.getIntProperty(MOBILIZER_CHOICE,
+					GOOGLE_MOBILIZER_CHOICE);
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return 0;
+		}
+    }
+    
+    /** Set mobilizer. */
+    public void setMobilizerChoice(int choice) {
+        m_settings.setIntProperty(MOBILIZER_CHOICE, choice);
+    }
+	//#endif
+
+	//#ifndef DSMALLMEM
+    /** Get put bookmark name in news item list.*/
+    public boolean getBookmarkNameNews() {
+        return m_settings.getBooleanProperty(m_singleton.BOOKMARK_NAME_NEWS, false);
+    }
+    
+    /** Set put bookmark name in news item list. */
+    public void setBookmarkNameNews(boolean bookmarkNameNews) {
+        m_settings.setBooleanProperty(m_singleton.BOOKMARK_NAME_NEWS, bookmarkNameNews);
+    }
+    
+    /** Get use text box */
+    public boolean getUseTextBox() {
+        return m_settings.getBooleanProperty(m_singleton.USE_TEXT_BOX, false);
+    }
+    
+    /** Set use text box */
+    public void setUseTextBox(boolean useTextBox) {
+        m_settings.setBooleanProperty(m_singleton.USE_TEXT_BOX, useTextBox);
+    }
+	//#endif
 
 	//#ifdef DMIDP20
     /** Get font choice */
@@ -295,26 +347,6 @@ final public class RssReaderSettings {
         m_settings.setIntProperty(m_singleton.FIT_POLICY, fitPolicy);
     }
     
-    /** Get put bookmark name in news item list.*/
-    public boolean getBookmarkNameNews() {
-        return m_settings.getBooleanProperty(m_singleton.BOOKMARK_NAME_NEWS, false);
-    }
-    
-    /** Set put bookmark name in news item list. */
-    public void setBookmarkNameNews(boolean bookmarkNameNews) {
-        m_settings.setBooleanProperty(m_singleton.BOOKMARK_NAME_NEWS, bookmarkNameNews);
-    }
-    
-    /** Get use text box */
-    public boolean getUseTextBox() {
-        return m_settings.getBooleanProperty(m_singleton.USE_TEXT_BOX, false);
-    }
-    
-    /** Set use text box */
-    public void setUseTextBox(boolean useTextBox) {
-        m_settings.setBooleanProperty(m_singleton.USE_TEXT_BOX, useTextBox);
-    }
-
     /** Get backlight flash secs */
     public int getBacklightFlashSecs() {
         return m_settings.getIntProperty(m_singleton.BACKLIGHT_FLASH_SECS, 0);
