@@ -60,7 +60,7 @@ final public class Settings2Test extends BaseTestCase {
 		//#ifdef DSMALLMEM
 		super(10, "Settings2Test");
 		//#else
-		super(13, "Settings2Test");
+		super(15, "Settings2Test");
 		//#endif
 	}
 
@@ -107,6 +107,12 @@ final public class Settings2Test extends BaseTestCase {
 				break;
 			case 12:
 				testSettings5();
+				break;
+			case 13:
+				testSettings14();
+				break;
+			case 14:
+				testSettings15();
 				break;
 			//#endif
 			default:
@@ -239,6 +245,23 @@ final public class Settings2Test extends BaseTestCase {
 		settingsTestSub(mname, 0, TEST_LONG, new Long(423L), new Long(testLong));
 		m_settings.save(0, false);
 	}
+
+	//#ifdef DMIDP20
+	public void testSettings14() throws Throwable {
+		String mname = "testSettings14";
+		int mobilizerChoice = m_appSettings.getMobilizerChoice();
+		appSettingsTestSub(mname, "mobilizerChoice", new Integer(1),
+				new Integer(mobilizerChoice));
+	}
+
+	public void testSettings15() throws Throwable {
+		String mname = "testSettings15";
+		m_appSettings.setMobilizerChoice(2);
+		int mobilizerChoice = m_appSettings.getMobilizerChoice();
+		appSettingsTestSub(mname, "mobilizerChoice", new Integer(2),
+				new Integer(mobilizerChoice));
+	}
+	//#endif
 
 	void settingsTestSub(String mname, int region, String name, Object oexpValue,
 			Object ogetValue)
