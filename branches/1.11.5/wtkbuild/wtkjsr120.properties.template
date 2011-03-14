@@ -1,7 +1,8 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
 #-- IB 2010-09-28 1.11.5RC2 Allow versions with JSR-120.
 #-- IB 2010-10-13 1.11.5Dev11 Have required and optional permissions.
-wtk.wma.enabled = true
+#-- IB 2010-13-06 1.11.5Dev17 Use enabled .value to use smartlink.
+wtk.wma.enabled.value = true
 wtk.wma.version = 1.1
 DJSR120 = DJSR120
 file.prefix.jsr120 = ${sfile.prefix.jsr120}_
