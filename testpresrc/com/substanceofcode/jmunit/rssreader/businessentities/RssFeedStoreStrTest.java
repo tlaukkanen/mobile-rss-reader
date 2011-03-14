@@ -33,6 +33,8 @@
  * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
  * IB 2011-01-24 1.11.5Dev16 Fix code placement for using JMUnit on a device.
  * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
+ * IB 2011-02-02 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
+ * IB 2011-02-02 1.11.5Dev17 Change items to array to save on memory and for simplicity.
 */
 
 // Expand to define full vers define
@@ -177,7 +179,7 @@ implements Observer
 				vitems.addElement(item2);
 			}
 
-			feed.setItems(vitems);
+			feed.setVecItems(vitems);
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest(mname + " step " + step +
 					" feed=" + feed);}
@@ -391,7 +393,7 @@ implements Observer
 			if (finestLoggable) {logger.finest("storeStringTestSub  " + mname + " saveHdr,serializeItems,encoded,modifyCapable,genFeed=" + saveHdr + "," + serializeItems + "," + encoded + "," + modifyCapable + "," + genFeed);}
 			//#endif
 			if (!genFeed) {
-				storeString = feed.getStoreString(serializeItems, encoded);
+				storeString = feed.getStoreString(true, serializeItems, encoded);
 			}
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("storeStringTestSub  " + mname + " storeString=" + storeString);}
@@ -411,7 +413,7 @@ implements Observer
 			assertTrue(mname + " feeds equal.", feed.equals(nfeed));
 			if (!itemsSaved) {
 				assertEquals(mname + " new feed items = 0", 0,
-						nfeed.getItems().size());
+						nfeed.getItems().length);
 			}
 		} catch (Throwable e) {
 			//#ifdef DLOGGING
