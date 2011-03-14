@@ -32,6 +32,11 @@
  * IB 2010-11-26 1.11.5Dev15 Use checkRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
  * IB 2010-11-26 1.11.5Dev15 Fix toString used by testing to separate explicit from the first field in the item.
  * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
+ * IB 2011-01-31 1.11.5Dev17 Have checkRead return true if items are the same.  Use this to reduce cross check of items being the same.
+ * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS items.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
+ * IB 2011-03-12 1.11.5Dev17 Have m_state keep track of unread items and itunes flag.
+ * IB 2011-03-12 1.11.5Dev17 Have m_state keep track of unread items and itunes flag.
 */
 
 // Expand to define itunes define
@@ -80,7 +85,7 @@ import com.substanceofcode.testutil.console.TestLogUtil;
 public class RssItunesItem extends RssItem
 //#ifdef DTEST
 //#ifdef DJMTEST
-implements RssItunesItemInfo
+implements RssItunesItemInfo, RssItunesInfo
 //#endif
 //#endif
 {
@@ -104,7 +109,6 @@ implements RssItunesItemInfo
     private boolean fineLoggable = true;
     private boolean finestLoggable = true;
 	//#endif
-    protected boolean m_itunes = false;
     protected String m_author = "";   // The RSS item description
     protected String m_subtitle = "";   // The RSS item description
     protected String m_summary = "";   // The RSS item description
@@ -139,10 +143,14 @@ implements RssItunesItemInfo
 					String summary,
 					byte explicit,
 					String duration) {
-		super(title, link, desc, date, enclosure, unreadItem);
+		super(title, link, desc, date, enclosure,
+				(byte)((unreadItem ? 0x01 : 0x00)
 		//#ifdef DITUNES
-		m_itunes = itunes;
-		if (m_itunes) {
+				 | (itunes ? 0x02 : 0x00)
+		//#endif
+			 ));
+		//#ifdef DITUNES
+		if (itunes) {
 			m_author = author;
 			m_subtitle = subtitle;
 			m_summary = summary;
@@ -158,7 +166,6 @@ implements RssItunesItemInfo
 		//#ifdef DITUNES
 		if (item instanceof RssItunesItem) {
 			RssItunesItem ititem = (RssItunesItem)item;
-			this.m_itunes = ititem.m_itunes;
 			this.m_author = ititem.m_author;
 			this.m_subtitle = ititem.m_subtitle;
 			this.m_summary = ititem.m_summary;
@@ -174,13 +181,11 @@ implements RssItunesItemInfo
 		String subtitle = "";
 		String summary = "";
 		//#ifdef DITUNES
-		if (m_itunes) {
-			author = m_author.replace('|', CONE);
-			subtitle = m_subtitle.replace('|', CONE);
-			summary = m_summary.replace('|', CONE);
-		}
+		author = m_author.replace('|', CONE);
+		subtitle = m_subtitle.replace('|', CONE);
+		summary = m_summary.replace('|', CONE);
 		//#endif
-        String preData = (m_itunes ? "1" : "") + "|" +
+        String preData = "|" +
 			author + "|" + subtitle + "|" + summary + "|" +
                  ((m_explicit == BNO_EXPLICIT) ? "" :
 						 Integer.toString((int)m_explicit)) + "|" +
@@ -237,36 +242,41 @@ implements RssItunesItemInfo
 			if (finestLoggable) {logger.finest("init nodes.length=" + nodes.length);}
 			//#endif
 			//#ifdef DITUNES
-			int ITUNES = 0;
-			m_itunes = nodes[ITUNES].equals("1");
+			{
+				int AUTHOR;
+				m_author = nodes[AUTHOR = 1];
+			}
+			if (hasPipe) {
+				m_author = m_author.replace(CONE, '|');
+			}
 			
-			if (m_itunes) {
-				int AUTHOR = 1;
-				m_author = nodes[AUTHOR];
-				if (hasPipe) {
-					m_author = m_author.replace(CONE, '|');
-				}
-				
-				int SUBTITLE = 2;
-				m_subtitle = nodes[SUBTITLE];
-				if (hasPipe) {
-					m_subtitle = m_subtitle.replace(CONE, '|');
-				}
-				
-				int SUMMARY = 3;
-				m_summary = nodes[SUMMARY];
-				if (hasPipe) {
-					m_summary = m_summary.replace(CONE, '|');
-				}
+			{
+				int SUBTITLE;
+				m_subtitle = nodes[SUBTITLE = 2];
+			}
+			if (hasPipe) {
+				m_subtitle = m_subtitle.replace(CONE, '|');
+			}
+			
+			{
+				int SUMMARY;
+				m_summary = nodes[SUMMARY = 3];
+			}
+			if (hasPipe) {
+				m_summary = m_summary.replace(CONE, '|');
+			}
 
-				int EXPLICIT = 4;
-				String explicit = nodes[EXPLICIT];
+			{
+				int EXPLICIT;
+				String explicit = nodes[EXPLICIT = 4];
 				if (explicit.length() > 0) {
 					m_explicit = (byte)Integer.parseInt(explicit);
 				}
+			}
 
-				int DURATION = 5;
-				m_duration = nodes[DURATION];
+			{
+				int DURATION;
+				m_duration = nodes[DURATION = 5];
 			}
 			//#endif
 
@@ -281,7 +291,7 @@ implements RssItunesItemInfo
     /** Write record as a string */
 	//#ifdef DTEST
     public String toString() {
-        String storeString = m_itunes + "|" + m_author + "|" + m_subtitle + "|" +
+        String storeString = "|" + m_author + "|" + m_subtitle + "|" +
 			m_summary + "|" + (int)m_explicit + "|" + super.toString();
         return storeString;
     }
@@ -373,18 +383,25 @@ implements RssItunesItemInfo
         return (m_duration);
     }
     
-	public void checkRead(RssItunesItem pititem) {
+	public boolean checkRead(RssItem pitem) {
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("checkRead pititem=" + pititem);}
+		if (finestLoggable) {logger.finest("checkRead pitem=" + pitem);}
 		if (finestLoggable) {logger.finest("checkRead this=" + this);}
 		//#endif
-		if ((m_itunes == pititem.m_itunes) &&
-			 m_author.equals(pititem.m_author) &&
+		if (((super.m_state & pitem.m_state) == 0x02) &&
+			(pitem instanceof RssItunesItem)) {
+			RssItunesItem pititem = (RssItunesItem)pitem;
+			if (m_author.equals(pititem.m_author) &&
 			 m_subtitle.equals(pititem.m_subtitle) &&
 			 m_summary.equals(pititem.m_subtitle) &&
 			 (m_explicit == pititem.m_explicit) &&
 			 m_duration.equals(pititem.m_duration)) {
-			 super.checkRead(pititem);
+				return super.checkRead(pitem);
+			} else {
+				return false;
+			}
+		} else {
+			return super.checkRead(pitem);
 		}
 	}
 
@@ -411,14 +428,18 @@ implements RssItunesItemInfo
 		}
 		RssItunesItem item = (RssItunesItem)pitem;
 		//#endif
-		if (!TestLogUtil.fieldEquals(item.isItunes(), m_itunes,
-			"m_itunes", logger, fineLoggable)) {
+
+		if ((item instanceof RssItunesInfo) &&
+			!TestLogUtil.fieldEquals(((RssItunesInfo)item).isItunes(),
+			super.isItunes(), "itunes", logger, fineLoggable)) {
 			result = false;
 		}
+
 		if (!TestLogUtil.fieldEquals(item.getAuthor(), m_author,
 			"m_author", logger, fineLoggable)) {
 			result = false;
 		}
+
 		if (!TestLogUtil.fieldEquals(item.getSubtitle(), m_subtitle,
 			"m_subtitle", logger, fineLoggable)) {
 			result = false;
@@ -440,21 +461,9 @@ implements RssItunesItemInfo
 	}
 	//#endif
 
-    public void setItunes(boolean itunes) {
-		//#ifdef DITUNES
-        this.m_itunes = itunes;
-		//#else
-        this.m_itunes = false;
-		//#endif
-    }
-
-    public boolean isItunes() {
-		//#ifdef DITUNES
-        return (m_itunes);
-		//#else
-        return (false);
-		//#endif
-    }
+    public Object clone() {
+		return new RssItunesItem(this);
+	}
 
 }
 //#endif
