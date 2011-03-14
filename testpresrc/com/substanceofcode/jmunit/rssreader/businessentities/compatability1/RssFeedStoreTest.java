@@ -26,6 +26,8 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
  * IB 2011-01-24 1.11.5Dev16 Fix code placement for using JMUnit on a device.
+ * IB 2011-02-02 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
+ * IB 2011-02-02 1.11.5Dev17 Change items to array to save on memory and for simplicity.
  */
 
 // Expand to define test define
@@ -129,7 +131,7 @@ final public class RssFeedStoreTest extends BaseTestCase {
 				vitems.addElement(item2);
 			}
 
-			feed.setItems(vitems);
+			feed.setVecItems(vitems);
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest(mname + " step " + step +
 					" feed=" + feed.getClass().getName() + "," + feed);}
@@ -166,7 +168,7 @@ final public class RssFeedStoreTest extends BaseTestCase {
 				vitems.addElement(item2);
 			}
 
-			feed.setItems(vitems);
+			feed.setVecItems(vitems);
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest(mname + " step " + step +
 					" infoFeed=" + feed.getClass().getName() + "," + feed);}
@@ -337,7 +339,7 @@ final public class RssFeedStoreTest extends BaseTestCase {
 			if (finestLoggable) {logger.finest("storeStringTestSub  " + mname + " serializeItems,encoded,genFeed=" + serializeItems + "," + encoded + "," + genFeed);}
 			//#endif
 			if (!genFeed) {
-				storeString = infoFeed.getStoreString(serializeItems, encoded);
+				storeString = infoFeed.getStoreString(true, serializeItems, encoded);
 			}
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("storeStringTestSub  " + mname + " storeString=" + storeString);}
@@ -356,9 +358,9 @@ final public class RssFeedStoreTest extends BaseTestCase {
 			if (finestLoggable) {logger.finest("storeStringTestSub " + mname + " nfeed=" + nfeed);}
 			//#endif
 			assertEquals(mname + " new feed items = 0", 0,
-					nfeed.getItems().size());
+					nfeed.getVecItems().size());
 			assertEquals(mname + " new feed upddete = \"\"", "", nfeed.getUpddate());
-			infoFeed.setItems(new Vector());
+			infoFeed.setVecItems(new Vector());
 			infoFeed.setUpddate("");
 			assertTrue(mname + " feeds equal without items.", infoFeed.equals(((RssFeedInfo)nfeed)));
 		} catch (Throwable e) {
