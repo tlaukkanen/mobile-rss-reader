@@ -49,6 +49,9 @@
  * IB 2011-01-14 1.11.5Alpha15 Use only EncodingStreamReader to read data instead of having a separate InputStreamReader to read with.
  * IB 2011-01-14 1.11.5Alpha15 Have "" as empty title instead of null.
  * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
+ * IB 2011-03-11 1.11.5Dev17 If text attribute does not have the name, try the title attribute.
+ * IB 2011-03-13 1.11.5Dev17 Have constructor for future background loading of feeds.
 */
 
 // Expand to define full vers define
@@ -71,9 +74,8 @@ package com.substanceofcode.rssreader.businesslogic;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.XmlParser;
-import javax.microedition.io.*;
-import java.util.*;
-import java.io.*;
+import java.util.Vector;
+import java.io.InputStream;
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.XmlParser;
 
@@ -107,8 +109,8 @@ public class OpmlParser extends FeedListParser {
     }
     
     /** Constructor with current feeds. */
-    public OpmlParser(RssItunesFeed[] feeds, RssFeedStore rssFeeds) {
-        super(feeds, rssFeeds);
+    public OpmlParser(String[] feedNames, RssFeedStore rssFeeds) {
+        super(feedNames, rssFeeds);
     }
     
     /** Parse OPML list */
@@ -158,7 +160,9 @@ public class OpmlParser extends FeedListParser {
 					if (fineLoggable) {logger.fine("Parsing <outline> tag");}
 					//#endif
 					
-					title = parser.getAttributeValue( "text" );
+					if ((title = parser.getAttributeValue( "text" )) == null) {
+						title = parser.getAttributeValue( "title" );
+					}
 					if (title != null) {
 						title = encodingUtil.replaceAlphaEntities(title);
 						// No need to convert from UTF-8 to Unicode using replace
