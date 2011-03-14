@@ -146,7 +146,7 @@ public class TestLogUtil {
 					}
 				}
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals String unequal " + thisLog + ",this,pos=" + parmValue + "," + thisValue + "," + i);}
+				if (fineLoggable) {logger.fine("equals String unequal " + thisLog + ",this,pos={" + parmValue + "},{" + thisValue + "}," + i);}
 				//#endif
 				return false;
 			}
