@@ -28,6 +28,7 @@
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-14 1.11.5Alpha15 Log change to m_feedURLFilter.
+ * IB 2011-03-09 1.11.5Dev17 More logging.
 */
 
 // Expand to define MIDP define
@@ -46,8 +47,8 @@ import java.io.InputStream;
 
 import com.substanceofcode.utils.compatibility4.CauseException;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.compatibility4.Observable;
-import net.eiroca.j2me.observable.compatibility4.ObserverManager;
+import net.yinlight.j2me.observable.Observable;
+import net.yinlight.j2me.observable.ObservableHandler;
 //#endif
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
@@ -86,23 +87,27 @@ implements
     private CauseException m_ex = null;
     private boolean m_redirect = false;  // The RSS feed is redirected
 	//#ifdef DMIDP20
-    private ObserverManager observerMgr = null;
+    private ObservableHandler observableHandler = null;
 	//#endif
     
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("compatibility4.FeedListParser");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
+    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 	//#endif
 
     /** Creates a new instance of FeedListParser */
     public FeedListParser(String url, String username, String password) {
 		super();
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("Constructor url,username,password=" + url + "," + username + "," + password);}
+		//#endif
         m_parsingThread = new Thread(this);
 		m_url = url;
 		m_username = username;
 		m_password = password;
 		//#ifdef DMIDP20
-		observerMgr = new ObserverManager(this);
+		observableHandler = new ObservableHandler();
 		//#endif
     }
     
@@ -120,13 +125,16 @@ implements
     }
     
 	//#ifdef DMIDP20
-	public ObserverManager getObserverManager() {
-		return observerMgr;
+	public ObservableHandler getObservableHandler() {
+		return observableHandler;
 	}
 	//#endif
 
     /** Parsing thread */
     public void run() {
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("run m_feedNameFilter,m_feedURLFilter,m_maxItemCount,m_getFeedTitleList=" + m_feedNameFilter + "," + m_feedURLFilter + "," + m_maxItemCount + "," + m_getFeedTitleList);}
+		//#endif
         try {
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("Thread running=" + this);}
@@ -208,12 +216,12 @@ implements
 			}
 			//#endif
 			//#ifdef DMIDP20
-			if (observerMgr != null) {
-				observerMgr.notifyObservers(this);
+			if (observableHandler != null) {
+				observableHandler.notifyObservers(this);
 			}
 			//#endif
         }        
-    }  
+    }
     
     
     /** Get feeds from selected url */
