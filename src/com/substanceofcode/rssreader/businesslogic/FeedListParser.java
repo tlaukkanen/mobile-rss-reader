@@ -45,7 +45,24 @@
  * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
  * IB 2011-01-14 1.11.5Alpha15 Log change to m_feedURLFilter.
  * IB 2011-01-14 1.11.5Alpha15 Cosmetic.
-*/
+ * IB 2011-03-06 1.11.5Dev17 Only use thread utils if not small memory.
+ * IB 2011-03-09 1.11.5Dev17 More logging.
+ * IB 2011-03-11 1.11.5Dev17 Set m_urlHandler to null to save memory.
+ * IB 2011-03-13 1.11.5Dev17 Save old feeds and feed names (from URL) from RssFeedStore to allow future background updates.
+ * IB 2011-03-13 1.11.5Dev17 Allow access to current field names from RssFeedStore to allow future background updates.
+ * IB 2011-03-13 1.11.5Dev17 Allow clearing of RssFeedStore background info.
+ * IB 2011-03-13 1.11.5Dev17 Have getFeedTitleList to use title for name when parsing the whole feed.
+ * IB 2011-03-13 1.11.5Dev17 Allow optional keeping of user name/password.
+ * IB 2011-03-13 1.11.5Dev17 Allow optional keeping of state of items (e.g. read/unread).
+ * IB 2011-03-13 1.11.5Dev17 Have getTitleOnly to use title for name when parsing just to get the title.
+ * IB 2011-03-13 1.11.5Dev17 Have getFeedTitleList to use title for name when parsing the whole feed.
+ * IB 2011-03-13 1.11.5Dev17 Have useFeedUrlList to use the url for name.
+ * IB 2011-03-13 1.11.5Dev17 Return presence boolean array to show which feeds were added.
+ * IB 2011-03-13 1.11.5Dev17 Give info messages if no loading form and logging.
+ * IB 2011-03-13 1.11.5Dev17 Set urlHandler to null after parsing is done to relieve memory.
+ * IB 2011-03-13 1.11.5Dev17 Have optional setting of getAllFeedList to parse all feeds.
+ * IB 2011-03-13 1.11.5Dev17 Have optional setting of getAllUpdFeedList to parse all updated feeds.
+ */
 // Expand to define MIDP define
 //#define DMIDP20
 // Expand to define memory size define
@@ -64,6 +81,7 @@ package com.substanceofcode.rssreader.businesslogic;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 import com.substanceofcode.rssreader.businessentities.RssFeedStore;
@@ -104,21 +122,31 @@ implements
 	protected String m_url;
 	protected String m_username;
 	protected String m_password;
-	protected URLHandler urlHandler;
+	protected URLHandler m_urlHandler;
+	RssFeedStore m_rssFeeds;
 	RssFeedStore m_oldRssFeeds;
-	Hashtable m_oldRssNames;
+	RssFeedStore m_oldRssNames;
+	Vector m_feedNames;
 	protected String m_feedNameFilter = "";
 	protected String m_feedURLFilter = "";
+	protected boolean m_keepModGroup = false;
+
+	protected boolean m_keepUsPwd = false;
+
+	protected boolean m_getTitleOnly = false;
 	protected boolean m_getFeedTitleList = false;
-	protected boolean m_getAllFeedList = false;
-	protected boolean m_getAllUpdFeedList = false;
 	protected boolean m_useFeedUrlList = false;
+
+	protected boolean m_getAllFeedList = false;
+
+	protected boolean m_getAllUpdFeedList = false;
 
 	protected boolean m_override = false;  // The noticy flag for override
 	//#ifndef DSMALLMEM
 	protected boolean m_redirectHtml = false;
 	//#endif
-	protected RssItunesFeed[] m_feeds;
+	protected RssItunesFeed[] m_feeds = null;
+	protected boolean[] m_pres = null;
     final private boolean m_needParse;
     private boolean m_successfull = false;
     private Exception m_ex = null;
@@ -130,6 +158,7 @@ implements
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("FeedListParser");
 //@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private boolean finestLoggable = logger.isLoggable(Level.FINEST);
 //@    volatile protected boolean m_logChar    = false; // Log characters use traceLoggable
 //@    volatile protected boolean m_logParseChar = false; // Log characters use traceLoggable
 //@
@@ -141,13 +170,24 @@ implements
 	//#endif
 
     /** Creates a new instance of FeedListParser */
-    public FeedListParser(String url, String username, String password,
+    private FeedListParser(String url, String username, String password,
+			boolean needUrlHandler, String[] afeedNames,
 			RssFeedStore rssFeeds) {
-		urlHandler = new URLHandler();
-		m_needParse = true;
-		RssFeedStore[] arrFeeds = rssFeeds.copyFeeds();
-		m_oldRssFeeds = (RssFeedStore)arrFeeds[0];
-		m_oldRssNames = arrFeeds[1];
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("Constructor url,username,password,needUrlHandler,afeedNames,rssFeeds=" + url + "," + username + "," + password + "," + needUrlHandler + "," + afeedNames + "," + rssFeeds);}
+		//#endif
+		m_urlHandler = needUrlHandler ? new URLHandler() : (URLHandler)nullPtr;
+		m_needParse = needUrlHandler;
+		if ((m_rssFeeds = rssFeeds) != null) {
+			Object[] arrFeeds = rssFeeds.copyFeeds(afeedNames);
+			m_oldRssFeeds = (RssFeedStore)arrFeeds[0];
+			m_oldRssNames = (RssFeedStore)arrFeeds[1];
+			m_feedNames = (Vector)arrFeeds[2];
+		} else {
+			m_oldRssFeeds = (RssFeedStore)nullPtr;
+			m_oldRssNames = (RssFeedStore)nullPtr;
+			m_feedNames = (Vector)nullPtr;
+		}
         m_parsingThread = MiscUtil.getThread(this, "FeedListParser", this,
 				"constructor");
 		m_url = url;
@@ -159,21 +199,14 @@ implements
     }
     
     /** Creates a new instance of FeedListParser */
-    public FeedListParser(RssItunesFeed[] feeds, RssFeedStore rssFeeds) {
-		urlHandler = null;
-		m_needParse = false;
-		RssFeedStore[] arrFeeds = rssFeeds.copyFeeds();
-		m_oldRssFeeds = (RssFeedStore)arrFeeds[0];
-		m_oldRssNames = arrFeeds[1];
-        m_parsingThread = MiscUtil.getThread(this, "FeedListParser", this,
-				"constructor");
-		m_url = null;
-		m_username = null;
-		m_password = null;
-		m_feeds = feeds;
-		//#ifdef DMIDP20
-		observableHandler = new ObservableHandler();
-		//#endif
+    public FeedListParser(String url, String username, String password,
+			RssFeedStore rssFeeds) {
+    	this(url, username, password, true, null, rssFeeds);
+    }
+    
+    /** Creates a new instance of FeedListParser */
+    public FeedListParser(String[] feedNames, RssFeedStore rssFeeds) {
+    	this(null, null, null, false, feedNames, rssFeeds);
     }
     
     /** Start parsing the feed list */
@@ -189,6 +222,10 @@ implements
         return m_feeds;
     }
     
+    public boolean[] getPres() {
+        return (m_pres);
+    }
+
 	//#ifdef DMIDP20
 	public ObservableHandler getObservableHandler() {
 		return observableHandler;
@@ -197,28 +234,69 @@ implements
 
     /** Parsing thread */
     public void run() {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("run m_feedNameFilter,m_feedURLFilter,m_keepModGroup,m_keepUsPwd,m_maxItemCount,m_useFeedUrlList,m_getFeedTitleList,m_getTitleOnly=" + m_feedNameFilter + "," + m_feedURLFilter + "," + m_keepModGroup + "," + m_keepUsPwd + "," + + m_maxItemCount + "," + m_useFeedUrlList + "," + m_getFeedTitleList + "," + m_getTitleOnly);}
+		//#endif
         try {
 			//#ifdef DLOGGING
 //@			if (fineLoggable) {logger.fine("Thread running=" + MiscUtil.getThreadInfo(m_parsingThread));}
 			//#endif
             if (m_needParse && (((m_feeds = parseFeeds()) == null) || (m_feeds.length == 0))) {
+				m_urlHandler = (URLHandler)nullPtr;
+				if (m_feeds != null) {
+					m_pres = new boolean[0];
+				}
 				m_successfull = false;
 				m_ex = new CauseException("Invalid or empty import file " +
 						m_url);
 				return;
-			} else if (m_getFeedTitleList || m_getAllFeedList ||
-					m_getAllUpdFeedList || m_useFeedUrlList) {
-				for(int feedIndex=0; feedIndex<m_feeds.length; feedIndex++) {
-					RssItunesFeed feed = m_feeds[feedIndex];
-					String name = feed.getName();
-					String oldname;
-					if ((name.length() == 0) && m_useFeedUrlList) {
+			} else if (m_needParse || m_getFeedTitleList || m_getAllFeedList ||
+					m_getAllUpdFeedList || m_useFeedUrlList || m_getTitleOnly) {
+				m_urlHandler = (URLHandler)nullPtr;
+				int len;
+				boolean useFeeds;
+				if (useFeeds = (m_feeds != null)) {
+					len = m_feeds.length;
+				} else {
+					len = m_feedNames.size();
+				}
+				Vector vfeeds = new Vector();
+				boolean[] apres = new boolean[len];
+				int presIndex = 0;
+				for (int feedIndex=0; feedIndex < len; feedIndex++) {
+					String name;
+					RssItunesFeed origFeed;
+					if (useFeeds) {
+						origFeed = m_feeds[feedIndex];
+						name = origFeed.getName();
+					} else {
+						if ((name = (String)m_feedNames.elementAt(feedIndex)) ==
+								null) {
+							origFeed = (RssItunesFeed)nullPtr;
+						} else {
+							origFeed = m_rssFeeds.getOld(name);
+						}
+					}
+					if ((name == null) || (origFeed == null)) {
+						//#ifdef DLOGGING
+//@						logger.warning("Skipping null name/feed feedIndex,name,origFeed=" + feedIndex + "," + name + "," + ((origFeed == null) ? "null" : origFeed.getName()));
+						//#endif
+						continue;
+					}
+					RssItunesFeed feed = (origFeed != null) ?
+						(RssItunesFeed)origFeed.clone() : (RssItunesFeed)nullPtr;
+					boolean modified = false;
+					boolean hasNoName;
+					if ((hasNoName = (name.length() == 0)) && m_useFeedUrlList
+							&& (feed != null)) {
 						name = feed.getUrl();
 						feed.setName(name);
+						modified = true;
+						hasNoName = false;
 					}
-					boolean hasNoName = (name.length() == 0);
+					String oldname;
 					if (hasNoName) {
-						oldname = (String)m_oldRssNames.get(feed.getUrl());
+						oldname = m_oldRssNames.getFeedName(feed.getUrl());
 						if (oldname == null) {
 							oldname = "";
 						} else if ((oldname.length() > 0)) {
@@ -228,99 +306,170 @@ implements
 					} else {
 						oldname = name;
 					}
-					RssItunesFeed oldfeed = ((oldname.length() > 0) ?
-							m_oldRssFeeds.get(oldname) : null);
-					boolean pres = ((name.length() != 0) &&
+					RssItunesFeed oldfeed = ((oldname.length() > 0) &&
+								(m_oldRssFeeds != null)) ?
+							m_oldRssFeeds.get(oldname) : (RssItunesFeed)nullPtr;
+					boolean pres = (!hasNoName &&
 							oldname.equals(name) && (oldfeed != null));
-					if (pres && !m_getAllFeedList && !m_override) {
-						CauseException ce = new CauseException("Error:  Feed " +
-								"already exists with name " + name +
-								".  Existing feed not updated.  " +
-								"Use override in place to override an existing " +
-								"feed with an old feed with the same name.");
-						if (m_loadForm != null) {
-							m_loadForm.addExc(ce.getMessage(), ce);
-						}
-						//#ifdef DLOGGING
-//@						logger.severe("FeedListParser.run(): No override", ce);
-						//#endif
-						continue;
-					} else if (((name.length() == 0) && m_getFeedTitleList) ||
-								((name.length() != 0) && !pres) ||
-								(pres && (m_getAllFeedList || m_override))) {
-						if (pres && (m_loadForm != null)) {
-							m_loadForm.appendNote(
-									"Overriding existing feed with the one from " +
-									"import feed name " + name);
-						}
-						RssFeedParser fparser = new RssFeedParser( feed,
-								oldfeed, m_getAllUpdFeedList && pres);
-						if (m_loadForm != null) {
-							if (name.length() == 0) {
-								m_loadForm.appendMsg(
-										"Loading title for name from " +
-										feed.getUrl());
+					if (m_loadForm != null) {
+						m_loadForm.appendMsg((hasNoName ?
+								((feed != null) ? feed.getUrl() : (String)nullPtr)
+								: name) + "...");
+					//#ifdef DLOGGING
+//@					} else {
+//@						logger.info((hasNoName ?
+//@								((feed != null) ? feed.getUrl() : (String)nullPtr)
+//@								: name) + "...");
+					//#endif
+					}
+					try {
+						if (pres && !m_getAllFeedList && !m_override) {
+							CauseException ce = new CauseException(
+									"Feed already exists with name " + name +
+									".  Existing feed not updated.  " +
+									"Use override in place to override an existing " +
+									"feed with an old feed with the same name.");
+							if (m_loadForm != null) {
+								m_loadForm.addExc("Error\n" + ce.getMessage(),
+										ce);
+							}
+							//#ifdef DLOGGING
+//@							logger.severe("FeedListParser.run(): No override", ce);
+							//#endif
+							continue;
+						} else if (((name.length() == 0) && (m_getFeedTitleList
+										|| m_getTitleOnly)) ||
+								((m_getAllFeedList || m_getAllUpdFeedList) &&
+								 (name.length() != 0) && (!pres ||
+									 (pres && m_override)))) {
+							if (pres && (m_loadForm != null)) {
+								m_loadForm.appendNote(
+										"Warning\nOverriding existing feed with the one from " +
+										"import feed name " + name);
+							//#ifdef DLOGGING
+//@							} else if(pres) {
+//@								logger.info(
+//@										"Warning\nOverriding existing feed with the one from " +
+//@										"import feed name " + name);
+							//#endif
+							}
+							RssFeedParser fparser = new RssFeedParser( feed,
+									oldfeed, m_getAllUpdFeedList && pres);
+							if (m_loadForm != null) {
+								if (name.length() == 0) {
+									m_loadForm.appendMsg(
+											"\nLoading title for name from " +
+											feed.getUrl());
+								} else {
+									m_loadForm.appendMsg("\nLoading feed from " +
+											feed.getUrl());
+								}
+							}
+							//#ifdef DLOGGING
+//@							logger.finest((m_getFeedTitleList ?
+//@										"Getting title for url=" :
+//@										(m_getAllUpdFeedList ?
+//@										 "Updating feed for url=" :
+//@										 "Getting feed for url=")) +
+//@									feed.getUrl());
+							//#endif
+							if (m_getAllUpdFeedList || m_getAllFeedList) {
+								fparser.setGetFeedTitleList(m_getFeedTitleList);
 							} else {
-								m_loadForm.appendMsg("Loading feed from " +
-										feed.getUrl());
+								fparser.setGetTitleOnly(m_getTitleOnly);
+							}
+							/** Get RSS feed */
+							try {
+								fparser.parseRssFeed( m_getAllUpdFeedList,
+										m_maxItemCount );
+								feed = fparser.getRssFeed();
+								fparser = (RssFeedParser)nullPtr;
+								if (name.length() == 0) {
+									if ((oldname.length() != 0) && 
+											feed.getName().equals(oldname)) {
+										if (m_loadForm != null) {
+											m_loadForm.appendNote(
+													"\nWarning loaded title/name matches existing name, " +
+													name);
+										}
+										if (!m_getAllFeedList && !m_override) {
+											CauseException ce = new CauseException(
+													"Feed already exists with " +
+													"name " + name +
+													".  Existing feed not updated.  " +
+													"Use override in place to override an existing " +
+													"feed with an old feed with the same name.");
+											if (m_loadForm != null) {
+												m_loadForm.addExc("Error\n" +
+														ce.getMessage(), ce);
+												//#ifdef DLOGGING
+//@											} else {
+//@												logger.severe(
+//@														"Error\n" +
+//@														ce.getMessage());
+												//#endif
+											}
+											continue;
+										}
+										oldfeed = ((oldname != null) &&
+													(m_oldRssFeeds != null)) ?
+												m_oldRssFeeds.get(oldname) :
+												(RssItunesFeed)nullPtr;
+										pres = true;
+									}
+								}
+								modified = true;
+								if (pres && (m_keepUsPwd || m_keepModGroup) &&
+										(oldfeed != null)) {
+									feed.checkPresRead(m_keepModGroup, oldfeed);
+								}
+							} catch(Exception ex) {
+								if (m_loadForm != null) {
+									m_loadForm.recordExcForm(
+											"Error\nInternal error loading " +
+											"info for feed " +
+											feed.getUrl(), ex);
+								}
+							}
+						} else if ((name.length() == 0) && (!m_getFeedTitleList
+										&& !m_getTitleOnly)) {
+							if (m_loadForm != null) {
+								m_loadForm.appendNote(
+										"Error\nSkipping feed with no name url=" +
+										feed.getUrl() +
+										"\nUse get missing titles from feed.");
+							//#ifdef DLOGGING
+//@							} else {
+//@								logger.info(
+//@										"Error\nSkipping feed with no name url=" +
+//@										feed.getUrl());
+							//#endif
 							}
 						}
+					} finally {
+						vfeeds.addElement(modified ? feed : origFeed);
+						apres[presIndex++] = pres;
+						if (modified || !pres) {
+							m_rssFeeds.put(feed);
+						}
+						if (m_loadForm != null) {
+							m_loadForm.appendMsg("ok\n");
 						//#ifdef DLOGGING
-//@						logger.finest((m_getFeedTitleList ?
-//@									"Getting title for url=" :
-//@									(m_getAllUpdFeedList ?
-//@									 "Updating feed for url=" :
-//@								"Getting feed for url=")) +
-//@								feed.getUrl());
+//@						} else {
+//@							logger.info("ok");
 						//#endif
-						fparser.setGetTitleOnly(m_getFeedTitleList);
-						/** Get RSS feed */
-						try {
-							fparser.parseRssFeed( m_getAllUpdFeedList,
-									m_maxItemCount );
-							feed = fparser.getRssFeed();
-							if ((name.length() == 0) &&
-								(oldname.length() != 0) && 
-									feed.getName().equals(oldname)) {
-								if (m_loadForm != null) {
-									m_loadForm.appendNote(
-										"Loaded title/name matches existing name, " +
-										name);
-								}
-								if (!m_getAllFeedList && !m_override) {
-									CauseException ce = new CauseException(
-											"Error:  Feed " +
-											"already exists with name " + name +
-											".  Existing feed not updated.  " +
-											"Use override in place to override an existing " +
-											"feed with an old feed with the same name.");
-									if (m_loadForm != null) {
-										m_loadForm.addExc(ce.getMessage(), ce);
-									}
-									continue;
-								}
-								oldfeed = ((oldname != null) ?
-										m_oldRssFeeds.get(oldname) : null);
-								pres = true;
-							}
-							if (pres) {
-								feed.checkPresRead(m_getAllUpdFeedList,
-										oldfeed);
-							}
-							m_feeds[feedIndex] = feed;
-							if (m_loadForm != null) {
-								m_loadForm.appendMsg("ok\n");
-							}
-						} catch(Exception ex) {
-							if (m_loadForm != null) {
-								m_loadForm.recordExcForm(
-										"Error loading title for feed " +
-										feed.getUrl(), ex);
-							}
 						}
 					}
 				}
+				m_feeds = MiscUtil.getVecrFeed(vfeeds);
+				if (len == presIndex) {
+					m_pres = apres;
+				} else {
+					m_pres= new boolean[presIndex];
+					System.arraycopy(apres, 0, m_pres, 0, presIndex);
+				}
 			}
+			m_urlHandler = (URLHandler)nullPtr;
 			m_successfull = true;
         } catch( Throwable e ) {
 			m_ex = URLHandler.procIoExc("Error while parsing import data ", e,
@@ -333,7 +482,7 @@ implements
 					//#endif
 					);
         } finally {
-			//#ifdef DMIDP20
+			//#ifndef DSMALLMEM
 			MiscUtil.removeThread(m_parsingThread);
 			//#endif
 			//#ifdef DLOGGING
@@ -346,7 +495,13 @@ implements
 				observableHandler.notifyObservers(this);
 			}
 			//#endif
-        }        
+			m_oldRssFeeds = (RssFeedStore)nullPtr;
+			m_oldRssNames = (RssFeedStore)nullPtr;
+			m_feedNames = (Vector)nullPtr;
+			if (m_rssFeeds != null) {
+				m_rssFeeds.clearFeedInfo();
+			}
+        }
     }  
     
     
@@ -354,14 +509,14 @@ implements
     public RssItunesFeed[] parseFeeds() throws IOException, Exception {
         
 		try {
-			urlHandler.handleOpen(m_url, m_username, m_password, false, false,
+			m_urlHandler.handleOpen(m_url, m_username, m_password, false, false,
 					null, "",
 					"Error while parsing import data ",
 					"Out of memory error while parsing import data ",
 					"Internal error while parsing import data ");
-			if (urlHandler.m_needRedirect) {
-				urlHandler.m_needRedirect = false;
-				m_feeds = parseHeaderRedirect(urlHandler.m_location);
+			if (m_urlHandler.m_needRedirect) {
+				m_urlHandler.m_needRedirect = false;
+				m_feeds = parseHeaderRedirect(m_urlHandler.m_location);
 				return m_feeds;
 			}
 
@@ -370,11 +525,11 @@ implements
 //@			if (fineLoggable) {logger.fine("m_redirectHtml=" + m_redirectHtml);}
 			//#endif
 			// If we find HTML, usually it is redirection
-			if (m_redirectHtml && HTMLParser.isHtml(urlHandler.m_contentType)) {
+			if (m_redirectHtml && HTMLParser.isHtml(m_urlHandler.m_contentType)) {
 				return parseHTMLRedirect();
 			} else {
 			//#endif
-				return parseFeeds(urlHandler.m_inputStream);
+				return parseFeeds(m_urlHandler.m_inputStream);
 			//#ifndef DSMALLMEM
 			}
 			//#endif
@@ -390,7 +545,7 @@ implements
 					);
 			throw ex;
         } finally {
-			urlHandler.handleClose();
+			m_urlHandler.handleClose();
 		}
     }
     
@@ -402,12 +557,12 @@ implements
 //@			logger.severe("Error 2nd header redirect url:  " + newUrl);
 			//#endif
 			System.out.println("Error 2nd header redirect url " +
-					urlHandler.m_redirectUrl + " to 2nd redirect " + newUrl);
+					m_urlHandler.m_redirectUrl + " to 2nd redirect " + newUrl);
 			throw new IOException("Error 2nd header redirect url " +
-					urlHandler.m_redirectUrl + " to 2nd redirect " + newUrl);
+					m_urlHandler.m_redirectUrl + " to 2nd redirect " + newUrl);
 		}
 		m_redirect = true;
-		urlHandler.m_redirectUrl = m_url;
+		m_urlHandler.m_redirectUrl = m_url;
 		m_url = newUrl;
 		try {
 			return parseFeeds();
@@ -421,7 +576,7 @@ implements
 	private RssItunesFeed[] parseHTMLRedirect()
     throws IOException, Exception {
 		String svUrl = m_url;
-		m_url = urlHandler.parseHTMLRedirect(m_url, urlHandler.m_inputStream);
+		m_url = m_urlHandler.parseHTMLRedirect(m_url, m_urlHandler.m_inputStream);
 		try {
 			return parseFeeds();
 		} finally {
@@ -494,6 +649,50 @@ implements
 
     public void setUseFeedUrlList(boolean useFeedUrlList) {
         this.m_useFeedUrlList = useFeedUrlList;
+    }
+
+    public void setGetTitleOnly(boolean getTitleOnly) {
+        this.m_getTitleOnly = getTitleOnly;
+    }
+
+    public void setGetAllFeedList(boolean getAllFeedList) {
+        this.m_getAllFeedList = getAllFeedList;
+    }
+
+    public boolean isGetAllFeedList() {
+        return (m_getAllFeedList);
+    }
+
+    public void setGetAllUpdFeedList(boolean getAllUpdFeedList) {
+        this.m_getAllUpdFeedList = getAllUpdFeedList;
+    }
+
+    public boolean isGetAllUpdFeedList() {
+        return (m_getAllUpdFeedList);
+    }
+
+    public void setKeepModGroup(boolean keepModGroup) {
+        this.m_keepModGroup = keepModGroup;
+    }
+
+    public boolean isKeepModGroup() {
+        return (m_keepModGroup);
+    }
+
+    public void setKeepUsPwd(boolean keepUsPwd) {
+        this.m_keepUsPwd = keepUsPwd;
+    }
+
+    public boolean isKeepUsPwd() {
+        return (m_keepUsPwd);
+    }
+
+    public void setOverride(boolean override) {
+        this.m_override = override;
+    }
+
+    public boolean isOverride() {
+        return (m_override);
     }
 
     public void setLoadForm(LoadingForm loadForm) {
