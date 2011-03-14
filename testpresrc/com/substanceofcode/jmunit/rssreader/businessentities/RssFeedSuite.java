@@ -51,11 +51,6 @@ final public class RssFeedSuite extends TestSuite {
 	public RssFeedSuite() {
 		super("RssFeedSuite");
 		add(new RssFeedStoreStrTest());
-		//#ifdef DCOMPATIBILITY
-		add(new com.substanceofcode.jmunit.rssreader.businessentities.compatibility1.RssFeedStoreTest());
-		add(new com.substanceofcode.jmunit.rssreader.businessentities.compatibility2.RssFeedStoreTest());
-		add(new com.substanceofcode.jmunit.rssreader.businessentities.compatibility3.RssFeedStoreTest());
-		//#endif
 	}
 }
 //#endif
