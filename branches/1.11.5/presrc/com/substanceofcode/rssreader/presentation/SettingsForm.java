@@ -67,6 +67,11 @@
  * IB 2011-01-18 1.11.5Dev16 Use initForm (singular) to initialize the settings form's vars/form.  
  * IB 2011-01-18 1.11.5Dev16 Use initForms (plural in RssReaderMIDlet) to initialize the settings form.  This will handle showing of about/license.
  * IB 2011-01-18 1.11.5Dev16 Use getCmdAdd to create and add a command.
+ * IB 2011-01-28 1.11.5Dev17 Change setSettingNbr to setFrGui2SettingNbr.
+ * IB 2011-01-28 1.11.5Dev17 Set and update MOBILIZER_CHOICE.
+ * IB 2011-01-29 1.11.5Dev17 Use setFrSettings2GuiNbr in FeatureMgr to set numeric gui TextField from RssReaderSettings.
+ * IB 2011-01-29 1.11.5Dev17 Change max items for feed TextField to show current setting instead of default setting.
+ * IB 2011-03-06 1.11.5Dev17 Allow regular and up memory devices to use bookmark name in title.  
  */
 
 // Expand to define MIDP define
@@ -167,10 +172,13 @@ implements CommandListener
 	//#else
     private StringItem m_itunesEnabled;
 	//#endif
+	//#ifndef DSMALLMEM
+    private ChoiceGroup m_nameNews;
+	//#endif
 	//#ifdef DMIDP20
+    private ChoiceGroup m_mobilizerChoice;
     private ChoiceGroup m_fontChoice;
     private ChoiceGroup m_fitPolicy;
-    private ChoiceGroup m_nameNews;
     private TextField m_backlightFlash;
     private TextField m_vibrate;
 	//#endif
@@ -207,12 +215,12 @@ implements CommandListener
 	}
         
  	public void initForm() {
-        m_okCommand = FeatureMgr.getCmdAdd(this, "OK", Command.OK, 4);
+        m_okCommand = FeatureMgr.getCmdAdd(this, "OK", null, Command.OK, 4);
 
 		//#ifdef DFULLVERS
-        m_cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", Command.CANCEL, 2);
+        m_cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", null, Command.CANCEL, 2);
 		//#else
-		FeatureMgr.m_aboutCmd = FeatureMgr.getCmdAdd(this, "About", Command.SCREEN, 100);
+		FeatureMgr.m_aboutCmd = FeatureMgr.getCmdAdd(this, "About", null, Command.SCREEN, 100);
 		FeatureMgr.getRssMidlet().initExit(this);
 		//#endif
         
@@ -222,13 +230,11 @@ implements CommandListener
 		//#endif
         
         RssReaderSettings settings = featureMgr.getRssMidlet().getSettings();
-        Settings csettings = settings.getSettingsInstance();
+        Settings bsettings = settings.getSettingsInstance();
 		//#ifdef DFULLVERS
-        int maxCount = settings.getMaximumItemCountInFeed();
-        
         m_itemCountField = FeatureMgr.getAddTextField(this,
 				"Max item count in feed",
-                String.valueOf(settings.INIT_MAX_ITEM_COUNT), 3,
+                String.valueOf(settings.getMaximumItemCountInFeed()), 3,
 				TextField.NUMERIC);
 
         m_markUnreadItems = FeatureMgr.getAddChoiceGroup(this,
@@ -249,7 +255,16 @@ implements CommandListener
 				"This is only available on the smartphone version.");
 		//#endif
 
+		//#ifndef DSMALLMEM
+        m_nameNews = FeatureMgr.getAddChoiceGroup(this,
+				"Put feed name in river of news", new String []
+				{"Don't show name", "Show name"});
+		//#endif
 		//#ifdef DMIDP20
+        m_mobilizerChoice = FeatureMgr.getAddChoiceGroup(this,
+				"Choose mobilizer size",
+				new String[] {"No mobilizer", "Google mobilizer",
+				"Skweezer mobilizer"});
         m_fontChoice = FeatureMgr.getAddChoiceGroup(this,
 				"Choose list font size",
 				new String[] {"Default font size", "Small",
@@ -258,15 +273,10 @@ implements CommandListener
 				"Choose list wraparound",
 				new String[] {"Default wrap around", "Wraparound on",
 				"Wrap around off"});
-        m_nameNews = FeatureMgr.getAddChoiceGroup(this,
-				"Put feed name in river of news", new String []
-				{"Don't show name", "Show name"});
-
         m_backlightFlash = FeatureMgr.getAddTextField(this,
 				"Flash backlight for seconds after updating.",
                 String.valueOf(settings.getBacklightFlashSecs()), 3,
 				TextField.NUMERIC);
-
         m_vibrate = FeatureMgr.getAddTextField(this,
 				"Vibrate phone for seconds after updating.",
                 String.valueOf(settings.getVibrateSecs()), 3,
@@ -365,9 +375,9 @@ implements CommandListener
 		String mepl = (String)omepl[0];
         FeatureMgr.getAddStringItem(this, "Phone Microedition platform:", mepl);
 		try {
-			m_currfnp = csettings.getStringProperty(0, "build-file-root", "") +
+			m_currfnp = bsettings.getStringProperty(0, "build-file-root", "") +
 				".";
-			String[] sbuildf = MiscUtil.split(csettings.getStringProperty(0,
+			String[] sbuildf = MiscUtil.split(bsettings.getStringProperty(0,
 						"sbuild-file-root", ""), ",");
 			boolean projectFound = false;
 			StringBuffer sb = new StringBuffer();
@@ -376,7 +386,7 @@ implements CommandListener
 				if (m_finestLoggable) {m_logger.finest("Constructor sbuildf[i]=" + i + "," + sbuildf[i]);}
 				//#endif
 				String sval = ((sbuildf[i].charAt(0) == '-') ? "-_" :
-						csettings.getStringProperty(0, sbuildf[i].replace(
+						bsettings.getStringProperty(0, sbuildf[i].replace(
 								'.', '-'), ""));
 				//#ifdef DLOGGING
 				if (m_finestLoggable) {m_logger.finest("Constructor sval=" + sval);}
@@ -517,9 +527,10 @@ implements CommandListener
 	public void updateForm() {
         RssReaderMIDlet midlet = featureMgr.getRssMidlet();
         RssReaderSettings settings = midlet.getSettings();
+        Settings bsettings = settings.getSettingsInstance();
 		//#ifdef DFULLVERS
-        int maxCount = settings.getMaximumItemCountInFeed();
-        m_itemCountField.setString(String.valueOf(maxCount));
+		super.featureMgr.setFrSettings2GuiNbr(bsettings,
+				settings.MAX_ITEM_COUNT, m_itemCountField);
         boolean markUnreadItems = settings.getMarkUnreadItems();
 		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
 		m_markUnreadItems.setSelectedFlags( selectedItems );
@@ -539,7 +550,15 @@ implements CommandListener
 		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
 		//#endif
 		// end DSMARTPHONE
+		//#ifndef DSMALLMEM
+        boolean nameNews = settings.getBookmarkNameNews();
+		m_nameNews.setSelectedFlags( new boolean[] {!nameNews, nameNews});
+		//#endif
 		//#ifdef DMIDP20
+        int mobilizerChoice = settings.getMobilizerChoice();
+		m_mobilizerChoice.setSelectedFlags( new boolean[] {false, false, false,
+				false} );
+		m_mobilizerChoice.setSelectedIndex( mobilizerChoice, true );
         int fontChoice = settings.getFontChoice();
 		m_fontChoice.setSelectedFlags( new boolean[] {false, false, false,
 				false} );
@@ -547,16 +566,19 @@ implements CommandListener
         int fitPolicy = settings.getFitPolicy();
 		m_fitPolicy.setSelectedFlags( new boolean[] {false, false, false} );
 		m_fitPolicy.setSelectedIndex( fitPolicy, true );
-        boolean nameNews = settings.getBookmarkNameNews();
-		m_nameNews.setSelectedFlags( new boolean[] {!nameNews, nameNews});
+		super.featureMgr.setFrSettings2GuiNbr(bsettings,
+				settings.BACKLIGHT_FLASH_SECS, m_backlightFlash);
+		super.featureMgr.setFrSettings2GuiNbr(bsettings, settings.VIBRATE_SECS,
+				m_vibrate);
 		//#endif
 		// end DMIDP20
+		super.featureMgr.setFrSettings2GuiNbr(bsettings,
+				settings.MAX_WORD_COUNT, m_wordCountField);
 		//#endif
 		// end DFULLVERS
 		int[] memInfo = null;
 		try {
-			Settings csettings = settings.getSettingsInstance();
-			memInfo = csettings.getSettingMemInfo();
+			memInfo = bsettings.getSettingMemInfo();
 		} catch (Exception e) {
 			memInfo = new int[0];
 		}
@@ -589,14 +611,14 @@ implements CommandListener
 		{
             // Save settings
             RssReaderSettings settings = midlet.getSettings();
-			Settings csettings = settings.getSettingsInstance();
+			Settings bsettings = settings.getSettingsInstance();
 			LoadingForm loadForm = LoadingForm.getLoadingForm(
 						"Updating settings...", this, null);
 			super.featureMgr.setLoadForm(loadForm);
             try {
 				//#ifdef DFULLVERS
-                int maxCount = Integer.parseInt( m_itemCountField.getString() );
-                settings.setMaximumItemCountInFeed( maxCount );
+				super.featureMgr.setFrGui2SettingsNbr(m_itemCountField,
+						settings.MAX_ITEM_COUNT, bsettings);
 				boolean markUnreadItems = m_markUnreadItems.isSelected(0);
                 settings.setMarkUnreadItems( markUnreadItems );
 				//#ifdef DMIDP20
@@ -609,7 +631,12 @@ implements CommandListener
 				//#else
 				settings.setItunesEnabled( false );
 				//#endif
+				//#ifndef DSMALLMEM
+				settings.setBookmarkNameNews( !m_nameNews.isSelected(0) );
+				//#endif
 				//#ifdef DMIDP20
+				settings.setMobilizerChoice(
+						m_mobilizerChoice.getSelectedIndex() );
 				int fontChoice = m_fontChoice.getSelectedIndex();
 				settings.setFontChoice( fontChoice );
 				//#ifdef DLOGGING
@@ -620,19 +647,15 @@ implements CommandListener
 				//#ifdef DLOGGING
 				if (m_fineLoggable) {m_logger.fine("fitPolicy=" + fitPolicy);}
 				//#endif
-				boolean nameNews = !m_nameNews.isSelected(0);
-				settings.setBookmarkNameNews( nameNews );
-
-				super.featureMgr.setSettingNbr(m_backlightFlash,
-						settings.BACKLIGHT_FLASH_SECS, csettings);
-
-				super.featureMgr.setSettingNbr(m_vibrate,
-						settings.VIBRATE_SECS, csettings);
+				super.featureMgr.setFrGui2SettingsNbr(m_backlightFlash,
+						settings.BACKLIGHT_FLASH_SECS, bsettings);
+				super.featureMgr.setFrGui2SettingsNbr(m_vibrate,
+						settings.VIBRATE_SECS, bsettings);
 
 				//#endif
 
-				super.featureMgr.setSettingNbr(m_wordCountField,
-						settings.MAX_WORD_COUNT, csettings);
+				super.featureMgr.setFrGui2SettingsNbr(m_wordCountField,
+						settings.MAX_WORD_COUNT, bsettings);
 				//#endif
 				// end DFULLVERS
 
