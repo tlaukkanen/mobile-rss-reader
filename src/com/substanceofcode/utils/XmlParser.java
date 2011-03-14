@@ -50,6 +50,7 @@
  * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  * IB 2011-01-14 1.11.5Alpha15 Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
  * IB 2011-01-24 1.11.5Dev16 Put in comment out future code to use both local and global vars for buffering.
+ * IB 2011-03-06 1.11.5Dev17 More logging.
 */
 
 // Expand to define full vers define
@@ -1101,7 +1102,7 @@ public class XmlParser {
 				}
 			}
 			//#ifdef DLOGGING
-//@			if (finerLoggable) {logger.finer("getAttributeValue attribute value=" + value);}
+//@			if (finerLoggable) {logger.finer("getAttributeValue attribute,value=" + attributeName + "," + value);}
 			//#endif
 					
 			return value;
