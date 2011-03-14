@@ -384,6 +384,18 @@ v1.11.5 Dev 16 (Dev16) (Jan 27th 2011)
 - Allow access modification to allow ProGuard optimizer greater flexibility to optimize.  Performance effect:  unknown.
 - Minor performance and code reduction improvements.
 
+v1.11.5 Dev 17 (Dev17) (Mar 13th 2011)
+- Allow optional import and complete loading of feed at the same time (this takes much longer).
+- Small memory savings.
+- Fix to allow parameters in links.
+- Show current max items on settings form.
+- Distribute RIM alx and cod file in a zip file for each version.
+- Allow settings to choose google or Skweezer mobility option to open links.  This can help with large forms on underpowered devices.  For google, there is a no picture option when opening.
+- Fix bad link for atoms which have both href and text.
+- Allow more date formats.
+- Fix bad links for RSS if initial capital image tag is in header.
+- Use base tag for HTML imports.
+
 Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
