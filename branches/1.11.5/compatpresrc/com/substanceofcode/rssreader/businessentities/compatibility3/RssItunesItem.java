@@ -36,6 +36,7 @@
 package com.substanceofcode.rssreader.businessentities.compatibility3;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesItemInfo;
+import com.substanceofcode.rssreader.businessentities.RssItunesInfo;
 import com.substanceofcode.rssreader.businessentities.RssItemInfo;
 import com.substanceofcode.utils.compatibility4.Base64;
 import com.substanceofcode.utils.MiscUtil;
@@ -59,7 +60,7 @@ import net.sf.jlogmicro.util.logging.Level;
  */
 public class RssItunesItem extends RssItem
 //#ifdef DTEST
-implements RssItunesItemInfo
+implements RssItunesItemInfo, RssItunesInfo
 //#endif
 {
     
