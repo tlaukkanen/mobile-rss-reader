@@ -3,9 +3,11 @@
 #-- IB 2011-01-14 1.11.5Dev16 Use standard file prefix to allow internet link program to use it.
 #-- IB 2011-01-27 1.11.5Dev16 Fix novice prefix by adding _ at the end.
 #-- IB 2011-01-27 1.11.5Dev16 Fix novice property by making it true.
+#-- IB 2011-03-06 1.11.5Dev17 Skip smartlink given that it gives class not found error for MIDP 2.0.
 DNOVICEDEF = DNOVICE
 NOVICE = true
 file.prefix.novice = ${sfile.prefix.novice}_
 SUFFIXVERS.novice = -novice
 novice.txt = novice 
 novice = true
+skip.smartlink = true
