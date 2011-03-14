@@ -19,6 +19,8 @@
 /*
  * IB 2010-04-30 1.11.5RC2 Track thread info.
  * IB 2010-04-30 1.11.5RC2 Method to get the first cause.
+ * IB 2011-03-10 1.11.5Dev17 Have equals method for CauseException.
+ * IB 2011-03-10 1.11.5Dev17 Have different serialVersionUID for CauseException to be different from the compatibility version.
  */
 
 // Expand to define memory size define
@@ -32,7 +34,7 @@ package com.substanceofcode.utils;
  */
 public class CauseException extends Exception {
     
-    private static final long serialVersionUID = 50L;
+    private static final long serialVersionUID = 51L;
     final static protected int MAX_CAUSES = 50;
     private Throwable cause = null;
 	//#ifndef DSMALLMEM
@@ -109,5 +111,17 @@ public class CauseException extends Exception {
 
         return null;
     }
+	
+	public boolean equals(Exception exc) {
+		if (exc == null) {
+			return false;
+		} else if ((super.getMessage() != null) && (exc.getMessage() != null)) {
+			return super.getMessage().equals(exc.getMessage());
+		} else if ((super.getMessage() == null) && (exc.getMessage() == null)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 }
