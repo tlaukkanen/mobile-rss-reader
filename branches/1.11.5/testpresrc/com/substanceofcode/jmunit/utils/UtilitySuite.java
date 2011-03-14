@@ -53,6 +53,7 @@ final public class UtilitySuite extends TestSuite {
 
 	public UtilitySuite() {
 		super("UtilitySuite");
+		add(new MiscUtilTest());
 		add(new Settings1Test());
 		add(new Settings2Test());
 		//#ifdef DFULLVERS
@@ -62,9 +63,6 @@ final public class UtilitySuite extends TestSuite {
 		add(new XmlParserTest());
 		//#ifndef DSMALLMEM
 		add(new HtmlParserTest());
-		//#endif
-		//#ifdef DCOMPATIBILITY
-		add(new com.substanceofcode.jmunit.utils.compatibility4.SortTest());
 		//#endif
 		//#endif
 	}
