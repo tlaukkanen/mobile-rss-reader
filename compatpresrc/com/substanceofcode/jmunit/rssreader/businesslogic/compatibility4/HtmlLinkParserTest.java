@@ -45,6 +45,7 @@
  * IB 2011-01-22 1.11.5Dev16 Start with first link for sourceforge which while invalid, will cause prompt for internet access.  When taking http stats, don't count the first (sourceforge) link so that time to answer prompt is not counted as access time.
  * IB 2011-01-22 1.11.5Dev16 Only take stats if both parsers are successful at parsing.  This prevents bad protocol (e.g. not http) links from giving bad stats.
  * IB 2011-01-22 1.11.5Dev16 If not logging, use stdout to list stats.
+ * IB 2011-03-08 1.11.5Dev17 Increase number of tests to 15.
  */
 
 // Expand to define MIDP define
@@ -72,8 +73,8 @@ import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFe
 import com.substanceofcode.rssreader.businesslogic.compatibility4.HTMLLinkParser;
 //#endif
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.compatibility4.Observer;
-import net.eiroca.j2me.observable.compatibility4.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -84,7 +85,7 @@ import net.sf.jlogmicro.util.logging.Level;
 
 final public class HtmlLinkParserTest extends BaseTestCase
 //#ifdef DMIDP20
-implements Observer, net.yinlight.j2me.observable.Observer
+implements Observer
 //#endif
 {
 
@@ -92,8 +93,8 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	private boolean ready = false;
 	//#endif
 
-	private boolean oneTestOnly = false;
-	private boolean retryModHttp = oneTestOnly && false;
+	private boolean oneTestOnly = true;
+	private boolean retryModHttp = oneTestOnly && false; // UNDO
 	private String testUrl = (oneTestOnly ? "jar:///links.html" :
 				"http://mobilerssreader.sourceforge.net/testdata/links.html");
 	private long currTotalTime = 0L;
@@ -101,18 +102,19 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	private long oldTotalTime = 0L;
 	private long oldTotalCount = 0L;
 	private int nextIx = 0; // Start at 0 to get interenet prompt for sourceforge home to skip it's stats.
-	private int prevNextIx = 0; // Start at 0 to get interenet prompt for sourceforge home to skip it's stats.
+	private int prevNextIx = nextIx; // undo 0; // Start at 0 to get interenet prompt for sourceforge home to skip it's stats.
+	static private int nbrTests = 15;
 	//#ifdef DLOGGING
-	private boolean alterLogLevel = fineLoggable; // traceLoggable;
+	private boolean alterLogLevel = traceLoggable;
 	private boolean endAlterLogLevel = false;
 	private boolean levelAltered = false;
-	private int alterix = 45;
-	private int endAlterix = 47;
-	private String newLogLevel = Level.FINEST.getName();
+	private int alterix = 49;
+	private int endAlterix = 50;
+	private String newLogLevel = Level.FINEST.getName(); // UNDO
 	//#endif
 
 	public HtmlLinkParserTest() {
-		super(10, "compatibility4.HtmlLinkParserTest");
+		super(nbrTests, "compatibility4.HtmlLinkParserTest");
 	}
 
 	public void test(int testNumber) throws Throwable {
@@ -147,6 +149,21 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			case 9:
 				testHtmlParse10();
 				break;
+			case 10:
+				testHtmlParse11();
+				break;
+			case 11:
+				testHtmlParse12();
+				break;
+			case 12:
+				testHtmlParse13();
+				break;
+			case 13:
+				testHtmlParse14();
+				break;
+			case 14:
+				testHtmlParse15();
+				break;
 			default:
 				fail("Bad number for switch testNumber=" + testNumber);
 				break;
@@ -154,17 +171,10 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 		synchronized(this) {
-			super.notifyAll();
 			ready = true;
-		}
-	}
-
-	public void changed(net.yinlight.j2me.observable.Observable observable, Object arg) {
-		synchronized(this) {
 			super.notifyAll();
-			ready = true;
 		}
 	}
 
@@ -288,6 +298,61 @@ implements Observer, net.yinlight.j2me.observable.Observer
 		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, true);
 	}
 
+	public void testHtmlParse11() throws Throwable {
+		String mname = "testHtmlParse11";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				testUrl, "", "", new RssFeedStore());
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser(testUrl, "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, true);
+	}
+
+	public void testHtmlParse12() throws Throwable {
+		String mname = "testHtmlParse12";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				testUrl, "", "", new RssFeedStore());
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser(testUrl, "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, true);
+	}
+
+	public void testHtmlParse13() throws Throwable {
+		String mname = "testHtmlParse13";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				testUrl, "", "", new RssFeedStore());
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser(testUrl, "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, true);
+	}
+
+	public void testHtmlParse14() throws Throwable {
+		String mname = "testHtmlParse14";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				testUrl, "", "", new RssFeedStore());
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser(testUrl, "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, true);
+	}
+
+	public void testHtmlParse15() throws Throwable {
+		String mname = "testHtmlParse15";
+		com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser =
+			new com.substanceofcode.rssreader.businesslogic.HTMLLinkParser(
+				testUrl, "", "", new RssFeedStore());
+		HTMLLinkParser cmpHtmlParser =
+			new HTMLLinkParser(testUrl, "", "");
+
+		compatibilityHtmlLinkParserTestSub(mname, htmlParser, cmpHtmlParser, true);
+	}
+
     public void compatibilityHtmlLinkParserTestSub(final String pmname,
 			com.substanceofcode.rssreader.businesslogic.HTMLLinkParser htmlParser,
 			HTMLLinkParser compatibilityHtmlParser, boolean endFeeds)
@@ -371,7 +436,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			} else {
 				throw compatibilityHtmlParser.getEx();
 			}
-			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / 10));
+			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / nbrTests));
 			for (; (nextIx < endIx) && (nextIx < rssfeeds.length) && (nextIx < cmpRssFeeds.length);
 					nextIx++) {
 				//#ifdef DLOGGING
@@ -380,7 +445,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					svLogLevel = super.updSvLogging(newLogLevel);
 					alterLogLevel = false;
 					logger.info(mname + " altering level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
-				} else if (endAlterLogLevel && (nextIx >= endAlterix)) {
+				} else if (endAlterLogLevel && (nextIx > endAlterix)) {
 					endAlterLogLevel = false;
 					super.updPrevLogging(svLogLevel);
 					logger.info(mname + " reverting level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
@@ -449,7 +514,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				//#ifdef DMIDP20
 				cmpFparser.makeObserable(null, true, 10);
 				ready = false;
-				cmpFparser.getObserverManager().addObserver(this);
+				cmpFparser.getObservableHandler().addObserver(this);
 				cmpFparser.getParsingThread().start();
 				while (!isReady()) {
 					synchronized(this) {
@@ -513,7 +578,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				// Workaround
 				Object[] oret = super.cmpModLog(
 						"Feed must equal expected feed " + assertInfo,
-						ncmpfeed, nfeed);
+						ncmpfeed, nfeed, null);
 				if (oret[1] != null) {
 					throw (Throwable)oret[1];
 				}
