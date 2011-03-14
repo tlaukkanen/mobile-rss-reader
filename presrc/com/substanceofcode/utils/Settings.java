@@ -72,6 +72,7 @@
  * IB 2011-01-11 1.11.5Dev15 Change logging of load value to trace.
  * IB 2011-01-11 1.11.5Dev15 Have deleteStore create settings if it does not exist since the vars are no longer static, need to use settings instance to access instance vars to delete store.
  * IB 2011-01-24 1.11.5Dev16 For internet link version, settings is used only by SettingsForm.  Don't have it be a singleton to reduce static methods.
+ * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
  */
 
 // Expand to define CLDC define
@@ -93,8 +94,8 @@ import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
-import javax.microedition.lcdui.*;
+import java.util.Hashtable;
+import java.util.Enumeration;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
