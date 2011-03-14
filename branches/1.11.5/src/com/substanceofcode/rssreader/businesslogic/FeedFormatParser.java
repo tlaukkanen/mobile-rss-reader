@@ -21,6 +21,7 @@
  */
 /*
  * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-03-13 1.11.5Dev17 Have getFeedTitleList to use title for name when parsing the whole feed.
  */
 
 // Expand to define full vers define
@@ -44,7 +45,8 @@ import java.util.Vector;
 public interface FeedFormatParser {
 
     RssItunesFeed parse(XmlParser parser, RssItunesFeed feed,
-			int maxItemCount, boolean getTitleOnly) throws IOException;
+			int maxItemCount, boolean getFeedTitleList, boolean getTitleOnly)
+	throws IOException;
     
 }
 //#endif
