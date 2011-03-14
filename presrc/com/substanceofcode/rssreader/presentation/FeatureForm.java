@@ -30,6 +30,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
  * IB 2011-01-12 1.11.5Alpha15 Don't use static vars for RssReaderSettings.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
  */
 
 // Expand to define MIDP define
@@ -187,8 +188,8 @@ public class FeatureForm extends Form {
 				"Font not supported by device.  Reset to default or pick another font.");
 			loadForm.addExc("Error changing font.", ce);
 		}
-		RssReaderMIDlet midlet = featureMgr.getRssMidlet();
-		if (midlet != null) {
+        RssReaderMIDlet midlet;
+        if ((midlet = featureMgr.getRssMidlet()) != null) {
 			midlet.getSettings().setFontChoice(
 				midlet.getSettings().DEFAULT_FONT_CHOICE);
 		}
