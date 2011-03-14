@@ -108,6 +108,16 @@
  * IB 2011-01-24 1.11.5Dev16 Fix println statement.
  * IB 2011-01-24 1.11.5Dev16 Have jsr75Avail to determine if JSR-75 is available for MIDlet, applet or standalone.  Also, return if exists or the version number.
  * IB 2010-11-22 1.11.5Dev14 For CLDC 1.0, use this.getClass() to get the class instance to use to load KFileSelectorMgr.
+ * IB 2011-01-28 1.11.5Dev17 Change setSettingNbr to setFrGui2SettingsNbr.
+ * IB 2011-01-28 1.11.5Dev17 Add setFrSettings2GuiNbr to set the text field with a numeric value from the settings with the given key.
+ * IB 2011-03-06 1.11.5Dev17 Only use thread utils if not small memory.
+ * IB 2011-03-06 1.11.5Dev17 Only use CmdReceiver utils if not small memory.
+ * IB 2011-03-06 1.11.5Dev17 Have setFrGui2SettingsNbr to take the Items from the form and set the corresponding int RSS settings.
+ * IB 2011-03-06 1.11.5Dev17 Have setFrSettings2GuiNbr to take the int settings from RSS settings and set the corresponding Item in the form.
+ * IB 2011-03-06 1.11.5Dev17 Have getCmdAdd and getCmdAddPrompt allow optional long label.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
+ * IB 2011-03-06 1.11.5Dev17 Make sure midlet is not null for tests and future combination with other programs.
+ * IB 2011-03-06 1.11.5Dev17 Let adding prompt to be used for non FeatureForm/List.  The prompt is ignored if not for these displayables.
 */
 
 // Expand to define MIDP define
@@ -171,7 +181,7 @@ import com.substanceofcode.testlcdui.TextField;
 
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.Settings;
-//#ifdef DMIDP20
+//#ifndef DSMALLMEM
 import com.substanceofcode.utils.CmdReceiver;
 //#endif
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
@@ -188,7 +198,7 @@ import net.sf.jlogmicro.util.logging.Level;
 
 public class FeatureMgr implements CommandListener,
 	   Runnable
-		//#ifdef DMIDP20
+		//#ifndef DSMALLMEM
 	   ,CmdReceiver
 		//#endif
 {
@@ -498,7 +508,7 @@ public class FeatureMgr implements CommandListener,
 				}
 			} while (background);
 		} finally {
-			//#ifdef DMIDP20
+			//#ifndef DSMALLMEM
 			if (procThread != null) {
 				MiscUtil.removeThread(procThread);
 			}
@@ -524,7 +534,7 @@ public class FeatureMgr implements CommandListener,
 
 	public void startWakeup(boolean wakeupThread) {
 		if ( (procThread == null) || !procThread.isAlive()) {
-			//#ifdef DMIDP20
+			//#ifndef DSMALLMEM
 			if (procThread != null) {
 				MiscUtil.removeThread(procThread);
 			}
@@ -707,9 +717,14 @@ public class FeatureMgr implements CommandListener,
 		return choiceGroup;
 	}
 
-	public void setSettingNbr(TextField nfield, String setKey,
+	public void setFrGui2SettingsNbr(TextField nfield, String setKey,
 			Settings settings) {
 		settings.setIntProperty(setKey, Integer.parseInt(nfield.getString()));
+	}
+
+	public void setFrSettings2GuiNbr(Settings settings, String setKey,
+			TextField nfield) {
+		nfield.setString(String.valueOf(settings.getIntProperty(setKey, 0)));
 	}
 
     /** Initialize URL text Box */
@@ -916,7 +931,10 @@ public class FeatureMgr implements CommandListener,
 
 	//#ifdef DMIDP20
 	public Font getCustomFont() {
-		final RssReaderSettings appSettings = FeatureMgr.getRssMidlet().getSettings();
+		RssReaderMIDlet midlet;
+		final RssReaderSettings appSettings = ((midlet =
+				FeatureMgr.getRssMidlet()) == null) ? null :
+				midlet.getSettings();
 		if (appSettings == null) {
 			return null;
 		}
@@ -990,7 +1008,7 @@ public class FeatureMgr implements CommandListener,
 	}
 	//#endif
 
-	//#ifdef DMIDP20
+	//#ifndef DSMALLMEM
 	public Object[] action(Object[] reqs) {
 		if ((reqs.length == 2) && (reqs[0] instanceof Short) &&
 			((Short)reqs[0] == MiscUtil.SPAUSE_APP)) {
@@ -1076,36 +1094,48 @@ public class FeatureMgr implements CommandListener,
 	//#endif
 
   /**
-   * Create a new command using the resource key and standard parms
+   * Create a new command using the standard parms
    *
    * @param label - command label
+   * @param longLabel - long command label (ignored if not MIDP 2.0)
    * @param commandType - Command type
    * @param priority - Command priority
    * @return    Command
    * @author Irv Bunton
    */
     public static Command getCmdAdd(Displayable disp, String label,
-			int commandType, int priority) {
+			String longLabel, int commandType, int priority) {
 		//#ifdef DLOGGING
 		Logger logger = Logger.getLogger("FeatureMgr");
-		logger.finest("getCmdAdd label,commandType,priority=" + label + "," + commandType + "," + priority);
+		logger.finest("getCmdAdd label,longLabel,commandType,priority=" + label + "," + longLabel + "," + commandType + "," + priority);
 		//#endif
 		Command ncmd;
-		disp.addCommand(ncmd = new Command(label, commandType, priority));
+		//#ifdef DMIDP20
+		if (longLabel != null) {
+			disp.addCommand(ncmd = new Command(label, longLabel, commandType,
+						priority));
+		} else {
+			//#endif
+			disp.addCommand(ncmd = new Command(label, commandType, priority));
+			//#ifdef DMIDP20
+		}
+		//#endif
 		return ncmd;
 	}
 
   /**
-   * Create a new command using the resource key and standard parms
+   * Create a new command using the standard parms
    *
    * @param label - command label
+   * @param longLabel - command long label
    * @param commandType - Command type
    * @param priority - Command priority
+   * @param prompt - Command prompt
    * @return    Command
    * @author Irv Bunton
    */
     public static Command getCmdAddPrompt(Displayable disp, String label,
-			int commandType, int priority, String prompt) {
+			String longLabel, int commandType, int priority, String prompt) {
 		//#ifdef DLOGGING
 		Logger logger = Logger.getLogger("FeatureMgr");
 		logger.finest("getCmdAddPrompt label,commandType,priority=" + label + "," + commandType + "," + priority);
@@ -1113,10 +1143,14 @@ public class FeatureMgr implements CommandListener,
 		Command ncmd;
 		if (disp instanceof FeatureForm) {
 			((FeatureForm)disp).addPromptCommand(ncmd =
-				new Command(label, commandType, priority), prompt);
-		} else {
+				getCmdAdd(disp, label, longLabel, commandType, priority),
+				prompt);
+		} if (disp instanceof FeatureList) {
 			((FeatureList)disp).addPromptCommand(ncmd =
-				new Command(label, commandType, priority), prompt);
+				getCmdAdd(disp, label, longLabel, commandType, priority),
+				prompt);
+		} else {
+			ncmd = getCmdAdd(disp, label, longLabel, commandType, priority);
 		}
 		return ncmd;
 	}
