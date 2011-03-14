@@ -26,6 +26,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  * IB 2011-01-14 1.11.5Alpha15 Use conditional preprocessed cldc11 code with modifications instead of cldc10 code.
+ * IB 2011-03-08 1.11.5Dev17 Test HtmlLinkParser2Test.
  */
 
 // Expand to define full vers define
@@ -53,11 +54,10 @@ final public class FeedListParserSuite extends TestSuite {
 
 	public FeedListParserSuite() {
 		super("FeedListParserSuite");
-		//#ifdef DCOMPATIBILITY
-		add(new com.substanceofcode.jmunit.rssreader.businesslogic.compatibility4.FeedListParserSuite());
-		//#endif
 		//#ifndef DSMALLMEM
+		add(new HtmlLinkParser3Test());
 		add(new HtmlLinkParserTest());
+		add(new HtmlLinkParser2Test());
 		//#endif
 	}
 }
