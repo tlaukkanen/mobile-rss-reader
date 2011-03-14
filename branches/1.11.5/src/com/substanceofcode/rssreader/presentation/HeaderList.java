@@ -41,6 +41,8 @@
  * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
  * IB 2011-01-12 1.11.5Alpha15 After modifying/updating the feed, use old feed pointer with new feed pointer to update the feed.  If the old pointer does not match the current pointer, do not update as it means that the future background processing has updated the feed already. 
  * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-31 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-02-02 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
 */
 
 // Expand to define MIDP define
@@ -81,7 +83,6 @@ import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
-import com.substanceofcode.rssreader.businessentities.RssItunesItem;
 import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 //#ifdef DMIDP20
@@ -126,9 +127,9 @@ implements
 		m_feed = feed;
 		m_modFeed = false;
 		//#ifdef DLOGGING
-//@		if (m_finestLoggable) {m_logger.finest("Constructor m_feed.getName(),m_feed.getItems().size(),selectedIx,itunesEnabled=" + m_feed.getName() + "," + m_feed.getItems().size() + "," + selectedIx + "," + itunesEnabled);}
+//@		if (m_finestLoggable) {m_logger.finest("Constructor m_feed.getName(),m_feed.getItems().length,selectedIx,itunesEnabled=" + m_feed.getName() + "," + m_feed.getItems().length + "," + selectedIx + "," + itunesEnabled);}
 		//#ifdef DITUNES
-//@		if (m_finestLoggable) {m_logger.finest("Constructor feed.getName(),feed.getLink(),feed.getItems().size()=" + feed.getName() + "," + feed.getLink() + "," + feed.getItems().size());}
+//@		if (m_finestLoggable) {m_logger.finest("Constructor feed.getName(),feed.getLink(),feed.getItems().length=" + feed.getName() + "," + feed.getLink() + "," + feed.getItems().length);}
 		//#endif
 		//#endif
 		this.m_itunesEnabled = itunesEnabled;
@@ -156,7 +157,7 @@ implements
 //@	public void testFeed() {
 //@		try {
 //@			RssItunesFeed feed = m_feed;
-//@			String store = feed.getStoreString(true, true);
+//@			String store = feed.getStoreString(true, true, true);
 //@			RssItunesFeed feed2 = RssItunesFeed.deserialize( true,
 //@					true, store );
 //@			boolean feedEq = feed.equals(feed2);
