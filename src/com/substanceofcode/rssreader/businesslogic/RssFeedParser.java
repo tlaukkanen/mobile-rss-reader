@@ -43,6 +43,10 @@
  * IB 2011-01-14 1.11.5Alpha15 Use procIoExc from URLHandler process exception handling for IO and other exceptions including out of memory.
  * IB 2011-01-14 1.11.5Alpha15 Use getRssMidlet from FeatureMgr to get the Rss Midlet.
  * IB 2011-01-22 1.11.5Dev16 If m_maxItemCount has not been set, take it from the RssReaderSettings either via midlet or directly from getInstance.
+ * IB 2011-01-31 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
+ * IB 2011-03-09 1.11.5Dev17 More logging.
+ * IB 2011-03-13 1.11.5Dev17 Have getFeedTitleList to use title for name when parsing the whole feed.
 */
 
 // Expand to define full vers define
@@ -63,7 +67,7 @@
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
-import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+import com.substanceofcode.rssreader.businessentities.RssItem;
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.XmlParser;
@@ -72,9 +76,8 @@ import com.substanceofcode.utils.HTMLParser;
 //#endif
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
-import javax.microedition.io.*;
-import java.util.*;
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
 
 import com.substanceofcode.utils.CauseException;
 //#ifdef DMIDP20
@@ -108,7 +111,8 @@ implements
     private RssItunesFeed m_oldRssFeed;  // The original RSS feed
 
     private int m_maxItemCount;  // Max count of itetms to get for a feed.
-    private boolean m_getTitleOnly = false;  // The RSS feed
+    private boolean m_getTitleOnly = false;  // Get the feed title only.
+	protected boolean m_getFeedTitleList = false; // If no feed name, use the title.
     private boolean m_updFeed = false;  // Do updated feeds only.
     private boolean m_successfull = false;
     private Exception m_ex = null;
@@ -311,8 +315,11 @@ implements
      */
     public void parseRssFeedXml(InputStream is, int maxItemCount)
     throws IOException, CauseException {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("parseRssFeedXml is,m_rssFeed.getName(),m_rssFeed.getUrl(),m_maxItemCount,m_getFeedTitleList,m_getTitleOnly=" + is + "," + m_rssFeed.getName() + "," + m_rssFeed.getUrl() + "," + + m_maxItemCount + "," + m_getFeedTitleList + "," + m_getTitleOnly);}
+		//#endif
         /** Initialize item collection */
-        m_rssFeed.getItems().removeAllElements();
+        m_rssFeed.setItems(new RssItem[0]);
         
         /** Initialize XML parser and parse feed */
         XmlParser parser = new XmlParser(is);
@@ -340,13 +347,13 @@ implements
             /** Feed is in RSS format */
             formatParser = new RssFormatParser();
             m_rssFeed = formatParser.parse( parser, m_rssFeed,
-					maxItemCount, m_getTitleOnly );
+					maxItemCount, m_getFeedTitleList, m_getTitleOnly );
             
         } else if(entryElementName.equals("feed")) {
             /** Feed is in Atom format */
             formatParser = new AtomFormatParser();
             m_rssFeed = formatParser.parse( parser, m_rssFeed,
-					maxItemCount, m_getTitleOnly );
+					maxItemCount, m_getFeedTitleList, m_getTitleOnly );
             
         } else {
             CauseException ce = new CauseException(
@@ -421,6 +428,10 @@ implements
 
     public boolean isGetTitleOnly() {
         return (m_getTitleOnly);
+    }
+
+    public void setGetFeedTitleList(boolean getFeedTitleList) {
+        this.m_getFeedTitleList = getFeedTitleList;
     }
 
     public Thread getParsingThread() {
