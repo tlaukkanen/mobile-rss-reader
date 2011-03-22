@@ -60,6 +60,7 @@
  * IB 2011-01-26 1.11.5Dev16 Use FeatureMgr.getCmdAdd to create a command and add command at the same time.
  * IB 2011-03-06 1.11.5Dev17 Only use thread utils if MIDP 2.0.
  * IB 2011-03-07 1.11.5Dev17 Optionally use long command label.
+ * IB 2011-03-18 1.11.5Dev17 Use nullPtr to init selectCommand.
 */
 
 // Expand to define MIDP define
@@ -161,7 +162,7 @@ final public class KFileSelectorImpl
 				"file.separator", "/", "Unable to get file.separator", null)[0];
 		cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", null, Command.CANCEL, 2);
 		openCommand = FeatureMgr.getCmdAdd(this, "Open", null, Command.ITEM, 4);
-		selectCommand = null;
+		selectCommand = (Command)nullPtr;
 		//#ifdef DTEST
 		try {
 
