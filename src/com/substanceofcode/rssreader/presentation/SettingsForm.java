@@ -77,6 +77,8 @@
  * IB 2011-03-19 1.11.5Dev17 Account for MIDP 1.0 and 2.x both listed for MIDP.
  * IB 2011-03-19 1.11.5Dev17 Account for CLDC 1.0 and 1.1 both listed for CLDC.
  * IB 2011-03-19 1.11.5Dev17 Prepare for future Afri-ware version.
+ * IB 2011-03-21 1.11.5Dev17 Use FeatureMgr.getAppDefProperty to get the app property and return the given default if null.
+ * IB 2011-03-21 1.11.5Dev17 If build-file-root is not defined, don't do preferred/current jad/jar.
  */
 
 // Expand to define MIDP define
@@ -391,127 +393,135 @@ implements CommandListener
 				super.featureMgr.getLoadForm());
 		String mepl = (String)omepl[0];
         FeatureMgr.getAddStringItem(this, "Phone Microedition platform:", mepl);
-		try {
-			m_currfnp = bsettings.getStringProperty(0, "build-file-root", "") +
-				".";
-			String[] sbuildf = MiscUtil.split(bsettings.getStringProperty(0,
-						"sbuild-file-root", ""), ",");
-			boolean projectFound = false;
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < sbuildf.length; i++) {
-				//#ifdef DLOGGING
-//@				if (m_finestLoggable) {m_logger.finest("Constructor sbuildf[i]=" + i + "," + sbuildf[i]);}
-				//#endif
-				String sval = ((sbuildf[i].charAt(0) == '-') ? "-_" :
-						bsettings.getStringProperty(0, sbuildf[i].replace(
-								'.', '-'), ""));
-				//#ifdef DLOGGING
-//@				if (m_finestLoggable) {m_logger.finest("Constructor sval=" + sval);}
-				//#endif
-				int len;
-				if ((len = sval.length()) > 0)  {
-					String aval = (sval.charAt(len - 1) != '_') ? sval :
-						sval.substring(0, len - 1);
+		do {
+			try {
+				m_currfnp = FeatureMgr.getAppDefProperty("build-file-root", "") +
+					".";
+				if (m_currfnp.length() < 2) {
 					//#ifdef DLOGGING
-//@					if (m_finestLoggable) {m_logger.finest("Constructor aval=" + aval);}
+//@					if (m_fineLoggable) {m_logger.fine("Constructor build-file-root not defined or blank.  Skipping preferred/current jad/jar.");}
 					//#endif
-					if ((aval.charAt(0) == 'm') || (aval.charAt(0) == 'c') ||
-							(aval.charAt(0) == 'j')) {
-						Object oval;
-						if (((oval = sysOptions.get(aval)) != null) &&
-								((Boolean)oval).booleanValue()) {
-							//#ifdef DLOGGING
-//@							if (m_finestLoggable) {m_logger.finest("Constructor oval=" + oval);}
-							//#endif
-							//#ifndef DSMARTPHONE
-							if (aval.equals("cldc11")) {
-								// For simplicity, if not smartphone version
-								// use CLDC 1.0 for all versions.
-								aval = "cldc10";
-							}
-							//#endif
-							sb.append(aval).append("_");
-						}
-					} else {
-						if (!projectFound) {
-							projectFound = sbuildf[i].startsWith("release");
-						}
-						// This is expanded by filter to "novice" or configured
-						// value for it.
-						if (aval.equals("novice")) {
-							//#ifndef DNOVICE
-							aval = "";
-							//#endif
-						//#ifndef DSMARTPHONE
-						} else if (aval.equals("smartphone")) {
-							aval = "";
+					break;
+				}
+				String[] sbuildf = MiscUtil.split(FeatureMgr.getAppDefProperty(
+							"sbuild-file-root", ""), ",");
+				boolean projectFound = false;
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < sbuildf.length; i++) {
+					//#ifdef DLOGGING
+//@					if (m_finestLoggable) {m_logger.finest("Constructor sbuildf[i]=" + i + "," + sbuildf[i]);}
+					//#endif
+					String sval = ((sbuildf[i].charAt(0) == '-') ? "-_" :
+							FeatureMgr.getAppDefProperty(sbuildf[i].replace(
+									'.', '-'), ""));
+					//#ifdef DLOGGING
+//@					if (m_finestLoggable) {m_logger.finest("Constructor sval=" + sval);}
+					//#endif
+					int len;
+					if ((len = sval.length()) > 1)  {
+						String aval = (sval.charAt(len - 1) != '_') ? sval :
+							sval.substring(0, len - 1);
+						//#ifdef DLOGGING
+//@						if (m_finestLoggable) {m_logger.finest("Constructor aval=" + aval);}
 						//#endif
-						//#ifndef DAFRIWARE
-						} else if (aval.equals("afriware")) {
-							aval = "";
-						//#endif
-							// intlink is never the preferred version.
-						} else if (aval.equals("intlink")) {
-							aval = "";
-						//#ifndef DSIGNED
-						} else if (aval.equals("signed")) {
-							aval = "";
-						//#endif
-						} else if (aval.equals("verisign")) {
-							//#ifndef DVERSIGN
-							aval = "";
-							//#endif
-						} else if (aval.equals("thawte")) {
-							//#ifndef DTHAWTE
-							aval = "";
-							//#endif
-						} else if (aval.equals("godaddy")) {
-							//#ifndef DGODADDY
-							aval = "";
-							//#endif
-						}
-						if (projectFound) {
-							sb.append(aval);
-						} else {
-							if (aval.length() > 0) {
+						if ((aval.charAt(0) == 'm') || (aval.charAt(0) == 'c') ||
+								(aval.charAt(0) == 'j')) {
+							Object oval;
+							if (((oval = sysOptions.get(aval)) != null) &&
+									((Boolean)oval).booleanValue()) {
+								//#ifdef DLOGGING
+//@								if (m_finestLoggable) {m_logger.finest("Constructor oval=" + oval);}
+								//#endif
+								//#ifndef DSMARTPHONE
+								if (aval.equals("cldc11")) {
+									// For simplicity, if not smartphone version
+									// use CLDC 1.0 for all versions.
+									aval = "cldc10";
+								}
+								//#endif
 								sb.append(aval).append("_");
+							}
+						} else {
+							if (!projectFound) {
+								projectFound = sbuildf[i].startsWith("release");
+							}
+							// This is expanded by filter to "novice" or configured
+							// value for it.
+							if (aval.equals("novice")) {
+								//#ifndef DNOVICE
+								aval = "";
+								//#endif
+								//#ifndef DSMARTPHONE
+							} else if (aval.equals("smartphone")) {
+								aval = "";
+								//#endif
+								//#ifndef DAFRIWARE
+							} else if (aval.equals("afriware")) {
+								aval = "";
+								//#endif
+								// intlink is never the preferred version.
+							} else if (aval.equals("intlink")) {
+								aval = "";
+								//#ifndef DSIGNED
+							} else if (aval.equals("signed")) {
+								aval = "";
+								//#endif
+							} else if (aval.equals("verisign")) {
+								//#ifndef DVERSIGN
+								aval = "";
+								//#endif
+							} else if (aval.equals("thawte")) {
+								//#ifndef DTHAWTE
+								aval = "";
+								//#endif
+							} else if (aval.equals("godaddy")) {
+								//#ifndef DGODADDY
+								aval = "";
+								//#endif
+							}
+							if (projectFound) {
+								sb.append(aval);
+							} else {
+								if (aval.length() > 0) {
+									sb.append(aval).append("_");
+								}
 							}
 						}
 					}
 				}
+				//#ifdef DLOGGING
+//@				if (m_finestLoggable) {m_logger.finest("Constructor sb=" + sb);}
+				//#endif
+				m_preffnp = sb.append(".").toString();
+				m_preffJadTx = FeatureMgr.getAddStringItem(this, "Preferred jad:",
+						m_preffnp + "jad");
+				m_preffJarTx = FeatureMgr.getAddStringItem(this, "Preferred jar:",
+						m_preffnp + "jar");
+				//#ifdef DTEST
+//@				m_currJadTx = FeatureMgr.getAddTextField(this, "Current jad:",
+//@						m_currfnp + "jad", Math.max(m_currfnp.length() + 3, 526),
+//@						TextField.ANY);
+				//#else
+				FeatureMgr.getAddStringItem(this, "Current jad:", m_currfnp + "jad");
+				//#endif
+				//#ifdef DTEST
+//@				m_currJarTx = FeatureMgr.getAddTextField(this, "Current jar:",
+//@						m_currfnp + "jar", Math.max(m_currfnp.length() + 3, 526),
+//@						TextField.ANY);
+				//#else
+				FeatureMgr.getAddStringItem(this, "Current jar:",
+						m_currfnp +
+						"jar");
+				//#endif
+				if (m_preffnp.equals(m_currfnp)) {
+					m_preffJadTx.setLabel("Preferred jad (current):");
+					m_preffJarTx.setLabel("Preferred jar (current):");
+				}
+			} catch (Throwable e) {
+				super.featureMgr.getLoadForm().recordExcForm(
+						"Internal error unable to get preferred jad/jar.", e);
 			}
-			//#ifdef DLOGGING
-//@			if (m_finestLoggable) {m_logger.finest("Constructor sb=" + sb);}
-			//#endif
-			m_preffnp = sb.append(".").toString();
-			m_preffJadTx = FeatureMgr.getAddStringItem(this, "Preferred jad:",
-					m_preffnp + "jad");
-			m_preffJarTx = FeatureMgr.getAddStringItem(this, "Preferred jar:",
-					m_preffnp + "jar");
-			//#ifdef DTEST
-//@			m_currJadTx = FeatureMgr.getAddTextField(this, "Current jad:",
-//@					m_currfnp + "jad", Math.max(m_currfnp.length() + 3, 526),
-//@					TextField.ANY);
-			//#else
-			FeatureMgr.getAddStringItem(this, "Current jad:", m_currfnp + "jad");
-			//#endif
-			//#ifdef DTEST
-//@			m_currJarTx = FeatureMgr.getAddTextField(this, "Current jar:",
-//@					m_currfnp + "jar", Math.max(m_currfnp.length() + 3, 526),
-//@					TextField.ANY);
-			//#else
-			FeatureMgr.getAddStringItem(this, "Current jar:",
-					m_currfnp +
-					"jar");
-			//#endif
-			if (m_preffnp.equals(m_currfnp)) {
-				m_preffJadTx.setLabel("Preferred jad (current):");
-				m_preffJarTx.setLabel("Preferred jar (current):");
-			}
-		} catch (Throwable e) {
-			super.featureMgr.getLoadForm().recordExcForm(
-					"Internal error unable to get preferred jad/jar.", e);
-		}
+		} while (false);
 
 		Object[] omel = FeatureMgr.getSysProperty("microedition.locale",
 				null, "Unable to get microedition.locale",
