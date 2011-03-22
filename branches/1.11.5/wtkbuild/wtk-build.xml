@@ -170,6 +170,8 @@
 	<!-- IB 2011-03-14 1.11.5Dev17 Fix removal of cod files.  -->
 	<!-- IB 2011-03-18 1.11.5Dev17 Don't copy alx, jad, jar, and cod files to FTP or google.  Put them into zip file which in addition contains the alx file.  -->
 	<!-- IB 2011-03-19 1.11.5Dev17 Prepare for future Afri-ware version.  -->
+	<!-- IB 2011-03-21 1.11.5Dev17 Use stage.file instead of sstage.file for jad file properties.  -->
+	<!-- IB 2011-03-21 1.11.5Dev17 Create a yinlight ftp in/htm and sourceforge ftp in/htm file for each target in the "bin" for that target.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1072,7 +1074,7 @@
 	<target name="make.jad" depends="prepare" >
 		<property name="shtml.file.prefix" value="file.prefix.smartphone,file.prefix.afriware,file.prefix.memorysize,file.prefix.full,file.prefix.intlink,file.prefix.signed,file.prefix.verisign,file.prefix.thawte,file.prefix.godaddy,file.prefix.jsr75,file.prefix.jsr238" />
 		<property name="sfile.prefix" value="file.prefix.midp1.0,file.prefix.midp2.0,file.prefix.cldc1.0,file.prefix.cldc1.1,file.prefix.novice,file.prefix.large,${shtml.file.prefix}" />
-		<property name="sbuild.prefix" value="${sfile.prefix},sstage.file" />
+		<property name="sbuild.prefix" value="${sfile.prefix},stage.file" />
 		<property name="sbuild.file.root" value="${sbuild.prefix},release.name,-,FMIDLETVERSROOT" />
 		<property name="build.file.root" value="${build.file.root}" />
 		<property name="file.prefix.signer" value="${file.prefix.godaddy}${file.prefix.thawte}${file.prefix.verisign}" />
@@ -1120,7 +1122,7 @@
 			<attribute name="file-prefix-verisign" value="${sfile.prefix.verisign}_" />
 			<attribute name="file-prefix-godaddy" value="${sfile.prefix.godaddy}_" />
 			<attribute name="release-name" value="${release.name}" />
-			<attribute name="sstage-file" value="${sstage.file}" />
+			<attribute name="stage-file" value="${stage.file}" />
 			<attribute name="FMIDLETVERSROOT" value="${FMIDLETVERSROOT}" />
 			<attribute name="jlomicro-level" value="${jlomicro-level}" unless="no.test" />
 			<attribute name="jlomicro-handlers" value="${jlomicro-handlers}" unless="no.test" />
@@ -1616,11 +1618,11 @@
 	</target>
 
 	<target name="sftp.index.line.append" depends="set.file.summary" if="upload.to.sftp">
-		<echo message="&lt;li&gt;&lt;a href=&quot;device-install-files/${file.name}&quot;&gt;${file.name} ${file.summary}&lt;/a&gt;&lt;/li&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;li&gt;&lt;a href=&quot;device-install-files/${file.name}&quot;&gt;${file.name} ${file.summary}&lt;/a&gt;&lt;/li&gt;&#10;" file="${sftp.pgm.index.file}" append="true" />
 	</target>
 
 	<target name="sftp.upload.line.append" if="upload.to.sftp">
-		<echo message="put ${file.name} device-install-files&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ${file.name} device-install-files&#10;" file="${sftp.pgm.in.file}" append="true" />
 	</target>
 
 	<target name="sftp.upload.line.append.sun.file" depends="prepare" >
@@ -1690,6 +1692,12 @@
 	<target name="sftp.upload.append" depends="prepare" if="upload.to.sftp">
 		<antcall target="sftp.upload.append.rim" inheritAll="true" />
 		<antcall target="sftp.upload.append.sun" inheritAll="true" />
+		<concat destfile="${sftp.in.file}" append="true" >
+			<fileset file="${sftp.pgm.in.file}" />
+		</concat>
+		<concat destfile="${sftp.index.file}" append="true" >
+			<fileset file="${sftp.pgm.index.file}" />
+		</concat>
 	</target>
 
 	<target name="sftp.upload.archives" depends="prepare" if="upload.to.sftp">
@@ -1866,11 +1874,15 @@
 		<antcall target="build" />
 		<antcall target="google.upload.append" inheritAll="true" />
 		<antcall target="sftp.upload.append" inheritAll="true" >
+			<param name="sftp.pgm.in.file" value="${bin}/yl${build.file.root}in" />
 			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
+			<param name="sftp.pgm.index.file" value="${bin}/yl${build.file.root}.htm" />
 			<param name="sftp.index.file" value="${yinlight.ftp.index.file}" />
 		</antcall>
 		<antcall target="sftp.upload.append" >
+			<param name="sftp.pgm.in.file" value="${bin}/sf${build.file.root}in" />
 			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
+			<param name="sftp.pgm.index.file" value="${bin}/sf${build.file.root}.htm" />
 			<param name="sftp.index.file" value="${sourceforge.ftp.index.file}" />
 		</antcall>
 		<antcall target="exec.create.rim.files" inheritAll="true" />
