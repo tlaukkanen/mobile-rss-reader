@@ -105,7 +105,7 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 			logger.info("Started " + mname + " EncodingStreamReaderTestSub");
 			//#endif
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub bomReqs.length,inputData.length,binputData.length,sinputData.length=" + bomReqs.length + "," + inputData.length + "," + binputData.length + "," + sinputData.length);} ;
+			if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub bomReqs.length,inputData.length,binputData.length,sinputData.length=" + bomReqs.length + "," + inputData.length + "," + binputData.length + "," + sinputData.length);}
 			//#endif
 			for (bix = 0; (bix < bomReqs.length) || (bomReqs.length == 0);) {
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -116,7 +116,7 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 				// EncodingStreamReader.logiarr( useInpType, bix)
 				if ((bomReqs.length == 0) || (bomReqs[bix].length == 0)) {
 					//#ifdef DLOGGING
-					if (finestLoggable && (bomReqs.length == 0)) {logger.finest(mname + " EncodingStreamReaderTestSub Continuing bix,bomReqs.length," + suserTypeRep + "=" +  bix + "," + bomReqs.length + "," + suserTypeVal);} ;
+					if (finestLoggable && (bomReqs.length == 0)) {logger.finest(mname + " EncodingStreamReaderTestSub Continuing bix,bomReqs.length," + suserTypeRep + "=" +  bix + "," + bomReqs.length + "," + suserTypeVal);}
 					if (finestLoggable && (bomReqs.length > 0) && (bomReqs[bix].length == 0)) {logger.finest(mname + " EncodingStreamReaderTestSub Continuing bix,bomReqs[bix].length," + suserTypeRep + "=" +  bix + "," + bomReqs[bix].length + "," + suserTypeVal);}
 					//#endif
 				} else {
@@ -124,13 +124,13 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 					wrbos(bos, crbos(mname, cbomb));
 					barrix = cbomb.length;
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub Continuing bix,bomReqs.length,cbomb[0],cbomb[bomReqs.length - 1]=" +  bix + "," + bomReqs.length + "," + EncodingStreamReader.logBarr(cbomb, 0) + "," + EncodingStreamReader.logBarr(cbomb, bomReqs.length - 1));} ;
+					if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub Continuing bix,bomReqs.length,cbomb[0],cbomb[bomReqs.length - 1]=" +  bix + "," + bomReqs.length + "," + EncodingStreamReader.logBarr(cbomb, 0) + "," + EncodingStreamReader.logBarr(cbomb, bomReqs.length - 1));}
 					//#endif
 				}
 				for (int j = 0; j < inputData.length; j++) {
 					int[] inputType = inputData[j];
 					//#ifdef DLOGGING
-					if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub inputType[0],inputType[1],useInpType[bix]=" + "," + EncodingStreamReader.logiarr(inputType, 0) + "," + EncodingStreamReader.logiarr(inputType, 1) + "," + suserTypeVal);} ;
+					if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub inputType[0],inputType[1],useInpType[bix]=" + "," + EncodingStreamReader.logiarr(inputType, 0) + "," + EncodingStreamReader.logiarr(inputType, 1) + "," + suserTypeVal);}
 					//#endif
 					switch (inputType[0]) {
 						case EncodingStreamReq.USE_ARR_IN_BARR:
@@ -154,7 +154,7 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 							int off = inputType[1];
 							for (int i = 0; i < inputType[2]; i++) {
 								//#ifdef DLOGGING
-								if (logdConstChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub bix,i,off,sinputData[off]=" + bix + "," + i + "," + off + "," + EncodingStreamReader.logsoarr(sinputData, off));} ;
+								if (logdConstChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub bix,i,off,sinputData[off]=" + bix + "," + i + "," + off + "," + EncodingStreamReader.logsoarr(sinputData, off));}
 								//#endif
 								switch (useInpType[bix]) {
 									case EncodingStreamReq.USE_IN_UTF16BE:
@@ -218,10 +218,10 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 				byte[] barr = bos.toByteArray();
 				ByteArrayInputStream bis = new ByteArrayInputStream(barr);
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub charLen,barr.length=" + charLen + "," + barr.length);} ;
+				if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub charLen,barr.length=" + charLen + "," + barr.length);}
 				//#endif
 				//#ifdef DLOGGING
-				if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub barrix,barr[0],barr[barrix],barr[barr.length - 1]=" + "," + barrix + "," + EncodingStreamReader.logBarr(barr, 0) + "," + EncodingStreamReader.logBarr(barr, barrix) + "," + EncodingStreamReader.logBarr(barr, barr.length - 1));} ;
+				if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub barrix,barr[0],barr[barrix],barr[barr.length - 1]=" + "," + barrix + "," + EncodingStreamReader.logBarr(barr, 0) + "," + EncodingStreamReader.logBarr(barr, barrix) + "," + EncodingStreamReader.logBarr(barr, barr.length - 1));}
 				//#endif
 				EncodingUtil encodingUtil = EncodingUtil.getEncodingUtil(bis);
 				EncodingStreamReader esr = encodingUtil.getEncodingStreamReader();
@@ -240,14 +240,14 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 					while (((inputCharacter = esr.read()) != -1) &&
 							(barrix < barr.length))  {
 						//#ifdef DLOGGING
-						if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub inputCharacter=" + "," + EncodingStreamReader.logInpChar(inputCharacter) + "," + EncodingStreamReader.logBarr(barr, barrix));} ;
+						if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub inputCharacter=" + "," + EncodingStreamReader.logInpChar(inputCharacter) + "," + EncodingStreamReader.logBarr(barr, barrix));}
 						//#endif
 						if (firstRead) {
 							firstRead = false;
 							if (bomReqs.length != 0) {
 								String assertmsg = "bix,expEncs[bix],esr.getBitNbrDoc()=" + bix + "," + expEncs[bix] + "," + esr.getBitNbrDoc();
 								//#ifdef DLOGGING
-								if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub " + assertmsg);} ;
+								if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub " + assertmsg);}
 								//#endif
 								assertEquals(assertmsg, expEncs[bix],
 										esr.getBitNbrDoc());
@@ -257,11 +257,11 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 							esr.setGetPrologue(false);
 							esr.setModEncoding(esr.isModBit16o32());
 							//#ifdef DLOGGING
-							if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub got prologue inputCharacter=" + EncodingStreamReader.logInpChar(inputCharacter));} ;
+							if (finestLoggable) {logger.finest(mname + " EncodingStreamReaderTestSub got prologue inputCharacter=" + EncodingStreamReader.logInpChar(inputCharacter));}
 							//#endif
 						}
 						//#ifdef DLOGGING
-						if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub inputCharacter=" + EncodingStreamReader.logInpChar(inputCharacter));} ;
+						if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub inputCharacter=" + EncodingStreamReader.logInpChar(inputCharacter));}
 						//#endif
 						String assertmsgPrefix = mname + " EncodingStreamReaderTestSub bix,barrix,barr[barrix],inputCharacter=" + bix + "," + barrix + ",";
 						String assertmsgMid = bix + "," + barrix;
@@ -303,8 +303,8 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 					}
 					while (inputCharacter != -1) {
 						//#ifdef DLOGGING
-						if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub barrix,inputCharacter,barr[barrix]=" + barrix + "," + EncodingStreamReader.logInpChar(inputCharacter) + "," + EncodingStreamReader.logBarr(barr, barrix));} ;
-						if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub inputCharacter=" + "," + EncodingStreamReader.logInpChar(inputCharacter));} ;
+						if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub barrix,inputCharacter,barr[barrix]=" + barrix + "," + EncodingStreamReader.logInpChar(inputCharacter) + "," + EncodingStreamReader.logBarr(barr, barrix));}
+						if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub inputCharacter=" + "," + EncodingStreamReader.logInpChar(inputCharacter));}
 						//#endif
 						barrix++;
 						if ((lenRead = esr.read(cbuf, 0, cbuf.length)) <= 0) {
@@ -314,7 +314,7 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 						}
 					}
 					//#ifdef DLOGGING
-					if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub end while inputCharacter=" + "," + EncodingStreamReader.logInpChar(inputCharacter));} ;
+					if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub end while inputCharacter=" + "," + EncodingStreamReader.logInpChar(inputCharacter));}
 					//#endif
 				} else {
 					//#ifdef DLOGGING
@@ -330,7 +330,7 @@ abstract public class EncodingStreamReaderTest extends BaseTestCase
 					}
 				} else {
 					//#ifdef DLOGGING
-					if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub end while inputCharacter=" + "," + EncodingStreamReader.logInpChar(inputCharacter));} ;
+					if (logReadChar && traceLoggable) {logger.trace(mname + " EncodingStreamReaderTestSub end while inputCharacter=" + "," + EncodingStreamReader.logInpChar(inputCharacter));}
 					//#endif
 					break;
 				}
