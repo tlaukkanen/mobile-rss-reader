@@ -46,6 +46,7 @@
  * IB 2011-03-06 1.11.5Dev17 Have methods to convert from a vector to either a RssItem or RssItunesFeed array.
  * IB 2011-03-06 1.11.5Dev17 Have mobility choice for open with method urlEncode.
  * IB 2011-03-11 1.11.5Dev17 Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
+ * IB 2011-03-14 1.11.5Dev17 Combine statements.
  */
 
 // Expand to define MIDP define
@@ -511,10 +512,13 @@ public class MiscUtil {
 //@		boolean finerLoggable = logger.isLoggable(Level.FINER);
 		//#endif
         try{
-			if (text == null) { return null; }
-            String htmlText = text.trim();
-            int htmlStartIndex = htmlText.indexOf('<');
-			if (htmlStartIndex == -1) { return text; }
+            int htmlStartIndex;
+            String htmlText;
+			if ((text == null) ||
+					((htmlStartIndex = (htmlText = text.trim()).indexOf('<'))
+					 < 0)) {
+				return text;
+			}
             StringBuffer plainText = new StringBuffer();
             while (htmlStartIndex>=0) {
                 plainText.append(htmlText.substring(0,htmlStartIndex));
@@ -528,17 +532,17 @@ public class MiscUtil {
 					//#endif
 					return plainText.toString().trim();
 				}
-                final int html1stSpaceIndex = htmlText.indexOf(' ',
-						htmlStartIndex);
                 int htmlTagEndIndex;
                 int startTagLen;
                 int tagLen;
-				if ((html1stSpaceIndex > 0) &&
+                final int html1stSpaceIndex;
+				if (((html1stSpaceIndex = htmlText.indexOf(' ',
+						htmlStartIndex)) > 0) &&
 						(htmlEndIndex > html1stSpaceIndex)) {
 					startTagLen = html1stSpaceIndex - htmlStartIndex;
-					htmlTagEndIndex = htmlText.lastIndexOf(' ',
-						htmlEndIndex) + 1;
-					tagLen = startTagLen + htmlEndIndex - htmlTagEndIndex + 1;
+					tagLen = startTagLen + htmlEndIndex -
+							(htmlTagEndIndex = htmlText.lastIndexOf(' ',
+								htmlEndIndex) + 1) + 1;
 				} else {
 					startTagLen = htmlEndIndex - htmlStartIndex;
 					htmlTagEndIndex = htmlEndIndex;
@@ -794,6 +798,7 @@ public class MiscUtil {
 								"Unable to close URL " +
 								((HttpConnection)conn).getURL(),e);
 					} catch (Throwable e2) {
+						e2.printStackTrace();
 					}
 				//#ifdef DJSR75
 //@				} else if (conn instanceof FileConnection) {
