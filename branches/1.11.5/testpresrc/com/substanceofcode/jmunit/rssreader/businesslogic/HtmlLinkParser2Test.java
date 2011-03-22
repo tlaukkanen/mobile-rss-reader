@@ -84,7 +84,6 @@ implements Observer
 	private boolean alterLogLevel = traceLoggable;
 
 	private boolean endAlterLogLevel = false;
-	private boolean levelAltered = false;
 	private int alterix = 54;
 	private int endAlterix = 55;
 	private String newLogLevel = Level.FINEST.getName(); // UNDO
@@ -332,7 +331,8 @@ implements Observer
 		try {
 			//#ifdef DLOGGING
 			logger.info("Started " + mname + ",activeCount,freeMemory()=" + Thread.activeCount() + "," + Runtime.getRuntime().freeMemory());
-			if (finestLoggable) {logger.finest(mname + " cmpHtmlLinkParserTestSub htmlParser=" + htmlParser);} ;
+			if (finestLoggable) {logger.finest(mname + " cmpHtmlLinkParserTestSub htmlParser=" + htmlParser);}
+			//#endif
 			if (httpFile && (nextIx >= 1)) {
 				//#ifdef DLOGGING
 				logger.info(mname + " nextIx,currTotalTime,currTotalCount(prev)=" + nextIx + "," + currTotalTime + "," + currTotalCount);
@@ -347,12 +347,12 @@ implements Observer
 			} else {
 				prevNextIx = nextIx;
 			}
-			//#endif
 			long startTime = 0L;
 			if (httpFile && (nextIx >= 1)) {
 				System.gc();
 				startTime = System.currentTimeMillis();
 			}
+			//#ifdef DMIDP20
 			ready = false;
 			htmlParser.getObservableHandler().addObserver(this);
 			//#endif
@@ -373,7 +373,8 @@ implements Observer
 			}
 			//#ifdef DMIDP20
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine(mname + " htmlParser.isSuccessfull()=" + htmlParser.isSuccessfull());} ;
+			if (fineLoggable) {logger.fine(mname + " htmlParser.isSuccessfull()=" + htmlParser.isSuccessfull());}
+			//#endif
 			//#endif
 			RssItunesFeedInfo[] rssfeeds = htmlParser.getFeeds();
 			if (httpFile && (nextIx >= 1)) {
@@ -382,14 +383,16 @@ implements Observer
 			}
 			cmpHtmlParser.startParsing();
 			cmpHtmlParser.join();
+			//#ifdef DMIDP20
 			if (httpFile && (nextIx >= 1) && htmlParser.isSuccessfull() &&
 					cmpHtmlParser.isSuccessfull()) {
 				oldTotalTime += (System.currentTimeMillis() - startTime);
 				oldTotalCount++;
 				System.gc();
 			}
+			//#endif
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine(mname + " cmpHtmlParser.isSuccessfull()=" + cmpHtmlParser.isSuccessfull());} ;
+			if (fineLoggable) {logger.fine(mname + " cmpHtmlParser.isSuccessfull()=" + cmpHtmlParser.isSuccessfull());}
 			//#endif
 			RssItunesFeed[] cmpRssFeeds =
 				(RssItunesFeed[])cmpHtmlParser.getFeeds();
@@ -422,13 +425,13 @@ implements Observer
 				//#endif
 				RssItunesFeedInfo feed = rssfeeds[nextIx];
 				//#ifdef DLOGGING
-				if (!finestLoggable) {logger.info(mname + " nextIx,feed 1=" + nextIx + "," + feed.getName() + "," + feed.getUrl());} ;
-				if (finestLoggable) {logger.finest(mname + " nextIx,feed 1=" + nextIx + "," +  feed.getName() + "," + feed.getUrl());} ;
+				if (!finestLoggable) {logger.info(mname + " nextIx,feed 1=" + nextIx + "," + feed.getName() + "," + feed.getUrl());}
+				if (finestLoggable) {logger.finest(mname + " nextIx,feed 1=" + nextIx + "," +  feed.getName() + "," + feed.getUrl());}
 				//#endif
 				RssItunesFeed cmpfeed = cmpRssFeeds[nextIx];
 				//#ifdef DLOGGING
-				if (!finestLoggable) {logger.info(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.getName());} ;
-				if (finestLoggable) {logger.finest(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.getName() + "," + cmpfeed.getUrl());} ;
+				if (!finestLoggable) {logger.info(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.getName());}
+				if (finestLoggable) {logger.finest(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.getName() + "," + cmpfeed.getUrl());}
 				//#endif
 				String assertInfo = new String("nextIx,name,url=" + nextIx + "," + feed.getName() + "," +  feed.getUrl());
 				goNext = true;
@@ -513,23 +516,23 @@ implements Observer
 					oldTotalCount++;
 				}
 				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine(mname + " nextIxa,feed.getName(),cmpFexc,fexc=" + nextIx + "," + feed.getName() + "," + cmpFexc + "," + fexc);} ;
-				if (fineLoggable) {logger.fine(mname + " nextIx,feed.getName(),cmpSuccessful,successful=" + nextIx + "," + feed.getName() + "," + cmpSuccessful + "," + successful);} ;
+				if (fineLoggable) {logger.fine(mname + " nextIxa,feed.getName(),cmpFexc,fexc=" + nextIx + "," + feed.getName() + "," + cmpFexc + "," + fexc);}
+				if (fineLoggable) {logger.fine(mname + " nextIx,feed.getName(),cmpSuccessful,successful=" + nextIx + "," + feed.getName() + "," + cmpSuccessful + "," + successful);}
 				//#endif
 				assertEquals("cmpHtmlLinkParserTestSub isSuccessfull() must equal nextIx=" + nextIx, cmpSuccessful, successful);
 				if (!cmpSuccessful) {
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest(mname + " cmpHtmlLinkParserTestSub not successful nextIx,feed.getName(),fexc,cmpFexc=" + nextIx + "," + feed.getName() + "," + fexc + "," + cmpFexc);} ;
+					if (finestLoggable) {logger.finest(mname + " cmpHtmlLinkParserTestSub not successful nextIx,feed.getName(),fexc,cmpFexc=" + nextIx + "," + feed.getName() + "," + fexc + "," + cmpFexc);}
 					//#endif
 					continue;
 				}
 				RssItunesFeedInfo nfeed = fparser.getRssFeed();
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest(mname + " nextIx,feed 3=" + nextIx + "," + feed.getName() + "," + feed.getUrl());} ;
+				if (finestLoggable) {logger.finest(mname + " nextIx,feed 3=" + nextIx + "," + feed.getName() + "," + feed.getUrl());}
 				//#endif
 				RssItunesFeed ncmpfeed = (RssItunesFeed)cmpFparser.getRssFeed();
 				//#ifdef DLOGGING
-				if (finestLoggable) {logger.finest(mname + " nextIx,ncmpfeed 3=" + nextIx + "," + ncmpfeed.getName() + "," + ncmpfeed.getUrl());} ;
+				if (finestLoggable) {logger.finest(mname + " nextIx,ncmpfeed 3=" + nextIx + "," + ncmpfeed.getName() + "," + ncmpfeed.getUrl());}
 				//#endif
 				// Workaround
 				goNext = true;
@@ -557,7 +560,7 @@ implements Observer
 						cmpHtmlParser, endFeeds);
 			}
 			//#ifdef DLOGGING
-			if (fineLoggable) {logger.fine(mname + " finished.");} ;
+			if (fineLoggable) {logger.fine(mname + " finished.");}
 			//#endif
 		} catch (Throwable e) {
 			if (goNext) {
