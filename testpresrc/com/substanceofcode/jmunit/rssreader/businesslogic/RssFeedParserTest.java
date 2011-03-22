@@ -29,6 +29,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
+ * IB 2011-03-15 1.11.5Dev17 Fix max item count for MIDP 1.0 parsing for RssFeedParserTest.
 */
 
 // Expand to define full vers define
@@ -61,12 +62,23 @@ import net.yinlight.j2me.observable.Observable;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
+//#ifdef DLOGGING
+import net.sf.jlogmicro.util.logging.Level;
+//#endif
+
 final public class RssFeedParserTest extends BaseTestCase
 //#ifdef DMIDP20
 implements Observer
 //#endif
 {
 
+	private boolean alterLogLevel = true; // or traceLoggable
+	private boolean endAlterLogLevel = false;
+	private int alterix = 5;
+	private int endAlterix = 5;
+	//#ifdef DLOGGING
+	private String newLogLevel = Level.FINEST.getName(); // UNDO
+	//#endif
 	private boolean ready = false;
 
 	public RssFeedParserTest() {
@@ -74,8 +86,21 @@ implements Observer
 	}
 
 	public void test(int testNumber) throws Throwable {
+		//#ifdef DLOGGING
+		if (alterLogLevel && (testNumber >= alterix) &&
+				(alterix >= 0)) {
+			endAlterLogLevel = true;
+			svLogLevel = super.updSvLogging(newLogLevel);
+			logger.info(testNumber + " altering level testNumber,svLogLevel,newLevel=" + testNumber + "," + svLogLevel + "," + logger.getParent().getLevel());
+			alterLogLevel = false;
+		} else if (endAlterLogLevel && (testNumber > endAlterix)) {
+			endAlterLogLevel = false;
+			super.updPrevLogging(svLogLevel);
+			logger.info(testNumber + " reverting level testNumber,svLogLevel,newLevel=" + testNumber + "," + svLogLevel + "," + logger.getParent().getLevel());
+		}
+		//#endif
 		switch (testNumber) {
-			case 3: //undo 0:
+			case 0:
 				testFeedParse1();
 				break;
 			case 1:
@@ -84,7 +109,7 @@ implements Observer
 			case 2:
 				testFeedParse3();
 				break;
-			case 0: // UNDO 3:
+			case 3:
 				testFeedParse4();
 				break;
 			default:
@@ -188,7 +213,7 @@ implements Observer
 			waitReady();
 			//#else
 			try {
-				fparser.parseRssFeed( false, 10);
+				fparser.parseRssFeed( false, maxItemCount);
 			} catch(Throwable e) {
 				//#ifdef DLOGGING
 				logger.severe(mname + " feedParserTestSub failure parseRssFeed feed=" + feed.getName() + "," + feed.getUrl(),e);
