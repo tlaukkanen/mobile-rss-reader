@@ -47,6 +47,10 @@
  * IB 2011-03-13 1.11.5Dev17 Process dates of the form Wed, 6 September 14:00:00 GMT.
  * IB 2011-03-13 1.11.5Dev17 Process dates of the form March 11, 2011 3:11:26 PM PST
  * IB 2011-03-13 1.11.5Dev17 Combine statements.
+ * IB 2011-03-15 1.11.5Dev17 Minor performance improvement in getting the month.
+ * IB 2011-03-15 1.11.5Dev17 Remove catch of Exception as it does the same as the catch of Throwable in RssFormatParser.
+ * IB 2011-03-15 1.11.5Dev17 Fix processing of dates of the form March 11, 2011 3:11:26 PM PST
+ * IB 2011-03-15 1.11.5Dev17 Minor memory savings in RSS parsing of dates.
  */
 
 // Expand to define full vers define
@@ -117,7 +121,9 @@ public class RssFormatParser implements FeedFormatParser {
 			while(!parser.getName().equals("item")) {
 				switch (parser.parse()) {
 					case XmlParser.END_DOCUMENT:
-						System.out.println("No entries found.");
+						//#ifdef DTEST
+//@						System.out.println("No entries found.");
+						//#endif
 						return feed;
 					case XmlParser.ELEMENT:
 						String elementName = parser.getName();
@@ -424,7 +430,7 @@ public class RssFormatParser implements FeedFormatParser {
      * Sat, 23 Sep 2006 22:25:11 +0000
      */
     public static Object[] parseStdDateTZ(String dateString) {
-        Object[] objs = null;
+
 		//#ifdef DLOGGING
 //@		Logger logger = Logger.getLogger("RssFormatParser");
 //@		boolean finestLoggable = logger.isLoggable(Level.FINEST);
@@ -453,6 +459,7 @@ public class RssFormatParser implements FeedFormatParser {
 
             String[] values;
             columnCount = (values = MiscUtil.split(dateString, " ")).length;
+            String monthString = null;
             switch (columnCount) {
 				case 5:
 					// Expected format:
@@ -485,8 +492,9 @@ public class RssFormatParser implements FeedFormatParser {
 						values[dayOfMonthIndex] =
 								values[dayOfMonthIndex].substring(0, 2);
 					}
-					if (Character.isDigit(values[monthIndex].charAt(0))) {
-						monthIndex = 0;
+					if (Character.isDigit((monthString =
+									values[monthIndex]).charAt(0))) {
+						monthString = values[monthIndex = 0];
 						yearIndex = 2;
 						timeIndex = 3;
 						{
@@ -528,19 +536,28 @@ public class RssFormatParser implements FeedFormatParser {
             int dayOfMonth = Integer.parseInt( values[ dayOfMonthIndex ] );
             
             // Month
-            String[] months =  {
-                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-            String monthString = values[ monthIndex ];
-            int month=0;
-            for(int monthEnumIndex=0; monthEnumIndex<11; monthEnumIndex++) {
-                if( monthString.startsWith( months[ monthEnumIndex ] )) {
-                    month = monthEnumIndex;
-                }
-            }
+            if (monthString == null) {
+				monthString = values[ monthIndex ];
+			}
+			if (monthString.length() > 3) {
+				monthString = monthString.substring(0, 3);
+			}
+            int month;
+			{
+				String months;
+				int pos;
+				month = ((pos = (months =
+						"Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec,").indexOf(
+							monthString)) / 4);
+				if (pos < 0) {
+					throw new Exception("Invalid month=" + monthString);
+				}
+			}
 			//#ifdef DLOGGING
 //@			if (finestLoggable) {logger.finest("parse month,monthString=" + month + "," + monthString);}
 			//#endif
+			// Free memory.
+			monthString = null;
             
             // Year
             int year;
@@ -555,6 +572,13 @@ public class RssFormatParser implements FeedFormatParser {
             
             // Time
             String[] timeValues = MiscUtil.split(values[ timeIndex ],":");
+			final String stz = ((tzIndex == -1) || (tzIndex >= values.length)) ?
+				 null : values[tzIndex];
+			//#ifdef DLOGGING
+//@			int valuesLen = values.length;
+			//#endif
+			// Save memory.
+			values = null;
             int hours = Integer.parseInt( timeValues[0] );
 			if (ampmAdj > 0) {
 				hours += ampmAdj;
@@ -569,43 +593,29 @@ public class RssFormatParser implements FeedFormatParser {
 					seconds = 0;
 				}
 			}
+			// Save space.
+			timeValues = null;
             
 			Date pubDate = getCal(
 					dayOfMonth, month, year, hours, minutes, seconds);
-			if ((tzIndex == -1) || (tzIndex >= values.length)) {
-				objs = new Object[] {pubDate, null};
-			} else {
-				final String stz;
-				objs = new Object[] {pubDate, (stz = values[tzIndex])};
-				//#ifdef DLOGGING
-//@				logger.finest("parseStdDateTZ values.length,tzIndex,stz=" + values.length + "," + tzIndex + "," + stz);
-				//#endif
-			}
-            
-        } catch(Exception ex) {
-            // TODO: Add exception handling code
-            System.err.println("parseStdDate error while converting date string to object " + 
-				"columnCount,date format: " +
-
-                    columnCount + "," + dateString + "," + ex.toString());
 			//#ifdef DLOGGING
-//@			logger.severe("parseStdDateTZ   error while converting date " +
-//@						   "string to object columnCount,date format: " +
-//@						   columnCount + "," + dateString, ex);
+//@			logger.finest("parseStdDateTZ valuesLen,tzIndex,stz=" + valuesLen + "," + tzIndex + "," + stz);
 			//#endif
-        } catch(Throwable t) {
+			return new Object[] {pubDate, stz};
+		
+        } catch(Throwable e) {
             // TODO: Add exception handling code
             System.err.println("parseStdDate error while converting date string to object " + 
 					"columnCount,date format,throwable: " + columnCount + "," +
-                    dateString + "," + t.toString());
+                    dateString + "," + e.toString());
 			//#ifdef DLOGGING
 //@			logger.severe("parseStdDateTZ   error while converting date " +
 //@						   "string to object " +
 //@                    "columnCount,date format: " + columnCount + "," +
-//@					dateString, t);
+//@					dateString, e);
 			//#endif
+			return null;
         }
-        return objs;
     }
     
     /**
