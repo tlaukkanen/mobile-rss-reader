@@ -72,6 +72,11 @@
  * IB 2011-01-29 1.11.5Dev17 Use setFrSettings2GuiNbr in FeatureMgr to set numeric gui TextField from RssReaderSettings.
  * IB 2011-01-29 1.11.5Dev17 Change max items for feed TextField to show current setting instead of default setting.
  * IB 2011-03-06 1.11.5Dev17 Allow regular and up memory devices to use bookmark name in title.  
+ * IB 2011-03-18 1.11.5Dev17 Cosmetic change.
+ * IB 2011-03-18 1.11.5Dev17 Fix statements to be inside conditional compile blocks when needed.
+ * IB 2011-03-19 1.11.5Dev17 Account for MIDP 1.0 and 2.x both listed for MIDP.
+ * IB 2011-03-19 1.11.5Dev17 Account for CLDC 1.0 and 1.1 both listed for CLDC.
+ * IB 2011-03-19 1.11.5Dev17 Prepare for future Afri-ware version.
  */
 
 // Expand to define MIDP define
@@ -82,6 +87,8 @@
 @DJSR75@
 // Expand to define smartphone define
 @DSMARTPHONEDEF@
+// Expand to define Afriware define
+@DAFRIWAREDEF@
 // Expand to define itunes define
 @DFULLVERSDEF@
 // Expand to define itunes define
@@ -191,10 +198,11 @@ implements CommandListener
     private StringItem m_memAvailItem;
     private StringItem m_threadsUsed;
     private boolean prevStdExit;
+	//#ifdef DLOGGING
     private String prevLevel;
+	//#endif
     private String m_preffnp;
     private String m_currfnp;
-    private int m_preffJad;
     private StringItem m_preffJadTx;
     private StringItem m_preffJarTx;
 	//#ifdef DTEST
@@ -339,20 +347,29 @@ implements CommandListener
 		Hashtable sysOptions = new Hashtable(5);
 		String omidpv = MiscUtil.replace(MiscUtil.replace(mep, "-", ""),
 					".", "").toLowerCase();
+		if ((omidpv.indexOf("midp10") >= 0) && (omidpv.indexOf("midp2") >= 0)) {
+			omidpv = "midp20";
+		}
 		sysOptions.put(omidpv, new Boolean(true));
 		String cmidpv = MiscUtil.replace(omidpv, "21","20");
 		sysOptions.put(cmidpv, new Boolean(true));
 		//#ifdef DLOGGING
 		if (m_finestLoggable) {m_logger.finest("Constructor cmidpv=" + cmidpv);}
 		//#endif
-		Object[] omec = FeatureMgr.getSysProperty("microedition.configuration",
-				"N/A", "Unable to get microedition.configuration",
-				super.featureMgr.getLoadForm());
-		String mec = (String)omec[0];
-        FeatureMgr.getAddStringItem(this, "Phone CLDC version:", mec);
+		{
+			Object[] omec = FeatureMgr.getSysProperty("microedition.configuration",
+					"N/A", "Unable to get microedition.configuration",
+					super.featureMgr.getLoadForm());
+			String mec = (String)omec[0];
+			FeatureMgr.getAddStringItem(this, "Phone CLDC version:", mec);
+			mec = MiscUtil.replace(MiscUtil.replace(mec, "-", ""),
+						".", "").toLowerCase();
+			if ((mec.indexOf("cldc10") >= 0) && (mec.indexOf("cldc11") >= 0)) {
+				mec = "cldc11";
+			}
 
-		sysOptions.put(MiscUtil.replace(MiscUtil.replace(mec, "-", ""),
-					".", "").toLowerCase(), new Boolean(true));
+			sysOptions.put(mec, new Boolean(true));
+		}
 		Object[] ojsr75Avail = super.featureMgr.jsr75Avail();
 		boolean hasjsr75 = ((Boolean)ojsr75Avail[0]).booleanValue();
         FeatureMgr.getAddStringItem(this, "Phone JSR 75 available:",
@@ -406,13 +423,13 @@ implements CommandListener
 							//#ifdef DLOGGING
 							if (m_finestLoggable) {m_logger.finest("Constructor oval=" + oval);}
 							//#endif
+							//#ifndef DSMARTPHONE
 							if (aval.equals("cldc11")) {
 								// For simplicity, if not smartphone version
 								// use CLDC 1.0 for all versions.
-								//#ifndef DSMARTPHONE
 								aval = "cldc10";
-								//#endif
 							}
+							//#endif
 							sb.append(aval).append("_");
 						}
 					} else {
@@ -425,17 +442,21 @@ implements CommandListener
 							//#ifndef DNOVICE
 							aval = "";
 							//#endif
+						//#ifndef DSMARTPHONE
 						} else if (aval.equals("smartphone")) {
-							//#ifndef DSMARTPHONE
 							aval = "";
-							//#endif
+						//#endif
+						//#ifndef DAFRIWARE
+						} else if (aval.equals("afriware")) {
+							aval = "";
+						//#endif
 							// intlink is never the preferred version.
 						} else if (aval.equals("intlink")) {
 							aval = "";
+						//#ifndef DSIGNED
 						} else if (aval.equals("signed")) {
-							//#ifndef DSIGNED
 							aval = "";
-							//#endif
+						//#endif
 						} else if (aval.equals("verisign")) {
 							//#ifndef DVERSIGN
 							aval = "";
