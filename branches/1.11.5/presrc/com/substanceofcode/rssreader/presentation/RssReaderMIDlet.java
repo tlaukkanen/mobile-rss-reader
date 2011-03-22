@@ -152,6 +152,7 @@
  * IB 2011-03-13 1.11.5Dev17 Cosmetic changes.
  * IB 2011-03-13 1.11.5Dev17 More logging.
  * IB 2011-03-13 1.11.5Dev17 Null bookmarks StringBuffer to make sure that we save memory starting recovery code for out of memory.
+ * IB 2011-03-21 1.11.5Dev17 Show errors from getting preferred/current jad/jar.
 */
 
 // Expand to define test define
@@ -1328,7 +1329,9 @@ implements
 				try {
 					final SettingsForm settingsForm = initializeSettingsForm(
 							true, m_loadForm);
-					setCurrent( null, settingsForm );
+					settingsForm.getFeatureMgr().getLoadForm().replaceRef(
+							null, settingsForm);
+					setCurrentNotes( settingsForm );
 				} catch(Throwable t) {
 					// Message already given.
 					t.printStackTrace();
