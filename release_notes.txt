@@ -384,9 +384,9 @@ v1.11.5 Dev 16 (Dev16) (Jan 27th 2011)
 - Allow access modification to allow ProGuard optimizer greater flexibility to optimize.  Performance effect:  unknown.
 - Minor performance and code reduction improvements.
 
-v1.11.5 Dev 17 (Dev17) (Mar 13th 2011)
+v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
 - Allow optional import and complete loading of feed at the same time (this takes much longer).
-- Small memory savings.
+- Small memory savings for parsing and saving.
 - Fix to allow parameters in links.
 - Show current max items on settings form.
 - Distribute RIM alx and cod file in a zip file for each version.
@@ -395,6 +395,8 @@ v1.11.5 Dev 17 (Dev17) (Mar 13th 2011)
 - Allow more date formats.
 - Fix bad links for RSS if initial capital image tag is in header.
 - Use base tag for HTML imports.
+- Process dates of the form March 11, 2011 3:11:26 PM PST, Wed, 6 September 14:00:00 GMT, and 11 Mar 2011 11:43 GMT.
+- Only put RIM zip files on release sites.  Need to unzip on computer and install using ALX using RIM Desktop Manager.
 
 Device notes:
 
@@ -403,6 +405,7 @@ Device notes:
 Program issues:
 
 - While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modified, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
+- Preferred/current jad/jar are not shown on some devices.
 - Some devices and emulators are unable to store the feed data.  You can quickly test if this happens with your phone by opening the program and getting the about screen automatically displayed.  Add one feed with add feed:  Use a simple feed so that it is quick to do.  Or, you can import an OPML.  You do not need to open the resulting feeds as this is unnecessary to prove that this works.  Then, use the exit menu item to exit.  Respond OK to exit.  Then, open the program again.  If the about is not shown, then the program is saving data.  Also, the feeds that you added or imported should be there.
 
 TODO:
