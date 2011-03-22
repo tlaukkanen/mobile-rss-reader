@@ -31,6 +31,7 @@
  * IB 2011-01-31 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
  * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS feeds.
  * IB 2011-03-13 1.11.5Dev17 Have adjustFields for compatibility to change fields that are time sensitive to get compatibility compares to match.
+ * IB 2011-03-18 1.11.5Dev17 Remove unnecessarily public keyword.
 */
 
 // Expand to define test define
@@ -84,7 +85,7 @@ public interface RssFeedInfo {
 
     /** Return record store string for feed only.  This excludes items which
 	    are put into store string by RssItunesFeed.  */
-    public String getStoreString(final boolean saveHdr,
+    String getStoreString(final boolean saveHdr,
 			final boolean serializeItems, final boolean encoded);
 
 	/** Compare feed to an existing feed.  **/
@@ -92,21 +93,21 @@ public interface RssFeedInfo {
     
     /** Return RSS feed items */
 	//#ifdef DTEST
-	public RssItemInfo[] getItems();
+	RssItemInfo[] getItems();
 	//#else
 	public RssItem[] getItems();
 	//#endif
     
     /** Set items */
 	//#ifdef DTEST
-	public void setItems(RssItemInfo[] items);
+	void setItems(RssItemInfo[] items);
 	//#else
-	public void setItems(RssItem[] items);
+	void setItems(RssItem[] items);
 	//#endif
     
-	public Vector getVecItems();
+	Vector getVecItems();
 
-	public void setVecItems(Vector vtems);
+	void setVecItems(Vector vtems);
 
     String getLink();
 
