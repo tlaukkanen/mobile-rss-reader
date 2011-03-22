@@ -73,6 +73,8 @@
  * IB 2011-01-11 1.11.5Dev15 Have deleteStore create settings if it does not exist since the vars are no longer static, need to use settings instance to access instance vars to delete store.
  * IB 2011-01-24 1.11.5Dev16 For internet link version, settings is used only by SettingsForm.  Don't have it be a singleton to reduce static methods.
  * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
+ * IB 2011-03-16 1.11.5Dev17 More logging.
+ * IB 2011-03-19 1.11.5Dev17 For saveRec need to set bookmarks to "" to reduce memory overflow.
  */
 
 // Expand to define CLDC define
@@ -350,7 +352,7 @@ final public class Settings {
 		synchronized(this) {
 			String value = (String) m_properties.get( name );
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("getProperty 1 m_region,m_properties.size(),name,value=" + m_region + "," + m_properties.size() + "," + name + "," + value);}
+			if (finestLoggable) {logger.finest("getProperty 1 m_region,m_properties.size(),name,value=" + m_region + "," + m_properties.size() + "," + name + "," + MiscUtil.toString(value, false, 300));}
 			//#endif
 			if (value == null) {
 				MIDlet midlet = FeatureMgr.getMidlet();
@@ -363,7 +365,7 @@ final public class Settings {
 				}
 			}
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("getProperty 2 m_region,name,value=" + m_region + "," + name + "," + value);}
+			if (finestLoggable) {logger.finest("getProperty 2 m_region,name,value=" + m_region + "," + name + "," + MiscUtil.toString(value, false, 300));}
 			//#endif
 			return value;
 		}
@@ -424,7 +426,7 @@ final public class Settings {
 		}
         Object value = getProperty( name );
 		//#ifdef DLOGGING
-		if (finestLoggable) {logger.finest("getStringProperty region,m_region,name,value=" + region + "," + m_region + "," + name + "," + value);}
+		if (finestLoggable) {logger.finest("getStringProperty region,m_region,name,value=" + region + "," + m_region + "," + name + "," + MiscUtil.toString(value, false, 300));}
 		//#endif
 		String rtnValue = ( value != null ) ? value.toString() : defaultValue;
 		if (value == null) {
@@ -600,7 +602,7 @@ final public class Settings {
 							value = din.readUTF();
 						}
 						//#ifdef DLOGGING
-						if (traceLoggable) {logger.trace("load value=" + value);}
+						if (traceLoggable) {logger.trace("load value=" + MiscUtil.toString(value, false, 300));}
 						//#endif
 						properties.put( name, value );
 					}
@@ -728,7 +730,7 @@ final public class Settings {
 					dout.writeUTF( name );
 					value = cproperties.get(name).toString();
 					//#ifdef DLOGGING
-					if (finestLoggable) {logger.finest("save value=" + value);}
+					if (finestLoggable) {logger.finest("save value=" + MiscUtil.toString(value, false, 300));}
 					//#endif
 					byte[] bvalue;
 					try {
@@ -755,6 +757,10 @@ final public class Settings {
 								name + ioe.getMessage());
 						ioe.printStackTrace();
 						bvalue = value.getBytes();
+					}
+					if (name.equals(BOOKMARKS_NAME)) {
+						value = "";
+						cproperties.put(BOOKMARKS_NAME, "");
 					}
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("save bvalue=" + bvalue);}
@@ -810,14 +816,14 @@ final public class Settings {
 				e.printStackTrace();
 				throw new CauseException("Internal error during save.", e);
 			} catch (Throwable e) {
+				/** Error while executing save */
+				e.printStackTrace();
+				System.out.println("saveRec internal error " + e.getMessage());
 				CauseException ce = new CauseException("Internal error while " +
 						"processing save.", e);
 				//#ifdef DLOGGING
 				logger.severe(ce.getMessage(), ce);
 				//#endif
-				/** Error while executing constructor */
-				System.out.println(ce.getMessage() + e.getMessage());
-				e.printStackTrace();
 				throw ce;
 			} finally {
 				/* Workaround for MicroEmulator. */
