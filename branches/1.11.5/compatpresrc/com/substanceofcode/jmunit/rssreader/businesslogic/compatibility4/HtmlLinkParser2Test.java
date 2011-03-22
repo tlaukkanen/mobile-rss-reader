@@ -299,8 +299,8 @@ implements Observer
 				} else if (name.indexOf("linksearchurl=/rss") >= 0) {
 					feedListParser.setFeedURLFilter("/rss");
 				}
-				//#ifdef DMIDP20
 				ready = false;
+				//#ifdef DMIDP20
 				feedListParser.getObservableHandler().addObserver(this);
 				//#endif
 				feedListParser.startParsing();
