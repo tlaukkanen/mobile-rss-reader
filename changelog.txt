@@ -1063,7 +1063,9 @@ v1.11.5 Dev 16 (Dev16) (Jan 27th 2011)
 - Use -optimizationpasses to specify more than one (using 3 for this release) optimization passes.
 - Use setSelectedIndex after initializing bookmarks to make sure selection is at the top of the list.
 
-v1.11.5 Dev 17 (Dev17) (Mar 13th 2011)
+v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
+- Account for CLDC 1.0 and 1.1 both listed for CLDC.
+- Account for MIDP 1.0 and 2.x both listed for MIDP.
 - Add MIDP 1.0 "regular" memory compile and build target which is skippped for distribution.
 - Add more targets to not make for dist.smartphone.test.
 - Add more targets to not make for dist.test.
@@ -1081,44 +1083,46 @@ v1.11.5 Dev 17 (Dev17) (Mar 13th 2011)
 - Allow sourceforge project name to be somewhat more generic.
 - Allow thread methods for non small memory releases.
 - Allow use of bookmark name in River of News for non small memory.
+- Catch Throwable instead of Exception and return null or partially initialized item/feed.
 - Change items to array to save on memory and for simplicity.
 - Change max items for feed TextField to show current setting instead of default setting.
 - Change setSettingNbr to setFrGui2SettingsNbr.
 - Check itunes fields separately to avoid setting up temporary strings.
 - Combine statements.
-- Create test fo MiscUtil in MiscUtilTest.
-- Do comparison test using FeedListParsers.xml.
+- Cosmetic changes.
 - Don't compile code not present if small memory.
+- Don't copy alx, jad, jar, and cod files to FTP or google.  Put them into zip file which in addition contains the alx file.
 - Don't do script tags because we cannot process them.
 - Don't have signed MIDP 1.0 as it is not supported.
 - Don't preserve org.kablog.kgui.KFileSelectorMgr if it is not present.  This prevents errors.
 - Don't upload internet link version to google code.
 - Do parser suite first to get http prompt faster.
+- Fix max item count for MIDP 1.0 parsing for RssFeedParserTest.
+- Fix processing of dates of the form March 11, 2011 3:11:26 PM PST
+- Fix removal of cod files.
+- Fix statements to be inside conditional compile blocks when needed.
 - For RIM, send zip file.
+- For saveRec need to set bookmarks to "" to reduce memory overflow.
 - Give info messages if no loading form and logging.
 - Have adjustFields for compatibility to change fields that are time sensitive to get compatibility compares to match.
 - Have bookmark details forms for non small memory.
 - Have checkRead return true if items are the same.  Use this to reduce cross check of items being the same.
 - Have checkRead return true if the item's unread was saved.
-- Have clone to create a copy.
+- Have clone to create a copy for items/feeds.
 - Have constructor for future background loading of feeds.
 - Have convVec to use for testing to convert from an object array to a Vector.
 - Have different serialVersionUID for CauseException to be different from the compatibility version.
 - Have equals method for CauseException.
-- Have FeatureMgr.getCmdAddPrompt to both create a prompt command and add it to the displayable.  Return the command pointer.
-- Have FeatureMgr.getCmdAdd to both create a command and add it to the displayable.  Return the command pointer.
+- Have FeatureMgr.getCmdAdd/FeatureMgr.getCmdAddPrompt to both create a command/prompt command and add it to the displayable.  Return the command pointer.
 - Have getCmdAdd and getCmdAddPrompt allow optional long label.
 - Have getFeedTitleList to use title for name when parsing the whole feed.
 - Have getTitleOnly to use title for name when parsing just to get the title.
-- Have keep.smartlink to use smartlink.
-- Have keep.smartlink to use smartlink for MIDP 1.0 and internet link.
-- Have long command name option for some commands.
+- Have keep.smartlink to use smartlink and use for MIDP 1.0 and internet link.
 - Have mark unread items default to false for non-small memory.
 - Have methods to convert from a vector to either a RssItem or RssItunesFeed array.
 - Have mobility choice for open with method urlEncode.
 - Have m_state keep track of unread items and itunes flag.
 - Have notifyObservers without parameter send boolean true to observers.
-- Have open mobilizer and no pic mobilizer for item.
 - Have open mobilizer and no pic mobilizer for item and bookmark details forms.
 - Have optional setting of getAllFeedList to parse all feeds.
 - Have optional setting of getAllUpdFeedList to parse all updated feeds.
@@ -1132,38 +1136,43 @@ v1.11.5 Dev 17 (Dev17) (Mar 13th 2011)
 - Have tmp release in tmp directory/domain for testing.
 - Have useFeedUrlList to use the url for name.
 - Have value of href be used as link before text of link.
+- If 0/1 fields while deserialization, use null or initialization m_items value.
+- If get Throwable while serializing, return null item.
 - If item date has an error, save the string value ass errDate.
 - If text attribute does not have the name, try the title attribute.
 - Increase number of tests to 15.
 - Let adding prompt to be used for non FeatureForm/List.  The prompt is ignored if not for these displayables.
 - Make sure midlet is not null for tests and future combination with other programs.
+- Minor memory savings in RSS parsing of dates.
+- Minor performance improvement in getting the month.
 - More logging.
 - Move compatibility tests to compatibility packages.
 - Need () after Thread.yield.
-- Need clone method for RSS feeds.
-- Need clone method for RSS items.
 - Need RssItunesInfo to move itunes flag to RssItem.
-- Only compile this if it is the full version.
+- Null bookmarks StringBuffer to make sure that we save memory starting recovery code for out of memory.
 - Only doing EncodingUtilTest if this is the full version.
 - Only upload RIM zip file as others are not usable.
 - Only use CmdReceiver utils if not small memory.
 - Only use thread utils if not small memory.
 - Optionally use long command label.
 - Parse and store feeds from FeedListParser in ImportFeedsForm.  Put new feeds into the booklist in the form code.
+- Prepare for future Afri-ware version.
 - Prevent ${act.comp.src} directory from being created.
+- Print stack trace in empty catch.
 - Process dates of the form 11 Mar 2011 11:43 GMT.
 - Process dates of the form March 11, 2011 3:11:26 PM PST
 - Process dates of the form Wed, 6 September 14:00:00 GMT.
 - Recognize image with initial cap to prevent invalid links, etc inside the image tag contents.
+- Remove catch of Exception as it does the same as the catch of Throwable in RssFormatParser.
+- Remove unnecessarily public keyword.
 - Remove unused and now obsolete cldc10.TestCase
 - Return presence boolean array to show which feeds were added.
-- (rework) Use standard file prefix to allow smartphone program to use it.
+- Use standard file prefix to allow smartphone program to use it.
 - RssFeed clone/constructor needs to clone/instantiate new items instead of re-using the parameter's items.
 - Save old feeds and feed names (from URL) from RssFeedStore to allow future background updates.
 - Set and update MOBILIZER_CHOICE.
 - Set m_urlHandler to null to save memory.
 - Set the millisecond to 0 to allow dates to be more consistent.
-- Set urlHandler to null after parsing is done to relieve memory.
 - Skip smartlink given that it gives class not found error for MIDP 2.0.
 - Specify imports without '*'.
 - Standardize var names.
@@ -1184,8 +1193,11 @@ v1.11.5 Dev 17 (Dev17) (Mar 13th 2011)
 - Use getCmdAdd to have long labels for the commands.
 - Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
 - Use Netbeans WTK home.
+- Use nullPtr to init vars.
 - Use RssItem instead of RssItunesItem to allow future difference in the two.
+- Use RssItunesItem to serialize to maintain compatibility with previous stores of the same version.
 - Use setFrSettings2GuiNbr in FeatureMgr to set numeric gui TextField from RssReaderSettings.
+- Use tag len to see if l/L tag is link length.
 - Use utility methods to convert from Vector to arrays.
 - Use wtktemporary.properties to more easily set temporary test development properties used for the build.
 
@@ -1206,6 +1218,9 @@ General issues:
 - For some emulators and devices, bookmarks are not saved.  However, saving bookmarks does work on WTK 2.5.2_01 and most phones that I have tested.
 
 TODO:  Not necessarily in the order it will be done or if it will be done at all.
+- Fix null pointer with invalid feed of rss feed directory (invalid OPML) read as feed for Samsung insight HD.
+- fr itunes and other iso8859 error if no iso8859?
+- Have HTMLLinkParser check for autolinks as well.
 - Fix code for future backgkround processing.
 - Fix code for determining the right version to handle MDIP vers with 2 or more versions supported.
 - Test "regular" memory and smartphone version of MIDP 1.0.
