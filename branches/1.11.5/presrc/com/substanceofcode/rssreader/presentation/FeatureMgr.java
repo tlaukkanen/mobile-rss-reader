@@ -119,6 +119,7 @@
  * IB 2011-03-06 1.11.5Dev17 Make sure midlet is not null for tests and future combination with other programs.
  * IB 2011-03-06 1.11.5Dev17 Let adding prompt to be used for non FeatureForm/List.  The prompt is ignored if not for these displayables.
  * IB 2011-03-18 1.11.5Dev17 Print stack trace in empty catch.
+ * IB 2011-03-21 1.11.5Dev17 Use FeatureMgr.getAppDefProperty to get the app property and return the given default if null.
 */
 
 // Expand to define MIDP define
@@ -1472,6 +1473,15 @@ public class FeatureMgr implements CommandListener,
 			StringBuffer sbrtn = (StringBuffer)txtObj;
 			sbrtn.setLength(0);
 			sbrtn.append(value);
+		}
+	}
+
+	static String getAppDefProperty(String key, String vdefault) {
+		String value;
+		if ((midlet != null) && (value = midlet.getAppProperty(key)) != null) {
+			return value;
+		} else {
+			return vdefault;
 		}
 	}
 
