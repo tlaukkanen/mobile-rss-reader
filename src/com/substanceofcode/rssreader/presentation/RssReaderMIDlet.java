@@ -149,6 +149,9 @@
  * IB 2011-03-06 1.11.5Dev17 Have long command name option for some commands.
  * IB 2011-03-06 1.11.5Dev17 Synchronize access to m_platformURL.
  * IB 2011-03-13 1.11.5Dev17 Parse and store feeds from FeedListParser in ImportFeedsForm.  Put new feeds into the booklist in the form code.
+ * IB 2011-03-13 1.11.5Dev17 Cosmetic changes.
+ * IB 2011-03-13 1.11.5Dev17 More logging.
+ * IB 2011-03-13 1.11.5Dev17 Null bookmarks StringBuffer to make sure that we save memory starting recovery code for out of memory.
 */
 
 // Expand to define test define
@@ -356,7 +359,7 @@ implements
     private int             m_curBookmark;  // The currently selected item
 	//#ifdef DMIDP20
     volatile private Observable m_backGrParser; // The currently selected RSS in background
-    volatile private Observable m_backGrFdlParser; // The currently selected RSS in background
+    volatile private Observable m_backGrFdlParser; // The currently selected feed list in background
 	//#endif
     
     // GUI items
@@ -443,8 +446,8 @@ implements
 		m_showLicense = false;
 		m_unreadImage = null;
 		//#ifdef DFULLVERS
-		m_bookmarkList = null;
-		m_citem = null;
+		m_bookmarkList = (FeatureList)nullPtr;
+		m_citem = (RssItem)nullPtr;
 		//#else
 //@		m_settingsForm = null;
 		//#endif
@@ -457,8 +460,8 @@ implements
 		GOOGLE_NO_IMAGES = "&_gwt_noimg=1";
 		SKWEEZER_MOBILITY = "http://www.skweezer.com/s.aspx?q=";
 		m_parseBackground = false;
-		m_backGrParser = null; // The currently selected RSS in background
-		m_backGrFdlParser = null; // The currently selected RSS in background
+		m_backGrParser = (Observable)nullPtr; // The currently selected RSS in background
+		m_backGrFdlParser = (Observable)nullPtr; // The currently selected RSS in background
 		//#endif
 
 		//#ifdef DTESTUI
@@ -748,6 +751,7 @@ implements
 							m_rssFeeds, m_bookmarkList, m_loadForm, m_settings
 							//#ifdef DLOGGING
 //@							,logger
+//@							,fineLoggable
 //@							,finestLoggable
 							//#endif
 							);
@@ -1149,11 +1153,9 @@ implements
 								  //#endif
 			) {
 		if (t instanceof Exception) {
-			Exception e = (Exception)t;
-			loadForm.recordExcForm(excMsg, e);
+			loadForm.recordExcForm(excMsg, t);
 		} else if (t instanceof OutOfMemoryError) {
-			OutOfMemoryError e = (OutOfMemoryError)t;
-			CauseException ce = new CauseException(excMsg, e);
+			CauseException ce = new CauseException(excMsg, t);
 			loadForm.recordExcForm(
 					"Out Of Memory Error initializing/loading form", ce);
 		} else {
@@ -1367,9 +1369,9 @@ implements
 //@							(beginMem - Runtime.getRuntime().freeMemory()));
 					//#endif
 					setCurrent( null, bmForm );
-				} catch(OutOfMemoryError t) {
+				} catch(OutOfMemoryError e) {
 					m_loadForm.recordExcForm("\nOut Of Memory Error loading " +
-							"bookmark form", t);
+							"bookmark form", e);
 				} catch(Throwable t) {
 					m_loadForm.recordExcForm("\nInternal error loading bookmark " +
 							"form" + ((m_getEditBMForm ? (" " + bm.getName()) : " ")), t);
@@ -1655,7 +1657,7 @@ implements
 			obsmain = this;
 		}
 		RssFeedParser cbackGrParser = new RssFeedParser(feed,
-				(modfeed ? feed : null), updfeed);
+				(modfeed ? feed : (RssItunesFeed)nullPtr), updfeed);
 		Displayable cprevDisp = null;
 		boolean     cgetPage = false;
 		boolean     cgetModPage = false;
@@ -1911,6 +1913,7 @@ implements
 						m_rssFeeds, m_bookmarkList, loadForm, m_settings
 						//#ifdef DLOGGING
 //@						,logger
+//@						,fineLoggable
 //@						,fineLoggable
 						//#endif
 						);
@@ -2289,6 +2292,7 @@ implements
 			final Settings settings
 			//#ifdef DLOGGING
 //@			,final Logger logger
+//@			,final boolean fineLoggable
 //@			,final boolean finestLoggable
 			//#endif
 			) {
@@ -2310,7 +2314,7 @@ implements
 		final int endIx = (bookRegion + 1) * bsize / iparts - 1;
         try {
 			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("firstIx,endIx=" + firstIx + "," + endIx);}
+//@			if (finestLoggable) {logger.finest("saveBookmarks firstIx,endIx=" + firstIx + "," + endIx);}
 			//#endif
 			Vector vstored = new Vector();
 			try {
@@ -2318,7 +2322,7 @@ implements
 				for( int i=firstIx; i<=endIx; i++) {
 					final String name = bookmarkList.getString(i);
 					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("i,name=" + i + "," + name);}
+//@					if (finestLoggable) {logger.finest("saveBookmarks i,name=" + i + "," + name);}
 					//#endif
 					if (!rssFeeds.containsKey( name )) {
 						continue;
@@ -2340,12 +2344,22 @@ implements
 					}
 				}
 			} catch(OutOfMemoryError error) {
+				//#ifdef DLOGGING
+//@				int len = bookmarks.length();
+				//#endif
+				// Null this to make sure tha we release the memory.
+				bookmarks = null;
+				//#ifdef DLOGGING
+//@				logger.severe(
+//@						"saveBookmarks Out of memory while Saving bookmarks length=" +
+//@						len, error);
+				//#endif
 				loadForm.recordExcForm(
 						"Out of memory while Saving bookmarks without " +
 						"updated news items.  Reducing memory.", error);
-				
+
+				bookmarks = new StringBuffer();
 				/** Save feeds without items */
-				bookmarks.setLength(0);
 				for( int i=firstIx; i<=endIx; i++) {
 					final String name = bookmarkList.getString(i);
 					if( name.length() == 0) {
@@ -2368,6 +2382,9 @@ implements
 			}
 			//#ifdef DTEST
 //@			System.out.println("storeTime=" + storeTime);
+			//#endif
+			//#ifdef DLOGGING
+//@			if (fineLoggable) {logger.fine("saveBookmarks bookmarks.length()=" + bookmarks.length());}
 			//#endif
             settings.setStringProperty(settings.BOOKMARKS_NAME, bookmarks.toString());
 		} catch (Throwable t) {
@@ -2397,6 +2414,7 @@ implements
 			final Settings settings
 			//#ifdef DLOGGING
 //@			,final Logger logger
+//@			,final boolean fineLoggable
 //@			,final boolean finestLoggable
 			//#endif
 			) {
@@ -2416,6 +2434,7 @@ implements
 							bookmarkList, loadForm, settings
 							//#ifdef DLOGGING
 //@							,logger
+//@							,fineLoggable
 //@							,finestLoggable
 							//#endif
 							);
