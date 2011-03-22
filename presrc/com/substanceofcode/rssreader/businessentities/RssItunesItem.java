@@ -34,9 +34,13 @@
  * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
  * IB 2011-01-31 1.11.5Dev17 Have checkRead return true if items are the same.  Use this to reduce cross check of items being the same.
  * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS items.
- * IB 2011-03-06 1.11.5Dev17 Combine statements.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
  * IB 2011-03-12 1.11.5Dev17 Have m_state keep track of unread items and itunes flag.
  * IB 2011-03-12 1.11.5Dev17 Have m_state keep track of unread items and itunes flag.
+ * IB 2011-03-15 1.11.5Dev17 More logging.
+ * IB 2011-03-15 1.11.5Dev17 Catch Throwable instead of Exception and return null or partially initialized item.
+ * IB 2011-03-15 1.11.5Dev17 If 0/1 fields while deserialization, return null
+ * IB 2011-03-06 1.11.5Dev17 Use RssItem instead of RssItunesItem to allow future difference in the two.
 */
 
 // Expand to define itunes define
@@ -205,9 +209,26 @@ implements RssItunesItemInfo, RssItunesInfo
 			boolean hasPipe = (data.indexOf((char)1) >= 0);
 			String[] nodes = MiscUtil.split( data, "|");
 			RssItunesItem item = new RssItunesItem();
-			item.init(hasPipe, nodes);
-			return item;
-        } catch(Exception e) {
+			if (nodes.length > 1) {
+				item.init(hasPipe, nodes);
+			} else {
+				//#ifdef DLOGGING
+				Logger.getLogger("RssItem").severe(
+						"unencodedDeserialize error invalid item data=" + data,
+						new Exception(
+							"unencodedDeserialize error invalid item data"));
+				//#endif
+				return null;
+			}
+			if (item.isItunes()) {
+				return item;
+			} else {
+				return new RssItem(item);
+			}
+        } catch(Throwable e) {
+			//#ifdef DLOGGING
+			Logger.getLogger("RssItem").severe("unencodedDeserialize error data=" + data, e);
+			//#endif
             System.err.println("unencodedDeserialize Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
 			return null;
@@ -218,7 +239,10 @@ implements RssItunesItemInfo, RssItunesInfo
 	public static RssItem deserialize(String data) {
 		try {
 			return unencodedDeserialize(MiscUtil.decodeStr(data));
-        } catch(Exception e) {
+        } catch(Throwable e) {
+			//#ifdef DLOGGING
+			Logger.getLogger("RssItem").severe("deserialize error data=" + data, e);
+			//#endif
             System.err.println("Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
 			return null;
@@ -282,7 +306,10 @@ implements RssItunesItemInfo, RssItunesInfo
 
 			super.init(NBR_ITUNES_INFO, true, hasPipe, nodes);
 
-        } catch(Exception e) {
+        } catch(Throwable e) {
+			//#ifdef DLOGGING
+			logger.severe("init error m_title,m_link=" + m_title + "," + m_link, e);
+			//#endif
             System.err.println("Error while RssItunesItem deserialize : " + e.toString());
 			e.printStackTrace();
         }
