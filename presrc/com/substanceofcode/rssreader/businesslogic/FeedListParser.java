@@ -62,6 +62,7 @@
  * IB 2011-03-13 1.11.5Dev17 Set urlHandler to null after parsing is done to relieve memory.
  * IB 2011-03-13 1.11.5Dev17 Have optional setting of getAllFeedList to parse all feeds.
  * IB 2011-03-13 1.11.5Dev17 Have optional setting of getAllUpdFeedList to parse all updated feeds.
+ * IB 2011-03-18 1.11.5Dev17 Combine statements.
  */
 // Expand to define MIDP define
 @DMIDPVERS@
@@ -375,39 +376,38 @@ implements
 										m_maxItemCount );
 								feed = fparser.getRssFeed();
 								fparser = (RssFeedParser)nullPtr;
-								if (name.length() == 0) {
-									if ((oldname.length() != 0) && 
-											feed.getName().equals(oldname)) {
-										if (m_loadForm != null) {
-											m_loadForm.appendNote(
-													"\nWarning loaded title/name matches existing name, " +
-													name);
-										}
-										if (!m_getAllFeedList && !m_override) {
-											CauseException ce = new CauseException(
-													"Feed already exists with " +
-													"name " + name +
-													".  Existing feed not updated.  " +
-													"Use override in place to override an existing " +
-													"feed with an old feed with the same name.");
-											if (m_loadForm != null) {
-												m_loadForm.addExc("Error\n" +
-														ce.getMessage(), ce);
-												//#ifdef DLOGGING
-											} else {
-												logger.severe(
-														"Error\n" +
-														ce.getMessage());
-												//#endif
-											}
-											continue;
-										}
-										oldfeed = ((oldname != null) &&
-													(m_oldRssFeeds != null)) ?
-												m_oldRssFeeds.get(oldname) :
-												(RssItunesFeed)nullPtr;
-										pres = true;
+								if ((name.length() == 0) &&
+									(oldname.length() != 0) && 
+									feed.getName().equals(oldname)) {
+									if (m_loadForm != null) {
+										m_loadForm.appendNote(
+												"\nWarning loaded title/name matches existing name, " +
+												name);
 									}
+									if (!m_getAllFeedList && !m_override) {
+										CauseException ce = new CauseException(
+												"Feed already exists with " +
+												"name " + name +
+												".  Existing feed not updated.  " +
+												"Use override in place to override an existing " +
+												"feed with an old feed with the same name.");
+										if (m_loadForm != null) {
+											m_loadForm.addExc("Error\n" +
+													ce.getMessage(), ce);
+											//#ifdef DLOGGING
+										} else {
+											logger.severe(
+													"Error\n" +
+													ce.getMessage());
+											//#endif
+										}
+										continue;
+									}
+									oldfeed = ((oldname != null) &&
+											(m_oldRssFeeds != null)) ?
+										m_oldRssFeeds.get(oldname) :
+										(RssItunesFeed)nullPtr;
+									pres = true;
 								}
 								modified = true;
 								if (pres && (m_keepUsPwd || m_keepModGroup) &&
