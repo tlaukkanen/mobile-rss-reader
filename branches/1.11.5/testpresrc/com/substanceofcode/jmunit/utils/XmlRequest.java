@@ -42,15 +42,15 @@ package com.substanceofcode.jmunit.utils;
 
 public interface XmlRequest
 {
-	static int GET_PARSE = 0;
-	static int GET_PARSE_XML_ELEMENT = 1;
-	static int GET_IS_UTF =	2;
-	static int GET_IS_WIN = 3;
-	static int GET_IS_DOCENCODING = 4;
-	static int GET_NAMESPACES = 5;
-	static int GET_ATTRIBUTE = 6;
-	static int GET_TEXT = 7;
-	static int GET_NAME = 8;
+	int GET_PARSE = 0;
+	int GET_PARSE_XML_ELEMENT = 1;
+	int GET_IS_UTF =	2;
+	int GET_IS_WIN = 3;
+	int GET_IS_DOCENCODING = 4;
+	int GET_NAMESPACES = 5;
+	int GET_ATTRIBUTE = 6;
+	int GET_TEXT = 7;
+	int GET_NAME = 8;
 	static Integer IGET_PARSE = new Integer(GET_PARSE);
 	static Integer IGET_PARSE_XML_ELEMENT = new Integer(GET_PARSE_XML_ELEMENT);
 	static Integer IGET_IS_UTF =	new Integer(GET_IS_UTF);
