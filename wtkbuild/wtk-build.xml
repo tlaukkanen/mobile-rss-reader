@@ -167,6 +167,9 @@
 	<!-- IB 2011-03-06 1.11.5Dev17 Add more targets to not make for dist.smartphone.test.  -->
 	<!-- IB 2011-03-07 1.11.5Dev17 Allow optional temporary distribution with temporary subdomain and directory path using wtktemporary.properties.template with yinlight.tmp.subdir, yinlight.tmp.subpath, and yinlight.subdomain.  -->
 	<!-- IB 2011-03-07 1.11.5Dev17 Add MIDP 1.0 "regular" memory compile and build target which is skippped for distribution.  -->
+	<!-- IB 2011-03-14 1.11.5Dev17 Fix removal of cod files.  -->
+	<!-- IB 2011-03-18 1.11.5Dev17 Don't copy alx, jad, jar, and cod files to FTP or google.  Put them into zip file which in addition contains the alx file.  -->
+	<!-- IB 2011-03-19 1.11.5Dev17 Prepare for future Afri-ware version.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -219,6 +222,7 @@
 	<property name="sfile.prefix.full" value="full" />
 	<property name="sfile.prefix.intlink" value="intlink" />
 	<property name="sfile.prefix.smartphone" value="smartphone" />
+	<property name="sfile.prefix.afriware" value="afriware" />
 	<property name="sfile.prefix.regsize.midp10" value="moderate" />
 	<property name="sfile.prefix.novice" value="novice" />
 	<property name="sfile.prefix.jsr75" value="jsr75" />
@@ -370,6 +374,10 @@
 		<property file="${basedir}/wtksmartphone.properties${build.template}" />
 	</target>
 
+	<target name="prepare.afriware" >
+		<property file="${basedir}/wtkafriware.properties${build.template}" />
+	</target>
+
 	<target name="prepare.signed" >
 		<property file="${basedir}/wtksigned.properties${build.template}" />
 		<property name="vendor" value="${yinlight.vendor}" />
@@ -490,6 +498,7 @@
 		<property name="DMEMSIZEDEF" value="DREGULARMEM" />
 		<property name="DITUNESDEF" value="DNOITUNES" />
 		<property name="DSMARTPHONEDEF" value="DNOSMARTPHONE" />
+		<property name="DAFRIWAREDEF" value="DNOAFRIWARE" />
 		<property name="DNOVICEDEF" value="DNONOVICE" />
 		<property name="DINTLINKDEF" value="DNOINTLINK" />
 		<property name="DFULLVERSDEF" value="DNODFULLVERS" />
@@ -523,6 +532,7 @@
 		<property name="file.prefix.cldc1.1" value="" />
 		<property name="file.prefix.novice" value="" />
 		<property name="file.prefix.smartphone" value="" />
+		<property name="file.prefix.afriware" value="" />
 		<property name="file.prefix.memorysize" value="" />
 		<property name="file.prefix.full" value="" />
 		<property name="file.prefix.intlink" value="" />
@@ -539,7 +549,7 @@
 		<property name="file.prefix.jsr205" value="" />
 		<property name="file.prefix.jsr238" value="" />
 		<property name="file.prefix.large" value="" />
-		<property name="html.file.prefix" value="${file.prefix.smartphone}${file.prefix.memorysize}${file.prefix.full}${file.prefix.intlink}${file.prefix.signed}${file.prefix.verisign}${file.prefix.thawte}${file.prefix.godaddy}${file.prefix.jsr75}${file.prefix.jsr238}" />
+		<property name="html.file.prefix" value="${file.prefix.smartphone}${file.prefix.afriware}${file.prefix.memorysize}${file.prefix.full}${file.prefix.intlink}${file.prefix.signed}${file.prefix.verisign}${file.prefix.thawte}${file.prefix.godaddy}${file.prefix.jsr75}${file.prefix.jsr238}" />
 		<property name="file.prefix" value="${file.prefix.midp1.0}${file.prefix.midp2.0}${file.prefix.cldc1.0}${file.prefix.cldc1.1}${file.prefix.novice}${file.prefix.large}${html.file.prefix}" />
 		<property name="bin" value="${target}/bin${file.prefix}" />
 		<property name="rim.bin" value="${target}/bin${file.prefix}_rim" />
@@ -552,6 +562,7 @@
 		<property name="SUFFIXVERS.cldc1.1" value="" />
 		<property name="SUFFIXVERS.novice" value="" />
 		<property name="SUFFIXVERS.smartphone" value="" />
+		<property name="SUFFIXVERS.afriware" value="" />
 		<property name="SUFFIXVERS.memorysize" value="" />
 		<property name="SUFFIXVERS.full" value="" />
 		<property name="SUFFIXVERS.intlink" value="" />
@@ -566,7 +577,7 @@
 		<property name="SUFFIXVERS.jsr184" value="" />
 		<property name="SUFFIXVERS.jsr238" value="" />
 		<property name="SUFFIXVERS.large" value="" />
-		<property name="SUFFIXVERS" value="${SUFFIXVERS.midp1.0}${SUFFIXVERS.midp2.0}${SUFFIXVERS.cldc1.0}${SUFFIXVERS.cldc1.1}${SUFFIXVERS.novice}${SUFFIXVERS.smartphone}${SUFFIXVERS.memorysize}${SUFFIXVERS.full}${SUFFIXVERS.intlink}${SUFFIXVERS.signed}${SUFFIXVERS.verisign}${SUFFIXVERS.thawte}${SUFFIXVERS.godaddy}${SUFFIXVERS.jsr75}${SUFFIXVERS.jsr82}${SUFFIXVERS.jsr120}${SUFFIXVERS.jsr135}${SUFFIXVERS.jsr184}${SUFFIXVERS.jsr238}${SUFFIXVERS.large}" />
+		<property name="SUFFIXVERS" value="${SUFFIXVERS.midp1.0}${SUFFIXVERS.midp2.0}${SUFFIXVERS.cldc1.0}${SUFFIXVERS.cldc1.1}${SUFFIXVERS.novice}${SUFFIXVERS.smartphone}${SUFFIXVERS.afriware}${SUFFIXVERS.memorysize}${SUFFIXVERS.full}${SUFFIXVERS.intlink}${SUFFIXVERS.signed}${SUFFIXVERS.verisign}${SUFFIXVERS.thawte}${SUFFIXVERS.godaddy}${SUFFIXVERS.jsr75}${SUFFIXVERS.jsr82}${SUFFIXVERS.jsr120}${SUFFIXVERS.jsr135}${SUFFIXVERS.jsr184}${SUFFIXVERS.jsr238}${SUFFIXVERS.large}" />
 		<property name="lib.jsr75" value="" />
 		<property name="lib.jsr82" value="" />
 		<property name="lib.jsr120" value="" />
@@ -587,6 +598,7 @@
 		<property name="novice.txt" value="${src}/data/novice.txt" />
 		<property name="jsr75" value="" />
 		<property name="smartphone" value="" />
+		<property name="afriware" value="" />
 		<property name="stage.stable.text" value="stable" />
 		<property name="stage.phase.text" value="production" />
 		<property name="signed.text" value="" />
@@ -617,6 +629,7 @@
 			<filter token="DMEMSIZEDEF" value="//#define ${DMEMSIZEDEF}" />
 			<filter token="DITUNESDEF" value="//#define ${DITUNESDEF}" />
 			<filter token="DSMARTPHONEDEF" value="//#define ${DSMARTPHONEDEF}" />
+			<filter token="DAFRIWAREDEF" value="//#define ${DAFRIWAREDEF}" />
 			<filter token="DNOVICEDEF" value="//#define ${DNOVICEDEF}" />
 			<filter token="SFILEPREFIXNOVICE" value="${sfile.prefix.novice}" />
 			<filter token="DINTLINKDEF" value="//#define ${DINTLINKDEF}" />
@@ -724,6 +737,7 @@
 	    <echo message="DCLDCVERS=${DCLDCVERS}" />
 	    <echo message="DITUNESDEF=${DITUNESDEF}" />
 	    <echo message="DSMARTPHONEDEF=${DSMARTPHONEDEF}" />
+	    <echo message="DAFRIWAREDEF=${DAFRIWAREDEF}" />
 	    <echo message="DNOVICEDEF=${DNOVICEDEF}" />
 	    <echo message="DINTLINKDEF=${DINTLINKDEF}" />
 	    <echo message="DFULLVERSDEF=${DFULLVERSDEF}" />
@@ -781,7 +795,7 @@
 	<target name="preprocess" depends="init.act.presrc,init.preprocess.presrc.file,init.preprocess" if="presrc" >
 		<antcall target="display.props" inheritAll="true" />
 		<!-- Check with defines in jdk.home rapc. -->
-		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DMEMSIZEDEF},${DITUNESDEF},${DSMARTPHONEDEF},${DNOVICEDEF},${DFEATUREMGRDEF},${DFEATUREFORMDEF},${DINTLINKDEF},${DFULLVERSDEF},${DSIGNEDDEF},${DVERISIGNDEF},${DTHAWTEDEF},${DGODADDYDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DJMTESTPLUSDEF},${DJMTESTFREEDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
+		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DMEMSIZEDEF},${DITUNESDEF},${DSMARTPHONEDEF},${DAFRIWAREDEF},${DNOVICEDEF},${DFEATUREMGRDEF},${DFEATUREFORMDEF},${DINTLINKDEF},${DFULLVERSDEF},${DSIGNEDDEF},${DVERISIGNDEF},${DTHAWTEDEF},${DGODADDYDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DJMTESTPLUSDEF},${DJMTESTFREEDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
 		<echo message="preprocess.defines=${preprocess.defines}" />
 		<property name="act.presrc" value="${presrc}" />
 		<echo message="act.presrc=${act.presrc}" />
@@ -1056,7 +1070,7 @@
 	</target>
 
 	<target name="make.jad" depends="prepare" >
-		<property name="shtml.file.prefix" value="file.prefix.smartphone,file.prefix.memorysize,file.prefix.full,file.prefix.intlink,file.prefix.signed,file.prefix.verisign,file.prefix.thawte,file.prefix.godaddy,file.prefix.jsr75,file.prefix.jsr238" />
+		<property name="shtml.file.prefix" value="file.prefix.smartphone,file.prefix.afriware,file.prefix.memorysize,file.prefix.full,file.prefix.intlink,file.prefix.signed,file.prefix.verisign,file.prefix.thawte,file.prefix.godaddy,file.prefix.jsr75,file.prefix.jsr238" />
 		<property name="sfile.prefix" value="file.prefix.midp1.0,file.prefix.midp2.0,file.prefix.cldc1.0,file.prefix.cldc1.1,file.prefix.novice,file.prefix.large,${shtml.file.prefix}" />
 		<property name="sbuild.prefix" value="${sfile.prefix},sstage.file" />
 		<property name="sbuild.file.root" value="${sbuild.prefix},release.name,-,FMIDLETVERSROOT" />
@@ -1088,7 +1102,8 @@
 			<attribute name="file-prefix-full" value="${sfile.prefix.full}_" />
 			<attribute name="file-prefix-intlink" value="${sfile.prefix.intlink}_" />
 			<attribute name="file-prefix-smartphone" value="${sfile.prefix.smartphone}_" />
-			<attribute name="sfile-prefix-memorysize" value="${sfile.prefix.memorysize}_" />
+			<attribute name="file-prefix-afriware" value="${sfile.prefix.afriware}_" />
+			<attribute name="file-prefix-memorysize" value="${file.prefix.memorysize}_" />
 			<attribute name="file-prefix-novice" value="${sfile.prefix.novice}_" />
 			<attribute name="file-prefix-jsr75" value="${sfile.prefix.jsr75}_" />
 			<attribute name="file-prefix-jsr82" value="${sfile.prefix.jsr82}_" />
@@ -1414,6 +1429,8 @@
 				</codset>
 			</application>
 		</alx>
+		<copy file="${bin}/${rim.build.file.root}.jad" tofile="${rim.bin.alx}/${rim.build.file.root}.jad"  preservelastmodified="true" />
+		<copy file="${bin}/${rim.build.file.root}.jar" tofile="${rim.bin.alx}/${rim.build.file.root}.jar"  preservelastmodified="true" />
 		<zip destfile="${dist}/${rim.build.file.root}.zip" basedir="${rim.bin.alx}" />
 		<move file="${rim.bin.alx}/${rim.build.file.root}.alx" tofile="${dist}/${rim.build.file.root}.alx"  preservelastmodified="true" />
 		<move todir="${dist}" >
@@ -1434,7 +1451,7 @@
 	    <echo message="${basedir}/${dist}/${rim.build.file.root}.jar=${basedir}/${dist}/${rim.build.file.root}.jar}" />
 	    <echo message="rim.bin=${rim.bin}" />
 		<!-- Check with defines in jdk.home rapc. -->
-		<property name="rapc.preprocess.defines" value="${DMIDPVERS};${DCLDCVERS};${DMEMSIZEDEF};${DITUNESDEF};${DSMARTPHONEDEF};${DINTLINKDEF};${DFULLVERSDEF};${DSIGNEDDEF};${DFEATUREMGRDEF};${DFEATUREFORMDEF};${DNOVICEDEF};${DTHAWTEDEF};${DGODADDYDEF};${DVERISIGNDEF};${DJSR75};${DJSR238};${DTESTDEF};${DJMTESTDEF};${DJMTESTPLUSDEF};${DJMTESTFREEDEF};${DLOGDEF};${DTESTUIDEF};${DCOMPATDEF}" />
+		<property name="rapc.preprocess.defines" value="${DMIDPVERS};${DCLDCVERS};${DMEMSIZEDEF};${DITUNESDEF};${DSMARTPHONEDEF};${DAFRIWAREDEF};${DINTLINKDEF};${DFULLVERSDEF};${DSIGNEDDEF};${DFEATUREMGRDEF};${DFEATUREFORMDEF};${DNOVICEDEF};${DTHAWTEDEF};${DGODADDYDEF};${DVERISIGNDEF};${DJSR75};${DJSR238};${DTESTDEF};${DJMTESTDEF};${DJMTESTPLUSDEF};${DJMTESTFREEDEF};${DLOGDEF};${DTESTUIDEF};${DCOMPATDEF}" />
 		<echo message="prapc.reprocess.defines=${prapc.reprocess.defines}" />
 		<mkdir dir="${rim.bin}" />
 		<rapc jdehome="${jde.home}" exepath="${wtk.home}/bin" srcdir="${comp.src}" destdir="${rim.bin}" output="${rim.build.file.root}" defines="${prapc.reprocess.defines}" verbose="true" nodebug="true" >
@@ -1452,6 +1469,8 @@
 		</alx>
 		<move file="${rim.bin}/${rim.build.file.root}.cso" tofile="${dist}/${rim.build.file.root}.cso"  preservelastmodified="true" />
 		<move file="${rim.bin}/${rim.build.file.root}.cod" tofile="${dist}/${rim.build.file.root}.cod"  preservelastmodified="true" />
+		<copy file="${bin}/${rim.build.file.root}.jad" tofile="${rim.bin.alx}/${rim.build.file.root}.jad"  preservelastmodified="true" />
+		<copy file="${bin}/${rim.build.file.root}.jar" tofile="${rim.bin.alx}/${rim.build.file.root}.jar"  preservelastmodified="true" />
 		<zip destfile="${rim.bin}/${rim.build.file.root}.zip" basedir="${rim.bin.alx}" />
 		<move file="${rim.bin.alx}/${rim.build.file.root}.alx" tofile="${dist}/${rim.build.file.root}.alx"  preservelastmodified="true" />
 		<move file="${rim.bin}/${rim.build.file.root}.zip" tofile="${dist}/${rim.build.file.root}.zip"  preservelastmodified="true" />
@@ -1461,6 +1480,7 @@
 		<delete dir="${op.dir}" />
 		<mkdir dir="${op.dir}" />
 
+	    <echo message="svn.url=${svn.url}" />
 		<echo message="${svn.pgm} ${svn.op} ${svn.url} ${svn.src}" />
 		<exec executable="${svn.pgm}" dir="${op.dir}" >
 			<arg value="${svn.op}" />
@@ -1637,26 +1657,34 @@
 	</target>
 
 	<target name="sftp.upload.append.rim" depends="prepare" if="${upload.to.sftp}" >
+		<!-- Do not copy jad files as they are in the zip file.
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="jad" />
 			<param name="fext.suffix" value="" />
 		</antcall>
+		-->
+		<!-- Do not copy jar files as they are in the zip file.
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="jar" />
 			<param name="fext.suffix" value="" />
 		</antcall>
+		-->
+		<!-- Do not copy cod files as they are in the zip file.
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="cod" />
 			<param name="fext.suffix" value="" />
 		</antcall>
+		-->
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="zip" />
 			<param name="fext.suffix" value="" />
 		</antcall>
+		<!-- Do not copy alx files as they are in the zip file.
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="alx" />
 			<param name="fext.suffix" value="" />
 		</antcall>
+		-->
 	</target>
 
 	<target name="sftp.upload.append" depends="prepare" if="upload.to.sftp">
@@ -2697,7 +2725,7 @@
 			<fileset dir="./" includes="**/*.tmp" />
 			<fileset dir="./" includes="**/LogFile.txt" />
 			<fileset dir="../wtkbuild" includes="**/*.cod" />
-			<fileset dir="../" includes="rim*/*.cod" />
+			<fileset dir="../" includes="rim*.cod" />
 			<fileset dir="../" includes="RSSReader-**.debug" />
 		</delete>
 	</target>
