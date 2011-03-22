@@ -118,6 +118,7 @@
  * IB 2011-03-06 1.11.5Dev17 Combine statements.
  * IB 2011-03-06 1.11.5Dev17 Make sure midlet is not null for tests and future combination with other programs.
  * IB 2011-03-06 1.11.5Dev17 Let adding prompt to be used for non FeatureForm/List.  The prompt is ignored if not for these displayables.
+ * IB 2011-03-18 1.11.5Dev17 Print stack trace in empty catch.
 */
 
 // Expand to define MIDP define
@@ -1207,13 +1208,11 @@ public class FeatureMgr implements CommandListener,
 			//#endif
 			System.err.println("Error while getting mark image: " + e.toString());
 		}
-		if (loadForm != null) {
-			if (ce != null) {
-				if (wce != null) {
-					loadForm.addExc(wce.getMessage(), wce);
-				}
-				loadForm.addExc(ce.getMessage(), ce);
+		if ((loadForm != null) && (ce != null)) {
+			if (wce != null) {
+				loadForm.addExc(wce.getMessage(), wce);
 			}
+			loadForm.addExc(ce.getMessage(), ce);
 		}
 		return image;
 		
@@ -1405,6 +1404,7 @@ public class FeatureMgr implements CommandListener,
 					forName("javax.microedition.io.file.FileConnection");
 				hasjsr75 = true;
 			} catch (Throwable e) {
+				e.printStackTrace();
 			}
 		}
 		ojsr75Avail[0] = new Boolean(hasjsr75);
