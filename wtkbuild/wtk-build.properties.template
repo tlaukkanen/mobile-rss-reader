@@ -45,6 +45,7 @@
 #-- IB 2011-03-12 1.11.5Dev17 Allow sourceforge project name to be somewhat more generic.
 #-- IB 2011-03-12 1.11.5Dev17 Use Netbeans WTK home.
 #-- IB 2011-03-13 1.11.5Dev17 Allow override of branch version.
+#-- IB 2011-03-21 1.11.5Dev17 Use 1.11.5 for src version branch.
 
 #windows.drive = C:
 windows.drive = 
@@ -223,7 +224,7 @@ need.svn.preprocessed = true
 #svn.url =  https://${src.module.name}.googlecode.com/svn/trunk/
 svn.src =  ${src.module.name}
 svn.subdir = branches
-svn.branch.vers = /1.11.1
+svn.branch.vers = /1.11.5
 svn.url =  http://${svn.src}.googlecode.com/svn/${svn.subdir}${svn.branch.vers}
 svn.user =  ibuntonjr
 svn.pass = ${env.ibuntonjr_pass}
