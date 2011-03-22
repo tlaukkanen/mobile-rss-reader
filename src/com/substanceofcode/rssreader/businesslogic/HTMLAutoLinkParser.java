@@ -39,6 +39,7 @@
  * IB 2011-01-14 1.11.5Alpha15 Have "" as empty title instead of null.
  * IB 2011-01-14 1.11.5Alpha15 Only process non empty tag names.
  * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-03-18 1.11.5Dev17 Use tag len to see if l/L tag is link length.
 */
 
 // Expand to define memory size define
@@ -209,7 +210,8 @@ public class HTMLAutoLinkParser extends FeedListParser {
 						break;
 					case 'l':
 					case 'L':
-						if (!tagName.toLowerCase().equals("link")) {
+						if ((tagLen == 4) &&
+								!tagName.toLowerCase().equals("link")) {
 							break;
 						}
 						//#ifdef DLOGGING
