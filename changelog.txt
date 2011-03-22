@@ -1090,6 +1090,7 @@ v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
 - Check itunes fields separately to avoid setting up temporary strings.
 - Combine statements.
 - Cosmetic changes.
+- Create a yinlight ftp in/htm and sourceforge ftp in/htm file for each target in the "bin" for that target.
 - Don't compile code not present if small memory.
 - Don't copy alx, jad, jar, and cod files to FTP or google.  Put them into zip file which in addition contains the alx file.
 - Don't do script tags because we cannot process them.
@@ -1137,6 +1138,7 @@ v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
 - Have useFeedUrlList to use the url for name.
 - Have value of href be used as link before text of link.
 - If 0/1 fields while deserialization, use null or initialization m_items value.
+- If build-file-root is not defined, don't do preferred/current jad/jar.
 - If get Throwable while serializing, return null item.
 - If item date has an error, save the string value ass errDate.
 - If text attribute does not have the name, try the title attribute.
@@ -1167,12 +1169,12 @@ v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
 - Remove unnecessarily public keyword.
 - Remove unused and now obsolete cldc10.TestCase
 - Return presence boolean array to show which feeds were added.
-- Use standard file prefix to allow smartphone program to use it.
 - RssFeed clone/constructor needs to clone/instantiate new items instead of re-using the parameter's items.
 - Save old feeds and feed names (from URL) from RssFeedStore to allow future background updates.
 - Set and update MOBILIZER_CHOICE.
 - Set m_urlHandler to null to save memory.
 - Set the millisecond to 0 to allow dates to be more consistent.
+- Show errors from getting preferred/current jad/jar.
 - Skip smartlink given that it gives class not found error for MIDP 2.0.
 - Specify imports without '*'.
 - Standardize var names.
@@ -1190,6 +1192,7 @@ v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
 - Use base tag to set the base for relative URL's.
 - Use conditional preprocessed cldc11 code (with modifications) instead of cldc10 code.
 - Use enabled .value to use smartlink.
+- Use FeatureMgr.getAppDefProperty to get the app property and return the given default if null.
 - Use getCmdAdd to have long labels for the commands.
 - Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
 - Use Netbeans WTK home.
@@ -1197,6 +1200,8 @@ v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
 - Use RssItem instead of RssItunesItem to allow future difference in the two.
 - Use RssItunesItem to serialize to maintain compatibility with previous stores of the same version.
 - Use setFrSettings2GuiNbr in FeatureMgr to set numeric gui TextField from RssReaderSettings.
+- Use stage.file instead of sstage.file for jad file properties.
+- Use standard file prefix to allow smartphone program to use it.
 - Use tag len to see if l/L tag is link length.
 - Use utility methods to convert from Vector to arrays.
 - Use wtktemporary.properties to more easily set temporary test development properties used for the build.
