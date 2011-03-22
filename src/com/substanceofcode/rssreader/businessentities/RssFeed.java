@@ -45,6 +45,9 @@
  * IB 2011-03-06 1.11.5Dev17 Use a StringBuffer to serialize for minor performance improvement.
  * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
  * IB 2011-03-06 1.11.5Dev17 Use RssItem instead of RssItunesItem to allow future difference in the two.
+ * IB 2011-03-15 1.11.5Dev17 Use RssItunesItem to serialize to maintain compatibility with previous stores of the same version.
+ * IB 2011-03-15 1.11.5Dev17 If 0 items while deserialization, use initialization m_items value.
+ * IB 2011-03-15 1.11.5Dev17 Catch Throwable instead of Exception and return null or partially initialized feed.
 */
 
 // Expand to define itunes define
@@ -318,7 +321,7 @@ public class RssFeed
 			if (iTunesCapable) {
 				//#ifdef DITUNES
 //@				{
-//@					int LINK = 5;
+//@					int LINK;
 //@					m_link = nodes[startIndex + (LINK = 5)];
 //@				}
 //@				{
@@ -382,7 +385,7 @@ public class RssFeed
 				}
 			}
 
-		} catch(Exception e) {
+		} catch(Throwable e) {
 			//#ifdef DLOGGING
 //@			logger.severe("init error", e);
 			//#endif
@@ -395,7 +398,7 @@ public class RssFeed
 				} else {
 					m_items = gitems;
 				}
-			} else {
+			} else if (gindex > 0) {
 				m_items = new RssItem[gindex];
 				System.arraycopy(gitems, 0, m_items, 0, gindex);
 			}
@@ -458,7 +461,8 @@ public class RssFeed
 						serializedItems.append(
 								((RssItunesItem)rssItem).serialize());
 					} else {
-						serializedItems.append(rssItem.serialize());
+						serializedItems.append(
+								new RssItunesItem(rssItem).serialize());
 					}
 					serializedItems.append(".");
 				} else {
@@ -466,7 +470,8 @@ public class RssFeed
 						serializedItems.append(
 								((RssItunesItem)rssItem).unencodedSerialize());
 					} else {
-						serializedItems.append(rssItem.unencodedSerialize());
+						serializedItems.append(
+								new RssItunesItem(rssItem).unencodedSerialize());
 					}
 					serializedItems.append(CTWO);
 				}
@@ -511,6 +516,9 @@ public class RssFeed
 			storeString.append("||||");
 		}
 		storeString.append(serializedItems);
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("getStoreString m_name,m_url,storeString.length()=" + m_name + "," + m_url + "," + storeString.length());}
+		//#endif
 		return storeString.toString();
 
 	}
@@ -752,11 +760,9 @@ public class RssFeed
 //@		if (finestLoggable) {logger.finest("checkPresRead modFeed,feed=" + modFeed + "," + feed);}
 //@		if (finestLoggable) {logger.finest("checkPresRead this=" + this);}
 		//#endif
-		if (feed.getUsername().length() > 0) {
-			if (m_username.length() == 0) {
-				m_username = feed.getUsername();
-				m_password = feed.getPassword();
-			}
+		if ((feed.getUsername().length() > 0) && (m_username.length() == 0)) {
+			m_username = feed.getUsername();
+			m_password = feed.getPassword();
 		}
 		if (modFeed) {
 			RssItem[] ritems = feed.m_items;
