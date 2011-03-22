@@ -32,6 +32,9 @@
  * IB 2011-03-06 1.11.5Dev17 Combine statements.
  * IB 2011-03-06 1.11.5Dev17 Have checkRead return true if the item's unread was saved.
  * IB 2011-03-07 1.11.5Dev17 Have m_state keep track of unread items and itunes flag.
+ * IB 2011-03-15 1.11.5Dev17 More logging.
+ * IB 2011-03-15 1.11.5Dev17 Catch Throwable instead of Exception and return null or partially initialized item.
+ * IB 2011-03-15 1.11.5Dev17 If get Throwable while serializing, return null item.
  */
 
 // Expand to define itunes define
@@ -175,47 +178,83 @@ public class RssItem
 	  store to memory will be deserialized only by the iTunes capable
 	  version.
 	  */
-    public String unencodedSerialize() {
-        String dateString;
-        if(m_date==null){
-            dateString = "";
-        } else {
-		    // We use base 16 (hex) for the date so that we can save some
-			// space for toString.
-            dateString = Long.toString( m_date.getTime(), 16 );
-        }
+	public String unencodedSerialize() {
+		try {
+			String dateString;
+			if(m_date==null){
+				dateString = "";
+			} else {
+				// We use base 16 (hex) for the date so that we can save some
+				// space for toString.
+				dateString = Long.toString( m_date.getTime(), 16 );
+			}
 
-		String title = m_title.replace('|', CONE);
-        String preData = title + "|" + m_link + "|" + dateString + "|" +
-			    m_enclosure + "|" + (int)m_state + "|" + m_desc;
-		return (preData);
-	}
-    
-    /** Serialize the object
-	  this serialize does not need to know if Itunes is capable/enabled given
-	  that no fields were added to make it capable/enabled
-	  */
-    public String serialize() {
-        String encodedSerializedData = MiscUtil.encodeStr(unencodedSerialize());
-		return encodedSerializedData;
+			String title = m_title.replace('|', CONE);
+			String preData = title + "|" + m_link + "|" + dateString + "|" +
+				m_enclosure + "|" + (int)m_state + "|" + m_desc;
+			return (preData);
+		} catch(Throwable e) {
+			//#ifdef DLOGGING
+//@			logger.severe("unencodedSerialize error m_title,m_link=" + m_title + "," + m_link, e);
+			//#endif
+			System.err.println("unencodedSerialize error : " + e.toString());
+			e.printStackTrace();
+			return null;
+		}
 	}
 		
-	/**
-	  Initialize fields in the class from data.
-	  startIndex - Starting index in nodes of RssItem
-	  iTunesCapable - True if the data can support Itunes (but may not
-	  				  actually have Itunes data) or may not be turned
-					  on by the user.  So, the serializaion/deserialization
-					  will account for iTunes fields except if not
-					  enabled, the will have empty values.
-					  If itunes capable we use base 16 (hex) for
-					  the date so that we can save some space for
-					  toString.
-	  hasPipe - True if the data has a pipe in at least one item
-	  nodes - (elements in an array).
-	  **/
+		/** Serialize the object
+		  this serialize does not need to know if Itunes is capable/enabled given
+		  that no fields were added to make it capable/enabled
+		  */
+	public String serialize() {
+		try {
+			String unencodedSerializeStr;
+			if ((unencodedSerializeStr = unencodedSerialize()) != null) {
+				//#ifdef DLOGGING
+//@				String encodedSerializedData = 
+				//#else
+					return
+				//#endif
+					MiscUtil.encodeStr(unencodedSerializeStr);
+				//#ifdef DLOGGING
+//@				return encodedSerializedData;
+				//#endif
+			} else {
+				//#ifdef DLOGGING
+//@				logger.severe(
+//@						"serialize error unencodedSerialize returning null m_title,m_link=" +
+//@						m_title + "," + m_link, new Exception(
+//@							"serialize error unencodedSerialize returning null"));
+				//#endif
+				return null;
+			}
+		} catch(Throwable e) {
+			//#ifdef DLOGGING
+//@			logger.severe("serialize error m_title,m_link=" + m_title + "," + m_link, e);
+			//#endif
+			System.err.println("Error while rssitem init : " + e.toString());
+			e.printStackTrace();
+			return null;
+		}
+	}
+			
+		/**
+		  Initialize fields in the class from data.
+		  startIndex - Starting index in nodes of RssItem
+		  iTunesCapable - True if the data can support Itunes (but may not
+						  actually have Itunes data) or may not be turned
+						  on by the user.  So, the serializaion/deserialization
+						  will account for iTunes fields except if not
+						  enabled, the will have empty values.
+						  If itunes capable we use base 16 (hex) for
+						  the date so that we can save some space for
+						  toString.
+		  hasPipe - True if the data has a pipe in at least one item
+		  nodes - (elements in an array).
+		  **/
 	protected void init(int startIndex, boolean iTunesCapable,
-					    boolean hasPipe, String [ ] nodes) {
+			boolean hasPipe, String [ ] nodes) {
 
 		try {
 			/* Node count should be 6:
@@ -235,12 +274,12 @@ public class RssItem
 					m_title = m_title.replace('\n', '|');
 				}
 			}
-			
+
 			{
 				int LINK;
 				m_link = nodes[startIndex + (LINK = 1)];
 			}
-			
+
 			{
 				int DATE;
 				String dateString = nodes[startIndex + (DATE = 2)];
@@ -252,7 +291,7 @@ public class RssItem
 					}
 				}        
 			}
-			
+
 			{
 				int ENCLOSURE;
 				m_enclosure = nodes[startIndex + (ENCLOSURE = 3)];
@@ -263,7 +302,7 @@ public class RssItem
 				String cunreadState = nodes[startIndex + (STATE = 4)];
 				m_state = (byte)Integer.parseInt(cunreadState);
 			}
-					
+
 			// If description has '|', we need to join.
 			{
 				int DESC;
@@ -273,12 +312,15 @@ public class RssItem
 					m_desc = nodes[startIndex + DESC];
 				}
 			}
-					
-        } catch(Exception e) {
-            System.err.println("Error while rssitem init : " + e.toString());
+
+		} catch(Throwable e) {
+			//#ifdef DLOGGING
+//@			logger.severe("init error m_title,m_link=" + m_title + "," + m_link, e);
+			//#endif
+			System.err.println("Error while rssitem init : " + e.toString());
 			e.printStackTrace();
-        }
-    }
+		}
+	}
 
 	/** Deserialize the object **/
 	public static RssItem deserialize(String encodedData) {
@@ -286,10 +328,13 @@ public class RssItem
 			// Base 64 decode
 			String data = MiscUtil.decodeStr(encodedData);
 			return unencodedDeserialize(data);
-        } catch(Exception e) {
+        } catch(Throwable e) {
+			//#ifdef DLOGGING
+//@			Logger.getLogger("RssItem").severe("deserialize error encodedData=" + encodedData, e);
+			//#endif
             System.err.println("Error while rssitem deserialize : " + e.toString());
 			e.printStackTrace();
-			return new RssItem();
+			return null;
         }
 	}
 
@@ -298,18 +343,21 @@ public class RssItem
 	  the items.
 	  */
 	public static RssItem unencodedDeserialize(String data) {
-		RssItem item = new RssItem();
 		try {
+			RssItem item = new RssItem();
 			boolean hasPipe = (data.indexOf('\n') >= 0);
 			String[] nodes = MiscUtil.split( data, "|");
 			item.init(0, false, hasPipe, nodes);
 			return item;
 			
-        } catch(Exception e) {
+        } catch(Throwable e) {
+			//#ifdef DLOGGING
+//@			Logger.getLogger("RssItem").severe("unencodedDeserialize error data=" + data, e);
+			//#endif
             System.err.println("Error while rssitem deserialize : " + e.toString());
 			e.printStackTrace();
+			return null;
         }
-        return item;
 	}
 
 	public boolean checkRead(RssItem item) {
