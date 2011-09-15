@@ -172,6 +172,7 @@
 	<!-- IB 2011-03-19 1.11.5Dev17 Prepare for future Afri-ware version.  -->
 	<!-- IB 2011-03-21 1.11.5Dev17 Use stage.file instead of sstage.file for jad file properties.  -->
 	<!-- IB 2011-03-21 1.11.5Dev17 Create a yinlight ftp in/htm and sourceforge ftp in/htm file for each target in the "bin" for that target.  -->
+	<!-- IB 2011-03-25 1.11.5Dev18 Upload RIM zip first to google so that the jad/jar files appear last which is first in the download list.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -1584,6 +1585,13 @@
 		<echo message="cd */RSS*/dist&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="rim_" />
+			<param name="fext" value="zip" />
+			<param name="fext.suffix" value="" />
+			<param name="append.google.labels" value="${google.labels}" />
+			<param name="device.type" value="Blackberry only zip with alx and cod," />
+		</antcall>
+		<antcall target="google.upload.line.append.file" inheritAll="true" >
 			<param name="fprefix" value="" />
 			<param name="fext" value="jad" />
 			<param name="fext.suffix" value="" />
@@ -1605,13 +1613,6 @@
 			<param name="fext.suffix" value="" />
 			<param name="append.google.labels" value="${google.labels}" />
 			<param name="device.type" value="(not Blackberry)" />
-		</antcall>
-		<antcall target="google.upload.line.append.file" inheritAll="true" >
-			<param name="fprefix" value="rim_" />
-			<param name="fext" value="zip" />
-			<param name="fext.suffix" value="" />
-			<param name="append.google.labels" value="${google.labels}" />
-			<param name="device.type" value="Blackberry only zip with alx and cod," />
 		</antcall>
 		<echo message="cd ../../..&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
