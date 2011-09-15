@@ -75,6 +75,9 @@
  * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
  * IB 2011-03-16 1.11.5Dev17 More logging.
  * IB 2011-03-19 1.11.5Dev17 For saveRec need to set bookmarks to "" to reduce memory overflow.
+ * IB 2011-03-28 1.11.5Dev18 Use null pattern using nullPtr.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for Settings.save into a vector in an array.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for Settings.getInstance into a vector in an array.
  */
 
 // Expand to define CLDC define
@@ -93,10 +96,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
+import java.util.Vector;
 import java.util.Enumeration;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.rms.RecordStore;
@@ -126,7 +129,6 @@ import com.substanceofcode.rssreader.presentation.FeatureMgr;
  */
 final public class Settings {
     
-	final Object nullPtr = null;
     public final int OLD_MAX_REGIONS = 1;
     public final int MAX_REGIONS = 15;
     public final String SETTINGS_NAME = "RssReader-setttings-vers";
@@ -161,43 +163,37 @@ final public class Settings {
      * Singleton pattern is used to return 
      * only one instance of record store
      */
-	//#ifdef DCLDCV11
-//@    public static Settings getInstance()
-	//#else
-	//#ifdef DFULLVERS
-    public static synchronized Settings getInstance()
-	//#else
-	//#ifdef DINTLINK
-//@	// For internet link version, we only call this once.  We don't need
-//@	// synchronized which might have some problems in some KVMs.
-//@    public Settings getInstance()
+    public static
+	//#ifdef DCLDCV10
+    synchronized
 	//#endif
-//@	// End DINTLINK
-	//#endif
-	// End DFULLVERS
-	//#endif
-	// End DCLDCV11
-    throws IOException, CauseRecStoreException, CauseException {
+    Settings getInstance(Object[] parms)
+	throws IOException, CauseRecStoreException, CauseException
+	{
 		//#ifdef DCLDCV11
 //@		synchronized(Settings.class) {
 		//#endif
 			if( m_store == null ) {
-				m_store = new Settings();
+				m_store = new Settings(parms);
 			}
 			return m_store;
 		//#ifdef DCLDCV11
-//@        }
+//@		}
 		//#endif
-    }
+	}
 
     /** Constructor */
 	//#ifdef DFULLVERS
-    private Settings()
+    private
 	//#else
-//@    public Settings()
+//@    public
 	//#endif
-    throws IOException, CauseRecStoreException, CauseException {
-        load(0);
+    Settings(Object[] parms)
+    throws IOException, CauseRecStoreException, CauseException
+	{
+		Object[] aparms = load(0);
+		parms[0] = aparms[0];
+		parms[1] = aparms[1];
     }
 
 	private Object[] openRecStore(boolean createIfNecessary)
@@ -248,7 +244,7 @@ final public class Settings {
 		return new Object[] {rs, new Integer(numRecs)};
 	}
     
-	private Object[] init()
+	private Object[] init(Vector procError)
     throws IOException, CauseRecStoreException, CauseException {
 		boolean currentSettings = true;
 		RecordStore rs = null;
@@ -279,11 +275,11 @@ final public class Settings {
 			}
 			if (numRecs <= 1) {
 				if (numRecs == 0) {
-					saveRec(rs, 0, true);
+					saveRec(rs, 0, true, procError);
 					++numRecs;
 				}
 				if (numRecs == 1) {
-					saveRec(rs, 1, true);
+					saveRec(rs, 1, true, procError);
 					++numRecs;
 				}
 				if (!m_initialized) {
@@ -319,7 +315,8 @@ final public class Settings {
 			throw new CauseException("Internal error while loading " +
 					"recix=" + recix, e);
 		}
-		return new Object[] {rs, new Integer(numRecs), new Boolean(currentSettings)};
+		return new Object[] {rs, new Integer(numRecs),
+			new Boolean(currentSettings)};
 	}
 
 	private RecordStore closeStore(RecordStore rs) {
@@ -436,7 +433,7 @@ final public class Settings {
     }
     
     /** Load properties from record store */
-    private int load(int region)
+    private Object[] load(int region)
     throws IOException, CauseRecStoreException, CauseException {
 		//#ifdef DLOGGING
 //@		logger.info("load region=" + region);
@@ -445,12 +442,13 @@ final public class Settings {
 		RecordStore rs = null;
 		synchronized(this) {
 			
+			Vector procError = new Vector();
 			m_valuesChanged = false;
 			m_properties.clear();
 			boolean currentSettings;
 			if (m_firstLoad) {
 				m_firstLoad = false;
-				Object[] res = init();
+				Object[] res = init(procError);
 				rs = (RecordStore)res[0];
 				numRecs = ((Integer)res[1]).intValue();
 				currentSettings = ((Boolean)res[2]).booleanValue();
@@ -484,7 +482,8 @@ final public class Settings {
 					if (region >= numRecs) {
 						m_properties.put(BOOKMARKS_NAME, "");
 					} else {
-						loadRec( rs, region, currentSettings, m_properties );
+						loadRec(rs, region, currentSettings,
+									m_properties, procError);
 					}
 				}
 				
@@ -506,12 +505,12 @@ final public class Settings {
 						(region == 0)) {
 					// If not current settings, save them to udate to
 					// current.
-					saveRec(rs, 0, true);
+					saveRec(rs, 0, true, procError);
 					if (numRecs == 0) {
 						++numRecs;
 					}
 					// Update bookmark region too.
-					saveRec(rs, 1, true);
+					saveRec(rs, 1, true, procError);
 					if (numRecs == 1) {
 						++numRecs;
 					}
@@ -520,14 +519,16 @@ final public class Settings {
 					closeStore(rs);
 				}
 			}
-			return numRecs;
+			return new Object[] {new Integer(numRecs), procError};
 		}
     }
     
 	// todo change "load"
-    public boolean loadRec(RecordStore rs, int region, boolean currentSettings,
-			Hashtable properties  )
-    throws IOException, CauseRecStoreException, CauseException {
+    public void loadRec(RecordStore rs, int region,
+			boolean currentSettings,
+			Hashtable properties, Vector procError)
+    throws IOException, CauseRecStoreException, CauseException
+	{
 		synchronized(this) {
 			byte[] data = null;
 			try {
@@ -540,6 +541,9 @@ final public class Settings {
 					properties.put(BOOKMARKS_NAME, "");
 				}
 				irie.printStackTrace();
+				procError.addElement(new CauseException(
+							"Warning:  Reading non-existent record.", irie));
+				return;
 			} catch (RecordStoreException e) {
 				//#ifdef DLOGGING
 //@				logger.severe("load ", e);
@@ -550,95 +554,121 @@ final public class Settings {
 				throw new CauseRecStoreException(
 						"RecordStoreException while loading region=" +
 						region, e);
+			} catch (Throwable e) {
+				throw new CauseException(
+						"Internal error unable to read from store", e);
 			}
-			ByteArrayInputStream bin = null;
-			DataInputStream din = null;
-			boolean readError = false;
-			boolean convError = false;
-			try {
-				if( (data != null) && (data.length > 1) ) {
-					bin = new ByteArrayInputStream( data );
-					din = new DataInputStream( bin );
-					int num = din.readInt();
-					while( num-- > 0 ) {
-						String name = din.readUTF();
+			readRec(data, region, currentSettings, properties, procError 
+					//#ifdef DLOGGING
+//@					,logger ,finestLoggable, traceLoggable
+					//#endif
+				    );
+			//#ifdef DLOGGING
+//@			if (fineLoggable) {logger.fine("save procError=" + procError);}
+			//#endif
+			m_region = region;
+		}
+	}
+
+    static public void readRec(byte[] data, int region,
+			boolean currentSettings,
+			Hashtable properties,
+			Vector procError
+			//#ifdef DLOGGING
+//@			,Logger logger
+//@			,boolean finestLoggable
+//@			,boolean traceLoggable
+			//#endif
+			)
+	throws IOException, CauseException
+	{
+		ByteArrayInputStream bin = null;
+		DataInputStream din = null;
+		int len = procError.size();
+		try {
+			if( (data != null) && (data.length > 1) ) {
+				bin = new ByteArrayInputStream( data );
+				din = new DataInputStream( bin );
+				int num = din.readInt();
+				while( num-- > 0 ) {
+					String name = din.readUTF();
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("readRec load name=" + name);}
+					//#endif
+					String value;
+					if (currentSettings) {
+						final int blen = din.readInt();
 						//#ifdef DLOGGING
-//@						if (finestLoggable) {logger.finest("load name=" + name);}
+//@						if (finestLoggable) {logger.finest("readRec load blen=" + blen);}
 						//#endif
-						String value;
-						if (currentSettings) {
-							final int blen = din.readInt();
-							//#ifdef DLOGGING
-//@							if (finestLoggable) {logger.finest("load blen=" + blen);}
-							//#endif
-							if (blen == 0) {
-								value = "";
-							} else {
-								byte [] bvalue = new byte[blen];
-								final int bvlen = din.read(bvalue);
-								try {
-									value = new String(bvalue, 0, bvlen, "UTF-8");
-								} catch (UnsupportedEncodingException e) {
-									//#ifdef DLOGGING
-//@									logger.severe("load cannot convert load name=" + name, e);
-									//#endif
-									/** Error while executing constructor */
-									System.out.println("load cannot convert load name=" +
-											name + e.getMessage());
-									e.printStackTrace();
-									value = new String(bvalue, 0, bvlen);
-								} catch (IOException e) {
-									//#ifdef DLOGGING
-//@									logger.severe("load cannot convert load name=" + name, e);
-									//#endif
-									/** Error while executing constructor */
-									System.out.println("load cannot convert load name=" +
-											name + e.getMessage());
-									e.printStackTrace();
-									value = new String(bvalue, 0, bvlen);
-								}
-							}
+						if (blen == 0) {
+							value = "";
 						} else {
-							value = din.readUTF();
+							byte [] bvalue = new byte[blen];
+							final int bvlen = din.read(bvalue);
+							try {
+								value = new String(bvalue, 0, bvlen, "UTF-8");
+							} catch (UnsupportedEncodingException e) {
+								//#ifdef DLOGGING
+//@								logger.severe("readRec load cannot convert load name=" + name, e);
+								//#endif
+								/** Error while executing constructor */
+								System.out.println("load cannot convert load name=" +
+										name + e.getMessage());
+								e.printStackTrace();
+								value = new String(bvalue, 0, bvlen);
+							} catch (IOException e) {
+								//#ifdef DLOGGING
+//@								logger.severe("readRec load cannot convert load name=" + name, e);
+								//#endif
+								value = null;
+								procError.addElement(new CauseException(
+											"IO error reading value during load " +
+											name,
+											e));
+							} catch (Throwable e) {
+								//#ifdef DLOGGING
+//@								logger.severe("readRec load cannot convert load name=" + name, e);
+								//#endif
+								value = null;
+								procError.addElement(new CauseException(
+											"Internal error reading value during load " +
+											name, e));
+							}
 						}
-						//#ifdef DLOGGING
-//@						if (traceLoggable) {logger.trace("load value=" + MiscUtil.toString(value, false, 300));}
-						//#endif
+					} else {
+						value = din.readUTF();
+					}
+					//#ifdef DLOGGING
+//@					if (traceLoggable) {logger.trace("readRec load value=" + MiscUtil.toString(value, false, 300));}
+					//#endif
+					if (value != null) {
 						properties.put( name, value );
 					}
 				}
-				m_region = region;
-			} catch (Exception e) {
-				//#ifdef DLOGGING
-//@				logger.severe("load ", e);
-				//#endif
-				/** Error while executing constructor */
-				System.out.println("load " + e.getMessage());
-				e.printStackTrace();
-				throw new CauseException("Internal error while loading region=" +
-						region, e);
-			} catch (Throwable e) {
-				//#ifdef DLOGGING
-//@				logger.severe("load throwable ", e);
-				//#endif
-				/** Error while executing constructor */
-				System.out.println("load throwable " + e.getMessage());
-				e.printStackTrace();
-				throw new CauseException("Internal error while loading " +
-						"region=" + region, e);
-			} finally {
-				/* Workaround for MicroEmulator. */
-				din = (DataInputStream)MiscUtil.closeInputStream(din);
-				/* Workaround for MicroEmulator. */
-				bin = (ByteArrayInputStream)MiscUtil.closeInputStream(bin);
 			}
-			return readError || convError;
+		} catch (Throwable e) {
+			//#ifdef DLOGGING
+//@			logger.severe("readRec load cannot read/convert load " +
+//@					"region=" + region, e);
+			//#endif
+			/** Error while executing constructor */
+			System.out.println("load " + e.getMessage());
+			e.printStackTrace();
+			procError.addElement(new CauseException(
+						"Internal error while loading " +
+						"region=" + region, e));
+		} finally {
+			/* Workaround for MicroEmulator. */
+			din = (DataInputStream)MiscUtil.closeInputStream(din);
+			/* Workaround for MicroEmulator. */
+			bin = (ByteArrayInputStream)MiscUtil.closeInputStream(bin);
 		}
 	}
 
     /** Save property Hashtable to record store.
         Use MAX_REGIONS records in store to help with running out of memory.  */
-    public void save( int region, boolean force )
+    public void save(int region, boolean force, Vector procError)
 	throws IOException, CauseRecStoreException, CauseException {
 		synchronized(this) {
 			//#ifdef DLOGGING
@@ -648,7 +678,7 @@ final public class Settings {
 			try {
 				Object[] openObjs = openRecStore(true);
 				rs = (RecordStore)openObjs[0];
-				saveRec( rs, region, force );
+				saveRec( rs, region, force, procError);
 			} finally {
 				
 				if( rs != null ) {
@@ -658,18 +688,15 @@ final public class Settings {
 		}
 	}
 
-    public boolean saveRec(RecordStore rs, int region, boolean force )
+    public void saveRec(RecordStore rs, int region, boolean force,
+			Vector procError)
 	throws IOException, CauseRecStoreException, CauseException {
 		//#ifdef DLOGGING
 //@		if (finestLoggable) {logger.finest("saveRec rs,rs.info,region,force,m_valuesChanged=" + rs + "," + getStoreInfo(rs) + "," + region + "," + force + "," + m_valuesChanged);}
 		//#endif
 
 		synchronized(this) {
-			if( !m_valuesChanged && !force ) return false;
-			
-			boolean convError = false;
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			DataOutputStream dout = new DataOutputStream( bout );
+			if( !m_valuesChanged && !force ) return;
 			
 			try {
 				String vers = (String)m_properties.get(SETTINGS_NAME);
@@ -720,66 +747,30 @@ final public class Settings {
 				//#ifdef DLOGGING
 //@				if (fineLoggable) {logger.fine("save region,cproperties.size()=" + region + "," + cproperties.size());}
 				//#endif
-				dout.writeInt( cproperties.size() );
-				Enumeration e = cproperties.keys();
-				while( e.hasMoreElements() ) {
-					String name = (String) e.nextElement();
-					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("save name=" + name);}
-					//#endif
-					dout.writeUTF( name );
-					value = cproperties.get(name).toString();
-					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("save value=" + MiscUtil.toString(value, false, 300));}
-					//#endif
-					byte[] bvalue;
+				ByteArrayOutputStream bout = new ByteArrayOutputStream();
+				DataOutputStream dout = new DataOutputStream( bout );
+				try {
+					getBufRec(cproperties, bout, dout, true,
+							true, procError
+							//#ifdef DLOGGING
+//@							,logger ,finestLoggable, traceLoggable
+							//#endif
+					);
+					byte[] data = bout.toByteArray();
 					try {
-						bvalue = value.getBytes("UTF-8");
-
-					} catch (UnsupportedEncodingException uee) {
-						//#ifdef DLOGGING
-//@						logger.severe("save cannot convert save name=" + name, uee);
-						//#endif
-						/** Error while executing constructor */
-						System.out.println("save cannot convert save name=" +
-								name + uee.getMessage());
-						uee.printStackTrace();
-						bvalue = value.getBytes();
-					} catch (IOException ioe) {
-						//#ifdef DLOGGING
-//@						logger.severe("save cannot convert save name=" + name, ioe);
-						//#endif
-						if (!convError) {
-							convError = true;
-						}
-						/** Error while executing constructor */
-						System.out.println("save cannot convert save name=" +
-								name + ioe.getMessage());
-						ioe.printStackTrace();
-						bvalue = value.getBytes();
+						rs.setRecord( (region + 1), data, 0, data.length );
+					} catch (InvalidRecordIDException irie) {
+						rs.addRecord( data, 0, data.length );
+					} catch (Throwable e) {
+						procError.addElement(new CauseException(
+									"Internal error while saving/storing " +
+									"region=" + region, e));
 					}
-					if (name.equals(BOOKMARKS_NAME)) {
-						value = "";
-						cproperties.put(BOOKMARKS_NAME, "");
-					}
-					//#ifdef DLOGGING
-//@					if (finestLoggable) {logger.finest("save bvalue=" + bvalue);}
-					//#endif
-					dout.writeInt( bvalue.length );
-					dout.write( bvalue, 0, bvalue.length );
-				}
-				
-				try {
-					dout.flush();
-				} catch( Exception de ){
-					de.printStackTrace();
-				}
-				byte[] data = bout.toByteArray();
-				
-				try {
-					rs.setRecord( (region + 1), data, 0, data.length );
-				} catch (InvalidRecordIDException irie) {
-					rs.addRecord( data, 0, data.length );
+				} finally {
+					/* Workaround for MicroEmulator. */
+					dout = (DataOutputStream)MiscUtil.closeOutputStream(dout);
+					/* Workaround for MicroEmulator. */
+					bout = (ByteArrayOutputStream)MiscUtil.closeOutputStream(bout);
 				}
 				//#ifdef DLOGGING
 //@				if (fineLoggable) {logger.fine("save stored region=" + region);}
@@ -825,41 +816,185 @@ final public class Settings {
 //@				logger.severe(ce.getMessage(), ce);
 				//#endif
 				throw ce;
-			} finally {
-				/* Workaround for MicroEmulator. */
-				dout = (DataOutputStream)MiscUtil.closeOutputStream(dout);
-				/* Workaround for MicroEmulator. */
-				bout = (ByteArrayOutputStream)MiscUtil.closeOutputStream(bout);
 			}
-			return convError;
 		}
     }
+
+	//#ifdef DTEST
+//@	public
+	//#else
+	private
+	//#endif
+	void getBufRec(Hashtable cproperties,
+			/*
+			String bookmarksValue,
+			*/
+			ByteArrayOutputStream bout,
+			DataOutputStream dout, boolean flushByte, boolean flushData,
+			Vector procError
+			//#ifdef DLOGGING
+//@			,Logger logger
+//@			,boolean finestLoggable
+//@			,boolean traceLoggable
+			//#endif
+			)
+	throws IOException, CauseException
+	{
+		dout.writeInt( cproperties.size() );
+		boolean first = true;
+		Enumeration e = cproperties.keys();
+		while( e.hasMoreElements() ) {
+			String name;
+			String value = cproperties.get(
+					name = (String) e.nextElement()).toString();
+			/*
+			   if (name.equals(BOOKMARKS_NAME) && (value.length() == 0)) {
+			   value = bookmarksValue;
+			   }
+			 */
+			//#ifdef DLOGGING
+//@			if (finestLoggable) {logger.finest("getBufRec save name=" + name);}
+			//#endif
+			dout.writeUTF( name );
+			if (first) {
+				first = false;
+				int len = bout.size();
+				if (flushData) {
+					try {
+						dout.flush();
+					} catch( Exception de ){
+						de.printStackTrace();
+					}
+					if (len > bout.size()) {
+						//#ifdef DLOGGING
+//@						logger.warning(
+//@								"getBufRec Lost size with dout flush, retrying witout it... len,bout.size()=" + len + "," + bout.size());
+						//#endif
+						getBufRec(cproperties, bout, dout, flushByte,
+								false, procError
+								//#ifdef DLOGGING
+//@								,logger ,finestLoggable, traceLoggable
+								//#endif
+								);
+						return;
+					}
+					len = bout.size();
+				}
+				if (flushByte) {
+					try {
+						bout.flush();
+					} catch( Exception de ){
+						de.printStackTrace();
+					}
+					if (len > bout.size()) {
+						//#ifdef DLOGGING
+//@						logger.warning(
+//@								"getBufRec Lost size with bout flush, retrying witout it... len,bout.size()=" + len + "," + bout.size());
+						//#endif
+						getBufRec(cproperties, bout, dout, false,
+								flushData, procError
+								//#ifdef DLOGGING
+//@								,logger ,finestLoggable, traceLoggable
+								//#endif
+								);
+						return;
+					}
+				}
+			}
+			//#ifdef DLOGGING
+//@			if (finestLoggable) {logger.finest("getBufRec save value=" + MiscUtil.toString(value, false, 300));}
+			//#endif
+			byte[] bvalue;
+			try {
+				bvalue = value.getBytes("UTF-8");
+
+			} catch (UnsupportedEncodingException uee) {
+				//#ifdef DLOGGING
+//@				logger.severe("getBufRec save cannot convert save name=" + name, uee);
+				//#endif
+				/** Error while executing constructor */
+				System.out.println("save cannot convert save name=" +
+						name + uee.getMessage());
+				uee.printStackTrace();
+				bvalue = value.getBytes();
+			} catch (IOException ioe) {
+				//#ifdef DLOGGING
+//@				logger.severe("getBufRec save cannot convert save name=" + name, ioe);
+				//#endif
+				/** Error while executing constructor */
+				System.out.println("getBufRec IO save cannot convert save name=" +
+						name + ioe.getMessage());
+				ioe.printStackTrace();
+				bvalue = new byte[0];
+				procError.addElement(new CauseException(
+							"IO error reading value during save, saving '' for " +
+							name, ioe));
+			} catch (Throwable ex) {
+				//#ifdef DLOGGING
+//@				logger.severe("getBufRec catch ", ex);
+				//#endif
+				/** Error while executing constructor */
+				System.out.println("catch " + ex.getMessage());
+				ex.printStackTrace();
+				throw new CauseException("Internal error during save.", ex);
+			}
+			/*
+			   if (name.equals(BOOKMARKS_NAME)) {
+			   if (bookmarksValue.length() == 0) {
+			   bookmarksValue = value;
+			   }
+			   value = "";
+			   cproperties.put(BOOKMARKS_NAME, "");
+			   }
+			 */
+			//#ifdef DLOGGING
+//@			if (finestLoggable) {logger.finest("getBufRec save bvalue=" + bvalue);}
+			//#endif
+			dout.writeInt( bvalue.length );
+			dout.write( bvalue, 0, bvalue.length );
+		}
+		int len = bout.size();
+		if (flushData) {
+			try {
+				dout.flush();
+			} catch( Exception de ){
+				de.printStackTrace();
+			}
+		}
+		if (flushByte) {
+			try {
+				bout.flush();
+			} catch( Exception de ){
+				de.printStackTrace();
+			}
+		}
+	}
     
     /** Get memory usage of the record store */
     public int[] getSettingMemInfo()
 		throws IOException, RecordStoreException {
-	try {
-			
+			try {
+
 				RecordStore rs = null;
 				int[] memInfo = null;
-				
-					try {
-						
-						synchronized(this) {
-							Object[] openObjs = openRecStore(false);
-							if (openObjs == null) {
-								return new int[0];
-							} else {
-								rs = (RecordStore)openObjs[0];
-							}
-							memInfo = new int[2];
-							memInfo[0] = rs.getSize();
-							memInfo[1] = rs.getSizeAvailable();
+
+				try {
+
+					synchronized(this) {
+						Object[] openObjs = openRecStore(false);
+						if (openObjs == null) {
+							return new int[0];
+						} else {
+							rs = (RecordStore)openObjs[0];
 						}
-						return memInfo;
-					} finally {
-						rs = closeStore(rs);
+						memInfo = new int[2];
+						memInfo[0] = rs.getSize();
+						memInfo[1] = rs.getSizeAvailable();
 					}
+					return memInfo;
+				} finally {
+					rs = closeStore(rs);
+				}
 			} catch (CauseException re) {
 				return new int[0];
 			} catch (Exception e) {
@@ -867,7 +1002,7 @@ final public class Settings {
 				e.printStackTrace();
 				return new int[0];
 			}
-    }
+		}
     
     /** Set a boolean property */
     public void setBooleanProperty( String name, boolean value ) {
@@ -913,7 +1048,7 @@ final public class Settings {
 //@			csettings = m_store;
 //@		} else {
 //@			try {
-//@				csettings = new Settings();
+//@				csettings = new Settings(new Object[2]);
 //@			} catch (Throwable e) {
 //@				e.printStackTrace();
 //@				return;
@@ -948,7 +1083,9 @@ final public class Settings {
 //@
 //@			m_store.m_firstLoad = true;
 //@			m_store.m_properties = new Hashtable();
-//@			m_store = null;
+//@			// Save memory and use null pattern.
+//@			Object nullPtr = null;
+//@			m_store = (Settings)nullPtr;
 //@		}
 //@	}
 	//#endif
