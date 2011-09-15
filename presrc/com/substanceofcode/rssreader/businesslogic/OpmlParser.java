@@ -52,6 +52,7 @@
  * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
  * IB 2011-03-11 1.11.5Dev17 If text attribute does not have the name, try the title attribute.
  * IB 2011-03-13 1.11.5Dev17 Have constructor for future background loading of feeds.
+ * IB 2011-04-05 1.11.5Dev18 Trim the title in case it has spaces for HTML and OPML parsers.
 */
 
 // Expand to define full vers define
@@ -175,7 +176,7 @@ public class OpmlParser extends FeedListParser {
 						// Replace special chars like left quote, etc.
 						// Since we have already converted to unicode, we want
 						// to replace with uni chars.
-						title = encodingUtil.replaceSpChars(title);
+						title = encodingUtil.replaceSpChars(title).trim();
 					} else {
 						title = "";
 					}
