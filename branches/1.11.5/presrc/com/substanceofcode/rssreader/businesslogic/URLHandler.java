@@ -35,6 +35,7 @@
  * IB 2011-01-14 1.11.5Alpha15 Use procIoExc to process exception handling for IO and other exceptions including out of memory.
  * IB 2011-01-14 1.11.5Alpha15 Change user agent to use the program's MIDP/CLDC combination vs alwasy MIDP/CLDC 1.0.
  * IB 2010-01-12 1.11.5Alpha15 Add ability to log for character or parsing.
+ * IB 2010-09-14 1.11.5Dev18 Increase number of redirects allowed to 5.
 */
 
 // Expand to define full vers define
@@ -92,7 +93,7 @@ import com.substanceofcode.rssreader.presentation.LoadingForm;
  */
 public class URLHandler {
     
-    protected int MAX_REDIRECTS = 3;  // Max times URL is redirected
+    protected int MAX_REDIRECTS = 5;  // Max times URL is redirected
     protected int m_redirects = 0;  // The URL is redirected
     protected String m_redirectUrl = "";  // The URL is redirected URL
     protected boolean m_needRedirect = false;  // The URL needs to be redirected
