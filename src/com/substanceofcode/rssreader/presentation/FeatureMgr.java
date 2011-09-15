@@ -120,6 +120,7 @@
  * IB 2011-03-06 1.11.5Dev17 Let adding prompt to be used for non FeatureForm/List.  The prompt is ignored if not for these displayables.
  * IB 2011-03-18 1.11.5Dev17 Print stack trace in empty catch.
  * IB 2011-03-21 1.11.5Dev17 Use FeatureMgr.getAppDefProperty to get the app property and return the given default if null.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for RssReaderSettings.getInstance into a vector.
 */
 
 // Expand to define MIDP define
@@ -147,6 +148,7 @@
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
+import java.util.Vector;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -1272,11 +1274,15 @@ public class FeatureMgr implements CommandListener,
 		boolean firstTime = false;
 		boolean itunesEnabled = false;
 		try {
-			appSettings = RssReaderSettings.getInstance();
+			Object[] parms = new Object[] {new Vector()};
+			appSettings = RssReaderSettings.getInstance(parms);
 			arrsettings[0] = appSettings;
-			Throwable le = appSettings.getLoadExc();
-			if (le != null) {
-				loadForm.recordExcForm("Error while loading settings.", le);
+			Vector vle = (Vector)parms[0];
+			if (vle != null) {
+				for (int i = 0; i < vle.size(); i++) {
+					loadForm.recordExcForm("Error while loading settings.",
+							(CauseException)vle.elementAt(i));
+				}
 			}
 			try {
 				settings = appSettings.getSettingsInstance();
@@ -1290,7 +1296,7 @@ public class FeatureMgr implements CommandListener,
 						"Internal error.  Error while getting settings/stored bookmarks",
 						e);
 			}
-		} catch(Exception e) {
+		} catch (Throwable e) {
 			loadForm.recordExcForm("Error while loading settings.", e);
 		}
 		//#ifdef DLOGGING
