@@ -45,6 +45,9 @@
  * IB 2011-03-06 1.11.5Dev17 Have bookmark details forms for non small memory.
  * IB 2011-03-06 1.11.5Dev17 Allow use of bookmark name in River of News for non small memory.
  * IB 2011-03-06 1.11.5Dev17 Have mark unread items default to false for non-small memory.
+ * IB 2011-03-28 1.11.5Dev18 Fix CLDC 1.1 class synchronized for RssReaderSettings.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for Settings.getInstance into a vector in an object array.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for RssReaderSettings.getInstance into a vector in an object array.
  */
 
 // Expand to define MIDP define
@@ -67,11 +70,13 @@ package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.Settings;
 import java.io.IOException;
+import java.util.Vector;
 import javax.microedition.rms.RecordStoreException;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.List;
 
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
+import com.substanceofcode.utils.CauseException;
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -98,8 +103,8 @@ final public class RssReaderSettings {
     private final String MARK_UNREAD_ITEMS = "mark-unread-items";
     private final String ITUNES_ENABLED = "itunes-enabled";
 	//#ifdef DMIDP20
-    public static final int GOOGLE_MOBILIZER_CHOICE = 1;
-    private static final String MOBILIZER_CHOICE = "mobilizer-choice";
+    public final int GOOGLE_MOBILIZER_CHOICE = 1;
+    private final String MOBILIZER_CHOICE = "mobilizer-choice";
 	//#endif
 	//#ifndef DSMALLMEM
     private final String BOOKMARK_NAME_NEWS = "bookmark-name-news";
@@ -125,51 +130,59 @@ final public class RssReaderSettings {
     private final String USE_STANDARD_EXIT = "use-standard-exit";
     private final String NOVICE = "novice";
     public final int INIT_MAX_ITEM_COUNT = 10;
-    private Throwable m_loadExc = null;
 	//#ifdef DLOGGING
     private final String LOG_LEVEL = "log-level";
 	//#endif
     
     /** Creates a new instance of RssReaderSettings */
-    private RssReaderSettings() {
+    private RssReaderSettings(Object[] parms) {
+		Vector procError = new Vector();
         try {
 			//#ifdef DLOGGING
 			Logger.getLogger("RssReaderSettings").info("Constructor midlet=" +
 					FeatureMgr.getMidlet());
 			//#endif
+			Object[] sparms = new Object[] {null, null};
 			//#ifdef DFULLVERS
-            m_settings = Settings.getInstance();
+            m_settings = Settings.getInstance(sparms);
 			//#else
-            m_settings = new Settings();
+            m_settings = new Settings(sparms);
 			//#endif
-        } catch (Throwable e) {
-			m_loadExc = e;
-            e.printStackTrace();
-        }
+			if (sparms[1] != null) {
+				procError = (Vector)sparms[1];
+			}
+		} catch (Throwable e) {
+			procError.addElement(new CauseException(
+						"Internal error loading settings.", e));
+			e.printStackTrace();
+		}
+		if (procError.size() > 0) {
+			parms[0] = procError;
+		}
     }
     
     /** Get instance */
-	//#ifdef DCLDCV11
-    public static RssReaderSettings getInstance()
-	//#else
-    public static synchronized RssReaderSettings getInstance()
+    public static
+	//#ifdef DCLDCV10
+    synchronized
 	//#endif
-	{
+    RssReaderSettings getInstance(Object[] parms) {
 		//#ifdef DCLDCV11
-		synchronized(Settings.class) {
+		synchronized(RssReaderSettings.class) {
 		//#endif
-		//#ifdef DLOGGING
-		Logger.getLogger("RssReaderSettings").info(
-				"Constructor midlet,m_singleton=" + FeatureMgr.getMidlet() + "," + m_singleton);
-		//#endif
-        if(m_singleton==null) {
-            m_singleton = new RssReaderSettings();
-        }
-        return m_singleton;
+			//#ifdef DLOGGING
+			Logger.getLogger("RssReaderSettings").info(
+					"Constructor midlet,m_singleton=" + FeatureMgr.getMidlet() + "," + m_singleton);
+			//#endif
+			if(m_singleton==null) {
+				m_singleton = new RssReaderSettings(parms);
+			}
+			return m_singleton;
 		//#ifdef DCLDCV11
-        }
+		}
 		//#endif
     }
+    
     
     /** Get maximum item count */
     public int getMaximumItemCountInFeed() {
@@ -407,10 +420,6 @@ final public class RssReaderSettings {
         return m_settings.getStringProperty( 0, m_settings.SETTINGS_NAME, "");
     }
     
-    public Throwable getLoadExc() {
-        return (m_loadExc);
-    }
-
     public Settings getSettingsInstance() {
         return (m_settings);
     }
