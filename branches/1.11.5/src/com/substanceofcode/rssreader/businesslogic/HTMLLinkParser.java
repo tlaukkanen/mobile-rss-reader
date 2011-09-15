@@ -40,6 +40,7 @@
  * IB 2011-01-14 1.11.5Alpha15 Make sure the tag name length is > 0.
  * IB 2011-01-14 1.11.5Alpha15 Make sure the anchor is not another tag starting with 'a'.
  * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-04-05 1.11.5Dev18 Trim the title in case it has spaces for HTML and OPML parsers.
 */
 
 // Expand to define memory size define
@@ -212,7 +213,7 @@ public class HTMLLinkParser extends FeedListParser {
 						// Title can be 0 as this is used also for
 						// getting 
 						title = title.trim();
-						title = MiscUtil.removeHtml( title );
+						title = MiscUtil.removeHtml( title ).trim();
 
 						if ((link = parser.getAttributeValue( "href" ))
 									== null) {
