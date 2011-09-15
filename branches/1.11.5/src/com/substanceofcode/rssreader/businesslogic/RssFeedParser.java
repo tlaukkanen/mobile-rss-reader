@@ -47,6 +47,7 @@
  * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
  * IB 2011-03-09 1.11.5Dev17 More logging.
  * IB 2011-03-13 1.11.5Dev17 Have getFeedTitleList to use title for name when parsing the whole feed.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for RssReaderSettings.getInstance into a vector.
 */
 
 // Expand to define full vers define
@@ -381,7 +382,13 @@ implements
 			//#endif
 			if (m_maxItemCount == -2) {
 				RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
-				m_maxItemCount = (midlet != null) ? midlet.getSettings().INIT_MAX_ITEM_COUNT : RssReaderSettings.getInstance().INIT_MAX_ITEM_COUNT;
+				if (midlet != null) {
+					m_maxItemCount = midlet.getSettings().INIT_MAX_ITEM_COUNT;
+				} else {
+					Object[] parms = new Object[] {null};
+					m_maxItemCount = RssReaderSettings.getInstance(
+							parms).INIT_MAX_ITEM_COUNT;
+				}
 			}
 			parseModRssFeed(m_updFeed, m_maxItemCount);
         } catch( Throwable e ) {
