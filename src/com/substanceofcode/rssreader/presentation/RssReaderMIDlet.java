@@ -153,6 +153,7 @@
  * IB 2011-03-13 1.11.5Dev17 More logging.
  * IB 2011-03-13 1.11.5Dev17 Null bookmarks StringBuffer to make sure that we save memory starting recovery code for out of memory.
  * IB 2011-03-21 1.11.5Dev17 Show errors from getting preferred/current jad/jar.
+ * IB 2011-09-14 1.11.5Dev18 Put errors for RssReaderSettings.getInstance into a vector.
 */
 
 // Expand to define test define
@@ -2425,10 +2426,11 @@ implements
 		Gauge gauge = new Gauge(guageTxt, false, nbrRegions, 0);
 		int pl = loadForm.append(gauge);
 		loadForm.getFeatureMgr().showMe();
+		Vector procError = new Vector();
 		try {
 			if (!firstTime) {
 				settings.setLongProperty(settings.STORE_DATE, storeDate);
-				settings.save(0, false);
+				settings.save(0, false, procError);
 			}
 			gauge.setValue(1);
 			if (!firstTime) {
@@ -2441,12 +2443,12 @@ implements
 //@							,finestLoggable
 							//#endif
 							);
-					settings.save(ic, false);
+					settings.save(ic, false, procError);
 					gauge.setValue(ic + 1);
 				}
 				// Set internal region back to 0.
 				settings.setStringProperty(settings.BOOKMARKS_NAME, "");
-				settings.save(0, false);
+				settings.save(0, false, procError);
 			}
 			pl = -1;
 			gauge.setValue(gauge.getMaxValue());
