@@ -47,6 +47,8 @@
  * IB 2011-03-06 1.11.5Dev17 Have mobility choice for open with method urlEncode.
  * IB 2011-03-11 1.11.5Dev17 Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
  * IB 2011-03-14 1.11.5Dev17 Combine statements.
+ * IB 2011-09-12 1.11.5Dev18 Trace closeConnection entry.
+ * IB 2011-09-12 1.11.5Dev18 Set returned connection to null when closing it.
  */
 
 // Expand to define MIDP define
@@ -783,6 +785,10 @@ public class MiscUtil {
    */
 	static public Connection closeConnection(Connection conn) {
 
+		//#ifdef DLOGGING
+		Logger.getLogger("MiscUtil").trace("closeConnection conn=" + conn);
+		//#endif
+
 		if (conn != null) {
 			try {
 				((Connection)conn).close();
@@ -814,6 +820,7 @@ public class MiscUtil {
 				logger.warning("Error closing connection.", ce);
 				//#endif
 				e.printStackTrace();
+			} finally {
 				conn = (Connection)nullPtr;
 			}
 		}
