@@ -1206,6 +1206,22 @@ v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
 - Use utility methods to convert from Vector to arrays.
 - Use wtktemporary.properties to more easily set temporary test development properties used for the build.
 
+v1.11.5 Dev 18 (Dev18) (Sep 15th 2011)
+- Upload RIM zip first to google so that the jad/jar files appear last which is first in the download list.
+- More logging.
+- Remove extra closeConnection.
+- Better error handling.
+- Close connection when going back to root because setFileConnection cannot be used to display the root tree.  Always use open to show the selected root tree.
+- Trace closeConnection entry.
+- Set returned connection to null.
+- Use null pattern using nullPtr.
+- Put errors for Settings.save into a vector in an array.
+- Put errors for Settings.getInstance into a vector in an array.
+- Fix CLDC 1.1 class synchronized for RssReaderSettings.
+- Put errors for RssReaderSettings.getInstance into a vector in an object array.
+- Trim the title in case it has spaces for HTML and OPML parsers.
+- Increase number of redirects allowed to 5.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
