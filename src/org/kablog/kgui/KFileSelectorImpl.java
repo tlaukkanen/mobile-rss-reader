@@ -61,6 +61,10 @@
  * IB 2011-03-06 1.11.5Dev17 Only use thread utils if MIDP 2.0.
  * IB 2011-03-07 1.11.5Dev17 Optionally use long command label.
  * IB 2011-03-18 1.11.5Dev17 Use nullPtr to init selectCommand.
+ * IB 2011-09-14 1.11.5Dev18 More logging.
+ * IB 2011-09-14 1.11.5Dev18 Remove extra closeConnection.
+ * IB 2011-09-14 1.11.5Dev18 Better error handling.
+ * IB 2011-09-14 1.11.5Dev18 Close connection when going back to root because setFileConnection cannot be used to display the root tree.  Always use open to show the selected root tree.
 */
 
 // Expand to define MIDP define
@@ -374,6 +378,9 @@
 //@			{
 //@				// Free memory before doing the open.
 //@				currentRoot = (FileConnection)nullPtr;
+				//#ifdef DLOGGING
+//@				if (finestLoggable) {logger.finest("resetRoots open defaultDir=" + defaultDir);}
+				//#endif
 //@				currentRoot = (FileConnection) Connector.open(  defaultDir,  Connector.READ);
 //@				displayCurrentRoot();
 //@			}
@@ -383,7 +390,7 @@
 //@				displayDbgMsg("### resetroot ex: " + e, null);
 				//#endif
 				//#ifdef DLOGGING
-//@				logger.severe("KFileSelectorImpl constructor ", e);
+//@				logger.severe("KFileSelectorImpl resetRoots ", e);
 				//#endif
 //@				displayAllRoots();
 //@			}
@@ -415,7 +422,6 @@
 			//#endif
 //@			super.append(root.substring(1), FOLDER_IMAGE);
 //@		}
-//@		currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 //@	}//displayAllRoots
 //@
 //@	/* Load roots into rootsList array. */
@@ -439,10 +445,13 @@
 //@				rootsList.addElement(FILE_SEPARATOR + (String) roots.nextElement());
 //@			}
 //@		} catch (Throwable e) {
-			//#ifdef DTEST
-//@			displayDbgMsg("### load roots: " + e, null);
+			//#ifdef DLOGGING
+//@			logger.severe("KFileSelectorImpl loadRoots", e);
 			//#else
 //@			e.printStackTrace();
+			//#endif
+			//#ifdef DTEST
+//@			displayDbgMsg("### load roots: " + e, null);
 			//#endif
 //@		}
 //@	}//loadRoots
@@ -482,12 +491,18 @@
 							//#ifdef DTEST
 //@							displayDbgMsg("new currentRoot...", null);
 							//#endif
+							//#ifdef DLOGGING
+//@							if (finestLoggable) {logger.finest("openSelected open selectedFile=file:///" + selectedFile);}
+							//#endif
 //@							currentRoot = (FileConnection) Connector.open("file:///" + selectedFile, Connector.READ);
 //@						}
 //@						else
 //@						{
 							//#ifdef DTEST
 //@							displayDbgMsg("set cur root conn...", null);
+							//#endif
+							//#ifdef DLOGGING
+//@							if (finestLoggable) {logger.finest("openSelected setFileConnection selectedFile=" + selectedFile);}
 							//#endif
 //@							currentRoot.setFileConnection(selectedFile);
 //@						}
@@ -532,11 +547,15 @@
 //@					    rootsList.contains(FILE_SEPARATOR + curShortName)))
 //@					{
 //@						displayAllRoots();
+//@						currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 //@					}
 //@					else
 //@					{
 //@						try
 //@						{
+							//#ifdef DLOGGING
+//@							if (finestLoggable) {logger.finest("openSelected setFileConnection up_dir=" + UP_DIR);}
+							//#endif
 //@							currentRoot.setFileConnection(UP_DIR);
 //@							displayCurrentRoot();
 //@						}
@@ -677,7 +696,7 @@
 //@		catch (Exception e)
 //@		{
 			//#ifdef DLOGGING
-//@			logger.severe("KFileSelectorImpl constructor", e);
+//@			logger.severe("KFileSelectorImpl displayCurrentRoot", e);
 			//#else
 //@			e.printStackTrace();
 			//#endif
@@ -773,6 +792,9 @@
 //@
 //@					// Free memory before doing the open.
 //@					currentRoot = (FileConnection)nullPtr;
+					//#ifdef DLOGGING
+//@					if (finestLoggable) {logger.finest("openSelected open selectedURL=" + selectedURL);}
+					//#endif
 //@					currentRoot = (FileConnection) Connector.open(selectedURL);
 //@
 //@					//currentRoot.setFileConnection(selectedFile); //relative to current directory
@@ -865,6 +887,9 @@
 //@	/* Method to listen for changes in root. */
 //@	public void rootChanged(int changeType, String strArg)
 //@	{
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("rootChanged open changeType,strArg=" + changeType + "," + strArg);}
+		//#endif
 		//#ifdef DTEST
 //@		if (bDebug) {
 //@			//that's nice...
