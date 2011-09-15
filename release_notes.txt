@@ -398,6 +398,13 @@ v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
 - Process dates of the form March 11, 2011 3:11:26 PM PST, Wed, 6 September 14:00:00 GMT, and 11 Mar 2011 11:43 GMT.
 - Only put RIM zip files on release sites.  Need to unzip on computer and install using ALX using RIM Desktop Manager.
 
+v1.11.5 Dev 18 (Dev18) (Sep 15th 2011)
+- Fix find files problem with going back up to the first directory from a sub directory.
+- Fix potential save problems.
+- Give errors for save problems. 
+- Trim spaces off of titles.
+- Allow 5 redirects for RSS url's.
+
 Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
