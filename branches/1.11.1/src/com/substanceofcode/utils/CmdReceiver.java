@@ -24,11 +24,12 @@
  * IB 2010-03-14 1.11.5RC2 Provide a command receiver to execute actions as part of the command pattern.
  * IB 2010-05-28 1.11.5RC2 Use threads and CmdReceiver for MIDP 2.0 only.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-02-05 1.11.5Dev17 Allow CmdReceiver for large memory MIDP 1.0.
 */
 
-// Expand to define MIDP define
-//#define DMIDP20
-//#ifdef DMIDP20
+// Expand to define memory size define
+//#define DREGULARMEM
+//#ifndef DSMALLMEM
 package com.substanceofcode.utils;
 
 /**
