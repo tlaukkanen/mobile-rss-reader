@@ -34,10 +34,31 @@
  * IB 2010-07-04 1.11.5Dev6 Code cleanup.
  * IB 2010-08-15 1.11.5Dev8 Add runnable for thread class name to thread info.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-12 1.11.5Dev15 Have closeInputStream, closeOutputStream, and closeConnection to close input/output streams and a connection.
+ * IB 2011-01-14 1.11.5Alpha15 Use CmdReceiver interface to allow FeatureMgr to initialize KFileSelectorMgr without directly referencing it's class.  This allows for better use of optional APIs.
+ * IB 2011-01-14 1.11.5Alpha15 Compare dates as strings to determine if they are equal to allow determining if two items are the same to preserve their read flags.
+ * IB 2011-01-14 1.11.5Alpha15 Have methods to enable better logging.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile some code for internet link version.
+ * IB 2011-01-24 1.11.5Dev16 Have future action request to end the app.
+ * IB 2011-02-01 1.11.5Dev17 Have split with character separator character.
+ * IB 2011-03-06 1.11.5Dev17 Have convVec to use for testing to convert from an object array to a Vector.
+ * IB 2011-03-06 1.11.5Dev17 Allow thread methods for non small memory releases.
+ * IB 2011-03-06 1.11.5Dev17 Have methods to convert from a vector to either a RssItem or RssItunesFeed array.
+ * IB 2011-03-06 1.11.5Dev17 Have mobility choice for open with method urlEncode.
+ * IB 2011-03-11 1.11.5Dev17 Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
+ * IB 2011-03-14 1.11.5Dev17 Combine statements.
+ * IB 2011-09-12 1.11.5Dev18 Trace closeConnection entry.
+ * IB 2011-09-12 1.11.5Dev18 Set returned connection to null when closing it.
  */
 
 // Expand to define MIDP define
 @DMIDPVERS@
+// Expand to define CLDC define
+@DCLDCVERS@
+// Expand to define itunes define
+@DFULLVERSDEF@
+// Expand to define memory size define
+@DMEMSIZEDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define logging define
@@ -45,16 +66,27 @@
 package com.substanceofcode.utils;
 
 //TODO test </a> html. test no http (or using base?)
+import java.util.Date;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import javax.microedition.io.Connection;
+import javax.microedition.io.HttpConnection;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+//#ifdef DJSR75
+import javax.microedition.io.file.FileConnection;
+//#endif
 
-//#ifdef DMIDP20
+//#ifndef DSMALLMEM
 import com.substanceofcode.utils.CmdReceiver;
+//#endif
+//#ifdef DFULLVERS
+import com.substanceofcode.rssreader.businessentities.RssItem;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
 //#endif
 //#ifdef DTEST
 import com.substanceofcode.rssreader.businessentities.RssItemInfo;
@@ -80,8 +112,10 @@ public class MiscUtil {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
             .toCharArray();
 
-	//#ifdef DMIDP20
-	public final static Short SPAUSE_APP = new Short((short)0);
+	//#ifndef DSMALLMEM
+	public final static Short SINIT_OBJ = new Short((short)0);
+	public final static Short SPAUSE_APP = new Short((short)1);
+	public final static Short SEXIT_APP = new Short((short)2);
 	static private final Hashtable cthreads = new Hashtable();
 	//#endif
     static private long threadNbr = 1L;
@@ -116,13 +150,13 @@ public class MiscUtil {
 			//#else
 			Thread thread = new Thread(runnable);
 			//#endif
-			//#ifdef DMIDP20
+			//#ifndef DSMALLMEM
 			cthreads.put(thread, new Object[] {cname, runnable});
 			//#endif
+			return thread;
 		//#ifdef DCLDCV11
 		}
 		//#endif
-		return thread;
 	}
 
 	static public Thread getThread(Runnable runnable, String name, Object obj,
@@ -143,7 +177,7 @@ public class MiscUtil {
 		synchronized(MiscUtil.class) {
 		//#endif
 			StringBuffer tsb = new StringBuffer("Thread ");
-			//#ifdef DMIDP10
+			//#ifdef DSMALLMEM
 			return tsb.append(thread.hashCode()).append(",").append(
 					thread.toString()).toString();
 			//#else
@@ -169,7 +203,7 @@ public class MiscUtil {
 		//#endif
 	}
 
-	//#ifdef DMIDP20
+	//#ifndef DSMALLMEM
 	static public
 	//#ifdef DCLDCV10
 	synchronized
@@ -190,7 +224,7 @@ public class MiscUtil {
 		//#endif
 	}
 
-	public static
+	static public
 	//#ifdef DCLDCV10
 	synchronized
 	//#endif
@@ -209,7 +243,6 @@ public class MiscUtil {
 			}
 		//#ifdef DCLDCV11
 		}
-		return cthread;
 		//#endif
 	}
 	//#endif
@@ -403,6 +436,34 @@ public class MiscUtil {
     }
     
     /**
+     * Split string into multiple strings
+     * @param original      Original string
+     * @param separator     Separator character in original string
+     * @return              Splitted string array
+     */
+    public static String[] split(String original, char separator) {
+        Vector nodes = new Vector();
+        
+        // Parse nodes into vector
+        int index = original.indexOf(separator);
+        while(index>=0) {
+            nodes.addElement( original.substring(0, index) );
+            original = original.substring(index+1);
+            index = original.indexOf(separator);
+        }
+        // Get the last node
+        nodes.addElement( original );
+        
+        // Create splitted string array
+		int nsize = nodes.size();
+        String[] result = new String[ nsize ];
+        if( nsize >0 ) {
+			nodes.copyInto(result);
+        }
+        return result;
+    }
+    
+    /**
      * Join strings into one string
      * @param originals      Original strings
      * @param joinStr        Join string
@@ -440,6 +501,7 @@ public class MiscUtil {
         return s;
     }
     
+	//#ifdef DFULLVERS
     /** 
      * Method removes HTML tags from given string.
      * 
@@ -452,10 +514,13 @@ public class MiscUtil {
 		boolean finerLoggable = logger.isLoggable(Level.FINER);
 		//#endif
         try{
-			if (text == null) { return null; }
-            String htmlText = text.trim();
-            int htmlStartIndex = htmlText.indexOf('<');
-			if (htmlStartIndex == -1) { return text; }
+            int htmlStartIndex;
+            String htmlText;
+			if ((text == null) ||
+					((htmlStartIndex = (htmlText = text.trim()).indexOf('<'))
+					 < 0)) {
+				return text;
+			}
             StringBuffer plainText = new StringBuffer();
             while (htmlStartIndex>=0) {
                 plainText.append(htmlText.substring(0,htmlStartIndex));
@@ -469,17 +534,17 @@ public class MiscUtil {
 					//#endif
 					return plainText.toString().trim();
 				}
-                final int html1stSpaceIndex = htmlText.indexOf(' ',
-						htmlStartIndex);
                 int htmlTagEndIndex;
                 int startTagLen;
                 int tagLen;
-				if ((html1stSpaceIndex > 0) &&
+                final int html1stSpaceIndex;
+				if (((html1stSpaceIndex = htmlText.indexOf(' ',
+						htmlStartIndex)) > 0) &&
 						(htmlEndIndex > html1stSpaceIndex)) {
 					startTagLen = html1stSpaceIndex - htmlStartIndex;
-					htmlTagEndIndex = htmlText.lastIndexOf(' ',
-						htmlEndIndex) + 1;
-					tagLen = startTagLen + htmlEndIndex - htmlTagEndIndex + 1;
+					tagLen = startTagLen + htmlEndIndex -
+							(htmlTagEndIndex = htmlText.lastIndexOf(' ',
+								htmlEndIndex) + 1) + 1;
 				} else {
 					startTagLen = htmlEndIndex - htmlStartIndex;
 					htmlTagEndIndex = htmlEndIndex;
@@ -520,6 +585,85 @@ public class MiscUtil {
             return text;
         }
     }
+	//#endif
+
+	/**
+	 * URL encode a string
+	 * Copyright 2006 Nokia Corporation
+	 * Created by: Ferenc Dosa Racz
+	 *
+	 * Licensed under the Apache License, Version 2.0 (the "License");
+	 * you may not use this file except in compliance with the License.
+	 * You may obtain a copy of the License at
+	 *
+	 *     http://www.apache.org/licenses/LICENSE-2.0
+	 *
+	 * Unless required by applicable law or agreed to in writing, software
+	 * distributed under the License is distributed on an "AS IS" BASIS,
+	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 * See the License for the specific language governing permissions and
+	 * limitations under the License.
+	 *
+	 */
+	/*
+	 * This code was first modified 01/27/2011
+	 */
+	//#ifdef DMIDP20
+	/**
+	 * Very simple url encoder - improve as need arises.
+	 * e.g. from 
+	 * "+plus &ampersand ,comma :colon =equal"
+	 * to 
+	 * "%2Bplus+%26ampersand+%2Ccomma+%3Acolon+%3Dequal"
+	 */
+	public static String urlEncode(String url) {
+		String rv = null;
+
+		if (url != null) {
+			StringBuffer sb = new StringBuffer();
+			char[] curl = url.toCharArray();
+
+			for (int i = 0; i < url.length(); ++i) {
+				int
+					c = curl[i];
+
+				if ((0x30 <= c && c <= 0x39) ||  // '0'-'9'
+						(0x41 <= c && c <= 0x5A) ||  // 'A'-'Z'
+						(0x61 <= c && c <= 0x7A)) {  // 'a'-'z'
+					sb.append((char)c);
+				} else if (c == 0x20) { // ' '
+					sb.append('+');
+				} else {
+					String
+						hex = Integer.toHexString(c);
+
+					if (hex.length() == 1) {
+						sb.append("%0");
+					} else {
+						sb.append('%');
+					}
+
+					sb.append(hex);
+				}
+			}
+
+			rv = sb.toString();
+		}
+
+		return rv;
+	} //
+
+	//#endif
+
+	static public String getSgmlUrl(String url) {
+		return MiscUtil.replace(url, "&amp;", "&");
+	}
+
+	static public boolean cmpDateStr(Date date1, Date date2) {
+		return (((date1 == null) && (date2 == null)) ||
+			 ((date1 != null) && (date2 != null) &&
+			 date1.toString().equals(date2.toString())));
+	}
     
 	static public String toString(Object obj, boolean showClass, int maxStrLen) {
 		if (obj == null) {
@@ -555,7 +699,133 @@ public class MiscUtil {
 					item.toString();
 		}
 	}
+
+	static public String toString(Date adate) {
+		if (adate == null) {
+			return "null";
+		} else {
+			return adate.toString();
+		}
+	}
+
+	static public String toString(String parm) {
+		if (parm == null) {
+			return "null";
+		} else {
+			return parm;
+		}
+	}
+
 	//#endif
+
+  /**
+   * Close the connection.  This allows us to save code space doing the same
+   * thing and allows logging of errors in case they are useful.  This  helps
+   * with some compilers that want you to close the stream using the super
+   * class instead of the subclass.
+   *
+   * @param conn
+   * @return    InputStream
+   * @author Irv Bunton
+   */
+	static public InputStream closeInputStream(InputStream conn) {
+
+		if (conn != null) {
+			try {((InputStream)conn).close();}
+			catch (IOException e) {
+				//#ifdef DLOGGING
+				Logger logger = Logger.getLogger("MiscUtil");
+				CauseException ce = new CauseException(
+						"Unable to close connection.", e);
+				logger.warning("Error closing connection.", ce);
+				//#endif
+				conn = (InputStream)nullPtr;
+			}
+		}
+		return conn;
+	}
+
+  /**
+   * Close the connection.  This allows us to save code space doing the same
+   * thing and allows logging of errors in case they are useful.  This  helps
+   * with some compilers that want you to close the stream using the super
+   * class instead of the subclass.
+   *
+   * @param conn
+   * @return    OutputStream
+   * @author Irv Bunton
+   */
+	static public OutputStream closeOutputStream(OutputStream conn) {
+
+		if (conn != null) {
+			try {((OutputStream)conn).close();}
+			catch (IOException e) {
+				//#ifdef DLOGGING
+				Logger logger = Logger.getLogger("MiscUtil");
+				CauseException ce = new CauseException(
+						"Unable to close connection.", e);
+				logger.warning("Error closing connection.", ce);
+				//#endif
+				conn = (OutputStream)nullPtr;
+			}
+		}
+		return conn;
+	}
+
+	//#ifdef DFULLVERS
+  /**
+   * Close the connection.  This allows us to save code space doing the same
+   * thing and allows logging of errors in case they are useful.  This  helps
+   * with some compilers that want you to close the stream using the super
+   * class instead of the subclass.
+   *
+   * @param conn
+   * @return    Connection
+   * @author Irv Bunton
+   */
+	static public Connection closeConnection(Connection conn) {
+
+		//#ifdef DLOGGING
+		Logger.getLogger("MiscUtil").trace("closeConnection conn=" + conn);
+
+		//#endif
+		if (conn != null) {
+			try {
+				((Connection)conn).close();
+			}
+			catch (IOException e) {
+				//#ifdef DLOGGING
+				Logger logger = Logger.getLogger("MiscUtil");
+				//#endif
+				CauseException ce = null;
+				if (conn instanceof HttpConnection) {
+					try {
+						ce = new CauseException(
+								"Unable to close URL " +
+								((HttpConnection)conn).getURL(),e);
+					} catch (Throwable e2) {
+						e2.printStackTrace();
+					}
+				//#ifdef DJSR75
+				} else if (conn instanceof FileConnection) {
+					ce = new CauseException(
+							"Unable to close URL " +
+							((FileConnection)conn).getURL(),e);
+				//#endif
+				}
+				if (ce == null) {
+					ce = new CauseException("Unable to close connection.", e);
+				}
+				//#ifdef DLOGGING
+				logger.warning("Error closing connection.", ce);
+				//#endif
+				e.printStackTrace();
+			} finally {
+				conn = (Connection)nullPtr;
+			}
+		}
+		return conn;
+	}
 
 /*
  * Visit url for update: http://sourceforge.net/projects/jvftp
@@ -658,5 +928,46 @@ public class MiscUtil {
 		}
 		longQuickSort(a, indexes, 0, aend);
 	}
+	//#endif
+
+	//#ifdef DTEST
+	static public Vector convVec(Object[] oelems) {
+		int olen = oelems.length;
+		Vector velems = new Vector(olen);
+		for (int i = 0;i < olen; i++) {
+			velems.addElement(oelems[i]);
+		}
+		return velems;
+	}
+
+	static public RssItemInfo[] getVecrItemf(final Vector vobjs) {
+		int vlen;
+		RssItemInfo[] objs = new RssItemInfo[vlen = vobjs.size()];
+		if (vlen > 0) {
+			vobjs.copyInto(objs);
+		}
+        return objs;
+    }
+	//#endif
+
+	//#ifdef DFULLVERS
+	static public RssItem[] getVecrItem(final Vector vobjs) {
+		int vlen;
+		RssItem[] objs = new RssItem[vlen = vobjs.size()];
+		if (vlen > 0) {
+			vobjs.copyInto(objs);
+		}
+        return objs;
+    }
+
+	static public RssItunesFeed[] getVecrFeed(final Vector vobjs) {
+		int vlen;
+		RssItunesFeed[] objs = new RssItunesFeed[vlen = vobjs.size()];
+		if (vlen > 0) {
+			vobjs.copyInto(objs);
+		}
+        return objs;
+    }
+	//#endif
 
 }
