@@ -28,6 +28,12 @@
  * IB 2010-06-29 1.11.5RC2 Use compatibility observer pattern.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of EncodingUtil and EncodingStreamReader.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of CauseException and EncodingStreamReader.
+ * IB 2011-01-22 1.11.5Dev16 If m_maxItemCount has not been set, take it from the RssReaderSettings either via midlet or directly from getInstance.
+ * IB 2011-03-08 1.11.5Dev17 Switch to yinlight Observable/ObservableHandler to prepare to change the license.
+ * IB 2011-03-09 1.11.5Dev17 More logging.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for RssReaderSettings.getInstance into a vector.
 */
 
 // Expand to define MIDP define
@@ -50,16 +56,17 @@ import com.substanceofcode.utils.compatibility4.XmlParser;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.URLHandler;
 import com.substanceofcode.utils.SgmlParserIntr;
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
 
-import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.compatibility4.EncodingUtil;
 import com.substanceofcode.rssreader.businesslogic.SgmlFormatParser;
-import com.substanceofcode.utils.CauseException;
+import com.substanceofcode.utils.compatibility4.CauseException;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.compatibility4.Observable;
-import net.eiroca.j2me.observable.compatibility4.ObserverManager;
+import net.yinlight.j2me.observable.Observable;
+import net.yinlight.j2me.observable.ObservableHandler;
 //#endif
 
 //#ifdef DLOGGING
@@ -91,7 +98,7 @@ implements
     private boolean m_successfull = false;
     private CauseException m_ex = null;
 	//#ifdef DMIDP20
-    private ObserverManager observerMgr = null;
+    private ObservableHandler observableHandler = null;
 	//#endif
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("compatibility4.RssFeedParser");
@@ -103,7 +110,7 @@ implements
     public RssFeedParser(RssItunesFeedInfo rssFeed) {
         m_rssFeed = rssFeed;
 		m_updFeed = true;
-		m_maxItemCount = RssReaderSettings.INIT_MAX_ITEM_COUNT;
+		m_maxItemCount = -2;
     }
     
 	//#ifdef DMIDP20
@@ -116,7 +123,7 @@ implements
 		m_midlet = midlet;
 		m_updFeed = updFeed;
 		m_maxItemCount = maxItemCount;
-		observerMgr = new ObserverManager(this);
+		observableHandler = new ObservableHandler();
 		//#ifdef DCLDCV11
         m_parsingThread = new Thread(this, "RssFeedParser");
 		//#else
@@ -252,8 +259,11 @@ implements
      */
     public void parseRssFeedXml(InputStream is, int maxItemCount)
     throws IOException {
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("parseRssFeedXml is,m_rssFeed.getName(),m_rssFeed.getUrl(),m_maxItemCount,m_getTitleOnly=" + is + "," + m_rssFeed.getName() + "," + m_rssFeed.getUrl() + "," + + m_maxItemCount + "," + m_getTitleOnly);}
+		//#endif
         /** Initialize item collection */
-        m_rssFeed.getItems().removeAllElements();
+        m_rssFeed.getVecItems().removeAllElements();
         
         /** Initialize XML parser and parse feed */
         SgmlParserIntr parser = new XmlParser(is);
@@ -292,8 +302,8 @@ implements
     }
     
 	//#ifdef DMIDP20
-	public ObserverManager getObserverManager() {
-		return observerMgr;
+	public ObservableHandler getObservableHandler() {
+		return observableHandler;
 	}
 	//#endif
 
@@ -303,6 +313,11 @@ implements
 			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine("Thread running=" + this);}
 			//#endif
+			if (m_maxItemCount == -2) {
+				RssReaderMIDlet midlet = FeatureMgr.getRssMidlet();
+				Object[] parms = new Object[] {null};
+				m_maxItemCount = (midlet != null) ? midlet.getSettings().INIT_MAX_ITEM_COUNT : RssReaderSettings.getInstance(parms).INIT_MAX_ITEM_COUNT;
+			}
 			parseRssFeed(m_updFeed, m_maxItemCount);
         } catch( IOException ex ) {
 			//#ifdef DLOGGING
@@ -347,8 +362,8 @@ implements
 				m_midlet.wakeup(2);
 			}
 			//#ifdef DMIDP20
-			if (observerMgr != null) {
-				observerMgr.notifyObservers(this);
+			if (observableHandler != null) {
+				observableHandler.notifyObservers(this);
 			}
 			//#endif
 			//#ifdef DLOGGING
