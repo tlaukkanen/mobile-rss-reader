@@ -36,6 +36,10 @@
  * IB 2010-10-12 1.11.5Dev9 Add m_loadStartCmd to allow going to start screen in this case bookmarks from loading screen.
  * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
  * IB 2010-11-22 1.11.5Dev14 New method showMeNotes to show notes if loadingform has notes/exceptions, else show display.
+ * IB 2011-01-22 1.11.5Alpha15 Use main display from FeatureMgr; thus, it is not needed as a parameter.
+ * IB 2011-01-11 1.11.5Dev15 Use super.featureMgr instead of featureMgr.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-03-06 1.11.5Dev17 Only use thread utils if not small memory.
  */
 
 // Expand to define MIDP define
@@ -102,7 +106,6 @@ final public class LoadingForm extends FeatureForm
 //@	private Object m_observable;
 	//#endif
 	private volatile Displayable m_disp;
-	private Displayable m_mainDisp;
 
 	//#ifdef DLOGGING
 //@    private Logger logger = Logger.getLogger("LoadingForm");
@@ -112,7 +115,6 @@ final public class LoadingForm extends FeatureForm
 	/* Constructor */
 	LoadingForm(final String title,
 				final Displayable disp,
-				final Displayable mainDisp,
 				//#ifdef DMIDP20
 				final Observable observable
 				//#else
@@ -133,7 +135,6 @@ final public class LoadingForm extends FeatureForm
 		super.addCommand( m_loadMsgsCmd );
 		super.addCommand( m_loadErrCmd );
 		super.addCommand( m_loadDiagCmd );
-		m_mainDisp = mainDisp;
 		m_disp = disp;
 		if (disp != null) {
 			super.addCommand( FeatureMgr.m_backCommand );
@@ -142,15 +143,13 @@ final public class LoadingForm extends FeatureForm
 
 	static public LoadingForm getLoadingForm(final String desc,
 									   Displayable disp,
-									   Displayable mainDisp,
 									   //#ifdef DMIDP20
 									   Observable observable
 									   //#else
 //@									   Object observable
 									   //#endif
 			) {
-		LoadingForm loadForm = new LoadingForm("Loading", disp, mainDisp,
-				observable);
+		LoadingForm loadForm = new LoadingForm("Loading", disp, observable);
 		loadForm.appendMsg( desc + "\n" );
 		loadForm.setCommandListener( loadForm, false );
 		loadForm.getFeatureMgr().showMe();
@@ -163,24 +162,10 @@ final public class LoadingForm extends FeatureForm
 			if (!isLoadFinished()) {
 				recordFin();
 			}
-			featureMgr.showMe();
+			super.featureMgr.showMe();
 		} else {
-			featureMgr.setCurrentMgr(null, nextDisp);
+			super.featureMgr.setCurrentMgr(null, nextDisp);
 		}
-	}
-
-	static public LoadingForm getLoadingForm(final String desc,
-									   Displayable disp,
-									   //#ifdef DMIDP20
-									   Observable observable
-									   //#else
-//@									   Object observable
-									   //#endif
-			) {
-		return LoadingForm.getLoadingForm(desc,
-									   disp,
-									   FeatureMgr.getMainDisp(),
-									   observable);
 	}
 
 	/* Add start command and where it goes when clicked.  */
@@ -220,15 +205,15 @@ final public class LoadingForm extends FeatureForm
 			}
 			//#endif
 			if (cdisp != null) {
-				featureMgr.setCurrentAlt( cdisp, null, null, cdisp );
+				super.featureMgr.setCurrentAlt( cdisp, null, null, cdisp );
 			}
 		}
 
 		if( c == m_loadQuitCmd ){
-			RssReaderMIDlet midlet = featureMgr.getMidlet();
+			RssReaderMIDlet midlet = featureMgr.getRssMidlet();
 			if (midlet != null) {
 				try {
-					featureMgr.getMidlet().destroyApp(true);
+					super.featureMgr.getRssMidlet().destroyApp(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -282,7 +267,7 @@ final public class LoadingForm extends FeatureForm
 		e.printStackTrace();
 		setTitle("Finished with errors below");
 		addExc(ce.getMessage(), ce);
-		featureMgr.showMe();
+		super.featureMgr.showMe();
 	}
 
 	/* Record the exception in the loading form, log it and give std error. */
@@ -339,7 +324,7 @@ final public class LoadingForm extends FeatureForm
 				}
 			}
 			if (!showErrsOnly) {
-				//#ifdef DMIDP20
+				//#ifndef DSMALLMEM
 				super.append("Current threads:\n");
 				String[] threadInfo = MiscUtil.getDispThreads();
 				for (int ic = 0; ic < threadInfo.length; ic++) {
@@ -365,6 +350,9 @@ final public class LoadingForm extends FeatureForm
 		if (msg != null) {
 			super.append(msg);
 			m_msgs.addElement(msg);
+			//#ifdef DLOGGING
+//@			logger.info("appendMsg msg=" + msg);
+			//#endif
 		}
 	}
 
@@ -383,7 +371,7 @@ final public class LoadingForm extends FeatureForm
 	}
 
 	/* Replace reference to displayable to free memory or
-	   define where to return to.  Use null to go to m_mainDisp. */
+	   define where to return to.  Use null to go to mainDisp. */
 	public void replaceRef(final Displayable disp,
 			final Displayable newDisp) {
 		//#ifdef DLOGGING
@@ -394,7 +382,7 @@ final public class LoadingForm extends FeatureForm
 			if (m_disp == disp) {
 				m_disp = (Displayable)nullPtr;
 			}
-			m_disp = (newDisp == null) ? m_mainDisp : newDisp;
+			m_disp = (newDisp == null) ? FeatureMgr.getMainDisp() : newDisp;
 			if ((odisp == null) && (m_disp != null)) {
 				super.addCommand( FeatureMgr.m_backCommand);
 			}
