@@ -25,6 +25,7 @@
  * IB 2010-03-07 1.11.4RC1 Code cleanup.
  * IB 2010-03-07 1.11.4RC1 Need toString.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS items.
 */
 
 // Expand to define logging define
@@ -89,6 +90,8 @@
 //@    String getEnclosure();
 //@
 //@    String toString();
+//@
+//@	Object clone();
 //@
 //@}
 //#endif
