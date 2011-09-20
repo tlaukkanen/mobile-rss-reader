@@ -24,7 +24,15 @@
 /*
  * IB 2010-03-14 1.11.5RC2 Combine classes to save space.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Allow cloning of feeds to determine if they are equal to allow determining if two items are the same to preserve their read flags.  Also, allow future background updates.
+ * IB 2011-01-14 1.11.5Alpha15 Have checkPresRead to preserve the read flags of feeds.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
+ * IB 2011-02-02 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
+ * IB 2011-03-06 1.11.5Dev17 Have RssFeed constructor copy items.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
 */
+// Expand to define itunes define
+//#define DFULLVERS
 // Expand to define itunes define
 //#define DNOITUNES
 // Expand to define logging define
@@ -41,6 +49,7 @@
 //#ifdef DLOGGING
 //#define HAS_EQUALS
 //#endif
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.MiscUtil;
@@ -153,7 +162,6 @@ public class RssItunesFeed extends RssFeed
 	public RssItunesFeed(RssFeed feed) {
 		super(feed);
 		try {
-        
 			if (feed instanceof RssItunesFeed) {
 				RssItunesFeed itfeed = (RssItunesFeed)feed;
 				this.m_itunes = itfeed.m_itunes;
@@ -165,22 +173,6 @@ public class RssItunesFeed extends RssFeed
 					this.m_subtitle = itfeed.m_subtitle;
 					this.m_summary = itfeed.m_summary;
 					this.m_explicit = itfeed.m_explicit;
-				}
-			} else {
-				final Vector cvitems = feed.getItems();
-				if (cvitems.size() > 0) {
-					RssItem[] citems = new RssItem[cvitems.size()];
-					cvitems.copyInto(citems);
-					Vector nvitems = new Vector();
-					for (int ic = 0; ic < citems.length; ic++) {
-						final RssItem item = citems[ic];
-						if (item instanceof RssItunesItem) {
-							nvitems.addElement((RssItunesItem)item);
-						} else {
-							nvitems.addElement(new RssItunesItem(item));
-						}
-					}
-					m_items = nvitems;
 				}
 			}
         } catch(Throwable e) {
@@ -224,49 +216,65 @@ public class RssItunesFeed extends RssFeed
 //@			if (finestLoggable) {logger.finest("nodes.length=" + nodes.length);}
 			//#endif
 			//#ifdef DITUNES
-//@			int ITUNES = 0;
-//@			m_itunes = nodes[ITUNES].equals("1");
+//@			{
+//@				int ITUNES;
+//@				m_itunes = nodes[ITUNES = 0].equals("1");
+//@			}
 //@			
 //@			if (m_itunes) {
-//@				int TITLE = 1;
-//@				m_title = nodes[TITLE];
-//@				if (hasPipe) {
-//@					m_title = m_title.replace(CONE, '|');
+//@				{
+//@					int TITLE;
+//@					m_title = nodes[TITLE = 1];
+//@					if (hasPipe) {
+//@						m_title = m_title.replace(CONE, '|');
+//@					}
 //@				}
 //@				
-//@				int DESCRIPTION = 2;
-//@				m_description = nodes[DESCRIPTION];
-//@				if (hasPipe) {
-//@					m_description = m_description.replace(CONE, '|');
+//@				{
+//@					int DESCRIPTION;
+//@					m_description = nodes[DESCRIPTION = 2];
+//@					if (hasPipe) {
+//@						m_description = m_description.replace(CONE, '|');
+//@					}
 //@				}
 //@				
-//@				int LANGUAGE = 3;
-//@				m_language = nodes[LANGUAGE];
+//@				{
+//@					int LANGUAGE;
+//@					m_language = nodes[LANGUAGE = 3];
+//@				}
 //@				
-//@				int AUTHOR = 4;
-//@				m_author = nodes[AUTHOR];
+//@				{
+//@					int AUTHOR;
+//@					m_author = nodes[AUTHOR = 4];
+//@				}
 //@				if (hasPipe) {
 //@					m_author = m_author.replace(CONE, '|');
 //@				}
 //@				
-//@				int SUBTITLE = 5;
-//@				m_subtitle = nodes[SUBTITLE];
+//@				{
+//@					int SUBTITLE;
+//@					m_subtitle = nodes[SUBTITLE = 5];
+//@				}
 //@				if (hasPipe) {
 //@					m_subtitle = m_subtitle.replace(CONE, '|');
 //@				}
 //@				
-//@				int SUMMARY = 6;
-//@				m_summary = nodes[SUMMARY];
+//@				{
+//@					int SUMMARY;
+//@					m_summary = nodes[SUMMARY = 6];
+//@				}
 //@				if (hasPipe) {
 //@					m_summary = m_summary.replace(CONE, '|');
 //@				}
 //@
-//@				int EXPLICIT = 7;
-//@				final String explicit = nodes[EXPLICIT];
-//@				if (explicit.length() > 0) {
-//@					m_explicit = (byte)Integer.parseInt(explicit);
-//@				} else {
-//@					m_explicit = RssItunesItem.BNO_EXPLICIT;
+//@				{
+//@					int EXPLICIT;
+//@					final String explicit = nodes[EXPLICIT = 7];
+//@					if (explicit.length() > 0) {
+//@						m_explicit = (byte)Integer.parseInt(explicit);
+//@					} else {
+//@						m_explicit = RssItunesItem.BNO_EXPLICIT;
+//@					}
 //@				}
 //@			}
 			//#endif
@@ -286,7 +294,8 @@ public class RssItunesFeed extends RssFeed
     }
     
     /** Return record store string */
-    public String getStoreString(boolean serializeItems, boolean encoded){
+    public String getStoreString(final boolean saveHdr,
+			final boolean serializeItems, final boolean encoded) {
 		String title = "";
 		String description = "";
 		String author = "";
@@ -306,7 +315,7 @@ public class RssItunesFeed extends RssFeed
                 author + "|" + subtitle + "|" + summary + "|" +
                  ((m_explicit == RssItunesItem.BNO_EXPLICIT) ? "" :
 						 Integer.toString((int)m_explicit)) + "|" +
-			super.getStoreString(serializeItems, encoded);
+			super.getStoreString(saveHdr, serializeItems, encoded);
         return storeString;
         
     }
@@ -467,4 +476,17 @@ public class RssItunesFeed extends RssFeed
         return (m_title);
     }
 
+	public void checkPresRead(boolean modFeed, RssItunesFeed itfeed) {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("checkPresRead modFeed,itfeed=" + modFeed + "," + itfeed);}
+//@		if (finestLoggable) {logger.finest("checkPresRead this=" + this);}
+		//#endif
+		super.checkPresRead(modFeed, itfeed);
+	}
+
+    public Object clone() {
+		return new RssItunesFeed(this);
+	}
+
 }
+//#endif
