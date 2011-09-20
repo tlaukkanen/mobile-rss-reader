@@ -1,9 +1,11 @@
 #Used to turn D${RELEASE}TEST to DNOTEST
 # IB 2010-05-28 1.11.5RC2 Turn on obfuscate.
 # IB 2010-05-28 1.11.5RC2 Use 2 passes for optimization.
+# IB 2011-01-17 1.11.5Alpha15 Have test.src.excludes to exclude test files.
 RELEASE = NO
 EMULATOR = false
 obfuscate = yes
 keep.obfuscate = true
 nbr.optimization.passes = 2
 need.rim = true
+test.src.excludes = **/test*,**/jmunit/**,**/compatibility1/**,**/compatibility2/**,**/compatibility3/**,**/compatibility4/**
