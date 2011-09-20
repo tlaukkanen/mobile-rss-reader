@@ -26,14 +26,29 @@
  * IB 2010-07-19 1.11.5Dev8 Don't remove entities for link with CDATA.
  * IB 2010-07-19 1.11.5Dev8 For smartphone, set feed header fields if no items.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev14 To help with minor performance, start vector with max items.
+ * IB 2010-11-26 1.11.5Dev14 To help with minor space, use trimToSize for items..
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-03-07 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-03-09 1.11.5Dev17 More logging.
+ * IB 2011-03-11 1.11.5Dev17 Trim the date.
+ * IB 2011-03-11 1.11.5Dev17 Have value of href be used as link before text of link.
+ * IB 2011-03-11 1.11.5Dev17 Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
+ * IB 2011-03-13 1.11.5Dev17 Use RssItem instead of RssItunesItem to allow future difference in the two.
+ * IB 2011-03-13 1.11.5Dev17 Have getFeedTitleList to use title for name when parsing the whole feed.
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define test ui define
 @DTESTUIDEF@
 // Expand to define logging define
 @DLOGDEF@
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 //#ifdef DLOGGING
@@ -42,7 +57,7 @@ import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
-import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+import com.substanceofcode.rssreader.businessentities.RssItem;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.XmlParser;
 import java.io.IOException;
@@ -81,10 +96,13 @@ public class AtomFormatParser implements FeedFormatParser {
 
     /** Parse Atom feed */
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
-			            int maxItemCount, boolean getTitleOnly)
+			int maxItemCount, boolean getFeedTitleList, boolean getTitleOnly)
 	throws IOException {
         
-        Vector items = new Vector();
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("parse parser,cfeed.getName(),cfeed.getUrl(),maxItemCount,getFeedTitleList,getTitleOnly=" + parser + "," + cfeed.getName() + "," + cfeed.getUrl() + "," + + maxItemCount + "," + getFeedTitleList + "," + getTitleOnly);}
+		//#endif
+        Vector vitems = new Vector(maxItemCount + 1);
 		m_extParser.parseNamespaces(parser);
 		m_language = parser.getAttributeValue("xml:lang");
 		if (m_language == null) {
@@ -95,11 +113,8 @@ public class AtomFormatParser implements FeedFormatParser {
 		//#endif
 		m_hasExt = m_extParser.isHasExt();
 		RssItunesFeed feed = cfeed;
-        feed.setItems(items);
         
-		//#ifdef DITUNES
 		try {
-		//#endif
 			/** Parse to first entry element */
 			while(!parser.getName().equals("entry")) {
 				//#ifdef DTEST
@@ -139,8 +154,11 @@ public class AtomFormatParser implements FeedFormatParser {
 						break;
 				}
 			}
-		//#ifdef DITUNES
 		} finally {
+			if ((feed.getName().length() == 0) && getFeedTitleList) {
+				feed.setName(m_title);
+			}
+			//#ifdef DITUNES
 			feed.setLink(m_link);
 			// Atom has not feed level date.
 			feed.setDate(null);
@@ -148,55 +166,59 @@ public class AtomFormatParser implements FeedFormatParser {
 				feed = m_extParser.getFeedInstance(feed, m_language,
 						m_title, m_description);
 			}
+			//#endif
 		}
-		//#endif
         
 		reset();
 
-        int parsingResult;
-        while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
-			if (parsingResult != XmlParser.ELEMENT) {
-				continue;
-			}
-            String elementName = parser.getName();
-            if (elementName.length() == 0) {
-				continue;
-			}
-            
-			char elemChar = elementName.charAt(0);
-            if( (elemChar == 'e') &&
-				 elementName.equals("entry") ) {
-                /** Save previous entry */
-				RssItunesItem item = createItem();
-				if ( item != null) {
-                    items.addElement( item );
-                    if(items.size()==maxItemCount) {
-                        return feed;
-                    }
-                }                
-                
-                /** New entry */
-				/** reset */
-				reset();
-            } else {
-				if (parseCommon(parser, elemChar, elementName)) {
+		try {
+			int parsingResult;
+			while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
+				if (parsingResult != XmlParser.ELEMENT) {
 					continue;
 				}
-				parseItem(parser, elemChar, elementName);
+				String elementName = parser.getName();
+				if (elementName.length() == 0) {
+					continue;
+				}
+
+				char elemChar = elementName.charAt(0);
+				if( (elemChar == 'e') &&
+						elementName.equals("entry") ) {
+					/** Save previous entry */
+					RssItem item = createItem();
+					if ( item != null) {
+						vitems.addElement( item );
+						if(vitems.size()==maxItemCount) {
+							return feed;
+						}
+					}                
+
+					/** New entry */
+					/** reset */
+					reset();
+				} else {
+					if (parseCommon(parser, elemChar, elementName)) {
+						continue;
+					}
+					parseItem(parser, elemChar, elementName);
+				}
 			}
+
+			/** Save previous entry */
+			RssItem item = createItem();
+			if ( item != null) {
+				vitems.addElement( item );
+			}
+		} finally {
+			feed.setVecItems(vitems);
 		}
-				
-        /** Save previous entry */
-		RssItunesItem item = createItem();
-		if ( item != null) {
-            items.addElement( item );
-        }
                         
         return feed;
     }
     
 	/** Save previous entry */
-	final private RssItunesItem createItem() {
+	final private RssItem createItem() {
 		boolean hasTitle = (m_title.length()>0);
 		boolean hasDesc = (m_description.length()>0);
 		if(hasTitle || hasDesc || (m_summary.length()>0)) {
@@ -232,13 +254,13 @@ public class AtomFormatParser implements FeedFormatParser {
 			if (m_date.length() > 0) {
 				pubDate = RssFormatParser.parseRssDate(m_date);
 			}
-			RssItunesItem item;
+			RssItem item;
 			if (m_hasExt) {
 				item = m_extParser.createItem(m_title, m_link,
 						m_description, pubDate, m_enclosure, true,
 						m_author);
 			} else {
-				item = new RssItunesItem(m_title, m_link,
+				item = new RssItem(m_title, m_link,
 						m_description, pubDate,
 								   m_enclosure, true);
 			}
@@ -283,14 +305,12 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'l':
 				if( elementName.equals("link") ) {
-					String clink = parser.getText(false).trim();
-					// Some atoms have href= attribute.
-					if (clink.length() == 0) {
-						String hlink = parser.getAttributeValue("href");
-						if (hlink != null) {
-							clink = hlink;
-						}
+					String clink;
+					if (((clink = parser.getAttributeValue("href")) == null) ||
+						(clink.length() == 0)) {
+						clink = parser.getText(false).trim();
 					}
+					clink = MiscUtil.getSgmlUrl(clink);
 					String rel = parser.getAttributeValue("rel");
 					if ((rel == null) || (rel.length() == 0)) {
 						m_link = clink;
@@ -300,7 +320,8 @@ public class AtomFormatParser implements FeedFormatParser {
 							case 'e':
 								// Only get the first m_enclosure.  Atom's can have
 								// multiple enclosures for the same item.
-								if (rel.equals("enclosure") && m_enclosure.equals("")) {
+								if (rel.equals("enclosure") &&
+										(m_enclosure.length() == 0)) {
 									 m_enclosure = clink;
 									 return true;
 								}
@@ -367,7 +388,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'u': // Updated for Atom 1.0
 				if( elementName.equals("updated")) {
-					m_updated = parser.getText(true);
+					m_updated = parser.getText(true).trim();
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("published=m_updated=" + m_updated);}
 					//#endif
@@ -375,7 +396,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'm': // Modified for Atom 0.3
 				if( elementName.equals("modified")) {
-					m_modified = parser.getText(true);
+					m_modified = parser.getText(true).trim();
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("published=m_modified=" + m_modified);}
 					//#endif
@@ -383,7 +404,7 @@ public class AtomFormatParser implements FeedFormatParser {
 				break;
 			case 'p': // Published
 				if( elementName.equals("published")) {
-					m_date = parser.getText(true);
+					m_date = parser.getText(true).trim();
 					//#ifdef DLOGGING
 					if (finestLoggable) {logger.finest("published=m_date=" + m_date);}
 					//#endif
@@ -394,3 +415,4 @@ public class AtomFormatParser implements FeedFormatParser {
 	}
 
 }
+//#endif
