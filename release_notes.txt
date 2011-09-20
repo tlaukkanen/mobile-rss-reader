@@ -365,6 +365,46 @@ v1.11.5 Development 14 (dev14) (Nov 26th 2010)
 - Copy signed files to distsigned directory.
 - If jsr-75 vers exists show the version string in case it changes later.
 
+v1.11.5 Alpha 15 (dev14) (Jan 17th 2011)
+- Have internet link version which shows only some phone/program properties and the preferred jad/jar based on the current capabilities of the phone.  This currently has a bug where the signing authority is not put into the preferred name.
+- Have full (non-internet) version (with full_ in it's file name) have preferred jad/jar above and have the full functionality of the reader.
+- Fixed problem that may have caused file read problems.
+- Read more bytes at a time most times to give a performance improvement (theoretically).
+- Reduce static variable space to allow more devices/emulators to be able to save the feed data.
+- Use feed lastBuildDate for the feed date if pubdate not present in RSS feed.
+- Warn user using update instead of update modified that update does not use conditional gets.
+- Handle UTF-8, UTF_16, and UTF-32 Byte Order Marks (BOM)s if supported by the devices encoding.
+- Try to preserve user name/password after doing update modified.  Saving the read flags needs more work.
+- Added unused gzip handling code to smartphone version.
+- Have optional (default none) vibrate and flash backlight set on Settings form.  The vibrate and/or flashing back light is done after update/modify all feeds ONLY if the phone supports it and ONLY if the reader is in the foreground (this is a J2ME limitation).
+- Modify use of optional JSR-75 (phone memory access) to allow it to be loaded only if used.  This may save memory if it is not used during a session.
+
+v1.11.5 Dev 16 (Dev16) (Jan 27th 2011)
+- Use 3 optimization passes instead of just one for ProGuard optimizer.  This makes somewhat smaller code.  Performance effect:  unknown.
+- Allow access modification to allow ProGuard optimizer greater flexibility to optimize.  Performance effect:  unknown.
+- Minor performance and code reduction improvements.
+
+v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
+- Allow optional import and complete loading of feed at the same time (this takes much longer).
+- Small memory savings for parsing and saving.
+- Fix to allow parameters in links.
+- Show current max items on settings form.
+- Distribute RIM alx and cod file in a zip file for each version.
+- Allow settings to choose google or Skweezer mobility option to open links.  This can help with large forms on underpowered devices.  For google, there is a no picture option when opening.
+- Fix bad link for atoms which have both href and text.
+- Allow more date formats.
+- Fix bad links for RSS if initial capital image tag is in header.
+- Use base tag for HTML imports.
+- Process dates of the form March 11, 2011 3:11:26 PM PST, Wed, 6 September 14:00:00 GMT, and 11 Mar 2011 11:43 GMT.
+- Only put RIM zip files on release sites.  Need to unzip on computer and install using ALX using RIM Desktop Manager.
+
+v1.11.5 Dev 18 (Dev18) (Sep 15th 2011)
+- Fix find files problem with going back up to the first directory from a sub directory.
+- Fix potential save problems.
+- Give errors for save problems. 
+- Trim spaces off of titles.
+- Allow 5 redirects for RSS url's.
+
 Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
@@ -372,6 +412,7 @@ Device notes:
 Program issues:
 
 - While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modified, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
+- Preferred/current jad/jar are not shown on some devices.
 - Some devices and emulators are unable to store the feed data.  You can quickly test if this happens with your phone by opening the program and getting the about screen automatically displayed.  Add one feed with add feed:  Use a simple feed so that it is quick to do.  Or, you can import an OPML.  You do not need to open the resulting feeds as this is unnecessary to prove that this works.  Then, use the exit menu item to exit.  Respond OK to exit.  Then, open the program again.  If the about is not shown, then the program is saving data.  Also, the feeds that you added or imported should be there.
 
 TODO:
