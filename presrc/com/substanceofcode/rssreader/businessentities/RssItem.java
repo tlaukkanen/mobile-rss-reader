@@ -25,8 +25,20 @@
  * IB 2010-04-30 1.11.5RC2 Use method to encode/decode.
  * IB 2010-07-04 1.11.5Dev6 Code cleanup.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev15 Use checkRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
+ * IB 2010-11-26 1.11.5Dev15 Use itemEquals to compare each item for testing and logging.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
+ * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS items.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
+ * IB 2011-03-06 1.11.5Dev17 Have checkRead return true if the item's unread was saved.
+ * IB 2011-03-07 1.11.5Dev17 Have m_state keep track of unread items and itunes flag.
+ * IB 2011-03-15 1.11.5Dev17 More logging.
+ * IB 2011-03-15 1.11.5Dev17 Catch Throwable instead of Exception and return null or partially initialized item.
+ * IB 2011-03-15 1.11.5Dev17 If get Throwable while serializing, return null item.
  */
 
+// Expand to define itunes define
+@DFULLVERSDEF@
 // Expand to define logging define
 @DLOGDEF@
 // Expand to define test define
@@ -41,6 +53,7 @@
 //#ifdef DLOGGING
 //#define HAS_EQUALS
 //#endif
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.MiscUtil;
@@ -68,7 +81,7 @@ import net.sf.jlogmicro.util.logging.Level;
 public class RssItem
 	//#ifdef DTEST
 	//#ifdef DJMTEST
-	implements RssItemInfo
+	implements RssItemInfo, RssItunesInfo
 	//#endif
 	//#endif
 {
@@ -81,15 +94,17 @@ public class RssItem
     protected String m_desc  = "";   // The RSS item description
     protected Date m_date = null;
     protected String m_enclosure  = "";   // The RSS item enclosure
-    protected boolean m_unreadItem = false;
+    protected byte m_state = (byte)0x00;
 	//#ifdef DLOGGING
     private Logger logger = Logger.getLogger("RssItem");
     private boolean fineLoggable = logger.isLoggable(Level.FINE);
     private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+    private boolean traceLoggable = logger.isLoggable(Level.TRACE);
 	//#elif DTESTUI
     private Object logger = null;
     private boolean fineLoggable = true;
     private boolean finestLoggable = true;
+    private boolean traceLoggable = true;
 	//#endif
     
     /** Creates a new instance of RssItem.  Used by this class and
@@ -98,19 +113,25 @@ public class RssItem
 	}
 
     /** Creates a new instance of RssItem */
-    public RssItem(String title, String link, String desc, Date pubDate,
-			       String enclosure, boolean unreadItem) {
+    protected RssItem(String title, String link, String desc, Date pubDate,
+			       String enclosure, byte state) {
         m_title = title;
         m_link = link;
         m_desc = desc;
         m_date = pubDate;
         m_enclosure = enclosure;
-        m_unreadItem = unreadItem;
+        m_state = state;
+    }
+    
+    public RssItem(String title, String link, String desc, Date pubDate,
+			       String enclosure, boolean unreadItem) {
+		this(title, link, desc, pubDate, enclosure,
+				(byte)(unreadItem ? 0x01 : 0x00));
     }
     
     public RssItem(RssItem item) {
 		this(item.m_title, item.m_link, item.m_desc, item.m_date,
-			 item.m_enclosure, item.m_unreadItem);
+			 item.m_enclosure, item.m_state);
 	}
 
     /** Get RSS item title */
@@ -157,57 +178,95 @@ public class RssItem
 	  store to memory will be deserialized only by the iTunes capable
 	  version.
 	  */
-    public String unencodedSerialize() {
-        String dateString;
-        if(m_date==null){
-            dateString = "";
-        } else {
-		    // We use base 16 (hex) for the date so that we can save some
-			// space for toString.
-            dateString = Long.toString( m_date.getTime(), 16 );
-        }
+	public String unencodedSerialize() {
+		try {
+			String dateString;
+			if(m_date==null){
+				dateString = "";
+			} else {
+				// We use base 16 (hex) for the date so that we can save some
+				// space for toString.
+				dateString = Long.toString( m_date.getTime(), 16 );
+			}
 
-		String title = m_title.replace('|', CONE);
-        String preData = title + "|" + m_link + "|" + dateString + "|" +
-			    m_enclosure + "|" + (m_unreadItem ? "1" : "0") + "|" + m_desc;
-		return (preData);
-	}
-    
-    /** Serialize the object
-	  this serialize does not need to know if Itunes is capable/enabled given
-	  that no fields were added to make it capable/enabled
-	  */
-    public String serialize() {
-        String encodedSerializedData = MiscUtil.encodeStr(unencodedSerialize());
-		return encodedSerializedData;
+			String title = m_title.replace('|', CONE);
+			String preData = title + "|" + m_link + "|" + dateString + "|" +
+				m_enclosure + "|" + (int)m_state + "|" + m_desc;
+			return (preData);
+		} catch(Throwable e) {
+			//#ifdef DLOGGING
+			logger.severe("unencodedSerialize error m_title,m_link=" + m_title + "," + m_link, e);
+			//#endif
+			System.err.println("unencodedSerialize error : " + e.toString());
+			e.printStackTrace();
+			return null;
+		}
 	}
 		
-	/**
-	  Initialize fields in the class from data.
-	  startIndex - Starting index in nodes of RssItem
-	  iTunesCapable - True if the data can support Itunes (but may not
-	  				  actually have Itunes data) or may not be turned
-					  on by the user.  So, the serializaion/deserialization
-					  will account for iTunes fields except if not
-					  enabled, the will have empty values.
-					  If itunes capable we use base 16 (hex) for
-					  the date so that we can save some space for
-					  toString.
-	  hasPipe - True if the data has a pipe in at least one item
-	  nodes - (elements in an array).
-	  **/
+		/** Serialize the object
+		  this serialize does not need to know if Itunes is capable/enabled given
+		  that no fields were added to make it capable/enabled
+		  */
+	public String serialize() {
+		try {
+			String unencodedSerializeStr;
+			if ((unencodedSerializeStr = unencodedSerialize()) != null) {
+				//#ifdef DLOGGING
+				String encodedSerializedData = 
+				//#else
+					return
+				//#endif
+					MiscUtil.encodeStr(unencodedSerializeStr);
+				//#ifdef DLOGGING
+				return encodedSerializedData;
+				//#endif
+			} else {
+				//#ifdef DLOGGING
+				logger.severe(
+						"serialize error unencodedSerialize returning null m_title,m_link=" +
+						m_title + "," + m_link, new Exception(
+							"serialize error unencodedSerialize returning null"));
+				//#endif
+				return null;
+			}
+		} catch(Throwable e) {
+			//#ifdef DLOGGING
+			logger.severe("serialize error m_title,m_link=" + m_title + "," + m_link, e);
+			//#endif
+			System.err.println("Error while rssitem init : " + e.toString());
+			e.printStackTrace();
+			return null;
+		}
+	}
+			
+		/**
+		  Initialize fields in the class from data.
+		  startIndex - Starting index in nodes of RssItem
+		  iTunesCapable - True if the data can support Itunes (but may not
+						  actually have Itunes data) or may not be turned
+						  on by the user.  So, the serializaion/deserialization
+						  will account for iTunes fields except if not
+						  enabled, the will have empty values.
+						  If itunes capable we use base 16 (hex) for
+						  the date so that we can save some space for
+						  toString.
+		  hasPipe - True if the data has a pipe in at least one item
+		  nodes - (elements in an array).
+		  **/
 	protected void init(int startIndex, boolean iTunesCapable,
-					    boolean hasPipe, String [ ] nodes) {
+			boolean hasPipe, String [ ] nodes) {
 
 		try {
 			/* Node count should be 6:
 			 * title | link | date | enclosure | unreadItem | desc
 			 */
-			int TITLE = 0;
+			{
+				int TITLE;
+				m_title = nodes[startIndex + (TITLE = 0)];
+			}
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + nodes[ startIndex + TITLE ]);}
+			if (finestLoggable) {logger.finest("currCmpRssfeeds startIndex,nodes.length,first nodes=" + startIndex + "," + nodes.length + "|" + m_title);} ;
 			//#endif
-			m_title = nodes[startIndex + TITLE];
 			if (hasPipe) {
 				if (iTunesCapable) {
 					m_title = m_title.replace(CONE, '|');
@@ -215,40 +274,53 @@ public class RssItem
 					m_title = m_title.replace('\n', '|');
 				}
 			}
-			
-			int LINK = 1;
-			m_link = nodes[startIndex + LINK];
-			
-			int DATE = 2;
-			String dateString = nodes[startIndex + DATE];
-			if(dateString.length()>0) {
-				if (iTunesCapable) {
-					m_date = new Date(Long.parseLong(dateString, 16));
-				} else {
-					m_date = new Date(Long.parseLong(dateString));
-				}
-			}        
-			
-			int ENCLOSURE = 3;
-			m_enclosure = nodes[startIndex + ENCLOSURE];
 
-			int NEWITEM = 4;
-			String cunreadItem = nodes[startIndex + NEWITEM];
-			m_unreadItem = (cunreadItem.equals("1"));
-					
-			// If description has '|', we need to join.
-			int DESC = 5;
-			if (DESC + startIndex < (nodes.length - 1)) {
-				m_desc = MiscUtil.join(nodes, "|", startIndex + DESC);
-			} else {
-				m_desc = nodes[startIndex + DESC];
+			{
+				int LINK;
+				m_link = nodes[startIndex + (LINK = 1)];
 			}
-					
-        } catch(Exception e) {
-            System.err.println("Error while rssitem init : " + e.toString());
+
+			{
+				int DATE;
+				String dateString = nodes[startIndex + (DATE = 2)];
+				if(dateString.length()>0) {
+					if (iTunesCapable) {
+						m_date = new Date(Long.parseLong(dateString, 16));
+					} else {
+						m_date = new Date(Long.parseLong(dateString));
+					}
+				}        
+			}
+
+			{
+				int ENCLOSURE;
+				m_enclosure = nodes[startIndex + (ENCLOSURE = 3)];
+			}
+
+			{
+				int STATE;
+				String cunreadState = nodes[startIndex + (STATE = 4)];
+				m_state = (byte)Integer.parseInt(cunreadState);
+			}
+
+			// If description has '|', we need to join.
+			{
+				int DESC;
+				if ((DESC = 5) + startIndex < (nodes.length - 1)) {
+					m_desc = MiscUtil.join(nodes, "|", startIndex + DESC);
+				} else {
+					m_desc = nodes[startIndex + DESC];
+				}
+			}
+
+		} catch(Throwable e) {
+			//#ifdef DLOGGING
+			logger.severe("init error m_title,m_link=" + m_title + "," + m_link, e);
+			//#endif
+			System.err.println("Error while rssitem init : " + e.toString());
 			e.printStackTrace();
-        }
-    }
+		}
+	}
 
 	/** Deserialize the object **/
 	public static RssItem deserialize(String encodedData) {
@@ -256,10 +328,13 @@ public class RssItem
 			// Base 64 decode
 			String data = MiscUtil.decodeStr(encodedData);
 			return unencodedDeserialize(data);
-        } catch(Exception e) {
+        } catch(Throwable e) {
+			//#ifdef DLOGGING
+			Logger.getLogger("RssItem").severe("deserialize error encodedData=" + encodedData, e);
+			//#endif
             System.err.println("Error while rssitem deserialize : " + e.toString());
 			e.printStackTrace();
-			return new RssItem();
+			return null;
         }
 	}
 
@@ -268,18 +343,41 @@ public class RssItem
 	  the items.
 	  */
 	public static RssItem unencodedDeserialize(String data) {
-		RssItem item = new RssItem();
 		try {
+			RssItem item = new RssItem();
 			boolean hasPipe = (data.indexOf('\n') >= 0);
 			String[] nodes = MiscUtil.split( data, "|");
 			item.init(0, false, hasPipe, nodes);
 			return item;
 			
-        } catch(Exception e) {
+        } catch(Throwable e) {
+			//#ifdef DLOGGING
+			Logger.getLogger("RssItem").severe("unencodedDeserialize error data=" + data, e);
+			//#endif
             System.err.println("Error while rssitem deserialize : " + e.toString());
 			e.printStackTrace();
+			return null;
         }
-        return item;
+	}
+
+	public boolean checkRead(RssItem item) {
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("checkRead item=" + item);}
+		if (finestLoggable) {logger.finest("checkRead this=" + this);}
+		//#endif
+		if (m_title.equals(item.m_title) &&
+			m_link.equals(item.m_link) &&
+			m_desc.equals(item.m_desc) &&
+			MiscUtil.cmpDateStr(m_date, item.m_date) ||
+			m_enclosure.equals(item.m_enclosure)) {
+			//#ifdef DLOGGING
+			if (finestLoggable) {logger.finest("checkRead m_title,m_state,item.m_state=" + m_title + "," + m_state + "," + item.m_state);}
+			//#endif
+			m_state = item.m_state;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/* Compare item. */
@@ -291,28 +389,9 @@ public class RssItem
 	//#endif
 	{
 		boolean result = true;
-		if (!TestLogUtil.fieldEquals(item.getTitle(), m_title,
-			"m_title", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getLink(), m_link,
-			"m_link", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getDescription(), m_desc,
-			"m_desc", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getDate(), m_date,
-			"m_date", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.getEnclosure(), m_enclosure,
-			"m_enclosure", logger, fineLoggable)) {
-			result = false;
-		}
-		if (!TestLogUtil.fieldEquals(item.isUnreadItem(), m_unreadItem,
-			"m_unreadItem", logger, fineLoggable)) {
+		if (!TestLogUtil.itemEquals(this, item,
+			new boolean[] {true, true, true, true, true, true},
+			"RssItem", logger, fineLoggable, traceLoggable)) {
 			result = false;
 		}
 		return result;
@@ -320,11 +399,27 @@ public class RssItem
 	//#endif
 
     public void setUnreadItem(boolean unreadItem) {
-        this.m_unreadItem = unreadItem;
+        this.m_state = (byte)((m_state & 0x0e) | (unreadItem ? 0x01 : 0x00));
     }
 
     public boolean isUnreadItem() {
-        return (m_unreadItem);
+        return ((m_state & 0x01) == 1);
+    }
+
+    public void setItunes(boolean itunes) {
+		//#ifdef DITUNES
+        this.m_state = (byte)((m_state & 0x0d) | (itunes ? 0x02 : 0x00));
+		//#else
+        this.m_state &= 0x0d;
+		//#endif
+    }
+
+    public boolean isItunes() {
+		//#ifdef DITUNES
+        return ((m_state & 0x02) == 0x02);
+		//#else
+        return (false);
+		//#endif
     }
 
     public String getEnclosure() {
@@ -339,9 +434,14 @@ public class RssItem
 	//#ifdef DTEST
     public String toString() {
         String preData = m_title + "|" + m_link + "|" + m_date + "|" +
-			    m_enclosure + "|" + m_unreadItem + "|" + m_desc;
+			    m_enclosure + "|" + m_state + "|" + m_desc;
 		return (preData);
 	}
 	//#endif
     
+    public Object clone() {
+		return new RssItem(this);
+	}
+
 }
+//#endif
