@@ -25,6 +25,8 @@
  * IB 2010-04-05 1.11.4RC1 Allow logging of characters for different expected tokens.
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-12 1.11.5Alpha15 Cosmetic changes.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
 */
 
 // Expand to define test define
@@ -42,8 +44,6 @@ import java.util.Date;
 import java.util.Vector;
 
 import com.substanceofcode.utils.MiscUtil;
-
-import jmunit.framework.cldc10.TestCase;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 import com.substanceofcode.utils.MiscUtil;
@@ -113,7 +113,7 @@ final public class MiscUtil1Test extends BaseTestCase implements Runnable
 	}
 
 	/*
-    public void MiscUtilrTestSub(final String mname, final String url,
+    public void miscUtilrTestSub(final String mname, final String url,
 			String[] xmlStrings,
 			String enc,
 			Object [] htmlRequests, Vector expHtmlResults, Vector xmlResults )
