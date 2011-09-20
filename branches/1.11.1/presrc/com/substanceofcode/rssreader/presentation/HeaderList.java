@@ -36,10 +36,19 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-10-30 1.11.5Dev12 Need to set m_feed before we use it to log.
  * IB 2010-11-16 1.11.5Dev14 Have back be 1, cancel be 2, stop be 3, ok be 4, open be 5, and select be 6.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Give prompt for regular update that it does not use conditional gets.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 After modifying/updating the feed, use old feed pointer with new feed pointer to update the feed.  If the old pointer does not match the current pointer, do not update as it means that the future background processing has updated the feed already. 
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-31 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-02-02 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
 */
 
 // Expand to define MIDP define
 @DMIDPVERS@
+// Expand to define itunes define
+@DFULLVERSDEF@
 // Expand to define itunes define
 @DITUNESDEF@
 // Expand to define logging define
@@ -47,6 +56,7 @@
 // Expand to define test ui define
 @DTESTUIDEF@
 
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Date;
@@ -73,7 +83,7 @@ import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
-import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 //#ifdef DMIDP20
 import net.yinlight.j2me.observable.Observer;
@@ -94,6 +104,7 @@ implements
 	CommandListener
 {
 	private boolean     m_itunesEnabled;    // True if Itunes is enabled
+	private boolean     m_modFeed;          // True if modifying the feed
 	private Command     m_updateCmd;        // The update headers command
 	private Command     m_updateModCmd;     // The update modified headers command
 	//#ifdef DITUNES
@@ -107,25 +118,30 @@ implements
     
 	/* Constructor */
 	public HeaderList(final FeatureList bookmarkList, final int selectedIx,
-			final Hashtable rssFeeds, Image unreadImage,
+			final RssFeedStore rssFeeds, Image unreadImage,
 			boolean itunesEnabled,
 			LoadingForm loadForm, final RssItunesFeed feed) {
 		super(feed.getName(), List.IMPLICIT,
 				selectedIx, 1, bookmarkList,
 				rssFeeds, unreadImage, loadForm, 10);
 		m_feed = feed;
+		m_modFeed = false;
 		//#ifdef DLOGGING
-		if (m_finestLoggable) {m_logger.finest("Constructor m_feed.getName(),m_feed.getItems().size(),selectedIx,itunesEnabled=" + m_feed.getName() + "," + m_feed.getItems().size() + "," + selectedIx + "," + itunesEnabled);}
+		if (m_finestLoggable) {m_logger.finest("Constructor m_feed.getName(),m_feed.getItems().length,selectedIx,itunesEnabled=" + m_feed.getName() + "," + m_feed.getItems().length + "," + selectedIx + "," + itunesEnabled);}
 		//#ifdef DITUNES
-		if (m_finestLoggable) {m_logger.finest("Constructor feed.getName(),feed.getLink(),feed.getItems().size()=" + feed.getName() + "," + feed.getLink() + "," + feed.getItems().size());}
+		if (m_finestLoggable) {m_logger.finest("Constructor feed.getName(),feed.getLink(),feed.getItems().length=" + feed.getName() + "," + feed.getLink() + "," + feed.getItems().length);}
 		//#endif
 		//#endif
 		this.m_itunesEnabled = itunesEnabled;
-		m_updateCmd         = new Command("Update feed", Command.SCREEN, 7);
 		m_updateModCmd      = new Command("Update modified feed",
-										  Command.SCREEN, 8);
-		super.addCommand(m_updateCmd);
+										  Command.SCREEN, 7);
+		m_updateCmd         = new Command("Update feed", Command.SCREEN, 8);
 		super.addCommand(m_updateModCmd);
+		super.addPromptCommand(m_updateCmd,
+					"Are you sure that you want to upgrade?  " +
+					"Unlike update modified, update does not use " +
+					"conditional gets.  This can use more network " +
+					"resources.  Also, all read flags are reset without update.");
 		//#ifdef DITUNES
 		if (m_itunesEnabled && (feed.isItunes() ||
 		   (feed.getLink().length() > 0) || (feed.getDate() != null))) { 
@@ -141,7 +157,7 @@ implements
 	public void testFeed() {
 		try {
 			RssItunesFeed feed = m_feed;
-			String store = feed.getStoreString(true, true);
+			String store = feed.getStoreString(true, true, true);
 			RssItunesFeed feed2 = RssItunesFeed.deserialize( true,
 					true, store );
 			boolean feedEq = feed.equals(feed2);
@@ -156,7 +172,7 @@ implements
 				System.out.println("feed store=" + store);
 			}
 		} catch(Throwable t) {
-			featureMgr.getLoadForm().recordExcForm(
+			super.featureMgr.getLoadForm().recordExcForm(
 					"\ntestFeed Internal error", t);
 		}
 	}
@@ -165,12 +181,14 @@ implements
 	//#ifdef DMIDP20
 	public void changed(Observable observable, Object arg) {
 
-		RssFeedParser cbackGrRssParser = FeatureMgr.getMidlet().checkActive(observable);
+		RssFeedParser cbackGrRssParser = FeatureMgr.getRssMidlet().checkRssActive(
+				observable);
 		if (cbackGrRssParser == null) {
 			return;
 		}
 		if (!cbackGrRssParser.getObservableHandler().isCanceled()) {
 			m_feed = cbackGrRssParser.getRssFeed();
+			m_rssFeeds.put(m_feed, m_oldFeed);
 		}
 	}
 	//#endif
@@ -183,26 +201,31 @@ implements
 		if (m_finestLoggable) {m_logger.finest("commandAction c=" + c.getLabel());}
 		//#endif
 
-		RssReaderMIDlet midlet = featureMgr.getMidlet();
+		RssReaderMIDlet midlet = featureMgr.getRssMidlet();
 		/** Update currently selected RSS feed's headers */
 		if( (c == m_updateCmd) ||  (c == m_updateModCmd) ) {
-			midlet.setPageInfo(false, (c == m_updateCmd),
-					(c == m_updateModCmd), this);
+			synchronized(this) {
+				m_modFeed = (c == m_updateModCmd);
+			}
+			midlet.setPageInfo(false, (c == m_updateCmd), m_modFeed, this);
+			m_oldFeed = m_rssFeeds.get(m_feed.getName());
 			// Update existing bookmark.
 			//#ifdef DMIDP20
 			synchronized(this) {
 				// Have procBackPage create loading form.
-				midlet.procBackPage(m_feed, null, true, this, null);
+				midlet.procBackPage(m_feed, true, m_modFeed, null, true, this,
+						null);
 			}
 			//#else
 			/* Updating feed... */
 			LoadingForm loadForm = LoadingForm.getLoadingForm(
 					"Updating feed...", this, null);
-			featureMgr.setLoadForm(loadForm);
+			super.featureMgr.setLoadForm(loadForm);
 			try {
-				RssFeedParser parser = new RssFeedParser( m_feed );
-				parser.parseRssFeed( (c == m_updateModCmd),
-					midlet.getSettings().getMaximumItemCountInFeed());
+				RssFeedParser parser = new RssFeedParser( m_feed, m_feed,
+						m_modFeed );
+				parser.parseModRssFeed(m_modFeed,
+						midlet.getSettings().getMaximumItemCountInFeed());
 				midlet.procUpdHeader(parser, loadForm);
 			} catch(Throwable e) {
 				midlet.procPageExc(m_feed, false, e);
@@ -215,7 +238,7 @@ implements
 		if( c == m_bookmarkDetailsCmd ) {
 			LoadingForm loadForm = LoadingForm.getLoadingForm(
 					"Loading detail form...", this, null);
-			featureMgr.setLoadForm(loadForm);
+			super.featureMgr.setLoadForm(loadForm);
 			midlet.initializeDetailForm(m_feed, this, loadForm);
 		}
 		//#endif
@@ -224,4 +247,6 @@ implements
 
 	/** Keep the title */
 	public void updTitle() {}
+
 }
+//#endif
