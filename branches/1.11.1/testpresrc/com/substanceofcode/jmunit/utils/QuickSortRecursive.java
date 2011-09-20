@@ -23,8 +23,13 @@
 /*
  * IB 2010-05-25 1.11.5RC2 Use recursive quicksort to compare with non-recursive.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -33,6 +38,7 @@
 @DLOGDEF@
 
 //#ifdef DJMTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.jmunit.utils;
 
 public class QuickSortRecursive {
@@ -124,4 +130,5 @@ public class QuickSortRecursive {
 	}
 
 }
+//#endif
 //#endif
