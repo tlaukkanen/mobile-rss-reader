@@ -25,6 +25,8 @@
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-03-09 1.11.5Dev17 More logging.
+ * IB 2011-03-17 1.11.5Dev17 If item date has an error, save the string value ass errDate.
  */
 
 // Expand to define test define
@@ -44,6 +46,7 @@ import net.sf.jlogmicro.util.logging.Level;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesItem;
 import com.substanceofcode.rssreader.businessentities.RssItunesItemInfo;
+import com.substanceofcode.rssreader.businessentities.compatibility4.RssItem;
 import com.substanceofcode.rssreader.businesslogic.SgmlFormatParser;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.SgmlParserIntr;
@@ -86,6 +89,9 @@ public class AtomFormatParser implements SgmlFormatParser {
 			            int maxItemCount, boolean getTitleOnly)
 	throws IOException {
         
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("parse parser,cfeed.getName(),cfeed.getUrl(),maxItemCount,getTitleOnly=" + parser + "," + cfeed.getName() + "," + cfeed.getUrl() + "," + + maxItemCount + "," + getTitleOnly);}
+		//#endif
         Vector items = new Vector();
 		m_extParser.parseNamespaces(parser);
 		m_language = parser.getAttributeValue("xml:lang");
@@ -97,7 +103,7 @@ public class AtomFormatParser implements SgmlFormatParser {
 		//#endif
 		m_hasExt = m_extParser.isHasExt();
 		RssItunesFeedInfo feed = cfeed;
-        feed.setItems(items);
+        feed.setVecItems(items);
         
         /** Parse to first entry element */
         while(!parser.getName().equals("entry")) {
@@ -238,6 +244,9 @@ public class AtomFormatParser implements SgmlFormatParser {
 				item = new RssItunesItem(m_title, m_link,
 						m_description, pubDate,
 								   m_enclosure, true);
+			}
+			if ((pubDate == null) && (m_date.length() > 0)) {
+				((RssItem)item).setErrDate(m_date);
 			}
 			return item;
 		}
