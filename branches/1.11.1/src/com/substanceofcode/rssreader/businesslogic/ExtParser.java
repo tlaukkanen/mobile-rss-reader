@@ -27,12 +27,21 @@
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
  * IB 2010-07-28 1.11.5Dev8 Don't convert entities for skipped/unused items.
  * IB 2010-09-27 1.11.5Dev8 Don't use block if not logging.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-03-11 1.11.5Dev17 Trim the date.
+ * IB 2011-03-13 1.11.5Dev17 Use RssItem instead of RssItunesItem to allow future difference in the two.
+ * IB 2011-03-13 1.11.5Dev17 Check itunes fields separately to avoid setting up temporary strings.
  */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
 // Expand to define itunes define
 //#define DNOITUNES
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import java.io.IOException;
@@ -138,9 +147,9 @@ final public class ExtParser {
 	}
 
 	/** Create an Itunes item if at least one of these fields are not
-	  their uninitialized values, else return an RssItunesItem to save on
+	  their uninitialized values, else return an RssItem to save on
 	  memory. */
-    public RssItunesItem createItem(String title, String link, String desc,
+    public RssItem createItem(String title, String link, String desc,
 					Date date,
 					String enclosure,
 					boolean unreadItem, String author) {
@@ -160,26 +169,26 @@ final public class ExtParser {
 		desc = MiscUtil.removeHtml(desc);
 		desc = desc.trim();
 		m_subtitle = MiscUtil.removeHtml(m_subtitle);
-		if ((m_author + m_subtitle + m_summary + m_duration).equals("") &&
+		if ((m_author.length() == 0) && (m_subtitle.length() == 0) &&
+			(m_summary.length() == 0) && (m_duration.length() == 0) &&
 				(m_explicit == (byte)-1)) {
-			RssItunesItem item = new RssItunesItem(title, link, desc, date,
-					enclosure, unreadItem);
-			return item;
-		}
-		if (m_author.length() == 0) {
-			m_author = author;
-		}
-		if (m_author.length() == 0) {
-			m_author = m_creator;
-		}
-		return new RssItunesItem(title, link, desc, date,
-			        enclosure, unreadItem,
+			return new RssItem(title, link, desc, date, enclosure, unreadItem);
+		} else {
+			if (m_author.length() == 0) {
+				m_author = author;
+			}
+			if (m_author.length() == 0) {
+				m_author = m_creator;
+			}
+			return new RssItunesItem(title, link, desc, date,
+					enclosure, unreadItem,
 					true,
 					m_author,
 					m_subtitle,
 					m_summary,
 					m_explicit,
 					m_duration);
+		}
 	}
 
 	/** Parse the namespaces for Itunes namespaces and date namespace. */
@@ -334,7 +343,7 @@ final public class ExtParser {
 //@					if (finestLoggable) {logger.finest("m_duration=" + m_duration);}
 					//#endif
 				} else if( subElem.equals("date") ) {
-					m_date = parser.getText(true);
+					m_date = parser.getText(true).trim();
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_date=" + m_date);}
 					//#endif
@@ -423,3 +432,4 @@ final public class ExtParser {
     }
 
 }
+//#endif
