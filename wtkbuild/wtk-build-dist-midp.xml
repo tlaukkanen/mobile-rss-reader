@@ -1,0 +1,368 @@
+<?xml version="1.0"?>
+
+<project name="RSSReader" default="dist.midp.2.0" basedir="." >
+
+	<!-- IB 2010-09-15 1.11.5RC2 Use new file wtk-build-dist-midp.xml to contain dist.midp... targets. -->
+
+	<!-- MIDP-2.0 MIDP-2.0 and JSR-75, and MIDP-2.0 and -->
+	<!--JSR-75, etc -->
+
+	<!-- These are do create release full versions for MIDP-1.0. -->
+	<target name="dist.midp.1.0" depends="prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage,prepare.release" unless="no.1.0" >
+		<antcall target="dist.version" inheritAll="yes" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.1.0.jsr120" depends="prepare.midp1.0,prepare.cldc1.0,prepare.jsr120,prepare.stage,prepare.no.stage" unless="no.1.0.jsr120" >
+		<antcall target="dist.version" inheritAll="yes" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- These are do create release internet install link version for MIDP-1.0 -->
+	<target name="dist.midp.1.0.intlink" depends="prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage,prepare.intlink,prepare.release" unless="no.1.0.intlink" >
+		<antcall target="dist.version" inheritAll="yes" >
+			<param name="upload.to.google" value="false" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.1.0.reg" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage,prepare.release" unless="no.1.0.reg" >
+		<antcall target="dist.version" inheritAll="yes" >
+			<param name="upload.to.google" value="false" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.1.0.reg.smartphone" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage,prepare.release,prepare.smartphone" unless="${no.1.0.reg.smartphone}" >
+		<antcall target="dist.version" inheritAll="yes" >
+			<param name="upload.to.google" value="false" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0" depends="prepare.midp2.0,prepare.cldc1.0" unless="no.2.0" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=${stage.featured}Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.intlink" depends="prepare.midp2.0,prepare.cldc1.0,prepare.intlink" unless="no.2.0.intlink" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="false" />
+			<param name="google.labels" value="--labels=${stage.featured}Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.0,prepare.signed,prepare.verisign" unless="no.2.0.signed.verisign" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.0,prepare.signed,prepare.thawte" unless="no.2.0.signed.thawte" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Do MIDP 2.0 with novice version. -->
+	<target name="dist.midp.2.0.novice" depends="prepare.midp2.0,prepare.cldc1.0,prepare.novice" unless="no.2.0.novice" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="make.build.files" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1" depends="prepare.midp2.0,prepare.cldc1.1" unless="no.2.0.cldc.1.1" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="make.build.files" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75" unless="no.2.0.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="jsr" value="JSR-75" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr120" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr120" unless="no.2.0.jsr120" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr75.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75,prepare.signed,prepare.verisign" unless="no.2.0.jsr75.signed.verisign" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="jsr" value="JSR-75" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr75.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75,prepare.signed,prepare.thawte" unless="no.2.0.jsr75.signed.thawte" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="jsr" value="JSR-75" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr120.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr120,prepare.signed,prepare.verisign" unless="no.2.0.jsr120.signed.verisign" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr120.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr120,prepare.signed,prepare.thawte" unless="no.2.0.jsr120.signed.thawte" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.jsr75" unless="no.2.0.cldc.1.1.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="make.build.files" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.jsr120" depends="prepare.midp2.0,prepare.cldc1.1,prepare.jsr120" unless="no.2.0.cldc.1.1.jsr120" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="make.build.files" value="false" />
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.smartphone" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone" unless="no.2.0.smartphone" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone,prepare.jsr75" unless="no.2.0.smartphone.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.smartphone" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.release" unless="no.2.0.cldc.1.1.smartphone" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.smartphone.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.signed,prepare.verisign" unless="no.2.0.cldc.1.1.smartphone.signed.verisign" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="need.applet" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.smartphone.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.signed,prepare.thawte" unless="no.2.0.cldc.1.1.smartphone.signed.thawte" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="need.applet" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.smartphone.signed.godaddy" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.signed,prepare.godaddy" unless="no.2.0.cldc.1.1.smartphone.signed.godaddy" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="need.applet" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.jsr75" unless="no.2.0.cldc.1.1.smartphone.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="make.build.files" value="false" />
+			<param name="upload.to.google" value="true" />
+			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
+			<param name="upload.to.sftp" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.smartphone.signed.verisign.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.signed,prepare.verisign,prepare.jsr75" unless="no.2.0.cldc.1.1.smartphone.signed.verisign.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.smartphone.signed.thawte.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.signed,prepare.thawte,prepare.jsr75" unless="no.2.0.cldc.1.1.smartphone.signed.thawte.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.smartphone.signed.godaddy.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.signed,prepare.godaddy,prepare.jsr75" unless="no.2.0.cldc.1.1.smartphone.signed.godaddy.jsr75" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.signed.verisign.jsr120" depends="prepare.midp2.0,prepare.cldc1.1,prepare.signed,prepare.verisign,prepare.jsr120" unless="no.2.0.cldc.1.1.signed.verisign.jsr120" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.signed.thawte.jsr120" depends="prepare.midp2.0,prepare.cldc1.1,prepare.signed,prepare.thawte,prepare.jsr120" unless="no.2.0.cldc.1.1.signed.thawte.jsr120" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.signed.godaddy.jsr120" depends="prepare.midp2.0,prepare.cldc1.1,prepare.signed,prepare.godaddy,prepare.jsr120" unless="no.2.0.cldc.1.1.signed.godaddy.jsr120" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.signed.verisign.jsr75.jsr82.jsr120.jsr135.jsr184.jsr205" depends="prepare.midp2.0,prepare.cldc1.1,prepare.signed,prepare.verisign,prepare.jsr75,prepare.jsr82,prepare.jsr120,prepare.jsr135,prepare.jsr184,prepare.jsr205" unless="no.2.0.cldc.1.1.signed.verisign.jsr75.jsr82.jsr120.jsr135.jsr184.jsr205" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.signed.thawte.jsr75.jsr82.jsr120.jsr135" depends="prepare.midp2.0,prepare.cldc1.1,prepare.signed,prepare.thawte,prepare.jsr75" unless="no.2.0.cldc.1.1.signed.thawte.jsr75,prepare.jsr82,prepare.jsr120,prepare.jsr135" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.cldc.1.1.signed.godaddy.jsr75.jsr82.jsr120.jsr135" depends="prepare.midp2.0,prepare.cldc1.1,prepare.signed,prepare.godaddy,prepare.jsr75" unless="no.2.0.cldc.1.1.signed.godaddy.jsr75,prepare.jsr82,prepare.jsr120,prepare.jsr135" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+			<param name="make.build.files" value="false" />
+			<param name="need.applet" value="true" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<target name="dist.midp.2.0.jsr238" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr238" unless="no.2.0.jsr238" >
+		<antcall target="dist.version" inheritAll="true" >
+			<param name="make.build.files" value="false" />
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+</project>
