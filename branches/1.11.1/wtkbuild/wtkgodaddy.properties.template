@@ -1,4 +1,8 @@
 #-- IB 2010-10-30 1.11.5Dev12 Use properties file for signed jar/jad files.
-file.prefix.godaddy = godaddy_
-SUFFIXVERS.godaddy = -godaddy
-godaddy.text = godaddy 
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
+#-- IB 2011-01-14 1.11.5Alpha15 Have text to put signing authority name into description on project host.
+DGODADDYDEF = DGODADDY
+file.prefix.godaddy = ${sfile.prefix.godaddy}_
+SUFFIXVERS.godaddy = -${sfile.prefix.godaddy}
+signed.authority = godaddy
+godaddy.text = ${signed.authority} 
