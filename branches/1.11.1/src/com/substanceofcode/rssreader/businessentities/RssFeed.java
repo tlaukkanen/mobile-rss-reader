@@ -31,10 +31,31 @@
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-07-29 1.11.5Dev8 Don't allocate space for m_date and m_link if not smartphone.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev15 Use checkPresRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
+ * IB 2010-11-26 1.11.5Dev15 Use checkPresRead to set the username/password to the parameter's RssFeed.
+ * IB 2010-11-26 1.11.5Dev15 Use setItemDatesNull in compatibility testing to null the feed's date if the comparison feed's date is null.  This worksaround a fix where the new version takes the lastBuildDate if pubdate is null.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile unneeded code for internet link version.
+ * IB 2011-01-31 1.11.5Dev17 RssFeed clone/constructor needs to clone/instantiate new items instead of re-using the parameter's items.
+ * IB 2011-01-31 1.11.5Dev17 More logging.
+ * IB 2011-01-31 1.11.5Dev17 Have checkRead return true if items are the same.  Use this to reduce cross check of items being the same.
+ * IB 2011-01-31 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-01-31 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
+ * IB 2011-02-01 1.11.5Dev17 Need clone method for RSS feeds.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
+ * IB 2011-03-06 1.11.5Dev17 Use a StringBuffer to serialize for minor performance improvement.
+ * IB 2011-03-06 1.11.5Dev17 Specify imports without '*'.
+ * IB 2011-03-06 1.11.5Dev17 Use RssItem instead of RssItunesItem to allow future difference in the two.
+ * IB 2011-03-15 1.11.5Dev17 Use RssItunesItem to serialize to maintain compatibility with previous stores of the same version.
+ * IB 2011-03-15 1.11.5Dev17 If 0 items while deserialization, use initialization m_items value.
+ * IB 2011-03-15 1.11.5Dev17 Catch Throwable instead of Exception and return null or partially initialized feed.
 */
 
+// Expand to define itunes define
+//#define DFULLVERS
 // Expand to define logging define
 //#define DNOLOGGING
+// Expand to define test define
+//#define DNOCOMPAT
 // Expand to define test define
 //#define DNOTEST
 // Expand to define test ui define
@@ -53,12 +74,13 @@
 //#ifdef DLOGGING
 //#define HAS_EQUALS
 //#endif
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businessentities;
 
 import com.substanceofcode.utils.MiscUtil;
-import com.substanceofcode.rssreader.businesslogic.RssFormatParser;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.Date;
+import java.util.Vector;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -87,8 +109,9 @@ public class RssFeed
 	final protected static char CONE = (char)1;
 	final private static char [] CBONE = {CONE};
 	final public static String STR_ONE = new String(CBONE);
-	final protected static char [] CBTWO = {(char)2};
-	final public static String STR_TWO = new String(CBTWO);
+    final protected static char CTWO = (char)2;
+    final private static char [] CATWO = {CTWO};
+	final public static String STR_TWO = new String(CATWO);
 	final public static int ITUNES_ITEMS = 8;
 	final public static int MODIFY_ITEMS = 9;
 	final public static int MAX_NAME_LEN = 100;
@@ -109,12 +132,11 @@ public class RssFeed
 	protected String m_upddate = "";
 	//#ifdef DITUNES
 //@	protected Date m_date = null;
-//@
 //@	protected String m_link = "";   // The RSS feed link
 	//#endif
 	protected String m_etag = ""; // The RSS feed etag
 
-	protected Vector m_items = new Vector();  // The RSS item vector
+	protected RssItem[] m_items = new RssItem[0];  // The RSS item array
 
 	/** Creates a new instance of RSSBookmark */
 	public RssFeed(){
@@ -158,12 +180,17 @@ public class RssFeed
 //@		this.m_date = feed.m_date;
 		//#endif
 		this.m_etag = feed.m_etag;
-		this.m_items = new Vector();
-		int ilen = feed.m_items.size();
-		RssItem [] rItems = new RssItem[ilen];
-		feed.m_items.copyInto(rItems);
+		int ilen = feed.m_items.length;
+		RssItem[] cItems = new RssItem[ilen];
+		this.m_items = cItems;
+		RssItem[] rItems = feed.m_items;
 		for (int ic = 0; ic < ilen; ic++) {
-			m_items.addElement(rItems[ic]);
+			RssItem rssItem = rItems[ic];
+			if (rssItem instanceof RssItunesItem) {
+				cItems[ic] = (RssItem)((RssItunesItem)rssItem).clone();
+			} else {
+				cItems[ic] = (RssItem)rssItem.clone();
+			}
 		}
 	}
 
@@ -200,29 +227,40 @@ public class RssFeed
 			boolean hasPipe, boolean encoded,
 			String [ ] nodes) {
 
+		int gindex = 0;
+		int itemIndex=0;
+		RssItem[] gitems = null;
 		try {
 
 			/* Node count should be 9
 			 * name | url | username | password | upddate | link | date |
 			 * etag | place holder for time zone. | items 
 			 */
-			int NAME = 0;
+			{
+				int NAME;
+				m_name = nodes[ startIndex + (NAME = 0) ];
+			}
 			//#ifdef DLOGGING
-//@			if (finestLoggable) {logger.finest("init firstSettings,startIndex,iTunesCapable,modifyCapable,nodes.length,first nodes=" + firstSettings + "," + startIndex + "," + iTunesCapable + "," + modifyCapable + "," + nodes.length + "|" + nodes[ startIndex + NAME ]);}
+//@			if (finestLoggable) {logger.finest("init firstSettings,startIndex,iTunesCapable,modifyCapable,nodes.length,m_name=" + firstSettings + "," + startIndex + "," + iTunesCapable + "," + modifyCapable + "," + nodes.length + "|" + m_name);}
 			//#endif
-			m_name = nodes[ startIndex + NAME ];
 
-			int URL = 1;
-			m_url = nodes[ startIndex + URL ];
+			{
+				int URL;
+				m_url = nodes[ startIndex + (URL = 1) ];
+			}
 
-			int USERNAME = 2;
-			m_username = nodes[ startIndex + USERNAME ];
+			{
+				int USERNAME;
+				m_username = nodes[ startIndex + (USERNAME = 2) ];
+			}
 			if (iTunesCapable && hasPipe) {
 				m_username = m_username.replace(CONE, '|');
 			}
 
-			int PASSWORD = 3;
-			m_password = nodes[ startIndex + PASSWORD ];
+			{
+				int PASSWORD;
+				m_password = nodes[ startIndex + (PASSWORD = 3) ];
+			}
 			if (iTunesCapable) {
 				if (m_password.length() > 0) {
 					m_password = MiscUtil.decodeStr(m_password);
@@ -252,8 +290,10 @@ public class RssFeed
 			} else {
 				ITEMS = 5;
 			}
-			int UPDDATE = 4;
-			m_upddate = nodes[startIndex + UPDDATE];
+			{
+				int UPDDATE;
+				m_upddate = nodes[startIndex + (UPDDATE = 4)];
+			}
 			// In this version, we are adding ETag, so we cannot use
 			// m_upddate from before because they must be used together.
 			if (hasPipe && (m_upddate.length()>0) && iTunesCapable &&
@@ -261,8 +301,10 @@ public class RssFeed
 				m_upddate = m_upddate.replace(CONE, '|');
 			}
 			if(modifyCapable) {
-				int ETAG = 7;
-				m_etag = nodes[startIndex + ETAG];
+				{
+					int ETAG;
+					m_etag = nodes[startIndex + (ETAG = 7)];
+				}
 				if (hasPipe) {
 					m_etag = m_etag.replace(CONE, '|');
 				}
@@ -278,14 +320,16 @@ public class RssFeed
 			}
 			if (iTunesCapable) {
 				//#ifdef DITUNES
-//@				int LINK = 5;
-//@				if (nodes[startIndex + LINK].length() > 0) {
-//@					m_link = nodes[startIndex + LINK];
+//@				{
+//@					int LINK;
+//@					m_link = nodes[startIndex + (LINK = 5)];
 //@				}
-//@				int DATE = 6;
-//@				String fdateString = nodes[startIndex + DATE];
-//@				if (fdateString.length() > 0) {
-//@					m_date = new Date(Long.parseLong(fdateString, 16));
+//@				{
+//@					int DATE;
+//@					String fdateString = nodes[startIndex + (DATE = 6)];
+//@					if (fdateString.length() > 0) {
+//@						m_date = new Date(Long.parseLong(fdateString, 16));
+//@					}
 //@				}
 				//#endif
 			}
@@ -317,9 +361,14 @@ public class RssFeed
 			//#endif
 
 			// Deserialize itemss
-			String[] serializedItems = MiscUtil.split(itemArrayData, ".");
-
-			for(int itemIndex=0; itemIndex<serializedItems.length; itemIndex++) {
+			String[] serializedItems = MiscUtil.split(itemArrayData,
+						(encoded ? '.' : CTWO));
+			//#ifdef DLOGGING
+//@			if (traceLoggable) {logger.trace("init serializedItems.length=" + serializedItems.length);}
+			//#endif
+			gitems = new RssItem[serializedItems.length];
+			final int silen = serializedItems.length;
+			for(; itemIndex<silen; itemIndex++) {
 				String serializedItem = serializedItems[ itemIndex ];
 				if(serializedItem.length()>0) {
 					RssItem rssItem;
@@ -331,17 +380,28 @@ public class RssFeed
 								serializedItem );
 					}
 					if (rssItem != null) {
-						m_items.addElement( rssItem );
+						gitems[gindex++] = rssItem;
 					}
 				}
 			}
 
-		} catch(Exception e) {
+		} catch(Throwable e) {
 			//#ifdef DLOGGING
 //@			logger.severe("init error", e);
 			//#endif
 			System.err.println("Error while rssfeed initialization : " + e.toString());
 			e.printStackTrace();
+		} finally {
+			if (gindex == itemIndex) {
+				if (gitems == null) {
+					m_items = new RssItem[0];
+				} else {
+					m_items = gitems;
+				}
+			} else if (gindex > 0) {
+				m_items = new RssItem[gindex];
+				System.arraycopy(gitems, 0, m_items, 0, gindex);
+			}
 		}
 	}
 
@@ -385,20 +445,35 @@ public class RssFeed
 
 	/** Return record store string for feed only.  This excludes items which
 	  are put into store string by RssItunesFeed.  */
-	public String getStoreString(boolean serializeItems, boolean encoded){
+    public String getStoreString(final boolean saveHdr,
+			final boolean serializeItems, final boolean encoded) {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("getStoreString saveHdr,serializeItems,encoded,m_items.length=" + saveHdr + "," + serializeItems + "," + encoded + "," + m_items.length);}
+		//#endif
 		StringBuffer serializedItems = new StringBuffer();
 		if( serializeItems ) {
-			int ilen = m_items.size();
-			RssItunesItem [] ritems = new RssItunesItem[ilen];
-			m_items.copyInto(ritems);
+			int ilen = m_items.length;
+			RssItem [] ritems = m_items;
 			for(int itemIndex=0; itemIndex<ilen;itemIndex++) {
-				RssItunesItem rssItem = (RssItunesItem)ritems[itemIndex];
+				RssItem rssItem = ritems[itemIndex];
 				if (encoded) {
-					serializedItems.append(rssItem.serialize());
+					if (rssItem instanceof RssItunesItem) {
+						serializedItems.append(
+								((RssItunesItem)rssItem).serialize());
+					} else {
+						serializedItems.append(
+								new RssItunesItem(rssItem).serialize());
+					}
 					serializedItems.append(".");
 				} else {
-					serializedItems.append(rssItem.unencodedSerialize());
-					serializedItems.append(CBTWO);
+					if (rssItem instanceof RssItunesItem) {
+						serializedItems.append(
+								((RssItunesItem)rssItem).unencodedSerialize());
+					} else {
+						serializedItems.append(
+								new RssItunesItem(rssItem).unencodedSerialize());
+					}
+					serializedItems.append(CTWO);
 				}
 			}
 		}
@@ -414,28 +489,37 @@ public class RssFeed
 		String encodedPassword;
 		// Encode password to make reading password difficult
 		encodedPassword = MiscUtil.encodeStr( password );
-		//#ifdef DITUNES
-//@		String dateString;
-//@		if(m_date==null){
-//@			dateString = "";
-//@		} else {
-//@			// We use base 16 (hex) for the date so that we can save some
-//@			// space for toString.
-//@			dateString = Long.toString( m_date.getTime(), 16 );
-//@		}
-		//#else
-		String dateString = "";
+		String updString = saveHdr ? m_upddate.replace('|' , CONE) : "";
+		// Leave space for former time zone. 
+		// We'll change to image? in next release.
+	    StringBuffer storeString = new StringBuffer(name).append('|').append(
+			url).append('|').append(username).append('|').append(
+			encodedPassword).append('|').append(updString).append('|').append(
+			link);
+		if (saveHdr) {
+			//#ifdef DITUNES
+//@			String dateString;
+//@			if(m_date==null){
+//@				dateString = "";
+//@			} else {
+//@				// We use base 16 (hex) for the date so that we can save some
+//@				// space for toString.
+//@				dateString = Long.toString( m_date.getTime(), 16 );
+//@			}
+			//#else
+			String dateString = "";
+			//#endif
+			String etag = m_etag.replace('|' , CONE);
+			storeString.append('|').append(dateString).append('|').append(
+				etag).append("||");
+		} else {
+			storeString.append("||||");
+		}
+		storeString.append(serializedItems);
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("getStoreString m_name,m_url,storeString.length()=" + m_name + "," + m_url + "," + storeString.length());}
 		//#endif
-		String updString = m_upddate.replace('|' , CONE);
-		String etag = m_etag.replace('|' , CONE);
-		// Leave space for former time zone.  We'll fix in next release.
-		String storeString = name + "|" +
-			url + "|" + username + "|" +
-			encodedPassword + "|" + updString + "|" +
-			link + "|" + dateString + "|" +
-			etag + "|" + "" + "|" +
-			serializedItems;
-		return storeString;
+		return storeString.toString();
 
 	}
 
@@ -449,8 +533,8 @@ public class RssFeed
 //@	{
 //@		if (feed == null) { return false;}
 //@		boolean result = true;
-//@		int flen = feed.getItems().size();
-//@		int ilen = m_items.size();
+//@		int flen = feed.getItems().length;
+//@		int ilen = m_items.length;
 //@		try {
 //@			if (!TestLogUtil.fieldEquals(feed.getUrl(), m_url,
 //@						"m_url", logger, fineLoggable)) {
@@ -487,17 +571,11 @@ public class RssFeed
 //@				result = false;
 //@			}
 //@			if (!TestLogUtil.fieldEquals(flen, ilen,
-//@				"m_items.size() ilen", logger, fineLoggable)) {
+//@				"m_items.length ilen", logger, fineLoggable)) {
 //@				result = false;
 //@			}
-//@			RssItem [] ritems = new RssItem[ilen];
-//@			if (ilen > 0) {
-//@				m_items.copyInto(ritems);
-//@			}
-//@			RssItem [] fitems = new RssItem[flen];
-//@			if (flen > 0) {
-//@				feed.getItems().copyInto(fitems);
-//@			}
+//@			RssItemInfo[] ritems = m_items;
+//@			RssItemInfo[] fitems = feed.getItems();
 //@			for (int ic = 0; (ic < ilen) && (ic < flen); ic++) {
 //@				if (!TestLogUtil.fieldEquals(fitems[ic], ritems[ic],
 //@							"ritems[" + ic + "]", logger, fineLoggable)) {
@@ -507,21 +585,83 @@ public class RssFeed
 //@		} catch (Throwable e) {
 //@			result = false;
 			//#ifdef DLOGGING
-//@			logger.severe("equals error feed.m_items,m_items=" + flen + "," + ((flen == 0) ? "n/a" : feed.getItems().elementAt(0)) + "," + ilen + "," + ((ilen == 0) ? "n/a" : m_items.elementAt(0)) , e);
+//@			logger.severe("equals error feed.m_items,m_items=" + flen + "," + ((flen == 0) ? "n/a" : (feed.getItems()[0]).toString()) + "," + ilen + "," + ((ilen == 0) ? "n/a" : m_items[0].toString()) , e);
 			//#endif
 //@		}
 //@		return result;
 //@	}
 	//#endif
 
+	//#ifdef DCOMPATIBILITY
+//@	/** Compare feed to an existing feed.  **/
+//@	public boolean setItemDatesNull(RssItunesFeedInfo feed) {
+//@		boolean result = false;
+		//#ifdef DLOGGING
+//@		if (traceLoggable) {logger.trace("setItemDatesNull feed.getDate(),m_date=" + feed.getDate() + "," + m_date);}
+		//#endif
+//@		if ((feed.getDate() == null) && (m_date != null)) {
+//@			m_date = null;
+//@			result = true;
+//@		}
+//@		int ilen = m_items.length;
+//@		RssItem[] ritems = m_items;
+//@		int flen = feed.getItems().length;
+//@		RssItemInfo [] fitems = feed.getItems();
+//@		for (int ic = 0; (ic < ilen) && (ic < flen); ic++) {
+			//#ifdef DLOGGING
+//@			if (traceLoggable) {logger.trace("setItemDatesNull ic,fitems[ic].getDate(),ritems[ic].m_date=" + ic + "," + fitems[ic].getDate() + "," + ritems[ic].m_date);}
+			//#endif
+//@			if ((fitems[ic].getDate() == null) &&
+//@				(ritems[ic].m_date != null)) {
+//@				ritems[ic].m_date = null;
+//@				result = true;
+//@			}
+//@		}
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("result=" + result);}
+		//#endif
+//@		return result;
+//@	}
+//@
+//@	public boolean adjustFields() { return false; }
+//@
+	//#endif
+
 	/** Return RSS feed items */
-	public Vector getItems() {
+	//#ifdef DTEST
+//@	public RssItemInfo[] getItems()
+	//#else
+	public RssItem[] getItems()
+	//#endif
+	{
 		return m_items;
 	}
 
 	/** Set items */
-	public void setItems(Vector items) {
+	//#ifdef DTEST
+//@	public void setItems(RssItemInfo[] items) 
+	//#else
+	public void setItems(RssItem[] items) 
+	//#endif
+	{
+		//#ifdef DTEST
+//@		m_items = (RssItem[])items;
+		//#else
 		m_items = items;
+		//#endif
+	}
+
+	//#ifdef DTEST
+//@	/** Return RSS feed items */
+//@	public Vector getVecItems() {
+//@		return MiscUtil.convVec(m_items);
+//@	}
+	//#endif
+
+	/** Set items */
+	public void setVecItems(Vector vtems) {
+		m_items = new RssItem[vtems.size()];
+		vtems.copyInto(m_items);
 	}
 
 	public void setUpddate(String upddate) {
@@ -550,12 +690,15 @@ public class RssFeed
 	//#ifdef DTEST
 //@	public String toString() {
 //@		StringBuffer serializedItems = new StringBuffer();
-//@		int ilen = m_items.size();
-//@		RssItunesItem [] ritems = new RssItunesItem[ilen];
-//@		m_items.copyInto(ritems);
+//@		int ilen = m_items.length;
+//@		RssItem [] ritems = m_items;
 //@		for(int itemIndex=0; itemIndex<ilen;itemIndex++) {
-//@			RssItunesItem rssItem = (RssItunesItem)ritems[itemIndex];
-//@			serializedItems.append(rssItem.toString());
+//@			RssItem rssItem = ritems[itemIndex];
+//@			if (rssItem instanceof RssItunesItem) {
+//@				serializedItems.append(((RssItunesItem)rssItem).toString());
+//@			} else {
+//@				serializedItems.append(rssItem.toString());
+//@			}
 //@			serializedItems.append(".");
 //@		}
 		//#ifdef DITUNES
@@ -612,4 +755,45 @@ public class RssFeed
 		//#endif
 	}
 
+	public void checkPresRead(boolean modFeed, RssFeed feed) {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("checkPresRead modFeed,feed=" + modFeed + "," + feed);}
+//@		if (finestLoggable) {logger.finest("checkPresRead this=" + this);}
+		//#endif
+		if ((feed.getUsername().length() > 0) && (m_username.length() == 0)) {
+			m_username = feed.getUsername();
+			m_password = feed.getPassword();
+		}
+		if (modFeed) {
+			RssItem[] ritems = feed.m_items;
+			final int olen = feed.getItems().length;
+			if (olen > 0) {
+				final int clen = m_items.length;
+				boolean[] checked = new boolean[clen];
+				RssItem[] citems = m_items;
+				for (int ic = 0; ic < clen; ic++) {
+					RssItem citem = citems[ic];
+					for (int jc = 0; jc < olen; jc++) {
+						if (citem instanceof RssItunesItem) {
+							if (!checked[jc] &&
+									((RssItunesItem)citem).checkRead(
+										ritems[jc])) {
+								checked[jc] = true;
+							}
+						} else {
+							if (!checked[jc] && citem.checkRead(ritems[jc])) {
+								checked[jc] = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public Object clone() {
+		return new RssFeed(this);
+	}
+
 }
+//#endif
