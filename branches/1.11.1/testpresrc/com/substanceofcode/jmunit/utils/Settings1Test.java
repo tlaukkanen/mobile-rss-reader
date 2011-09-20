@@ -24,8 +24,16 @@
  * IB 2010-06-27 1.11.5Dev2 Have 1st settings test class.
  * IB 2010-09-27 1.11.5Dev8 Don't use midlet directly for RssReaderSettings.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Optionally only compile this if the code is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
+ * IB 2011-03-28 1.11.5Dev18 Put errors for Settings.save into a vector.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for RssReaderSettings.getInstance into a vector.
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -36,7 +44,7 @@
 //#ifdef DJMTEST
 package com.substanceofcode.jmunit.utils;
 
-import jmunit.framework.cldc10.TestCase;
+import java.util.Vector;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 import com.substanceofcode.utils.MiscUtil;
@@ -81,7 +89,8 @@ final public class Settings1Test extends BaseTestCase {
 				Settings.listRecordStores();
 			}
 			//#endif
-			m_appSettings = RssReaderSettings.getInstance();
+			Object[] parms = new Object[] {null};
+			m_appSettings = RssReaderSettings.getInstance(parms);
 		}
 		if (m_settings == null) {
 			m_settings = m_appSettings.getSettingsInstance();
@@ -99,7 +108,10 @@ final public class Settings1Test extends BaseTestCase {
 		//#else
 		appSettingsTestSub(mname, "markUnreadItems", m_settings.isInitialized() ? true : false, markUnreadItems);
 		//#endif
-		m_settings.save(0, false);
+		Vector procError = new Vector();
+		m_settings.save(0, false, procError);
+		assertEquals("No errors should exist.", procError.size(),  0);
+
 	}
 
 	public void testSettings2() throws Throwable {
@@ -115,7 +127,9 @@ final public class Settings1Test extends BaseTestCase {
 		//#else
 		appSettingsTestSub(mname, "markUnreadItems", true, markUnreadItems);
 		//#endif
-		m_settings.save(0, true);
+		Vector procError = new Vector();
+		m_settings.save(0, true, procError);
+		assertEquals("No errors should exist.", procError.size(),  0);
 		//#ifdef DTEST
 		m_appSettings.deleteSettings();
 		//#endif
