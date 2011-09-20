@@ -1,6 +1,10 @@
 #-- IB 2010-10-20 1.11.5Dev12 Use properties file for signed jar/jad files.
 #-- IB 2010-10-20 1.11.5Dev12 Don't write third certification in jad file.
 #-- IB 2010-11-16 1.11.5Dev12 Treat Verisign as other signed files.
-file.prefix.verisign = verisign_
-SUFFIXVERS.verisign = -verisign
-verisign.text = verisign 
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
+#-- IB 2011-01-14 1.11.5Alpha15 Have text to put signing authority name into description on project host.
+DVERISIGNDEF = DVERISIGN
+file.prefix.verisign = ${sfile.prefix.verisign}_
+SUFFIXVERS.verisign = -${sfile.prefix.verisign}
+signed.authority = verisign
+verisign.text = ${signed.authority} 
