@@ -25,6 +25,10 @@
  * IB 2010-05-30 1.11.5RC2 Better logging.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Alpha15 Use RssItunesItemInfo for the item compares.
+ * IB 2011-01-31 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-02-02 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
+ * IB 2011-03-13 1.11.5Dev17 Have adjustFields for compatibility to change fields that are time sensitive to get compatibility compares to match.
  */
 
 // Expand to define logging define
@@ -102,7 +106,9 @@ public class RssFeed implements RssFeedInfo {
 	protected Date m_upddate = null;
 	protected byte m_upddateTz = (byte)-1;
 	protected Date m_date = null;
-		protected String m_link = "";   // The RSS feed link
+	protected String m_errDate = "";
+	protected String m_link = "";   // The RSS feed link
+	private String m_firstLink = "";
 	protected String m_etag = ""; // The RSS feed etag
 
 	protected Vector m_items = new Vector();  // The RSS item vector
@@ -149,13 +155,17 @@ public class RssFeed implements RssFeedInfo {
 		//#endif
 		this.m_etag = feed.getEtag();
 		this.m_items = new Vector();
-		int ilen = feed.getItems().size();
-		RssItem [] rItems = new RssItem[ilen];
-		if (ilen > 0) {
-			feed.getItems().copyInto(rItems);
+  		int ilen = feed.getVecItems().size();
+  		RssItem [] rItems = new RssItem[ilen];
+  		if (ilen > 0) {
+  			feed.getVecItems().copyInto(rItems);
+  		}
+  		for (int ic = 0; ic < ilen; ic++) {
+  			m_items.addElement(new RssItunesItem(rItems[ic]));
 		}
-		for (int ic = 0; ic < ilen; ic++) {
-			m_items.addElement(rItems[ic]);
+		if (feed instanceof RssFeed) {
+			m_firstLink = ((RssFeed)feed).m_firstLink;
+			m_errDate = ((RssFeed)feed).m_errDate;
 		}
 	}
 
@@ -379,6 +389,11 @@ public class RssFeed implements RssFeedInfo {
 		m_password = password;
 	}
 
+    public String getStoreString(final boolean saveHdr,
+			final boolean serializeItems, final boolean encoded) {
+		return getStoreString(serializeItems, encoded);
+	}
+
 	/** Return record store string for feed only.  This excludes items which
 	  are put into store string by RssItunesFeed.  */
 	public String getStoreString(boolean serializeItems, boolean encoded){
@@ -443,7 +458,7 @@ public class RssFeed implements RssFeedInfo {
 	{
 		if (feed == null) { return false;}
 		boolean result = true;
-		int flen = feed.getItems().size();
+		int flen = feed.getItems().length;
 		int ilen = m_items.size();
 		try {
 			if (!TestLogUtil.fieldEquals(feed.getUrl(), m_url,
@@ -478,20 +493,14 @@ public class RssFeed implements RssFeedInfo {
 				"m_items.size() ilen", logger, fineLoggable)) {
 				result = false;
 			}
-			RssItunesItem [] ritems = new RssItunesItem[ilen];
+			RssItunesItemInfo [] ritems = new RssItunesItemInfo[ilen];
 			if (ilen > 0) {
 				//#ifdef DLOGGING
 				if (fineLoggable) {logger.fine("equals ritems[0]=" + m_items.elementAt(0).getClass().getName());}  
 				//#endif
 				m_items.copyInto(ritems);
 			}
-			RssItemInfo [] fitems = new RssItemInfo[flen];
-			if (flen > 0) {
-				//#ifdef DLOGGING
-				if (fineLoggable) {logger.fine("equals fitems[0]=" + feed.getItems().elementAt(0).getClass().getName());}  
-				//#endif
-				feed.getItems().copyInto(fitems);
-			}
+			RssItemInfo [] fitems = feed.getItems();
 			for (int ic = 0; (ic < ilen) && (ic < flen); ic++) {
 				if (!TestLogUtil.fieldEquals(fitems[ic], ritems[ic],
 							"ritems[" + ic + "]", logger, fineLoggable)) {
@@ -502,20 +511,43 @@ public class RssFeed implements RssFeedInfo {
 			result = false;
 			//#ifdef DLOGGING
 			logger.severe("equals unequal error flen,ilen=" + flen + "," + ilen, e);
-			logger.severe("equals error feed.m_items,m_items=" + ((flen == 0) ? "n/a" : feed.getItems().elementAt(0)) + "," + ((ilen == 0) ? "n/a" : m_items.elementAt(0)) , e);
+			logger.severe("equals error feed.m_items,m_items=" + flen + "," + ((flen == 0) ? "n/a" : feed.getItems()[0].toString()) + "," + ilen + "," + ((ilen == 0) ? "n/a" : m_items.elementAt(0)) , e);
 			//#endif
 		}
 		return result;
 	}
 
+    /** Return RSS feed items */
+	public RssItemInfo[] getItems() {
+		RssItemInfo[] ritems = MiscUtil.getVecrItemf(m_items);
+        return ritems;
+    }
+    
+    /** Set items */
+	public void setItems(RssItemInfo[] items) {
+        m_items = MiscUtil.convVec(items);
+    }
+    
 	/** Return RSS feed items */
-	public Vector getItems() {
+	public Vector getVecItems() {
 		return m_items;
 	}
 
 	/** Set items */
-	public void setItems(Vector items) {
-		m_items = items;
+	public void setVecItems(Vector vitems) {
+		m_items = vitems;
+	}
+
+	public boolean adjustFields() {
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("adjustFields m_firstLink,m_link=" + m_firstLink + "," + m_link);}
+		//#endif
+		if (m_firstLink.length() > 0) {
+			m_link = m_firstLink;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void setUpddate(String upddate) {
@@ -601,6 +633,26 @@ public class RssFeed implements RssFeedInfo {
 
 	public Date getDate() {
 		return (m_date);
+	}
+
+    public void setErrDate(String m_errDate) {
+        this.m_errDate = m_errDate;
+    }
+
+    public String getErrDate() {
+        return (m_errDate);
+    }
+
+    public void setFirstLink(String firstLink) {
+        this.m_firstLink = firstLink;
+    }
+
+    public String getFirstLink() {
+        return (m_firstLink);
+    }
+
+	public Object clone() {
+		return new RssFeed(this);
 	}
 
 }
