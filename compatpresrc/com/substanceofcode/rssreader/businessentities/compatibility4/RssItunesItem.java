@@ -26,6 +26,7 @@
  * IB 2010-05-30 1.11.5RC2 Fix equals to use RssItemInfo interface.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-26 1.11.5Dev14 Need to add m_duration to equals.
  */
 
 // Expand to define logging define
@@ -42,6 +43,7 @@
 package com.substanceofcode.rssreader.businessentities.compatibility4;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesItemInfo;
+import com.substanceofcode.rssreader.businessentities.RssItunesInfo;
 import com.substanceofcode.rssreader.businessentities.RssItemInfo;
 import com.substanceofcode.utils.compatibility4.Base64;
 import com.substanceofcode.utils.MiscUtil;
@@ -67,7 +69,7 @@ import com.substanceofcode.testutil.console.TestLogUtil;
  * @version 1.1
  */
 public class RssItunesItem extends RssItem
-implements RssItunesItemInfo
+implements RssItunesItemInfo, RssItunesInfo
 {
     
 	// Make max summary same as max description (actual max is 50K)
@@ -381,10 +383,13 @@ implements RssItunesItemInfo
 			return result;
 		}
 		RssItunesItemInfo item = (RssItunesItemInfo)pitem;
-		if (!TestLogUtil.fieldEquals(item.isItunes(), m_itunes,
-			"m_itunes", logger, fineLoggable)) {
+
+		if ((item instanceof RssItunesInfo) &&
+			!TestLogUtil.fieldEquals(((RssItunesInfo)item).isItunes(),
+			m_itunes, "m_itunes", logger, fineLoggable)) {
 			result = false;
 		}
+
 		if (!TestLogUtil.fieldEquals(item.getAuthor(), m_author,
 			"m_author", logger, fineLoggable)) {
 			result = false;
@@ -400,6 +405,10 @@ implements RssItunesItemInfo
 		if (!TestLogUtil.fieldEquals(item.getExplicit().toLowerCase(),
 					RssItunesItem.convExplicit(m_explicit).toLowerCase(),
 			"m_explicit", logger, fineLoggable)) {
+			result = false;
+		}
+		if (!TestLogUtil.fieldEquals(item.getDuration(), m_duration,
+			"m_duration", logger, fineLoggable)) {
 			result = false;
 		}
 		return result;
