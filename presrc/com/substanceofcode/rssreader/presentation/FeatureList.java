@@ -30,6 +30,9 @@
  * IB 2010-09-27 1.11.5Dev8 Log setFont error as warning.
  * IB 2010-09-27 1.11.5Dev8 Add setFont errors that are not ArrayIndexOutOfBoundsException to stack.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 Don't use static vars for RssReaderSettings.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
  */
 
 // Expand to define MIDP define
@@ -109,8 +112,8 @@ public class FeatureList extends List {
 	//#ifdef DMIDP20
 	public void initFont() {
 		font = featureMgr.getCustomFont();
-        RssReaderMIDlet midlet = featureMgr.getMidlet();
-        if (midlet != null) {
+        RssReaderMIDlet midlet;
+        if ((midlet = featureMgr.getRssMidlet()) != null) {
 			final int fitPolicy = midlet.getSettings().getFitPolicy();
 			if (fitPolicy != List.TEXT_WRAP_DEFAULT) {
 				super.setFitPolicy(fitPolicy);
@@ -202,7 +205,7 @@ public class FeatureList extends List {
 			logger.warning("ArrayIndexOutOfBoundsException on setFont");
 		}
 		//#endif
-		RssReaderMIDlet midlet = featureMgr.getMidlet();
+		RssReaderMIDlet midlet = featureMgr.getRssMidlet();
 		if (midlet != null) {
 			LoadingForm loadForm = featureMgr.getLoadForm();
 			if (loadForm != null) {
@@ -211,7 +214,7 @@ public class FeatureList extends List {
 				loadForm.addExc("Error changing font.", ce);
 			}
 			midlet.getSettings().setFontChoice(
-					RssReaderSettings.DEFAULT_FONT_CHOICE);
+					midlet.getSettings().DEFAULT_FONT_CHOICE);
 		}
 		if (e instanceof ArrayIndexOutOfBoundsException) {
 			this.font = (Font)nullPtr;
