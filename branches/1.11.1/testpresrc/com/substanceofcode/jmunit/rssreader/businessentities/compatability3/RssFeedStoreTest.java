@@ -23,6 +23,11 @@
 /*
  * IB 2010-04-17 1.11.5RC2 Change to put compatibility classes in compatibility packages.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-12 1.11.5Alpha15 Limit lenght of feed string logged to 80.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
+ * IB 2011-01-24 1.11.5Dev16 Fix code placement for using JMUnit on a device.
+ * IB 2011-02-02 1.11.5Dev17 Allow optional saving of only the feed header name, user/pass, and link.
+ * IB 2011-02-02 1.11.5Dev17 Change items to array to save on memory and for simplicity.
  */
 
 // Expand to define test define
@@ -41,7 +46,7 @@ package com.substanceofcode.jmunit.rssreader.businessentities.compatibility3;
 import java.util.Date;
 import java.util.Vector;
 
-import jmunit.framework.cldc10.TestCase;
+import com.substanceofcode.utils.MiscUtil;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
@@ -128,7 +133,7 @@ final public class RssFeedStoreTest extends BaseTestCase {
 				vitems.addElement(item2);
 			}
 
-			feed.setItems(vitems);
+			feed.setVecItems(vitems);
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest(mname + " step " + step +
 					" feed=" + feed);}
@@ -187,7 +192,7 @@ final public class RssFeedStoreTest extends BaseTestCase {
 				vitems.addElement(item2);
 			}
 
-			feed.setItems(vitems);
+			feed.setVecItems(vitems);
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest(mname + " step " + step +
 					" infoFeed=" + feed);}
@@ -358,13 +363,14 @@ final public class RssFeedStoreTest extends BaseTestCase {
 			RssItunesFeed infoFeed,
 			String storeString) throws Throwable {
 		try {
+			boolean genFeed = storeString != null;
 			//#ifdef DLOGGING
 			logger.info("storeStringTestSub Started " + mname);
-			boolean genFeed = storeString != null;
 			if (finestLoggable) {logger.finest("storeStringTestSub  " + mname + " serializeItems,encoded,modifyCapable,genFeed=" + serializeItems + "," + encoded + "," + modifyCapable + "," + genFeed);}
 			//#endif
 			if (!genFeed) {
-				storeString = infoFeed.getStoreString(serializeItems, encoded);
+				storeString = infoFeed.getStoreString(true, serializeItems,
+						encoded);
 			}
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("storeStringTestSub  " + mname + " storeString=" + storeString);}
@@ -380,12 +386,12 @@ final public class RssFeedStoreTest extends BaseTestCase {
 				com.substanceofcode.rssreader.businessentities.RssItunesFeed.deserialize(
 								modifyCapable, encoded, storeString);
 			//#ifdef DLOGGING
-			if (finestLoggable) {logger.finest("storeStringTestSub " + mname + " nfeed=" + nfeed);}
+			if (finestLoggable) {logger.finest("storeStringTestSub " + mname + " nfeed=" + MiscUtil.toString(nfeed, false, 80));}
 			//#endif
 			assertEquals(mname + " new feed items = 0", 0,
-					nfeed.getItems().size());
+					nfeed.getVecItems().size());
 			assertEquals(mname + " new feed upddete = \"\"", "", nfeed.getUpddate());
-			infoFeed.setItems(new Vector());
+			infoFeed.setVecItems(new Vector());
 			infoFeed.setUpddate("");
 			assertTrue(mname + " feeds equal without items.", infoFeed.equals(nfeed));
 		} catch (Throwable e) {
