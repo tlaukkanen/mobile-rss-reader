@@ -3,9 +3,9 @@ diff and cmt
 "Find presrc.*va
 @m
 /presrc.*va$
-@n
 "Find source file name in window below usually whycmt.
-$F/l"ay$0jjjw/"apAk
+@n
+$F/l"ay$0jjjw/a\/"apAk
 "Put source comment into j buffer.
 @y
 0WWWWW"jy$0j
@@ -18,3 +18,25 @@ $F/l"ay$0jjjw/"apAk
 "Put XML comment into j buffer.
 @h
 0f-WWWW"jy$j0w
+
+"Another set of macro settings
+"Find { backwards
+@m
+?}
+"Change 3 parm method to call assertion.method for making composition methods.
+@n
+kmej%jmb'e:'b,'edkk2yyjp0w4dwwldwW.W.A;jdd=%<<$j2<<jz-k0wiassertion.
+"If 3 parms are on two lines, change to be on one line and make throws the next
+"line.  This is to set up to use @n
+@u
+%?throwshskkJj0$%
+"Change 2 parm method to call assertion.method for making composition methods.
+@n
+%jmbk%kme:'b,'ed%k$%B"jy$joassertion."jp$a;2Bdw3bdwj$%2<<.$%zz-jz-
+"Remove space after ) so @n can work
+@u
+%k$xj%
+"Do for assert with > 1 line?
+@n
+kmej%jmb:'b,'ed%k0f)%B"jyf)joassertion."jp0$a;3bdw3bdwkmbj<'b$%z-
+
