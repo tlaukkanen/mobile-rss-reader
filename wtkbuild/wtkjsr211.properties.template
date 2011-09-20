@@ -1,0 +1,10 @@
+#-- IB 2011-03-06 1.11.5Dev17 Have properties for content handler (JSR-211).
+#-- IB 2011-03-06 1.11.5Dev17 Use enabled .value to use smartlink.
+wtk.contenthandler.enabled.value = true
+DJSR211 = DJSR211
+file.prefix.jsr211 = ${sfile.prefix.jsr211}_
+PERMISSIONS_REQ.jsr211 = 
+PERMISSIONS_OPT.jsr211 = javax.microedition.content.ContentHandler
+SUFFIXVERS.jsr211 = -jsr211
+nojsr211.res.excludes =
+lib.jsr211 = :${wtk.home}/lib/jsr211.jar
