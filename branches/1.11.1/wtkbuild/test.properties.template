@@ -1,11 +1,25 @@
+#-- IB 2011-01-14 1.11.5Alpha15 Use DJMTESTPLUSDEF to allow JMUnit (forked to JMUnit Plus) to have the option to test without creating multiple midlets.
+#-- IB 2011-01-14 1.11.5Alpha15 Use DJMTESTFREEDEF to allow JMUnit (forked to JMUnit Plus) to free up memory when finishing tests by removing the executed tests.
+#-- IB 2011-01-14 1.11.5Alpha15 Use DFEATUREMGRDEF and DFEATUREMGRIMPORTDEF to allow JMUnit (forked to JMUnit Plus) to use FeatureMgr to create a thread to do the commandAction.
+#-- IB 2011-01-14 1.11.5Alpha15 Use presrc of JMUnit (forked to JMUnit Plus) to copy into the mobile rss reader source and preprocess with the other source.
+#-- IB 2011-01-24 1.11.5Dev16 Fix declaration of djmtestfree define.
+#-- IB 2011-01-26 1.11.5Dev16 Don't free JMUnit test memory as this causes null pointer exceptions.
 RELEASE = 
 DTESTDEF = D${RELEASE}TEST
 DJMTESTDEF = D${RELEASE}JMTEST
+#DJMTESTPLUSDEF = D${RELEASE}JMTESTPLUS
+DJMTESTPLUSDEF = DNOJMTESTPLUS
+#This causes null pointers for > 1 test!!
+#DJMTESTFREEDEF = D${RELEASE}JMTESTFREE
+DJMTESTFREEDEF = DNOJMTESTFREE
 DTESTUIDEF = D${RELEASE}TESTUI
 DLOGDEF = D${RELEASE}LOGGING
 #Use Feature Form for logging report form
 DFEATUREFORMDEF = D${RELEASE}FEATUREFORM
 DFEATUREFORMIMPORTDEF = import com.substanceofcode.rssreader.presentation.FeatureForm;
+#Use Feature Manager for JMUnit form
+DFEATUREMGRDEF = D${RELEASE}FEATUREMGR
+DFEATUREMGRIMPORTDEF = import com.substanceofcode.rssreader.presentation.FeatureMgr;
 #DLOGDEF = DNOLOGGING
 #add.jars = true
 #ext.jar = ../../../JLogMicro/bin/JLogMicro.jar
@@ -14,9 +28,8 @@ testui.presrc = ../testpresrc
 #Copy from src copy.jar.src = true
 #Copy from src jarsrc = ../../../JLogMicro/src
 #jar.presrc = ../../../JLogMicro/jlogmicro/presrc
-#undo
 jar.presrc = ../../../../JLogMicro/jlogmicro/presrc
-jmunit.src = ../../../../JMUnit/jmunit/src_cldc10
+jmunit.src = ../../../../JMUnit/jmunit-plus/presrc/main/java
 need.test.res = true
 res.test.dir = ../testdata
 res.test.todir = 
