@@ -24,8 +24,15 @@
  * IB 2010-05-24 1.11.5RC2 Unit test utility classes.
  * IB 2010-06-27 1.11.5Dev2 Test 1st and 2nd settings test classes.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only doing EncodingUtilTest if this is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use conditional preprocessed cldc11 code (with modifications) instead of cldc10 code.
+ * IB 2011-01-24 1.11.5Dev16  Don't compile code not present if small memory.
  */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define memory size define
 @DMEMSIZEDEF@
 // Expand to define test define
@@ -40,20 +47,23 @@
 //#ifdef DJMTEST
 package com.substanceofcode.jmunit.utils;
 
-import jmunit.framework.cldc10.TestSuite;
+import jmunit.framework.cldc11.TestSuite;
 
 final public class UtilitySuite extends TestSuite {
 
 	public UtilitySuite() {
 		super("UtilitySuite");
+		add(new MiscUtilTest());
 		add(new Settings1Test());
 		add(new Settings2Test());
+		//#ifdef DFULLVERS
+		//#ifndef DSMALLMEM
+		add(new EncodingUtilTest());
+		//#endif
 		add(new XmlParserTest());
 		//#ifndef DSMALLMEM
 		add(new HtmlParserTest());
 		//#endif
-		//#ifdef DCOMPATIBILITY
-		add(new com.substanceofcode.jmunit.utils.compatibility4.SortTest());
 		//#endif
 	}
 
