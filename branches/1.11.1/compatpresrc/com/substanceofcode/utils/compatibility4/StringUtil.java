@@ -134,7 +134,7 @@ public class StringUtil {
 		boolean finerLoggable = logger.isLoggable(Level.FINER);
 		//#endif
         try{
-			if (text == null) { return null; }
+  			if (text == null) { return null; }
             StringBuffer plainText = new StringBuffer();
             String htmlText = text.trim();
             int htmlStartIndex = htmlText.indexOf('<');
