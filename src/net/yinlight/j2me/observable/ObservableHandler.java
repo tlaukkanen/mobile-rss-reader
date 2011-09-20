@@ -31,6 +31,7 @@
  * IB 2010-07-05 1.11.5Dev7 Update source text to make distribution/redistribution license options clearer.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev8 Change --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-03-13 1.11.5Dev17 Have notifyObservers without parameter send boolean true to observers.
  */
 
 // Expand to define MIDP define
@@ -79,7 +80,7 @@ public class ObservableHandler {
 	}
 
 	public void notifyObservers(Observable observable) {
-		notifyObservers(observable, null);
+		notifyObservers(observable, new Boolean(true));
 	}
 
 	public void notifyObservers(final Observable observable, final Object arg) {
