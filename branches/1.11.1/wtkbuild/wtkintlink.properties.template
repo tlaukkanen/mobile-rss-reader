@@ -1,7 +1,12 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties files based on full version.
 #-- IB 2010-11-12 1.11.5DEV14 Use intlink to create file to go to internet links to install the program
+#-- IB 2010-11-12 1.11.5DEV14 Use intlink to create file to go to internet links to install the program
+#-- IB 2011-01-17 1.11.5Alpha15 Override values set in wtkfull.properties to allow that file to be the default.  Need to set it's values first to prevent them from being set by wtkfull.properties.
 DINTLINKDEF = DINTLINK
-file.prefix.intlink = intlink_
+file.prefix.intlink = ${sfile.prefix.intlink}_
 SUFFIXVERS.intlink = -intlink
 intlink = Internet Install Link
 make.link= true
+DFULLVERSDEF = DNOFULLVERS
+file.prefix.full = 
+SUFFIXVERS.full =
