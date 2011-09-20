@@ -1,0 +1,5 @@
+#-- IB 2011-01-20 1.11.5Dev17 Use wtktemporary.properties to more easily set temporary test development properties used for the build.
+#-- IB 2011-03-07 1.11.5Dev17 Allow optional temporary distribution with temporary subdomain and directory path using wtktemporary.properties.template with yinlight.tmp.subdir, yinlight.tmp.subpath, and yinlight.subdomain.
+yinlight.tmp.subdir = test/
+yinlight.tmp.subpath = mobile-rss-reader/
+yinlight.subdomain = t
