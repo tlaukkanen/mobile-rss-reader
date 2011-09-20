@@ -26,6 +26,13 @@
  * IB 2010-09-27 1.11.5Dev8 Remove midlet which is now not used directly.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Use procThrowable from LoggingTestCase.
+ * IB 2011-01-14 1.11.5Alpha15 Use convience methods updSvLogging and updPrevLogging from LoggingTestCase to alter/restore the logging level.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-14 1.11.5Alpha15 Use notifyAll to avoid waiting with wait.
+ * IB 2011-01-14 1.11.5Alpha15 If failure is for equals test, increase nextIx to allow the next test to try the next feed instead of retrying the failed feed over and over again.
+ * IB 2011-01-14 1.11.5Alpha15 Use convience method cmpModLog from LoggingTestCase to see if feeds are unequal and change the logging level to retry using logging to make debugging equals failures easier.  Also, retry with modified previous version for bug fixes/enhancements made in the current version.
+ * IB 2011-01-24 1.11.5Dev16 Fix conditional compile of DLOGGING code.
  */
 
 // Expand to define MIDP define
@@ -44,9 +51,8 @@ package com.substanceofcode.jmunit.rssreader.businesslogic.compatibility4;
 
 import java.util.Date;
 
-import jmunit.framework.cldc10.TestCase;
-
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 //#ifndef DSMALLMEM
 import com.substanceofcode.utils.HTMLParser;
 //#endif
@@ -54,8 +60,8 @@ import com.substanceofcode.rssreader.businesslogic.compatibility4.RssFeedParser;
 import com.substanceofcode.rssreader.businessentities.compatibility4.RssItunesFeed;
 import com.substanceofcode.rssreader.businesslogic.compatibility4.OpmlParser;
 //#ifdef DMIDP20
-import net.eiroca.j2me.observable.compatibility4.Observer;
-import net.eiroca.j2me.observable.compatibility4.Observable;
+import net.yinlight.j2me.observable.Observer;
+import net.yinlight.j2me.observable.Observable;
 //#endif
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
@@ -66,7 +72,7 @@ import net.sf.jlogmicro.util.logging.Level;
 
 final public class OpmlParserTest extends BaseTestCase
 //#ifdef DMIDP20
-implements Observer, net.yinlight.j2me.observable.Observer
+implements Observer
 //#endif
 {
 
@@ -80,7 +86,6 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	private int alterix = 37;
 	private int endAlterix = 39;
 	private String newLogLevel = Level.FINEST.getName();
-	private Level svLogLevel = null;
 	//#endif
 
 	public OpmlParserTest() {
@@ -111,12 +116,11 @@ implements Observer, net.yinlight.j2me.observable.Observer
 	}
 
 	//#ifdef DMIDP20
-	public void changed(Observable observable) {
+	public void changed(Observable observable, Object arg) {
 		ready = true;
-	}
-
-	public void changed(net.yinlight.j2me.observable.Observable observable, Object arg) {
-		ready = true;
+		synchronized(this) {
+			super.notifyAll();
+		}
 	}
 
 	public boolean isReady() {
@@ -129,7 +133,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 		String mname = "testOpmlParse1";
 		com.substanceofcode.rssreader.businesslogic.OpmlParser OpmlParser =
 			new com.substanceofcode.rssreader.businesslogic.OpmlParser(
-				"jar:///links-opml.xml", "", "");
+				"jar:///links-opml.xml", "", "", new RssFeedStore());
 		OpmlParser cmpOpmlParser =
 			new OpmlParser("jar:///links-opml.xml", "", "");
 
@@ -141,7 +145,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 		String mname = "testOpmlParse2";
 		com.substanceofcode.rssreader.businesslogic.OpmlParser OpmlParser =
 			new com.substanceofcode.rssreader.businesslogic.OpmlParser(
-				"jar:///links-opml.xml", "", "");
+				"jar:///links-opml.xml", "", "", new RssFeedStore());
 		OpmlParser cmpOpmlParser =
 			new OpmlParser("jar:///links-opml.xml", "", "");
 
@@ -153,7 +157,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 		String mname = "testOpmlParse3";
 		com.substanceofcode.rssreader.businesslogic.OpmlParser OpmlParser =
 			new com.substanceofcode.rssreader.businesslogic.OpmlParser(
-				"jar:///links-opml.xml", "", "");
+				"jar:///links-opml.xml", "", "", new RssFeedStore());
 		OpmlParser cmpOpmlParser =
 			new OpmlParser("jar:///links-opml.xml", "", "");
 
@@ -165,7 +169,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 		String mname = "testOpmlParse4";
 		com.substanceofcode.rssreader.businesslogic.OpmlParser OpmlParser =
 			new com.substanceofcode.rssreader.businesslogic.OpmlParser(
-				"jar:///links-opml.xml", "", "");
+				"jar:///links-opml.xml", "", "", new RssFeedStore());
 		OpmlParser cmpOpmlParser =
 			new OpmlParser("jar:///links-opml.xml", "", "");
 
@@ -177,7 +181,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 		String mname = "testOpmlParse5";
 		com.substanceofcode.rssreader.businesslogic.OpmlParser OpmlParser =
 			new com.substanceofcode.rssreader.businesslogic.OpmlParser(
-				"jar:///links-opml.xml", "", "");
+				"jar:///links-opml.xml", "", "", new RssFeedStore());
 		OpmlParser cmpOpmlParser =
 			new OpmlParser("jar:///links-opml.xml", "", "");
 
@@ -188,6 +192,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			final com.substanceofcode.rssreader.businesslogic.OpmlParser OpmlParser,
 			final OpmlParser compatibilityOpmlParser, boolean endFeeds)
 	throws Throwable {
+		boolean goNext = false;
 		try {
 			//#ifdef DLOGGING
 			logger.info("Started " + mname);
@@ -201,7 +206,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			//#ifdef DMIDP20
 			while (!isReady()) {
 				synchronized(this) {
-					wait(1000L);
+					wait(500L);
 				}
 			}
 			//#else
@@ -213,12 +218,14 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			RssItunesFeedInfo[] rssfeeds = OpmlParser.getFeeds();
 			compatibilityOpmlParser.startParsing();
 			compatibilityOpmlParser.join();
+			//#ifdef DLOGGING
 			if (fineLoggable) {logger.fine(mname + " compatibilityOpmlParser.isSuccessfull()=" + compatibilityOpmlParser.isSuccessfull());}
+			//#endif
 			RssItunesFeed[] cmpRssFeeds =
 				(RssItunesFeed[])compatibilityOpmlParser.getFeeds();
-			assertTrue(mname + " rssfeeds feed length should be > 0",
+			assertTrue(mname + "compatibilityOpmlParserTestSub rssfeeds feed length should be > 0",
 					rssfeeds.length > 0);
-			assertTrue(mname + " cmpRssFeeds feed length should be > 0",
+			assertTrue(mname + "compatibilityOpmlParserTestSub cmpRssFeeds feed length should be > 0",
 					cmpRssFeeds.length > 0);
 			int endIx = endFeeds ? rssfeeds.length : (nextIx + (rssfeeds.length / 5));
 			for (; (nextIx < endIx) && (nextIx < rssfeeds.length) && (nextIx < cmpRssFeeds.length);
@@ -226,13 +233,12 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				//#ifdef DLOGGING
 				if (alterLogLevel && (nextIx >= alterix) && (alterix >= 0)) {
 					endAlterLogLevel = true;
-					svLogLevel = logger.getParent().getLevel();
-					logger.getParent().setLevel(Level.parse(newLogLevel));
+					svLogLevel = super.updSvLogging(newLogLevel);
 					alterLogLevel = false;
 					logger.info(mname + " altering level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
 				} else if (endAlterLogLevel && (nextIx >= endAlterix)) {
 					endAlterLogLevel = false;
-					logger.getParent().setLevel(svLogLevel);
+					super.updPrevLogging(svLogLevel);
 					logger.info(mname + " reverting level nextIx,svLogLevel,newLevel=" + nextIx + "," + svLogLevel + "," + logger.getParent().getLevel());
 				}
 				//#endif
@@ -244,8 +250,13 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest(mname + " nextIx,cmpfeed 1=" + nextIx + "," + cmpfeed.toString());}
 				//#endif
-				String assertInfo = new String("nextIx,name,url=" + nextIx + "," + feed.getName() + "," +  feed.getUrl());
-				assertTrue("Original feed must equal expected feed " + assertInfo, cmpfeed.equals(feed));
+				String assertInfo = "nextIx,name,url=" + nextIx + "," + feed.getName() + "," +  feed.getUrl();
+				Object[] oret = super.cmpModLog(
+						"compatibilityOpmlParserTestSub Original feed must equal expected feed " + assertInfo,
+						(RssItunesFeed)cmpfeed, feed, null);
+				if (oret[1] != null) {
+					throw (Throwable)oret[1];
+				}
 				if (((feed.getUrl().indexOf("http://") >= 0) &&
 					//#ifndef DSMALLMEM
 					HTMLParser.isHtml(feed.getUrl()) ||
@@ -264,7 +275,8 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				}
 				com.substanceofcode.rssreader.businesslogic.RssFeedParser fparser =
 					new com.substanceofcode.rssreader.businesslogic.RssFeedParser(
-							(com.substanceofcode.rssreader.businessentities.RssItunesFeed)feed);
+							(com.substanceofcode.rssreader.businessentities.RssItunesFeed)feed,
+							null, false);
 				//#ifdef DMIDP20
 				fparser.makeObserable(true, 10);
 				ready = false;
@@ -272,7 +284,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				fparser.getParsingThread().start();
 				while (!isReady()) {
 					synchronized(this) {
-						wait(1000L);
+						wait(500L);
 					}
 				}
 				boolean successful = fparser.isSuccessfull();
@@ -291,11 +303,11 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				//#ifdef DMIDP20
 				cmpFparser.makeObserable(null, true, 10);
 				ready = false;
-				cmpFparser.getObserverManager().addObserver(this);
+				cmpFparser.getObservableHandler().addObserver(this);
 				cmpFparser.getParsingThread().start();
 				while (!isReady()) {
 					synchronized(this) {
-						wait(1000L);
+						wait(500L);
 					}
 				}
 				boolean cmpSuccessful = cmpFparser.isSuccessfull();
@@ -317,7 +329,7 @@ implements Observer, net.yinlight.j2me.observable.Observer
 					//#endif
 					continue;
 				}
-				assertEquals("compatibilityOpmlParserTestSub successful must equal nextIx=" + nextIx, cmpSuccessful, successful);
+				assertEquals("compatibilityOpmlParserTestSub successful must equal " + assertInfo, cmpSuccessful, successful);
 				if (!cmpSuccessful) {
 					//#ifdef DLOGGING
 					if (fineLoggable) {logger.fine(mname + " compatibilityOpmlParserTestSub not successful nextIx,feed.getName(),fexc,cmpFexc=" + nextIx + "," + feed.getName() + "," + fexc + "," + cmpFexc, fexc);}
@@ -332,7 +344,15 @@ implements Observer, net.yinlight.j2me.observable.Observer
 				//#ifdef DLOGGING
 				if (finestLoggable) {logger.finest(mname + " nextIx,ncmpfeed 3=" + nextIx + "," + ncmpfeed.toString());}
 				//#endif
-				assertTrue("Feed must equal expected feed " + assertInfo, ncmpfeed.equals(nfeed));
+				// Workaround
+				goNext = true;
+				Object[] ocmpret = super.cmpModLog(
+						"compatibilityOpmlParserTestSub Original feed must equal expected feed " + assertInfo,
+						(RssItunesFeed)ncmpfeed, nfeed, null);
+				if (ocmpret[1] != null) {
+					throw (Throwable)ocmpret[1];
+				}
+				goNext = false;
 				// Free up memory.
 				rssfeeds[nextIx] = null;
 				// Free up memory.
@@ -343,11 +363,10 @@ implements Observer, net.yinlight.j2me.observable.Observer
 			if (fineLoggable) {logger.fine(mname + " finished.");}
 			//#endif
 		} catch (Throwable e) {
-			//#ifdef DLOGGING
-			logger.severe(mname + " failure ",e);
-			//#endif
-			e.printStackTrace();
-			throw e;
+			if (goNext) {
+				nextIx++;
+			}
+			super.procThrowable(mname, e);
 		}
 	}
 
