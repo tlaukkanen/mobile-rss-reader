@@ -1,6 +1,8 @@
 #-- IB 2010-05-25 1.11.5RC2 Use properties file for signed jar/jad files.
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
 DSIGNEDDEF = DSIGNED
-file.prefix.signed = signed_
+file.prefix.signed = ${sfile.prefix.signed}_
+microemu.prefix.signed = ${sfile.prefix.signed}-
 SUFFIXVERS.signed = -signed
 signed.text = Signed 
 signed = true
