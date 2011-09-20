@@ -1,0 +1,2 @@
+#-- IB 2011-01-12 1.11.5Alpha15 Have special file for small memory.
+DMEMSIZEDEF = DSMALLMEM
