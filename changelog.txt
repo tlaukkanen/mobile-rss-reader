@@ -782,6 +782,446 @@ v1.11.5 Development 14 (dev14) (Nov 26th 2010)
 - Use properties files based on full version.
 - Use substanceofcode for info url for signed.
 
+v1.11.5 Alpha 15 (Jan 17th 2011)
+- Remove Controller and KFileSelectorFactory classes to reduce some size.
+- Add ability to log for character or parsing.
+- Add bean shell properties (not used).
+- Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+- Add option to use Netbeans workspace env var for wtk.home property.
+- Add RecordStoreException code to loadRec if cannot get a record.
+- Add setLogChar and isLogChar for SgmlParserIntr implementation to compatibility4 XmlParser.
+- Add signed, verisign and/or thawte to identify applet and regular emulator signing authorities.
+- Add trace logging.
+- After modifying the read field, use old feed pointer with new feed pointer to update the feed.  If the old pointer does not match the current pointer, do not update as it means that the future background processing has updated the feed already. 
+- After modifying/updating the feed, use old feed pointer with new feed pointer to update the feed.  If the old pointer does not match the current pointer, do not update as it means that the future background processing has updated the feed already. 
+- Allow cloning of feeds to determine if they are equal to allow determining if two items are the same to preserve their read flags.  Also, allow future background updates.
+- Allow jmunit plus to use the feature mgr when using jmunit code in the test compile vs the library.
+- Allow logging of characters for different expected tokens.
+- Allow logging of characters read once or repeatedly.
+- Allow option (default) to preserve the read state (flags) when importing and the feed is already present.
+- Allow option (default) to preserve the username/password when importing and the feed is already present.
+- Allow retrying the test case with http access if retryModHttp is true.
+- Allow specification of a accept label for the prompt form.
+- Allow specification of test.src.excludes test source exclude properties specified in release.properties.
+- Allow test to get the EncodingUtilIntr interface.
+- Allow test using jar or http links if oneTestOnly is true.
+- Allow tracing for parsing or reading chars once or ongoing.
+- Allow use text box option to be public when testing to test using it.
+- Allow using fixup to stop if tagName is empty.
+- Allow using fixup (using true) to stop if tagName is empty.
+- Better information echoed.
+- Better logging.
+- Better removal/not copying of test src.
+- Buffer reading of characters in XmlParser to reduce multiple calls to read().  Use new read(...) in EncodingStreamReader instead.
+- Calculate average time for http access/parsing for current and previous versions for performance testing.
+- Change equals message for both null so that it is done as an else vs due to the other conditions returning null.  This is a slight performance improvement.
+- Change if/unless conditions for target/wtk antenna to be an expression which can evaluate to true.  This gives greater flexibility for use of these expressions (usually the value of one property).
+- Change logging of load value to trace.
+- Change package and getlogging for compatibility4.
+- Change static fields to instance vars for the RssReaderSettings singleton to reduce static memory used.
+- Change static fields to instance vars for the Settings singleton to reduce static memory used.
+- Change static fields to instance vars for the singleton to reduce static memory used.
+- Change static vars to instance vars to reduce RMS save problems.
+- Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+- Change user agent to use the program's MIDP/CLDC combination vs alwasy MIDP/CLDC 1.0.
+- Class to allow testing of encoding util (future).
+- Compare dates as strings to determine if they are equal to allow determining if two items are the same to preserve their read flags.
+- Cosmetic.
+- Cosmetic changes.
+- Create forms in constructor, but add items in the start of run method.
+- Create loadRec to make loading more independent.
+- Do 3 fewer tests if small memory (MIDP 1.0) to account for removed classes/features.
+- Do buffering so that we can read a few characters ahead and not make as many calls to super.read() to look at BOM and multi-byte characters.
+- Do modification of the bytes if 16 or 32 bits.
+- Do modification of the bytes if 16 or 32 bits.  Handle BE and LE for both.
+- Don't use static vars for RssReaderSettings.
+- Do parser suite first to get http prompt faster.
+- Fix define for CLDC to make conditional CLDC code compiled correctly.
+- Fix getting the absolute URL from the relative URL.
+- Fix toString used by testing to separate explicit from the first field in the item.
+- For JMUnit Plus using midlets, take midlet from the single midlet vs the current test which is part of multiple midlets used as tests.
+- Future calculate average time for http access/parsing for current and previous versions for performance testing.
+- Future have loadRec return true if read/conversion error for value.
+- Future use return from saveRec which returns true if read/conversion error for value.
+- Give prompt for regular update that it does not use conditional gets.
+- Handle BOM for UTF-8.
+- Handle updating existing feeds or parsing and updating/adding feeds.
+- Handle UTF-1 and UTF-7 partially assuming it will be supported by the device.
+- Have a constructor for existing feeds to handle future background reading of feeds.
+- Have "" as empty name instead of null.
+- Have "" as empty title instead of null.
+- Have bookmarks list for the full version and SettingsForm for the internet link version.
+- Have character and parse logging for testing.
+- Have checkActive be checkRssActive so for future use of background processing.
+- Have checkPresRead to preserve the read flags of feeds.
+- Have clone to help with future background updating of feeds.
+- Have closeInputStream, closeOutputStream, and closeConnection to close input/output streams and a connection.
+- Have deleteStore create settings if it does not exist since the vars are no longer static, need to use settings instance to access instance vars to delete store.
+- Have exit code allow either full or internet link version.
+- Have fields to show the preferred jar/jad based on current MIDP/JSR settings and the current jar/jad names for internet link/full code to display the text "current" if the preferred jar/jad name matches the current one.  In the future, the MIDP 2.0 version will download the preferred version on user request.
+- Have getAddChoiceGroup to both create a choice field which uses layout bottom (MIDP 2.0) and appends the field to the given form.
+- Have getAddStringItem to both create a string item which uses layout bottom (MIDP 2.0) and appends the item to the given form.
+- Have getAddTextField to both create a text field which uses layout bottom (MIDP 2.0) and appends the field to the given form.
+- Have getCmdAddPrompt to both create a prompt command and add it to the displayable.  Return the command pointer.
+- Have getCmdAdd to both create a command and add it to the displayable.  Return the command pointer.
+- Have html flag to tell XmlParser and EncodingStreamReader to only allow HTMLParser to set the encoding except for byte order mark (BOM).
+- Have html flag to tell XmlParser to only allow HTMLParser to set the encoding except for byte order mark (BOM).
+- Have loop for pause and wait on a specific time period to avoid timing issues and spurrious awakes.
+- Have methods to enable better logging.
+- Have m_exitCommand be in FeatureMgr.
+- Have microemu jars begin with signed- if jar is signed.
+- Have modUpdAllFeeds to allow future regression testing of background update/modify.
+- Have new target prepare.intlink to set up internet link properties.
+- Have new target prepare.smallmem which is a dependency for MIDP 1.0 and the internet link version.  This reduces the code for these versions.
+- Have new target prepare.smartphone to set up smartphone properties.
+- Have novice as part of the program name if novice is built.
+- Have one.target which if true does not do the prepare target more than once.  This is only useful when compiling/building one target.  It must be false for creating the release which executes multiple targets.
+- Have optional backlight after update/refresh all.
+- Have optional vibrate after update/refresh all.
+- Have override flag for future background processing.
+- Have prepare target depend on prepare.full to make the full version the default.  This can be overridden by prepare.intlink.
+- Have prepare.test, prepare.release vs test.prepare, etc to be like other prepare... targets.
+- Have properties to allow compilation of just one file using the preprocessing of the previous files the same as before.
+- Have properties to show the preferred jar/jad based on current MIDP/JSR settings and the current jar/jad names for internet link/full code to display the text "current" if the preferred jar/jad name matches the current one.  In the future, the MIDP 2.0 version will download the preferred version on user request.
+- Have property of the name of google, sourceforge and yinlight ftp build directories to use for finish sftp step.
+- Have replace... methods not be static.
+- Have set/getBitNbrDoc to keep track of how many bits make up a character.
+- Have signed compile use verisign compile to help test preferred jad.
+- Have some public static keys for int options to allow shorter coding in SettingsForm.
+- Have special file for small memory.
+- Have special reverseItems to change sort order.
+- Have test.src.excludes to exclude test files.
+- Have test update command to allow upating of the current jar/jad names to test internet link code to display the text "current" if the preferred jar/jad name matches the current one.
+- Have text to put signing authority name into description on project host.
+- Have update/refresh all feeds for future background processing.
+- If failure is for equals test, increase nextIx to allow the next test to try the next feed instead of retrying the failed feed over and over again.
+- If internet link version, don't show optional items except standard exit.
+- If internet link version, have thread to initialize the settings form and then show the form.
+- If logging and necessary, write severe or other message.  If not logging, printStackTrace.
+- If logging level is changed, use initLogVars to reset the logging vars in RssReaderMIDlet.
+- If old gives 0 feeds and new gives error (has no feeds assumed), treat as equal.
+- If unable to get microedition.locale, get file.encoding for applet/standalone emulator.
+- If we are modifying the feed, save the unread settings.
+- Increase number of tests to 10 to spread out the testing among more steps.  This also allows more tests to be run if one fails (not for errors).
+- In EncodingUtil, initialize formally static vars created by internal functions in getInstance to help reduce problems with not being able to save data.  Put all such vars in one block.  Make all methods non-static except getInstance and getEncodingUtil.  Move m_sglStatExcs to be first as it is depended upon by many vars.  Move vars with no or only m_sglStatExcs to follow init of m_sglStatExcs.  Move vars set by methods depending on other initialized vars to be second:  Only m_sglConvCp1252 was like this.  Have m_sglStatExcs be set to null after all initializations if it has no entries.  Remove code creating m_sglStatExcs from methods except for getStatExcs.  Have all methods ued for initialization have try/catch Throwable blocks to reduce initialization problems.
+- Limit lenght of feed string logged to 80.
+- Log change to m_feedURLFilter.
+- Maintain only one vector for sorted items.
+- Make BOOKMARKS_NAME blank if record 2 (region 1) or greater.
+- Make demo directory into signed-demo directory to move it to the bottom of an aphabetically sorted page.
+- Make some globally used vars volatile.
+- Make sure the anchor is not another tag starting with 'a'.
+- Make sure the tag name length is > 0.
+- Make sure we parse an element.  Not getting one is only a future possibilty.
+- Method to get the first cause.
+- More logging.
+- Need to add m_duration to equals.
+- Need to define DTEST to use it.
+- Need to preserve class org.kablog.kgui.KFileSelectorMgr because it is loaded using forName and proguard does not preserve classes loaded like this.
+- New class to test EncodingUtil.
+- Only compile code/features present only in the full version if this compile is for the full version.
+- Only compile some portions if it is the full version.
+- Only compile this if it is the full version.
+- Only compile this is it is the full version.
+- Only copy demo directory to yinlight version.
+- Only doing EncodingUtilTest if this is the full version.
+- Only process non empty tag names.
+- Optionally only compile this if the code is the full version.
+- Override values set in wtkfull.properties to allow that file to be the default.  Need to set it's values first to prevent them from being set by wtkfull.properties.
+- Pass error messages to log/display exceptions to handleOpen of URLHandler.
+- Pass in rssFeeds.
+- Pass in rss feed store.
+- Pass rssFeeds to FeedListParser.
+- Provide common methods and vars to test EncodingStreamReader.
+- Provide request constants to test EncodingStreamReader.
+- Put html tests first to have http prompt come as soon as possible.
+- Put index file sfuploads.htm into the google, sourceforge and yinlight ftp build directories in the finish sftp step.
+- Release memory for InputStream by closing it and making it null with closeConnection.
+- Remove redundant new String of literal string.
+- Remove references to formally static vars.
+- Save midlet instead of RssReaderMIDlet to be more generic and help with testing.  Have getRssMidlet to return the RssReaderMIDlet.
+- Save old feed pointer to use to update feed for future background processing only for MIDP 2.0.
+- Save the old rss feed names to know if updating or adding apps.
+- Save the pointer to the old feed and make a copy to modify so that it will allow future background processing.
+- Set instance vars in constructor.
+- Start at second (index 1) feed to skip sourceforge home link.
+- Test EncodingStreamReader.
+- Test line feeds in code.
+- To help with minor performance, start vector with max items.
+- To help with minor space, use trimToSize for items..
+- Track thread info.
+- Use checkPresRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
+- Use checkPresRead to set the username/password to the parameter's RssFeed.
+- Use checkRead to set the m_unreadItem to the parameter RssItem's m_unreadItem if the other fields are equal.
+- Use closeConnection in MiscUtil to close a connection.
+- Use closeConnection in MiscUtil to close connections.
+- Use CmdReceiver interface to allow FeatureMgr to initialize KFileSelectorMgr without directly referencing it's class.  This allows for better use of optional APIs.
+- Use CmdReceiver interface to allow FeatureMgr to initialize KFileSelectorMgr without directly referencing it's class.  This allows for better use of optional APIs.  It is still necessary to install the correct version on the right device, however.
+- Use compatibility4 version of CauseException and EncodingStreamReader.
+- Use compatibility4 version of EncodingStreamReader.
+- Use compatibility4 version of EncodingUtil.
+- Use compatibility4 version of EncodingUtil and EncodingStreamReader.
+- Use compatibility4 version of StringUtil.
+- Use conditional preprocessed cldc11 code (with modifications) instead of cldc10 code.
+- Use conditional preprocessed cldc11 code with modifications instead of cldc10 code.
+- Use convience method cmpModLog from LoggingTestCase to see if feeds are unequal and change the logging level to retry using logging to make debugging equals failures easier.  Also, retry with modified previous version for bug fixes/enhancements made in the current version.
+- Use convience methods updSvLogging and updPrevLogging from LoggingTestCase to alter/restore the logging level.
+- Use current encodingUtil for replace methods.
+- Use DFEATUREMGRDEF and DFEATUREMGRIMPORTDEF to allow JMUnit (forked to JMUnit Plus) to use FeatureMgr to create a thread to do the commandAction.
+- Use DJMTESTFREEDEF to allow JMUnit (forked to JMUnit Plus) to free up memory when finishing tests by removing the executed tests.
+- Use DJMTESTPLUSDEF to allow JMUnit (forked to JMUnit Plus) to have the option to test without creating multiple midlets.
+- Use DNOVICEDEF to reduce code size for novice version.
+- Use featureMgr instead of getFeatureMgr().
+- Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
+- Use getRssMidlet from FeatureMgr to get the Rss Midlet.
+- Use getSysPropStarts to get system properties and see if it starts with a string.  This can help with initialization of static variables.
+- Use inheritAll to reduce dependencies on the "prepare" target.
+- Use intlink to create file to go to internet links to install the program
+- Use itemEquals to compare each item for testing and logging.
+- Use jmunit plus source code for JMUnit testing.
+- Use linksearchurl to specify link search for a URL in the feed name.
+- Use main display from FeatureMgr.
+- Use main display from FeatureMgr; thus, it is not needed as a parameter.
+- Use m_encodingStreamReader to parse.
+- Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+- Use MiscUtil.toString to log null or the value of the equals parameter vs conditional logic.
+- Use modfication of bytes only in read(...) as read() is a special case of read(...) reading only one character.
+- Use notifyAll to avoid waiting with wait.
+- Use nullPtr to decrease memory.
+- Use only EncodingStreamReader to read data instead of having a separate InputStreamReader to read with.
+- Use OPT_TOOLS environment var for opt.tools.
+- Use presrc of JMUnit (forked to JMUnit Plus) to copy into the mobile rss reader source and preprocess with the other source.
+- Use procIoExc from URLHandler process exception handling for IO and other exceptions including out of memory.
+- Use procIoExc from URLHandler to process exception handling for IO and other exceptions including out of memory.
+- Use procIoExc in URLHandler to handle the IO exception and other exceptions common with IO exception.
+- Use procIoExc to process exception handling for IO and other exceptions including out of memory.
+- Use procThrowable from LoggingTestCase.
+- Use properties to make build file more standard for any project.
+- Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+- Use RssItunesItemInfo for the item compares.
+- Use setItemDatesNull in compatibility testing to null the feed's date if the comparison feed's date is null.  This worksaround a fix where the new version takes the lastBuildDate if pubdate is null.
+- Use setSettingNbr to allow easy setting of int RssReaderSettings settings using key names.
+- Use singleton instead of some static vars for EncodingUtil.
+- Uses smartphone for future change to using smartphone instead of itunes.
+- Use standard file prefix to allow internet link program to use it.
+- Use super.featureMgr instead of featureMgr.
+- Workaround problem where old name becomes null.
+
+v1.11.5 Dev 16 (Dev16) (Jan 27th 2011)
+- Add novice compile target.
+- Build MIDP 2.0, CLDC 1.0, novice target.
+- Change more static fields to instance vars for the singleton to reduce static memory used.
+- Copy/put RIM jar file to ftp site.
+- Don't compile code not present if small memory.
+- Don't compile unneeded code for internet link version.
+- Don't put novice binary into the distribution.  Only the source code will be present.
+- Fix code placement for using JMUnit on a device.
+- Fix conditional compile of DLOGGING code.
+- Fix declaration of djmtestfree define.
+- Fix location of novice.txt file.  
+- Fix novice prefix by adding _ at the end.
+- Fix novice property by making it true.
+- Fix println statement.
+- For CLDC 1.0, use this.getClass() to get the class instance to use to load KFileSelectorMgr.
+- For internet link version, create only one instance of Settings using the constructor.
+- For internet link version, settings is used only by SettingsForm.  Don't have it be a singleton to reduce static methods.
+- Give db used and available in Kbs.
+- Have about menu item to show the about/license info.
+- Have future action request to end the app.
+- Have jsr75Avail to determine if JSR-75 is available for MIDlet, applet or standalone.  Also, return if exists or the version number.
+- Have logger object, finestLoggable, and traceLoggable for using JMUnit on a device.
+- Have m_aboutCmd in FeatureMgr since it should be common for all apps.
+- Have targets prepare.devopment/beta/alpha/production to make setting the properties for these stages easy.
+- Have title and heading with version info in index file.
+- If internet link version, don't show optional items except standard exit.
+- If internet link version, have thread to initialize the settings form and then show the form.
+- If m_maxItemCount has not been set, take it from the RssReaderSettings either via midlet or directly from getInstance.
+- If not logging, use stdout to list stats.
+- If unconditional=false is used for destroyApp, throw MIDletStateChangeException and start or continue saving.
+- Increase code not compiled for internet link version.
+- Keep showing license form until the user accepts it.  Otherwise, kick them out of the program.
+- More only compile some portions if it is the full version.
+- Need to preserve org.kablog.kgui.KFileSelectorMgr to allow loading with class.forName for optional JSR-75 code.
+- New property ACCEPT_LICENSE to indicate that someone accepted the license.
+- Only compile Byte Order Mark code for MIDP 2.0 (i.e. not smaller memory).
+- Only retry if we are doing oneTestOnly.
+- Only take stats if both parsers are successful at parsing.  This prevents bad protocol (e.g. not http) links from giving bad stats.
+- Put file descriptions in a property to allow creation of more descriptive file index file.
+- Put ftp device install files into device-install directory to get them to come up first in sourceforge.
+- Put in comment out future code to use both local and global vars for buffering.
+- Put rim_ prefix on googlecode RIM files.
+- Remove parameter setting which prevents performing novice target.
+- Separate out obfuscate from wtkpackage.  This allows Netebeans WTK home to obfuscate (hopefully).  Need wtkpreverify because wtkobfuscate does not preverify the result.
+- Start with first link for sourceforge which while invalid, will cause prompt for internet access.  When taking http stats, don't count the first (sourceforge) link so that time to answer prompt is not counted as access time.
+- Use -allowaccessmodification allow ProGuard optimization to make some methods public to use inline or other optimizations.
+- Use base URL for index file pointing to the version files directory.  This allows the file to work in any directory as everything is fully qualified.
+- Use getCmdAdd to create and add a command.
+- Use initForm (singular) to initialize the settings form's vars/form.  
+- Use initForms (plural in RssReaderMIDlet) to initialize the settings form.  This will handle showing of about/license.
+- Use jsr75avail from FeatureMgr to determine availability of JSR-75.
+- Use main display from FeatureMgr.
+- Use -optimizationpasses to specify more than one (using 3 for this release) optimization passes.
+- Use setSelectedIndex after initializing bookmarks to make sure selection is at the top of the list.
+
+v1.11.5 Dev 17 (Dev17) (Mar 21th 2011)
+- Account for CLDC 1.0 and 1.1 both listed for CLDC.
+- Account for MIDP 1.0 and 2.x both listed for MIDP.
+- Add MIDP 1.0 "regular" memory compile and build target which is skippped for distribution.
+- Add more targets to not make for dist.smartphone.test.
+- Add more targets to not make for dist.test.
+- Add setFrSettings2GuiNbr to set the text field with a numeric value from the settings with the given key.
+- Allow access to current field names from RssFeedStore to allow future background updates.
+- Allow clearing of RssFeedStore background info.
+- Allow CmdReceiver for large memory MIDP 1.0.
+- Allow optional complete loading of feeds with ImportFeedsForm using FeedListParser.
+- Allow optional keeping of state of items (e.g. read/unread).
+- Allow optional keeping of user name/password.
+- Allow optional saving of only the feed header name, user/pass, and link.
+- Allow optional temporary distribution with temporary subdomain and directory path using wtktemporary.properties.template with yinlight.tmp.subdir, yinlight.tmp.subpath, and yinlight.subdomain.
+- Allow override of branch version.
+- Allow regular and up memory devices to use bookmark name in title.
+- Allow sourceforge project name to be somewhat more generic.
+- Allow thread methods for non small memory releases.
+- Allow use of bookmark name in River of News for non small memory.
+- Catch Throwable instead of Exception and return null or partially initialized item/feed.
+- Change items to array to save on memory and for simplicity.
+- Change max items for feed TextField to show current setting instead of default setting.
+- Change setSettingNbr to setFrGui2SettingsNbr.
+- Check itunes fields separately to avoid setting up temporary strings.
+- Combine statements.
+- Cosmetic changes.
+- Create a yinlight ftp in/htm and sourceforge ftp in/htm file for each target in the "bin" for that target.
+- Don't compile code not present if small memory.
+- Don't copy alx, jad, jar, and cod files to FTP or google.  Put them into zip file which in addition contains the alx file.
+- Don't do script tags because we cannot process them.
+- Don't have signed MIDP 1.0 as it is not supported.
+- Don't preserve org.kablog.kgui.KFileSelectorMgr if it is not present.  This prevents errors.
+- Don't upload internet link version to google code.
+- Do parser suite first to get http prompt faster.
+- Fix max item count for MIDP 1.0 parsing for RssFeedParserTest.
+- Fix processing of dates of the form March 11, 2011 3:11:26 PM PST
+- Fix removal of cod files.
+- Fix statements to be inside conditional compile blocks when needed.
+- For RIM, send zip file.
+- For saveRec need to set bookmarks to "" to reduce memory overflow.
+- Give info messages if no loading form and logging.
+- Have adjustFields for compatibility to change fields that are time sensitive to get compatibility compares to match.
+- Have bookmark details forms for non small memory.
+- Have checkRead return true if items are the same.  Use this to reduce cross check of items being the same.
+- Have checkRead return true if the item's unread was saved.
+- Have clone to create a copy for items/feeds.
+- Have constructor for future background loading of feeds.
+- Have convVec to use for testing to convert from an object array to a Vector.
+- Have different serialVersionUID for CauseException to be different from the compatibility version.
+- Have equals method for CauseException.
+- Have FeatureMgr.getCmdAdd/FeatureMgr.getCmdAddPrompt to both create a command/prompt command and add it to the displayable.  Return the command pointer.
+- Have getCmdAdd and getCmdAddPrompt allow optional long label.
+- Have getFeedTitleList to use title for name when parsing the whole feed.
+- Have getTitleOnly to use title for name when parsing just to get the title.
+- Have keep.smartlink to use smartlink and use for MIDP 1.0 and internet link.
+- Have mark unread items default to false for non-small memory.
+- Have methods to convert from a vector to either a RssItem or RssItunesFeed array.
+- Have mobility choice for open with method urlEncode.
+- Have m_state keep track of unread items and itunes flag.
+- Have notifyObservers without parameter send boolean true to observers.
+- Have open mobilizer and no pic mobilizer for item and bookmark details forms.
+- Have optional setting of getAllFeedList to parse all feeds.
+- Have optional setting of getAllUpdFeedList to parse all updated feeds.
+- Have properties for content handler (JSR-211).
+- Have regularmem option for MIDP 1.0.
+- Have RssFeed constructor copy items.
+- Have setFrGui2SettingsNbr to take the Items from the form and set the corresponding int RSS settings.
+- Have setFrSettings2GuiNbr to take the int settings from RSS settings and set the corresponding Item in the form.
+- Have special file for regular memory.
+- Have split with character separator character.
+- Have tmp release in tmp directory/domain for testing.
+- Have useFeedUrlList to use the url for name.
+- Have value of href be used as link before text of link.
+- If 0/1 fields while deserialization, use null or initialization m_items value.
+- If build-file-root is not defined, don't do preferred/current jad/jar.
+- If get Throwable while serializing, return null item.
+- If item date has an error, save the string value ass errDate.
+- If text attribute does not have the name, try the title attribute.
+- Increase number of tests to 15.
+- Let adding prompt to be used for non FeatureForm/List.  The prompt is ignored if not for these displayables.
+- Make sure midlet is not null for tests and future combination with other programs.
+- Minor memory savings in RSS parsing of dates.
+- Minor performance improvement in getting the month.
+- More logging.
+- Move compatibility tests to compatibility packages.
+- Need () after Thread.yield.
+- Need RssItunesInfo to move itunes flag to RssItem.
+- Null bookmarks StringBuffer to make sure that we save memory starting recovery code for out of memory.
+- Only doing EncodingUtilTest if this is the full version.
+- Only upload RIM zip file as others are not usable.
+- Only use CmdReceiver utils if not small memory.
+- Only use thread utils if not small memory.
+- Optionally use long command label.
+- Parse and store feeds from FeedListParser in ImportFeedsForm.  Put new feeds into the booklist in the form code.
+- Prepare for future Afri-ware version.
+- Prevent ${act.comp.src} directory from being created.
+- Print stack trace in empty catch.
+- Process dates of the form 11 Mar 2011 11:43 GMT.
+- Process dates of the form March 11, 2011 3:11:26 PM PST
+- Process dates of the form Wed, 6 September 14:00:00 GMT.
+- Recognize image with initial cap to prevent invalid links, etc inside the image tag contents.
+- Remove catch of Exception as it does the same as the catch of Throwable in RssFormatParser.
+- Remove unnecessarily public keyword.
+- Remove unused and now obsolete cldc10.TestCase
+- Return presence boolean array to show which feeds were added.
+- RssFeed clone/constructor needs to clone/instantiate new items instead of re-using the parameter's items.
+- Save old feeds and feed names (from URL) from RssFeedStore to allow future background updates.
+- Set and update MOBILIZER_CHOICE.
+- Set m_urlHandler to null to save memory.
+- Set the millisecond to 0 to allow dates to be more consistent.
+- Show errors from getting preferred/current jad/jar.
+- Skip smartlink given that it gives class not found error for MIDP 2.0.
+- Specify imports without '*'.
+- Standardize var names.
+- Switch to yinlight Observable/ObservableHandler to prepare to change the license.
+- Synchronize access to m_platformURL.
+- Test 1st and 2nd settings test classes.
+- Test creating store string and creating from the store string to make sure that it works.
+- Test HtmlLinkParser2Test.
+- Test ParserSuite and UtilitySuite.
+- Test parsing feed list and parsing feeds at the same time.
+- Test to make sure that unexpected exceptions are not thrown for all test feeds and compare.
+- Trim the date.
+- Unit test utility classes.
+- Use a StringBuffer to serialize for minor performance improvement.
+- Use base tag to set the base for relative URL's.
+- Use conditional preprocessed cldc11 code (with modifications) instead of cldc10 code.
+- Use enabled .value to use smartlink.
+- Use FeatureMgr.getAppDefProperty to get the app property and return the given default if null.
+- Use getCmdAdd to have long labels for the commands.
+- Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
+- Use Netbeans WTK home.
+- Use nullPtr to init vars.
+- Use RssItem instead of RssItunesItem to allow future difference in the two.
+- Use RssItunesItem to serialize to maintain compatibility with previous stores of the same version.
+- Use setFrSettings2GuiNbr in FeatureMgr to set numeric gui TextField from RssReaderSettings.
+- Use stage.file instead of sstage.file for jad file properties.
+- Use standard file prefix to allow smartphone program to use it.
+- Use tag len to see if l/L tag is link length.
+- Use utility methods to convert from Vector to arrays.
+- Use wtktemporary.properties to more easily set temporary test development properties used for the build.
+
+v1.11.5 Dev 18 (Dev18) (Sep 15th 2011)
+- Upload RIM zip first to google so that the jad/jar files appear last which is first in the download list.
+- More logging.
+- Remove extra closeConnection.
+- Better error handling.
+- Close connection when going back to root because setFileConnection cannot be used to display the root tree.  Always use open to show the selected root tree.
+- Trace closeConnection entry.
+- Set returned connection to null.
+- Use null pattern using nullPtr.
+- Put errors for Settings.save into a vector in an array.
+- Put errors for Settings.getInstance into a vector in an array.
+- Fix CLDC 1.1 class synchronized for RssReaderSettings.
+- Put errors for RssReaderSettings.getInstance into a vector in an object array.
+- Trim the title in case it has spaces for HTML and OPML parsers.
+- Increase number of redirects allowed to 5.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
@@ -791,30 +1231,62 @@ Program issues:
 
 - While the program will not hang if there is a network problem when opening a bookmark/feed, update, update modifyed, it can hang if update all, or update modified all.  These other situations will be resolved in another release (TBD).
 
-Issues:
+Development issues:
+- Preferred jar/jad lacks signing authority name.
+- The full version of the settings form flashes an unimportant error before showing the main screen.
 
-- For some emulators and devices, bookmarks are not saved.
+General issues:
+- For some emulators and devices, bookmarks are not saved.  However, saving bookmarks does work on WTK 2.5.2_01 and most phones that I have tested.
 
-TODO:
-
+TODO:  Not necessarily in the order it will be done or if it will be done at all.
+- Fix null pointer with invalid feed of rss feed directory (invalid OPML) read as feed for Samsung insight HD.
+- fr itunes and other iso8859 error if no iso8859?
+- Have HTMLLinkParser check for autolinks as well.
+- Fix code for future backgkround processing.
+- Fix code for determining the right version to handle MDIP vers with 2 or more versions supported.
+- Test "regular" memory and smartphone version of MIDP 1.0.
+- Don't show preferred or current jad/jar for novice compile.
+- Download link?
+- Cut down on setcurrent methods in FeatureMgr.
+- No copy/paste for MIDP 1.0.
+- Offline version built by applet.
+- Add about.
+- Set selection 0 for booklist to prevent it showing the last bookmark on some devices.
+- Have FeatureMgr do allow paste and copy(link) (getLabel, gettext or getString for text item if making textbox).
+- Have FeatureMgr do copy form for loadingForm.
+- Make sure that objects are all closed.
+- Document use of MicroEmulator to demo app.  This does not save the vars, except standalone?
+- Show the current signing authority.
+- Create own image for open/closed envelopes using parallel and diagonal lines. 
+- More work on feed background processing.  Need to modify all old pointers to the feed after update.  This may be already done by re-initializing the list every time.  Need to have some atomic way to get elements from booklist?
+- Make sure flash backlight and vibrate have positive values.
+- Use weak ref for old bookmark pointers for AllNewsList and FeedListParser?
+- Background only for smartphone vers.
+- Replace old pointers as we read/update new feeds to save memory.
+- Release logging changes.
+- Use comments (found in wordpress blogs) which appears to be exactly the comments, perhaps too big.  Summerize or first so many bytes?
+- Look at activity stream specs
+- Use lastBuildDate and source url=, is link "via" in atom.
+- Use logo in place of image
+- Request Accept-Charset: unicode-1-1, iso8859-1, *;q=3,2,1 (if utf-8 supported encoding)
+- Request Accept-Encoding: gzip, *;q=2,1 (if gzip lib present)
+- Finding if cp1252 will accept any character to use if iso8859-1 is not present.
 - Selecting root directory in find files does not return the root directory.
 - Selecting .. for up directory, does not give error.  It goes up one directory.
 - Are alx files in zip files?
 - Use echo to add to readme?
-- Add full to file names.
 - Make static vars that use method initialization be instance vars of Singleton.
-- Create HTML index file of released ftp files.
+- Try WML file with .htaccess to link to files.
 - Use prompt form to ask about license.
 - Create version to go to install links and allow full version to do it also.
 - RssFormatParser remove extra spaces between description item 7 of imbed
 - URLHandler document need super
-- Have the same order for OK, Back, Cancel, Exit, and Open.
 - Share cancel command.
 - If setCommandListener again, just change user, restart thread, join
 - Handle storeDate.
 - Handle OutOfMemoryError.
-- Optionally keep the back light on with desired intensity.
-- Optionally flash the backlight for a specific duration when update all is complete.
+- Test optional flash the backlight for a specific duration when update all is complete.
+- Test optional vibrate for a specific duration when update all is complete.
 - Check if need to set to itunes feed if not in header, but in items.
 - Add some media fields.
 - Use decorator patteren for media fields.
