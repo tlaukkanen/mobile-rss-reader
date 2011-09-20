@@ -40,16 +40,75 @@
  * IB 2010-11-17 1.11.5Dev14 Cosmetic change.
  * IB 2010-11-18 1.11.5Dev14 Change jsr-75 exists to give true for allowed and not allowed.
  * IB 2010-11-19 1.11.5Dev14 Use getSysProperty instead of getProperty for working with emulator and possibly other devices.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile some portions if it is the full version.
+ * IB 2011-01-11 1.11.5Alpha15 Use super.featureMgr instead of featureMgr.
+ * IB 2011-01-14 1.11.5Dev15 Have optional backlight after update/refresh all.
+ * IB 2011-01-14 1.11.5Dev15 Have optional vibrate after update/refresh all.
+ * IB 2011-01-14 1.11.5Dev15 Have some public static keys for int options to allow shorter coding in SettingsForm.
+ * IB 2011-01-14 1.11.5Dev15 Change static fields to instance vars for the RssReaderSettings singleton to reduce static memory used.
+ * IB 2011-01-14 1.11.5Dev15 Have fields to show the preferred jar/jad based on current MIDP/JSR settings and the current jar/jad names for internet link/full code to display the text "current" if the preferred jar/jad name matches the current one.  In the future, the MIDP 2.0 version will download the preferred version on user request.
+ * IB 2011-01-14 1.11.5Dev15 Have test update command to allow upating of the current jar/jad names to test internet link code to display the text "current" if the preferred jar/jad name matches the current one.
+ * IB 2011-01-14 1.11.5Dev15 More logging.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 Have getAddTextField to both create a text field which uses layout bottom (MIDP 2.0) and appends the field to the given form.
+ * IB 2011-01-12 1.11.5Alpha15 Have getAddChoiceGroup to both create a choice field which uses layout bottom (MIDP 2.0) and appends the field to the given form.
+ * IB 2011-01-12 1.11.5Alpha15 Have getAddStringItem to both create a string item which uses layout bottom (MIDP 2.0) and appends the item to the given form.
+ * IB 2011-01-12 1.11.5Alpha15 Have novice as part of the program name if novice is built.
+ * IB 2011-01-12 1.11.5Alpha15 If unable to get microedition.locale, get file.encoding for applet/standalone emulator.
+ * IB 2011-01-12 1.11.5Alpha15 Use setSettingNbr to allow easy setting of int RssReaderSettings settings using key names.
+ * IB 2011-01-12 1.11.5Alpha15 If logging level is changed, use initLogVars to reset the logging vars in RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 Use main display from FeatureMgr.
+ * IB 2011-01-12 1.11.5Alpha15 If internet link version, have thread to initialize the settings form and then show the form.
+ * IB 2011-01-12 1.11.5Alpha15 If internet link version, don't show optional items except standard exit.
+ * IB 2011-01-18 1.11.5Alpha15 Give db avail./size in kb.
+ * IB 2011-01-18 1.11.5Dev16 Use jsr75avail from FeatureMgr to determine availabilit of JSR-75.
+ * IB 2011-01-18 1.11.5Dev16 Have about menu item to show the about/license info.
+ * IB 2011-01-18 1.11.5Dev16 Give db used and available in Kbs.
+ * IB 2011-01-18 1.11.5Dev16 Use initForm (singular) to initialize the settings form's vars/form.  
+ * IB 2011-01-18 1.11.5Dev16 Use initForms (plural in RssReaderMIDlet) to initialize the settings form.  This will handle showing of about/license.
+ * IB 2011-01-18 1.11.5Dev16 Use getCmdAdd to create and add a command.
+ * IB 2011-01-28 1.11.5Dev17 Change setSettingNbr to setFrGui2SettingNbr.
+ * IB 2011-01-28 1.11.5Dev17 Set and update MOBILIZER_CHOICE.
+ * IB 2011-01-29 1.11.5Dev17 Use setFrSettings2GuiNbr in FeatureMgr to set numeric gui TextField from RssReaderSettings.
+ * IB 2011-01-29 1.11.5Dev17 Change max items for feed TextField to show current setting instead of default setting.
+ * IB 2011-03-06 1.11.5Dev17 Allow regular and up memory devices to use bookmark name in title.  
+ * IB 2011-03-18 1.11.5Dev17 Cosmetic change.
+ * IB 2011-03-18 1.11.5Dev17 Fix statements to be inside conditional compile blocks when needed.
+ * IB 2011-03-19 1.11.5Dev17 Account for MIDP 1.0 and 2.x both listed for MIDP.
+ * IB 2011-03-19 1.11.5Dev17 Account for CLDC 1.0 and 1.1 both listed for CLDC.
+ * IB 2011-03-19 1.11.5Dev17 Prepare for future Afri-ware version.
+ * IB 2011-03-21 1.11.5Dev17 Use FeatureMgr.getAppDefProperty to get the app property and return the given default if null.
+ * IB 2011-03-21 1.11.5Dev17 If build-file-root is not defined, don't do preferred/current jad/jar.
  */
 
 // Expand to define MIDP define
 //#define DMIDP20
+// Expand to define CLDC define
+//#define DCLDCV10
 // Expand to define DJSR75 define
 //#define DNOJSR75
+// Expand to define smartphone define
+//#define DNOSMARTPHONE
+// Expand to define Afriware define
+//#define DNOAFRIWARE
 // Expand to define itunes define
-//#define DNOITUNES
+//#define DFULLVERS
+// Expand to define itunes define
+//#define DNOINTLINK
+// Expand to define novice define
+//#define DNONOVICE
+// Expand to define signed define
+//#define DNOSIGNED
+// Expand to define godaddy define
+//#define DNOGODADDY
+// Expand to define thawte define
+//#define DNOTHAWTE
+// Expand to define verisign define
+//#define DNOVERISIGN
 // Expand to define logging define
 //#define DNOLOGGING
+// Expand to define test define
+//#define DNOTEST
 // Expand to define test ui define
 //#define DNOTESTUI
 
@@ -83,12 +142,12 @@ import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.Item;
 
 import com.substanceofcode.utils.Settings;
+import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import com.substanceofcode.rssreader.presentation.FeatureForm;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
-//@import net.sf.jlogmicro.util.logging.LogManager;
 //@import net.sf.jlogmicro.util.logging.Level;
 //#endif
 
@@ -97,23 +156,43 @@ import com.substanceofcode.rssreader.presentation.FeatureForm;
  * @author Tommi Laukkanen
  */
 public class SettingsForm extends FeatureForm
-implements CommandListener {
+implements CommandListener
+	//#ifdef DINTLINK
+//@	,Runnable
+	//#endif
+{
     
     private Command m_okCommand;
+	//#ifdef DFULLVERS
     private Command m_cancelCommand;
+	//#endif
+	//#ifdef DTEST
+//@    private Command m_updateCommand;
+	//#endif
     
+	//#ifdef DFULLVERS
     private TextField m_itemCountField;
     private ChoiceGroup m_markUnreadItems;
 	//#ifdef DMIDP20
     private ChoiceGroup m_useTextBox;
 	//#endif
-    private ChoiceGroup m_useStandardExit;
-    private ChoiceGroup m_itunesEnabled;
-	//#ifdef DMIDP20
-    private ChoiceGroup m_fontChoice;
-    private ChoiceGroup m_fitPolicy;
+	//#ifdef DSMARTPHONE
+//@    private ChoiceGroup m_itunesEnabled;
+	//#else
+    private StringItem m_itunesEnabled;
+	//#endif
+	//#ifndef DSMALLMEM
     private ChoiceGroup m_nameNews;
 	//#endif
+	//#ifdef DMIDP20
+    private ChoiceGroup m_mobilizerChoice;
+    private ChoiceGroup m_fontChoice;
+    private ChoiceGroup m_fitPolicy;
+    private TextField m_backlightFlash;
+    private TextField m_vibrate;
+	//#endif
+	//#endif
+    private ChoiceGroup m_useStandardExit;
     private TextField m_wordCountField;
     private StringItem m_pgmMemUsedItem;
     private StringItem m_pgmMemAvailItem;
@@ -122,65 +201,80 @@ implements CommandListener {
     private StringItem m_threadsUsed;
     private boolean prevStdExit;
 	//#ifdef DLOGGING
+//@    private String prevLevel;
+	//#endif
+    private String m_preffnp;
+    private String m_currfnp;
+    private StringItem m_preffJadTx;
+    private StringItem m_preffJarTx;
+	//#ifdef DTEST
+//@    private TextField m_currJadTx;
+//@    private TextField m_currJarTx;
+	//#endif
+
+	//#ifdef DLOGGING
 //@    private TextField m_logLevelField;
-//@    private Logger logger = Logger.getLogger("SettingsForm");
-//@    private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    private Logger m_logger = Logger.getLogger("SettingsForm");
+//@    private boolean m_fineLoggable = m_logger.isLoggable(Level.FINE);
+//@    private boolean m_finestLoggable = m_logger.isLoggable(Level.FINEST);
 	//#endif
     
     /** Creates a new instance of SettingsForm */
     public SettingsForm(LoadingForm loadForm) {
         super("Settings", loadForm);
+	}
         
-        m_okCommand = new Command("OK", Command.OK, 4);
-        super.addCommand( m_okCommand );
-        
-        m_cancelCommand = new Command("Cancel", Command.CANCEL, 2);
-        super.addCommand( m_cancelCommand );
-        
-        RssReaderSettings settings = featureMgr.getMidlet().getSettings();
-        int maxCount = settings.getMaximumItemCountInFeed();
-        
-        m_itemCountField = new TextField("Max item count in feed",
-                String.valueOf(maxCount), 3, TextField.NUMERIC);
-		//#ifdef DMIDP20
-		m_itemCountField.setLayout(Item.LAYOUT_BOTTOM);
+ 	public void initForm() {
+        m_okCommand = FeatureMgr.getCmdAdd(this, "OK", null, Command.OK, 4);
+
+		//#ifdef DFULLVERS
+        m_cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", null, Command.CANCEL, 2);
+		//#else
+//@		FeatureMgr.m_aboutCmd = FeatureMgr.getCmdAdd(this, "About", null, Command.SCREEN, 100);
+//@		FeatureMgr.getRssMidlet().initExit(this);
 		//#endif
-        super.append( m_itemCountField );
-		String [] choices = {"Mark", "No mark"};
-        m_markUnreadItems = new ChoiceGroup("Mark unread items",
-				                            Choice.EXCLUSIVE, choices, null);
-		//#ifdef DMIDP20
-		m_markUnreadItems.setLayout(Item.LAYOUT_BOTTOM);
+        
+		//#ifdef DTEST
+//@        m_updateCommand = new Command("Update", Command.ITEM, 5);
+//@        super.addCommand( m_updateCommand );
 		//#endif
-        super.append( m_markUnreadItems );
+        
+        RssReaderSettings settings = featureMgr.getRssMidlet().getSettings();
+        Settings bsettings = settings.getSettingsInstance();
+		//#ifdef DFULLVERS
+        m_itemCountField = FeatureMgr.getAddTextField(this,
+				"Max item count in feed",
+                String.valueOf(settings.getMaximumItemCountInFeed()), 3,
+				TextField.NUMERIC);
+
+        m_markUnreadItems = FeatureMgr.getAddChoiceGroup(this,
+				"Mark unread items", new String [] {"Mark", "No mark"});
 		//#ifdef DMIDP20
-		String [] txtChoices = {"Text (large) box", "Text (line) field"};
-        m_useTextBox = new ChoiceGroup("Text entry items",
-				                            Choice.EXCLUSIVE, txtChoices, null);
-		m_useTextBox.setLayout(Item.LAYOUT_BOTTOM);
-        super.append( m_useTextBox );
+        m_useTextBox = FeatureMgr.getAddChoiceGroup(this,
+				"Text entry items", new String [] {"Text (large) box",
+				"Text (line) field"});
 		//#endif
 
-		String [] txtExit = {"Use standard exit key", "Use menu exit key"};
-        m_useStandardExit = new ChoiceGroup("Exit key type",
-				                            Choice.EXCLUSIVE, txtExit, null);
-		//#ifdef DMIDP20
-		m_useStandardExit.setLayout(Item.LAYOUT_BOTTOM);
+		//#ifdef DSMARTPHONE
+//@        m_itunesEnabled = FeatureMgr.getAddChoiceGroup(this,
+//@				"Choose to use podcast data", new String []
+//@				{"Don't show podcast data", "Show Itunes data"});
+		//#else
+        m_itunesEnabled = FeatureMgr.getAddStringItem(this,
+				"Choose to use podcast data",
+				"This is only available on the smartphone version.");
 		//#endif
-        super.append( m_useStandardExit );
-		String [] itunesEnabledChoices = {"Don't show Itunes data",
-				"Show Itunes data"};
-        m_itunesEnabled = new ChoiceGroup("Choose to use Itunes data",
-				                            Choice.EXCLUSIVE,
-											itunesEnabledChoices,
-											null);
-		//#ifdef DMIDP20
-		m_itunesEnabled.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-		//#ifdef DITUNES
-//@        super.append( m_itunesEnabled );
+
+		//#ifndef DSMALLMEM
+        m_nameNews = FeatureMgr.getAddChoiceGroup(this,
+				"Put feed name in river of news", new String []
+				{"Don't show name", "Show name"});
 		//#endif
 		//#ifdef DMIDP20
+        m_mobilizerChoice = FeatureMgr.getAddChoiceGroup(this,
+				"Choose mobilizer size",
+				new String[] {"No mobilizer", "Google mobilizer",
+				"Skweezer mobilizer"});
         m_fontChoice = FeatureMgr.getAddChoiceGroup(this,
 				"Choose list font size",
 				new String[] {"Default font size", "Small",
@@ -189,164 +283,285 @@ implements CommandListener {
 				"Choose list wraparound",
 				new String[] {"Default wrap around", "Wraparound on",
 				"Wrap around off"});
-        m_nameNews = FeatureMgr.getAddChoiceGroup(this,
-				"Put feed name in river of news", new String []
-				{"Don't show name", "Show name"});
+        m_backlightFlash = FeatureMgr.getAddTextField(this,
+				"Flash backlight for seconds after updating.",
+                String.valueOf(settings.getBacklightFlashSecs()), 3,
+				TextField.NUMERIC);
+        m_vibrate = FeatureMgr.getAddTextField(this,
+				"Vibrate phone for seconds after updating.",
+                String.valueOf(settings.getVibrateSecs()), 3,
+				TextField.NUMERIC);
+
 		//#endif
-        int maxWordCount = settings.getMaxWordCountInDesc();
-        m_wordCountField = new TextField("Max word count desc abbrev",
-                String.valueOf(maxWordCount), 3, TextField.NUMERIC);
-		//#ifdef DMIDP20
-		m_wordCountField.setLayout(Item.LAYOUT_BOTTOM);
+
+        m_wordCountField = FeatureMgr.getAddTextField(this,
+				"Max word count desc abbrev",
+                String.valueOf(settings.getMaxWordCountInDesc()), 2,
+				TextField.NUMERIC);
+
 		//#endif
-        super.append( m_wordCountField );
-        StringItem pgmMidpVers = new StringItem("Program MIDP version:",
+        m_useStandardExit = FeatureMgr.getAddChoiceGroup(this,
+				"Exit key type", new String [] {"Use standard exit key",
+				"Use menu exit key"});
+
+        FeatureMgr.getAddStringItem(this, "Program MIDP version:",
 		//#ifdef DMIDP20
-				"MIDP-2.0");
+				"MIDP-2.0"
 		//#else
-//@				"MIDP-1.0");
+//@				"MIDP-1.0"
 		//#endif
-		//#ifdef DMIDP20
-		pgmMidpVers.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( pgmMidpVers );
-        StringItem pgCldVers = new StringItem("Program CLDC version:",
+				);
+
+        FeatureMgr.getAddStringItem(this, "Program CLDC version:",
 				//#ifdef DCLDCV11
-//@				"CLDC-1.1");
+//@				"CLDC-1.1"
 				//#else
-				"CLDC-1.0");
+				"CLDC-1.0"
 				//#endif
-		//#ifdef DMIDP20
-		pgCldVers.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( pgCldVers );
-        StringItem pgmJsr75 = new StringItem("Program JSR 75 available:",
+				);
+
+        FeatureMgr.getAddStringItem(this, "Program JSR 75 available:",
 		//#ifdef DJSR75
-//@				"true");
+//@				"true"
 		//#else
-				"false");
+				"false"
 		//#endif
-		//#ifdef DMIDP20
-		pgmJsr75.setLayout(Item.LAYOUT_BOTTOM);
+				);
+        FeatureMgr.getAddStringItem(this, "Program smartphone:",
+		//#ifdef DSMARTPHONE
+//@				"true"
+		//#else
+				"false"
 		//#endif
-        super.append( pgmJsr75 );
-		Object[] omep = FeatureMgr.getSysProperty("microedition.profiles", null,
-				"Unable to get microedition.profiles",
-				featureMgr.getLoadForm());
+				);
+        FeatureMgr.getAddStringItem(this, "Program signed:",
+		//#ifdef DSIGNED
+//@				"true"
+		//#else
+				"false"
+		//#endif
+				);
+		Object[] omep = FeatureMgr.getSysProperty("microedition.profiles",
+				"N/A", "Unable to get microedition.profiles",
+				super.featureMgr.getLoadForm());
 		String mep = (String)omep[0];
-		if (mep == null) {
-			mep = "N/A";
+        FeatureMgr.getAddStringItem(this, "Phone MIDP version:", mep);
+		Hashtable sysOptions = new Hashtable(5);
+		String omidpv = MiscUtil.replace(MiscUtil.replace(mep, "-", ""),
+					".", "").toLowerCase();
+		if ((omidpv.indexOf("midp10") >= 0) && (omidpv.indexOf("midp2") >= 0)) {
+			omidpv = "midp20";
 		}
-        StringItem midpVers = new StringItem("Phone MIDP version:", mep);
-		//#ifdef DMIDP20
-		midpVers.setLayout(Item.LAYOUT_BOTTOM);
+		sysOptions.put(omidpv, new Boolean(true));
+		String cmidpv = MiscUtil.replace(omidpv, "21","20");
+		sysOptions.put(cmidpv, new Boolean(true));
+		//#ifdef DLOGGING
+//@		if (m_finestLoggable) {m_logger.finest("Constructor cmidpv=" + cmidpv);}
 		//#endif
-        super.append( midpVers );
-		Object[] omec = FeatureMgr.getSysProperty("microedition.configuration",
-				null, "Unable to get microedition.configuration",
-				featureMgr.getLoadForm());
-		String mec = (String)omec[0];
-		if (mec == null) {
-			mec = "N/A";
+		{
+			Object[] omec = FeatureMgr.getSysProperty("microedition.configuration",
+					"N/A", "Unable to get microedition.configuration",
+					super.featureMgr.getLoadForm());
+			String mec = (String)omec[0];
+			FeatureMgr.getAddStringItem(this, "Phone CLDC version:", mec);
+			mec = MiscUtil.replace(MiscUtil.replace(mec, "-", ""),
+						".", "").toLowerCase();
+			if ((mec.indexOf("cldc10") >= 0) && (mec.indexOf("cldc11") >= 0)) {
+				mec = "cldc11";
+			}
+
+			sysOptions.put(mec, new Boolean(true));
 		}
-        StringItem cldcVers = new StringItem("Phone CLDC version:", mec);
-		//#ifdef DMIDP20
-		cldcVers.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( cldcVers );
-		//#ifdef DMIDP10
-//@        super.append(new StringItem("Phone JSR 75 available:",
-//@				String.valueOf(FeatureMgr.getSysProperty(
-//@				"microedition.io.file.FileConnection.version", null,
-//@				"Unable to get JSR-75 FileConnection", featureMgr.getLoadForm())[0] != null)));
-		//#else
-		Object[] ojsr75 = 
-				FeatureMgr.getSysPermission(
-				"javax.microedition.io.Connector.file.read",
-				"microedition.io.file.FileConnection.version", null,
-				"Unable to get JSR-75 FileConnection", featureMgr.getLoadForm());
-		int ijsr75 = ((Integer)ojsr75[0]).intValue();
-		if (ijsr75 >= 0) {
-			super.append(new StringItem("Phone JSR 75 available:",
-					String.valueOf(ijsr75 == 1)));
-			super.append(new StringItem("Phone JSR 75 exists:",
-					String.valueOf(ijsr75 >= 0)));
-		} else {
-			super.append(new StringItem("Phone JSR 75 available:",
-					String.valueOf(ojsr75[2] != null)));
+		Object[] ojsr75Avail = super.featureMgr.jsr75Avail();
+		boolean hasjsr75 = ((Boolean)ojsr75Avail[0]).booleanValue();
+        FeatureMgr.getAddStringItem(this, "Phone JSR 75 available:",
+				((Boolean)ojsr75Avail[0]).toString());
+		if (ojsr75Avail[1] != null) {
+			FeatureMgr.getAddStringItem(this, "Phone JSR 75 exists:",
+					((Boolean)ojsr75Avail[1]).toString());
 		}
-		if (ojsr75[2] != null) {
-			super.append(new StringItem("Phone JSR 75 version:",
-					(String)ojsr75[2]));
+		if (ojsr75Avail[2] != null) {
+			FeatureMgr.getAddStringItem(this, "Phone JSR 75 version:",
+					(String)ojsr75Avail[2]);
 		}
+		sysOptions.put("jsr75", new Boolean(hasjsr75));
+		//#ifdef DLOGGING
+//@		if (m_fineLoggable) {m_logger.fine("Constructor sysOptions=" + sysOptions);}
 		//#endif
 		Object[] omepl = FeatureMgr.getSysProperty("microedition.platform",
-				null, "Unable to get microedition.platform",
-				featureMgr.getLoadForm());
+				"N/A", "Unable to get microedition.platform",
+				super.featureMgr.getLoadForm());
 		String mepl = (String)omepl[0];
-		if (mepl == null) {
-			mepl = "N/A";
-		}
-        StringItem platformVers = new StringItem("Phone Microedition platform:",
-				mepl);
-		//#ifdef DMIDP20
-		platformVers.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( platformVers );
+        FeatureMgr.getAddStringItem(this, "Phone Microedition platform:", mepl);
+		do {
+			try {
+				m_currfnp = FeatureMgr.getAppDefProperty("build-file-root", "") +
+					".";
+				if (m_currfnp.length() < 2) {
+					//#ifdef DLOGGING
+//@					if (m_fineLoggable) {m_logger.fine("Constructor build-file-root not defined or blank.  Skipping preferred/current jad/jar.");}
+					//#endif
+					break;
+				}
+				String[] sbuildf = MiscUtil.split(FeatureMgr.getAppDefProperty(
+							"sbuild-file-root", ""), ",");
+				boolean projectFound = false;
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < sbuildf.length; i++) {
+					//#ifdef DLOGGING
+//@					if (m_finestLoggable) {m_logger.finest("Constructor sbuildf[i]=" + i + "," + sbuildf[i]);}
+					//#endif
+					String sval = ((sbuildf[i].charAt(0) == '-') ? "-_" :
+							FeatureMgr.getAppDefProperty(sbuildf[i].replace(
+									'.', '-'), ""));
+					//#ifdef DLOGGING
+//@					if (m_finestLoggable) {m_logger.finest("Constructor sval=" + sval);}
+					//#endif
+					int len;
+					if ((len = sval.length()) > 1)  {
+						String aval = (sval.charAt(len - 1) != '_') ? sval :
+							sval.substring(0, len - 1);
+						//#ifdef DLOGGING
+//@						if (m_finestLoggable) {m_logger.finest("Constructor aval=" + aval);}
+						//#endif
+						if ((aval.charAt(0) == 'm') || (aval.charAt(0) == 'c') ||
+								(aval.charAt(0) == 'j')) {
+							Object oval;
+							if (((oval = sysOptions.get(aval)) != null) &&
+									((Boolean)oval).booleanValue()) {
+								//#ifdef DLOGGING
+//@								if (m_finestLoggable) {m_logger.finest("Constructor oval=" + oval);}
+								//#endif
+								//#ifndef DSMARTPHONE
+								if (aval.equals("cldc11")) {
+									// For simplicity, if not smartphone version
+									// use CLDC 1.0 for all versions.
+									aval = "cldc10";
+								}
+								//#endif
+								sb.append(aval).append("_");
+							}
+						} else {
+							if (!projectFound) {
+								projectFound = sbuildf[i].startsWith("release");
+							}
+							// This is expanded by filter to "novice" or configured
+							// value for it.
+							if (aval.equals("novice")) {
+								//#ifndef DNOVICE
+								aval = "";
+								//#endif
+								//#ifndef DSMARTPHONE
+							} else if (aval.equals("smartphone")) {
+								aval = "";
+								//#endif
+								//#ifndef DAFRIWARE
+							} else if (aval.equals("afriware")) {
+								aval = "";
+								//#endif
+								// intlink is never the preferred version.
+							} else if (aval.equals("intlink")) {
+								aval = "";
+								//#ifndef DSIGNED
+							} else if (aval.equals("signed")) {
+								aval = "";
+								//#endif
+							} else if (aval.equals("verisign")) {
+								//#ifndef DVERSIGN
+								aval = "";
+								//#endif
+							} else if (aval.equals("thawte")) {
+								//#ifndef DTHAWTE
+								aval = "";
+								//#endif
+							} else if (aval.equals("godaddy")) {
+								//#ifndef DGODADDY
+								aval = "";
+								//#endif
+							}
+							if (projectFound) {
+								sb.append(aval);
+							} else {
+								if (aval.length() > 0) {
+									sb.append(aval).append("_");
+								}
+							}
+						}
+					}
+				}
+				//#ifdef DLOGGING
+//@				if (m_finestLoggable) {m_logger.finest("Constructor sb=" + sb);}
+				//#endif
+				m_preffnp = sb.append(".").toString();
+				m_preffJadTx = FeatureMgr.getAddStringItem(this, "Preferred jad:",
+						m_preffnp + "jad");
+				m_preffJarTx = FeatureMgr.getAddStringItem(this, "Preferred jar:",
+						m_preffnp + "jar");
+				//#ifdef DTEST
+//@				m_currJadTx = FeatureMgr.getAddTextField(this, "Current jad:",
+//@						m_currfnp + "jad", Math.max(m_currfnp.length() + 3, 526),
+//@						TextField.ANY);
+				//#else
+				FeatureMgr.getAddStringItem(this, "Current jad:", m_currfnp + "jad");
+				//#endif
+				//#ifdef DTEST
+//@				m_currJarTx = FeatureMgr.getAddTextField(this, "Current jar:",
+//@						m_currfnp + "jar", Math.max(m_currfnp.length() + 3, 526),
+//@						TextField.ANY);
+				//#else
+				FeatureMgr.getAddStringItem(this, "Current jar:",
+						m_currfnp +
+						"jar");
+				//#endif
+				if (m_preffnp.equals(m_currfnp)) {
+					m_preffJadTx.setLabel("Preferred jad (current):");
+					m_preffJarTx.setLabel("Preferred jar (current):");
+				}
+			} catch (Throwable e) {
+				super.featureMgr.getLoadForm().recordExcForm(
+						"Internal error unable to get preferred jad/jar.", e);
+			}
+		} while (false);
+
 		Object[] omel = FeatureMgr.getSysProperty("microedition.locale",
 				null, "Unable to get microedition.locale",
-				featureMgr.getLoadForm());
-		String mel = (String)omel[0];
-		if (mel == null) {
-			mel = "N/A";
+				super.featureMgr.getLoadForm());
+		if (omel == null) {
+			omel = FeatureMgr.getSysProperty("file.encoding",
+					"N/A", "Unable to get file.encoding.",
+					super.featureMgr.getLoadForm());
 		}
-        StringItem silocale = new StringItem("Phone Microedition locale:", mel);
-		//#ifdef DMIDP20
-		silocale.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( silocale );
+		String mel = (String)omel[0];
+        FeatureMgr.getAddStringItem(this, "Phone Microedition locale:", mel);
 		//#ifdef DLOGGING
 //@        m_logLevelField = new TextField("Logging level",
-//@                logger.getParent().getLevel().getName(), 20, TextField.ANY);
+//@                m_logger.getParent().getLevel().getName(), 20, TextField.ANY);
 		//#ifdef DMIDP20
 //@		m_logLevelField.setLayout(Item.LAYOUT_BOTTOM);
 		//#endif
 //@        super.append( m_logLevelField );
 		//#endif
-        m_pgmMemUsedItem = new StringItem("Application memory used:", "");
-		//#ifdef DMIDP20
-		m_pgmMemUsedItem.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( m_pgmMemUsedItem );
-        m_pgmMemAvailItem = new StringItem("Application memory available:", "");
-		//#ifdef DMIDP20
-		m_pgmMemAvailItem.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( m_pgmMemAvailItem );
-        m_memUsedItem = new StringItem("DB memory used:", "");
-		//#ifdef DMIDP20
-		m_memUsedItem.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( m_memUsedItem );
-        m_memAvailItem = new StringItem("DB memory available:", "");
-		//#ifdef DMIDP20
-		m_memAvailItem.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( m_memAvailItem );
-        m_threadsUsed = new StringItem("Active Threads:", "");
-		//#ifdef DMIDP20
-		m_threadsUsed.setLayout(Item.LAYOUT_BOTTOM);
-		//#endif
-        super.append( m_threadsUsed );
+        m_pgmMemUsedItem = FeatureMgr.getAddStringItem(this,
+				"Application memory used:", "");
+        m_pgmMemAvailItem = FeatureMgr.getAddStringItem(this,
+				"Application memory available:", "");
+        m_memUsedItem = FeatureMgr.getAddStringItem(this,
+				"DB memory used:", "");
+        m_memAvailItem = FeatureMgr.getAddStringItem(this,
+				"DB memory available:", "");
+        m_threadsUsed = FeatureMgr.getAddStringItem(this,
+				"Active Threads:", "");
 		updateForm();
     }
     
 	/* Update form items that change per run. */
 	public void updateForm() {
-        RssReaderMIDlet midlet = featureMgr.getMidlet();
+        RssReaderMIDlet midlet = featureMgr.getRssMidlet();
         RssReaderSettings settings = midlet.getSettings();
-        int maxCount = settings.getMaximumItemCountInFeed();
-        m_itemCountField.setString(String.valueOf(maxCount));
+        Settings bsettings = settings.getSettingsInstance();
+		//#ifdef DFULLVERS
+		super.featureMgr.setFrSettings2GuiNbr(bsettings,
+				settings.MAX_ITEM_COUNT, m_itemCountField);
         boolean markUnreadItems = settings.getMarkUnreadItems();
 		boolean [] selectedItems = {markUnreadItems, !markUnreadItems};
 		m_markUnreadItems.setSelectedFlags( selectedItems );
@@ -355,14 +570,26 @@ implements CommandListener {
 		boolean [] boolSelectedItems = {useTextBox, !useTextBox};
 		m_useTextBox.setSelectedFlags( boolSelectedItems );
 		//#endif
+		// end DMIDP20
         boolean useStdExit = settings.getUseStandardExit();
         prevStdExit = useStdExit;
 		boolean [] boolExitItems = {useStdExit, !useStdExit};
 		m_useStandardExit.setSelectedFlags( boolExitItems );
         boolean itunesEnabled = settings.getItunesEnabled();
-		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
-		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
+		//#ifdef DSMARTPHONE
+//@		boolean [] boolItunesEnabled = {!itunesEnabled, itunesEnabled};
+//@		m_itunesEnabled.setSelectedFlags( boolItunesEnabled );
+		//#endif
+		// end DSMARTPHONE
+		//#ifndef DSMALLMEM
+        boolean nameNews = settings.getBookmarkNameNews();
+		m_nameNews.setSelectedFlags( new boolean[] {!nameNews, nameNews});
+		//#endif
 		//#ifdef DMIDP20
+        int mobilizerChoice = settings.getMobilizerChoice();
+		m_mobilizerChoice.setSelectedFlags( new boolean[] {false, false, false,
+				false} );
+		m_mobilizerChoice.setSelectedIndex( mobilizerChoice, true );
         int fontChoice = settings.getFontChoice();
 		m_fontChoice.setSelectedFlags( new boolean[] {false, false, false,
 				false} );
@@ -370,13 +597,19 @@ implements CommandListener {
         int fitPolicy = settings.getFitPolicy();
 		m_fitPolicy.setSelectedFlags( new boolean[] {false, false, false} );
 		m_fitPolicy.setSelectedIndex( fitPolicy, true );
-        boolean nameNews = settings.getBookmarkNameNews();
-		m_nameNews.setSelectedFlags( new boolean[] {!nameNews, nameNews});
+		super.featureMgr.setFrSettings2GuiNbr(bsettings,
+				settings.BACKLIGHT_FLASH_SECS, m_backlightFlash);
+		super.featureMgr.setFrSettings2GuiNbr(bsettings, settings.VIBRATE_SECS,
+				m_vibrate);
 		//#endif
+		// end DMIDP20
+		super.featureMgr.setFrSettings2GuiNbr(bsettings,
+				settings.MAX_WORD_COUNT, m_wordCountField);
+		//#endif
+		// end DFULLVERS
 		int[] memInfo = null;
 		try {
-			Settings m_settings = Settings.getInstance();
-			memInfo = m_settings.getSettingMemInfo();
+			memInfo = bsettings.getSettingMemInfo();
 		} catch (Exception e) {
 			memInfo = new int[0];
 		}
@@ -387,65 +620,91 @@ implements CommandListener {
 		m_pgmMemUsedItem.setText(((totalMem - freeMem)/1024L) + "kb");
 		m_pgmMemAvailItem.setText((freeMem/1024L) + "kb");
         if (memInfo.length == 0) {
-			m_memUsedItem.setText("0");
-			m_memAvailItem.setText("0");
+			m_memUsedItem.setText("0kb");
+			m_memAvailItem.setText("0kb");
 		} else {
-			m_memUsedItem.setText(Integer.toString(memInfo[0]));
-			m_memAvailItem.setText(Integer.toString(memInfo[1]));
+			m_memUsedItem.setText((memInfo[0]/1024L) + "kb");
+			m_memAvailItem.setText((memInfo[1]/1024L) + "kb");
 		}
 		m_threadsUsed.setText(Integer.toString(Thread.activeCount()));
 	}
 
     public void commandAction(Command command, Displayable displayable) {
-        RssReaderMIDlet midlet = featureMgr.getMidlet();
-        if(command==m_okCommand) {
+        RssReaderMIDlet midlet = featureMgr.getRssMidlet();
+        if 
+			//#ifdef DTEST
+//@			((command==m_updateCommand) ||
+			//#endif
+			(command==m_okCommand)
+			//#ifdef DTEST
+//@			)
+			//#endif
+		{
             // Save settings
             RssReaderSettings settings = midlet.getSettings();
+			Settings bsettings = settings.getSettingsInstance();
 			LoadingForm loadForm = LoadingForm.getLoadingForm(
 						"Updating settings...", this, null);
-			featureMgr.setLoadForm(loadForm);
+			super.featureMgr.setLoadForm(loadForm);
             try {
-                int maxCount = Integer.parseInt( m_itemCountField.getString() );
-                settings.setMaximumItemCountInFeed( maxCount );
+				//#ifdef DFULLVERS
+				super.featureMgr.setFrGui2SettingsNbr(m_itemCountField,
+						settings.MAX_ITEM_COUNT, bsettings);
 				boolean markUnreadItems = m_markUnreadItems.isSelected(0);
                 settings.setMarkUnreadItems( markUnreadItems );
 				//#ifdef DMIDP20
 				boolean useTextBox = m_useTextBox.isSelected(0);
 				settings.setUseTextBox(useTextBox);
 				//#endif
-				boolean useStdExit = m_useStandardExit.isSelected(0);
-				settings.setUseStandardExit(useStdExit);
-				if (useStdExit != prevStdExit) {
-					midlet.initExit();
-				}
-				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
-				//#ifdef DITUNES
+				//#ifdef DSMARTPHONE
+//@				boolean itunesEnabled = !m_itunesEnabled.isSelected(0);
 //@				settings.setItunesEnabled( itunesEnabled );
 				//#else
 				settings.setItunesEnabled( false );
 				//#endif
+				//#ifndef DSMALLMEM
+				settings.setBookmarkNameNews( !m_nameNews.isSelected(0) );
+				//#endif
 				//#ifdef DMIDP20
+				settings.setMobilizerChoice(
+						m_mobilizerChoice.getSelectedIndex() );
 				int fontChoice = m_fontChoice.getSelectedIndex();
 				settings.setFontChoice( fontChoice );
 				//#ifdef DLOGGING
-//@				if (fineLoggable) {logger.fine("fontChoice=" + fontChoice);}
+//@				if (m_fineLoggable) {m_logger.fine("fontChoice=" + fontChoice);}
 				//#endif
 				int fitPolicy = m_fitPolicy.getSelectedIndex();
 				settings.setFitPolicy( fitPolicy );
 				//#ifdef DLOGGING
-//@				if (fineLoggable) {logger.fine("fitPolicy=" + fitPolicy);}
+//@				if (m_fineLoggable) {m_logger.fine("fitPolicy=" + fitPolicy);}
 				//#endif
-				boolean nameNews = !m_nameNews.isSelected(0);
-				settings.setBookmarkNameNews( nameNews );
+				super.featureMgr.setFrGui2SettingsNbr(m_backlightFlash,
+						settings.BACKLIGHT_FLASH_SECS, bsettings);
+				super.featureMgr.setFrGui2SettingsNbr(m_vibrate,
+						settings.VIBRATE_SECS, bsettings);
+
 				//#endif
-                int maxWordCount = Integer.parseInt( m_wordCountField.getString() );
-                settings.setMaxWordCountInDesc( maxWordCount );
+
+				super.featureMgr.setFrGui2SettingsNbr(m_wordCountField,
+						settings.MAX_WORD_COUNT, bsettings);
+				//#endif
+				// end DFULLVERS
+
+				boolean useStdExit = m_useStandardExit.isSelected(0);
+				settings.setUseStandardExit(useStdExit);
+				if (useStdExit != prevStdExit) {
+					midlet.initExit(FeatureMgr.getMainDisp());
+				}
 				//#ifdef DLOGGING
+//@				prevLevel = settings.getLogLevel();
 //@				try {
 //@					String logLevel =
 //@						m_logLevelField.getString().toUpperCase();
-//@					logger.getParent().setLevel(Level.parse(logLevel));
-//@					settings.setLogLevel( logLevel );
+//@					if (!logLevel.equals(prevLevel)) {
+//@						m_logger.getParent().setLevel(Level.parse(logLevel));
+//@						settings.setLogLevel(logLevel);
+//@						FeatureMgr.getRssMidlet().initLogVars();
+//@					}
 //@				} catch (IllegalArgumentException e) {
 //@					Alert invalidData = new Alert("Invalid Log Level",
 //@									"Invalid Log Level " +
@@ -453,7 +712,7 @@ implements CommandListener {
 //@									null,
 //@									AlertType.ERROR);
 //@					invalidData.setTimeout(Alert.FOREVER);
-//@					featureMgr.showMe(invalidData);
+//@					super.featureMgr.showMe(invalidData);
 //@					return;
 //@				}
 				//#endif
@@ -462,12 +721,63 @@ implements CommandListener {
 				loadForm.recordExcFormFin("Internal error.", e);
             }
             
-            midlet.showBookmarkList();
+			//#ifdef DTEST
+//@			if (command==m_updateCommand) {
+//@				String sjad = m_currJadTx.getString();
+//@				m_currfnp = sjad.substring(0, sjad.length() - 3);
+				//#ifdef DLOGGING
+//@				if (m_finestLoggable) {m_logger.finest("commandAction m_currfnp=" + m_currfnp);}
+				//#endif
+//@				if (m_preffnp.equals(m_currfnp)) {
+//@					m_preffJadTx.setLabel("Preferred jad (current):");
+//@					m_preffJarTx.setLabel("Preferred jar (current):");
+//@				} else {
+//@					m_preffJadTx.setLabel("Preferred jad:");
+//@					m_preffJarTx.setLabel("Preferred jar:");
+//@				}
+//@				super.getFeatureMgr().getLoadForm().showMeNotes(this);
+//@			} else {
+			//#endif
+				super.getFeatureMgr().getLoadForm().showMeNotes(
+						FeatureMgr.getMainDisp());
+			//#ifdef DTEST
+//@			}
+			//#endif
         }
         
+        /** Show about */
+		if(command == FeatureMgr.m_aboutCmd) {
+			midlet.initializeAboutForm();
+		}
+
+		//#ifdef DFULLVERS
         if(command==m_cancelCommand) {
             midlet.showBookmarkList();
         }
+		//#else
+//@        if(command==FeatureMgr.m_exitCommand) {
+//@			LoadingForm loadForm = LoadingForm.getLoadingForm(
+//@					"Exiting...", this, null);
+//@			super.featureMgr.setLoadForm(loadForm);
+//@			super.featureMgr.getRssMidlet().exitApp( true, loadForm );
+//@		}
+		//#endif
     }
 
+	//#ifdef DINTLINK
+//@    /** Run method is used to initialize the form for internet link version. */
+//@    public void run() {
+		//#ifdef DLOGGING
+//@		if (m_finestLoggable) {m_logger.finest("run super.size()=" + super.size());}
+		//#endif
+//@		try {
+//@			Thread.sleep(1L);
+//@			Thread.yield();
+//@		} catch (Throwable e) {
+//@			e.printStackTrace();
+//@		}
+//@		super.featureMgr.getRssMidlet().initForms();
+//@		super.featureMgr.setBackground(false);
+//@	}
+	//#endif
 }
