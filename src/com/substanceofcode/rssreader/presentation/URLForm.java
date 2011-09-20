@@ -30,6 +30,13 @@
  * IB 2010-11-18 1.11.5Dev14 Move find files call functionality to FeatureMgr.
  * IB 2010-11-18 1.11.5Dev14 Allow select directory for find files load message to be passed as a parameters (if selectDir true/false) to make it more generic.
 >  * IB 2010-11-22 1.11.5Dev14 Replace Alert with loading form exception.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-01-12 1.11.5Alpha15 Use midlet in FeatureMgr with getRssMidlet to get the RssReaderMIDlet.
+ * IB 2011-01-11 1.11.5Alpha15 Use super.featureMgr instead of featureMgr.
+ * IB 2011-02-05 1.11.5Dev17 Have FeatureMgr.getCmdAdd to both create a command and add it to the displayable.  Return the command pointer.
+ * IB 2011-02-05 1.11.5Dev17 Have FeatureMgr.getCmdAddPrompt to both create a prompt command and add it to the displayable.  Return the command pointer.
  */
 
 // Expand to define MIDP define
@@ -42,7 +49,10 @@
 //#define DNOLOGGING
 // Expand to define test ui define
 //#define DNOTESTUI
+// Expand to define full vers define
+//#define DFULLVERS
 
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
@@ -73,17 +83,16 @@ import javax.microedition.lcdui.Item;
 
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.rssreader.businesslogic.FeedListParser;
 import com.substanceofcode.rssreader.businesslogic.LineByLineParser;
 import com.substanceofcode.rssreader.businesslogic.OpmlParser;
 import com.substanceofcode.rssreader.businesslogic.RssFeedParser;
 import com.substanceofcode.rssreader.presentation.ImportFeedsForm;
 
-//#ifdef DJSR75
-//@import org.kablog.kgui.KFileSelectorMgr;
-//#endif
 import com.substanceofcode.rssreader.presentation.RssReaderMIDlet;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
+import com.substanceofcode.rssreader.presentation.FeatureMgr;
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -115,13 +124,13 @@ public class URLForm extends FeatureForm
 	protected Command     m_appndCmd = null; // The import append
 	protected Command     m_lastCmd = null; // The last data used
 	protected Command     m_clearCmd; // The clear
-//#ifdef DJSR75
+	//#ifdef DJSR75
 //@	protected Command     m_fileCmd;    // The find files command for importing
-//#endif
+	//#endif
 	//#ifdef DMIDP20
 	protected Command     m_pasteURLCmd;// The paste command
 	//#endif
-	protected Hashtable m_rssFeeds;         // The bookmark URLs
+	protected RssFeedStore m_rssFeeds;         // The bookmark URLs
 	protected RssReaderSettings m_appSettings;// The application settings
 	// The loading form
 	protected Thread m_thread = null; // The thread
@@ -132,7 +141,7 @@ public class URLForm extends FeatureForm
 
 	/** Initialize import form */
 	public URLForm(String formName, boolean selectDir,
-			Hashtable rssFeeds,
+			RssFeedStore rssFeeds,
 			RssReaderSettings appSettings,
 			LoadingForm loadForm) {
 		super(formName, loadForm);
@@ -157,40 +166,31 @@ public class URLForm extends FeatureForm
 		m_url = new TextField("URL", url, 256, TextField.URL);
 		super.append(m_url);
 		
-		Command cancelCmd = new Command("Cancel", Command.CANCEL,
-				2);
+		FeatureMgr.getCmdAdd(this, "Cancel", null, Command.CANCEL, 2);
 		if (hasOK) {
 			if (okPrompt != null) {
-				super.addPromptCommand(new Command("OK", Command.OK, 4),
+				FeatureMgr.getCmdAddPrompt(this, "OK", null, Command.OK, 4,
 						okPrompt);
 			} else {
-				super.addCommand(new Command("OK", Command.OK, 4));
+				FeatureMgr.getCmdAdd(this, "OK", null, Command.OK, 4);
 			}
 		}
 
 		//#ifdef DJSR75
 //@		/* Find files */
-//@		m_fileCmd     = new Command("Find files", Command.SCREEN,
-//@				initPriority++);
+//@		m_fileCmd     = FeatureMgr.getCmdAdd(this, "Find", "Find files",
+//@				Command.SCREEN, initPriority++);
 		//#endif
-		//#ifdef DMIDP20
 		/* Allow paste */
-		m_pasteURLCmd = new Command("Allow paste", Command.SCREEN,
-				initPriority++);
-		//#endif
-		// Show last data entered
-		m_lastCmd = new Command("Last", Command.SCREEN, initPriority++);
-		
-		super.addCommand( cancelCmd );
-		//#ifdef DJSR75
-//@		super.addCommand( m_fileCmd );
-		//#endif
 		//#ifdef DMIDP20
 		if (m_appSettings.getUseTextBox()) {
-			super.addCommand(m_pasteURLCmd);
+			m_pasteURLCmd = FeatureMgr.getCmdAdd(this, "Paste", "Allow paste", Command.SCREEN,
+					initPriority++);
 		}
 		//#endif
-		super.addCommand( m_lastCmd );
+		// Show last data entered
+		m_lastCmd = FeatureMgr.getCmdAdd(this, "Last", "Last Entry", Command.SCREEN, initPriority++);
+		
 	}
 
   /**
@@ -217,29 +217,16 @@ public class URLForm extends FeatureForm
 			String addLabel, String addLongLabel,
 			String appendLabel, String appendLongLabel) {
 
-		//#ifdef DMIDP20
-		m_insCmd      = new Command(insLabel, insLongLabel,
+		m_insCmd      = FeatureMgr.getCmdAdd(this, insLabel, insLongLabel,
 				Command.SCREEN, initPriority++);
-		m_addCmd      = new Command(addLabel, addLongLabel,
+		m_addCmd      = FeatureMgr.getCmdAdd(this, addLabel, addLongLabel,
 				Command.SCREEN, initPriority++);
-		m_appndCmd    = new Command(appendLabel, appendLongLabel,
+		m_appndCmd    = FeatureMgr.getCmdAdd(this, appendLabel, appendLongLabel,
 				Command.SCREEN, initPriority++);
-		//#else
-//@		m_insCmd      = new Command(insLabel,
-//@				Command.SCREEN, initPriority++);
-//@		m_addCmd      = new Command(addLabel,
-//@				Command.SCREEN, initPriority++);
-//@		m_appndCmd    = new Command(appendLabel,
-//@				Command.SCREEN, initPriority++);
-		//#endif
 
-		/* Clear */ m_clearCmd   = new Command("Clear", Command.SCREEN,
-					initPriority++);
-
-		super.addCommand( m_insCmd );
-		super.addCommand( m_addCmd );
-		super.addCommand( m_appndCmd );
-		super.addCommand( m_clearCmd );
+		/* Clear */
+		m_clearCmd   = FeatureMgr.getCmdAdd(this, "Clear", null, Command.SCREEN,
+				initPriority++);
 
 		initCommonInputUI(url, username, password, hasOK, okPrompt, initPriority);
 	}
@@ -255,14 +242,14 @@ public class URLForm extends FeatureForm
 		}
 		if (m_cancel) {
 			m_cancel = false;
-			featureMgr.getLoadForm().replaceRef(this, null);
-			featureMgr.getMidlet().showBookmarkList();
+			super.featureMgr.getLoadForm().replaceRef(this, null);
+			super.featureMgr.getRssMidlet().showBookmarkList();
 		}
 
 		//#ifdef DJSR75
 //@		if (m_fileReq) {
 //@			m_fileReq = false;
-//@			if (!featureMgr.getMidlet().JSR75_ENABLED) {
+//@			if (!super.featureMgr.getRssMidlet().JSR75_ENABLED) {
 //@				CauseException ce = new CauseException(
 //@						"Find files (JSR-75) not enabled on the phone.");
 //@				LoadingForm loadForm = super.getFeatureMgr().getLoadForm();
@@ -273,16 +260,16 @@ public class URLForm extends FeatureForm
 //@				return;
 //@			}
 //@			try {
-//@				RssReaderMIDlet midlet = featureMgr.getMidlet();
+//@				RssReaderMIDlet midlet = featureMgr.getRssMidlet();
 //@				if (midlet != null) {
 //@					if (this instanceof ImportFeedsForm) {
-//@						featureMgr.getFindFiles(m_selectDir,
+//@						super.featureMgr.getFindFiles(m_selectDir,
 //@								"Loading files to export from...",
 //@								"Loading files to import from...", 
 //@						(m_selectDir ? "Find export file" : "Find import file"),
 //@						 this, m_url);
 //@					} else {
-//@						featureMgr.getFindFiles(false,
+//@						super.featureMgr.getFindFiles(false,
 //@								"Loading files to read from...", null,
 //@								"Find feed file", this, m_url);
 //@					}
@@ -340,3 +327,4 @@ public class URLForm extends FeatureForm
 	}
 
 }
+//#endif
