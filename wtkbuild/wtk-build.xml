@@ -113,6 +113,71 @@
     <!-- IB 2010-11-18 1.11.5Dev14 Use a special rim bin for intermediate RIM files.  -->
     <!-- IB 2010-11-18 1.11.5Dev14 Have special rim jad and jar file.  -->
     <!-- IB 2010-11-18 1.11.5Dev14 Save temp cod file from signing to bin with -tmp.cod.  -->
+    <!-- IB 2010-11-27 1.11.5Dev15 Add signed, verisign and/or thawte to identify applet and regular emulator signing authorities.  -->
+    <!-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it. -->
+    <!-- IB 2011-01-14 1.11.5Alpha15 Have text to put signing authority name into description on project host. -->
+    <!-- IB 2011-01-14 1.11.5Alpha15 Have prepare.test, prepare.release vs test.prepare, etc to be like other prepare... targets.  -->
+    <!-- IB 2011-01-14 1.11.5Alpha15 Have microemu jars begin with signed- if jar is signed.  -->
+    <!-- IB 2011-01-16 1.11.5Alpha15 Need to preserve class org.kablog.kgui.KFileSelectorMgr because it is loaded using forName and proguard does not preserve classes loaded like this. -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Make demo directory into signed-demo directory to move it to the bottom of an aphabetically sorted page.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Only copy demo directory to yinlight version.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Better information echoed.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Have property of the name of google, sourceforge and yinlight ftp build directories to use for finish sftp step.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Put index file sfuploads.htm into the google, sourceforge and yinlight ftp build directories in the finish sftp step.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Better removal/not copying of test src. -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Use jmunit plus source code for JMUnit testing. -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Allow jmunit plus to use the feature mgr when using jmunit code in the test compile vs the library. -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Change if/unless conditions for target/wtk antenna to be an expression which can evaluate to true.  This gives greater flexibility for use of these expressions (usually the value of one property). -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Have new target prepare.smallmem which is a dependency for MIDP 1.0 and the internet link version.  This reduces the code for these versions.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Have new target prepare.smartphone to set up smartphone properties.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Have new target prepare.intlink to set up internet link properties.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Have prepare target depend on prepare.full to make the full version the default.  This can be overridden by prepare.intlink.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Have one.target which if true does not do the prepare target more than once.  This is only useful when compiling/building one target.  It must be false for creating the release which executes multiple targets.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Have properties to allow compilation of just one file using the preprocessing of the previous files the same as before.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Allow specification of test.src.excludes test source exclude properties specified in release.properties.  -->
+    <!-- IB 2011-01-17 1.11.5Alpha15 Use inheritAll to reduce dependencies on the "prepare" target.  -->
+	<!-- IB 2011-01-14 1.11.5Alpha15 Have properties to show the preferred jar/jad based on current MIDP/JSR settings and the current jar/jad names for internet link/full code to display the text "current" if the preferred jar/jad name matches the current one.  In the future, the MIDP 2.0 version will download the preferred version on user request. -->
+	<!-- IB 2011-01-14 1.11.5Alpha15 Have signed compile use verisign compile to help test preferred jad.  -->
+	<!-- IB 2011-01-18 1.11.5Alpha15 Copy/put RIM jar file to ftp site.  -->
+	<!-- IB 2011-01-18 1.11.5Alpha15 Put rim_ prefix on googlecode RIM files.  -->
+	<!-- IB 2011-01-23 1.11.5Dev16 Have targets prepare.devopment/beta/alpha/production to make setting the properties for these stages easy. -->
+	<!-- IB 2011-01-23 1.11.5Dev16 Separate out obfuscate from wtkpackage.  This allows Netebeans WTK home to obfuscate (hopefully).  Need wtkpreverify because wtkobfuscate does not preverify the result.  -->
+	<!-- IB 2011-01-23 1.11.5Dev16 Need to preserve org.kablog.kgui.KFileSelectorMgr to allow loading with class.forName for optional JSR-75 code. -->
+	<!-- IB 2011-01-23 1.11.5Dev16 Put file descriptions in a property to allow creation of more descriptive file index file. -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Put ftp device install files into device-install directory to get them to come up first in sourceforge.-->
+	<!-- IB 2011-01-26 1.11.5Dev16 Have title and heading with version info in index file.  -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Build MIDP 2.0, CLDC 1.0, novice target. -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Use base URL for index file pointing to the version files directory.  This allows the file to work in any directory as everything is fully qualified.  -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Use -optimizationpasses to specify more than one (using 3 for this release) optimization passes. -->
+	<!-- IB 2011-01-26 1.11.5Dev16 Use -allowaccessmodification allow ProGuard optimization to make some methods public to use inline or other optimizations.  -->
+	<!-- IB 2011-01-27 1.11.5Dev16 Add novice compile target.  -->
+	<!-- IB 2011-01-27 1.11.5Dev16 Remove parameter setting which prevents performing novice target.  -->
+	<!-- IB 2011-01-27 1.11.5Dev16 Don't put novice binary into the distribution.  Only the source code will be present.  -->
+	<!-- IB 2011-01-27 1.11.5Dev16 Fix location of novice.txt file.  -->
+	<!-- IB 2011-01-28 1.11.5Dev17 For RIM, send zip file.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Have keep.smartlink to use smartlink for MIDP 1.0 and internet link.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Use enabled .value to use smartlink.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Have regularmem option for MIDP 1.0.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Prevent ${act.comp.src} directory from being created.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Don't preserve org.kablog.kgui.KFileSelectorMgr if it is not present.  This prevents errors.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Only upload RIM zip file as others are not usable.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Don't upload internet link version to google code.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Don't have signed MIDP 1.0 as it is not supported.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Add more targets to not make for dist.test.  -->
+	<!-- IB 2011-03-06 1.11.5Dev17 Add more targets to not make for dist.smartphone.test.  -->
+	<!-- IB 2011-03-07 1.11.5Dev17 Allow optional temporary distribution with temporary subdomain and directory path using wtktemporary.properties.template with yinlight.tmp.subdir, yinlight.tmp.subpath, and yinlight.subdomain.  -->
+	<!-- IB 2011-03-07 1.11.5Dev17 Add MIDP 1.0 "regular" memory compile and build target which is skippped for distribution.  -->
+	<!-- IB 2011-03-14 1.11.5Dev17 Fix removal of cod files.  -->
+	<!-- IB 2011-03-18 1.11.5Dev17 Don't copy alx, jad, jar, and cod files to FTP or google.  Put them into zip file which in addition contains the alx file.  -->
+	<!-- IB 2011-03-19 1.11.5Dev17 Prepare for future Afri-ware version.  -->
+	<!-- IB 2011-03-21 1.11.5Dev17 Use stage.file instead of sstage.file for jad file properties.  -->
+	<!-- IB 2011-03-21 1.11.5Dev17 Create a yinlight ftp in/htm and sourceforge ftp in/htm file for each target in the "bin" for that target.  -->
+	<!-- IB 2011-03-25 1.11.5Dev18 Upload RIM zip first to google so that the jad/jar files appear last which is first in the download list.  -->
+	<!-- IB 2011-09-15 1.11.5RC2 Change echo name to match actual name.  -->
+	<!-- IB 2011-09-15 1.11.5RC2 Finish change of itunes change to smartphone name.  -->
+	<!-- IB 2010-09-15 1.11.5RC2 Use new file wtk-build-dist-midp.xml to contain dist.midp... targets. -->
+	<!-- IB 2010-09-15 1.11.5RC2 Use new file wtk-build-prepare-midp.xml to contain prepare... targets. -->
+	<!-- IB 2010-09-19 1.11.5RC2 Have upload.to.google used to check for it's value.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -125,7 +190,7 @@
 	<echo message="test.template=${test.template}" />
 	<echo message="optional.template=${optional.template}" />
 	<echo message="DLOGDEF=${DLOGDEF}" />
-	<echo message="presrc=" />
+	<echo message="Preset presrc=${presrc}" />
 	<property name="DEBUG" value="DEBUG" />
 	<property name="target" value="../target" />
 	<property name="tmpres" value="${target}/tmpres" />
@@ -134,14 +199,21 @@
 	<property name="analyze" value="${target}/analyze" />
 	<property name="dist.name" value="dist" />
 	<property name="dist" value="${target}/${dist.name}" />
-	<property name="distgooglecode" value="${target}/distgooglecode" />
-	<property name="distsourceforge" value="${target}/distsourceforge" />
+	<property name="distgooglecode.name" value="distgooglecode" />
+	<property name="distgooglecode" value="${target}/${distgooglecode.name}" />
+	<property name="distsourceforge.name" value="distsourceforge" />
+	<property name="distsourceforge" value="${target}/${distsourceforge.name}" />
 	<property name="ftpdist.name" value="ftpdist" />
 	<property name="ftpdist.dir" value="${target}/${ftpdist.name}" />
+	<property name="ftp.demo.dist.name" value="signed-demo" />
+	<property name="ftp.demo.dist.dir" value="${ftpdist.dir}/${ftp.demo.dist.name}" />
 	<property name="distsourceforge" value="${target}/distsourceforge" />
 	<property name="sourceforge.ftp.in.file" value="${distsourceforge}/sfftpin" />
-	<property name="distyinlight" value="${target}/distyinlight" />
+	<property name="sourceforge.ftp.index.file" value="${distsourceforge}/sfuploads.htm" />
+	<property name="distyinlight.name" value="distyinlight" />
+	<property name="distyinlight" value="${target}/${distyinlight.name}" />
 	<property name="yinlight.ftp.in.file" value="${distyinlight}/ylftpin" />
+	<property name="yinlight.ftp.index.file" value="${distyinlight}/yluploads.htm" />
 	<property name="distproject-name" value="distproject" />
 	<property name="distsigned" value="${target}/distsigned" />
 	<property name="distproject" value="${target}/${distproject-name}" />
@@ -151,13 +223,39 @@
 	<property name="build" value="${target}/build" />
 	<property name="classes" value="${target}/classes" />
 	<property name="tmppreprocess" value="${target}/tmppreprocess" />
+	<property name="tmppresrc" value="${target}/tmpprepresrc_file" />
 	<property name="ext.drive" value="${env.EXT_DRIVE}" />
+	<property name="sfile.prefix.cldc1.0" value="cldc10" />
+	<property name="sfile.prefix.cldc1.1" value="cldc11" />
+	<property name="sfile.prefix.full" value="full" />
+	<property name="sfile.prefix.intlink" value="intlink" />
+	<property name="sfile.prefix.smartphone" value="smartphone" />
+	<property name="sfile.prefix.afriware" value="afriware" />
+	<property name="sfile.prefix.regsize.midp10" value="moderate" />
+	<property name="sfile.prefix.novice" value="novice" />
+	<property name="sfile.prefix.jsr75" value="jsr75" />
+	<property name="sfile.prefix.jsr82" value="jsr82" />
+	<property name="sfile.prefix.jsr120" value="jsr120" />
+	<property name="sfile.prefix.jsr135" value="jsr135" />
+	<property name="sfile.prefix.jsr184" value="jsr184" />
+	<property name="sfile.prefix.jsr205" value="jsr205" />
+	<property name="sfile.prefix.jsr205" value="jsr205" />
+	<property name="sfile.prefix.jsr238" value="jsr238" />
+	<property name="sfile.prefix.large" value="large" />
+	<property name="sfile.prefix.midp1.0" value="midp10" />
+	<property name="sfile.prefix.midp2.0" value="midp20" />
+	<property name="sfile.prefix.signed" value="signed" />
+	<property name="sfile.prefix.thawte" value="thawte" />
+	<property name="sfile.prefix.verisign" value="verisign" />
+	<property name="sfile.prefix.godaddy" value="godaddy" />
 	<property file="${basedir}/wtk-build${device.props}.properties${build.template}" />
 	<echo message="java.home=${java.home}" />
 	<echo message="JAVA_HOME=${env.JAVA_HOME}" />
-	<property name="DFEATUREFORMDEF" value="DFEATUREFORMDEF" />
+	<property name="MIDLETVERS" value="${MIDLETVERSROOT}" />
+	<echo message="MIDLETVERS=${MIDLETVERS}" />
 	<!-- DCOMPATDEF is used to test compatibility store/restore of date -->
 	<property name="DCOMPATDEF" value="DNOCOMPAT" />
+	<property name="DJMUNITDEF" value="DNOJMUNIT" />
 	<echo message="unproc.src=${unproc.src}" />
 	<fail message="Must set comp.src to src directory to put the source to compile." unless="comp.src" />
 
@@ -180,165 +278,26 @@
 		<delete dir="${classes}" />
 	</target>
 
-	<target name="test.prepare" unless="no.test" >
-	    <echo message="Using test properties" />
-	    <echo message="no.release=${no.release}" />
-		<property name="test.template" value="" />
-		<property file="${basedir}/test.properties${test.template}" />
-		<antcall target="test.buildno" />
-		<property file="${basedir}/test_buildinfo.properties${test.template}" />
-	    <echo message="build.number=${build.number}" />
-	</target>
+	<!-- Import prepare.... or ...prepare targets. -->
 
-	<target name="test.buildno" unless="test.buildinfo" >
-	    <echo message="Using test properties" />
-	    <echo message="no.release=${no.release}" />
-		<buildnumber file="${basedir}/test_buildinfo.properties${test.template}" />
-	    <echo message="Release buildinfo update." />
-		<property name="test.buildno" value="true" />
-	</target>
-
-	<target name="release.prepare" unless="no.release" >
-	    <echo message="Using release properties" />
-		<property name="release.template" value="" />
-		<property file="${basedir}/release.properties${release.template}" />
-	    <echo message="RELEASE=${RELEASE}" />
-	    <echo message="build.number=${build.number}" />
-		<antcall target="release.buildno" />
-		<property file="${basedir}/release_buildinfo.properties${release.template}" />
-	    <echo message="build.number=${build.number}" />
-	</target>
-
-	<target name="release.buildno" unless="release.buildno" >
-		<buildnumber file="${basedir}/release_buildinfo.properties${release.template}" />
-	    <echo message="Release buildinfo update." />
-		<property name="release.buildno" value="true" />
-	</target>
-
-	<target name="staging.prepare" unless="no.staging" >
-	    <echo message="Using release staging properties" />
-		<property file="${basedir}/staging.properties" />
-	</target>
-
-	<target name="prepare.midp1.0" >
-		<property file="${basedir}/wtkmidp1.0.properties${build.template}" />
-	</target>
-
-	<target name="prepare.midp2.0" >
-		<property file="${basedir}/wtkmidp2.0.properties${build.template}" />
-	</target>
-
-	<target name="prepare.cldc1.0" >
-		<property file="${basedir}/wtkcldc1.0.properties${build.template}" />
-	</target>
-
-	<target name="prepare.cldc1.1" >
-		<property file="${basedir}/wtkcldc1.1.properties${build.template}" />
-	</target>
-
-	<target name="prepare.jsr75" >
-		<property file="${basedir}/wtkjsr75.properties${build.template}" />
-	</target>
-
-	<target name="prepare.itunes" >
-		<property file="${basedir}/wtkitunes.properties${build.template}" />
-	</target>
-
-	<target name="prepare.signed" >
-		<property file="${basedir}/wtksigned.properties${build.template}" />
-		<property name="vendor" value="${yinlight.vendor}" />
-		<property name="project.info.url" value="${yinlight.project.info.url}" />
-	</target>
-
-	<target name="prepare.novice" >
-		<property file="${basedir}/wtknovice.properties${build.template}" />
-	</target>
-
-	<target name="prepare.jsr238" >
-		<property file="${basedir}/wtkjsr238.properties${build.template}" />
-	</target>
-
-	<target name="prepare.verisign">
-		<property file="${basedir}/wtkverisign.properties${build.template}" />
-		<property name="tsalias" value="${env.VERISIGN_ALIAS}" />
-		<property name="tsstorepass" value="${env.VERISIGN_KEYSTORE_PASS}" />
-		<property name="tskeystore" value="${env.VERISIGN_KEYSTORE_LOCATION}/${env.VERISIGN_KEYSTORE_NAME}" />
-		<property name="tskeypass" value="${env.VERISIGN_KEYSTORE_PASS}" />
-	</target>
-
-	<target name="prepare.thawte">
-		<property file="${basedir}/wtkthawte.properties${build.template}" />
-		<property name="tsalias" value="${env.THAWTE_ALIAS}" />
-		<property name="tsstorepass" value="${env.THAWTE_KEYSTORE_PASS}" />
-		<property name="tskeystore" value="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" />
-		<property name="tskeypass" value="${env.THAWTE_KEYSTORE_PASS}" />
-	</target>
-
-	<target name="prepare.godaddy">
-		<property file="${basedir}/wtkgodaddy.properties${build.template}" />
-		<property name="tsalias" value="${env.GODADDY_ALIAS}" />
-		<property name="tsstorepass" value="${env.GODADDY_KEYSTORE_PASS}" />
-		<property name="tskeystore" value="${env.GODADDY_KEYSTORE_LOCATION}/${env.GODADDY_KEYSTORE_NAME}" />
-		<property name="tskeypass" value="${env.GODADDY_KEYSTORE_PASS}" />
-	</target>
-
-	<!-- Prepare the distribution stage (e.g. beta1) -->
-	<target name="prepare.stage" if="stage" >
-	    <echo message="Using distribution stage=${stage}" />
-		<property name="stage.file" value="${stage}_" />
-		<echo message="stage.file=${stage.file}" />
-		<property name="dist.stage.file" value="_${stage}" />
-		<echo message="dist.stage.file=${dist.stage.file}" />
-		<echo message="ustage=${ustage}" />
-		<property name="ustage.txt" value="${ustage} " />
-		<echo message="ustage.txt=${ustage.txt}" />
-		<property name="stage.featured" value="Featured," />
-		<property name="ftp.ustage.txt" value="${ustage}\ " />
-		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
-		<property name="no.individual.file" value="false" />
-	    <echo message="no.individual.file=${no.individual.file}" />
-	</target>
-
-	<!-- Prepare the full version of the program. -->
-	<target name="prepare.full" unless="${make.link}" >
-	    <echo message="Creating full version" />
-		<property file="${basedir}/wtkfull.properties${build.template}" />
-	</target>
-
-	<!-- Prepare the internet install link version of the program. -->
-	<target name="prepare.intlink" >
-	    <echo message="Creating internet install link" />
-		<property file="${basedir}/wtkintlink.properties${build.template}" />
-	</target>
-
-	<!-- Prepare to init stage properties if not set already.  -->
-	<target name="prepare.no.stage" unless="stage" >
-		<property name="stage" value="" />
-	    <echo message="Using distribution no stage=${stage}" />
-		<property name="stage.file" value="" />
-		<echo message="stage.file=${stage.file}" />
-		<property name="dist.stage.file" value="" />
-		<echo message="dist.stage.file=${dist.stage.file}" />
-		<property name="ustage" value="" />
-		<echo message="ustage=${ustage}" />
-		<property name="ustage.txt" value="" />
-		<echo message="ustage.txt=${ustage.txt}" />
-		<property name="stage.featured" value="Featured," />
-		<property name="ftp.ustage.txt" value="" />
-		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
-		<property name="no.individual.file" value="false" />
-	    <echo message="no.individual.file=${no.individual.file}" />
-	</target>
+    <import file="wtk-build-prepare-midp.xml" />
 
 	<!-- prepare the target folder -->
-	<target name="prepare" depends="test.prepare,release.prepare,prepare.stage,prepare.no.stage,prepare.full" >
+	<target name="prepare" depends="prepare.test,prepare.release,prepare.stage,prepare.no.stage,prepare.full" >
 		<!-- Define the Wireless Toolkit home directory. Needed by the tasks. -->
 		<!-- Define some additional properties for this project. Not required. -->
 		<property name="optional.template" value="" />
 		<property file="${basedir}/optional.properties${optional.template}" />
 		<property name="propdir" value="${basedir}" />
+		<property name="tmp.presrc.mdir" value="${tmppresrc}${presrc.mdir}" />
+		<echo message="tmp.presrc.mdir=${tmp.presrc.mdir}" />
+		<property name="tmp.presrc.subdir" value="${tmppresrc}${presrc.dir}" />
+		<echo message="tmp.presrc.subdir=${tmp.presrc.subdir}" />
 		<property name="res.includes" value="**/unread.png,**/rss.png" />
-		<property name="MIDLETVERS" value="${MIDLETVERSROOT}" />
+		<property name="one.target" value="false" />
+		<property name="novice" value="false" />
+		<property name="signed" value="false" />
+
 		<property name="PERMISSIONS_REQ.midp1.0" value="" />
 		<property name="PERMISSIONS_OPT.midp1.0" value="" />
 		<property name="PERMISSIONS_REQ.midp2.0" value="" />
@@ -351,18 +310,29 @@
 		<property name="PERMISSIONS_OPT" value="${PERMISSIONS_OPT.midp1.0}${PERMISSIONS_OPT.midp2.0}${PERMISSIONS_OPT.jsr75}${PERMISSIONS_OPT.jsr238}" />
 		<property name="DMEMSIZEDEF" value="DREGULARMEM" />
 		<property name="DITUNESDEF" value="DNOITUNES" />
+		<property name="DSMARTPHONEDEF" value="DNOSMARTPHONE" />
+		<property name="DAFRIWAREDEF" value="DNOAFRIWARE" />
+		<property name="DNOVICEDEF" value="DNONOVICE" />
 		<property name="DINTLINKDEF" value="DNOINTLINK" />
 		<property name="DFULLVERSDEF" value="DNODFULLVERS" />
 		<property name="DSIGNEDDEF" value="DNOSIGNED" />
+		<property name="DGODADDYDEF" value="DNOGODADDY" />
+		<property name="DVERISIGNDEF" value="DNOVERISIGN" />
+		<property name="DTHAWTEDEF" value="DNOTHAWTE" />
 		<property name="DJSR75" value="DNOJSR75" />
 		<property name="DJSR238" value="DNOJSR238" />
+		<property name="DJMTESTDEF" value="DNOJMTEST" />
+		<property name="DJMTESTPLUSDEF" value="DNOJMTESTPLUS" />
+		<property name="DJMTESTFREEDEF" value="DNOJMTESTFREE" />
 		<property name="nojsr75.res.excludes" value="**/file_icon.png,**/folder.png,**/up_dir_icon.png,**/folder_icon.png" />
-		<property name="wtk.optionalpda.enabled" value="false" />
-		<property name="wtk.bluetooth.enabled" value="false" />
-		<property name="wtk.wma.enabled" value="false" />
-		<property name="wtk.mmapi.enabled" value="false" />
-		<property name="wtk.miapi.enabled" value="false" />
-		<property name="wtk.wma2.enabled" value="false" />
+		<property name="wtk.optionalpda.enabled.value" value="false" />
+		<property name="wtk.bluetooth.enabled.value" value="false" />
+		<property name="wtk.wma.enabled.value" value="false" />
+		<property name="wtk.mmapi.enabled.value" value="false" />
+		<property name="wtk.miapi.enabled.value" value="false" />
+		<property name="wtk.java3d.enabled.value" value="false" />
+		<property name="wtk.wma2.enabled.value" value="false" />
+		<property name="wtk.contenthandler.enabled.value" value="false" />
 		<property name="file.nbr.midp1.0" value="" />
 		<property name="file.nbr.midp2.0" value="" />
 		<property name="file.nbr.midp" value="${file.nbr.midp1.0}${file.nbr.midp2.0}" />
@@ -374,18 +344,26 @@
 		<property name="file.prefix.cldc1.0" value="" />
 		<property name="file.prefix.cldc1.1" value="" />
 		<property name="file.prefix.novice" value="" />
-		<property name="file.prefix.itunes" value="" />
+		<property name="file.prefix.smartphone" value="" />
+		<property name="file.prefix.afriware" value="" />
+		<property name="file.prefix.memorysize" value="" />
 		<property name="file.prefix.full" value="" />
 		<property name="file.prefix.intlink" value="" />
 		<property name="file.prefix.signed" value="" />
+		<property name="microemu.prefix.signed" value="" />
 		<property name="file.prefix.verisign" value="" />
 		<property name="file.prefix.thawte" value="" />
 		<property name="file.prefix.godaddy" value="" />
 		<property name="file.prefix.jsr75" value="" />
+		<property name="file.prefix.jsr82" value="" />
+		<property name="file.prefix.jsr120" value="" />
+		<property name="file.prefix.jsr135" value="" />
+		<property name="file.prefix.jsr184" value="" />
+		<property name="file.prefix.jsr205" value="" />
 		<property name="file.prefix.jsr238" value="" />
 		<property name="file.prefix.large" value="" />
-		<property name="html.file.prefix" value="${file.prefix.itunes}${file.prefix.full}${file.prefix.intlink}${file.prefix.signed}${file.prefix.verisign}${file.prefix.thawte}${file.prefix.godaddy}${file.prefix.jsr75}" />
-		<property name="file.prefix" value="${file.prefix.midp1.0}${file.prefix.midp2.0}${file.prefix.cldc1.0}${file.prefix.cldc1.1}${file.prefix.novice}${html.file.prefix}${file.prefix.jsr238}" />
+		<property name="html.file.prefix" value="${file.prefix.smartphone}${file.prefix.afriware}${file.prefix.memorysize}${file.prefix.full}${file.prefix.intlink}${file.prefix.signed}${file.prefix.verisign}${file.prefix.thawte}${file.prefix.godaddy}${file.prefix.jsr75}${file.prefix.jsr238}" />
+		<property name="file.prefix" value="${file.prefix.midp1.0}${file.prefix.midp2.0}${file.prefix.cldc1.0}${file.prefix.cldc1.1}${file.prefix.novice}${file.prefix.large}${html.file.prefix}" />
 		<property name="bin" value="${target}/bin${file.prefix}" />
 		<property name="rim.bin" value="${target}/bin${file.prefix}_rim" />
 		<property name="rim.bin.alx" value="${target}/bin${file.prefix}_rim_alx" />
@@ -396,7 +374,9 @@
 		<property name="SUFFIXVERS.cldc1.0" value="" />
 		<property name="SUFFIXVERS.cldc1.1" value="" />
 		<property name="SUFFIXVERS.novice" value="" />
-		<property name="SUFFIXVERS.itunes" value="" />
+		<property name="SUFFIXVERS.smartphone" value="" />
+		<property name="SUFFIXVERS.afriware" value="" />
+		<property name="SUFFIXVERS.memorysize" value="" />
 		<property name="SUFFIXVERS.full" value="" />
 		<property name="SUFFIXVERS.intlink" value="" />
 		<property name="SUFFIXVERS.signed" value="" />
@@ -410,7 +390,7 @@
 		<property name="SUFFIXVERS.jsr184" value="" />
 		<property name="SUFFIXVERS.jsr238" value="" />
 		<property name="SUFFIXVERS.large" value="" />
-		<property name="SUFFIXVERS" value="${SUFFIXVERS.midp1.0}${SUFFIXVERS.midp2.0}${SUFFIXVERS.cldc1.0}${SUFFIXVERS.cldc1.1}${SUFFIXVERS.novice}${SUFFIXVERS.itunes}${SUFFIXVERS.full}${SUFFIXVERS.intlink}${SUFFIXVERS.signed}${SUFFIXVERS.verisign}${SUFFIXVERS.thawte}${SUFFIXVERS.godaddy}${SUFFIXVERS.jsr75}${SUFFIXVERS.jsr82}${SUFFIXVERS.jsr120}${SUFFIXVERS.jsr135}${SUFFIXVERS.jsr184}${SUFFIXVERS.jsr238}${SUFFIXVERS.large}" />
+		<property name="SUFFIXVERS" value="${SUFFIXVERS.midp1.0}${SUFFIXVERS.midp2.0}${SUFFIXVERS.cldc1.0}${SUFFIXVERS.cldc1.1}${SUFFIXVERS.novice}${SUFFIXVERS.smartphone}${SUFFIXVERS.afriware}${SUFFIXVERS.memorysize}${SUFFIXVERS.full}${SUFFIXVERS.intlink}${SUFFIXVERS.signed}${SUFFIXVERS.verisign}${SUFFIXVERS.thawte}${SUFFIXVERS.godaddy}${SUFFIXVERS.jsr75}${SUFFIXVERS.jsr82}${SUFFIXVERS.jsr120}${SUFFIXVERS.jsr135}${SUFFIXVERS.jsr184}${SUFFIXVERS.jsr238}${SUFFIXVERS.large}" />
 		<property name="lib.jsr75" value="" />
 		<property name="lib.jsr82" value="" />
 		<property name="lib.jsr120" value="" />
@@ -418,7 +398,10 @@
 		<property name="lib.jsr184" value="" />
 		<property name="lib.jsr238" value="" />
 		<property name="lib.classpath" value="${wtk.home}/lib/midpapi${file.nbr.midp}.jar:${wtk.home}/lib/cldcapi${file.nbr.cldc}.jar${lib.jsr75}${lib.jsr82}${lib.jsr120}${lib.jsr135}${lib.jsr184}${lib.jsr238}" />
-		<property name="DFEATUREFORMDEF" value="DFEATUREFORMDEF" />
+		<property name="DFEATUREFORMDEF" value="DNOFEATUREFORM" />
+		<property name="DFEATUREFORMIMPORTDEF" value="" />
+		<property name="DFEATUREMGRDEF" value="DNOFEATUREMGR" />
+		<property name="DFEATUREMGRIMPORTDEF" value="" />
 		<!-- DCOMPATDEF is used to test compatibility store/restore of date -->
 		<property name="DCOMPATDEF" value="DNOCOMPAT" />
 		<!-- Note:  this value will not be used if novice is set before -->
@@ -428,14 +411,15 @@
 		<property name="novice.txt" value="${src}/data/novice.txt" />
 		<property name="jsr75" value="" />
 		<property name="smartphone" value="" />
+		<property name="afriware" value="" />
 		<property name="stage.stable.text" value="stable" />
 		<property name="stage.phase.text" value="production" />
 		<property name="signed.text" value="" />
 		<property name="verisign.text" value="" />
 		<property name="thawte.text" value="" />
 		<property name="godaddy.text" value="" />
-		<property name="vendor" value="${tommi.vendor}" />
-		<property name="project.info.url" value="${tommi.project.info.url}" />
+		<property name="vendor" value="${original.vendor}" />
+		<property name="project.info.url" value="${original.project.info.url}" />
 		<property name="build.prefix" value="${file.prefix}${stage.file}" />
 		<property name="build.file.root" value="${build.prefix}${release.name}-${FMIDLETVERSROOT}" />
 		<property name="rim.build.file.root" value="rim_${build.file.root}" />
@@ -448,21 +432,31 @@
 		<property name="compiled" value="${build}/${build.prefix}pcompiled" />
 		<property name="preverified" value="${build}/${build.prefix}preverified" />
 		<property name="preprocessed" value="${build}/${build.prefix}preprocessed" />
-		<property name="obfuscated" value="${build}/${build.prefix}obfuscated" />
 		<filterset id="defile.filter" >
 			<filter token="DMIDPVERS" value="//#define ${DMIDPVERS}" />
 			<filter token="DCLDCVERS" value="//#define ${DCLDCVERS}" />
 			<filter token="DFEATUREFORMDEF" value="//#define ${DFEATUREFORMDEF}" />
 			<filter token="DFEATUREFORMIMPORTDEF" value="${DFEATUREFORMIMPORTDEF}" />
+			<filter token="DFEATUREMGRDEF" value="//#define ${DFEATUREMGRDEF}" />
+			<filter token="DFEATUREMGRIMPORTDEF" value="${DFEATUREMGRIMPORTDEF}" />
 			<filter token="DMEMSIZEDEF" value="//#define ${DMEMSIZEDEF}" />
 			<filter token="DITUNESDEF" value="//#define ${DITUNESDEF}" />
+			<filter token="DSMARTPHONEDEF" value="//#define ${DSMARTPHONEDEF}" />
+			<filter token="DAFRIWAREDEF" value="//#define ${DAFRIWAREDEF}" />
+			<filter token="DNOVICEDEF" value="//#define ${DNOVICEDEF}" />
+			<filter token="SFILEPREFIXNOVICE" value="${sfile.prefix.novice}" />
 			<filter token="DINTLINKDEF" value="//#define ${DINTLINKDEF}" />
 			<filter token="DFULLVERSDEF" value="//#define ${DFULLVERSDEF}" />
 			<filter token="DSIGNEDDEF" value="//#define ${DSIGNEDDEF}" />
+			<filter token="DVERISIGNDEF" value="//#define ${DVERISIGNDEF}" />
+			<filter token="DTHAWTEDEF" value="//#define ${DTHAWTEDEF}" />
+			<filter token="DGODADDYDEF" value="//#define ${DGODADDYDEF}" />
 			<filter token="DJSR75" value="//#define ${DJSR75}" />
 			<filter token="DJSR238" value="//#define ${DJSR238}" />
 			<filter token="DTESTDEF" value="//#define ${DTESTDEF}" />
 			<filter token="DJMTESTDEF" value="//#define ${DJMTESTDEF}" />
+			<filter token="DJMTESTPLUSDEF" value="//#define ${DJMTESTPLUSDEF}" />
+			<filter token="DJMTESTFREEDEF" value="//#define ${DJMTESTFREEDEF}" />
 			<filter token="DCOMPATDEF" value="//#define ${DCOMPATDEF}" />
 			<filter token="DTESTUIDEF" value="//#define ${DTESTUIDEF}" />
 			<filter token="DLOGDEF" value="//#define ${DLOGDEF}" />
@@ -528,7 +522,8 @@
 	</taskdef>
 	-->
 
-	<target name="display.props" >
+	<target name="display.props" unless="${show.once}" >
+		<property name="show.once" value="${one.target}" />
 	    <echo message="project.name=${project.name}" />
 	    <echo message="wtk.home=${wtk.home}" />
 	    <echo message="jar.jde.home=${jar.jde.home}" />
@@ -539,6 +534,8 @@
 	    <echo message="build.compiler=${build.compiler}" />
 	    <echo message="src=${src}" />
 	    <echo message="presrc=${presrc}" />
+	    <echo message="presrc.file=${presrc.file}" />
+	    <echo message="jar.presrc=${jar.presrc}" />
 	    <echo message="compat.presrc=${compat.presrc}" />
 	    <echo message="testui.presrc=${testui.presrc}" />
 	    <echo message="build.number=${build.number}" />
@@ -552,6 +549,9 @@
 	    <echo message="DMIDPVERS=${DMIDPVERS}" />
 	    <echo message="DCLDCVERS=${DCLDCVERS}" />
 	    <echo message="DITUNESDEF=${DITUNESDEF}" />
+	    <echo message="DSMARTPHONEDEF=${DSMARTPHONEDEF}" />
+	    <echo message="DAFRIWAREDEF=${DAFRIWAREDEF}" />
+	    <echo message="DNOVICEDEF=${DNOVICEDEF}" />
 	    <echo message="DINTLINKDEF=${DINTLINKDEF}" />
 	    <echo message="DFULLVERSDEF=${DFULLVERSDEF}" />
 	    <echo message="DSIGNEDDEF=${DSIGNEDDEF}" />
@@ -562,9 +562,11 @@
 	    <echo message="DJSR238=${DJSR238}" />
 	    <echo message="DTESTDEF=${DTESTDEF}" />
 	    <echo message="DJMTESTDEF=${DJMTESTDEF}" />
+	    <echo message="DJMTESTPLUSDEF=${DJMTESTPLUSDEF}" />
+	    <echo message="DJMTESTFREEDEF=${DJMTESTFREEDEF}" />
 	    <echo message="DTESTUIDEF=${DTESTUIDEF}" />
 	    <echo message="DCOMPATDEF=${DCOMPATDEF}" />
-	    <echo message="wtk.optionalpda.enabled=${wtk.optionalpda.enabled}" />
+	    <echo message="wtk.optionalpda.enabled.value=${wtk.optionalpda.enabled.value}" />
 	    <echo message="DLOGDEF=${DLOGDEF}" />
 	    <echo message="no.test=${no.test}" />
 	    <echo message="no.staging=${no.staging}" />
@@ -574,41 +576,61 @@
 	    <echo message="separator=${separator}" />
 	</target>
 
+	<target name="init.preprocess" depends="prepare" unless="presrc.file" >
+		<!-- Delete directory to compile so that we start fresh for cases -->
+		<!-- when we delete a file. -->
+		<property name="act.comp.src" value="${comp.src}" />
+		<delete dir="${act.comp.src}" />
+		<mkdir dir="${act.comp.src}" />
+		<!-- Copy unpreprocessed source to compiled src dir -->
+		<antcall target="copy.unproc.comp" inheritAll="true" />
+		<delete dir="${tmppreprocess}" />
+		<mkdir dir="${tmppreprocess}" />
+	</target>
+
+	<target name="init.act.presrc" depends="prepare" if="presrc.file" >
+		<property name="copy.all.once" value="true" />
+		<property name="act.presrc" value="${tmp.presrc.mdir}" />
+		<property name="act.comp.src" value="${comp.src.file}" />
+		<delete dir="${act.comp.src}" />
+		<mkdir dir="${act.comp.src}" />
+	</target>
+
+	<target name="init.preprocess.presrc.file" depends="prepare" if="presrc.file" >
+		<delete dir="${tmp.presrc.mdir}" />
+		<mkdir dir="${tmp.presrc.subdir}" />
+		<copy file="${presrc.file}" todir="${tmp.presrc.subdir}" />
+	</target>
+
 	<!-- Preprocess source using antenna preprocessor.  If preproccess -->
 	<!-- is not used, this copies the src to the directory to compile -->
 	<!-- comp.src. -->
-	<target name="preprocess" depends="prepare" if="presrc" >
-		<antcall target="display.props" />
-		<!-- Delete directory to compile so that we start fresh for cases -->
-		<!-- when we delete a file. -->
-		<delete dir="${comp.src}" />
-		<mkdir dir="${comp.src}" />
-		<!-- Copy unpreprocessed source to compiled src dir -->
-		<antcall target="copy.unproc.comp" />
-		<delete dir="${tmppreprocess}" />
+	<target name="preprocess" depends="init.act.presrc,init.preprocess.presrc.file,init.preprocess" if="presrc" >
+		<antcall target="display.props" inheritAll="true" />
 		<!-- Check with defines in jdk.home rapc. -->
-		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DMEMSIZEDEF},${DITUNESDEF},${DINTLINKDEF},${DFULLVERSDEF},${DSIGNEDDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
+		<property name="preprocess.defines" value="DEBUG=WARN,${DMIDPVERS},${DCLDCVERS},${DMEMSIZEDEF},${DITUNESDEF},${DSMARTPHONEDEF},${DAFRIWAREDEF},${DNOVICEDEF},${DFEATUREMGRDEF},${DFEATUREFORMDEF},${DINTLINKDEF},${DFULLVERSDEF},${DSIGNEDDEF},${DVERISIGNDEF},${DTHAWTEDEF},${DGODADDYDEF},${DJSR75},${DJSR238},${DTESTDEF},${DJMTESTDEF},${DJMTESTPLUSDEF},${DJMTESTFREEDEF},${DLOGDEF},${DTESTUIDEF},${DCOMPATDEF}" />
 		<echo message="preprocess.defines=${preprocess.defines}" />
-		<mkdir dir="${tmppreprocess}" />
-		<wtkpreprocess srcdir="${presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="yes" />
+		<property name="act.presrc" value="${presrc}" />
+		<echo message="act.presrc=${act.presrc}" />
+		<property name="act.comp.src" value="${comp.src}" />
+		<echo message="act.comp.src=${act.comp.src}" />
+		<wtkpreprocess srcdir="${act.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="yes" />
 		<echo message="Preprocess JMUnit pre src if set ${jmunit.src}." />
-		<wtkpreprocess srcdir="${jmunit.src}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="true" if="jmunit.src" />
+		<wtkpreprocess srcdir="${jmunit.src}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="true" if="jmunit.src"  unless="presrc.file" />
 		<echo message="Preprocess test UI if set ${testui.presrc}." />
-		<wtkpreprocess srcdir="${testui.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="true" if="testui.presrc" />
+		<wtkpreprocess srcdir="${testui.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" printsymbols="true" if="testui.presrc"  unless="presrc.file" />
 		<echo message="Preprocess compatiblity code if set ${compat.presrc}." />
-		<wtkpreprocess srcdir="${compat.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" if="compat.presrc" />
+		<wtkpreprocess srcdir="${compat.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" if="compat.presrc"  unless="presrc.file" />
 		<echo message="Preprocess jar src if set ${jar.presrc}." />
-		<wtkpreprocess srcdir="${jar.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" if="jar.presrc" />
-		<copy todir="${comp.src}" overwrite="true" >
+		<wtkpreprocess srcdir="${jar.presrc}" destdir="${tmppreprocess}" encoding="${wtk.encoding}" symbols="${preprocess.defines}" if="jar.presrc"  unless="presrc.file" />
+		<copy todir="${act.comp.src}" overwrite="true" >
 			<fileset dir="${tmppreprocess}" includes="**/*.java" />
 			<filterset refid="defile.filter" />
 		</copy>
-		<antcall target="delete.test.src" >
-			<param name="dsrc" value="${comp.src}" />
+		<antcall target="delete.test.src" inheritAll="true" >
+			<param name="dsrc" value="${act.comp.src}" />
 		</antcall>
-		<antcall target="wtk.src.copy" />
-		<delete file="${zipdir}/${build.prefix}src.zip" />
-		<zip destfile="${zipdir}/${build.prefix}src.zip" basedir="${comp.src}" />
+		<antcall target="zip.src" inheritAll="true" />
 	</target>
 
 	<!-- Copy preprocessed src to unprocessed source to allow the -->
@@ -617,15 +639,15 @@
 		<copy todir="${src}" overwrite="true" >
 			<!-- remove compatibility classes as these are kept in compatsrc -->
 			<!-- remove testui classes as these are kept in testui -->
-			<fileset dir="${comp.src}" includes="**/*.java" />
+			<fileset dir="${comp.src}" includes="**/*.java" excludes="${test.src.excludes}" />
 		</copy>
-		<antcall target="delete.test.src" >
+		<antcall target="delete.test.src" inheritAll="true" >
 			<param name="dsrc" value="${src}" />
 		</antcall>
 	</target>
 
 	<!-- Delete preprocessed test src in src -->
-	<target name="delete.test.src" depends="prepare" if="no.test">
+	<target name="delete.test.src" if="${no.test}">
 		<echo message="Deleting test src ${dsrc}." />
 		<delete includeemptydirs="true" failonerror="false" >
 			<!-- remove testui classes as these are kept in testui -->
@@ -634,7 +656,7 @@
 		</delete>
 	</target>
 
-	<target name="copy.unproc.comp" depends="prepare" if="unproc.src" >
+	<target name="copy.unproc.comp" if="unproc.src" >
 		<copy todir="${comp.src}" overwrite="true" >
 			<fileset dir="${unproc.src}" includes="**/*.java" />
 		</copy>
@@ -642,17 +664,26 @@
 
 	<target name="copy.comp.svn" depends="prepare" if="copy.comp.svn" >
 		<copy todir="${src}" overwrite="true" >
-			<fileset dir="${comp.src}" />
+			<fileset dir="${comp.src}" excludes="${test.src.excludes}" />
 		</copy>
 	</target>
 
-	<target name="wtk.src.copy" if="wtk.src" >
+	<target name="wtk.src.copy" if="wtk.src" unless="presrc.file" >
 		<delete includeEmptyDirs="true" >
 			<fileset dir="${wtk.src}" includes="**/*.java" />
 		</delete>
 		<copy todir="${wtk.src}" >
 			<fileset dir="${comp.src}" includes="**/*.java" />
 		</copy>
+	</target>
+
+	<target name="wtk.src.copy.file" if="presrc.file" >
+		<copy file="${comp.src.file}/${src.dir}/${presrc.file.base}" todir="${wtk.src}/${src.dir}" overwrite="true" />
+	</target>
+
+	<target name="zip.src" unless="presrc.file" >
+		<delete file="${zipdir}/${build.prefix}src.zip" />
+		<zip destfile="${zipdir}/${build.prefix}src.zip" basedir="${comp.src}" />
 	</target>
 
 	<path id="project.classpath">
@@ -663,27 +694,34 @@
 		<pathelement location="${jde.home.path}/bin/rapc.jar" />
 	</path>
 
-	<target name="compile" depends="prepare">
+	<target name="compile" depends="prepare,init.act.presrc,preprocess" >
 
-		<!-- Copy a JAD file from the WTK's demo applications.
-             Caution: Ant only copies this the first time. Also
-             make a directory to compile into. -->
+		<!-- Make a directory to compile into. -->
 
-		<antcall target="preprocess" />
 		<!-- Compile everything, but don't preverify (yet). -->
 		<antcall target="display.props" />
 
 		<echo message="add.jars=${add.jars}" />
 		<antcall target="add.jars" />
 		<antcall target="copy.jar.src" />
-		<antcall target="wtk.src.copy" />
-		<antcall target="display.props" />
+		<antcall target="wtk.src.copy" inheritAll="true" />
+		<antcall target="wtk.src.copy.file" inheritAll="true" />
 		<echo message="comp.src=${comp.src}" />
-		<wtkbuild srcdir="${comp.src}" destdir="${classes}" preverify="false" depend="yes" unless="ecj.jar" />
-		<antcall target="ecj.compile" />
-		<antcall target="findbugs" />
-		<antcall target="pmd" />
-		<antcall target="cpd" />
+		<property name="act.comp.src" value="${comp.src}" />
+		<echo message="act.comp.src=${act.comp.src}" />
+		<property name="wtk.optionalpda.enabled" value="${wtk.optionalpda.enabled.value}" />
+		<property name="wtk.bluetooth.enabled" value="${wtk.bluetooth.enabled.value}" />
+		<property name="wtk.wma.enabled" value="${wtk.wma.enabled.value}" />
+		<property name="wtk.mmapi.enabled" value="${wtk.mmapi.enabled.value}" />
+		<property name="wtk.miapi.enabled" value="${wtk.miapi.enabled.value}" />
+		<property name="wtk.java3d.enabled" value="${wtk.java3d.enabled.value}" />
+		<property name="wtk.wma2.enabled" value="${wtk.wma2.enabled.value}" />
+		<property name="wtk.contenthandler.enabled" value="${wtk.contenthandler.enabled.value}" />
+		<wtkbuild srcdir="${act.comp.src}" destdir="${classes}" preverify="false" includeantruntime="false" unless="ecj.jar" />
+		<antcall target="ecj.compile" inheritAll="true" />
+		<antcall target="findbugs" inheritAll="true" />
+		<antcall target="pmd" inheritAll="true" />
+		<antcall target="cpd" inheritAll="true" />
 	</target>
 
 	<target name="ecj.compile" if="ecj.jar" >
@@ -737,7 +775,7 @@
 		</fileset>
 	</path>
 
-	<target name="pmd" depends="prepare" if="${use.pmd.task}" >
+	<target name="pmd" if="${use.pmd.task}" >
 		<mkdir dir="${analyze}" />
 		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.classpath" />
 		<pmd rulesetfiles="rulesets/favorites.xml" encoding="UTF-8" >
@@ -755,7 +793,7 @@
 		  </exec>
 	  </target>
 
-	<target name="cpd" depends="prepare" if="${use.cpd.task}" >
+	<target name="cpd" if="${use.cpd.task}" >
 		<mkdir dir="${analyze}" />
 		<taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask" classpathref="pmd.classpath" />
 		<cpd minimumTokenCount="${pmd.minimumtokencount}" ignoreLiterals="true" format="xml" outputFile="${analyze}/cpd-${build.file.root}.xml" encoding="UTF-8" >
@@ -831,10 +869,10 @@
 		</copy>
 	</target>
 
-	<target name="copy.novice" if="novice" >
+	<target name="copy.novice" if="${novice}" >
 		<mkdir dir="${tmpres}/data" />
 		<copy tofile="${tmpres}/data/novice.txt" >
-			<fileset file="${novice.txt}" />
+			<fileset file="${novice.txt.file}" />
 		</copy>
 	</target>
 
@@ -845,6 +883,12 @@
 	</target>
 
 	<target name="make.jad" depends="prepare" >
+		<property name="shtml.file.prefix" value="file.prefix.smartphone,file.prefix.afriware,file.prefix.memorysize,file.prefix.full,file.prefix.intlink,file.prefix.signed,file.prefix.verisign,file.prefix.thawte,file.prefix.godaddy,file.prefix.jsr75,file.prefix.jsr238" />
+		<property name="sfile.prefix" value="file.prefix.midp1.0,file.prefix.midp2.0,file.prefix.cldc1.0,file.prefix.cldc1.1,file.prefix.novice,file.prefix.large,${shtml.file.prefix}" />
+		<property name="sbuild.prefix" value="${sfile.prefix},stage.file" />
+		<property name="sbuild.file.root" value="${sbuild.prefix},release.name,-,FMIDLETVERSROOT" />
+		<property name="build.file.root" value="${build.file.root}" />
+		<property name="file.prefix.signer" value="${file.prefix.godaddy}${file.prefix.thawte}${file.prefix.verisign}" />
 		<wtkjad jadfile="${mjadfile}" manifest="${mmanifest}" jarfile="${mjarfile}" update="${update.parm}" name="${project.name}" vendor="${vendor}" version="${MIDLETVERS}" encoding="UTF-8" >
 			<midlet name="${project.name}" icon="/${icons.dir}/${app-icon}" class="${midlet.class}" />
 			<midlet name="RssSuite" class="com.substanceofcode.jmunit.businessentities.RssSuite" unless="no.test" />
@@ -863,6 +907,34 @@
 			<attribute name="novice" value="${NOVICE}" />
 			<attribute name="Program-Version" value="${buildinfo}" />
 			<attribute name="original-author" value="${original.author}" />
+			<attribute name="sbuild-file-root" value="${sbuild.file.root}" />
+			<attribute name="build-file-root" value="${build.file.root}" />
+			<attribute name="file-prefix-signer" value="${file.prefix.signer}" />
+			<attribute name="file-prefix-cldc1-0" value="${sfile.prefix.cldc1.0}_" />
+			<attribute name="file-prefix-cldc1-1" value="${sfile.prefix.cldc1.1}_" />
+			<attribute name="file-prefix-full" value="${sfile.prefix.full}_" />
+			<attribute name="file-prefix-intlink" value="${sfile.prefix.intlink}_" />
+			<attribute name="file-prefix-smartphone" value="${sfile.prefix.smartphone}_" />
+			<attribute name="file-prefix-afriware" value="${sfile.prefix.afriware}_" />
+			<attribute name="file-prefix-memorysize" value="${file.prefix.memorysize}_" />
+			<attribute name="file-prefix-novice" value="${sfile.prefix.novice}_" />
+			<attribute name="file-prefix-jsr75" value="${sfile.prefix.jsr75}_" />
+			<attribute name="file-prefix-jsr82" value="${sfile.prefix.jsr82}_" />
+			<attribute name="file-prefix-jsr120" value="${sfile.prefix.jsr120}_" />
+			<attribute name="file-prefix-jsr135" value="${sfile.prefix.jsr135}_" />
+			<attribute name="file-prefix-jsr184" value="${sfile.prefix.jsr184}_" />
+			<attribute name="file-prefix-jsr205" value="${sfile.prefix.jsr205}_" />
+			<attribute name="file-prefix-jsr238" value="${sfile.prefix.jsr238}_" />
+			<attribute name="file-prefix-midp1-0" value="${sfile.prefix.midp1.0}_" />
+			<attribute name="file-prefix-midp2-0" value="${sfile.prefix.midp2.0}_" />
+			<attribute name="file-prefix-novice" value="${sfile.prefix.novice}_" />
+			<attribute name="file-prefix-signed" value="${sfile.prefix.signed}_" />
+			<attribute name="file-prefix-thawte" value="${sfile.prefix.thawte}_" />
+			<attribute name="file-prefix-verisign" value="${sfile.prefix.verisign}_" />
+			<attribute name="file-prefix-godaddy" value="${sfile.prefix.godaddy}_" />
+			<attribute name="release-name" value="${release.name}" />
+			<attribute name="stage-file" value="${stage.file}" />
+			<attribute name="FMIDLETVERSROOT" value="${FMIDLETVERSROOT}" />
 			<attribute name="jlomicro-level" value="${jlomicro-level}" unless="no.test" />
 			<attribute name="jlomicro-handlers" value="${jlomicro-handlers}" unless="no.test" />
 			<attribute name="jlomicro-ConsoleHandler-formatter" value="${jlomicro-ConsoleHandler-formatter}" unless="no.test" />
@@ -877,7 +949,15 @@
 
 	<target name="package.obfuscate.preverify" depends="prepare" >
 	    <echo message="keep.obfuscate=${keep.obfuscate}" />
-		<wtkpackage jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" manifest="${bin}/manifest.mf" cldc="${JCLDCVERS}" profile="${JMIDPVERS}" preverify="true" obfuscate="${keep.obfuscate}" verbose="true" >
+		<property name="wtk.optionalpda.enabled" value="${wtk.optionalpda.enabled.value}" />
+		<property name="wtk.bluetooth.enabled" value="${wtk.bluetooth.enabled.value}" />
+		<property name="wtk.wma.enabled" value="${wtk.wma.enabled.value}" />
+		<property name="wtk.mmapi.enabled" value="${wtk.mmapi.enabled.value}" />
+		<property name="wtk.miapi.enabled" value="${wtk.miapi.enabled.value}" />
+		<property name="wtk.java3d.enabled" value="${wtk.java3d.enabled.value}" />
+		<property name="wtk.wma2.enabled" value="${wtk.wma2.enabled.value}" />
+		<property name="wtk.contenthandler.enabled" value="${wtk.contenthandler.enabled.value}" />
+		<wtkpackage jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" manifest="${bin}/manifest.mf" cldc="${JCLDCVERS}" profile="${JMIDPVERS}" preverify="true" obfuscate="false" verbose="true" >
 
 			<!-- Package our newly compiled classes and the
                  resources from the WTK's demo application. -->
@@ -886,10 +966,23 @@
 			<fileset dir="${tmpres}" />
 
 		</wtkpackage>
+		<copy file="${bin}/${build.file.root}.jad" tofile="${bin}/pre-smartlink-${build.file.root}.jad" />
+		<copy file="${bin}/${build.file.root}.jar" tofile="${bin}/pre-smartlink-${build.file.root}.jar" />
+		<property name="wtk.all.enabled" value="true" />
+		<wtksmartlink jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" verbose="true" if="keep.smartlink" unless="skip.smartlink" >
+			<preserve class="org.kablog.kgui.KFileSelectorMgr" if="jsr75.present" />
+		</wtksmartlink>
+		<wtkobfuscate jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" verbose="true" if="keep.obfuscate" >
+			<preserve class="org.kablog.kgui.KFileSelectorMgr" if="jsr75.present" />
+			<argument value="-optimizationpasses" />
+			<argument value="${proguard.passes}" />
+			<argument value="-allowaccessmodification" />
+		</wtkobfuscate>
+		<wtkpreverify jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" if="keep.obfuscate" />
 
 	</target>
 
-	<target name="tool.sign.jar" depends="prepare" if="signed" unless="${no.jar.sign}" >
+	<target name="tool.sign.jar" depends="prepare" if="${signed}" unless="${no.jar.sign}" >
 		<echo message="tsalias=${tsalias}" />
 		<echo message="tsstorepass=${tsstorepass}" />
 		<echo message="tskeystore=${tskeystore}" />
@@ -910,7 +1003,7 @@
 		<copy file="${jsjar.signed.out}" todir="${distsigned}" overwrite="true" />
 	</target>
 
-	<target name="tool.sign" depends="prepare" if="signed" unless="${no.jar.sign}" >
+	<target name="tool.sign" depends="prepare" if="${signed}" unless="${no.jar.sign}" >
 		<mkdir dir="${distsigned}" />
 		<parallel>
 		<sequential>
@@ -972,7 +1065,7 @@
 		</parallel>
 	</target>
 
-	<target name="antenna.wtksign" depends="prepare" if="signed" unless="${no.jar.sign}" >
+	<target name="antenna.wtksign" depends="prepare" if="${signed}" unless="${no.jar.sign}" >
 		  <echo message="&lt;wtksign keystore=&quot;${tskeystore}&quot; jadfile=&quot;${sjadfile}&quot; jarfile=&quot;${sjarfile}&quot; certalias=&quot;${tsalias}&quot; storepass=&quot;${tsstorepass}&quot; keypass=&quot;${tsstorepass}&quot; &gt;" />
 		<copy file="${jsjad1.in}" tofile="${jsjad.signed.out}" overwrite="true" />
 		<copy file="${jsjar.in}" tofile="${jsjar.signed.out}" overwrite="true" />
@@ -1009,8 +1102,6 @@
 		<antcall target="copy.res" />
 		<antcall target="copy.novice" />
 		<antcall target="copy.test.res" />
-
-		<echo message="MIDLETVERS=${MIDLETVERS}" />
 
 		<antcall target="make.jad" inheritAll="true" >
 			<param name="mweb.jarfile" value="${build.file.root}.jar" />
@@ -1074,9 +1165,9 @@
 		</copy>
 	</target>
 
-	<target name="bb-ant.sign" depends="prepare" if="signed" unless="${no.rim.sign}" >
+	<target name="bb-ant.sign" depends="prepare" if="${signed}" unless="${no.rim.sign}" >
 	    <echo message="Signing ../${rim.build.file.root}.cod waiting 1 second." />
-		<sleep seconds="1" />
+		<sleep seconds="${bb.sleep}" />
 		<copy file="../${rim.build.file.root}.cod" tofile="${bin}/${rim.build.file.root}-presign.cod" overwrite="true" />
 		<sigtool codfile="../${rim.build.file.root}.cod" password="${env.THAWTE_KEYSTORE_PASS}" />
 		<move file="../${rim.build.file.root}.cod" tofile="${dist}/${rim.build.file.root}.cod"  preservelastmodified="true" />
@@ -1091,7 +1182,7 @@
 		</move>
 	</target>
 
-	<target name="create.prc" depends="prepare" if="wtk.wme.home" >
+	<target name="create.prc" depends="prepare" if="wtk.wme.home" unless="${signed}" >
 		<wtkmakeprc jarfile="${bin}/${project.name}.jar" name="${project.name}"  highres="true" creator="${prc.creater}" longname="${prc.longname}" />
 		<mkdir dir="${dist}/${build.prefix}prc" />
 		<move file="${bin}/${project.name}.prc" todir="${dist}/${build.prefix}prc"  preservelastmodified="true" />
@@ -1113,9 +1204,9 @@
 			<arg value="jad=${dist}/${build.file.root}_cod.jad" />
 			<arg value="${bin}/${build.file.root}_cod_in.jar" />
 		</exec>
-		<move file="${project.name}.cso" tofile="${dist}/${rim.build.file.root}.cso"  preservelastmodified="true" />
+		<move file="${project.name}.cso" tofile="${rim.bin}/${rim.build.file.root}.cso"  preservelastmodified="true" />
 		<move file="${project.name}.cod" tofile="${dist}/${rim.build.file.root}.cod"  preservelastmodified="true" />
-		<move file="${project.name}.debug" tofile="${dist}/${rim.build.file.root}.debug"  preservelastmodified="true" />
+		<move file="${project.name}.debug" tofile="${rim.bin}/${rim.build.file.root}.debug"  preservelastmodified="true" />
 	</target>
 
 	<target name="jar.create.rim.files" depends="prepare" if="jar.jde.home" unless="${bb.jde.use}" >
@@ -1151,6 +1242,8 @@
 				</codset>
 			</application>
 		</alx>
+		<copy file="${bin}/${rim.build.file.root}.jad" tofile="${rim.bin.alx}/${rim.build.file.root}.jad"  preservelastmodified="true" />
+		<copy file="${bin}/${rim.build.file.root}.jar" tofile="${rim.bin.alx}/${rim.build.file.root}.jar"  preservelastmodified="true" />
 		<zip destfile="${dist}/${rim.build.file.root}.zip" basedir="${rim.bin.alx}" />
 		<move file="${rim.bin.alx}/${rim.build.file.root}.alx" tofile="${dist}/${rim.build.file.root}.alx"  preservelastmodified="true" />
 		<move todir="${dist}" >
@@ -1158,9 +1251,10 @@
 			<fileset dir="${rim.bin}" includes="*.signed" />
 		</move>
 		<move file="${bin}/${rim.build.file.root}.jad" tofile="${dist}/${rim.build.file.root}.jad"  preservelastmodified="true" />
-		<move file="../${rim.build.file.root}.cso" tofile="${dist}/${rim.build.file.root}.cso"  preservelastmodified="true" />
-		<move file="../${rim.build.file.root}.debug" tofile="${dist}/${rim.build.file.root}.debug"  preservelastmodified="true" />
-		<delete file="../${rim.build.file.root}.jar" />
+		<move file="${bin}/${rim.build.file.root}.jar" tofile="${dist}/${rim.build.file.root}.jar"  preservelastmodified="true" />
+		<move file="../${rim.build.file.root}.cso" tofile="${rim.bin}/${rim.build.file.root}.cso"  preservelastmodified="true" />
+		<move file="../${rim.build.file.root}.debug" tofile="${rim.bin}/${rim.build.file.root}.debug"  preservelastmodified="true" />
+		<move file="../${rim.build.file.root}.jar" tofile="${rim.bin}/${rim.build.file.root}.jar"  preservelastmodified="true" />
 		<delete file="../${rim.build.file.root}-1.debug" />
 	</target>
 
@@ -1170,7 +1264,7 @@
 	    <echo message="${basedir}/${dist}/${rim.build.file.root}.jar=${basedir}/${dist}/${rim.build.file.root}.jar}" />
 	    <echo message="rim.bin=${rim.bin}" />
 		<!-- Check with defines in jdk.home rapc. -->
-		<property name="rapc.preprocess.defines" value="${DMIDPVERS};${DCLDCVERS};${DMEMSIZEDEF};${DITUNESDEF};${DINTLINKDEF};${DFULLVERSDEF};${DSIGNEDDEF};${DJSR75};${DJSR238};${DTESTDEF};${DJMTESTDEF};${DLOGDEF};${DTESTUIDEF};${DCOMPATDEF}" />
+		<property name="rapc.preprocess.defines" value="${DMIDPVERS};${DCLDCVERS};${DMEMSIZEDEF};${DITUNESDEF};${DSMARTPHONEDEF};${DAFRIWAREDEF};${DINTLINKDEF};${DFULLVERSDEF};${DSIGNEDDEF};${DFEATUREMGRDEF};${DFEATUREFORMDEF};${DNOVICEDEF};${DTHAWTEDEF};${DGODADDYDEF};${DVERISIGNDEF};${DJSR75};${DJSR238};${DTESTDEF};${DJMTESTDEF};${DJMTESTPLUSDEF};${DJMTESTFREEDEF};${DLOGDEF};${DTESTUIDEF};${DCOMPATDEF}" />
 		<echo message="prapc.reprocess.defines=${prapc.reprocess.defines}" />
 		<mkdir dir="${rim.bin}" />
 		<rapc jdehome="${jde.home}" exepath="${wtk.home}/bin" srcdir="${comp.src}" destdir="${rim.bin}" output="${rim.build.file.root}" defines="${prapc.reprocess.defines}" verbose="true" nodebug="true" >
@@ -1188,15 +1282,18 @@
 		</alx>
 		<move file="${rim.bin}/${rim.build.file.root}.cso" tofile="${dist}/${rim.build.file.root}.cso"  preservelastmodified="true" />
 		<move file="${rim.bin}/${rim.build.file.root}.cod" tofile="${dist}/${rim.build.file.root}.cod"  preservelastmodified="true" />
+		<copy file="${bin}/${rim.build.file.root}.jad" tofile="${rim.bin.alx}/${rim.build.file.root}.jad"  preservelastmodified="true" />
+		<copy file="${bin}/${rim.build.file.root}.jar" tofile="${rim.bin.alx}/${rim.build.file.root}.jar"  preservelastmodified="true" />
 		<zip destfile="${rim.bin}/${rim.build.file.root}.zip" basedir="${rim.bin.alx}" />
 		<move file="${rim.bin.alx}/${rim.build.file.root}.alx" tofile="${dist}/${rim.build.file.root}.alx"  preservelastmodified="true" />
 		<move file="${rim.bin}/${rim.build.file.root}.zip" tofile="${dist}/${rim.build.file.root}.zip"  preservelastmodified="true" />
 	</target>
 
-	<target name="svn.op.dist" if="${need.svn.preprocessed}" unless="skip.svn.op" >
+	<target name="svn.op.dist" if="${need.svn.preprocessed}" unless="${skip.svn.op}" >
 		<delete dir="${op.dir}" />
 		<mkdir dir="${op.dir}" />
 
+	    <echo message="svn.url=${svn.url}" />
 		<echo message="${svn.pgm} ${svn.op} ${svn.url} ${svn.src}" />
 		<exec executable="${svn.pgm}" dir="${op.dir}" >
 			<arg value="${svn.op}" />
@@ -1278,35 +1375,50 @@
 		</antcall>
 	</target>
 
-	<target name="google.upload.line.append" depends="prepare" if="upload.to.google">
-		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${file.name} --summary=&quot;${stage.stable.text} ${signed.text}${verisign.text}${thawte.text}${godaddy.text}${device.type} MIDP ${wtk.midp.version} ${intlink} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}${latest.binary.desc}&quot; ${append.google.labels}&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
+	<target name="google.upload.line.append" if="${upload.to.google}">
+		<echo message="googlecode_upload.pl --user=${svn.user} --pass=${svn.pass} --project=${svn.src} --progress --file=${file.name} --summary=&quot;${file.summary}&quot; ${append.google.labels}&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 	</target>
 
-	<target name="google.upload.line.append.file" depends="prepare" unless="${no.individual.file}" >
+	<target name="set.file.summary" depends="prepare" unless="${no.individual.file}" >
+		<property name="latest.binary.desc" value="latest ${stage.phase.text} binary for direct phone install this is included in binary zip.  See documentation for which program to use." />
+		<property name="file.summary" value="${stage.stable.text} ${signed.text}${verisign.text}${thawte.text}${godaddy.text}${device.type} MIDP ${wtk.midp.version} ${intlink} ${smartphone} ${jsr75} Mobile RSS Reader - Version ${MIDLETVERSROOT} ${ustage.txt}${latest.binary.desc}" />
+	</target>
+
+	<target name="google.upload.line.append.file" depends="set.file.summary" unless="${no.individual.file}" >
 		<antcall target="google.upload.line.append" inheritAll="true" >
-			<param name="file.name" value="${build.file.root}${fext.suffix}.${fext}" />
+			<param name="file.name" value="${fprefix}${build.file.root}${fext.suffix}.${fext}" />
 		</antcall>
 	</target>
 
-	<target name="google.upload.append" depends="prepare" if="upload.to.google">
-		<property name="jsr" value="" />
+	<target name="google.upload.append" if="upload.to.google">
 		<property name="google.labels" value="" />
-		<property name="latest.binary.desc" value="latest ${stage.phase.text} binary for direct phone install this is included in binary zip.  See documentation for which program to use." />
 		<echo message="cd */RSS*/dist&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="rim_" />
+			<param name="fext" value="zip" />
+			<param name="fext.suffix" value="" />
+			<param name="append.google.labels" value="${google.labels}" />
+			<param name="device.type" value="Blackberry only zip with alx and cod," />
+		</antcall>
+		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="" />
 			<param name="fext" value="jad" />
 			<param name="fext.suffix" value="" />
 			<param name="append.google.labels" value="Deprecated,Type-Package" />
 			<param name="device.type" value="(not Blackberry)" />
 		</antcall>
+		<!-- Only upload RIM zip file as others are not usable.
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="rim_" />
 			<param name="fext" value="cod" />
 			<param name="fext.suffix" value="" />
 			<param name="append.google.labels" value="${google.labels}" />
 			<param name="device.type" value="Blackberry" />
 		</antcall>
+		-->
 		<antcall target="google.upload.line.append.file" inheritAll="true" >
+			<param name="fprefix" value="" />
 			<param name="fext" value="jar" />
 			<param name="fext.suffix" value="" />
 			<param name="append.google.labels" value="${google.labels}" />
@@ -1316,23 +1428,36 @@
 		<echo message="pwd&#10;" file="${distgooglecode}/googleupload.sh" append="true" />
 	</target>
 
-	<target name="sftp.upload.line.append" depends="prepare" if="upload.to.sftp">
-		<echo message="put ${file.name}&#10;" file="${sftp.in.file}" append="true" />
+	<target name="sftp.index.line.append" depends="set.file.summary" if="upload.to.sftp">
+		<echo message="&lt;li&gt;&lt;a href=&quot;device-install-files/${file.name}&quot;&gt;${file.name} ${file.summary}&lt;/a&gt;&lt;/li&gt;&#10;" file="${sftp.pgm.index.file}" append="true" />
+	</target>
+
+	<target name="sftp.upload.line.append" if="upload.to.sftp">
+		<echo message="put ${file.name} device-install-files&#10;" file="${sftp.pgm.in.file}" append="true" />
 	</target>
 
 	<target name="sftp.upload.line.append.sun.file" depends="prepare" >
+		<property name="device.type" value="(not Blackberry)" />
+		<property name="file.name" value="${rim.build.file.root}${fext.suffix}.${fext}" />
 		<antcall target="sftp.upload.line.append" inheritAll="true" >
+			<param name="file.name" value="${build.file.root}${fext.suffix}.${fext}" />
+		</antcall>
+		<antcall target="sftp.index.line.append" inheritAll="true" >
 			<param name="file.name" value="${build.file.root}${fext.suffix}.${fext}" />
 		</antcall>
 	</target>
 
 	<target name="sftp.upload.line.append.rim.file" depends="prepare" >
+		<property name="device.type" value="Blackberry" />
 		<antcall target="sftp.upload.line.append" inheritAll="true" >
+			<param name="file.name" value="${rim.build.file.root}${fext.suffix}.${fext}" />
+		</antcall>
+		<antcall target="sftp.index.line.append" inheritAll="true" >
 			<param name="file.name" value="${rim.build.file.root}${fext.suffix}.${fext}" />
 		</antcall>
 	</target>
 
-	<target name="sftp.upload.append.sun" depends="prepare" if="upload.to.sftp" unless="sftp.no.sun" >
+	<target name="sftp.upload.append.sun" depends="prepare" if="${upload.to.sftp}" unless="${sftp.no.sun}" >
 		<antcall target="sftp.upload.line.append.sun.file" inheritAll="true" >
 			<param name="fext" value="jad" />
 			<param name="fext.suffix" value="" />
@@ -1344,36 +1469,46 @@
 		<antcall target="sftp.applet.initialize" inheritAll="true" />
 	</target>
 
-	<target name="sftp.upload.append.rim" depends="prepare" if="upload.to.sftp" unless="signed" >
-		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
-			<param name="fext" value="cso" />
-			<param name="fext.suffix" value="" />
-		</antcall>
+	<target name="sftp.upload.append.rim" depends="prepare" if="${upload.to.sftp}" >
+		<!-- Do not copy jad files as they are in the zip file.
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="jad" />
 			<param name="fext.suffix" value="" />
 		</antcall>
+		-->
+		<!-- Do not copy jar files as they are in the zip file.
+		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
+			<param name="fext" value="jar" />
+			<param name="fext.suffix" value="" />
+		</antcall>
+		-->
+		<!-- Do not copy cod files as they are in the zip file.
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="cod" />
 			<param name="fext.suffix" value="" />
 		</antcall>
-		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
-			<param name="fext" value="signed" />
-			<param name="fext.suffix" value="" />
-		</antcall>
+		-->
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="zip" />
 			<param name="fext.suffix" value="" />
 		</antcall>
+		<!-- Do not copy alx files as they are in the zip file.
 		<antcall target="sftp.upload.line.append.rim.file" inheritAll="true" >
 			<param name="fext" value="alx" />
 			<param name="fext.suffix" value="" />
 		</antcall>
+		-->
 	</target>
 
 	<target name="sftp.upload.append" depends="prepare" if="upload.to.sftp">
 		<antcall target="sftp.upload.append.rim" inheritAll="true" />
 		<antcall target="sftp.upload.append.sun" inheritAll="true" />
+		<concat destfile="${sftp.in.file}" append="true" >
+			<fileset file="${sftp.pgm.in.file}" />
+		</concat>
+		<concat destfile="${sftp.index.file}" append="true" >
+			<fileset file="${sftp.pgm.index.file}" />
+		</concat>
 	</target>
 
 	<target name="sftp.upload.archives" depends="prepare" if="upload.to.sftp">
@@ -1387,88 +1522,140 @@
 
 	<target name="sftp.applet.initialize" depends="prepare" if="${need.applet}" >
 		<mkdir dir="${ftpdist.dir}" />
-		<mkdir dir="${ftpdist.dir}/lib" />
-		<property name="file.vers.prefix" value="-demo-v${fn.root.emulator.version}${dist.stage.file}" />
+		<mkdir dir="${ftp.demo.dist.dir}" />
+		<mkdir dir="${ftpdist.dir}/signedlib" />
+		<property name="file.vers.prefix" value="-demo-${file.prefix.godaddy}${file.prefix.verisign}${file.prefix.thawte}v${fn.root.emulator.version}${dist.stage.file}" />
+		<property name="microemu.fn.root" value="${microemu.prefix.signed}microemu" />
 		<antcall target="tool.sign.jar" inheritAll="true" >
 			<param name="jsjar.in" value="${emulator.home}/lib/microemu-javase-applet.jar" />
-			<param name="jsjar.signed.out" value="${ftpdist.dir}/lib/microemu-javase-applet${file.vers.prefix}.jar" />
+			<param name="jsjar.signed.out" value="${ftpdist.dir}/signedlib/${microemu.fn.root}-javase-applet${file.vers.prefix}.jar" />
 		</antcall>
 		<antcall target="tool.sign.jar" inheritAll="true" >
 			<param name="jsjar.in" value="${emulator.home}/devices/microemu-device-large.jar" />
-			<param name="jsjar.signed.out" value="${ftpdist.dir}/lib/microemu-device-large${file.vers.prefix}.jar" />
+			<param name="jsjar.signed.out" value="${ftpdist.dir}/signedlib/${microemu.fn.root}-device-large${file.vers.prefix}.jar" />
 		</antcall>
-		<copy file="${emulator.home}/lib/midpapi20.jar" tofile="${ftpdist.dir}/lib/midpapi20${file.vers.prefix}.jar" overwrite="true" />
+		<copy file="${emulator.home}/lib/midpapi20.jar" tofile="${ftpdist.dir}/signedlib/${microemu.prefix.signed}midpapi20${file.vers.prefix}.jar" overwrite="true" />
 		<antcall target="tool.sign.jar" inheritAll="true" >
 			<param name="jsjar.in" value="${emulator.home}/lib/midpapi20.jar" />
-			<param name="jsjar.signed.out" value="${ftpdist.dir}/lib/midpapi20${file.vers.prefix}.jar" />
+			<param name="jsjar.signed.out" value="${ftpdist.dir}/signedlib/${microemu.prefix.signed}midpapi20${file.vers.prefix}.jar" />
 		</antcall>
+		<copy file="${emulator.home}/lib/cldcapi11.jar" tofile="${ftpdist.dir}/signedlib/${microemu.prefix.signed}cldcapi11${file.vers.prefix}.jar" overwrite="true" />
 		<antcall target="tool.sign.jar" inheritAll="true" >
 			<param name="jsjar.in" value="${emulator.home}/lib/cldcapi11.jar" />
-			<param name="jsjar.signed.out" value="${ftpdist.dir}/lib/cldcapi11${file.vers.prefix}.jar" />
+			<param name="jsjar.signed.out" value="${ftpdist.dir}/signedlib/${microemu.prefix.signed}cldcapi11${file.vers.prefix}.jar" />
 		</antcall>
 		<antcall target="tool.sign.jar" inheritAll="true" >
 			<param name="jsjar.in" value="${emulator.home}/lib/microemu-jsr-75.jar" />
-			<param name="jsjar.signed.out" value="${ftpdist.dir}/lib/microemu-jsr-75${file.vers.prefix}.jar" />
+			<param name="jsjar.signed.out" value="${ftpdist.dir}/signedlib/${microemu.fn.root}-jsr-75${file.vers.prefix}.jar" />
 		</antcall>
 		<property name="emulator.file.name" value="${emulator.root}${file.vers.prefix}.jar" />
 		<antcall target="tool.sign.jar" inheritAll="true" >
 			<param name="jsjar.in" value="${path.emulator.jar}" />
-			<param name="jsjar.signed.out" value="${ftpdist.dir}/lib/${emulator.file.name}" />
+			<param name="jsjar.signed.out" value="${ftpdist.dir}/signedlib/${microemu.prefix.signed}${emulator.file.name}" />
 		</antcall>
-		<copy file="${src}/main/html/microemuapplet.html" tofile="${ftpdist.dir}/microemu_${html.file.prefix}applet${file.vers.prefix}.html" overwrite="true" >
+		<filterset id="emulator.info" >
+			<filter token="EMULATORJAR" value="${microemu.prefix.signed}${emulator.file.name}" />
+			<filter token="EMULATORCLASS" value="${emulator.class}" />
+			<filter token="FILEVERSPREFIX" value="${file.vers.prefix}" />
+			<filter token="BUILDFILEROOT" value="${build.file.root}" />
+			<filter token="MICROEMUFNROOT" value="${microemu.fn.root}" />
+			<filter token="MICROEMUPREFIXSIGNED" value="${microemu.prefix.signed}" />
+		</filterset>
+		<copy file="${src}/main/html/microemuapplet.html" tofile="${ftp.demo.dist.dir}/microemu_${html.file.prefix}applet${file.vers.prefix}.html" overwrite="true" >
 			<filterset refid="midlet.info" />
-			<filterset>
-				<filter token="FILEVERSPREFIX" value="${file.vers.prefix}" />
-				<filter token="BUILDFILEROOT" value="${build.file.root}" />
-			</filterset>
+			<filterset refid="emulator.info" />
 		</copy>
-		<copy file="${src}/main/bash/microemu.sh" tofile="${ftpdist.dir}/microemu_${html.file.prefix}demo${file.vers.prefix}.sh" overwrite="true" >
+		<copy file="${src}/main/bash/microemu.sh" tofile="${ftp.demo.dist.dir}/microemu_${html.file.prefix}demo${file.vers.prefix}.sh" overwrite="true" >
 			<filterset refid="midlet.info" />
-			<filterset>
-				<filter token="EMULATORJAR" value="${emulator.file.name}" />
-				<filter token="EMULATORCLASS" value="${emulator.class}" />
-				<filter token="FILEVERSPREFIX" value="${file.vers.prefix}" />
-				<filter token="BUILDFILEROOT" value="${build.file.root}" />
-			</filterset>
+			<filterset refid="emulator.info" />
 		</copy>
-		<echo message="-mkdir lib&#10;" file="${sftp.in.file}" append="true" />
-		<echo message="mput ../${ftpdist.name}/lib/* lib&#10;" file="${sftp.in.file}" append="true" />
-		<echo message="mput ../${ftpdist.name}/*.html&#10;" file="${sftp.in.file}" append="true" />
-		<echo message="mput ../${ftpdist.name}/*.sh&#10;" file="${sftp.in.file}" append="true" />
-		<echo message="put ../${ftpdist.name}/apache.htaccess lib/.htaccess&#10;" file="${sftp.in.file}" append="true" />
-		<echo message="put ../${dist.name}/${build.file.root}.jar lib&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="-mkdir signedlib&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="mput ../${ftpdist.name}/signedlib/* signedlib&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ../${ftpdist.name}/apache.htaccess signedlib/.htaccess&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="-mkdir ${ftp.demo.dist.name}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="mput ../${ftpdist.name}/${ftp.demo.dist.name}/* ${ftp.demo.dist.name}&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ../${ftpdist.name}/apache.htaccess ${ftp.demo.dist.name}/.htaccess&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="put ../${dist.name}/${build.file.root}.jar signedlib&#10;" file="${sftp.in.file}" append="true" />
 	</target>
 
-	<target name="sftp.upload.initialize" depends="prepare" if="upload.to.sftp">
+	<target name="sftp.upload.initialize" if="upload.to.sftp">
 		<mkdir dir="${ftp.in.dir}" />
 		<echo message="cd ${sftp.root.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
 		<property name="ftp.vers.dir" value="Version\ ${MIDLETVERSROOT}\ ${ftp.ustage.txt}Source\ and\ Binaries" />
+		<property name="ftp.vers.url" value="Version%20${MIDLETVERSROOT}%20${ftp.ustage.url.txt}Source%20and%20Binaries" />
+		<property name="ftp.vers.desc" value="Version ${MIDLETVERSROOT} ${ftp.ustage.desc.txt}Source and Binaries" />
 		<echo message="-mkdir ${ftp.vers.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="cd ${ftp.vers.dir}&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="pwd&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="-mkdir device-install-files&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${ftpdist.name}/apache.htaccess .htaccess&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/changelog.txt changelog-${FMIDLETVERSROOT}${dist.stage.file}.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/gpl-2.txt gpl-2.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/lgpl-2_1.txt lgpl-2_1.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/release_notes.txt release_notes-${FMIDLETVERSROOT}${dist.stage.file}.txt&#10;" file="${sftp.in.file}" append="true" />
 		<echo message="put ../${main}/changelog.txt changelog-${FMIDLETVERSROOT}${dist.stage.file}.txt&#10;" file="${sftp.in.file}" append="true" />
+		<echo message="&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; dir=&quot;ltr&quot; lang=&quot;en&quot;&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;head&gt;&#10;&lt;title&gt;${ftp.vers.desc}&lt;/title&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;base href=&quot;${sftp.base.url}/${ftp.vers.url}/&quot; /&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;/head&gt;&#10;&lt;body&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;h2&gt;${ftp.vers.desc}&lt;/h2&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="&lt;ul&gt;&#10;" file="${sftp.index.file}" append="true" />
 		<antcall target="sftp.upload.archives" inheritAll="true" />
 	</target>
 
-	<target name="sourceforge.initialize" depends="prepare" if="upload.to.sftp">
+	<target name="sftp.upload.finish" depends="prepare" if="upload.to.sftp">
+		<echo message="Adding to file ${sftp.in.file}" />
+		<echo message="&lt;/ul&gt;&lt;/body&gt;&#10;&lt;/html&gt;&#10;" file="${sftp.index.file}" append="true" />
+		<echo message="mput ../${ftp.in.dir.name}/*htm " file="${sftp.in.file}" append="true" />
+	</target>
+
+	<target name="sourceforge.initialize" depends="prepare.temporary,prepare.development,prepare.beta,prepare.rc,prepare.production,prepare" if="upload.to.sftp">
 		<antcall target="sftp.upload.initialize" inheritAll="true" >
 			<param name="ftp.in.dir" value="${distsourceforge}" />
+			<param name="ftp.in.base" value="${distsourceforge}" />
 			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
+			<param name="sftp.index.file" value="${sourceforge.ftp.index.file}" />
 			<param name="sftp.root.dir" value="${sourceforge.rootdir}" />
 		</antcall>
 	</target>
 
-	<target name="yinlight.initialize" depends="prepare" if="upload.to.sftp">
+	<target name="yinlight.initialize" depends="prepare.temporary,prepare.development,prepare.beta,prepare.rc,prepare.production,prepare" if="upload.to.sftp">
+		<property name="yinlight.subdomain" value="${src.module.name}" />
+		<echo message="yinlight.subdomain=${yinlight.subdomain}" />
+		<property name="yinlight.rootdir" value="html/${yinlight.tmp.subdir}${src.module.name}/downloads" />
+		<echo message="yinlight.rootdir=${yinlight.rootdir}" />
+		<property name="yinlight.base.url" value="http://${yinlight.subdomain}.yinlight.net/${yinlight.tmp.subpath}downloads" />
+		<echo message="yinlight.base.url=${yinlight.base.url}" />
 		<antcall target="sftp.upload.initialize" inheritAll="true" >
 			<param name="ftp.in.dir" value="${distyinlight}" />
 			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
+			<param name="sftp.index.file" value="${yinlight.ftp.index.file}" />
 			<param name="sftp.root.dir" value="${yinlight.rootdir}" />
+			<param name="sftp.base.url" value="${yinlight.base.url}" />
+		</antcall>
+	</target>
+
+	<target name="sourceforge.finish" depends="prepare" if="upload.to.sftp">
+		<antcall target="sftp.upload.finish" inheritAll="true" >
+			<param name="ftp.in.dir" value="${distsourceforge}" />
+			<param name="ftp.in.dir.name" value="${distsourceforge.name}" />
+			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
+			<param name="sftp.index.file" value="${sourceforge.ftp.index.file}" />
+			<param name="sftp.root.dir" value="${sourceforge.rootdir}" />
+			<param name="sftp.base.url" value="${sourceforge.base.url}" />
+		</antcall>
+	</target>
+
+	<target name="yinlight.finish" depends="prepare" if="upload.to.sftp">
+		<antcall target="sftp.upload.finish" inheritAll="true" >
+			<param name="ftp.in.dir" value="${distyinlight}" />
+			<param name="ftp.in.dir.name" value="${distyinlight.name}" />
+			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
+			<param name="sftp.index.file" value="${yinlight.ftp.index.file}" />
+			<param name="sftp.root.dir" value="${yinlight.rootdir}" />
+			<param name="sftp.base.url" value="${yinlight.base.url}" />
 		</antcall>
 	</target>
 
@@ -1497,11 +1684,17 @@
 		</if>
 		<antcall target="build" />
 		<antcall target="google.upload.append" inheritAll="true" />
-		<antcall target="sftp.upload.append" >
+		<antcall target="sftp.upload.append" inheritAll="true" >
+			<param name="sftp.pgm.in.file" value="${bin}/yl${build.file.root}in" />
 			<param name="sftp.in.file" value="${yinlight.ftp.in.file}" />
+			<param name="sftp.pgm.index.file" value="${bin}/yl${build.file.root}.htm" />
+			<param name="sftp.index.file" value="${yinlight.ftp.index.file}" />
 		</antcall>
 		<antcall target="sftp.upload.append" >
+			<param name="sftp.pgm.in.file" value="${bin}/sf${build.file.root}in" />
 			<param name="sftp.in.file" value="${sourceforge.ftp.in.file}" />
+			<param name="sftp.pgm.index.file" value="${bin}/sf${build.file.root}.htm" />
+			<param name="sftp.index.file" value="${sourceforge.ftp.index.file}" />
 		</antcall>
 		<antcall target="exec.create.rim.files" inheritAll="true" />
 		<antcall target="jar.create.rim.files" inheritAll="true" >
@@ -1522,6 +1715,22 @@
 		</antcall>
 	</target>
 
+	<!-- Compile full version WTK with MIDP-1.0, regular memory, and test -->
+	<target name="compile.1.0.reg" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0">
+		<antcall target="compile" >
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile full version WTK with MIDP-1.0, regular memory, smartphone, and test -->
+	<target name="compile.1.0.reg.smartphone" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0,prepare.smartphone">
+		<antcall target="compile" >
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
 	<!-- Compile full version WTK with MIDP-1.0 and test -->
 	<target name="compile.1.0.intlink" depends="prepare.midp1.0,prepare.cldc1.0,prepare.intlink">
 		<antcall target="compile" >
@@ -1532,6 +1741,14 @@
 
 	<!-- Compile full version using WTK with MIDP-2.0 and test -->
 	<target name="compile.2.0" depends="prepare.midp2.0,prepare.cldc1.0">
+		<antcall target="compile" >
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile full version using WTK with MIDP-2.0, test, and novice -->
+	<target name="compile.2.0.novice" depends="prepare.midp2.0,prepare.cldc1.0,prepare.novice">
 		<antcall target="compile" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
@@ -1571,8 +1788,20 @@
 		</antcall>
 	</target>
 
+	<!-- Compile using WTK with MIDP-2.0, JSR-75, previous code and test -->
+	<target name="compile.2.0.jsr75.test" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75" >
+		<antcall target="display.props" />
+		<antcall target="compile" inheritAll="true" >
+			<param name="src" value="${src}" />
+			<param name="unproc.src" value="${unproc.src}" />
+			<param name="presrc" value="${presrc}" />
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
 	<!-- Run using WTK with MIDP-2.0 and JSR-75 and test -->
-	<target name="run.2.0.jsr75" depends="prepare.midp2.0,prepare.cldc1.0">
+	<target name="run.2.0.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75">
 		<antcall target="compile" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
@@ -1587,36 +1816,38 @@
 		</antcall>
 	</target>
 
-	<!-- Compile using WTK with MIDP-2.0, JSR-75, previous code and test -->
-	<target name="compile.2.0.jsr75.test" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75" >
-		<antcall target="display.props" />
-		<antcall target="compile" inheritAll="true" >
-			<param name="src" value="${src}" />
-			<param name="unproc.src" value="${unproc.src}" />
-			<param name="presrc" value="${presrc}" />
-			<param name="no.staging" value="true" />
-			<param name="no.release" value="true" />
-		</antcall>
-	</target>
-
-	<!-- Compile using WTK with MIDP-2.0, Itunes, JSR-75 and test -->
-	<target name="compile.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes,prepare.jsr75" >
+	<!-- Compile using WTK with MIDP-2.0, Smartphone, JSR-75 and test -->
+	<target name="compile.2.0.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone,prepare.jsr75" >
 		<antcall target="compile" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
 		</antcall>
 	</target>
 
-	<!-- Compile using WTK with MIDP-2.0, Itunes, JSR-75 and test -->
-	<target name="compile.2.0.cldc.1.1.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.jsr75" >
+	<!-- Compile using WTK with MIDP-2.0, Smartphone, and test -->
+	<target name="compile.2.0.cldc.1.1.smartphone" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.test" >
+		<antcall target="compile" />
+	</target>
+
+	<!-- Compile using WTK with MIDP-2.0, Smartphone, JSR-75 and test -->
+	<target name="compile.2.0.cldc.1.1.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.jsr75" >
 		<antcall target="compile" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
 		</antcall>
 	</target>
 
-	<!-- Compile using WTK with MIDP-2.0, Itunes, Signed, JSR-75 and test -->
-	<target name="compile.2.0.cldc.1.1.itunes.signed.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.signed,prepare.jsr75" >
+	<!-- Compile using WTK with MIDP-2.0, Smartphone, Signed, JSR-75 and test -->
+	<target name="compile.2.0.cldc.1.1.smartphone.signed.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.signed,prepare.jsr75,prepare.verisign" >
+		<antcall target="compile" >
+			<param name="no.staging" value="true" />
+			<param name="no.release" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Future.  No code for JSR-238 now. -->
+	<!-- Compile for MIDP 1.0 as a release (no test) -->
+	<target name="compile.2.0.jsr238" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr238" > 
 		<antcall target="compile" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
@@ -1626,7 +1857,7 @@
 	<!-- Preprocess for MIDP 1.0 as a release (no test) -->
 	<!-- This puts the code into src directory for use with NetBeans, etc. -->
 	<target name="dist.preprocess.1.0" depends="prepare.midp1.0,prepare.cldc1.0" >
-		<antcall target="preprocess" >
+		<antcall target="preprocess" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1643,7 +1874,7 @@
 	<!-- There is no novice preprocess given that novice has the same -->
 	<!-- compile options as MIDP-2.0. -->
 	<target name="dist.preprocess.2.0" depends="prepare.midp2.0,prepare.cldc1.0">
-		<antcall target="preprocess" >
+		<antcall target="preprocess" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1658,7 +1889,7 @@
 	<!-- Preprocess for MIDP 2.0 and JSR-75 as a release (no test) -->
 	<!-- This puts the code into src directory for use with NetBeans, etc. -->
 	<target name="dist.preprocess.2.0.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75" >
-		<antcall target="preprocess" >
+		<antcall target="preprocess" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1670,10 +1901,10 @@
 		</antcall>
 	</target>
 
-	<!-- Preprocess for MIDP 2.0, and Itunes as a release (no test) -->
+	<!-- Preprocess for MIDP 2.0, and Smartphone as a release (no test) -->
 	<!-- This puts the code into src directory for use with NetBeans, etc. -->
-	<target name="dist.preprocess.2.0.itunes" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes" >
-		<antcall target="preprocess" >
+	<target name="dist.preprocess.2.0.smartphone" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone" >
+		<antcall target="preprocess" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1685,10 +1916,10 @@
 		</antcall>
 	</target>
 
-	<!-- Preprocess for MIDP 2.0, Itunes, and JSR-75 as a release (no test) -->
+	<!-- Preprocess for MIDP 2.0, Smartphone, and JSR-75 as a release (no test) -->
 	<!-- This puts the code into src directory for use with NetBeans, etc. -->
-	<target name="dist.preprocess.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes,prepare.jsr75" >
-		<antcall target="preprocess" >
+	<target name="dist.preprocess.2.0.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone,prepare.jsr75" >
+		<antcall target="preprocess" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1703,7 +1934,7 @@
 	<!-- Future preprocess for MIDP 2.0 and JSR-238 as a release (no test) -->
 	<!-- This puts the code into src directory for use with NetBeans, etc. -->
 	<target name="dist.preprocess.2.0.jsr238" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr238" >
-		<antcall target="preprocess" >
+		<antcall target="preprocess" inheritAll="true" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
 		</antcall>
@@ -1715,8 +1946,8 @@
 
 	<!-- test preprocess for MIDP 2.0 and JSR-75 as a release (no test) -->
 	<!-- This puts the code into src directory for use with NetBeans, etc. -->
-	<target name="test.preprocess.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75">
-		<antcall target="preprocess" >
+	<target name="test.preprocess.2.0.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75">
+		<antcall target="preprocess" inheritAll="true" >
 			<param name="no.release" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
@@ -1730,6 +1961,22 @@
 
 	<!-- Compile distriubuted full version for MIDP 1.0 as a release (no test) -->
 	<target name="dist.compile.1.0" depends="prepare.midp1.0,prepare.cldc1.0" >
+		<antcall target="compile" >
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile distriubuted full version for MIDP 1.0, regular memory, as a release (no test) -->
+	<target name="dist.compile.1.0.reg" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0" >
+		<antcall target="compile" >
+			<param name="no.test" value="true" />
+			<param name="no.staging" value="true" />
+		</antcall>
+	</target>
+
+	<!-- Compile distriubuted full version for MIDP 1.0, regular memory, as a release (no test) -->
+	<target name="dist.compile.1.0.reg.smartphone" depends="prepare.regularmem,prepare.midp1.0,prepare.cldc1.0,prepare.smartphone" >
 		<antcall target="compile" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -1768,37 +2015,37 @@
 		</antcall>
 	</target>
 
-	<!-- Compile for MIDP 2.0 and Itunes and JSR-75 for release -->
-	<target name="dist.compile.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes,prepare.jsr75" >
+	<!-- Compile for MIDP 2.0 and Smartphone and JSR-75 for release -->
+	<target name="dist.compile.2.0.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone,prepare.jsr75" >
 		<antcall target="compile" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
 	</target>
 
-	<!-- Compile using WTK with MIDP-2.0, CLDC 1.1, Itunes, JSR-75 and test -->
-	<target name="dist.compile.2.0.cldc.1.1.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.jsr75" >
+	<!-- Compile using WTK with MIDP-2.0, CLDC 1.1, Smartphone, and test -->
+	<target name="dist.compile.2.0.cldc.1.1.smartphone" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.test" >
+		<antcall target="compile" />
+	</target>
+
+	<!-- Compile using WTK with MIDP-2.0, CLDC 1.1, Smartphone, JSR-75 and test -->
+	<target name="dist.compile.2.0.cldc.1.1.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.jsr75" >
 		<antcall target="compile" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
 	</target>
 
-	<!-- Compile for MIDP 2.0, CLDC 1.1, Itunes, Signed and JSR-75 for release -->
-	<target name="dist.compile.2.0.cldc.1.1.itunes.signed.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.signed,prepare.jsr75" >
+	<!-- Compile for MIDP 2.0, CLDC 1.1, Smartphone, Signed and JSR-75 for release -->
+	<target name="dist.compile.2.0.cldc.1.1.smartphone.signed.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.smartphone,prepare.signed,prepare.jsr75,prepare.verisign" >
 		<antcall target="compile" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
 	</target>
 
-	<!-- Future.  No code for JSR-238 now. -->
-	<!-- Compile for MIDP 1.0 as a release (no test) -->
-	<target name="compile.2.0.jsr238" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr238" > 
-		<antcall target="compile" >
-			<param name="no.staging" value="true" />
-			<param name="no.release" value="true" />
-		</antcall>
+	<target name="dist.compile.2.0.jsr238" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr238,prepare.release" > 
+		<antcall target="compile" />
 	</target>
 
 	<!-- Compile all. -->
@@ -1823,11 +2070,11 @@
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
 		</antcall>
-		<antcall target="compile.2.0.itunes.jsr75" >
+		<antcall target="compile.2.0.smartphone.jsr75" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
 		</antcall>
-		<antcall target="compile.2.0.cldc.1.1.itunes.jsr75" >
+		<antcall target="compile.2.0.cldc.1.1.smartphone.jsr75" >
 			<param name="no.staging" value="true" />
 			<param name="no.release" value="true" />
 		</antcall>
@@ -1837,259 +2084,9 @@
 		</antcall>
 	</target>
 
+    <import file="wtk-build-dist-midp.xml" />
+
 	<!-- These are do create release full versions for MIDP-1.0. -->
-	<target name="dist.midp.1.0" depends="prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage" unless="no.1.0" >
-		<antcall target="dist.version" inheritAll="yes" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<!-- These are do create release internet install link version for MIDP-1.0 -->
-	<target name="dist.midp.1.0.intlink" depends="prepare.midp1.0,prepare.cldc1.0,prepare.stage,prepare.no.stage,prepare.intlink" unless="no.1.0.intlink" >
-		<antcall target="dist.version" inheritAll="yes" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.1.0.signed.verisign" depends="prepare.midp1.0,prepare.cldc1.0,prepare.signed,prepare.verisign" unless="no.1.0.signed.verisign" >
-		<antcall target="dist.version" inheritAll="yes" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.1.0.signed.thawte" depends="prepare.midp1.0,prepare.cldc1.0,prepare.signed,prepare.thawte" unless="no.1.0.signed.thawte" >
-		<antcall target="dist.version" inheritAll="yes" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0" depends="prepare.midp2.0,prepare.cldc1.0" unless="no.2.0" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=${stage.featured}Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.intlink" depends="prepare.midp2.0,prepare.cldc1.0,prepare.intlink" unless="no.2.0.intlink" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=${stage.featured}Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.0,prepare.signed,prepare.verisign" unless="no.2.0.signed.verisign" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.0,prepare.signed,prepare.thawte" unless="no.2.0.signed.thawte" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<!-- Do MIDP 2.0 with novice version. -->
-	<target name="dist.midp.2.0.novice" depends="prepare.midp2.0,prepare.cldc1.0,prepare.novice" unless="no.2.0.novice" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="make.build.files" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1" depends="prepare.midp2.0,prepare.cldc1.1" unless="no.2.0.cldc.1.1" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="make.build.files" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75" unless="no.2.0.jsr75" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="jsr" value="JSR-75" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.jsr75.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75,prepare.signed,prepare.verisign" unless="no.2.0.jsr75.signed.verisign" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="jsr" value="JSR-75" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.jsr75.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75,prepare.signed,prepare.thawte" unless="no.2.0.jsr75.signed.thawte" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="jsr" value="JSR-75" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.jsr75" unless="no.2.0.cldc.1.1.jsr75" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="make.build.files" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.itunes" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes" unless="no.2.0.itunes" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes,prepare.jsr75" unless="no.2.0.itunes.jsr75" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.itunes" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes" unless="no.2.0.cldc.1.1.itunes" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.itunes.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.signed,prepare.verisign" unless="no.2.0.cldc.1.1.itunes.signed.verisign" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.sftp" value="true" />
-			<param name="need.applet" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.itunes.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.signed,prepare.thawte" unless="no.2.0.cldc.1.1.itunes.signed.thawte" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.sftp" value="true" />
-			<param name="need.applet" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.itunes.signed.godaddy" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.signed,prepare.godaddy" unless="no.2.0.cldc.1.1.itunes.signed.godaddy" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.sftp" value="true" />
-			<param name="need.applet" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.jsr75" unless="no.2.0.cldc.1.1.itunes.jsr75" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="make.build.files" value="false" />
-			<param name="upload.to.google" value="true" />
-			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
-			<param name="upload.to.sftp" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.itunes.signed.verisign.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.signed,prepare.verisign,prepare.jsr75" unless="no.2.0.cldc.1.1.itunes.signed.verisign.jsr75" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="need.applet" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.itunes.signed.thawte.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.signed,prepare.thawte,prepare.jsr75" unless="no.2.0.cldc.1.1.itunes.signed.thawte.jsr75" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="need.applet" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.cldc.1.1.itunes.signed.godaddy.jsr75" depends="prepare.midp2.0,prepare.cldc1.1,prepare.itunes,prepare.signed,prepare.godaddy,prepare.jsr75" unless="no.2.0.cldc.1.1.itunes.signed.godaddy.jsr75" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.sftp" value="true" />
-			<param name="make.build.files" value="false" />
-			<param name="need.applet" value="true" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
-	<target name="dist.midp.2.0.jsr238" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr238" unless="no.2.0.jsr238" >
-		<antcall target="dist.version" inheritAll="true" >
-			<param name="make.build.files" value="false" />
-			<param name="no.test" value="true" />
-			<param name="no.staging" value="true" />
-		</antcall>
-	</target>
-
 	<!-- Package MIDP 1.0 version. -->
 	<target name="package.midp.1.0"  depends="prepare.midp1.0,prepare.cldc1.0" >
 		<antcall target="dist.version" inheritAll="true" >
@@ -2114,15 +2111,15 @@
 		</antcall>
 	</target>
 
-	<!-- Package MIDP 2.0 with itunes version with JSR-75 version. -->
-	<target name="package.midp.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes,prepare.jsr75" unless="no.2.0.itunes.jsr75" >
+	<!-- Package MIDP 2.0 with Smartphone version with JSR-75 version. -->
+	<target name="package.midp.2.0.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone,prepare.jsr75" unless="no.2.0.smartphone.jsr75" >
 		<antcall target="dist.version" inheritAll="true" >
 			<param name="no.release" value="true" />
 			<param name="no.staging" value="true" />
 		</antcall>
 	</target>
 
-	<target name="run.midp.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes,prepare.jsr75" unless="no.2.0.itunes.jsr75" >
+	<target name="run.midp.2.0.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone,prepare.jsr75" unless="no.2.0.smartphone.jsr75" >
 		<antcall target="run" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -2141,7 +2138,7 @@
 		<property name="distdir" value="${distjardir}/RSSReader-${FMIDLETVERSROOT}${dist.stage.file}" />
 		<mkdir dir="${distdir}" />
 		<copy todir="${distdir}/dist" overwrite="true" >
-			<fileset dir="${dist}" excludes="**/RE*.txt" />
+			<fileset dir="${dist}" excludes="**/RE*.txt,**/**novice**" />
 		</copy>
 		<copy file="${distall}/READMEAll.txt" tofile="${distdir}/dist/README.txt" overwrite="true" />
 		<zip destfile="${distproject}/${dist.project.expert.zip}" basedir="${distjardir}" />
@@ -2173,7 +2170,7 @@
 		</copy>
 	</target>
 
-	<target name="dist.dev.status" depends="release.buildno,release.prepare,prepare.stage,prepare.no.stage" >
+	<target name="dist.dev.status" depends="release.buildno,prepare.release,prepare.stage,prepare.no.stage" >
 		<antcall target="clean" />
 		<delete dir="${dist}" />
 		<mkdir dir="${dist}" />
@@ -2189,16 +2186,26 @@
 		<property name="dist.project.smartphone.zip" value="${dist.project.prefix}-smartphone-bin.zip" />
 		<property name="dist.project.bin.zip" value="${dist.project.prefix}-bin.zip" />
 		<property name="dist.project.src.zip" value="${dist.project.prefix}-src.zip" />
-		<antcall target="googlecode.initialize" inheritAll="true" />
 		<mkdir dir="${ftpdist.dir}" />
 		<copy file="${res.dir}/apache.htaccess" todir="${ftpdist.dir}" overwrite="true" />
+		<property name="yinlight.tmp.subdir" value="" />
+		<property name="yinlight.tmp.subpath" value="" />
 		<antcall target="sourceforge.initialize" inheritAll="true" >
 			<param name="upload.to.sftp" value="true" />
 		</antcall>
 		<antcall target="yinlight.initialize" inheritAll="true" >
 			<param name="upload.to.sftp" value="true" />
 		</antcall>
+		<antcall target="googlecode.initialize" inheritAll="true" />
 		<antcall target="dist.midp.1.0" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.1.0.reg" >
+			<param name="build.number" value="${build.number}" />
+			<param name="release.buildno" value="true" />
+		</antcall>
+		<antcall target="dist.midp.1.0.reg.smartphone" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
@@ -2206,11 +2213,7 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.1.0.signed.verisign" >
-			<param name="build.number" value="${build.number}" />
-			<param name="release.buildno" value="true" />
-		</antcall>
-		<antcall target="dist.midp.1.0.signed.thawte" >
+		<antcall target="dist.midp.2.0.novice" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
@@ -2230,41 +2233,41 @@
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.itunes" >
+		<antcall target="dist.midp.2.0.smartphone" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.itunes.jsr75" >
+		<antcall target="dist.midp.2.0.smartphone.jsr75" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.cldc.1.1.itunes" >
+		<antcall target="dist.midp.2.0.cldc.1.1.smartphone" >
 			<param name="sftp.no.sun" value="true" />
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.cldc.1.1.itunes.signed.verisign" >
+		<antcall target="dist.midp.2.0.cldc.1.1.smartphone.signed.verisign" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.cldc.1.1.itunes.signed.thawte" >
+		<antcall target="dist.midp.2.0.cldc.1.1.smartphone.signed.thawte" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.cldc.1.1.itunes.jsr75" >
+		<antcall target="dist.midp.2.0.cldc.1.1.smartphone.jsr75" >
 			<param name="sftp.no.sun" value="true" />
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.cldc.1.1.itunes.signed.verisign.jsr75" >
+		<antcall target="dist.midp.2.0.cldc.1.1.smartphone.signed.verisign.jsr75" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.cldc.1.1.itunes.signed.thawte.jsr75" >
+		<antcall target="dist.midp.2.0.cldc.1.1.smartphone.signed.thawte.jsr75" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
-		<antcall target="dist.midp.2.0.cldc.1.1.itunes.signed.godaddy.jsr75" >
+		<antcall target="dist.midp.2.0.cldc.1.1.smartphone.signed.godaddy.jsr75" >
 			<param name="build.number" value="${build.number}" />
 			<param name="release.buildno" value="true" />
 		</antcall>
@@ -2293,17 +2296,24 @@
 			<param name="release.buildno" value="true" />
 		</antcall>
 		<chmod file="${distgooglecode}/googleupload.sh" perm="744" />
+		<antcall target="sourceforge.finish" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+		</antcall>
+		<antcall target="yinlight.finish" inheritAll="true" >
+			<param name="upload.to.sftp" value="true" />
+		</antcall>
 		<antcall target="make.zip.files" inheritAll="true" />
 		<delete failonerror="false" includeemptydirs="true">
 			<fileset dir="./.rms" />
 			<fileset dir="./" includes="**/*.tmp" />
 			<fileset dir="./" includes="**/LogFile.txt" />
 			<fileset dir="../wtkbuild" includes="**/*.cod" />
+			<fileset dir="../" includes="rim*.cod" />
 			<fileset dir="../" includes="RSSReader-**.debug" />
 		</delete>
 	</target>
 
-	<target name="dist.all" >
+	<target name="dist.all" depends="prepare.temporary,prepare.development,prepare.beta,prepare.rc,prepare.production" >
 		<antcall target="dist.dev.status" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
@@ -2312,60 +2322,73 @@
 
 	<target name="dist" >
 		<antcall target="dist.all" inheritAll="true" >
-			<param name="no.1.0.signed.verisign" value="true" />
-			<param name="no.1.0.signed.thawte" value="true" />
+			<param name="no.1.0.reg" value="true" />
+			<param name="no.1.0.reg.smartphone" value="true" />
 			<param name="no.2.0.signed.verisign" value="true" />
 			<param name="no.2.0.signed.thawte" value="true" />
 			<param name="no.2.0.jsr75.signed.verisign" value="true" />
 			<param name="no.2.0.jsr75.signed.thawte" value="true" />
-			<param name="no.2.0.itunes" value="true" />
-			<param name="no.2.0.itunes.jsr75" value="true" />
+			<param name="no.2.0.smartphone" value="true" />
+			<param name="no.2.0.smartphone.jsr75" value="true" />
 			<param name="no.2.0.jsr75.signed.verisign" value="true" />
 			<param name="no.2.0.jsr75.signed.thawte" value="true" />
 			<param name="no.2.0.cldc.1.1" value="true" />
-			<param name="no.2.0.cldc.1.1.itunes" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone" value="true" />
 			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
-			<param name="no.2.0.novice" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
 		</antcall>
 	</target>
 
 	<target name="dist.no.signed" >
 		<antcall target="dist" inheritAll="true" >
-			<param name="no.2.0.cldc.1.1.itunes.signed.verisign" value="true" />
-			<param name="no.2.0.cldc.1.1.itunes.signed.thawte" value="true" />
-			<param name="no.2.0.cldc.1.1.itunes.signed.verisign.jsr75" value="true" />
-			<param name="no.2.0.cldc.1.1.itunes.signed.thawte.jsr75" value="true" />
+			<param name="no.1.0.reg" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.verisign" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.thawte" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.verisign.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.thawte.jsr75" value="true" />
 		</antcall>
 	</target>
 
 	<target name="dist.test" >
 		<antcall target="dist.all" inheritAll="true" >
-			<param name="stage" value="test_" />
 			<param name="no.1.0" value="true" />
-			<param name="no.1.0.signed.verisign" value="true" />
-			<param name="no.1.0.signed.thawte" value="true" />
-			<param name="no.2.0" value="true" />
-			<param name="no.2.0.novice" value="true" />
-			<param name="no.2.0.itunes" value="true" />
-			<param name="no.2.0.itunes.jsr75" value="true" />
-			<param name="no.2.0.cldc.1.1" value="true" />
+			<param name="no.1.0.reg" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone" value="true" />
 			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
-			<param name="no.2.0.cldc.1.1.itunes" value="true" />
-			<param name="no.2.0.cldc.1.1.itunes.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1" value="true" />
+			<param name="no.2.0.smartphone.jsr75" value="true" />
+			<param name="no.2.0.smartphone" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
+			<param name="no.2.0.novice" value="true" />
+			<param name="no.2.0" value="true" />
 		</antcall>
 	</target>
 
-	<target name="dist.itunes.test" >
+	<target name="dist.smartphone.test" >
 		<antcall target="dist.all" inheritAll="true" >
-			<param name="no.2.0.novice" value="true" />
+			<param name="no.1.0.intlink" value="true" />
+			<param name="no.1.0.reg" value="true" />
 			<param name="no.1.0" value="true" />
-			<param name="no.2.0" value="true" />
-			<param name="no.2.0.cldc.1.1" value="true" />
-			<param name="no.2.0.jsr75" value="true" />
 			<param name="no.2.0.cldc.1.1.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.godaddy.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.godaddy" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.thawte.jsr75" value="true" />
+			<param name="no.2.0.cldc.1.1.smartphone.signed.thawte" value="true" />
+			<param name="no.2.0.cldc.1.1" value="true" />
+			<param name="no.2.0.intlink" value="true" />
+			<param name="no.2.0.smartphone.jsr75" value="true" />
+			<param name="no.2.0.smartphone" value="true" />
 			<param name="no.2.0.jsr238" value="true" />
+			<param name="no.2.0.jsr75.signed.thawte" value="true" />
+			<param name="no.2.0.jsr75.signed.verisign" value="true" />
+			<param name="no.2.0.jsr75" value="true" />
+			<param name="no.2.0.novice" value="true" />
+			<param name="no.2.0.signed.thawte" value="true" />
+			<param name="no.2.0.signed.verisign" value="true" />
+			<param name="no.2.0.smartphone.jsr75" value="true" />
+			<param name="no.2.0.smartphone" value="true" />
+			<param name="no.2.0" value="true" />
 		</antcall>
 	</target>
 
@@ -2382,7 +2405,7 @@
 	</target>
 
 	<target name="run.dist.version"  depends="prepare" >
-		<echo message="emulator.jar=${path.emulator.jar}" />
+		<echo message="path.emulator.jar=${path.emulator.jar}" />
 		<property name="run.jar" value="${dist}/${build.file.root}.jar" />
 		<echo message="jar=${run.jar}" />
 		<java classname="${emulator.class}" fork="true" >
@@ -2394,7 +2417,7 @@
 		</java>
 	</target>
 
-	<target name="run.dist.midp.2.0.itunes.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.itunes,prepare.jsr75" unless="run.no.2.0.itunes.jsr75" >
+	<target name="run.dist.midp.2.0.smartphone.jsr75" depends="prepare.midp2.0,prepare.cldc1.0,prepare.smartphone,prepare.jsr75" unless="run.no.2.0.smartphone.jsr75" >
 		<antcall target="run.dist.version" inheritAll="true" >
 			<param name="no.test" value="true" />
 			<param name="no.staging" value="true" />
