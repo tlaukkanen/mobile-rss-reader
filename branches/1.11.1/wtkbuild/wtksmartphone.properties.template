@@ -1,0 +1,10 @@
+#-- IB 2010-05-25 1.11.5RC2 Use properties files based on midp, cldc, and JSRs used individually instead of combining them.
+#-- IB 2010-05-25 1.11.5RC2 Use smartphone for file name instead of podcast.
+#-- IB 2010-12-03 1.11.5Dev15 Uses smartphone for future change to using smartphone instead of itunes.
+#-- IB 2011-01-14 1.11.5Alpha15 Use standard file prefix to allow internet link program to use it.
+#-- IB 2011-02-05 1.11.5Dev17 (rework) Use standard file prefix to allow smartphone program to use it.
+DITUNESDEF = DITUNES
+DSMARTPHONEDEF = DSMARTPHONE
+file.prefix.smartphone = ${sfile.prefix.smartphone}_
+SUFFIXVERS.smartphone = -${sfile.prefix.smartphone}
+smartphone = Smartphone
