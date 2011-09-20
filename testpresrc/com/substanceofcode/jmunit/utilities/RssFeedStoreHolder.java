@@ -35,7 +35,6 @@
 @DCOMPATDEF@
 
 //#ifdef DJMTEST
-//#ifdef DCOMPATIBILITY
 package com.substanceofcode.jmunit.utilities;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
@@ -45,5 +44,4 @@ final public class RssFeedStoreHolder {
 	public RssItunesFeed feed; 
 	public RssFeedInfo infoFeed; 
 }
-//#endif
 //#endif
