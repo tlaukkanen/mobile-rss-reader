@@ -24,6 +24,7 @@
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-10-30 1.11.5Dev12 Use getSysProperty to get system property and return error message.  This gets an error in microemulator if it causes a class to be loaded.
  * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  */
 
 // Expand to define MIDP define
@@ -33,6 +34,7 @@
 // Expand to define test ui define
 @DTESTUIDEF@
 
+//#ifdef DFULLVERS
 //#ifdef DTESTUIUNDO
 
 package com.substanceofcode.testutil.presentation;
@@ -178,4 +180,5 @@ public class EncodingList extends List implements CommandListener {
     }
     
 }
+//#endif
 //#endif
