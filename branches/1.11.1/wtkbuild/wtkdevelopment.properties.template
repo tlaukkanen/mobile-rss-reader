@@ -1,0 +1,6 @@
+#-- IB 2011-01-20 1.11.5Dev16 Use wtkdevelopment.properties to more easily set development properties used for the build.
+stage = dev17
+ustage = DEV17
+stage.stable.text = unstable
+stage.phase.text = development
+stage.featured =
