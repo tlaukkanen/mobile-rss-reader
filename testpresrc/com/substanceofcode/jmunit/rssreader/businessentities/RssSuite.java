@@ -23,8 +23,15 @@
 /*
  * IB 2010-05-24 1.11.5RC2 Test ParserSuite and UtilitySuite.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use conditional preprocessed cldc11 code with modifications instead of cldc10 code.
+ * IB 2011-01-14 1.11.5Alpha15 Do parser suite first to get http prompt faster.
  */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
@@ -35,21 +42,23 @@
 @DLOGDEF@
 
 //#ifdef DJMTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.jmunit.rssreader.businessentities;
 
 import com.substanceofcode.jmunit.rssreader.businesslogic.ParserSuite;
 import com.substanceofcode.jmunit.utils.UtilitySuite;
 
-import jmunit.framework.cldc10.TestSuite;
+import jmunit.framework.cldc11.TestSuite;
 
 final public class RssSuite extends TestSuite {
 
 	public RssSuite() {
 		super("RssSuite");
-		add(new RssFeedSuite());
 		add(new ParserSuite());
+		add(new RssFeedSuite());
 		add(new UtilitySuite());
 	}
 
 }
+//#endif
 //#endif
