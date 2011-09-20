@@ -44,19 +44,36 @@
  * IB 2010-09-29 1.11.5Dev9 Have convAttrData to convert &,<,> in attributes data to &amp;,&#60;,&#62;.
  * IB 2010-09-29 1.11.5Dev9 Have convAttrUrlData to convert &,<,> in attributes data to &amp;,%3C,%3E.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-01 1.11.5Dev15 Buffer reading of characters in XmlParser to reduce multiple calls to read().  Use new read(...) in EncodingStreamReader instead.
+ * IB 2011-01-01 1.11.5Dev15 Use only EncodingStreamReader to read data instead of having a separate InputStreamReader to read with.
+ * IB 2011-01-01 1.11.5Dev15 Handle BOM for UTF-8.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
+ * IB 2011-01-24 1.11.5Dev16 Put in comment out future code to use both local and global vars for buffering.
+ * IB 2011-03-06 1.11.5Dev17 More logging.
 */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
+// Expand to define smartphone define
+//#define DNOSMARTPHONE
 // Expand to define testing define
 //#define DNOTEST
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifdef DFULLVERS
 package com.substanceofcode.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Vector;
+
+//#ifdef DTEST
+//@import com.substanceofcode.utils.EncodingUtilIntr;
+//#endif
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -68,31 +85,6 @@ import java.util.Vector;
  * @author Tommi Laukkanen
  */
 public class XmlParser {
-    
-	final       Object nullPtr = null;
-    /** Current XML element name (eg. <title> = title) */
-    final protected StringBuffer m_currentElementName = new StringBuffer();
-    final protected StringBuffer m_currentElementData = new StringBuffer();
-    protected boolean m_currentElementContainsText = false;
-	//#ifdef DTEST
-//@    boolean m_debugTrace = false;  // traceLoggable to add extra trace
-	//#endif
-    protected String m_fileEncoding = "ISO8859_1";  // See EncodingUtil
-    protected String m_docEncoding = "";  // See EncodingUtil
-    protected String m_defEncoding = "UTF-8";  // Default doc encoding
-    protected EncodingUtil m_encodingUtil = null;
-    protected EncodingStreamReader m_encodingStreamReader;
-	protected InputStreamReader m_inputStream;
-    private String [] m_namespaces = null;
-    private boolean m_getPrologue = true;
-	//#ifdef DLOGGING
-//@    private Logger logger = Logger.getLogger("XmlParser");
-//@    final private boolean fineLoggable = logger.isLoggable(Level.FINE);
-//@    final private boolean finerLoggable = logger.isLoggable(Level.FINER);
-//@    final private boolean finestLoggable = logger.isLoggable(Level.FINEST);
-//@    final private boolean traceLoggable = logger.isLoggable(Level.TRACE);
-//@    protected boolean m_logChar    = false; // Log characters use traceLoggable
-	//#endif
     
     /** Enumerations for parse function */
     public static final int PARTIAL_TEXT = 0;
@@ -118,19 +110,65 @@ public class XmlParser {
     private static final String END_COMMENT = "-->";
     private static final String BEGIN_CLOSE_TAG = "</";
     private static final String END_CLOSE_TAG = ">";
+    private static final String BEGIN_META = "<meta";
+    
+	final       Object m_nullPtr = null;
+	volatile int m_readLen;
+	volatile int m_lenRead;
+	volatile int m_offread;
+	volatile boolean m_eof;
+	boolean htmlFile;
+	char[] m_cbuf;
+    /** Current XML element name (eg. <title> = title) */
+    final protected StringBuffer m_currentElementName = new StringBuffer();
+    final protected StringBuffer m_currentElementData = new StringBuffer();
+    protected boolean m_currentElementContainsText = false;
+	//#ifdef DTEST
+//@    boolean m_debugTrace = false;  // traceLoggable to add extra trace
+	//#endif
+    protected String m_fileEncoding = "ISO8859_1";  // See EncodingUtil
+    protected String m_docEncoding = "";  // See EncodingUtil
+    protected String m_defEncoding = "UTF-8";  // Default doc encoding
+    protected EncodingUtil m_encodingUtil = null;
+    final protected EncodingUtil m_encodingInstance;
+    protected EncodingStreamReader m_encodingStreamReader;
+    private String [] m_namespaces = null;
+    private boolean m_getPrologue = true;
+	//#ifdef DLOGGING
+//@    private Logger logger = Logger.getLogger("XmlParser");
+//@    final private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    final private boolean finerLoggable = logger.isLoggable(Level.FINER);
+//@    final private boolean finestLoggable = logger.isLoggable(Level.FINEST);
+//@    final private boolean traceLoggable = logger.isLoggable(Level.TRACE);
+//@    volatile protected boolean m_logChar    = false; // Log characters use traceLoggable
+//@    volatile protected boolean m_logRepeatChar = false; // Log characters use traceLoggable
+//@
+//@    volatile protected boolean m_logReadChar = false; // Log characters use traceLoggable
+//@
+	//#endif
     
     /** Creates a new instance of XmlParser */
     public XmlParser(InputStream inputStream) {
-		this(new EncodingUtil(inputStream));
+		this(EncodingUtil.getEncodingUtil(inputStream));
     }
 
     /** Creates a new instance of XmlParser */
     public XmlParser(EncodingUtil encodingUtil) {
 		this.m_encodingUtil = encodingUtil;
-		m_encodingStreamReader =
-			m_encodingUtil.getEncodingStreamReader();
+		m_encodingStreamReader = m_encodingUtil.getEncodingStreamReader();
 		m_fileEncoding = m_encodingStreamReader.getFileEncoding();
-		m_inputStream = m_encodingStreamReader.getInputStream();
+		// If smartphone, use more memory.
+		//#ifdef DSMARTPHONE
+//@		m_cbuf = new char[200];
+		//#else
+		m_cbuf = new char[100];
+		//#endif
+		m_readLen = m_cbuf.length;
+		m_lenRead = m_cbuf.length;
+		m_offread = m_cbuf.length;
+		m_eof     = false;
+		htmlFile  = false;
+		m_encodingInstance = m_encodingUtil.getQuickInstance();
     }
 
   /**
@@ -143,6 +181,8 @@ public class XmlParser {
 		//#ifdef DLOGGING
 //@		if (finestLoggable) {logger.finest("procPrologue m_currentElementData.length(),m_currentElementData=" + m_currentElementData.length() + "," + m_currentElementData);}
 		//#endif
+		m_getPrologue = false;
+		m_encodingStreamReader.setGetPrologue(false);
 		String cencoding = getAttributeValue("encoding");
 		if (cencoding == null) {
 			//#ifdef DLOGGING
@@ -158,8 +198,59 @@ public class XmlParser {
 		return PROLOGUE;
 	}
 
+    protected int readBuf() throws IOException {
+		/* Future
+		m_offread = offread;
+		m_lenRead = lenRead;
+		*/
+		if (m_getPrologue) {
+			if (m_eof) {
+				//#ifdef DLOGGING
+//@				if (traceLoggable) {logger.trace("readBuf() end of stream m_eof s true logging for prologue m_lenRead,m_readLen=" + m_lenRead + "," + m_readLen);}
+				//#endif
+				return -1;
+			}
+			int inputCharacter;
+			if ((inputCharacter = m_encodingStreamReader.read()) == -1) {
+				m_eof = true;
+			}
+			//#ifdef DLOGGING
+//@			if (m_logReadChar && traceLoggable) {logger.trace("readBuf() get prologue returning inputCharacter=" + EncodingStreamReader.logInpChar(inputCharacter));}
+			//#endif
+			return inputCharacter;
+		} else {
+			if (m_offread < m_lenRead) {
+				//#ifdef DLOGGING
+//@				if (m_logReadChar && traceLoggable) {logger.trace("readBuf() returning m_cbuf[m_offread]=" + EncodingStreamReader.logcarr(m_cbuf, m_offread, m_lenRead));}
+				//#endif
+				return m_cbuf[m_offread++];
+			} else if (m_eof) {
+				//#ifdef DLOGGING
+//@				if (traceLoggable) {logger.trace("readBuf() end of stream m_eof s true m_lenRead,m_readLen=" + m_lenRead + "," + m_readLen);}
+				//#endif
+				return -1;
+			} else {
+				m_offread = 0;
+				if ((m_lenRead = m_encodingStreamReader.read(m_cbuf, 0,
+								m_readLen)) == -1) {
+					m_offread = -1;
+					m_eof = true;
+					//#ifdef DLOGGING
+//@					if (traceLoggable) {logger.trace("readBuf() end of stream m_lenRead,m_readLen=" + m_lenRead + "," + m_readLen);}
+					//#endif
+					return -1;
+				//#ifdef DLOGGING
+//@				} else {
+//@					if (m_logReadChar && traceLoggable) {logger.trace("readBuf() m_lenRead,m_cbuf[m_offread],m_cbuf[m_offread + 1]=" + m_lenRead + "," + EncodingStreamReader.logcarr(m_cbuf, m_offread, m_lenRead) + "," + EncodingStreamReader.logcarr(m_cbuf, m_offread + 1, m_lenRead));}
+				//#endif
+				}
+				return m_cbuf[m_offread++];
+			}
+		}
+	}
+
     /** Parse next element */
-    protected int parseStream(InputStreamReader is) throws IOException {
+    protected int parseStream(EncodingStreamReader is) throws IOException {
 		
 		boolean parsingElementName = false;
 		boolean elementFound = false;
@@ -167,15 +258,31 @@ public class XmlParser {
 		boolean parsingElementData = false;
 				
         char c;
-        int inputCharacter = is.read();
+        int inputCharacter = ((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+				readBuf());
+		//#ifdef DLOGGING
+//@		if (m_logReadChar && traceLoggable) {logger.trace("parseStream 1 m_lenRead,m_readLen,m_cbuf[m_offread]=" + m_lenRead + "," + m_readLen + "," + EncodingStreamReader.logcarr(m_cbuf, m_offread, m_lenRead));}
+		//#endif
+		int offread = m_offread;
+		int lenRead = m_lenRead;
 		try {
 			if (inputCharacter != -1) {
 				do {
+					//#ifdef DLOGGING
+//@					if (m_logChar && traceLoggable) {logger.trace("parseStream 2 offread,lenRead,m_offread,m_lenRead,m_currentElementName.length(),m_currentElementData.length()=" + offread + "," + lenRead  + "," + m_offread + "," + m_lenRead + "," + m_currentElementName.length() + "," + m_currentElementData.length());}
+					//#endif
+					if (offread == lenRead) {
+						offread = m_offread;
+						lenRead = m_lenRead;
+					}
 					c = (char)inputCharacter;
+					//#ifdef DLOGGING
+//@					boolean loggedChar = false;
+					//#endif
 					
 					if (elementStart) {
 						//#ifdef DLOGGING
-//@						if (m_logChar && traceLoggable) {logger.trace("parseStream elementStart,c=" + elementStart + "," + c);}
+//@						if (m_logChar && traceLoggable) {loggedChar = true; logger.trace("parseStream elementStart,c=" + elementStart + "," + c);}
 						//#endif
 						int parseResult = UNKNOWN_ELEMENT;
 						switch (c) {
@@ -183,7 +290,7 @@ public class XmlParser {
 								elementStart = false;
 								parsingElementName = false;
 								parsingElementData = false;
-								if ((parseResult = parseBeginEntity(is, false, c,
+								parseResult = parseBeginEntity(is, false, c,
 													m_currentElementData
 													//#ifdef DLOGGING
 //@													,
@@ -191,7 +298,10 @@ public class XmlParser {
 //@													traceLoggable,
 //@													m_logChar
 													//#endif
-													)) == CLOSE_TAG) {
+										);
+								offread = m_offread;
+								lenRead = m_lenRead;
+								if (parseResult == CLOSE_TAG) {
 									//#ifdef DLOGGING
 //@									if (m_logChar && traceLoggable) {logger.trace("parseStream / m_currentElementData,c=" + m_currentElementData + "," + c);}
 									//#endif
@@ -208,14 +318,16 @@ public class XmlParser {
 									parsingElementName = false;
 									parsingElementData = false;
 									parseResult = parseBeginEntity(is, false, c,
-														m_currentElementData
-														//#ifdef DLOGGING
-//@														,
-//@														logger,
-//@														traceLoggable,
-//@														m_logChar
-														//#endif
-														);
+											m_currentElementData
+											//#ifdef DLOGGING
+//@											,
+//@											logger,
+//@											traceLoggable,
+//@											m_logChar
+											//#endif
+											);
+									offread = m_offread;
+									lenRead = m_lenRead;
 									switch (parseResult) {
 										case CDATA:
 										case COMMENT:
@@ -229,7 +341,6 @@ public class XmlParser {
 											return parseResult;
 										case PROLOGUE:
 											if (m_getPrologue) {
-												m_getPrologue = false;
 												return procPrologue();
 											}
 											break;
@@ -247,7 +358,7 @@ public class XmlParser {
 					}
 					if(parsingElementName) {
 						//#ifdef DLOGGING
-//@						if (m_logChar && traceLoggable) {logger.trace("parseStream parsingElementName,c=" + parsingElementName + "," + c);}
+//@						if (m_logChar && traceLoggable) {loggedChar = true; logger.trace("parseStream parsingElementName,c=" + parsingElementName + "," + c);}
 						//#endif
 						// Determine if we have found the end of the element
 						// name and thus started element data.
@@ -287,6 +398,9 @@ public class XmlParser {
 								break;
 						}
 					}
+					//#ifdef DLOGGING
+//@					if (m_logChar && traceLoggable && !loggedChar) {loggedChar = true; logger.trace("parseStream miscelanious parsingElementName,elementFound,elementStart,parsingElementData,c=" + parsingElementName + "," + elementFound + "," + elementStart + "," + parsingElementData + "," + c);}
+					//#endif
 					// We found the beginning of a tag, so we start an element
 					// name.
 					if(c=='<') {
@@ -308,17 +422,24 @@ public class XmlParser {
 						elementStart = false;
 						//#ifdef DLOGGING
 //@						if (m_logChar) {
-//@							m_logChar = false;
-							//#ifdef DLOGGING
-//@							if (traceLoggable) {logger.trace("parseStream m_currentElementName=" + m_currentElementName);}
-							//#endif
-//@							m_encodingStreamReader.setLogChar(false);
+//@							if (traceLoggable) {logger.trace("parseStream m_currentElementName,m_currentElementData=" + m_currentElementName + "," + m_currentElementData);}
+//@							if (!m_logRepeatChar) {
+//@								m_logChar = false;
+//@								m_logReadChar = false;
+//@								m_encodingStreamReader.setLogChar(false);
+//@								if (traceLoggable) {logger.trace("parseStream turning off m_logChar and m_logReadChar");}
+//@							}
 //@						}
 						//#endif
-						// If we find XML without a prologue, need
+						// If we find a tag not html without a prologue, need
 						// to treat as default UTF-8 encoding for XML.
-						if (m_getPrologue) {
+						// The caller using HTML type, must set the encoding.
+						if (m_getPrologue && !htmlFile) {
+							//#ifdef DLOGGING
+//@							if (finerLoggable) {logger.finer("parseStream process end tag (>) if not HTML htmlFile,m_currentElementData=" + htmlFile + "," + m_currentElementData);}
+							//#endif
 							m_getPrologue = false;
+							// This also sets our reader m_getPrologue to false.
 							m_encodingUtil.getEncoding(m_fileEncoding,
 									m_defEncoding);
 							m_docEncoding = m_encodingUtil.getDocEncoding();
@@ -344,7 +465,9 @@ public class XmlParser {
 				}
 					// If we have not found an element, keep parsing.
 					// Otherwise, we get out of the loop.
-				while (!elementFound && ((inputCharacter = is.read()) != -1));
+				while (!elementFound && ((inputCharacter =
+						((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+							readBuf())) != -1));
 			}
 			
 			// Determine if we actually have element data or a tag
@@ -357,7 +480,7 @@ public class XmlParser {
 				m_currentElementContainsText = true;
 			}
 			//#ifdef DLOGGING
-//@			if (finerLoggable) {logger.finer("parseStream m_currentElementContainsText,m_currentElementData=" + m_currentElementContainsText + "," + m_currentElementData);}
+//@			if (finerLoggable) {logger.finer("parseStream after loop inputCharacter,m_currentElementContainsText,m_currentElementName,m_currentElementData=" + EncodingStreamReader.logInpChar(inputCharacter) + "," + m_currentElementContainsText + "," + m_currentElementName + "," + m_currentElementData);}
 			//#endif
 			
 		} catch (IOException e) {
@@ -367,6 +490,13 @@ public class XmlParser {
 			System.out.println("parse read error " + e + " " + e.getMessage());
 			e.printStackTrace();
 			throw e;
+			/*
+		} finally {
+			if (inputCharacter != -1) {
+				m_offread = offread;
+				m_lenRead = lenRead;
+			}
+			*/
 		}
 		if( inputCharacter == -1 ) {
 			//#ifdef DLOGGING
@@ -381,86 +511,186 @@ public class XmlParser {
 		}
     }
     
-	static public int parseBlock(InputStreamReader is, StringBuffer sb,
+	public int parseBlock(EncodingStreamReader is, StringBuffer sb,
 			int eblock, boolean startsBlock, boolean endsSep,
 			boolean reqEnd, String begin_block, String end_block)
 	throws IOException {
-        int inputCharacter;
 		boolean beginFound = false;
 		boolean beginChecked = false;
 		char c;
-		while ((inputCharacter = is.read()) != -1) {
-			c = (char)inputCharacter;
-			sb.append(c);
-			if (c != '>') {
-				continue;
-			} else {
-				if (!beginChecked) {
-					beginChecked = true;
-					int pos;
-					if (startsBlock) {
-						beginFound = sb.toString().startsWith(begin_block);
-						pos = 0;
-					} else {
-						pos = sb.toString().indexOf(begin_block);
-						beginFound = (pos >= 0);
+		//#ifdef DLOGGING
+//@		int irtn = UNKNOWN_ELEMENT;
+		//#endif
+        int inputCharacter = ((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+				readBuf());
+		/* Future
+		int offread = m_offread;
+		int lenRead = m_lenRead;
+		try {
+		*/
+			if (inputCharacter != -1) {
+				do {
+					/* Future
+					//#ifdef DLOGGING
+//@					if (m_logChar && traceLoggable) {logger.trace("parseBlock 1 offread,lenRead,m_offread,m_lenRead=" + offread + "," + lenRead  + "," + m_offread + "," + m_lenRead);}
+					//#endif
+					if (offread == lenRead) {
+						offread = m_offread;
+						lenRead = m_lenRead;
 					}
-					if (beginFound && endsSep) {
-						int epos;
-						if ((epos = (begin_block.length() + pos)) <
-								sb.length()) {
-							switch (sb.charAt(epos)) {
-								case '\n':
-								case '\r':
-								case ' ':
-									break;
-								default:
-									beginFound = false;
+					*/
+					/* Future
+					//#ifdef DLOGGING
+//@					//if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE1 m_offread,offread", m_offread, offread);}
+//@					//undo if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE1 m_lenRead,lenRead", m_lenRead, lenRead);}
+					//#endif
+					*/
+					c = (char)inputCharacter;
+					sb.append(c);
+					if (c != '>') {
+						/* Future
+						//#ifdef DLOGGING
+//@						if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE2 m_offread,offread", m_offread, offread);}
+//@						if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE2 m_lenRead,lenread", m_lenRead, lenRead);}
+//@						if (m_logReadChar && traceLoggable && (m_offread < m_lenRead)) {logger.assertLog("parseBlock NEC2 m_cbuf[m_offread],m_cbuf[offread]", m_cbuf[m_offread], m_cbuf[offread]);}
+						//#endif
+						*/
+						continue;
+					} else {
+						if (!beginChecked) {
+							beginChecked = true;
+							int pos;
+							if (startsBlock) {
+								beginFound = sb.toString().startsWith(begin_block);
+								pos = 0;
+							} else {
+								pos = sb.toString().indexOf(begin_block);
+								beginFound = (pos >= 0);
+							}
+							if (beginFound && endsSep) {
+								int epos;
+								if ((epos = (begin_block.length() + pos)) <
+										sb.length()) {
+									switch (sb.charAt(epos)) {
+										case '\n':
+										case '\r':
+										case ' ':
+											break;
+										default:
+											beginFound = false;
+									}
+								}
 							}
 						}
+						if (sb.toString().endsWith(end_block)) {
+							if (beginFound) {
+								//#ifdef DLOGGING
+//@								irtn =
+									//#else
+									return
+									//#endif
+									eblock;
+								//#ifdef DLOGGING
+//@								return irtn;
+								//#endif
+							} else {
+								//#ifdef DLOGGING
+//@								irtn =
+									//#else
+									return
+									//#endif
+									UNKNOWN_ELEMENT;
+								//#ifdef DLOGGING
+//@								return irtn;
+								//#endif
+							}
+						}
+						if (!beginFound || !reqEnd) {
+							break;
+						}
 					}
+					/* Future
+					//#ifdef DLOGGING
+//@					if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE2 m_offread,offread", m_offread, offread);}
+//@					if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE2 m_lenRead,lenread", m_lenRead, lenRead);}
+//@					if (m_logReadChar && traceLoggable && (m_offread < m_readLen)) {logger.assertLog("parseBlock NEC2 m_cbuf[m_offread],m_cbuf[offread]", m_cbuf[m_offread], m_cbuf[offread]);}
+					//#endif
+					*/
 				}
-				if (sb.toString().endsWith(end_block)) {
-					if (beginFound) {
-						return eblock;
-					} else {
-						return UNKNOWN_ELEMENT;
-					}
-				}
-				if (!beginFound || !reqEnd) {
-					break;
-				}
+				while ((inputCharacter =
+							((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+							 readBuf())) != -1);
+			}
+			if (inputCharacter == -1) {
+				//#ifdef DLOGGING
+//@				irtn =
+					//#else
+					return
+					//#endif
+					END_DOCUMENT;
+				//#ifdef DLOGGING
+//@				return irtn;
+				//#endif
+			}
+			//#ifdef DLOGGING
+//@			irtn =
+				//#else
+				return
+				//#endif
+				UNKNOWN_ELEMENT;
+			//#ifdef DLOGGING
+//@			return irtn;
+			//#endif
+			/* Future
+		} finally {
+			//#ifdef DLOGGING
+//@			if (m_logReadChar && traceLoggable) {logger.trace("parseBlock irtn=" + irtn);}
+//@			if (m_logChar && traceLoggable) {logger.trace("parseBlock 3 offread,lenRead,m_offread,m_lenRead=" + offread + "," + lenRead  + "," + m_offread + "," + m_lenRead);}
+			//#endif
+			if (offread != lenRead) {
+				//#ifdef DLOGGING
+//@				if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE3 m_offread,m_offread", m_offread, offread);}
+//@				if (traceLoggable && m_logChar) {logger.assertLog("parseBlock NE3 m_lenRead,m_offread", m_lenRead, lenRead);}
+				//#endif
+			   m_offread = offread;
 			}
 		}
-		if (inputCharacter == -1) {
-			return END_DOCUMENT;
-		}
-		return UNKNOWN_ELEMENT;
+		*/
 	}
 
-	static public Character skipBlanks(InputStreamReader is)
-	throws IOException {
-		char c;
-		int inputCharacter;
-		while ((inputCharacter = is.read()) != -1) {
-			if ((c = (char)inputCharacter) != ' ') {
-				return new Character(c);
+	public Character skipBlanks(EncodingStreamReader is)
+		throws IOException {
+			char c;
+			int inputCharacter;
+			while ((inputCharacter =
+						((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+						 readBuf())) != -1) {
+				if ((c = (char)inputCharacter) != ' ') {
+					return new Character(c);
+				}
 			}
+			//#ifdef DLOGGING
+//@			if (m_logReadChar && traceLoggable) {logger.trace("skipBlanks end of file inputCharacter=" + EncodingStreamReader.logInpChar(inputCharacter));}
+			//#endif
+			return null;
 		}
-		return null;
-	}
 
-	static public Character getChar(InputStreamReader is)
+	public Character getChar(EncodingStreamReader is)
 	throws IOException {
 		int inputCharacter;
-		if ((inputCharacter = is.read()) == -1) {
+		if ((inputCharacter =
+				((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+					readBuf())) == -1) {
+			//#ifdef DLOGGING
+//@			if (m_logReadChar && traceLoggable) {logger.trace("getChar end of file inputCharacter=" + EncodingStreamReader.logInpChar(inputCharacter));}
+			//#endif
 			return null;
 		} else {
 			return new Character((char)inputCharacter);
 		}
 	}
 
-	static public int parseBeginEntity(InputStreamReader is, boolean readNext,
+	public int parseBeginEntity(EncodingStreamReader is, boolean readNext,
 			char c,
 			StringBuffer sb
 			//#ifdef DLOGGING
@@ -491,7 +721,7 @@ public class XmlParser {
 			//#endif
 		}
 		if (c == '!') {
-			Character oc = XmlParser.getChar(is);
+			Character oc = getChar(is);
 			if (oc == null) {
 				//#ifdef DLOGGING
 //@				if (logChar && traceLoggable) {logger.trace("parseBeginEntity ! return end document c,sb=" + c + "," + sb.toString());}
@@ -592,12 +822,8 @@ public class XmlParser {
 	}
 
     /** Parse next element */
-    public int parse() throws IOException {
-		if (m_encodingStreamReader.isModEncoding()) {
-			return parseStream(m_encodingStreamReader);
-		} else {
-			return parseStream(m_inputStream);
-		}
+	public int parse() throws IOException {
+		return parseStream(m_encodingStreamReader);
 	}
 		
     /** Get element name */
@@ -610,15 +836,15 @@ public class XmlParser {
     
     /** Get element text including inner xml
 	  * If no text, return empty string "" */
-    private String getTextStream(InputStreamReader is, final boolean convEnts) throws IOException {
+    private String getTextStream(EncodingStreamReader is, final boolean convEnts) throws IOException {
         
 		if(!m_currentElementContainsText) {
 			return "";
 		}
 		
 		String text = "";
+		int inputCharacter;
 		try {
-			int inputCharacter;
 			char c;
 			char lastChars[] = {' ', ' ', ' '};
 			
@@ -654,54 +880,107 @@ public class XmlParser {
 			//#endif
 			StringBuffer textBuffer = new StringBuffer(
 					endCurrentElement.length());
-			if ((inputCharacter = is.read()) == -1) {
+			if ((inputCharacter =
+					((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+						readBuf())) == -1) {
 				return "";
 			}
-			do {
-				c = (char)inputCharacter;
-				//#ifdef DLOGGING
-//@				if (m_logChar && traceLoggable) {logger.trace("getTextStream c,textBuffer=" + c + "," + textBuffer.toString());}
-				//#endif
-				if (c == '<') {
-					int parseResult;
-					if ((parseResult = parseBeginEntity(is, true, c,
-										textBuffer
-										//#ifdef DLOGGING
-//@										,
-//@										logger,
-//@										traceLoggable,
-//@										m_logChar
-										//#endif
-										)) == CLOSE_TAG) {
-						final int tlen = textBuffer.length();
-						c = textBuffer.charAt(tlen - 1);
-						textBuffer.setLength(tlen - 1);
-						textBuffer.getChars(tlen - 4, tlen - 1, lastChars, 0);
-						//#ifdef DLOGGING
-//@						if (m_logChar && traceLoggable) {logger.trace("getTextStream CLOSE_TAG c,lastChars=" + c + "," + new String(lastChars));}
-//@						if (m_logChar && traceLoggable) {logger.trace("getTextStream CLOSE_TAG c,textBuffer=" + c + "," + textBuffer.toString());}
-						//#endif
-					} else if (parseResult == END_DOCUMENT) {
-						break;
-					} else {
-						continue;
+			/* Future
+			int offread = m_offread;
+			int lenRead = m_lenRead;
+			try {
+			*/
+				do {
+					/* Future
+					if (offread == lenRead) {
+						offread = m_offread;
+						lenRead = m_lenRead;
 					}
-				}
-				//System.out.print(c);
+					//#ifdef DLOGGING
+//@					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE1 m_offread,m_offread", m_offread, offread);}
+//@					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE1 m_lenRead,m_offread", m_lenRead, lenRead);}
+					//#endif
+					*/
+					c = (char)inputCharacter;
+					//#ifdef DLOGGING
+//@					if (m_logChar && traceLoggable) {logger.trace("getTextStream c,textBuffer=" + c + "," + textBuffer.toString());}
+					//#endif
+					if (c == '<') {
+						/*
+						m_offread = offread;
+						m_lenRead = lenRead;
+						//#ifdef DLOGGING
+//@						if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE m_offread,m_offread", m_offread, offread);}
+//@						if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE m_lenRead,m_offread", m_lenRead, lenRead);}
+						//#endif
+						*/
+						int parseResult = parseBeginEntity(is, true, c,
+								textBuffer
+								//#ifdef DLOGGING
+//@								,
+//@								logger,
+//@								traceLoggable,
+//@								m_logChar
+								//#endif
+								);
+						/* Future
+						offread = m_offread;
+						lenRead = m_lenRead;
+						*/
+						if (parseResult == CLOSE_TAG) {
+							final int tlen = textBuffer.length();
+							c = textBuffer.charAt(tlen - 1);
+							textBuffer.setLength(tlen - 1);
+							textBuffer.getChars(tlen - 4, tlen - 1, lastChars, 0);
+							//#ifdef DLOGGING
+//@							if (m_logChar && traceLoggable) {logger.trace("getTextStream CLOSE_TAG c,lastChars=" + c + "," + new String(lastChars));}
+//@							if (m_logChar && traceLoggable) {logger.trace("getTextStream CLOSE_TAG c,textBuffer=" + c + "," + textBuffer.toString());}
+							//#endif
+						} else if (parseResult == END_DOCUMENT) {
+							break;
+						} else {
+							continue;
+						}
+					}
+					//System.out.print(c);
 
-				if( (c == '>') &&
-				    (lastChars[0] == elementNameChars[0]) &&
-					(lastChars[1] == elementNameChars[1]) &&
-						(lastChars[2] == elementNameChars[2]) &&
-					textBuffer.toString().endsWith(endCurrentElement)) {
-					break;
+					if( (c == '>') &&
+							(lastChars[0] == elementNameChars[0]) &&
+							(lastChars[1] == elementNameChars[1]) &&
+							(lastChars[2] == elementNameChars[2]) &&
+							textBuffer.toString().endsWith(endCurrentElement)) {
+						break;
+					}
+					lastChars[0] = lastChars[1];
+					lastChars[1] = lastChars[2];
+					lastChars[2] = c;
+					textBuffer.append(c);
+					/* Future
+					//#ifdef DLOGGING
+//@					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE2 m_offread,m_offread", m_offread, offread);}
+//@					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE2 m_lenRead,m_offread", m_lenRead, lenRead);}
+//@					if (m_logReadChar && traceLoggable && (m_lenRead < m_offread)) {logger.assertLog("getTextStream NEC m_cbuf[m_offread],m_cbuf[offread++]", m_cbuf[m_offread], m_cbuf[offread]);}
+					//#endif
+					if (m_lenRead < m_offread) {
+						offread++;
+					}
+					*/
 				}
-				lastChars[0] = lastChars[1];
-				lastChars[1] = lastChars[2];
-				lastChars[2] = c;
-				textBuffer.append(c);
+				while ((inputCharacter =
+							((m_offread < m_lenRead) ? m_cbuf[m_offread++] :
+							 readBuf())) != -1);
+				/* Future
+			} finally {
+				if (inputCharacter != -1) {
+					//#ifdef DLOGGING
+//@					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE3 m_offread,m_offread", m_offread, offread);}
+//@					if (traceLoggable && m_logChar) {logger.assertLog("getTextStream NE3 m_lenRead,m_offread", m_lenRead, lenRead);}
+					//#endif
+					m_offread = offread;
+					m_lenRead = lenRead;
+				}
 			}
-			while ((inputCharacter = is.read()) != -1);
+			*/
 
 			if (m_docEncoding.length() == 0) {
 				text = textBuffer.toString();
@@ -728,7 +1007,7 @@ public class XmlParser {
 				}
 			}
 			// Save memory.
-			textBuffer = (StringBuffer)nullPtr;
+			textBuffer = (StringBuffer)m_nullPtr;
 			text = MiscUtil.replace(text, endCurrentElement, "");
 			
 			/** Handle some entities and encoded characters */
@@ -743,7 +1022,7 @@ public class XmlParser {
 
 				// Replace numeric entities including &#8217;, &#8216;
 				// &#8220;, and &#8221;
-				text = EncodingUtil.replaceNumEntity(text);
+				text = m_encodingUtil.replaceNumEntity(text);
 			}
 
 			// Replace special chars like left quote, etc.
@@ -769,15 +1048,9 @@ public class XmlParser {
 //@	}
 	//#endif
 
-    /** Get element text including inner xml
-	  * save some time by using the normal m_inputStream when we
-	  * know that we are not reading UTF-8/16. */
+    /** Get element text including inner xml */
     public String getText(boolean convEnts) throws IOException {
-		if (m_encodingStreamReader.isModEncoding()) {
-			return getTextStream(m_encodingStreamReader, convEnts);
-		} else {
-			return getTextStream(m_inputStream, convEnts);
-		}
+		return getTextStream(m_encodingStreamReader, convEnts);
 	}
 
     /** 
@@ -829,7 +1102,7 @@ public class XmlParser {
 				}
 			}
 			//#ifdef DLOGGING
-//@			if (finerLoggable) {logger.finer("getAttributeValue attribute value=" + value);}
+//@			if (finerLoggable) {logger.finer("getAttributeValue attribute,value=" + attributeName + "," + value);}
 			//#endif
 					
 			return value;
@@ -862,6 +1135,9 @@ public class XmlParser {
    * @author Irv Bunton
    */
 	public int parseXmlElement() throws IOException {
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("parseXmlElement begin");}
+		//#endif
         int parsingResult;
 		if (((parsingResult = parse()) == ELEMENT) &&
 			getName().equals("link")) {
@@ -877,6 +1153,9 @@ public class XmlParser {
 			}
 			parsingResult = parse();
 		}
+		//#ifdef DLOGGING
+//@		if (finestLoggable) {logger.finest("parseXmlElement end parsingResult=" + parsingResult);}
+		//#endif
 		return parsingResult;
 	}
 
@@ -954,8 +1233,21 @@ public class XmlParser {
         return (m_encodingUtil.isUtf());
     }
 
-    public EncodingUtil getEncodingUtil() {
+	//#ifdef DTEST
+//@    public EncodingUtilIntr getEncodingUtil()
+	//#else
+    public EncodingUtil getEncodingUtil()
+	//#endif
+	{
         return (m_encodingUtil);
+    }
+
+    public void setHtmlFile(boolean htmlFile) {
+        this.htmlFile = htmlFile;
+    }
+
+    public boolean isHtmlFile() {
+        return (htmlFile);
     }
 
 	//#ifdef DLOGGING
@@ -967,7 +1259,29 @@ public class XmlParser {
 //@    public boolean isLogChar() {
 //@        return (m_logChar);
 //@    }
+//@    public void setLogReadChar(boolean logReadChar) {
+//@        this.m_logReadChar = logReadChar;
+		//#ifdef DLOGGING
+//@		if (logReadChar) {
+//@			m_encodingStreamReader.setLogChar(true);
+//@		}
+		//#endif
+//@    }
+//@
+//@    public boolean isLogReadChar() {
+//@        return (m_logReadChar);
+//@    }
+//@
+//@    public void setLogRepeatChar(boolean logRepeatChar) {
+//@        this.m_logRepeatChar = logRepeatChar;
+//@    }
+//@
+//@    public boolean isLogRepeatChar() {
+//@        return (m_logRepeatChar);
+//@    }
+//@
 	//#endif
 	//#endif
 
 }
+//#endif
