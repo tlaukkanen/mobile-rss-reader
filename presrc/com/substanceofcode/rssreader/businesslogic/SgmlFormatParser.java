@@ -24,10 +24,16 @@
 /*
  * IB 2010-05-24 1.11.5RC2 Use interfaces to make compatibility testing easier.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
  */
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define test define
 @DTESTDEF@
 //#ifdef DTEST
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
@@ -46,4 +52,5 @@ public interface SgmlFormatParser {
 			int maxItemCount, boolean getTitleOnly) throws IOException;
     
 }
+//#endif
 //#endif
