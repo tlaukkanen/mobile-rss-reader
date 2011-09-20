@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+<project name="RSSReader" default="prepare.2.0" basedir="." >
+
+	<!-- IB 2010-09-15 1.11.5RC2 Use new file wtk-build-prepare-midp.xml to contain prepare... targets. -->
+
+	<target name="prepare.test" unless="${no.test}" >
+	    <echo message="Using test properties" />
+		<property name="no.staging" value="true" />
+		<property name="no.release" value="true" />
+	    <echo message="no.release=${no.release}" />
+		<property name="test.template" value="" />
+		<property file="${basedir}/test.properties${test.template}" />
+		<antcall target="test.buildno" />
+		<property file="${basedir}/test_buildinfo.properties${test.template}" />
+	    <echo message="build.number=${build.number}" />
+	</target>
+
+	<target name="test.buildno" unless="test.buildinfo" >
+	    <echo message="Using test properties" />
+	    <echo message="no.release=${no.release}" />
+		<buildnumber file="${basedir}/test_buildinfo.properties${test.template}" />
+	    <echo message="Release buildinfo update." />
+		<property name="test.buildno" value="true" />
+	</target>
+
+	<target name="prepare.release" unless="${no.release}" >
+	    <echo message="Using release properties" />
+		<property name="no.test" value="true" />
+		<property name="no.staging" value="true" />
+		<property name="release.template" value="" />
+		<property file="${basedir}/release.properties${release.template}" />
+	    <echo message="RELEASE=${RELEASE}" />
+	    <echo message="build.number=${build.number}" />
+		<antcall target="release.buildno" />
+		<property file="${basedir}/release_buildinfo.properties${release.template}" />
+	    <echo message="build.number=${build.number}" />
+	</target>
+
+	<target name="release.buildno" unless="release.buildno" >
+		<buildnumber file="${basedir}/release_buildinfo.properties${release.template}" />
+	    <echo message="Release buildinfo update." />
+		<property name="release.buildno" value="true" />
+	</target>
+
+	<target name="prepare.staging" unless="${no.staging}" >
+	    <echo message="Using release staging properties" />
+		<property name="no.test" value="true" />
+		<property name="no.release" value="true" />
+		<property name="staging.template" value="" />
+		<property file="${basedir}/staging.properties${staging.template}" />
+	</target>
+
+	<target name="prepare.temporary" if="${temp}" >
+	    <echo message="Using prepare.temporary." />
+		<property file="${basedir}/wtktemporary.properties${build.template}" />
+	    <echo message="yinlight.tmp.subdir=${yinlight.tmp.subdir}" />
+	    <echo message="yinlight.tmp.subpath=${yinlight.tmp.subpath}" />
+	    <echo message="yinlight.subdomain=${yinlight.subdomain}" />
+	</target>
+
+	<target name="prepare.development" if="${dev}" >
+	    <echo message="Using prepare.development." />
+		<property file="${basedir}/wtkdevelopment.properties${build.template}" />
+	</target>
+
+	<target name="prepare.beta" if="${beta}" >
+		<property file="${basedir}/wtkbeta.properties${build.template}" />
+	</target>
+
+	<target name="prepare.rc" if="${rc}" >
+		<property file="${basedir}/wtkrc.properties${build.template}" />
+	</target>
+
+	<target name="prepare.production" if="${production}" >
+		<property file="${basedir}/wtkproduction.properties${build.template}" />
+	</target>
+
+	<target name="prepare.smallmem" >
+		<property file="${basedir}/wtksmallmem.properties${build.template}" />
+	</target>
+
+	<target name="prepare.regularmem" >
+		<property file="${basedir}/wtkregularmem.properties${build.template}" />
+	</target>
+
+	<target name="prepare.midp1.0" depends="prepare.smallmem" >
+		<property file="${basedir}/wtkmidp1.0.properties${build.template}" />
+	</target>
+
+	<target name="prepare.midp2.0" >
+		<property file="${basedir}/wtkmidp2.0.properties${build.template}" />
+	</target>
+
+	<target name="prepare.cldc1.0" >
+		<property file="${basedir}/wtkcldc1.0.properties${build.template}" />
+	</target>
+
+	<target name="prepare.cldc1.1" >
+		<property file="${basedir}/wtkcldc1.1.properties${build.template}" />
+	</target>
+
+	<target name="prepare.jsr75" >
+		<property file="${basedir}/wtkjsr75.properties${build.template}" />
+	</target>
+
+	<target name="prepare.jsr82" >
+		<property file="${basedir}/wtkjsr82.properties${build.template}" />
+	</target>
+
+	<target name="prepare.jsr120" >
+		<property file="${basedir}/wtkjsr120.properties${build.template}" />
+	</target>
+
+	<target name="prepare.jsr135" >
+		<property file="${basedir}/wtkjsr135.properties${build.template}" />
+	</target>
+
+	<target name="prepare.jsr184" >
+		<property file="${basedir}/wtkjsr184.properties${build.template}" />
+	</target>
+
+	<target name="prepare.jsr205" >
+		<property file="${basedir}/wtkjsr205.properties${build.template}" />
+	</target>
+
+	<target name="prepare.smartphone" >
+		<property file="${basedir}/wtksmartphone.properties${build.template}" />
+	</target>
+
+	<target name="prepare.afriware" >
+		<property file="${basedir}/wtkafriware.properties${build.template}" />
+	</target>
+
+	<target name="prepare.signed" >
+		<property file="${basedir}/wtksigned.properties${build.template}" />
+		<property name="vendor" value="${yinlight.vendor}" />
+		<property name="project.info.url" value="${yinlight.project.info.url}" />
+	</target>
+
+	<target name="prepare.novice" >
+		<property file="${basedir}/wtknovice.properties${build.template}" />
+	</target>
+
+	<target name="prepare.jsr238" >
+		<property file="${basedir}/wtkjsr238.properties${build.template}" />
+	</target>
+
+	<target name="prepare.verisign">
+		<property file="${basedir}/wtkverisign.properties${build.template}" />
+		<property name="tsalias" value="${env.VERISIGN_ALIAS}" />
+		<property name="tsstorepass" value="${env.VERISIGN_KEYSTORE_PASS}" />
+		<property name="tskeystore" value="${env.VERISIGN_KEYSTORE_LOCATION}/${env.VERISIGN_KEYSTORE_NAME}" />
+		<property name="tskeypass" value="${env.VERISIGN_KEYSTORE_PASS}" />
+	</target>
+
+	<target name="prepare.thawte">
+		<property file="${basedir}/wtkthawte.properties${build.template}" />
+		<property name="tsalias" value="${env.THAWTE_ALIAS}" />
+		<property name="tsstorepass" value="${env.THAWTE_KEYSTORE_PASS}" />
+		<property name="tskeystore" value="${env.THAWTE_KEYSTORE_LOCATION}/${env.THAWTE_KEYSTORE_NAME}" />
+		<property name="tskeypass" value="${env.THAWTE_KEYSTORE_PASS}" />
+	</target>
+
+	<target name="prepare.godaddy">
+		<property file="${basedir}/wtkgodaddy.properties${build.template}" />
+		<property name="tsalias" value="${env.GODADDY_ALIAS}" />
+		<property name="tsstorepass" value="${env.GODADDY_KEYSTORE_PASS}" />
+		<property name="tskeystore" value="${env.GODADDY_KEYSTORE_LOCATION}/${env.GODADDY_KEYSTORE_NAME}" />
+		<property name="tskeypass" value="${env.GODADDY_KEYSTORE_PASS}" />
+	</target>
+
+	<!-- Prepare the distribution stage (e.g. beta1) -->
+	<target name="prepare.stage" if="stage" >
+	    <echo message="Using distribution stage=${stage}" />
+		<property name="sstage.file" value="${stage}" />
+		<property name="stage.file" value="${stage}_" />
+		<echo message="stage.file=${stage.file}" />
+		<property name="dist.stage.file" value="_${stage}" />
+		<echo message="dist.stage.file=${dist.stage.file}" />
+		<echo message="ustage=${ustage}" />
+		<property name="ustage.txt" value="${ustage} " />
+		<echo message="ustage.txt=${ustage.txt}" />
+		<property name="stage.featured" value="Featured," />
+		<property name="ftp.ustage.url.txt" value="${ustage}%20" />
+		<property name="ftp.ustage.desc.txt" value="${ustage} " />
+		<property name="ftp.ustage.txt" value="${ustage}\ " />
+		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
+		<property name="no.individual.file" value="false" />
+	    <echo message="no.individual.file=${no.individual.file}" />
+	</target>
+
+	<!-- Prepare the full version of the program. -->
+	<target name="prepare.full" unless="${make.link}" >
+	    <echo message="Creating full version" />
+		<property file="${basedir}/wtkfull.properties${build.template}" />
+	</target>
+
+	<!-- Prepare the internet install link version of the program. -->
+	<target name="prepare.intlink"  depends="prepare.smallmem" >
+	    <echo message="Creating internet install link" />
+		<property file="${basedir}/wtkintlink.properties${build.template}" />
+	</target>
+
+	<!-- Prepare to init stage properties if not set already.  -->
+	<target name="prepare.no.stage" unless="stage" >
+		<property name="stage" value="" />
+	    <echo message="Using distribution no stage=${stage}" />
+		<property name="stage.file" value="" />
+		<echo message="stage.file=${stage.file}" />
+		<property name="dist.stage.file" value="" />
+		<echo message="dist.stage.file=${dist.stage.file}" />
+		<property name="ustage" value="" />
+		<echo message="ustage=${ustage}" />
+		<property name="ustage.txt" value="" />
+		<echo message="ustage.txt=${ustage.txt}" />
+		<property name="stage.featured" value="Featured," />
+		<property name="ftp.ustage.url.txt" value="" />
+		<property name="ftp.ustage.desc.txt" value="" />
+		<property name="ftp.ustage.txt" value="" />
+		<echo message="ftp.ustage.txt=${ftp.ustage.txt}" />
+		<property name="no.individual.file" value="false" />
+	    <echo message="no.individual.file=${no.individual.file}" />
+	</target>
+
+</project>
