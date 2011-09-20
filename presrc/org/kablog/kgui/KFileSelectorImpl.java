@@ -50,6 +50,21 @@
  * IB 2010-11-19 1.11.5Dev14 Have displayDbgMsg print the class name.
  * IB 2010-11-22 1.11.5Dev14 Replace Alert with loading form exception.
  * IB 2010-11-22 1.11.5Dev14 Fix stack trace to use e instead of t.
+ * IB 2011-01-01 1.11.5Dev15 Use procIoExc in URLHandler to handle the IO exception and other exceptions common with IO exception.
+ * IB 2010-01-01 1.11.5Dev15 If logging and necessary, write severe or other message.  If not logging, printStackTrace.
+ * IB 2010-01-01 1.11.5Dev15 Use closeConnection in MiscUtil to close a connection.
+ * IB 2010-01-01 1.11.5Dev15 Release memory for InputStream by closing it and making it null with closeConnection.
+ * IB 2010-01-01 1.11.5Dev15 Use nullPtr to decrease memory.
+ * IB 2010-01-01 1.11.5Dev15 Use featureMgr instead of getFeatureMgr().
+ * IB 2011-01-11 1.11.5Dev15 Use super.featureMgr instead of featureMgr.
+ * IB 2011-01-26 1.11.5Dev16 Use FeatureMgr.getCmdAdd to create a command and add command at the same time.
+ * IB 2011-03-06 1.11.5Dev17 Only use thread utils if MIDP 2.0.
+ * IB 2011-03-07 1.11.5Dev17 Optionally use long command label.
+ * IB 2011-03-18 1.11.5Dev17 Use nullPtr to init selectCommand.
+ * IB 2011-09-14 1.11.5Dev18 More logging.
+ * IB 2011-09-14 1.11.5Dev18 Remove extra closeConnection.
+ * IB 2011-09-14 1.11.5Dev18 Better error handling.
+ * IB 2011-09-14 1.11.5Dev18 Close connection when going back to root because setFileConnection cannot be used to display the root tree.  Always use open to show the selected root tree.
 */
 
 // Expand to define MIDP define
@@ -85,6 +100,7 @@ import javax.microedition.lcdui.Image;
 import com.substanceofcode.rssreader.presentation.FeatureList;
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
+import com.substanceofcode.rssreader.businesslogic.URLHandler;
 import com.substanceofcode.utils.MiscUtil;
 
 //#ifdef DLOGGING
@@ -111,7 +127,7 @@ final public class KFileSelectorImpl
 
 	private final Command cancelCommand;
 
-	private final Command selectCommand;
+	private Command selectCommand;
 
 	private Vector rootsList = new Vector();
 
@@ -148,9 +164,9 @@ final public class KFileSelectorImpl
 
 		FILE_SEPARATOR = (String)FeatureMgr.getSysProperty(
 				"file.separator", "/", "Unable to get file.separator", null)[0];
-		cancelCommand = new Command("Cancel", Command.CANCEL, 2);
-		openCommand = new Command("Open", Command.ITEM, 4);
-		selectCommand = new Command("Select", Command.ITEM, 5);
+		cancelCommand = FeatureMgr.getCmdAdd(this, "Cancel", null, Command.CANCEL, 2);
+		openCommand = FeatureMgr.getCmdAdd(this, "Open", null, Command.ITEM, 4);
+		selectCommand = (Command)nullPtr;
 		//#ifdef DTEST
 		try {
 
@@ -166,10 +182,9 @@ final public class KFileSelectorImpl
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
 			logger.severe("KFileSelectorImpl constructor", t);
-			//#endif
-			/** Error while executing constructor */
-			System.out.println("KFileSelectorImpl constructor " + t.getMessage());
+			//#else
 			t.printStackTrace();
+			//#endif
 		}
 		//#endif
 
@@ -182,11 +197,11 @@ final public class KFileSelectorImpl
 		//#endif
 		//ROOT_IMAGE = Image.createImage("root_icon.png");
 		FOLDER_IMAGE = FeatureMgr.getImage(iconDir + "/folder_icon.png",
-				featureMgr.getLoadForm());
+				super.featureMgr.getLoadForm());
 		FILE_IMAGE = FeatureMgr.getImage(iconDir + "/file_icon.png",
-				featureMgr.getLoadForm());
+				super.featureMgr.getLoadForm());
 		UPDIR_IMAGE =  FeatureMgr.getImage(iconDir + "/up_dir_icon.png",
-				featureMgr.getLoadForm());
+				super.featureMgr.getLoadForm());
 
 		//#ifdef DTEST
 		displayDbgMsg("MFS building cmds....", null);
@@ -195,11 +210,10 @@ final public class KFileSelectorImpl
 		if (fineLoggable) {logger.fine("MFS building cmds....");}
 		//#endif
 
-		super.addCommand(openCommand);
 		if (selectDir) {
-			super.addCommand(selectCommand);
+			selectCommand = FeatureMgr.getCmdAdd(this, "Select", "Select dir/file",
+					Command.ITEM, 5);
 		}
-		super.addCommand(cancelCommand);
 		super.setSelectCommand(openCommand);
 
 	}
@@ -233,7 +247,7 @@ final public class KFileSelectorImpl
 						/** Error while executing constructor */
 						System.out.println("KFileSelectorImpl run openSelected " + t.getMessage());
 						//#endif
-						super.getFeatureMgr().getLoadForm().recordExcFormFin(
+						super.featureMgr.getLoadForm().recordExcFormFin(
 								"Internal error.  Unable to open.", t);
 						t.printStackTrace();
 					}
@@ -241,7 +255,7 @@ final public class KFileSelectorImpl
 					doCleanup();
 					parent.childFinished(this);
 					cancelCmd = false;
-					featureMgr.setBackground(false);
+					super.featureMgr.setBackground(false);
 				}
 			} catch (Exception e) {
 				//#ifdef DLOGGING
@@ -297,18 +311,7 @@ final public class KFileSelectorImpl
 		this.selectedFile = (String)nullPtr;
 		this.selectedURL = (String)nullPtr;
 
-		if (null != currentRoot) {
-			try {currentRoot.close();}
-			catch (IOException ioEx) {
-				//#ifdef DLOGGING
-				logger.severe("doCleanup ", ioEx);
-				//#endif
-				ioEx.printStackTrace();
-			}
-			// Save memory.
-			currentRoot = (FileConnection)nullPtr;
-		}
-
+		currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 		// Save memory.
 		fileDataBlock = (byte[])nullPtr;
 
@@ -373,6 +376,11 @@ final public class KFileSelectorImpl
 			//#endif
 			try
 			{
+				// Free memory before doing the open.
+				currentRoot = (FileConnection)nullPtr;
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest("resetRoots open defaultDir=" + defaultDir);}
+				//#endif
 				currentRoot = (FileConnection) Connector.open(  defaultDir,  Connector.READ);
 				displayCurrentRoot();
 			}
@@ -382,7 +390,7 @@ final public class KFileSelectorImpl
 				displayDbgMsg("### resetroot ex: " + e, null);
 				//#endif
 				//#ifdef DLOGGING
-				logger.severe("KFileSelectorImpl constructor ", e);
+				logger.severe("KFileSelectorImpl resetRoots ", e);
 				//#endif
 				displayAllRoots();
 			}
@@ -414,14 +422,7 @@ final public class KFileSelectorImpl
 			//#endif
 			super.append(root.substring(1), FOLDER_IMAGE);
 		}
-		// Save memory.
-		currentRoot = (FileConnection)nullPtr;
 	}//displayAllRoots
-
-
-
-
-
 
 	/* Load roots into rootsList array. */
 	protected void loadRoots()
@@ -444,10 +445,13 @@ final public class KFileSelectorImpl
 				rootsList.addElement(FILE_SEPARATOR + (String) roots.nextElement());
 			}
 		} catch (Throwable e) {
-			//#ifdef DTEST
-			displayDbgMsg("### load roots: " + e, null);
+			//#ifdef DLOGGING
+			logger.severe("KFileSelectorImpl loadRoots", e);
 			//#else
 			e.printStackTrace();
+			//#endif
+			//#ifdef DTEST
+			displayDbgMsg("### load roots: " + e, null);
 			//#endif
 		}
 	}//loadRoots
@@ -487,6 +491,9 @@ final public class KFileSelectorImpl
 							//#ifdef DTEST
 							displayDbgMsg("new currentRoot...", null);
 							//#endif
+							//#ifdef DLOGGING
+							if (finestLoggable) {logger.finest("openSelected open selectedFile=file:///" + selectedFile);}
+							//#endif
 							currentRoot = (FileConnection) Connector.open("file:///" + selectedFile, Connector.READ);
 						}
 						else
@@ -494,48 +501,30 @@ final public class KFileSelectorImpl
 							//#ifdef DTEST
 							displayDbgMsg("set cur root conn...", null);
 							//#endif
+							//#ifdef DLOGGING
+							if (finestLoggable) {logger.finest("openSelected setFileConnection selectedFile=" + selectedFile);}
+							//#endif
 							currentRoot.setFileConnection(selectedFile);
 						}
 						displayCurrentRoot();
 					}
-					catch (SecurityException e)
+					catch (Throwable e)
 					{
 						//#ifdef DTEST
-						displayDbgMsg("### open file: " + e, null);
+						displayDbgMsg("### file Conn open: " + e, null);
 						//#endif
-						//#ifdef DLOGGING
-						logger.severe("openSelected security exception selected:  " + selectedFile, e);
-						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
-						//#endif
-						super.getFeatureMgr().getLoadForm().recordExcFormFin(
-								"Security problem found either access " +
-								" denied or access refused by the user.", e);
-						e.printStackTrace();
-						throw e;
-					}
-					catch (IllegalArgumentException e)
-					{
-						//#ifdef DTEST
-						displayDbgMsg("### open file: " + e, null);
-						//#endif
-						//#ifdef DLOGGING
-						logger.severe("openSelected illegal argument selected:  " + selectedFile, e);
-						logger.severe("openSelected root url selected:  " + currentRoot.getURL(), e);
-						//#endif
-						super.getFeatureMgr().getLoadForm().recordExcFormFin(
-								"Illegal argument with find files.", e);
-						throw e;
-					}
-					catch (Exception e)
-					{
-						//#ifdef DTEST
-						displayDbgMsg("### open file: " + e, null);
-						//#endif
-						//#ifdef DLOGGING
-						logger.severe("openSelected exception selected:  " + selectedFile, e);
-						//#else
-						e.printStackTrace();
-						//#endif
+						URLHandler.procIoExc(
+								"Error while accessing file at ", e,
+								(null == currentRoot),
+								"file:///" + selectedFile,
+								"Out of memory error while accessing file at dir",
+								"Internal error while accessing file at dir",
+								"openSelected",
+								super.featureMgr.getLoadForm()
+								//#ifdef DLOGGING
+								,logger
+								//#endif
+								);
 					}
 				}
 				else if (selectedFile.equals(UP_DIR))
@@ -558,29 +547,40 @@ final public class KFileSelectorImpl
 					    rootsList.contains(FILE_SEPARATOR + curShortName)))
 					{
 						displayAllRoots();
+						currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 					}
 					else
 					{
 						try
 						{
+							//#ifdef DLOGGING
+							if (finestLoggable) {logger.finest("openSelected setFileConnection up_dir=" + UP_DIR);}
+							//#endif
 							currentRoot.setFileConnection(UP_DIR);
 							displayCurrentRoot();
 						}
-						catch (IOException e)
+						catch (Throwable e)
 						{
-							//#ifdef DLOGGING
-							logger.severe("KFileSelectorImpl openSelected at dir " + currentRoot.getPath() + "," + currentRoot.getName(), e);
-							//#else
-							e.printStackTrace();
-							//#endif
 							//#ifdef DTEST
 							displayDbgMsg("### setfileConn: " + e, null);
 							//#endif
-						}
-						catch (IllegalArgumentException e)
-						{
-							//there's something hosed with this path-- jump back to roots
-							displayAllRoots();
+							URLHandler.procIoExc(
+									"Error while accessing file at dir", e,
+									false,
+									UP_DIR,
+									"Out of memory error while accessing file at dir",
+									"Internal error while accessing file at dir",
+									"openSelected",
+									super.featureMgr.getLoadForm()
+									//#ifdef DLOGGING
+									,logger
+									//#endif
+									);
+							if (e instanceof IllegalArgumentException)
+							{
+								//there's something hosed with this path-- jump back to roots
+								displayAllRoots();
+							}
 						}
 					}
 				}
@@ -596,7 +596,7 @@ final public class KFileSelectorImpl
 					//parent.childFinished(this);
 
 					// Stop thread of FeatureMgr
-					featureMgr.setBackground(false);
+					super.featureMgr.setBackground(false);
 
 					// Clean up in separate thread.  This also saves
 					// the selectedURL and sends childFinished.
@@ -623,13 +623,9 @@ final public class KFileSelectorImpl
 			displayDbgMsg("=== Selected URL: " + selectedURL, null);
 			//#endif
 
-			try {currentRoot.close();}
-			catch(IOException ioEx) {
-				ioEx.printStackTrace();
-			}
 		}
 
-		currentRoot = (FileConnection)nullPtr; //reset it
+		currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 		//selectedFile = (String)nullPtr;
 
 		parent.childFinished(this);
@@ -700,7 +696,7 @@ final public class KFileSelectorImpl
 		catch (Exception e)
 		{
 			//#ifdef DLOGGING
-			logger.severe("KFileSelectorImpl constructor", e);
+			logger.severe("KFileSelectorImpl displayCurrentRoot", e);
 			//#else
 			e.printStackTrace();
 			//#endif
@@ -794,6 +790,11 @@ final public class KFileSelectorImpl
 					displayDbgMsg("selectedURL: " + selectedURL, null);
 					//#endif
 
+					// Free memory before doing the open.
+					currentRoot = (FileConnection)nullPtr;
+					//#ifdef DLOGGING
+					if (finestLoggable) {logger.finest("openSelected open selectedURL=" + selectedURL);}
+					//#endif
 					currentRoot = (FileConnection) Connector.open(selectedURL);
 
 					//currentRoot.setFileConnection(selectedFile); //relative to current directory
@@ -828,45 +829,45 @@ final public class KFileSelectorImpl
 							//#endif
 
 							is.read(fileDataBlock);
-							is.close();
+							is = (InputStream)MiscUtil.closeInputStream(is);
 
 							//#ifdef DTEST
 							displayDbgMsg("...data read.", null);
 							//#endif
 						}
-						catch (IOException ioEx)
+						catch (Throwable e)
 						{
-							//#ifdef DTEST
-							if (bDebug) {
-								System.err.println("### ioEx: " + ioEx);
-
-								ioEx.printStackTrace();
-							}
-							//#endif
-						}
-						catch (java.lang.OutOfMemoryError oom)
-						{
-							//#ifdef DTEST
-							if (bDebug) System.err.println("### OOM new fileDataBlock: "  + Runtime.getRuntime().freeMemory());
-							//#endif
+							URLHandler.procIoExc(
+									"Error while accessing file at dir", e,
+									currentRoot == null,
+									selectedURL,
+									"Out of memory error while accessing file at dir",
+									"Internal error while accessing file at dir",
+									"openSelected",
+									super.featureMgr.getLoadForm()
+									//#ifdef DLOGGING
+									,logger
+									//#endif
+									);
 						}
 					}
 
-					currentRoot.close(); //no longer needed
-					currentRoot = (FileConnection)nullPtr;
+					currentRoot = (FileConnection)MiscUtil.closeConnection(currentRoot);
 				}
-				catch (IOException ioEx)
+				catch (Throwable e)
 				{
-					//#ifdef DTEST
-					displayDbgMsg("### read file ioex: " + ioEx, null);
-					//#endif
-				}
-				catch (Exception ex)
-				{
-					//#ifdef DTEST
-					displayDbgMsg("### read file ex: " + ex, null);
-					//#endif
-
+					URLHandler.procIoExc(
+							"Error while reading file at dir", e,
+							currentRoot == null,
+							selectedURL,
+							"Out of memory error while reading file at dir",
+							"Internal error while reading file at dir",
+							"openSelected",
+							super.featureMgr.getLoadForm()
+							//#ifdef DLOGGING
+							,logger
+							//#endif
+							);
 				}
 			}
 		}
@@ -886,6 +887,9 @@ final public class KFileSelectorImpl
 	/* Method to listen for changes in root. */
 	public void rootChanged(int changeType, String strArg)
 	{
+		//#ifdef DLOGGING
+		if (finestLoggable) {logger.finest("rootChanged open changeType,strArg=" + changeType + "," + strArg);}
+		//#endif
 		//#ifdef DTEST
 		if (bDebug) {
 			//that's nice...
@@ -934,7 +938,9 @@ implements Runnable
 	/* Complete the Op when we run if we have a target.  */
 	public void run() {
 		
+		//#ifdef DMIDP20
 		try {
+		//#endif
 			if (null != target) {
 				
 				target.doNotifyOpComplete();
