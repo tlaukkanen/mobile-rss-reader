@@ -33,12 +33,35 @@
  * IB 2010-11-16 1.11.5Dev14 Add columnCount to parseStdDate exceptions.
  * IB 2010-11-16 1.11.5Dev14 Remove stimeZones and GMT because this may change with phone config or upgrading phone.
  * IB 2010-11-16 1.11.5Dev14 Have parseStdDateTZ return string time zone instead of index of time zone.
+ * IB 2010-11-26 1.11.5Dev14 To help with minor performance, start vector with max items.
+ * IB 2010-11-26 1.11.5Dev14 To help with minor space, use trimToSize for items..
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-03-06 1.11.5Dev17 Change items to array to save on memory and for simplicity.
+ * IB 2011-03-09 1.11.5Dev17 Recognize image with initial cap to prevent invalid links, etc inside the image tag contents.
+ * IB 2011-03-11 1.11.5Dev17 Set the millisecond to 0 to allow dates to be more consistent.
+ * IB 2011-03-11 1.11.5Dev17 Trim the date.
+ * IB 2011-03-11 1.11.5Dev17 Use MiscUtil.getSgmlUrl to convert &amp; within links to handle parameters in links.
+ * IB 2011-03-13 1.11.5Dev17 Have getFeedTitleList to use title for name when parsing the whole feed.
+ * IB 2011-03-13 1.11.5Dev17 Use RssItem instead of RssItunesItem to allow future difference in the two.
+ * IB 2011-03-13 1.11.5Dev17 Process dates of the form 11 Mar 2011 11:43 GMT.
+ * IB 2011-03-13 1.11.5Dev17 Process dates of the form Wed, 6 September 14:00:00 GMT.
+ * IB 2011-03-13 1.11.5Dev17 Process dates of the form March 11, 2011 3:11:26 PM PST
+ * IB 2011-03-13 1.11.5Dev17 Combine statements.
+ * IB 2011-03-15 1.11.5Dev17 Minor performance improvement in getting the month.
+ * IB 2011-03-15 1.11.5Dev17 Remove catch of Exception as it does the same as the catch of Throwable in RssFormatParser.
+ * IB 2011-03-15 1.11.5Dev17 Fix processing of dates of the form March 11, 2011 3:11:26 PM PST
+ * IB 2011-03-15 1.11.5Dev17 Minor memory savings in RSS parsing of dates.
  */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
 // Expand to define test define
 //#define DNOTEST
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -46,7 +69,7 @@ package com.substanceofcode.rssreader.businesslogic;
 //#endif
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
-import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+import com.substanceofcode.rssreader.businessentities.RssItem;
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.XmlParser;
 import java.io.IOException;
@@ -77,30 +100,30 @@ public class RssFormatParser implements FeedFormatParser {
 	private String m_link = "";
 	private String m_language = "";
 	private String m_date = "";
+	private String m_lastBuildDate = "";
 	private String m_enclosure = "";
 	private ExtParser m_extParser = new ExtParser();
 
     public RssItunesFeed parse(XmlParser parser, RssItunesFeed cfeed,
-			            int maxItemCount, boolean getTitleOnly)
+			int maxItemCount, boolean getFeedTitleList, boolean getTitleOnly)
 	throws IOException {
         
 		//#ifdef DLOGGING
-//@		if (finestLoggable) {logger.finest("parse cfeed.getName(),maxItemCount,getTitleOnly=" + cfeed.getName() + "," + + maxItemCount + "," + getTitleOnly);}
+//@		if (finestLoggable) {logger.finest("parse parser,cfeed.getName(),cfeed.getUrl(),maxItemCount,getFeedTitleList,getTitleOnly=" + parser + "," + cfeed.getName() + "," + cfeed.getUrl() + "," + + maxItemCount + "," + getFeedTitleList + "," + getTitleOnly);}
 		//#endif
-        Vector items = new Vector();
+        Vector items = new Vector(maxItemCount);
 		m_extParser.parseNamespaces(parser);
 		m_hasExt = m_extParser.isHasExt();
 		RssItunesFeed feed = cfeed;
-        feed.setItems(items);
         
         /** Parse to first entry element */
-		//#ifdef DITUNES
-//@		try {
-		//#endif
+		try {
 			while(!parser.getName().equals("item")) {
 				switch (parser.parse()) {
 					case XmlParser.END_DOCUMENT:
-						System.out.println("No entries found.");
+						//#ifdef DTEST
+//@						System.out.println("No entries found.");
+						//#endif
 						return feed;
 					case XmlParser.ELEMENT:
 						String elementName = parser.getName();
@@ -118,7 +141,13 @@ public class RssFormatParser implements FeedFormatParser {
 						}
 						switch (elemChar) {
 							case 'l':
-								 if (elementName.equals("language")) {
+								 if (elementName.equals("lastBuildDate")) {
+									 m_lastBuildDate = parser.getText(true).trim();
+									 //#ifdef DLOGGING
+//@									 if (finestLoggable) {logger.finest("m_lastBuildDate=" + m_lastBuildDate);}
+									 //#endif
+									 continue;
+								 } else if (elementName.equals("language")) {
 									 m_language = parser.getText(true);
 									 //#ifdef DLOGGING
 //@									 if (finestLoggable) {logger.finest("m_language=" + m_language);}
@@ -127,7 +156,8 @@ public class RssFormatParser implements FeedFormatParser {
 								 }
 								 break;
 							case 'i':
-								 if (elementName.equals("image")) {
+							case 'I':
+								 if (elementName.substring(1).equals("mage")) {
 									 // Skip image text as it includes link
 									 // and title.
 									 parser.getText(false);
@@ -148,11 +178,17 @@ public class RssFormatParser implements FeedFormatParser {
 						break;
 				}
 			}
-		//#ifdef DITUNES
-//@		} finally {
+		} finally {
+			if ((feed.getName().length() == 0) && getFeedTitleList) {
+				feed.setName(m_title);
+			}
+			//#ifdef DITUNES
 //@			feed.setLink(m_link);
 //@			if (m_date.length() > 0) {
 //@				Date pubDate = parseRssDate(m_date);
+//@				feed.setDate(pubDate);
+//@			} else if (m_lastBuildDate.length() > 0) {
+//@				Date pubDate = parseRssDate(m_lastBuildDate);
 //@				feed.setDate(pubDate);
 //@			} else {
 //@				feed.setDate(null);
@@ -161,69 +197,73 @@ public class RssFormatParser implements FeedFormatParser {
 //@				feed = m_extParser.getFeedInstance(feed, m_language, m_title,
 //@						m_description);
 //@			}
-//@		}
-		//#endif
+			//#endif
+		}
         
 		reset();
 
-		/** Parse next element */            
-        int parsingResult;
-        while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
-			if (parsingResult != XmlParser.ELEMENT) {
-				continue;
-			}
-            String elementName = parser.getName();
-            if (elementName.length() == 0) {
-				continue;
-			}
-            
-			char elemChar = elementName.charAt(0);
-            switch (elemChar) {
-				case 'i':
-					if (elementName.equals("item") ) {
-						/** Save previous entry */
-						RssItunesItem item = createItem();
-						if ( item != null) {
-							items.addElement( item );
-							if(items.size()==maxItemCount) {
-								return feed;
-							}
-						}                
+		try {
+			/** Parse next element */            
+			int parsingResult;
+			while( (parsingResult = parser.parse()) !=XmlParser.END_DOCUMENT ) {
+				if (parsingResult != XmlParser.ELEMENT) {
+					continue;
+				}
+				String elementName = parser.getName();
+				if (elementName.length() == 0) {
+					continue;
+				}
+				
+				char elemChar = elementName.charAt(0);
+				switch (elemChar) {
+					case 'i':
+						if (elementName.equals("item") ) {
+							/** Save previous entry */
+							RssItem item = createItem();
+							if ( item != null) {
+								items.addElement( item );
+								if(items.size()==maxItemCount) {
+									return feed;
+								}
+							}                
 
-						/** New entry */
-						/** reset */
-						reset();
-						continue;
-					}
-					break;
-				case 't':
-					// Textinput has required sub element description.
-					// We don't want the overriding description.
-					if (elementName.equals("textinput") ) {
-						parser.getText(false);
-						//#ifdef DLOGGING
-//@						if (finestLoggable) {logger.finest("skipping textinput data");}
-						//#endif
-						continue;
-					}
-					break;
-				default:
+							/** New entry */
+							/** reset */
+							reset();
+							continue;
+						}
+						break;
+					case 't':
+						// Textinput has required sub element description.
+						// We don't want the overriding description.
+						if (elementName.equals("textinput") ) {
+							parser.getText(false);
+							//#ifdef DLOGGING
+//@							if (finestLoggable) {logger.finest("skipping textinput data");}
+							//#endif
+							continue;
+						}
+						break;
+					default:
+				}
+				parseItem(parser, elemChar, elementName);
+				
 			}
-			parseItem(parser, elemChar, elementName);
-            
-        }
 
-        /** Save previous entry */
-		RssItunesItem item = createItem();
-		if ( item != null) {
-            items.addElement( item );
-        }        
+			/** Save previous entry */
+			RssItem item = createItem();
+			if ( item != null) {
+				items.addElement( item );
+			}        
+		} finally {
+			feed.setVecItems(items);
+		}
                         
 		return feed;
     }
     
 	/** Save previous entry */
-	final private RssItunesItem createItem() {
+	final private RssItem createItem() {
 		boolean hasTitle = (m_title.length()>0);
 		boolean hasDesc = (m_description.length()>0);
 		if (hasTitle || hasDesc) {
@@ -234,7 +274,7 @@ public class RssFormatParser implements FeedFormatParser {
 				m_title = m_title.replace('\n', ' ');
 				m_title = m_title.trim();
 			}
-			RssItunesItem item;
+			RssItem item;
 			Date pubDate = null;
 			// Check date in case we cannot find it.
 			if (m_date.equals("") && m_extParser.isHasExt()) {
@@ -249,7 +289,7 @@ public class RssFormatParser implements FeedFormatParser {
 						m_description, pubDate, m_enclosure, true,
 						m_author);
 			} else {
-				item = new RssItunesItem(m_title, m_link,
+				item = new RssItem(m_title, m_link,
 						m_description, pubDate,
 						m_enclosure, true);
 			}
@@ -281,7 +321,7 @@ public class RssFormatParser implements FeedFormatParser {
 		switch (elemChar) {
 			case 'p':
 				if( elementName.equals("pubDate")) {
-					m_date = parser.getText(true);
+					m_date = parser.getText(true).trim();
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_date=" + m_date);}
 					//#endif
@@ -310,7 +350,7 @@ public class RssFormatParser implements FeedFormatParser {
 				break;
 			case 'l':
 				if( elementName.equals("link") ) {
-					m_link = parser.getText(false);
+					m_link = MiscUtil.getSgmlUrl(parser.getText(false));
 					//#ifdef DLOGGING
 //@					if (finestLoggable) {logger.finest("m_link=" + m_link);}
 					//#endif
@@ -363,6 +403,7 @@ public class RssFormatParser implements FeedFormatParser {
 		cal.set(Calendar.HOUR_OF_DAY, hours);
 		cal.set(Calendar.MINUTE, minutes);
 		cal.set(Calendar.SECOND, seconds);
+		cal.set(Calendar.MILLISECOND, 0);
 		
 		return cal.getTime();
 	}
@@ -389,9 +430,10 @@ public class RssFormatParser implements FeedFormatParser {
      * Sat, 23 Sep 2006 22:25:11 +0000
      */
     public static Object[] parseStdDateTZ(String dateString) {
-        Object[] objs = null;
+
 		//#ifdef DLOGGING
 //@		Logger logger = Logger.getLogger("RssFormatParser");
+//@		boolean finestLoggable = logger.isLoggable(Level.FINEST);
 		//#endif
 		int columnCount = -1;
         try {
@@ -406,6 +448,7 @@ public class RssFormatParser implements FeedFormatParser {
             int monthIndex = 2;
             int yearIndex = 3;
             int timeIndex = 4;
+            int ampmAdj = 0;
             int tzIndex = 5;
             
 			int kc = 0;
@@ -414,23 +457,70 @@ public class RssFormatParser implements FeedFormatParser {
 				dateString = MiscUtil.replace(dateString, "  ", " ");
 			}
 
-            String[] values = MiscUtil.split(dateString, " ");
-            columnCount = values.length;
-            if( columnCount==5 ) {
-                // Expected format:
-                // 09 Nov 2006 23:18:49 EST
-                dayOfMonthIndex = 0;
-                monthIndex = 1;
-                yearIndex = 2;
-                timeIndex = 3;
-                tzIndex = 4;
-			} else if( columnCount==7 ) {
-                // Expected format:
-                // Thu, 19 Jul  2007 00:00:00 N
-                yearIndex = 4;
-                timeIndex = 5;
-                tzIndex = -1;
-            } else if( columnCount<5 || columnCount>6 ) {
+            String[] values;
+            columnCount = (values = MiscUtil.split(dateString, " ")).length;
+            String monthString = null;
+            switch (columnCount) {
+				case 5:
+					// Expected format:
+					// 09 Nov 2006 23:18:49 EST
+					// or
+					// 11 Mar 2011 11:43 GMT
+					// or
+					// Wed, 6 September 14:00:00 GMT
+					if (Character.isDigit(
+								values[dayOfMonthIndex = 0].charAt(0))) {
+						monthIndex = 1;
+						yearIndex = 2;
+						timeIndex = 3;
+					} else {
+						dayOfMonthIndex = 1;
+						monthIndex = 2;
+						Calendar cal = Calendar.getInstance();
+						cal.setTime(new Date()); 
+						cal.set(Calendar.MILLISECOND, 0);
+						yearIndex = -cal.get(Calendar.YEAR);
+						timeIndex = 3;
+					}
+					tzIndex = 4;
+					break;
+				case 6:
+					// Thr, 09 November 2006 23:18:49 EST
+					// or
+					// March 11, 2011 3:11:26 PM PST
+					if (values[dayOfMonthIndex].length() > 2) {
+						values[dayOfMonthIndex] =
+								values[dayOfMonthIndex].substring(0, 2);
+					}
+					if (Character.isDigit((monthString =
+									values[monthIndex]).charAt(0))) {
+						monthString = values[monthIndex = 0];
+						yearIndex = 2;
+						timeIndex = 3;
+						{
+							int ampmIndex;
+							int ampmpos;
+							if (!Character.isDigit(
+									values[tzIndex = 5].charAt(0)) &&
+									!Character.isDigit(
+									values[ampmIndex = 4].charAt(0))
+									&& ((ampmpos =
+									",AM,PM,".indexOf(values[ampmIndex]))
+										> 0) &&
+								(ampmpos == 4)) {
+								ampmAdj = 12;
+							}
+						}
+					}
+					break;
+				case 7:
+					// Expected format:
+					// Thu, 19 Jul  2007 00:00:00 N
+					yearIndex = 4;
+					timeIndex = 5;
+					tzIndex = -1;
+					break;
+				default:
 				//#ifdef DLOGGING
 //@				logger.warning("Invalid columnCount,date format: " + columnCount + "," + dateString);
 				//#endif
@@ -446,65 +536,86 @@ public class RssFormatParser implements FeedFormatParser {
             int dayOfMonth = Integer.parseInt( values[ dayOfMonthIndex ] );
             
             // Month
-            String[] months =  {
-                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-            String monthString = values[ monthIndex ];
-            int month=0;
-            for(int monthEnumIndex=0; monthEnumIndex<11; monthEnumIndex++) {
-                if( monthString.equals( months[ monthEnumIndex ] )) {
-                    month = monthEnumIndex;
-                }
-            }
+            if (monthString == null) {
+				monthString = values[ monthIndex ];
+			}
+			if (monthString.length() > 3) {
+				monthString = monthString.substring(0, 3);
+			}
+            int month;
+			{
+				String months;
+				int pos;
+				month = ((pos = (months =
+						"Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec,").indexOf(
+							monthString)) / 4);
+				if (pos < 0) {
+					throw new Exception("Invalid month=" + monthString);
+				}
+			}
+			//#ifdef DLOGGING
+//@			if (finestLoggable) {logger.finest("parse month,monthString=" + month + "," + monthString);}
+			//#endif
+			// Free memory.
+			monthString = null;
             
             // Year
-            int year = Integer.parseInt(values[ yearIndex ]);
-            if(year<100) {
-                year += 2000;
-            }
+            int year;
+			if (yearIndex >= 0) {
+				year = Integer.parseInt(values[ yearIndex ]);
+				if(year<100) {
+					year += 2000;
+				}
+			} else {
+				year = -yearIndex;
+			}
             
             // Time
             String[] timeValues = MiscUtil.split(values[ timeIndex ],":");
+			final String stz = ((tzIndex == -1) || (tzIndex >= values.length)) ?
+				 null : values[tzIndex];
+			//#ifdef DLOGGING
+//@			int valuesLen = values.length;
+			//#endif
+			// Save memory.
+			values = null;
             int hours = Integer.parseInt( timeValues[0] );
+			if (ampmAdj > 0) {
+				hours += ampmAdj;
+			}
             int minutes = Integer.parseInt( timeValues[1] );
-            int seconds = Integer.parseInt( timeValues[2] );
+            int seconds;
+			{
+				int secIndex;
+				if (timeValues.length > (secIndex = 2)) {
+					seconds = Integer.parseInt( timeValues[secIndex] );
+				} else {
+					seconds = 0;
+				}
+			}
+			// Save space.
+			timeValues = null;
             
 			Date pubDate = getCal(
 					dayOfMonth, month, year, hours, minutes, seconds);
-			if ((tzIndex == -1) || (tzIndex >= values.length)) {
-				objs = new Object[] {pubDate, null};
-			} else {
-				final String stz = values[tzIndex];
-				//#ifdef DLOGGING
-//@				logger.finest("parseStdDateTZ values.length,tzIndex,stz=" + values.length + "," + tzIndex + "," + stz);
-				//#endif
-				objs = new Object[] {pubDate, stz};
-			}
-            
-        } catch(Exception ex) {
-            // TODO: Add exception handling code
-            System.err.println("parseStdDate error while converting date string to object " + 
-				"columnCount,date format: " +
-
-                    columnCount + "," + dateString + "," + ex.toString());
 			//#ifdef DLOGGING
-//@			logger.severe("parseStdDateTZ   error while converting date " +
-//@						   "string to object columnCount,date format: " +
-//@						   columnCount + "," + dateString, ex);
+//@			logger.finest("parseStdDateTZ valuesLen,tzIndex,stz=" + valuesLen + "," + tzIndex + "," + stz);
 			//#endif
-        } catch(Throwable t) {
+			return new Object[] {pubDate, stz};
+		
+        } catch(Throwable e) {
             // TODO: Add exception handling code
             System.err.println("parseStdDate error while converting date string to object " + 
 					"columnCount,date format,throwable: " + columnCount + "," +
-                    dateString + "," + t.toString());
+                    dateString + "," + e.toString());
 			//#ifdef DLOGGING
 //@			logger.severe("parseStdDateTZ   error while converting date " +
 //@						   "string to object " +
 //@                    "columnCount,date format: " + columnCount + "," +
-//@					dateString, t);
+//@					dateString, e);
 			//#endif
+			return null;
         }
-        return objs;
     }
     
     /**
@@ -535,8 +646,6 @@ public class RssFormatParser implements FeedFormatParser {
             // 0 = year (could be with either 4 or 2 digits)
             // 1 = month
             // 2 = day of month/time
-            int yearIndex = 0;
-            int monthIndex = 1;
             int dayOfMonthTimeIndex = 2;
 			if (dateString.charAt(0) == '-') {
 				dateString = dateString.substring(1);
@@ -548,23 +657,50 @@ public class RssFormatParser implements FeedFormatParser {
                 throw new Exception("Invalid date format: " + dateString);
             }
             
-            int year = Integer.parseInt(values[ yearIndex ]);
+            int year;
+			{
+				int yearIndex;
+				year = Integer.parseInt(values[ yearIndex = 0 ]);
+			}
             
             // Month
-            int month = Integer.parseInt( values[ monthIndex ] );
+            int month;
+			{
+				int monthIndex;
+				month = Integer.parseInt( values[ monthIndex = 1 ] );
+			}
             
             // Day of month
-            String sdayOfMonth = values[ dayOfMonthTimeIndex ].substring(0, 2);
+			String sdayTime;
+            String sdayOfMonth = (sdayTime =
+					values[ dayOfMonthTimeIndex ]).substring(0,
+					Math.min(2, sdayTime.length()));
 
             int dayOfMonth = Integer.parseInt( sdayOfMonth );
             
-            String time = values[ dayOfMonthTimeIndex ].substring(3);
-            String [] timeValues = MiscUtil.split(time, ":");
-
-            int hours = Integer.parseInt( timeValues[0] );
-            int minutes = Integer.parseInt( timeValues[1] );
-            timeValues[2] = timeValues[2].substring( 0, 2 );
-            int seconds = Integer.parseInt( timeValues[2] );
+            String [] timeValues;
+            int hours;
+            int minutes;
+            int seconds;
+            String time;
+            if ((sdayTime.length() > sdayOfMonth.length()) &&
+				((time = sdayTime.substring(sdayOfMonth.length() + 1)).length()
+				 > 1) && (timeValues = MiscUtil.split(time, ":")).length >= 3) {
+				hours = Integer.parseInt( timeValues[0] );
+				String sminutes;
+				if ((sminutes = timeValues[1]).length() > 2) {
+					minutes = Integer.parseInt( sminutes.substring(0, 2) );
+					timeValues[2] = sminutes.substring(3, 5);
+				} else {
+					minutes = Integer.parseInt( sminutes );
+					timeValues[2] = timeValues[2].substring( 0, 2 );
+				}
+				seconds = Integer.parseInt( timeValues[2] );
+			} else {
+				hours = 0;
+				minutes = 0;
+				seconds = 0;
+			}
             
             pubDate = getCal(dayOfMonth, month - 1 + Calendar.JANUARY, year,
 					hours, minutes, seconds);
@@ -582,7 +718,7 @@ public class RssFormatParser implements FeedFormatParser {
         } catch(Throwable t) {
 			//#ifdef DLOGGING
 //@			Logger logger = Logger.getLogger("RssFormatParser");
-//@			logger.severe("parseStdDateTZ  error while converting date " +
+//@			logger.severe("parseDcDate error while converting date " +
 //@						   "string to object: " +
 //@                    dateString, t);
 			//#endif
@@ -642,3 +778,4 @@ public class RssFormatParser implements FeedFormatParser {
 	}
 
 }
+//#endif
