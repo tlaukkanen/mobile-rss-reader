@@ -24,6 +24,8 @@
  * IB 2010-05-24 1.11.5RC2 Test compatibility OpmlParser.
  * IB 2010-09-29 1.11.5Dev8 Add //#preprocess for RIM preprocessor.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2010-11-29 1.11.5Dev9 Use compatibility4 version of EncodingUtil and EncodingStreamReader.
+ * IB 2010-11-29 1.11.5Dev9 Allow test to get the EncodingUtilIntr interface.
  */
 
 package com.substanceofcode.rssreader.businesslogic.compatibility4;
@@ -34,7 +36,7 @@ import com.substanceofcode.utils.compatibility4.XmlParser;
 import javax.microedition.io.*;
 import java.util.*;
 import java.io.*;
-import com.substanceofcode.utils.EncodingUtil;
+import com.substanceofcode.utils.compatibility4.EncodingUtil;
 
 /**
  * OpmlParser is an utility class for aquiring and parsing a OPML lists.
@@ -73,7 +75,7 @@ public class OpmlParser extends FeedListParser {
 				return null;
 			}
             
-			EncodingUtil encodingUtil = parser.getEncodingUtil();
+			EncodingUtil encodingUtil = (EncodingUtil)parser.getEncodingUtil();
             do {
 				/** RSS item properties */
 				String title = "";
