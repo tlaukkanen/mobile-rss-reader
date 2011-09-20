@@ -23,23 +23,42 @@
 /*
  * IB 2010-04-05 1.11.5RC1 Log loading of test case.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Use conditional preprocessed cldc11 code with modifications instead of cldc10 code.
+ * IB 2011-01-14 1.11.5Alpha15 Use convience method cmpModLog from LoggingTestCase to see if feeds are unequal and change the logging level to retry using logging to make debugging equals failures easier.  Also, retry with modified previous version for bug fixes/enhancements made in the current version.
+ * IB 2011-01-14 1.11.5Alpha15 Use convience methods updSvLogging and updPrevLogging from LoggingTestCase to alter/restore the logging level.
+ * IB 2011-01-14 1.11.5Alpha15 For JMUnit Plus using midlets, take midlet from the single midlet vs the current test which is part of multiple midlets used as tests.
+ * IB 2011-01-14 1.11.5Alpha15 Use procThrowable from LoggingTestCase.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile some code for internet link version.
+ * IB 2011-01-24 1.11.5Dev16 Fix println statement.
 */
 
+// Expand to define itunes define
+@DFULLVERSDEF@
+// Expand to define test define
+@DCOMPATDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define JMUnit test define
 @DJMTESTDEF@
+// Expand to define JMUNITPLUS define
+@DJMTESTPLUSDEF@
 // Expand to define logging define
 @DLOGDEF@
 
 //#ifdef DJMTEST
 package com.substanceofcode.jmunit.logging;
 
-import javax.microedition.midlet.MIDlet;
+import java.util.Vector;
 
-import jmunit.framework.cldc10.TestCase;
+import jmunit.framework.cldc11.Test;
+import jmunit.framework.cldc11.TestCase;
+import jmunit.framework.cldc11.AssertionFailedException;
 
-import com.substanceofcode.rssreader.businessentities.RssItunesItem;
+//#ifdef DFULLVERS
+import com.substanceofcode.rssreader.businessentities.RssItunesFeedInfo;
+import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+//#endif
+import com.substanceofcode.utils.CauseException;
 
 import java.util.Enumeration;
 
@@ -58,28 +77,31 @@ import net.sf.jlogmicro.util.logging.RecStoreHandler;
 abstract public class LoggingTestCase extends TestCase {
 
 	//#ifdef DLOGGING
+	/*
+	protected Vector svLogLevel = null;
+	*/
     protected Logger logger;
     protected boolean fineLoggable;
     protected boolean finerLoggable;
     protected boolean finestLoggable;
     protected boolean traceLoggable;
+	protected Level svLogLevel = null;
+	protected Level svCmpLogLevel = null;
     protected LoggerRptForm debugForm = null;
+	protected String scompLevel = null; // Level.FINE.getName(); // UNDO Change to more stringent
 	//#endif
 
 	public LoggingTestCase(int nbr, String name) {
 		super(nbr, name);
 		//#ifdef DLOGGING
 		LogManager logManager = LogManager.getLogManager();
+		//#ifdef DJMTESTPLUS
+		logManager.readConfiguration(Test.getTestMidlet());
+		//#else
 		logManager.readConfiguration(this);
+		//#endif
 		logger = Logger.getLogger(name);
-		fineLoggable = logger.isLoggable(Level.FINE);
-		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
-		finerLoggable = logger.isLoggable(Level.FINER);
-		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
-		finestLoggable = logger.isLoggable(Level.FINEST);
-		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
-		traceLoggable = logger.isLoggable(Level.TRACE);
-		logger.fine("obj,traceLoggable=" + this + "," + traceLoggable);
+		setFlags();
 		for (Enumeration eHandlers = logger.getParent().getHandlers().elements();
 				eHandlers.hasMoreElements();) {
 			Object ohandler = eHandlers.nextElement();
@@ -88,10 +110,143 @@ abstract public class LoggingTestCase extends TestCase {
 				logger.finest("form=" + oform);
 			}
 		}
-		debugForm = new LoggerRptForm(logManager, this,
+		debugForm = new LoggerRptForm(logManager,
+				//#ifdef DJMTESTPLUS
+				Test.getTestMidlet(),
+				//#else
+				this,
+				//#endif
 					null, "net.sf.jlogmicro.util.logging.FormHandler");
 		logger.info("Loading test case,nbr cases=" + name + "," + nbr);
 		//#endif
+	}
+
+	//#ifdef DLOGGING
+	public void setFlags() {
+		fineLoggable = logger.isLoggable(Level.FINE);
+		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+		finerLoggable = logger.isLoggable(Level.FINER);
+		logger.fine("obj,fineLoggable=" + this + "," + fineLoggable);
+		finestLoggable = logger.isLoggable(Level.FINEST);
+		logger.fine("obj,finestLoggable=" + this + "," + finestLoggable);
+		traceLoggable = logger.isLoggable(Level.TRACE);
+		logger.fine("obj,traceLoggable=" + this + "," + traceLoggable);
+	}
+
+	public Level updSvLogging(String newLogLevel) {
+		/*
+		if (svLogLevel == null) {
+			svLogLevel = new Vector();
+		}
+		svLogLevel.addElement(logger.getParent().getLevel());
+		*/
+		Level cLogLevel = logger.getParent().getLevel();
+		String strsvLogLevel = cLogLevel.getName();
+		if ((newLogLevel != null) && !strsvLogLevel.equals(newLogLevel)) {
+			Level nlogLevel;
+			logger.getParent().setLevel(nlogLevel = Level.parse(newLogLevel));
+			//logger = Logger.getLogger(CURRENT_CLASS);
+			setFlags();
+			return nlogLevel;
+		} else {
+			return null;
+		}
+	}
+
+	public void updPrevLogging(Level svLogLevel) {
+		if (svLogLevel != null) {
+			Level cLogLevel = logger.getParent().getLevel();
+			if (!cLogLevel.getName().equals(svLogLevel.getName())) {
+				logger.getParent().setLevel(svLogLevel);
+				//logger = Logger.getLogger(CURRENT_CLASS);
+				setFlags();
+			}
+		}
+	}
+	//#endif
+
+	//#ifdef DFULLVERS
+	public Object[] cmpModLog(String cmpMsg,
+			RssItunesFeedInfo ncmpfeed, RssItunesFeedInfo nfeed,
+			Object[] objs) {
+		boolean feq = ncmpfeed.equals(nfeed);
+		if (!feq) {
+			//#ifdef DLOGGING
+			logger.warning("Feeds not equal nfeed.getName()=" + nfeed.getName());
+			//#endif
+			RssItunesFeedInfo mcmpfeed = (RssItunesFeedInfo)ncmpfeed.clone();
+			RssItunesFeedInfo mnfeed = (RssItunesFeedInfo)nfeed.clone();
+			boolean nfeq;
+			if (!(nfeq = mcmpfeed.equals(mnfeed))) {
+				//#ifdef DLOGGING
+				if (finestLoggable) {logger.finest("cmpModLog mnfeed.getClass().getName(),mcmpfeed.getClass().getName()=" + mnfeed.getClass().getName() + "," + mcmpfeed.getClass().getName());}
+				//#endif
+				//#ifdef DCOMPATIBILITY
+				((RssItunesFeed)mnfeed).setItemDatesNull(mcmpfeed);
+				 mcmpfeed.adjustFields();
+				//#endif
+				mcmpfeed.setUpddate("");
+				mcmpfeed.setEtag("");
+				mnfeed.setUpddate("");
+				mnfeed.setEtag("");
+				feq = mcmpfeed.equals(mnfeed);
+				if (!feq) {
+					//#ifdef DLOGGING
+					svCmpLogLevel = updSvLogging(scompLevel);
+					//#endif
+					mcmpfeed = (RssItunesFeedInfo)mcmpfeed.clone();
+					mnfeed = (RssItunesFeedInfo)mnfeed.clone();
+					feq = mcmpfeed.equals(mnfeed);
+					//#ifdef DLOGGING
+					updPrevLogging(svCmpLogLevel);
+					//#endif
+				}
+			}
+		}
+		Throwable ae = null;
+		if (!feq) {
+			try {
+				assertTrue(((objs == null) ? "" : ("{" +
+								objs[0] + "," + objs[1] + "},")) +
+								cmpMsg, ncmpfeed.equals(nfeed));
+			} catch (Throwable e) {
+				ae = e;
+			}
+		}
+		return new Object[] {new Boolean(feq), ae};
+	}
+	//#endif
+
+	public void procThrowable(String mname, Throwable e)
+	throws Throwable {
+		CauseException ce;
+		if (e instanceof AssertionFailedException) {
+			ce = new CauseException(mname +
+					" AssertionFailedException  RuntimeException " +
+					"exception.", e);
+		} else if (e instanceof RuntimeException) {
+			ce = new CauseException(mname +
+					" Internal error, runtime exception.", e);
+		} else if (e instanceof Exception) {
+			ce = new CauseException(mname +
+					" Internal error, miscelaneous exception.", e);
+		} else if (e instanceof OutOfMemoryError) {
+			ce = new CauseException(mname +
+					" Internal error, OutOfMemoryError error throwable.", e);
+		} else if (e instanceof Error) {
+			ce = new CauseException(mname +
+					" Internal error, Error throwable.", e);
+		} else {
+			ce = new CauseException(mname +
+					" Internal error, miscelaneous throwable.", e);
+		}
+		//#ifdef DLOGGING
+		logger.severe(ce.getMessage(), ce);
+		//#else
+		System.out.println(ce.getMessage());
+		e.printStackTrace();
+		//#endif
+		throw e;
 	}
 
 }
