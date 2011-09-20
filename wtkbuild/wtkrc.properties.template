@@ -1,0 +1,7 @@
+#-- IB 2011-01-20 1.11.5Dev16 Use wtkrc.properties to more easily set release candidate properties used for the build.
+#-- IB 2011-09-19 1.11.5Rc2 Release candidate2.
+stage = rc2
+ustage = RC2
+stage.stable.text = stable
+stage.phase.text = release candidate
+stage.featured = Featured,
