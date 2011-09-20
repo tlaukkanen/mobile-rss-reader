@@ -1,0 +1,6 @@
+#-- IB 2011-01-20 1.11.5Dev16 Use wtkproduction.properties to more easily set production properties used for the build.
+stage = 
+ustage = 
+stage.stable.text = stable
+stage.phase.text = production
+stage.featured = Featured,
