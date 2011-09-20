@@ -1,0 +1,4 @@
+#-- IB 2011-02-05 1.11.5Dev17 Have special file for regular memory.
+DMEMSIZEDEF = DREGULARMEM
+file.prefix.memorysize = ${sfile.prefix.regsize.midp10}_
+SUFFIXVERS.memorysize = -${sfile.prefix.regsize.midp10}
