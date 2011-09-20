@@ -92,12 +92,45 @@
  * IB 2010-11-22 1.11.5Dev14 Use logDisp to log the display class and title(if present).
  * IB 2010-11-22 1.11.5Dev14 Don't cast setCurrentFeature parameter to setCurrentAlt.
  * IB 2010-11-22 1.11.5Dev14 Have getPromptDisp use optional rejectLabel for cancel label if present.
+ * IB 2011-01-12 1.11.5Alpha15 Save midlet instead of RssReaderMIDlet to be more generic and help with testing.  Have getRssMidlet to return the RssReaderMIDlet.
+ * IB 2011-01-12 1.11.5Alpha15 Allow specification of a accept label for the prompt form.
+ * IB 2011-01-12 1.11.5Alpha15 Have m_exitCommand be in FeatureMgr.
+ * IB 2011-01-12 1.11.5Alpha15 Have loop for pause and wait on a specific time period to avoid timing issues and spurrious awakes.
+ * IB 2011-01-12 1.11.5Alpha15 Have getAddTextField to both create a text field which uses layout bottom (MIDP 2.0) and appends the field to the given form.
+ * IB 2011-01-12 1.11.5Alpha15 Have getAddStringItem to both create a string item which uses layout bottom (MIDP 2.0) and appends the item to the given form.
+ * IB 2011-01-12 1.11.5Alpha15 Have getCmdAdd to both create a command and add it to the displayable.  Return the command pointer.
+ * IB 2011-01-12 1.11.5Alpha15 Have getCmdAddPrompt to both create a prompt command and add it to the displayable.  Return the command pointer.
+ * IB 2011-01-12 1.11.5Alpha15 Don't use static vars for RssReaderSettings.
+ * IB 2011-01-12 1.11.5Alpha15 More logging.
+ * IB 2011-01-14 1.11.5Alpha15 Use CmdReceiver interface to allow FeatureMgr to initialize KFileSelectorMgr without directly referencing it's class.  This allows for better use of optional APIs.  It is still necessary to install the correct version on the right device, however.
+ * IB 2011-01-24 1.11.5Dev16 Have m_aboutCmd in FeatureMgr since it should be common for all apps.
+ * IB 2011-01-24 1.11.5Dev16 Don't compile some code for internet link version.
+ * IB 2011-01-24 1.11.5Dev16 Fix println statement.
+ * IB 2011-01-24 1.11.5Dev16 Have jsr75Avail to determine if JSR-75 is available for MIDlet, applet or standalone.  Also, return if exists or the version number.
+ * IB 2010-11-22 1.11.5Dev14 For CLDC 1.0, use this.getClass() to get the class instance to use to load KFileSelectorMgr.
+ * IB 2011-01-28 1.11.5Dev17 Change setSettingNbr to setFrGui2SettingsNbr.
+ * IB 2011-01-28 1.11.5Dev17 Add setFrSettings2GuiNbr to set the text field with a numeric value from the settings with the given key.
+ * IB 2011-03-06 1.11.5Dev17 Only use thread utils if not small memory.
+ * IB 2011-03-06 1.11.5Dev17 Only use CmdReceiver utils if not small memory.
+ * IB 2011-03-06 1.11.5Dev17 Have setFrGui2SettingsNbr to take the Items from the form and set the corresponding int RSS settings.
+ * IB 2011-03-06 1.11.5Dev17 Have setFrSettings2GuiNbr to take the int settings from RSS settings and set the corresponding Item in the form.
+ * IB 2011-03-06 1.11.5Dev17 Have getCmdAdd and getCmdAddPrompt allow optional long label.
+ * IB 2011-03-06 1.11.5Dev17 Combine statements.
+ * IB 2011-03-06 1.11.5Dev17 Make sure midlet is not null for tests and future combination with other programs.
+ * IB 2011-03-06 1.11.5Dev17 Let adding prompt to be used for non FeatureForm/List.  The prompt is ignored if not for these displayables.
+ * IB 2011-03-18 1.11.5Dev17 Print stack trace in empty catch.
+ * IB 2011-03-21 1.11.5Dev17 Use FeatureMgr.getAppDefProperty to get the app property and return the given default if null.
+ * IB 2011-03-28 1.11.5Dev18 Put errors for RssReaderSettings.getInstance into a vector.
 */
 
 // Expand to define MIDP define
 @DMIDPVERS@
 // Expand to define CLDC define
 @DCLDCVERS@
+// Expand to define DJSR75 define
+@DJSR75@
+// Expand to define full vers define
+@DFULLVERSDEF@
 // Expand to define test define
 @DTESTDEF@
 // Expand to define test ui define
@@ -115,6 +148,7 @@
 package com.substanceofcode.rssreader.presentation;
 
 import java.util.Hashtable;
+import java.util.Vector;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -151,15 +185,12 @@ import com.substanceofcode.testlcdui.TextField;
 
 import com.substanceofcode.utils.MiscUtil;
 import com.substanceofcode.utils.Settings;
-//#ifdef DMIDP20
+//#ifndef DSMALLMEM
 import com.substanceofcode.utils.CmdReceiver;
 //#endif
 import com.substanceofcode.rssreader.businessentities.RssReaderSettings;
 import com.substanceofcode.rssreader.presentation.LoadingForm;
 import com.substanceofcode.utils.CauseException;
-//#ifdef DJSR75
-import org.kablog.kgui.KFileSelectorMgr;
-//#endif
 
 //#ifdef DLOGGING
 import net.sf.jlogmicro.util.logging.Logger;
@@ -171,7 +202,7 @@ import net.sf.jlogmicro.util.logging.Level;
 
 public class FeatureMgr implements CommandListener,
 	   Runnable
-		//#ifdef DMIDP20
+		//#ifndef DSMALLMEM
 	   ,CmdReceiver
 		//#endif
 {
@@ -192,8 +223,10 @@ public class FeatureMgr implements CommandListener,
 	private boolean foundPrompt = false;
 	protected Command exCmd = null;
 	private Displayable exDisp = null;
-	static protected RssReaderMIDlet midlet = null;
+	static protected MIDlet midlet = null;
     static public Command m_backCommand = null; // The back to header list command
+    static public Command m_exitCommand = null;// The exit command
+    static public Command m_aboutCmd = null;// The about command
     private Displayable rtnDisp = null; // The form to return to for text box
     private Object rtnObj = null; // The object (e.g. item or StringBuffer) to return to for text box
     volatile private boolean     background = false;  // Flag to continue looping
@@ -280,6 +313,7 @@ public class FeatureMgr implements CommandListener,
 
 	public Displayable getPromptDisp(String promptTitle, String promptMsg,
 									 Command acceptCmd,
+									 String acceptLabel,
 									 Command rejectCmd,
 									 String rejectLabel,
 									 Displayable rtnDisp,
@@ -288,7 +322,8 @@ public class FeatureMgr implements CommandListener,
 		// before the alert or the alert will not be seen.
 		Form formAlert = new Form(promptTitle);
 		formAlert.append(promptMsg);
-		formAlert.addCommand(new Command("OK", Command.OK, 4));
+		formAlert.addCommand(new Command(((acceptLabel == null) ? "OK":
+						acceptLabel), Command.OK, 4));
 		formAlert.addCommand(new Command(((rejectLabel == null) ? "Cancel":
 						rejectLabel), Command.CANCEL, 2));
 		formAlert.setCommandListener(this);
@@ -423,7 +458,7 @@ public class FeatureMgr implements CommandListener,
 									String promptMsg =
 										(String)cpromptCommands.get(ccmd);
 									getPromptDisp(ccmd.getLabel(), promptMsg,
-											ccmd, null, null, disp, null);
+											ccmd, null, null, null, disp, null);
 								} else if (cdisp.equals(disp)) {
 									//#ifdef DLOGGING
 									if (fineLoggable) {logger.fine("Equal cdisp,disp,cmdFeatureUser=" + logCmd(ccmd) + "," + cdisp + "," + disp + "," + cmdFeatureUser);}
@@ -459,8 +494,8 @@ public class FeatureMgr implements CommandListener,
 					if (traceLoggable && (loop > 0)) {logger.trace("run loop,background,lngTaskEnd,lngTotalTimeTaken=" + this.loop + "," + background + "," + lngStart + "," + lngTaskEnd + "," + lngTotalTimeTaken);}
 					//#endif
 					synchronized(this) {
-						if (pauseApp) {
-							super.wait();
+						while(pauseApp) {
+							super.wait(DEFAULT_LOOP_TIME);
 						}
 					}
 					if (lngTotalTimeTaken < LOOP_TIME) {
@@ -477,7 +512,7 @@ public class FeatureMgr implements CommandListener,
 				}
 			} while (background);
 		} finally {
-			//#ifdef DMIDP20
+			//#ifndef DSMALLMEM
 			if (procThread != null) {
 				MiscUtil.removeThread(procThread);
 			}
@@ -503,7 +538,7 @@ public class FeatureMgr implements CommandListener,
 
 	public void startWakeup(boolean wakeupThread) {
 		if ( (procThread == null) || !procThread.isAlive()) {
-			//#ifdef DMIDP20
+			//#ifndef DSMALLMEM
 			if (procThread != null) {
 				MiscUtil.removeThread(procThread);
 			}
@@ -549,12 +584,20 @@ public class FeatureMgr implements CommandListener,
         this.background = background;
     }
 
-    static public void setMidlet(RssReaderMIDlet midlet) {
+    static public void setMidlet(MIDlet midlet) {
         FeatureMgr.midlet = midlet;
     }
 
-    static public RssReaderMIDlet getMidlet() {
-        return (FeatureMgr.midlet);
+    static public RssReaderMIDlet getRssMidlet() {
+		if (midlet instanceof RssReaderMIDlet) {
+			return ((RssReaderMIDlet)FeatureMgr.midlet);
+		} else {
+			return null;
+		}
+    }
+
+    static public MIDlet getMidlet() {
+		return FeatureMgr.midlet;
     }
 
   /**
@@ -621,6 +664,45 @@ public class FeatureMgr implements CommandListener,
 	}
 
   /**
+   * Create a TextField, set the layout and add it to the form.
+   *
+   * @param label
+   * @param value
+   * @param maxSize
+   * @param constraint
+   * @return    TextField
+   * @author Irv Bunton
+   */
+	static public TextField getAddTextField(Form form, String label,
+												String value, int maxSize,
+												int constraint) {
+        TextField testField = new TextField(label, value, maxSize, constraint);
+		//#ifdef DMIDP20
+		testField.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        form.append(testField);
+		return testField;
+	}
+
+  /**
+   * Create a StringItem, set the layout and add it to the form.
+   *
+   * @param label
+   * @param value
+   * @return    StringItem
+   * @author Irv Bunton
+   */
+	static public StringItem getAddStringItem(Form form, String label,
+												String value) {
+        StringItem itemInfo = new StringItem(label, value);
+		//#ifdef DMIDP20
+		itemInfo.setLayout(Item.LAYOUT_BOTTOM);
+		//#endif
+        form.append(itemInfo);
+		return itemInfo;
+	}
+
+  /**
    * Create a ChoiceGroup, set the layout and add it to the form.
    *
    * @param label
@@ -637,6 +719,16 @@ public class FeatureMgr implements CommandListener,
 		//#endif
         form.append(choiceGroup);
 		return choiceGroup;
+	}
+
+	public void setFrGui2SettingsNbr(TextField nfield, String setKey,
+			Settings settings) {
+		settings.setIntProperty(setKey, Integer.parseInt(nfield.getString()));
+	}
+
+	public void setFrSettings2GuiNbr(Settings settings, String setKey,
+			TextField nfield) {
+		nfield.setString(String.valueOf(settings.getIntProperty(setKey, 0)));
 	}
 
     /** Initialize URL text Box */
@@ -843,12 +935,15 @@ public class FeatureMgr implements CommandListener,
 
 	//#ifdef DMIDP20
 	public Font getCustomFont() {
-		final RssReaderSettings appSettings = FeatureMgr.getMidlet().getSettings();
+		RssReaderMIDlet midlet;
+		final RssReaderSettings appSettings = ((midlet =
+				FeatureMgr.getRssMidlet()) == null) ? null :
+				midlet.getSettings();
 		if (appSettings == null) {
 			return null;
 		}
 		if (appSettings.getFontChoice() ==
-				RssReaderSettings.DEFAULT_FONT_CHOICE) {
+				appSettings.DEFAULT_FONT_CHOICE) {
 			return null;
 		} else {
 			Font defFont = Font.getDefaultFont();
@@ -858,6 +953,7 @@ public class FeatureMgr implements CommandListener,
 	}
 	//#endif
 
+	//#ifdef DFULLVERS
 	/* Restore previous values. */
 	final static public void restorePrevValues(Item[] items, byte[] bdata) {
 		//#ifdef DLOGGING
@@ -914,8 +1010,9 @@ public class FeatureMgr implements CommandListener,
 			}
 		}
 	}
+	//#endif
 
-	//#ifdef DMIDP20
+	//#ifndef DSMALLMEM
 	public Object[] action(Object[] reqs) {
 		if ((reqs.length == 2) && (reqs[0] instanceof Short) &&
 			((Short)reqs[0] == MiscUtil.SPAUSE_APP)) {
@@ -940,6 +1037,7 @@ public class FeatureMgr implements CommandListener,
         return (dispLoadForm);
     }
 
+	//#ifdef DFULLVERS
 	/* Store current values. */
 	final static public byte[] storeValues(Item[] items) {
 		//#ifdef DLOGGING
@@ -997,7 +1095,71 @@ public class FeatureMgr implements CommandListener,
 		}
 		return bout.toByteArray();
 	}
+	//#endif
 
+  /**
+   * Create a new command using the standard parms
+   *
+   * @param label - command label
+   * @param longLabel - long command label (ignored if not MIDP 2.0)
+   * @param commandType - Command type
+   * @param priority - Command priority
+   * @return    Command
+   * @author Irv Bunton
+   */
+    public static Command getCmdAdd(Displayable disp, String label,
+			String longLabel, int commandType, int priority) {
+		//#ifdef DLOGGING
+		Logger logger = Logger.getLogger("FeatureMgr");
+		logger.finest("getCmdAdd label,longLabel,commandType,priority=" + label + "," + longLabel + "," + commandType + "," + priority);
+		//#endif
+		Command ncmd;
+		//#ifdef DMIDP20
+		if (longLabel != null) {
+			disp.addCommand(ncmd = new Command(label, longLabel, commandType,
+						priority));
+		} else {
+			//#endif
+			disp.addCommand(ncmd = new Command(label, commandType, priority));
+			//#ifdef DMIDP20
+		}
+		//#endif
+		return ncmd;
+	}
+
+  /**
+   * Create a new command using the standard parms
+   *
+   * @param label - command label
+   * @param longLabel - command long label
+   * @param commandType - Command type
+   * @param priority - Command priority
+   * @param prompt - Command prompt
+   * @return    Command
+   * @author Irv Bunton
+   */
+    public static Command getCmdAddPrompt(Displayable disp, String label,
+			String longLabel, int commandType, int priority, String prompt) {
+		//#ifdef DLOGGING
+		Logger logger = Logger.getLogger("FeatureMgr");
+		logger.finest("getCmdAddPrompt label,commandType,priority=" + label + "," + commandType + "," + priority);
+		//#endif
+		Command ncmd;
+		if (disp instanceof FeatureForm) {
+			((FeatureForm)disp).addPromptCommand(ncmd =
+				getCmdAdd(disp, label, longLabel, commandType, priority),
+				prompt);
+		} if (disp instanceof FeatureList) {
+			((FeatureList)disp).addPromptCommand(ncmd =
+				getCmdAdd(disp, label, longLabel, commandType, priority),
+				prompt);
+		} else {
+			ncmd = getCmdAdd(disp, label, longLabel, commandType, priority);
+		}
+		return ncmd;
+	}
+
+	//#ifdef DFULLVERS
   /**
    * Get the image for the image path.
    *
@@ -1008,7 +1170,8 @@ public class FeatureMgr implements CommandListener,
    */
 	public static Image getImage(final String imagePath, LoadingForm loadForm) {
 		//#ifdef DLOGGING
-		Logger.getLogger("FeatureMgr").finest("getImage imagePath,loadForm=" + imagePath + "," + loadForm);
+		Logger logger;
+		(logger = Logger.getLogger("FeatureMgr")).finest("getImage imagePath,loadForm=" + imagePath + "," + loadForm);
 		//#endif
 		Image image = null;
 		CauseException wce = null;
@@ -1019,6 +1182,9 @@ public class FeatureMgr implements CommandListener,
 				// with the emulator.  so, I do an alternate which is
 				// effectively the same thing.
 				image = Image.createImage(imagePath);
+				//#ifdef DLOGGING
+				Logger.getLogger("FeatureMgr").finest("getImage image with,height=" + image.getWidth() + "," + image.getHeight());
+				//#endif
 			} catch(IOException e) {
 				wce = new CauseException("Error while getting createImage: " + imagePath,
 					e);
@@ -1032,31 +1198,29 @@ public class FeatureMgr implements CommandListener,
 				is.close();
 				//#endif
 				//#ifdef DLOGGING
-				Logger logger = Logger.getLogger("FeatureMgr");
 				logger.warning(
-						"Could not get icon, alternate worked icons ex: ", e);
+						"getImage Could not get icon, alternate worked " +
+						"icons ex: ", e);
 				//#endif
 			}
 		} catch(Exception e) {
 			ce = new CauseException("Error while getting image: " + imagePath,
 					e);
 			//#ifdef DLOGGING
-			Logger logger = Logger.getLogger("FeatureMgr");
 			logger.severe(ce.getMessage(), ce);
 			//#endif
 			System.err.println("Error while getting mark image: " + e.toString());
 		}
-		if (loadForm != null) {
-			if (ce != null) {
-				if (wce != null) {
-					loadForm.addExc(wce.getMessage(), wce);
-				}
-				loadForm.addExc(ce.getMessage(), ce);
+		if ((loadForm != null) && (ce != null)) {
+			if (wce != null) {
+				loadForm.addExc(wce.getMessage(), wce);
 			}
+			loadForm.addExc(ce.getMessage(), ce);
 		}
 		return image;
 		
 	}
+	//#endif
 
 	//#ifdef DTESTLOGMIN
 	static String logCmd(Command cmd) {
@@ -1110,11 +1274,15 @@ public class FeatureMgr implements CommandListener,
 		boolean firstTime = false;
 		boolean itunesEnabled = false;
 		try {
-			appSettings = RssReaderSettings.getInstance();
+			Object[] parms = new Object[] {new Vector()};
+			appSettings = RssReaderSettings.getInstance(parms);
 			arrsettings[0] = appSettings;
-			Throwable le = appSettings.getLoadExc();
-			if (le != null) {
-				loadForm.recordExcForm("Error while loading settings.", le);
+			Vector vle = (Vector)parms[0];
+			if (vle != null) {
+				for (int i = 0; i < vle.size(); i++) {
+					loadForm.recordExcForm("Error while loading settings.",
+							(CauseException)vle.elementAt(i));
+				}
 			}
 			try {
 				settings = appSettings.getSettingsInstance();
@@ -1128,7 +1296,7 @@ public class FeatureMgr implements CommandListener,
 						"Internal error.  Error while getting settings/stored bookmarks",
 						e);
 			}
-		} catch(Exception e) {
+		} catch (Throwable e) {
 			loadForm.recordExcForm("Error while loading settings.", e);
 		}
 		//#ifdef DLOGGING
@@ -1208,6 +1376,48 @@ public class FeatureMgr implements CommandListener,
 		return res;
 	}
 
+	public Object[] jsr75Avail() {
+		boolean hasjsr75 = false;
+		Object[] ojsr75Avail = new Object[] {null, null, null};
+		//#ifdef DMIDP10
+		Object[] ojsr75 = FeatureMgr.getSysProperty(
+				"microedition.io.file.FileConnection.version", null,
+				"Unable to get JSR-75 FileConnection", null);
+		ojsr75Avail[2] = ojsr75[0];
+		//#else
+		Object[] ojsr75 = 
+				FeatureMgr.getSysPermission(
+				"javax.microedition.io.Connector.file.read",
+				"microedition.io.file.FileConnection.version", null,
+				"Unable to get JSR-75 FileConnection", null);
+		int ijsr75 = ((Integer)ojsr75[0]).intValue();
+		if (ijsr75 >= 0) {
+			hasjsr75 = ijsr75 == 1;
+			ojsr75Avail[1] = new Boolean(ijsr75 >= 0);
+		} else {
+		}
+		ojsr75Avail[2] = ojsr75[2];
+		//#endif
+		if (!hasjsr75) {
+			hasjsr75 = (ojsr75Avail[2] != null);
+		}
+		if (!hasjsr75) {
+			try {
+				//#ifdef DCLDCV10
+				this.getClass().
+				//#else
+				Class.
+				//#endif
+					forName("javax.microedition.io.file.FileConnection");
+				hasjsr75 = true;
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		ojsr75Avail[0] = new Boolean(hasjsr75);
+		return ojsr75Avail;
+	}
+
 	//#ifdef DJSR75
 	/* Set flag to show find files list.
 	   fileRtnForm - Form to return to after file finished.
@@ -1223,12 +1433,31 @@ public class FeatureMgr implements CommandListener,
 					(selectDir ? selectMsg :
 							((noSelectMsg == null) ? selectMsg : noSelectMsg)),
 						fileRtnDisp, null);
-			final KFileSelectorMgr fileSelectorMgr = new KFileSelectorMgr();
+
+			final Class fileSelectorMgrClass =
+				//#ifdef DCLDCV10
+				this.getClass().
+				//#else
+				Class.
+				//#endif
+					forName("org.kablog.kgui.KFileSelectorMgr");
+			final CmdReceiver fileSelectorMgr =
+				(CmdReceiver)fileSelectorMgrClass.newInstance();
 			//#ifdef DLOGGING
 			if (finestLoggable) {logger.finest("selectDir,selectMsg,noSelectMsg,fileRtnDisp,fileRtnObj=" + selectDir + "," + selectMsg  + "," + noSelectMsg + "," + fileRtnDisp + "," + fileRtnObj);}
 			//#endif
-			fileSelectorMgr.doLaunchSelector(
-					selectDir, findTitle, fileRtnDisp, fileRtnObj, cloadForm);
+			Object[] rtn = fileSelectorMgr.action(new Object []
+					{MiscUtil.SINIT_OBJ, new Boolean(selectDir), findTitle,
+					fileRtnDisp, fileRtnObj, cloadForm});
+			if (rtn[0] != null) {
+				throw (Throwable)rtn[0];
+			}
+		} catch(ClassNotFoundException ex) {
+			cloadForm.recordExcForm("Internal error JSR-75 not available or " +
+					"cannot be loaded.", ex);
+		} catch(ClassCastException ex) {
+			cloadForm.recordExcForm("Internal error loading/initializing " +
+					"class cannot be loaded.", ex);
 		} catch(OutOfMemoryError ex) {
 			cloadForm.recordExcForm("Out Of Memory Error getting " +
 					"file form.", ex);
@@ -1250,6 +1479,15 @@ public class FeatureMgr implements CommandListener,
 			StringBuffer sbrtn = (StringBuffer)txtObj;
 			sbrtn.setLength(0);
 			sbrtn.append(value);
+		}
+	}
+
+	static String getAppDefProperty(String key, String vdefault) {
+		String value;
+		if ((midlet != null) && (value = midlet.getAppProperty(key)) != null) {
+			return value;
+		} else {
+			return vdefault;
 		}
 	}
 
