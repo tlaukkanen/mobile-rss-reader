@@ -11,7 +11,6 @@ testui.presrc = ../testpresrc
 #Copy from src copy.jar.src = true
 #Copy from src jarsrc = ../../../JLogMicro/src
 #jar.presrc = ../../../JLogMicro/jlogmicro/presrc
-#undo
 #Don't do logging, just testui
 #jar.presrc = ../../../../JLogMicro/jlogmicro/presrc
 need.test.res = true
