@@ -31,6 +31,15 @@
  * IB 2010-07-04 1.11.5Dev6 Do not have empty catch block.
  * IB 2010-07-04 1.11.5Dev6 Do not have feedNameFilter and feedUrlFilter null.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-12 1.11.5Alpha15 Pass rssFeeds to FeedListParser.
+ * IB 2010-01-12 1.11.5Alpha15 Add ability to log for character, 
+ * IB 2011-01-14 1.11.5Alpha15 Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
+ * IB 2011-01-12 1.11.5Alpha15 Have replace... methods not be static.
+ * IB 2011-01-14 1.11.5Alpha15 Make sure we parse an element.  Not getting one is only a future possibilty.
+ * IB 2011-01-14 1.11.5Alpha15 Have "" as empty title instead of null.
+ * IB 2011-01-14 1.11.5Alpha15 Only process non empty tag names.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
+ * IB 2011-03-18 1.11.5Dev17 Use tag len to see if l/L tag is link length.
 */
 
 // Expand to define memory size define
@@ -42,10 +51,10 @@
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.HTMLParser;
 import com.substanceofcode.utils.XmlParser;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Vector;
@@ -77,14 +86,16 @@ public class HTMLAutoLinkParser extends FeedListParser {
 	//#endif
 
     /** Creates a new instance of HTMLAutoLinkParser */
-    public HTMLAutoLinkParser(String url, String username, String password) {
-        super(url, username, password);
+    public HTMLAutoLinkParser(String url, String username, String password,
+			RssFeedStore rssFeeds) {
+        super(url, username, password, rssFeeds);
     }
 
     public RssItunesFeed[] parseFeeds(InputStream is) {
 		// Init in case we get a severe error.
 		try {
-			return HTMLAutoLinkParser.parseFeeds(new EncodingUtil(is),
+			return HTMLAutoLinkParser.parseFeeds(EncodingUtil.getEncodingUtil(
+						is),
 											m_url,
 											m_needRss,
 											m_needFirstRss,
@@ -95,6 +106,9 @@ public class HTMLAutoLinkParser extends FeedListParser {
 //@											,fineLoggable
 //@											,finerLoggable
 //@											,finestLoggable
+//@											,m_logParseChar
+//@											,m_logRepeatChar
+//@											,m_logReadChar
 											//#endif
 											);
 		} catch (Throwable t) {
@@ -114,10 +128,13 @@ public class HTMLAutoLinkParser extends FeedListParser {
 										String feedNameFilter,
 										String feedURLFilter
 										//#ifdef DLOGGING
-//@										,Logger logger,
-//@										 boolean fineLoggable,
-//@										 boolean finerLoggable,
-//@										 boolean finestLoggable
+//@										,Logger logger
+//@										,boolean fineLoggabl
+//@										,boolean finerLoggable
+//@										,boolean finestLoggable
+//@										,boolean logParseChar
+//@										,boolean logRepeatChar
+//@										,boolean logReadChar
 										//#endif
 			                           ) {
         /** Initialize item collection */
@@ -125,6 +142,19 @@ public class HTMLAutoLinkParser extends FeedListParser {
         
         /** Initialize XML parser and parse OPML XML */
         HTMLParser parser = new HTMLParser(url, encodingUtil);
+		//#ifdef DTEST
+		//#ifdef DLOGGING
+//@		if (logReadChar) {
+//@			parser.setLogReadChar(logReadChar);
+//@		}
+//@		if (logParseChar) {
+//@			parser.setLogChar(logParseChar);
+//@		}
+//@		if (logRepeatChar) {
+//@			parser.setLogRepeatChar(logRepeatChar);
+//@		}
+		//#endif
+		//#endif
         try {
             
 			// The first element is the main tag.
@@ -148,10 +178,17 @@ public class HTMLAutoLinkParser extends FeedListParser {
 				String title = "";
 				String link = "";
 												
+				if (elementType != XmlParser.ELEMENT) {
+					continue;
+				}
 				String tagName = parser.getName();
 				//#ifdef DLOGGING
 //@				if (finerLoggable) {logger.finer("tagname: " + tagName);}
 				//#endif
+				int tagLen;
+				if ((tagLen = tagName.length()) == 0) {
+					continue;
+				}
 				switch (tagName.charAt(0)) {
 					case 'b':
 					case 'B':
@@ -173,7 +210,8 @@ public class HTMLAutoLinkParser extends FeedListParser {
 						break;
 					case 'l':
 					case 'L':
-						if (!tagName.toLowerCase().equals("link")) {
+						if ((tagLen == 4) &&
+								!tagName.toLowerCase().equals("link")) {
 							break;
 						}
 						//#ifdef DLOGGING
@@ -197,14 +235,16 @@ public class HTMLAutoLinkParser extends FeedListParser {
 						// Allow null title so that the caller can
 						// check if it needs to get the title another way.
 						if (title != null) {
-							title = EncodingUtil.replaceAlphaEntities(title);
-							title = EncodingUtil.replaceNumEntity(title);
+							title = encodingUtil.replaceAlphaEntities(title);
+							title = encodingUtil.replaceNumEntity(title);
 							// Replace special chars like left quote, etc.
 							// Since we have already converted to unicode, we want
 							// to replace with uni chars.
 							title = encodingUtil.replaceSpChars(title);
 
 							title = MiscUtil.removeHtml(title);
+						} else {
+							title = "";
 						}
 						if ((link = parser.getAttributeValue( "href" ))
 									== null) {
@@ -238,7 +278,7 @@ public class HTMLAutoLinkParser extends FeedListParser {
 						 */
 						if (!needRss || needFirstRss) {
 							//#ifdef DLOGGING
-//@							if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+//@							if (title.length() == 0) {logger.warning("parseFeeds warning null title for link=" + link);}
 							//#endif
 							RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 							rssFeeds.addElement( feed );
@@ -250,20 +290,22 @@ public class HTMLAutoLinkParser extends FeedListParser {
 							continue;
 						}
 						if ((feedNameFilter.length() > 0) &&
-							((title != null) &&
-							(title.toLowerCase().indexOf(feedNameFilter) < 0))) {
+							(title.length() != 0) &&
+							(title.toLowerCase().indexOf(feedNameFilter) < 0)) {
 							continue;
 						}
 						//#ifdef DLOGGING
-//@						if (title == null) {logger.warning("parseFeeds warning null title for link=" + link);}
+//@						if (title.length() == 0) {logger.warning("parseFeeds warning empty title for link=" + link);}
 						//#endif
 						RssItunesFeed feed = new RssItunesFeed(title, link, "", "");
 						rssFeeds.addElement( feed );
 						break;
 					default:
+						break;
 				}
 			}
-            while( process && (parser.parse() != XmlParser.END_DOCUMENT) );
+            while( process && (elementType = parser.parse()) !=
+					XmlParser.END_DOCUMENT );
             
         } catch (Exception ex) {
             System.err.println("HTMLAutoLinkParser.parseFeeds(): Exception " + ex.toString());
