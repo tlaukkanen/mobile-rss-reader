@@ -3,6 +3,7 @@
  * EncodingUtil.java
  *
  * Copyright (C) 2005-2006 Tommi Laukkanen
+ * Copyright (C) 2007-2010 Irving Bunton, Jr
  * http://www.substanceofcode.com
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,25 +25,41 @@
  * IB 2010-03-14 1.11.5RC2 Combine classes to save space.
  * IB 2010-07-04 1.11.5Dev6 Don't use m_ prefix for parameter definitions.
  * IB 2010-10-12 1.11.5Dev9 Change to --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
- * IB 2010-11-15 1.11.5Dev14 Use getSysPropStarts to get system prorperties and see if it starts with a string.  This can help with initialialization of static variables.
+ * IB 2010-11-15 1.11.5Dev14 Use getSysPropStarts to get system properties and see if it starts with a string.  This can help with initialization of static variables.
  * IB 2010-11-16 1.11.5Dev14 Add default value of null for getSysProperty, getSysPermission, and getSysPropStarts.
+ * IB 2011-01-01 1.11.5Dev15 In EncodingUtil, initialize formally static vars created by internal functions in getInstance to help reduce problems with not being able to save data.  Put all such vars in one block.  Make all methods non-static except getInstance and getEncodingUtil.  Move m_sglStatExcs to be first as it is depended upon by many vars.  Move vars with no or only m_sglStatExcs to follow init of m_sglStatExcs.  Move vars set by methods depending on other initialized vars to be second:  Only m_sglConvCp1252 was like this.  Have m_sglStatExcs be set to null after all initializations if it has no entries.  Remove code creating m_sglStatExcs from methods except for getStatExcs.  Have all methods ued for initialization have try/catch Throwable blocks to reduce initialization problems.
+ * IB 2011-01-01 1.11.5Dev15 Do modification of the bytes if 16 or 32 bits.
+ * IB 2011-01-01 1.11.5Dev15 Better logging.
+ * IB 2011-01-01 1.11.5Dev15 Have replace... methods not be static.
+ * IB 2011-01-01 1.11.5Dev15 Have set/getBitNbrDoc to keep track of how many bits make up a character.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
 */
 
+// Expand to define full vers define
+//#define DFULLVERS
+// Expand to define full vers define
+//#define DNOINTLINK
+// Expand to define CLDC define
+//#define DCLDCV10
 // Expand to define test define
 //#define DNOTEST
 // Expand to define logging define
 //#define DNOLOGGING
+//#ifdef DFULLVERS
 package com.substanceofcode.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import com.substanceofcode.utils.CauseException;
 import com.substanceofcode.rssreader.presentation.FeatureMgr;
+//#ifdef DTEST
+//@import com.substanceofcode.utils.EncodingUtilIntr;
+//#endif
 
 //#ifdef DLOGGING
 //@import net.sf.jlogmicro.util.logging.Logger;
@@ -54,98 +71,62 @@ import com.substanceofcode.rssreader.presentation.FeatureMgr;
  *
  * @author Irving Bunton Jr
  */
-final public class EncodingUtil {
+final public class EncodingUtil
+//#ifdef DTEST
+//@implements EncodingUtilIntr
+//#endif
+{
     
-	final static public boolean m_midpIso = (FeatureMgr.getSysPropStarts(
-			"microedition.encoding", null, "Unable to get micro encoding.", null,
-			"iso-8859") ||
-	                                        FeatureMgr.getSysPropStarts(
-			"microedition.encoding", null, "Unable to get micro encoding.", null,
-			"iso8859"));
-	final static public String m_isoEncoding = initIsoEncoding();
-	final static public boolean m_midpWin = (FeatureMgr.getSysPropStarts(
-			"microedition.encoding", null, "Unable to get micro encoding.", null,
-			"cp") ||
-			FeatureMgr.getSysPropStarts(
-			"microedition.encoding", null, "Unable to get micro encoding.", null,
-			"windows"));
-	final static public String m_winEncoding = initWinEncoding();
-	final static public boolean m_midpUni = FeatureMgr.getSysPropStarts(
-			"microedition.encoding", null, "Unable to get micro encoding.", null,
-			"utf-8");
-	final static String[] m_isoCommonEntities =
-		{"iexcl", "cent", "pound", "curren", "yen",
-		"brvbar", "sect", "uml", "copy", "ordf",
-		"laquo", "not", "shy", "reg", "macr",
-		"deg", "plusmn", "sup2", "sup3", "acute",
-		"micro", "para", "middot", "cedil", "sup1",
-		"ordm", "raquo", "frac14", "frac12", "frac34",
-		"iquest"};
+	final public boolean m_sglMidpIso;
+	final public String m_sglIsoEncoding;
+	final public boolean m_sglMidpWin;
+	final public String m_sglwinEncoding;
+	final public boolean m_sglMidpUni;
+	final String[] m_sglIsoCommonEntities;
+	final String[] m_sglIsoSpecialEntities;
+	final char[] m_sglIsoSpecialValues;
 
-	final static String[] m_isoSpecialEntities =
-			{"ndash", // en dash 
-			"mdash", // em dash 
-			"lsquo", // left single quotation mark 
-			"rsquo", // right single quotation mark 
-			"sbquo", // single low-9 quotation mark 
-			"ldquo", // left double quotation mark 
-			"rdquo", // right double quotation mark 
-			"bdquo"}; // double low-9 quotation mark 
+	final char[] m_sglIsoCommValues;
 
-	final static char[] m_isoSpecialValues =
-			{'-', // en dash 
-			'-', // em dash 
-			'\'', // left single quotation mark 
-			'\'', // right single quotation mark 
-			'\'', // single low-9 quotation mark 
-			'\"', // left double quotation mark 
-			'\"', // right double quotation mark 
-			'\"'}; // double low-9 quotation mark 
-
-	final static char[] m_isoCommValues = 
-		{0xA1, 0xA2, 0xA3, 0xA4, 0xA5,
-		0xA6, 0xA7, 0xA8, 0xA9, 0xAA,
-		0xAB, 0xAC, 0xAD, 0xAE, 0xAF,
-		0xB0, 0xB1, 0xB2, 0xB3, 0xB4,
-		0xB5, 0xB6, 0xB7, 0xB8, 0xB9,
-		0xBA, 0xBB, 0xBC, 0xBD, 0xBE,
-		0xBF};
-
-	final static String[] m_isoLatin1Entities = 
-		{"Agrave", "Aacute", "Acirc", "Atilde", "Auml",
-		"Aring", "AElig", "Ccedil", "Egrave", "Eacute", "Ecirc", "Euml",
-		"Igrave", "Iacute", "Icirc", "Iuml", "ETH", "Ntilde", "Ograve",
-		"Oacute", "Ocirc", "Otilde", "Ouml", "times", "Oslash", "Ugrave",
-		"Uacute", "Ucirc", "Uuml", "Yacute", "THORN", "szlig", "agrave",
-		"aacute", "acirc", "atilde", "auml", "aring", "aelig", "ccedil",
-		"egrave", "eacute", "ecirc", "euml", "igrave", "iacute", "icirc",
-		"iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde",
-		"ouml", "divide", "oslash", "ugrave", "uacute", "ucirc", "uuml",
-		"yacute", "thorn", "yuml"};
+	final String[] m_sglIsoLatin1Entities;
 
 	// Convert windows characters in iso 8859 control range to ISO
 	// (not the actual character, but a good fix or remove if no equivalent)
-	final private static char[] m_winIsoConvx80 = initWinIsoConv();
+	final public char[] m_sglWinIsoConvx80;
 
 	// Convert uni chars to equivalent windows characters in the 0x80 - 0x9f
 	// range.
 	/* FUTURE?
-	private static char[] m_uniWinConvx80 = initUniWinConvx80();
+	public char[] m_uniWinConvx80 = initUniWinConvx80();
 	*/
-
 	// See if windows cp-1252 is supported.
-	private static boolean m_hasWinEncoding = hasWinEncoding();
+	public boolean m_sglHasWinEncoding;
 	// See if ISO8859-1 is supported.
-	final private static boolean m_hasIso8859Encoding = hasIso8859Encoding();
+	final public boolean m_sglHasIso8859Encoding;
+	final public Hashtable m_sglConvIso88591;
+	final public Hashtable m_sglConvCp1252;
+	final public boolean m_sglConvWinUni;
+	volatile Vector m_sglStatExcs; // Exceptions encountered
 
+	//#ifdef DTEST
+//@    final private boolean m_debugTrace = false;  // True if want to trace more
+	//#endif
+    public final String SGL_WRIGHT_SGLE_QUOTE;
+    public final String SGL_RIGHT_SGLE_QUOTE;
 
+    final public byte NOT_UTF = (byte)0;         // Not UTF.
+    final public byte UTF_1 = (byte)1;         // UTF-1
+    final public byte UTF_7 = (byte)7;         // UTF-7
+    final public byte UTF_8 = (byte)8;         // UTF-8
+    final public byte UTF_16 = (byte)16;         // UTF-16
+    final public byte UTF_32 = (byte)32;         // UTF-32
+    final public byte BIG_5 = (byte)65;         // BIG-5
 	// Left single quote in cp-1252 (Windows) encoding.
     public static final char CWSGL_LOW9_QUOTE = 0x82; // #130;
     public static final char CWDBL_LOW9_QUOTE = 0x84; // #132;
     public static final char CWLEFT_SGL_QUOTE = 0x91; // #145;
     public static final char CWRIGHT_SGL_QUOTE = 0x92; // #146;
     private static final char [] CAWRIGHT_SGL_QUOTE = {CWRIGHT_SGL_QUOTE};
-    public static final String WRIGHT_SGL_QUOTE = new String(CAWRIGHT_SGL_QUOTE);
     public static final char CWLEFT_DBL_QUOTE = 0x93; // #147;
     public static final char CWRIGHT_DBL_QUOTE = 0x94; // #148;
     public static final char CWEN_DASH = 0x96; // #150;
@@ -157,7 +138,6 @@ final public class EncodingUtil {
     public static final char CLEFT_SGL_QUOTE = 0x2018;
     public static final char CRIGHT_SGL_QUOTE = 0x2019;
     private static final char [] CARIGHT_SGL_QUOTE = {CRIGHT_SGL_QUOTE};
-    public static final String RIGHT_SGL_QUOTE = new String(CARIGHT_SGL_QUOTE);
     public static final char CSGL_LOW9_QUOTE = 0x201A;
     private static final char CLEFT_DBL_QUOTE = 0x201C;
     private static final char CRIGHT_DBL_QUOTE = 0x201D;
@@ -169,38 +149,190 @@ final public class EncodingUtil {
     public static final char CNON_BREAKING_SP = (char)160;
     
     private EncodingStreamReader m_encodingStreamReader;
-	final private static Hashtable m_convIso88591 = initAlphaIso88591();
-	final private static Hashtable m_convCp1252 = initAlphaCp1252();
     private String m_docEncoding = "";  // Default for XML is UTF-8.
 	                                    // unexpected UTF-16.
     private boolean m_utf = false;  // Doc is utf.
+    private boolean m_modBit16o32 = false;  // Doc is not 16 or 32 bit.
+    private byte m_bitNbrDoc = NOT_UTF;
     private boolean m_windows = false;  // True if windows code space
-	final private static boolean m_convWinUni = initConvWinUni();
-	static Vector m_statExcs = null; // Exceptions encountered
-
 	Vector m_excs = null; // Exceptions encountered
 
-	//#ifdef DTEST
-//@    final private static boolean m_debugTrace = false;  // True if want to trace more
-	//#endif
+	volatile private static EncodingUtil m_singleton = null;
+
 	//#ifdef DLOGGING
-//@    final private Logger logger = Logger.getLogger("EncodingUtil");
-//@    final private boolean fineLoggable = logger.isLoggable(Level.FINE);
+//@    final private Logger logger;
+//@    final private boolean fineLoggable;
+//@    final private boolean traceLoggable;
 	//#endif
     
     /** Creates a new instance of EncodingUtil */
-    public EncodingUtil(InputStream inputStream) {
-		m_encodingStreamReader = new EncodingStreamReader(inputStream);
+    private EncodingUtil(boolean singleton) {
+		//#ifdef DLOGGING
+//@		logger = Logger.getLogger("EncodingUtil");
+//@		fineLoggable = logger.isLoggable(Level.FINE);
+//@		traceLoggable = logger.isLoggable(Level.TRACE);
+		//#endif
+		m_encodingStreamReader = null;
+		if (singleton) {
+			m_sglStatExcs = new Vector();
+			m_sglMidpIso = (FeatureMgr.getSysPropStarts(
+						"microedition.encoding", null, "Unable to get micro encoding.", null,
+						"iso-8859") ||
+					FeatureMgr.getSysPropStarts(
+						"microedition.encoding", null, "Unable to get micro encoding.", null,
+						"iso8859"));
+			m_sglIsoEncoding = initIsoEncoding();
+			m_sglMidpWin = (FeatureMgr.getSysPropStarts(
+						"microedition.encoding", null, "Unable to get micro encoding.", null,
+						"cp") ||
+					FeatureMgr.getSysPropStarts(
+						"microedition.encoding", null, "Unable to get micro encoding.", null,
+						"windows"));
+			m_sglwinEncoding = initWinEncoding();
+
+			m_sglMidpUni = FeatureMgr.getSysPropStarts(
+					"microedition.encoding", null, "Unable to get micro encoding.", null,
+					"utf-8");
+			m_sglIsoCommonEntities =
+				new String[] {"iexcl", "cent", "pound", "curren", "yen",
+					"brvbar", "sect", "uml", "copy", "ordf",
+					"laquo", "not", "shy", "reg", "macr",
+					"deg", "plusmn", "sup2", "sup3", "acute",
+					"micro", "para", "middot", "cedil", "sup1",
+					"ordm", "raquo", "frac14", "frac12", "frac34",
+					"iquest"};
+
+			m_sglIsoSpecialEntities =
+				new String[] {"ndash", // en dash 
+					"mdash", // em dash 
+					"lsquo", // left single quotation mark 
+					"rsquo", // right single quotation mark 
+					"sbquo", // single low-9 quotation mark 
+					"ldquo", // left double quotation mark 
+					"rdquo", // right double quotation mark 
+					"bdquo"}; // double low-9 quotation mark 
+
+			m_sglIsoSpecialValues =
+				new char[] {'-', // en dash 
+					'-', // em dash 
+					'\'', // left single quotation mark 
+					'\'', // right single quotation mark 
+					'\'', // single low-9 quotation mark 
+					'\"', // left double quotation mark 
+					'\"', // right double quotation mark 
+					'\"'}; // double low-9 quotation mark 
+
+			m_sglIsoCommValues = 
+				new char[] {0xA1, 0xA2, 0xA3, 0xA4, 0xA5,
+					0xA6, 0xA7, 0xA8, 0xA9, 0xAA,
+					0xAB, 0xAC, 0xAD, 0xAE, 0xAF,
+					0xB0, 0xB1, 0xB2, 0xB3, 0xB4,
+					0xB5, 0xB6, 0xB7, 0xB8, 0xB9,
+					0xBA, 0xBB, 0xBC, 0xBD, 0xBE,
+					0xBF};
+
+			m_sglIsoLatin1Entities = 
+				new String[] {"Agrave", "Aacute", "Acirc", "Atilde", "Auml",
+					"Aring", "AElig", "Ccedil", "Egrave", "Eacute", "Ecirc", "Euml",
+					"Igrave", "Iacute", "Icirc", "Iuml", "ETH", "Ntilde", "Ograve",
+					"Oacute", "Ocirc", "Otilde", "Ouml", "times", "Oslash", "Ugrave",
+					"Uacute", "Ucirc", "Uuml", "Yacute", "THORN", "szlig", "agrave",
+					"aacute", "acirc", "atilde", "auml", "aring", "aelig", "ccedil",
+					"egrave", "eacute", "ecirc", "euml", "igrave", "iacute", "icirc",
+					"iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde",
+					"ouml", "divide", "oslash", "ugrave", "uacute", "ucirc", "uuml",
+					"yacute", "thorn", "yuml"};
+
+			// Convert windows characters in iso 8859 control range to ISO
+			// (not the actual character, but a good fix or remove if no equivalent)
+			m_sglWinIsoConvx80 = initWinIsoConv();
+			m_sglHasWinEncoding = initHasWinEncoding();
+			m_sglHasIso8859Encoding = initHasIso8859Encoding();
+			m_sglConvIso88591 = initAlphaIso88591();
+			m_sglConvWinUni = initConvWinUni();
+    		SGL_WRIGHT_SGLE_QUOTE = new String(CAWRIGHT_SGL_QUOTE);
+    		SGL_RIGHT_SGLE_QUOTE = new String(CARIGHT_SGL_QUOTE);
+			m_sglConvCp1252 = initAlphaCp1252();
+
+		} else {
+			m_sglStatExcs = null;
+			m_sglMidpIso = false;
+			m_sglIsoEncoding = null;
+			m_sglMidpWin = false;
+			m_sglwinEncoding = null;
+			m_sglMidpUni = false;
+			m_sglIsoCommonEntities = null;
+			m_sglIsoSpecialEntities = null;
+			m_sglIsoSpecialValues = null;
+
+			m_sglIsoCommValues = null;
+
+			m_sglIsoLatin1Entities = null;
+			m_sglWinIsoConvx80 = null;
+			/* FUTURE?
+			m_uniWinConvx80 = null;
+			*/
+			m_sglHasWinEncoding = false;
+			m_sglHasIso8859Encoding = false;
+			m_sglConvIso88591 = null;
+			m_sglConvWinUni = false;
+    		SGL_WRIGHT_SGLE_QUOTE = null;
+    		SGL_RIGHT_SGLE_QUOTE = null;
+			m_sglConvCp1252 = null;
+		}
+	}
+
+    /** Creates a new instance of EncodingUtil */
+    static public EncodingUtil getEncodingUtil(InputStream inputStream) {
+		EncodingUtil encodingUtil = new EncodingUtil(false);
+		encodingUtil.getQuickInstance();
+		if (inputStream != null) {
+			encodingUtil.setEncodingStreamReader(
+				EncodingStreamReader.getEncodingStreamReader(inputStream,
+					encodingUtil));
+		}
+		return encodingUtil;
     }
 
-	/**  Determine the encoding based on what is passed in as well
-	  as if/when strings are to be further encoded.  Also decide to
-	  modify bytes read.  
-	 **/
+    /** Get instance */
+	//#ifdef DCLDCV11
+//@    public static EncodingUtil getInstance()
+	//#else
+    public static synchronized EncodingUtil getInstance()
+	//#endif
+	{
+		if (m_singleton != null) {
+			return m_singleton;
+		} else {
+			//#ifdef DCLDCV11
+//@			synchronized(EncodingUtil.class) {
+				//#endif
+				//#ifdef DLOGGING
+//@				Logger.getLogger("EncodingUtil").info(
+//@						"Constructor midlet,m_singleton=" + FeatureMgr.getMidlet() + "," + m_singleton);
+				//#endif
+				if (m_singleton == null) {
+					m_singleton = new EncodingUtil(true);
+				}
+				return m_singleton;
+				//#ifdef DCLDCV11
+//@			}
+			//#endif
+		}
+    }
+    
+    /** Get instance */
+    public EncodingUtil getQuickInstance() {
+		if (m_singleton != null) {
+			return m_singleton;
+		} else {
+			return getInstance();
+		}
+	}
 
     public void getEncoding(final String fileEncoding, final String encoding) {
-		getEncoding(m_hasIso8859Encoding, m_isoEncoding, m_hasWinEncoding,
-				m_winEncoding, fileEncoding, encoding);
+		getEncoding(m_singleton.m_sglHasIso8859Encoding, m_singleton.m_sglIsoEncoding, m_singleton.m_sglHasWinEncoding,
+				m_singleton.m_sglwinEncoding, fileEncoding, encoding);
 	}
 
 	/**  Determine the encoding based on what is passed in as well
@@ -212,37 +344,67 @@ final public class EncodingUtil {
 			final String isoEncoding, final boolean hasWinEncoding,
 			final String winEncoding, final String fileEncoding,
 			final String encoding) {
+		//#ifdef DLOGGING
+//@        if (fineLoggable) {logger.fine("getEncoding encoding=" + encoding);}
+		//#endif
 		String cencoding = encoding;
+		boolean modBit16o32 = m_encodingStreamReader.isModBit16o32();
+		byte bitNbrDoc = m_encodingStreamReader.getBitNbrDoc();
+		boolean futf = m_encodingStreamReader.isUtfDoc();
         // If there is a second char, don't stop splitting until we
         // return that char as input.
         if (cencoding == null) {
-           cencoding = "UTF-8";
+			if (modBit16o32) {
+			   cencoding = futf ? getBitEncoding(bitNbrDoc) : null;
+			}
+			if (cencoding == null) {
+			   cencoding = "UTF-8";
+			}
         }
         cencoding = cencoding.toUpperCase();
-		boolean modBit16 = m_encodingStreamReader.isModBit16();
 		boolean modEncoding = m_encodingStreamReader.isModEncoding();
 		m_utf = m_encodingStreamReader.isUtfDoc();
 		m_windows = false;
 		String docEncoding = fileEncoding;
 		// Only need to convert from 2 byte to 1 byte and vsa versa.
-        if (cencoding.equals("UTF-8") || cencoding.equals("UTF8") ||
-				(m_utf && !modBit16)) {
-            docEncoding = "UTF-8";
+        if (cencoding.equals("UTF-1") || cencoding.equals("UTF1")) {
+            docEncoding = "UTF-1";
             modEncoding = false;
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = UTF_1;
 			m_utf = true;
         } else if (cencoding.equals("UTF-16") || cencoding.equals("UTF16")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = true;
+            modBit16o32 = true;
             modEncoding = true;
+			bitNbrDoc = UTF_16;
 			m_utf = true;
 			// Don't do doc encoding as the stream reader does it.
             docEncoding = "";
+        } else if (cencoding.equals("UTF-32") || cencoding.equals("UTF32")) {
+			// If utf-32, don't set doc encoding as we are converting the
+			// bytes to single chars.
+            modBit16o32 = true;
+            modEncoding = true;
+			bitNbrDoc = UTF_32;
+			m_utf = true;
+			// Don't do doc encoding as the stream reader does it.
+            docEncoding = "";
+			// Have this last for UTF to catch missed encodings which
+			// are not 16/32 bit.
+		} else if (cencoding.equals("UTF-8") || cencoding.equals("UTF8") ||
+				(m_utf && !modBit16o32)) {
+            docEncoding = "UTF-8";
+            modEncoding = false;
+            modBit16o32 = false;
+			bitNbrDoc = UTF_8;
+			m_utf = true;
         } else if (cencoding.equals("BIG5") || cencoding.equals("BIG-5")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = BIG_5;
             modEncoding = false;
 			m_utf = false;
             docEncoding = "BIG5";
@@ -251,8 +413,9 @@ final public class EncodingUtil {
 			cencoding.equals("BIG_HSCS") || cencoding.equals("BIG-HSCS")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
             modEncoding = false;
+			bitNbrDoc = NOT_UTF;
 			m_utf = false;
             docEncoding = "BIG_HSCS";
 
@@ -260,50 +423,57 @@ final public class EncodingUtil {
 			cencoding.equals("MS932")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
             modEncoding = false;
+			bitNbrDoc = NOT_UTF;
 			m_utf = false;
             docEncoding = "MS932";
         } else if (cencoding.equals("x-mswin-936") ||
 			cencoding.equals("MS936")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
             modEncoding = false;
+			bitNbrDoc = NOT_UTF;
 			m_utf = false;
             docEncoding = "MS936";
         } else if (cencoding.equals("EUC_CN") || cencoding.equals("x-EUC-CN")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "EUC_CN";
         } else if (cencoding.equals("SJIS") || cencoding.equals("Shift-JIS")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
             modEncoding = false;
+			bitNbrDoc = NOT_UTF;
 			m_utf = false;
             docEncoding = "SJIS";
         } else if (cencoding.equals("EUC_JP") || cencoding.equals("EUC-JP")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
             modEncoding = false;
+			bitNbrDoc = NOT_UTF;
 			m_utf = false;
             docEncoding = "EUC_JP";
         } else if (cencoding.equals("EUC_JP_LINUX") || cencoding.equals("EUC-JP-LINUX")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "EUC_JP_LINUX";
         } else if (cencoding.equals("ISO-2022-JP") || cencoding.equals("ISO2022JP")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "ISO2022JP";
@@ -311,7 +481,8 @@ final public class EncodingUtil {
 				cencoding.equals("MS949")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "MS949";
@@ -319,7 +490,8 @@ final public class EncodingUtil {
 				cencoding.equals("MS950")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "MS950";
@@ -327,36 +499,41 @@ final public class EncodingUtil {
 				cencoding.equals("MS950_HKSCS")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "MS950_HKSCS";
         } else if (cencoding.equals("ISCII91")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "ISCII91";
         } else if (cencoding.equals("EUC_TW") || cencoding.equals("EUC-TW")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "EUC_TW";
         } else if (cencoding.equals("TIS-620") || cencoding.equals("TIS620")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "TIS620";
         } else if (cencoding.equals("GBK")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
             modEncoding = false;
+			bitNbrDoc = NOT_UTF;
 			m_utf = false;
             docEncoding = "GBK";
 		} else if (cencoding.startsWith("ISO-8859")) {
@@ -371,13 +548,15 @@ final public class EncodingUtil {
 			} else {
 				docEncoding = "";
 			}
+            modBit16o32 = false;
 			modEncoding = false;
-            modBit16 = false;
+			bitNbrDoc = NOT_UTF;
 
         } else if (cencoding.equals("GB18030")) {
 			// If utf-16, don't set doc encoding as we are converting the
 			// bytes to single chars.
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
             modEncoding = true;
 			m_utf = false;
             docEncoding = "GB18030";
@@ -394,7 +573,8 @@ final public class EncodingUtil {
 				docEncoding = "";
 			}
 			modEncoding = false;
-            modBit16 = false;
+            modBit16o32 = false;
+			bitNbrDoc = NOT_UTF;
 
 		} else if (cencoding.startsWith("WINDOWS-12")) {
 			if (hasWinEncoding) {
@@ -407,8 +587,9 @@ final public class EncodingUtil {
 			} else {
 				docEncoding = "";
 			}
+            modBit16o32 = false;
 			modEncoding = false;
-            modBit16 = false;
+			bitNbrDoc = NOT_UTF;
 			m_windows = true;
 		} else if (cencoding.indexOf("CP-") == 0) {
 			if (hasWinEncoding) {
@@ -422,8 +603,9 @@ final public class EncodingUtil {
 			} else {
 				docEncoding = "";
 			}
+            modBit16o32 = false;
 			modEncoding = false;
-            modBit16 = false;
+			bitNbrDoc = NOT_UTF;
 			m_windows = true;
 		} else if (cencoding.startsWith("CP")) {
 			if (hasWinEncoding) {
@@ -436,8 +618,9 @@ final public class EncodingUtil {
 			} else {
 				docEncoding = "";
 			}
+            modBit16o32 = false;
 			modEncoding = false;
-            modBit16 = false;
+			bitNbrDoc = NOT_UTF;
 			m_windows = true;
 		}
 		if (docEncoding.equals(fileEncoding)) {
@@ -452,10 +635,7 @@ final public class EncodingUtil {
 				CauseException ce = new CauseException(
 						"UnsupportedEncodingException while trying to " +
 						"convert doc encoding: " + m_docEncoding, e);
-				if (m_excs == null) {
-					m_excs = new Vector();
-				}
-				m_excs.addElement(ce);
+				m_singleton.m_excs.addElement(ce);
 				//#ifdef DLOGGING
 //@				logger.severe(ce.getMessage(), e);
 				//#endif
@@ -484,7 +664,7 @@ final public class EncodingUtil {
 							"Second unsupportedEncodingException while " +
 							" trying to convert doc encoding: " +
 							m_docEncoding, e2);
-					m_excs.addElement(ce2);
+					m_singleton.m_excs.addElement(ce2);
 					//#ifdef DLOGGING
 //@					logger.severe(ce2.getMessage(), e2);
 					//#endif
@@ -494,57 +674,84 @@ final public class EncodingUtil {
 			}
 		}
 		m_encodingStreamReader.setModEncoding(modEncoding);
-		m_encodingStreamReader.setModBit16(modBit16);
+		m_encodingStreamReader.setModBit16o32(modBit16o32);
+		m_modBit16o32 = modBit16o32;
+		m_encodingStreamReader.setBitNbrDoc(bitNbrDoc);
+		m_bitNbrDoc = bitNbrDoc;
+		m_encodingStreamReader.setGetPrologue(false);
 
 		//#ifdef DLOGGING
-//@        if (fineLoggable) {logger.fine("hasIso8859Encoding=" + hasIso8859Encoding);}
-//@        if (fineLoggable) {logger.fine("isoEncoding=" + isoEncoding);}
-//@        if (fineLoggable) {logger.fine("hasWinEncoding=" + hasWinEncoding);}
-//@        if (fineLoggable) {logger.fine("winEncoding=" + winEncoding);}
-//@        if (fineLoggable) {logger.fine("encoding=" + encoding);}
-//@        if (fineLoggable) {logger.fine("cencoding=" + cencoding);}
-//@        if (fineLoggable) {logger.fine("docEncoding=" + docEncoding);}
-//@        if (fineLoggable) {logger.fine("m_docEncoding=" + m_docEncoding);}
-//@        if (fineLoggable) {logger.fine("fileEncoding=" + fileEncoding);}
-//@        if (fineLoggable) {logger.fine("m_windows=" + m_windows);}
-//@        if (fineLoggable) {logger.fine("m_utf=" + m_utf);}
-//@        if (fineLoggable) {logger.fine("modEncoding=" + modEncoding);}
-//@        if (fineLoggable) {logger.fine("modBit16=" + modBit16);}
+//@        if (fineLoggable) {logger.fine("getEncoding hasIso8859Encoding=" + hasIso8859Encoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding isoEncoding=" + isoEncoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding hasWinEncoding=" + hasWinEncoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding winEncoding=" + winEncoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding encoding=" + encoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding cencoding=" + cencoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding docEncoding=" + docEncoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding m_docEncoding=" + m_docEncoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding fileEncoding=" + fileEncoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding m_windows=" + m_windows);}
+//@        if (fineLoggable) {logger.fine("getEncoding m_utf=" + m_utf);}
+//@        if (fineLoggable) {logger.fine("getEncoding modEncoding=" + modEncoding);}
+//@        if (fineLoggable) {logger.fine("getEncoding m_modBit16o32=" + m_modBit16o32);}
+//@        if (fineLoggable) {logger.fine("getEncoding m_bitNbrDoc=" + m_bitNbrDoc);}
 		//#endif
     }
 
+    public String getBitEncoding(final byte bitNbrDoc) {
+		switch (bitNbrDoc) {
+			case UTF_1:
+				return "UTF-1";
+			case UTF_7:
+				return "UTF-7";
+			case UTF_8:
+				return "UTF-8";
+			case UTF_16:
+				return "UTF-16";
+			case UTF_32:
+				return "UTF-32";
+			default:
+				return null;
+		}
+	}
+
 	/* Replace special characters with valid ones for the specified
 	   encoding. */
-	public static String replaceSpChars(String text, boolean isWindows,
+	public String replaceSpChars(String text, boolean isWindows,
 										boolean isUtf) {
-		return replaceSpChars(text, isWindows, isUtf, m_midpWin, m_midpUni);
+		return replaceSpChars(text, isWindows, isUtf, m_singleton.m_sglMidpWin,
+				m_singleton.m_sglMidpUni);
 	}
 
 	/* Replace special characters with valid ones for the specified
 	   encoding.   For callers which use an instance of this class.  */
 	public String replaceSpChars(String text) {
-		return replaceSpChars(text, m_windows, m_utf, m_midpWin, m_midpUni);
+		return replaceSpChars(text, m_windows, m_utf, m_singleton.m_sglMidpWin,
+				m_singleton.m_sglMidpUni);
 	}
 
 	/* Replace special characters with valid ones for the specified
 	   encoding. */
-	public static String replaceSpChars(String text, final boolean isWindows,
+	public String replaceSpChars(String text, final boolean isWindows,
 										final boolean isUtf,
 										final boolean midpWin,
 										final boolean midpUni) {
 		try {
+			//#ifdef DLOGGING
+//@			if (traceLoggable) {logger.trace("replaceSpChars isWindows,isUtf,midpWin,midpUni,text=" + isWindows + "," + isUtf + "," + midpWin + "," + midpUni + "," + text);}
+			//#endif
 			// No need to convert i diaeresis anymore as we do encoding
 			// change.
 			if (isWindows) {
 				if (midpWin) {
-					if (m_convWinUni) {
+					if (m_singleton.m_sglConvWinUni) {
 						text = replaceSpUniChars(text);
 						return text;
 					}
 				/* If we are converting a windows doc, the windows special
 				   characters are control characters in other encodings,
 				   so change to ASCII. */
-				} else if (m_convWinUni) {
+				} else if (m_singleton.m_sglConvWinUni) {
 					if (!midpUni) {
 						text = replaceSpUniWinChars(text);
 					}
@@ -555,8 +762,10 @@ final public class EncodingUtil {
 					for (int ic = 0; ic < ctext.length; ic++) {
 						final char cchr = ctext[ic];
 						if ((0x80 <= (int)cchr) && ((int)cchr <= 0x9f)) {
-							if (m_winIsoConvx80[(int)cchr - 0x80] != 0x01) {
-								ntext[jc++] = m_winIsoConvx80[(int)cchr - 0x80];
+							if (m_singleton.m_sglWinIsoConvx80[(int)cchr - 0x80] !=
+									0x01) {
+								ntext[jc++] = m_singleton.m_sglWinIsoConvx80[
+									(int)cchr - 0x80];
 								//#ifdef DTEST
 //@								if (m_debugTrace) {System.out.println("array cchr,conv=" + cchr + "," + Integer.toHexString(cchr) + "," + ntext[jc - 1] + "," + Integer.toHexString(ntext[jc - 1]));}
 								//#endif
@@ -591,7 +800,10 @@ final public class EncodingUtil {
 	/* Replace Unicode special characters with valid ones for Windows
 	   encoding as they sometimes are valid even in iso8859_1 even though
 	   it shouldn't be.  */
-	public static String replaceSpUniWinChars(String text) {
+	public String replaceSpUniWinChars(String text) {
+		//#ifdef DLOGGING
+//@        if (traceLoggable) {logger.trace("replaceSpUniWinChars text=" + text);}
+		//#endif
 		try {
 			final char [] ctext = text.toCharArray();
 			char [] ntext = new char[text.length()];
@@ -675,7 +887,10 @@ final public class EncodingUtil {
 	/* Replace Unicode special characters which have Windows (cp1252)
 	   equivalents into their windows equivalents except for those
 	   that have simi-equivalents (e.g. en dash to regular dash)*/
-	public static String replaceSpUniChars(String text) {
+	public String replaceSpUniChars(String text) {
+		//#ifdef DLOGGING
+//@        if (traceLoggable) {logger.trace("replaceSpUniChars text=" + text);}
+		//#endif
 		text = text.replace(CSGL_LOW9_QUOTE, '\'');
 		text = text.replace(CLEFT_SGL_QUOTE, '\'');
 		text = text.replace(CRIGHT_SGL_QUOTE, '\'');
@@ -689,7 +904,10 @@ final public class EncodingUtil {
 
 	/* Replace Windows special characters with simi-equivalents
 	   (e.g. en dash to regular dash)*/
-	public static String replaceSpWinChars(String text) {
+	public String replaceSpWinChars(String text) {
+		//#ifdef DLOGGING
+//@        if (traceLoggable) {logger.trace("replaceSpWinChars text=" + text);}
+		//#endif
 		text = text.replace(CWSGL_LOW9_QUOTE, '\'');
 		text = text.replace(CWLEFT_SGL_QUOTE, '\'');
 		text = text.replace(CWRIGHT_SGL_QUOTE, '\'');
@@ -704,7 +922,10 @@ final public class EncodingUtil {
     /* Replace all numeric entites e.g. &#228;
      *   @param  s  String to alter.
      */
-    public static String replaceNumEntity( String s) {
+    public String replaceNumEntity( String s) {
+		//#ifdef DLOGGING
+//@        if (traceLoggable) {logger.trace("replaceNumEntity s=" + s);}
+		//#endif
         if (s == null)  return s;
 		String snum = "";
 		try {
@@ -759,9 +980,12 @@ final public class EncodingUtil {
 	/**
 	  Replace alphabetic entities.
 	  */
-	public static String replaceAlphaEntities(String text) {
-		final Hashtable m_convEntities = (m_midpWin) ? m_convCp1252 :
-				m_convIso88591;
+	public String replaceAlphaEntities(String text) {
+		//#ifdef DLOGGING
+//@        if (traceLoggable) {logger.trace("replaceAlphaEntities text=" + text);}
+		//#endif
+		final Hashtable convEntities = (m_singleton.m_sglMidpWin) ?
+			m_singleton.m_sglConvCp1252 : m_singleton.m_sglConvIso88591;
 		int beginPos = 0;
 		int pos = -1;
 		while ((pos = text.indexOf('&', beginPos)) >= 0) {
@@ -779,8 +1003,8 @@ final public class EncodingUtil {
 				continue;
 			}
 			String entity = text.substring(pos + 1, epos);
-			if (m_convEntities.containsKey(entity)) {
-				String ent = (String)m_convEntities.get(entity);
+			if (convEntities.containsKey(entity)) {
+				String ent = (String)convEntities.get(entity);
 				text = text.substring(0, pos) + ent + text.substring(epos + 1);
 				// If we made a substitution, keep the position the same
 				// as sometimes, we get a double substitution when
@@ -797,11 +1021,8 @@ final public class EncodingUtil {
 	/**
 	  Create table of alpha entities for iso8859-1.
 	  */
-	public static Hashtable initAlphaIso88591() {
+	public Hashtable initAlphaIso88591() {
 
-		//#ifdef DTEST
-//@		System.out.println( "m_midpIso=" + m_midpIso);
-		//#endif
 		final char isoLatin1Values[] =
 			{0xC0, 0xC1, 0xC2, 0xC3, 0xC4,
 			0xC5, 0xC6, 0xC7, 0xC8, 0xC9,
@@ -819,9 +1040,9 @@ final public class EncodingUtil {
 
 		Hashtable convEntities = new Hashtable();
 		try {
-			initEntVals(convEntities, m_isoCommonEntities, m_isoCommValues);
-			initEntVals(convEntities, m_isoLatin1Entities, isoLatin1Values);
-			initEntVals(convEntities, m_isoSpecialEntities, m_isoSpecialValues);
+			initEntVals(convEntities, m_sglIsoCommonEntities, m_sglIsoCommValues);
+			initEntVals(convEntities, m_sglIsoLatin1Entities, isoLatin1Values);
+			initEntVals(convEntities, m_sglIsoSpecialEntities, m_sglIsoSpecialValues);
 			initHtmlCommEnts(convEntities);
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
@@ -837,11 +1058,8 @@ final public class EncodingUtil {
 	/**
 	  Create table of alpha entities for windows 1252.
 	  */
-	public static Hashtable initAlphaCp1252() {
+	public Hashtable initAlphaCp1252() {
 
-		//#ifdef DTEST
-//@		System.out.println( "m_midpWin=" + m_midpWin);
-		//#endif
 		char isoLatin1Values[] =
 			{0xC0, 0xC1, 0xC2, 0xC3, 0xC4,
 			0xC5, 0xC6, 0xC7, 0xC8, 0xC9,
@@ -860,8 +1078,8 @@ final public class EncodingUtil {
 		Hashtable convEntities = new Hashtable();
 		try {
 			/* ISO common entities have same encodings as Cp1252 */
-			initEntVals(convEntities, m_isoCommonEntities, m_isoCommValues);
-			initEntVals(convEntities, m_isoLatin1Entities, isoLatin1Values);
+			initEntVals(convEntities, m_sglIsoCommonEntities, m_sglIsoCommValues);
+			initEntVals(convEntities, m_sglIsoLatin1Entities, isoLatin1Values);
 			char wm_isoSpecialValues[] =
 				{CWEN_DASH, // en dash 
 				CWEM_DASH, // em dash 
@@ -871,7 +1089,7 @@ final public class EncodingUtil {
 				CWLEFT_DBL_QUOTE, // left double quotation mark 
 				CWRIGHT_DBL_QUOTE, // right double quotation mark 
 				0x84}; // double low-9 quotation mark 
-			initEntVals(convEntities, m_isoSpecialEntities, wm_isoSpecialValues);
+			initEntVals(convEntities, m_sglIsoSpecialEntities, wm_isoSpecialValues);
 			initHtmlCommEnts(convEntities);
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
@@ -886,7 +1104,7 @@ final public class EncodingUtil {
 
 	/* Initialize entries with passed in entity strings and character
 	   values turned into strings. */
-	public static void initEntVals(Hashtable convEntities, String[] entities, char[] entValues) {
+	public void initEntVals(Hashtable convEntities, String[] entities, char[] entValues) {
 		try {
 			//#ifdef DTEST
 //@			System.out.println( "Entities, values len=" + entities.length + "," + entValues.length);
@@ -925,7 +1143,7 @@ final public class EncodingUtil {
 	   used to replace the character in the string to be converted.
 	   The conversion starts at 0x80 and goes to including 0x9f.
 	   */
-	private static char [] initWinIsoConv() {
+	private char [] initWinIsoConv() {
 		char [] convTable = new char[0x9f - 0x80 + 1];
 		try {
 			//#ifdef DTEST
@@ -980,7 +1198,7 @@ final public class EncodingUtil {
 	   used to replace the character in the string to be converted.
 	   The conversion starts at 0x80 and goes to including 0x9f.
 	   */
-	private static char [] initUniWinConvx80() {
+	private char [] initUniWinConvx80() {
 		char [] convTable = new char[0x9f - 0x80 + 1];
 		try {
 			//#ifdef DTEST
@@ -1027,7 +1245,7 @@ final public class EncodingUtil {
 	}
 
 	/* Initialize entries for XML. */
-	private static void initHtmlCommEnts(Hashtable convEntities) {
+	private void initHtmlCommEnts(Hashtable convEntities) {
 		String htmlCommonEntities[] =
 				{"lt", "gt", "nbsp", "amp", "apos", "quot"};
 		char htmlCommonValues[] = {'<', '>', ' ', '&', '\'', '\"'};
@@ -1036,7 +1254,7 @@ final public class EncodingUtil {
 
 	/* Determine if creating a string converts the windows chars to
 	   Unicode. */
-	private static boolean initConvWinUni() {
+	private boolean initConvWinUni() {
 		boolean rtn = false;
 		try {
 			byte[] blftSgl = {(byte)CWLEFT_SGL_QUOTE};
@@ -1080,7 +1298,7 @@ final public class EncodingUtil {
 	}
 
 	/* Determine ISO encoding string. */
-	private static String initIsoEncoding() {
+	private String initIsoEncoding() {
 		try {
 			try {
 				new String("a".getBytes(), "ISO8859_1");
@@ -1119,7 +1337,7 @@ final public class EncodingUtil {
 	}
 
 	/* Determine Windows encoding string. */
-	private static String initWinEncoding() {
+	private String initWinEncoding() {
 		try {
 			try {
 				new String("a".getBytes(), "Cp1252");
@@ -1128,10 +1346,7 @@ final public class EncodingUtil {
 				CauseException ce = new CauseException(
 						"initWinEncoding UnsupportedEncodingException " +
 						"while trying to convert encoding Cp1252.", e);
-				if (m_statExcs == null) {
-					m_statExcs = new Vector();
-				}
-				m_statExcs.addElement(ce);
+				m_sglStatExcs.addElement(ce);
 				//#ifdef DTEST
 //@				System.out.println(ce.getMessage());
 				//#endif
@@ -1147,7 +1362,7 @@ final public class EncodingUtil {
 							"initWinEncoding second " +
 							"unsupportedEncodingException while " +
 							" trying to convert encoding WINDOWS-1252.", e2);
-					m_statExcs.addElement(ce2);
+					m_sglStatExcs.addElement(ce2);
 					//#ifdef DTEST
 //@					System.out.println(ce2.getMessage());
 					//#endif
@@ -1168,7 +1383,7 @@ final public class EncodingUtil {
 	}
 
 	/* Determine if windows encoding is supported.  */
-	public static boolean hasWinEncoding() {
+	public boolean initHasWinEncoding() {
 		try {
 			try {
 				new String("a".getBytes(), "Cp1252");
@@ -1177,10 +1392,7 @@ final public class EncodingUtil {
 				CauseException ce = new CauseException(
 						"hasWinEncoding UnsupportedEncodingException " +
 						"while trying to convert encoding Cp1252.", e);
-				if (m_statExcs == null) {
-					m_statExcs = new Vector();
-				}
-				m_statExcs.addElement(ce);
+				m_sglStatExcs.addElement(ce);
 				//#ifdef DTEST
 //@				System.out.println(ce.getMessage());
 				//#endif
@@ -1196,7 +1408,7 @@ final public class EncodingUtil {
 							"initWinEncoding second " +
 							"unsupportedEncodingException while " +
 							" trying to convert encoding WINDOWS-1252.", e2);
-					m_statExcs.addElement(ce2);
+					m_sglStatExcs.addElement(ce2);
 					//#ifdef DTEST
 //@					System.out.println(ce2.getMessage());
 					//#endif
@@ -1217,7 +1429,7 @@ final public class EncodingUtil {
 	}
 
 	/* Determine if iso-8859-1 encoding is supported.  */
-	public static boolean hasIso8859Encoding() {
+	public boolean initHasIso8859Encoding() {
 		try {
 			try {
 				new String("a".getBytes(), "ISO8859_1");
@@ -1228,26 +1440,26 @@ final public class EncodingUtil {
 				//#endif
 				//#ifdef DLOGGING
 //@				Logger logger = Logger.getLogger("EncodingUtil");
-//@				logger.severe("hasIso8859Encoding UnsupportedEncodingException ISO8859_1", e);
+//@				logger.severe("initHasIso8859Encoding UnsupportedEncodingException ISO8859_1", e);
 				//#endif
 				try {
 					new String("a".getBytes(), "ISO-8859-1");
 					return true;
 				} catch (UnsupportedEncodingException e2) {
 					//#ifdef DTEST
-//@					System.out.println("hasIso8859Encoding Unsupported encoding ISO-8859-1");
+//@					System.out.println("initHasIso8859Encoding Unsupported encoding ISO-8859-1");
 					//#endif
 					//#ifdef DLOGGING
 //@					logger.severe("initIsoEncoding UnsupportedEncodingException ISO-8859-1", e2);
 					//#else
-					e.printStackTrace();
+					e2.printStackTrace();
 					//#endif
 				}
 			}
 		} catch (Throwable t) {
 			//#ifdef DLOGGING
 //@			Logger logger = Logger.getLogger("EncodingUtil");
-//@			logger.severe("hasIso8859Encoding initConvWinUni", t);
+//@			logger.severe("initHasIso8859Encoding initConvWinUni", t);
 			//#else
 			t.printStackTrace();
 			//#endif
@@ -1279,55 +1491,76 @@ final public class EncodingUtil {
         return (m_utf);
     }
 
+    public void setBitNbrDoc(byte bitNbrDoc) {
+        this.m_bitNbrDoc = bitNbrDoc;
+    }
+
+    public byte getBitNbrDoc() {
+        return (m_bitNbrDoc);
+    }
+
 	//#ifdef DTEST
-//@    public static String[] getIsoCommonEntities() {
-//@        return (m_isoCommonEntities);
+//@    public String[] getIsoCommonEntities() {
+//@        return (m_singleton.m_sglIsoCommonEntities);
 //@    }
 //@
-//@    public static Hashtable getConvIso88591() {
-//@        return (m_convIso88591);
+//@    public Hashtable getConvIso88591() {
+//@        return (m_sglConvIso88591);
 //@    }
 //@
-//@    public static Hashtable getConvCp1252() {
-//@        return (m_convCp1252);
+//@    public Hashtable getConvCp1252() {
+//@        return (m_sglConvCp1252);
 //@    }
 //@
-//@    static public String[] getIsoSpecialEntities() {
-//@        return (m_isoSpecialEntities);
+//@    public String[] getIsoSpecialEntities() {
+//@        return (m_singleton.m_sglIsoSpecialEntities);
 //@    }
 //@
-//@    static public String getWinEncoding() {
-//@        return (m_winEncoding);
+//@    public char[] getIsoSpecialValues() {
+//@        return (m_sglIsoSpecialValues);
 //@    }
 //@
-//@    public static boolean isConvWinUni() {
-//@        return (m_convWinUni);
+//@    public char[] getIsoCommValues() {
+//@        return (m_sglIsoCommValues);
 //@    }
 //@
-//@    public static boolean isHasWinEncoding() {
-//@        return (m_hasWinEncoding);
+//@    public String[] getIsoLatin1Entities() {
+//@        return (m_sglIsoLatin1Entities);
+//@    }
+//@
+//@    public String getWinEncoding() {
+//@        return (m_singleton.m_sglwinEncoding);
+//@    }
+//@
+//@    public boolean isConvWinUni() {
+//@        return (m_singleton.m_sglConvWinUni);
+//@    }
+//@
+//@    public boolean isHasWinEncoding() {
+//@        return (m_singleton.m_sglHasWinEncoding);
 //@    }
 //@
 	//#endif
 
-    static public String getIsoEncoding() {
-        return (m_isoEncoding);
+    public String getIsoEncoding() {
+        return (m_singleton.m_sglIsoEncoding);
     }
 
-    public Vector getExcs() {
-		if (m_excs == null) {
+    static public Vector getExcs() {
+		if (m_singleton.m_excs == null) {
 			return new Vector();
 		} else {
-			return (m_excs);
+			return (m_singleton.m_excs);
 		}
     }
 
-    public static Vector getStatExcs() {
-		if (m_statExcs == null) {
+    public Vector getStatExcs() {
+		if (m_singleton.m_sglStatExcs == null) {
 			return new Vector();
 		} else {
-			return (m_statExcs);
+			return (m_singleton.m_sglStatExcs);
 		}
     }
 
 }
+//#endif
