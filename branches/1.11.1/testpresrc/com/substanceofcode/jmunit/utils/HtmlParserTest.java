@@ -27,6 +27,7 @@
  * IB 2010-07-19 1.11.5Dev8 Convert entities for text if CDATA used.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
  * IB 2010-11-15 1.11.5Dev14 Remove redundant new String of literal string.
+ * IB 2011-01-14 1.11.5Alpha15 Remove unused and now obsolete cldc10.TestCase
 */
 
 // Expand to define memory size define
@@ -51,7 +52,6 @@ import com.substanceofcode.utils.SgmlParserIntr;
 import com.substanceofcode.rssreader.businesslogic.ExtParser;
 
 import com.substanceofcode.jmunit.utils.XmlRequest;
-import jmunit.framework.cldc10.TestCase;
 
 import com.substanceofcode.jmunit.utilities.BaseTestCase;
 
@@ -188,29 +188,29 @@ final public class HtmlParserTest extends BaseTestCase
 		expHtmlResults.addElement("head");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
 		expHtmlResults.addElement("title");
-		expHtmlResults.addElement(new String("Andere | Lander - Anderes Deutsch"));
+		expHtmlResults.addElement("Andere | Lander - Anderes Deutsch");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("body"));
+		expHtmlResults.addElement("body");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("a"));
-		expHtmlResults.addElement(new String("a link"));
-		expHtmlResults.addElement(new String("http://german.lss.wisc.edu/gdgsa/podcast/Andere_Lander/"));
+		expHtmlResults.addElement("a");
+		expHtmlResults.addElement("a link");
+		expHtmlResults.addElement("http://german.lss.wisc.edu/gdgsa/podcast/Andere_Lander/");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("image"));
-		expHtmlResults.addElement(new String(""));
+		expHtmlResults.addElement("image");
+		expHtmlResults.addElement("");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("h1"));
-		expHtmlResults.addElement(new String("First Header"));
+		expHtmlResults.addElement("h1");
+		expHtmlResults.addElement("First Header");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("big"));
-		expHtmlResults.addElement(new String("Some Big text"));
+		expHtmlResults.addElement("big");
+		expHtmlResults.addElement("Some Big text");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("cite"));
-		expHtmlResults.addElement(new String("Some cited text"));
+		expHtmlResults.addElement("cite");
+		expHtmlResults.addElement("Some cited text");
 		expHtmlResults.addElement(new Integer(SgmlParserIntr.ELEMENT));
-		expHtmlResults.addElement(new String("a"));
-		expHtmlResults.addElement(new String("second link"));
-		expHtmlResults.addElement(new String("http://www.testurl2.com/"));
+		expHtmlResults.addElement("a");
+		expHtmlResults.addElement("second link");
+		expHtmlResults.addElement("http://www.testurl2.com/");
 		Vector xmlResults = new Vector();
 		htmlParserTestSub(mname, "http://www.baseurl.com", xmlStrings, "utf-8", htmlRequests, expHtmlResults,
 				xmlResults);
