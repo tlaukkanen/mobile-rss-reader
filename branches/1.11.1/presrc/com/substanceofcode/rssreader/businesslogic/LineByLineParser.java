@@ -29,13 +29,25 @@
  * IB 2010-07-04 1.11.5Dev6 Use null pattern for nulls to initialize and save memory.
  * IB 2010-07-05 1.11.5Dev6 Do not have feedNameFilter and feedUrlFilter null.
  * IB 2010-10-12 1.11.5Dev9 Add --Need to modify--#preprocess to modify to become //#preprocess for RIM preprocessor.
+ * IB 2011-01-14 1.11.5Alpha15 Only compile this if it is the full version.
+ * IB 2011-01-14 1.11.5Alpha15 Pass in rssFeeds.
+ * IB 2011-01-14 1.11.5Alpha15 Use getEncodingUtil and getEncodingStreamReader to create EncodingUtil and EncodingStreamReader respectively to eliminate cross referencing in constructors.
+ * IB 2011-01-14 1.11.5Alpha15 Use only EncodingStreamReader to read data instead of having a separate InputStreamReader to read with.
+ * IB 2011-01-14 1.11.5Alpha15 Have "" as empty name instead of null.
+ * IB 2011-01-14 1.11.5Alpha15 Use RssFeedStore class for rssFeeds to allow synchornization for future background processing.
 */
 
+// Expand to define full vers define
+@DFULLVERSDEF@
+// Expand to define full vers define
+@DINTLINKDEF@
 // Expand to define logging define
 @DLOGDEF@
+//#ifdef DFULLVERS
 package com.substanceofcode.rssreader.businesslogic;
 
 import com.substanceofcode.rssreader.businessentities.RssItunesFeed;
+import com.substanceofcode.rssreader.businessentities.RssFeedStore;
 import com.substanceofcode.utils.EncodingUtil;
 import com.substanceofcode.utils.EncodingStreamReader;
 import com.substanceofcode.utils.MiscUtil;
@@ -64,12 +76,13 @@ public class LineByLineParser extends FeedListParser {
 	//#endif
 
     /** Creates a new instance of LineByLineParser */
-    public LineByLineParser(String url, String username, String password) {
-        super(url, username, password);
+    public LineByLineParser(String url, String username, String password,
+			RssFeedStore rssFeeds) {
+        super(url, username, password, rssFeeds);
     }
 
     public RssItunesFeed[] parseFeeds(InputStream is) {
-		return parseFeeds(new EncodingUtil(is));
+		return parseFeeds(EncodingUtil.getEncodingUtil(is));
 	}
 
     public RssItunesFeed[] parseFeeds(EncodingUtil encodingUtil) {
@@ -84,11 +97,9 @@ public class LineByLineParser extends FeedListParser {
 				return new RssItunesFeed[0];
 			}
 			if (isr.isUtfDoc()) {
-				if (isr.isModBit16()) {
-					encodingUtil.getEncoding(isr.getFileEncoding(), "UTF-8");
-				} else {
-					encodingUtil.getEncoding(isr.getFileEncoding(), "UTF-16");
-				}
+				encodingUtil.getEncoding(isr.getFileEncoding(),
+						encodingUtil.getBitEncoding(
+							encodingUtil.getBitNbrDoc()));
 			}
             do {
                 inputBuffer.append((char)inputCharacter);
@@ -151,7 +162,7 @@ public class LineByLineParser extends FeedListParser {
 				//#endif
 				continue;
             } else {
-                name = (String)nullPtr;
+                name = "";
                 url = line;
 				//#ifdef DLOGGING
 				if (warningLoggable) {m_logger.warning("parseFeeds warning null title for url=" + url);}
@@ -160,7 +171,8 @@ public class LineByLineParser extends FeedListParser {
 			//#ifdef DLOGGING
 			if (fineLoggable) {m_logger.fine("parseFeeds name,url=" + name + "," + url);}
 			//#endif
-			if((( m_feedNameFilter.length() > 0) &&
+			if(((m_feedNameFilter.length() > 0) &&
+			  (name.length() != 0) &&
 			  (name.toLowerCase().indexOf(m_feedNameFilter) < 0)) ||
 			  (( m_feedURLFilter.length() > 0) &&
 			  (url.toLowerCase().indexOf(m_feedURLFilter) < 0))) {
@@ -173,3 +185,4 @@ public class LineByLineParser extends FeedListParser {
     }
     
 }
+//#endif
