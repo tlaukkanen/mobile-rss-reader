@@ -175,9 +175,10 @@
 	<!-- IB 2011-03-25 1.11.5Dev18 Upload RIM zip first to google so that the jad/jar files appear last which is first in the download list.  -->
 	<!-- IB 2011-09-15 1.11.5RC2 Change echo name to match actual name.  -->
 	<!-- IB 2011-09-15 1.11.5RC2 Finish change of itunes change to smartphone name.  -->
-	<!-- IB 2010-09-15 1.11.5RC2 Use new file wtk-build-dist-midp.xml to contain dist.midp... targets. -->
-	<!-- IB 2010-09-15 1.11.5RC2 Use new file wtk-build-prepare-midp.xml to contain prepare... targets. -->
-	<!-- IB 2010-09-19 1.11.5RC2 Have upload.to.google used to check for it's value.  -->
+	<!-- IB 2011-09-15 1.11.5RC2 Use new file wtk-build-dist-midp.xml to contain dist.midp... targets. -->
+	<!-- IB 2011-09-15 1.11.5RC2 Use new file wtk-build-prepare-midp.xml to contain prepare... targets. -->
+	<!-- IB 2011-09-19 1.11.5RC2 Have upload.to.google used to check for it's value.  -->
+	<!-- IB 2011-09-20 1.11.5 Have keep.obfuscate use value of property instead of presence to allow skip of wtkobfuscate.  -->
 
 	<property environment="env" />
 	<property name="sony.location" value="C:/SONYER~1/JavaME_SDK_CLDC/PC_Emulation/WTK2/" />
@@ -947,6 +948,15 @@
 
 	</target>
 
+	<target name="obfuscate.jar" if="${keep.obfuscate}" >
+		<wtkobfuscate jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" verbose="true" if="keep.obfuscate" >
+			<preserve class="org.kablog.kgui.KFileSelectorMgr" if="jsr75.present" />
+			<argument value="-optimizationpasses" />
+			<argument value="${proguard.passes}" />
+			<argument value="-allowaccessmodification" />
+		</wtkobfuscate>
+	</target>
+
 	<target name="package.obfuscate.preverify" depends="prepare" >
 	    <echo message="keep.obfuscate=${keep.obfuscate}" />
 		<property name="wtk.optionalpda.enabled" value="${wtk.optionalpda.enabled.value}" />
@@ -972,12 +982,7 @@
 		<wtksmartlink jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" verbose="true" if="keep.smartlink" unless="skip.smartlink" >
 			<preserve class="org.kablog.kgui.KFileSelectorMgr" if="jsr75.present" />
 		</wtksmartlink>
-		<wtkobfuscate jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" verbose="true" if="keep.obfuscate" >
-			<preserve class="org.kablog.kgui.KFileSelectorMgr" if="jsr75.present" />
-			<argument value="-optimizationpasses" />
-			<argument value="${proguard.passes}" />
-			<argument value="-allowaccessmodification" />
-		</wtkobfuscate>
+		<antcall target="obfuscate.jar" inheritAll="true" />
 		<wtkpreverify jarfile="${bin}/${build.file.root}.jar" jadfile="${bin}/${build.file.root}.jad" if="keep.obfuscate" />
 
 	</target>
