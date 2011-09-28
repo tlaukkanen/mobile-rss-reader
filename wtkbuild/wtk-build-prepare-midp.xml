@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
-<project name="RSSReader" default="prepare.2.0" basedir="." >
+<project name="PrepareMidp" default="prepare.2.0" basedir="." >
 
-	<!-- IB 2010-09-15 1.11.5RC2 Use new file wtk-build-prepare-midp.xml to contain prepare... targets. -->
+	<!-- IB 2011-09-15 1.11.5RC2 Use new file wtk-build-prepare-midp.xml to contain prepare... targets. -->
+	<!-- IB 2011-09-28 1.11.5 Use PrepareMidp for project to not conflict with the main project name. -->
 
 	<target name="prepare.test" unless="${no.test}" >
 	    <echo message="Using test properties" />
