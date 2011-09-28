@@ -405,6 +405,8 @@ v1.11.5 Dev 18 (Dev18) (Sep 15th 2011)
 - Trim spaces off of titles.
 - Allow 5 redirects for RSS url's.
 
+v1.11.5 (Sep 28th 2011)
+
 Device notes:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not allow an MP3 to be read from a URL, but play them from the file system)
