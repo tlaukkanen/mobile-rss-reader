@@ -1222,6 +1222,12 @@ v1.11.5 Dev 18 (Dev18) (Sep 15th 2011)
 - Trim the title in case it has spaces for HTML and OPML parsers.
 - Increase number of redirects allowed to 5.
 
+v1.11.5 (Sep 28th 2011)
+- Use DistMidp for project to not conflict with the main project name.
+- Use PrepareMidp for project to not conflict with the main project name.
+- Don't upload signed versions to google.
+- Have keep.obfuscate use value of property instead of presence to allow skip of wtkobfuscate.
+
 Device issues:
 
 - Phone must support MP3 links, etc to play enclosures (many phones do not
