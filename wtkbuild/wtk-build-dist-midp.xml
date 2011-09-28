@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 
-<project name="RSSReader" default="dist.midp.2.0" basedir="." >
+<project name="DistMidp" default="dist.midp.2.0" basedir="." >
 
-	<!-- IB 2010-09-15 1.11.5RC2 Use new file wtk-build-dist-midp.xml to contain dist.midp... targets. -->
+	<!-- IB 2011-09-15 1.11.5RC2 Use new file wtk-build-dist-midp.xml to contain dist.midp... targets. -->
+	<!-- IB 2011-09-28 1.11.5 Use DistMidp for project to not conflict with the main project name. -->
+	<!-- IB 2011-09-28 1.11.5 Don't upload signed versions to google. -->
 
 	<!-- MIDP-2.0 MIDP-2.0 and JSR-75, and MIDP-2.0 and -->
 	<!--JSR-75, etc -->
@@ -138,7 +140,7 @@
 
 	<target name="dist.midp.2.0.jsr75.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75,prepare.signed,prepare.verisign" unless="no.2.0.jsr75.signed.verisign" >
 		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
+			<param name="upload.to.google" value="false" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="upload.to.sftp" value="true" />
 			<param name="jsr" value="JSR-75" />
@@ -150,7 +152,7 @@
 
 	<target name="dist.midp.2.0.jsr75.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr75,prepare.signed,prepare.thawte" unless="no.2.0.jsr75.signed.thawte" >
 		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
+			<param name="upload.to.google" value="false" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="upload.to.sftp" value="true" />
 			<param name="jsr" value="JSR-75" />
@@ -162,7 +164,7 @@
 
 	<target name="dist.midp.2.0.jsr120.signed.verisign" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr120,prepare.signed,prepare.verisign" unless="no.2.0.jsr120.signed.verisign" >
 		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
+			<param name="upload.to.google" value="false" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="upload.to.sftp" value="true" />
 			<param name="make.build.files" value="false" />
@@ -173,7 +175,7 @@
 
 	<target name="dist.midp.2.0.jsr120.signed.thawte" depends="prepare.midp2.0,prepare.cldc1.0,prepare.jsr120,prepare.signed,prepare.thawte" unless="no.2.0.jsr120.signed.thawte" >
 		<antcall target="dist.version" inheritAll="true" >
-			<param name="upload.to.google" value="true" />
+			<param name="upload.to.google" value="false" />
 			<param name="google.labels" value="--labels=Type-Executable,OpSys-All" />
 			<param name="upload.to.sftp" value="true" />
 			<param name="make.build.files" value="false" />
